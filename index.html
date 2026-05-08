@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>โหรทายหนู AI Edition - Project Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Prompt:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0C0B18;
+            --card: #1A1935;
+            --gold: #E8B84B;
+            --gold2: #F5D680;
+            --text: #EAE6FF;
+            --muted: #A39BBE;
+            --border: rgba(180,150,255,0.15);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Sarabun', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            font-family: 'Prompt', sans-serif;
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--gold2), var(--gold));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        p {
+            color: var(--muted);
+            margin-bottom: 3rem;
+            font-size: 1.2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            text-decoration: none;
+            color: inherit;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            display: block;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--gold);
+        }
+
+        .card h2 {
+            font-family: 'Prompt', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--gold2);
+        }
+
+        .card p {
+            margin-bottom: 0;
+            font-size: 1rem;
+            color: var(--muted);
+        }
+
+        .footer {
+            margin-top: 4rem;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>โหรทายหนู AI Edition</h1>
+        <p>ศูนย์รวมข้อมูลการวางแผนและยุทธศาสตร์การพัฒนาแอปพลิเคชันโหราศาสตร์ยุคใหม่</p>
+        
+        <div class="grid">
+            <a href="hora-mobile-app-plan.html" class="card">
+                <h2>Mobile App Plan</h2>
+                <p>แผนการพัฒนา Native-Quality App พร้อมขั้นตอนและต้นทุน</p>
+            </a>
+            <a href="swot-astrology-ai-platform.html" class="card">
+                <h2>SWOT Analysis</h2>
+                <p>วิเคราะห์จุดแข็ง จุดอ่อน โอกาส และภัยคุกคาม พร้อมโมเดลรายได้</p>
+            </a>
+        </div>
+
+        <div class="footer">
+            ครูเด่น มาสเตอร์ฟา · CAP Vision Institute
+        </div>
+    </div>
+</body>
+</html>
