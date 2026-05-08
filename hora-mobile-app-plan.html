@@ -1,0 +1,1507 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mobile App Dev Plan — โหรทายหนู AI · iOS & Android</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Prompt:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0C0B18;
+  --ink2: #14132A;
+  --card: #1A1935;
+  --card2: #201E40;
+  --border: rgba(180,150,255,0.15);
+  --gold: #E8B84B;
+  --gold2: #F5D680;
+  --purple: #9B7FE8;
+  --purple2: #C4AAFF;
+  --blue: #4F9EFF;
+  --teal: #3ECFB2;
+  --red: #FF6B6B;
+  --green: #52D68A;
+  --orange: #FF9F43;
+  --text: #EAE6FF;
+  --muted: #7A738C;
+  --muted2: #A39BBE;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--text);
+  font-family: 'Sarabun', sans-serif;
+  font-size: 15px;
+  line-height: 1.75;
+  overflow-x: hidden;
+}
+
+/* ─── ANIMATED BG ─── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 40% at 15% 10%, rgba(155,127,232,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 85% 80%, rgba(79,158,255,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(232,184,75,0.06) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 24px 100px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── HERO ─── */
+.hero {
+  padding: 72px 0 60px;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 64px;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(155,127,232,0.12);
+  border: 1px solid rgba(155,127,232,0.3);
+  border-radius: 100px;
+  padding: 6px 18px 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--purple2);
+  margin-bottom: 28px;
+}
+
+.hero-pill span {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 8px var(--teal);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero h1 {
+  font-family: 'Prompt', sans-serif;
+  font-size: 52px;
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.hero h1 .line1 {
+  display: block;
+  background: linear-gradient(135deg, var(--gold2), var(--gold), #C98B20);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero h1 .line2 {
+  display: block;
+  background: linear-gradient(135deg, var(--purple2), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-size: 32px;
+  margin-top: 6px;
+}
+
+.hero .desc {
+  color: var(--muted2);
+  font-size: 16px;
+  max-width: 580px;
+  margin: 0 auto 36px;
+  line-height: 1.7;
+}
+
+.platform-badges {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.p-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border-radius: 14px;
+  border: 1px solid;
+  font-family: 'Prompt', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.p-badge.android {
+  border-color: rgba(82,214,138,0.4);
+  background: rgba(82,214,138,0.08);
+  color: var(--green);
+}
+
+.p-badge.ios {
+  border-color: rgba(79,158,255,0.4);
+  background: rgba(79,158,255,0.08);
+  color: var(--blue);
+}
+
+.p-badge.web {
+  border-color: rgba(232,184,75,0.4);
+  background: rgba(232,184,75,0.08);
+  color: var(--gold);
+}
+
+.p-badge .icon { font-size: 22px; }
+
+/* ─── SECTION ─── */
+.sec {
+  margin-bottom: 56px;
+}
+
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.sec-num {
+  font-family: 'Prompt', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--gold);
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+
+.sec-head h2 {
+  font-family: 'Prompt', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.sec-head::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ─── APPROACH COMPARISON ─── */
+.approach-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 700px) {
+  .approach-grid { grid-template-columns: 1fr; }
+}
+
+.approach-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+.approach-card.recommended {
+  border-color: var(--gold);
+  background: linear-gradient(135deg, rgba(232,184,75,0.06), var(--card));
+}
+
+.approach-card.recommended::before {
+  content: '⭐ แนะนำ';
+  position: absolute;
+  top: 12px; right: 12px;
+  background: var(--gold);
+  color: var(--ink);
+  font-family: 'Prompt', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.approach-card .a-icon { font-size: 32px; margin-bottom: 12px; }
+
+.approach-card .a-name {
+  font-family: 'Prompt', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.approach-card .a-tech {
+  font-size: 12px;
+  color: var(--purple2);
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.approach-card .a-desc {
+  font-size: 13px;
+  color: var(--muted2);
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+
+.pro-con { display: flex; flex-direction: column; gap: 5px; }
+
+.pro-con span {
+  font-size: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.pro-con .pro { color: var(--green); }
+.pro-con .con { color: var(--red); }
+
+/* ─── PHASE CARDS ─── */
+.phase-wrap { display: flex; flex-direction: column; gap: 18px; }
+
+.ph-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.ph-top {
+  padding: 20px 28px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  background: var(--card2);
+  border-bottom: 1px solid var(--border);
+}
+
+.ph-num-box {
+  width: 48px; height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Prompt', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.ph-num-box.c1 { background: rgba(232,184,75,0.15); color: var(--gold); border: 1px solid rgba(232,184,75,0.3); }
+.ph-num-box.c2 { background: rgba(155,127,232,0.15); color: var(--purple2); border: 1px solid rgba(155,127,232,0.3); }
+.ph-num-box.c3 { background: rgba(79,158,255,0.15); color: var(--blue); border: 1px solid rgba(79,158,255,0.3); }
+.ph-num-box.c4 { background: rgba(62,207,178,0.15); color: var(--teal); border: 1px solid rgba(62,207,178,0.3); }
+.ph-num-box.c5 { background: rgba(255,159,67,0.15); color: var(--orange); border: 1px solid rgba(255,159,67,0.3); }
+.ph-num-box.c6 { background: rgba(82,214,138,0.15); color: var(--green); border: 1px solid rgba(82,214,138,0.3); }
+
+.ph-info .ph-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.ph-info .ph-sub { font-size: 13px; color: var(--muted2); }
+
+.ph-meta {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.ph-meta .ph-time {
+  font-family: 'Prompt', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 3px;
+}
+
+.ph-meta .ph-cost {
+  font-family: 'Prompt', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.ph-body { padding: 22px 28px; }
+
+.task-cols {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0 24px;
+  margin-bottom: 16px;
+}
+
+@media (max-width: 600px) {
+  .task-cols { grid-template-columns: 1fr; }
+  .ph-top { grid-template-columns: auto 1fr; }
+  .ph-meta { display: none; }
+}
+
+.task-item {
+  font-size: 13.5px;
+  color: #C8C2E0;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.5;
+}
+
+.task-item::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--purple);
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+
+.deliverable-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+}
+
+.del-tag {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 20px;
+  background: rgba(155,127,232,0.1);
+  border: 1px solid rgba(155,127,232,0.25);
+  color: var(--purple2);
+}
+
+.del-tag.green { background: rgba(82,214,138,0.08); border-color: rgba(82,214,138,0.25); color: var(--green); }
+.del-tag.gold { background: rgba(232,184,75,0.08); border-color: rgba(232,184,75,0.25); color: var(--gold); }
+.del-tag.blue { background: rgba(79,158,255,0.08); border-color: rgba(79,158,255,0.25); color: var(--blue); }
+.del-tag.teal { background: rgba(62,207,178,0.08); border-color: rgba(62,207,178,0.25); color: var(--teal); }
+
+/* ─── COST TABLE ─── */
+.cost-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.cost-wrap table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cost-wrap thead tr {
+  background: var(--card2);
+}
+
+.cost-wrap th {
+  padding: 14px 20px;
+  font-family: 'Prompt', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.cost-wrap td {
+  padding: 13px 20px;
+  font-size: 14px;
+  color: var(--text);
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: middle;
+}
+
+.cost-wrap tbody tr:last-child td { border-bottom: none; }
+.cost-wrap tbody tr:hover { background: rgba(155,127,232,0.04); }
+
+.cost-wrap td.amt {
+  font-family: 'Prompt', sans-serif;
+  font-weight: 700;
+  color: var(--gold2);
+  white-space: nowrap;
+}
+
+.cost-wrap td.note { font-size: 12px; color: var(--muted); }
+
+.cost-wrap tfoot tr {
+  background: linear-gradient(90deg, rgba(232,184,75,0.08), var(--card2));
+  border-top: 2px solid rgba(232,184,75,0.3);
+}
+
+.cost-wrap tfoot td {
+  font-family: 'Prompt', sans-serif;
+  font-weight: 900;
+  font-size: 16px;
+  color: var(--gold);
+  padding: 18px 20px;
+}
+
+/* cat tag color */
+.cat { display: inline-block; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 8px; margin-right: 4px; }
+.cat.dev { background: rgba(155,127,232,0.15); color: var(--purple2); }
+.cat.infra { background: rgba(62,207,178,0.15); color: var(--teal); }
+.cat.store { background: rgba(79,158,255,0.15); color: var(--blue); }
+.cat.ai { background: rgba(232,184,75,0.15); color: var(--gold); }
+
+/* ─── GRAND TOTAL ─── */
+.grand-total {
+  background: var(--card);
+  border: 1px solid var(--gold);
+  border-radius: 20px;
+  padding: 40px 32px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-top: 32px;
+}
+
+.grand-total::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(232,184,75,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.grand-total .gt-label {
+  font-family: 'Prompt', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 14px;
+}
+
+.grand-total .gt-price {
+  font-family: 'Prompt', sans-serif;
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--gold2), var(--gold), #B8860B);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 8px;
+}
+
+.grand-total .gt-unit {
+  font-size: 18px;
+  color: var(--muted2);
+  margin-bottom: 28px;
+}
+
+.range-strip {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.rs-item {
+  flex: 1;
+  padding: 14px 12px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+
+.rs-item:last-child { border-right: none; }
+
+.rs-item .rs-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.rs-item .rs-val {
+  font-family: 'Prompt', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.rs-item.highlight { background: rgba(232,184,75,0.06); }
+.rs-item.highlight .rs-val { color: var(--gold); }
+
+/* ─── STORE GUIDE ─── */
+.store-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .store-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 36px; }
+}
+
+.store-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.store-card.android { border-top: 3px solid var(--green); }
+.store-card.ios { border-top: 3px solid var(--blue); }
+
+.store-card .s-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.store-card .s-icon { font-size: 32px; }
+
+.store-card .s-name {
+  font-family: 'Prompt', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.store-card .s-sub { font-size: 12px; color: var(--muted2); }
+
+.store-step { display: flex; flex-direction: column; gap: 10px; }
+
+.s-step {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.s-step .step-n {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Prompt', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.store-card.android .step-n { background: rgba(82,214,138,0.15); color: var(--green); border: 1px solid rgba(82,214,138,0.3); }
+.store-card.ios .step-n { background: rgba(79,158,255,0.15); color: var(--blue); border: 1px solid rgba(79,158,255,0.3); }
+
+.s-step .step-txt { font-size: 13px; color: var(--muted2); line-height: 1.5; padding-top: 3px; }
+.s-step .step-txt strong { color: var(--text); font-weight: 600; }
+
+.fee-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255,255,255,0.03);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-top: 14px;
+  font-size: 13px;
+}
+
+.fee-row .fee-lbl { color: var(--muted2); }
+
+.fee-row .fee-val {
+  font-family: 'Prompt', sans-serif;
+  font-weight: 700;
+  color: var(--gold);
+}
+
+/* ─── MONTHLY OPEX ─── */
+.opex-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 600px) { .opex-grid { grid-template-columns: 1fr; } }
+
+.opex-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.opex-card .oc-icon {
+  font-size: 28px;
+  flex-shrink: 0;
+}
+
+.opex-card .oc-info .oc-name {
+  font-family: 'Prompt', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 2px;
+}
+
+.opex-card .oc-info .oc-note { font-size: 12px; color: var(--muted); }
+
+.opex-card .oc-price {
+  margin-left: auto;
+  font-family: 'Prompt', sans-serif;
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--gold2);
+  flex-shrink: 0;
+  text-align: right;
+}
+
+.opex-card .oc-price .oc-sub { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+/* ─── ROI ─── */
+.roi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 700px) {
+  .roi-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+.roi-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 18px 14px;
+  text-align: center;
+}
+
+.roi-card .roi-period {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.roi-card .roi-users {
+  font-family: 'Prompt', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.roi-card .roi-rev {
+  font-family: 'Prompt', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.roi-card .roi-note { font-size: 11px; color: var(--muted); }
+
+/* ─── TIMELINE ─── */
+.tl { position: relative; padding-left: 40px; }
+
+.tl::before {
+  content: '';
+  position: absolute;
+  left: 12px; top: 8px; bottom: 8px;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--gold), var(--purple), transparent);
+}
+
+.tl-item {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.tl-item::before {
+  content: '';
+  position: absolute;
+  left: -31px; top: 5px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--gold);
+  border: 3px solid var(--ink);
+  box-shadow: 0 0 12px rgba(232,184,75,0.5);
+}
+
+.tl-item .tl-label {
+  font-family: 'Prompt', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+
+.tl-item .tl-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 5px;
+}
+
+.tl-item .tl-desc { font-size: 13px; color: var(--muted2); line-height: 1.6; }
+
+/* ─── FOOTER ─── */
+.footer {
+  border-top: 1px solid var(--border);
+  margin-top: 80px;
+  padding-top: 36px;
+  text-align: center;
+}
+
+.footer .f-logo {
+  font-family: 'Prompt', sans-serif;
+  font-size: 20px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+}
+
+.footer .f-tag { font-size: 13px; color: var(--muted); }
+
+/* ─── UTIL ─── */
+.note-box {
+  background: rgba(62,207,178,0.07);
+  border: 1px solid rgba(62,207,178,0.25);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 13px;
+  color: var(--teal);
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+.note-box strong { font-weight: 700; }
+
+.divider { width: 60px; height: 2px; background: linear-gradient(to right, transparent, var(--gold), transparent); margin: 0 auto 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<!-- ─── HERO ─── -->
+<div class="hero">
+  <div class="hero-pill"><span></span>Mobile App Blueprint 2025</div>
+  <h1>
+    <span class="line1">โหรทายหนู AI Edition</span>
+    <span class="line2">แผนพัฒนา Mobile App เต็มรูปแบบ</span>
+  </h1>
+  <p class="desc">
+    ขั้นตอน + ต้นทุนการพัฒนา Native-Quality App<br>
+    พร้อม Deploy บน Play Store และ App Store จริง
+  </p>
+  <div class="platform-badges">
+    <div class="p-badge android"><span class="icon">🤖</span>Google Play Store</div>
+    <div class="p-badge ios"><span class="icon">🍎</span>Apple App Store</div>
+    <div class="p-badge web"><span class="icon">🌐</span>Web App (โบนัส)</div>
+  </div>
+</div>
+
+<!-- ─── SECTION 1: APPROACH ─── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">01</span>
+    <h2>เลือก Approach การพัฒนา</h2>
+  </div>
+
+  <div class="approach-grid">
+    <div class="approach-card">
+      <div class="a-icon">⚛️</div>
+      <div class="a-name">React Native</div>
+      <div class="a-tech">Expo + TypeScript</div>
+      <div class="a-desc">เขียนโค้ดครั้งเดียว รันได้ทั้ง iOS + Android ชุมชนใหญ่ มี Library ครบ</div>
+      <div class="pro-con">
+        <span class="pro">✅ Cross-platform ประหยัดต้นทุน</span>
+        <span class="pro">✅ Performance ดีมาก</span>
+        <span class="pro">✅ เชื่อม Next.js Backend ง่าย</span>
+        <span class="con">⚠️ บาง Native Feature ต้อง Bridge</span>
+      </div>
+    </div>
+
+    <div class="approach-card recommended">
+      <div class="a-icon">🔷</div>
+      <div class="a-name">React Native + Expo</div>
+      <div class="a-tech">Expo Router + EAS Build</div>
+      <div class="a-desc">ใช้ Expo EAS Build ส่งขึ้น Store ได้ตรง มี OTA Update โดยไม่ต้อง Re-submit</div>
+      <div class="pro-con">
+        <span class="pro">✅ Deploy Store ง่ายที่สุด</span>
+        <span class="pro">✅ OTA Update ไม่ผ่าน Review</span>
+        <span class="pro">✅ Shared Code กับ Next.js ได้</span>
+        <span class="pro">✅ Expo SDK ครบทุก Feature</span>
+      </div>
+    </div>
+
+    <div class="approach-card">
+      <div class="a-icon">⚡</div>
+      <div class="a-name">Flutter</div>
+      <div class="a-tech">Dart + Material 3</div>
+      <div class="a-desc">ของ Google UI สวยมาก Performance ดี แต่ต้องเรียนภาษาใหม่ (Dart)</div>
+      <div class="pro-con">
+        <span class="pro">✅ UI/UX สวยงามมาก</span>
+        <span class="pro">✅ Performance ใกล้ Native</span>
+        <span class="con">⚠️ ต้องใช้ Dart (Learning curve)</span>
+        <span class="con">⚠️ ต้นทุนสูงกว่า</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <strong>💡 ครูเด่นแนะนำ:</strong> เลือก <strong>React Native + Expo (EAS Build)</strong> เพราะ Backend เราใช้ Next.js อยู่แล้ว ทีม Dev ใช้ JavaScript/TypeScript เดียวกัน ลดต้นทุนได้ 30–40% เมื่อเทียบกับทำแยก Native 2 แอป และ Expo EAS ส่งขึ้น Store ได้ตรงโดยไม่ต้องมี Mac เองก็ได้
+  </div>
+</div>
+
+<!-- ─── SECTION 2: PHASES ─── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">02</span>
+    <h2>ขั้นตอนการพัฒนา 6 Phases</h2>
+  </div>
+
+  <div class="phase-wrap">
+
+    <!-- Phase 1 -->
+    <div class="ph-card">
+      <div class="ph-top">
+        <div class="ph-num-box c1">1</div>
+        <div class="ph-info">
+          <div class="ph-title">🏗️ Project Setup & Architecture</div>
+          <div class="ph-sub">วางโครงสร้างทั้งระบบ, Database, Dev Environment</div>
+        </div>
+        <div class="ph-meta">
+          <div class="ph-time">สัปดาห์ 1–3</div>
+          <div class="ph-cost">฿12,000–20,000</div>
+        </div>
+      </div>
+      <div class="ph-body">
+        <div class="task-cols">
+          <div class="task-item">Setup Monorepo: Next.js (Backend+Web) + Expo (Mobile) ใน 1 Repo</div>
+          <div class="task-item">ออกแบบ Database Schema ใน Supabase (PostgreSQL)</div>
+          <div class="task-item">สร้าง Shared Type/API Layer (TypeScript) ใช้ร่วมกันทั้ง 2 Platform</div>
+          <div class="task-item">Setup Cloudflare Pages สำหรับ Backend API</div>
+          <div class="task-item">Expo EAS Build Configuration (iOS + Android Profiles)</div>
+          <div class="task-item">สมัคร Apple Developer Account + Google Play Console</div>
+          <div class="task-item">Design System: Colors, Typography, Components สำหรับ Mobile</div>
+          <div class="task-item">Git Workflow, CI/CD Pipeline (GitHub Actions + EAS)</div>
+        </div>
+        <div class="deliverable-row">
+          <span class="del-tag gold">Monorepo Ready</span>
+          <span class="del-tag">Supabase Schema</span>
+          <span class="del-tag blue">EAS Config</span>
+          <span class="del-tag">Dev Environment</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 2 -->
+    <div class="ph-card">
+      <div class="ph-top">
+        <div class="ph-num-box c2">2</div>
+        <div class="ph-info">
+          <div class="ph-title">🔐 Authentication & User System</div>
+          <div class="ph-sub">ระบบสมัคร/เข้าสู่ระบบ, Profile, การจัดการบัญชี</div>
+        </div>
+        <div class="ph-meta">
+          <div class="ph-time">สัปดาห์ 4–6</div>
+          <div class="ph-cost">฿15,000–22,000</div>
+        </div>
+      </div>
+      <div class="ph-body">
+        <div class="task-cols">
+          <div class="task-item">Supabase Auth: Email + Password, Google Sign-In</div>
+          <div class="task-item">Apple Sign-In (บังคับสำหรับ App Store)</div>
+          <div class="task-item">หน้า Onboarding (Welcome Slides สวยงาม)</div>
+          <div class="task-item">Profile Setup: ชื่อ, วันเกิด, เพศ (สำหรับโหราศาสตร์)</div>
+          <div class="task-item">Secure Token Storage (Expo SecureStore)</div>
+          <div class="task-item">Forgot Password + Email Verification Flow</div>
+          <div class="task-item">Biometric Login (Face ID / Fingerprint)</div>
+          <div class="task-item">Session Management + Auto-refresh Token</div>
+        </div>
+        <div class="deliverable-row">
+          <span class="del-tag green">Auth System</span>
+          <span class="del-tag">Onboarding UI</span>
+          <span class="del-tag blue">Apple Sign-In</span>
+          <span class="del-tag">Biometric</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 3 -->
+    <div class="ph-card">
+      <div class="ph-top">
+        <div class="ph-num-box c3">3</div>
+        <div class="ph-info">
+          <div class="ph-title">🔮 Core App — โหราศาสตร์ Engine</div>
+          <div class="ph-sub">ฟีเจอร์หลัก: คำนวณฤกษ์, ตารางดาว, ประวัติ</div>
+        </div>
+        <div class="ph-meta">
+          <div class="ph-time">สัปดาห์ 7–11</div>
+          <div class="ph-cost">฿25,000–40,000</div>
+        </div>
+      </div>
+      <div class="ph-body">
+        <div class="task-cols">
+          <div class="task-item">โหรทายหนู Calculation Engine (TypeScript) พร้อม Unit Tests</div>
+          <div class="task-item">หน้า Calculator: เลือกวัน/เวลา (Native Date Picker)</div>
+          <div class="task-item">หน้าผล: ตารางดาว, เกณฑ์ดาว, Animated Chart</div>
+          <div class="task-item">ระบบ Bookmark/Favorites บันทึกฤกษ์สำคัญ</div>
+          <div class="task-item">History Screen: ดูประวัติการคำนวณทั้งหมด</div>
+          <div class="task-item">Share Result (Native Share Sheet → LINE, FB, ฯลฯ)</div>
+          <div class="task-item">Offline Mode: Cache ผลคำนวณล่าสุดไว้ใช้ Offline</div>
+          <div class="task-item">วันมงคล Finder: ระบุ Event → ค้นหาวันที่ดี</div>
+        </div>
+        <div class="deliverable-row">
+          <span class="del-tag gold">Core Calculator</span>
+          <span class="del-tag green">History System</span>
+          <span class="del-tag">Offline Cache</span>
+          <span class="del-tag teal">Share Feature</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 4 -->
+    <div class="ph-card">
+      <div class="ph-top">
+        <div class="ph-num-box c4">4</div>
+        <div class="ph-info">
+          <div class="ph-title">🧠 AI Integration (Anthropic + Gemini)</div>
+          <div class="ph-sub">สมอง AI: Chat โหรส่วนตัว, วิเคราะห์ดาว, รายงาน</div>
+        </div>
+        <div class="ph-meta">
+          <div class="ph-time">สัปดาห์ 12–16</div>
+          <div class="ph-cost">฿20,000–35,000</div>
+        </div>
+      </div>
+      <div class="ph-body">
+        <div class="task-cols">
+          <div class="task-item">AI Chat "โหรส่วนตัว" — Claude Sonnet 4 Streaming</div>
+          <div class="task-item">Prompt Engineering Library โหราศาสตร์ไทย (RAG-based)</div>
+          <div class="task-item">Gemini: คำอธิบายฤกษ์ภาษาง่าย + Structured Output</div>
+          <div class="task-item">AI Dashboard: ดูดวงรายสัปดาห์/เดือน/ปี</div>
+          <div class="task-item">Cache Layer (Cloudflare KV) ลด API Cost 60%</div>
+          <div class="task-item">Token Quota ตาม Subscription Tier</div>
+          <div class="task-item">AI สร้าง PDF Report (ดาวน์โหลดได้)</div>
+          <div class="task-item">Push Notification: แจ้งฤกษ์ดี/ระวังรายวัน</div>
+        </div>
+        <div class="deliverable-row">
+          <span class="del-tag gold">AI Chat</span>
+          <span class="del-tag">Gemini Analysis</span>
+          <span class="del-tag blue">Push Notification</span>
+          <span class="del-tag teal">PDF Export</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 5 -->
+    <div class="ph-card">
+      <div class="ph-top">
+        <div class="ph-num-box c5">5</div>
+        <div class="ph-info">
+          <div class="ph-title">💳 Subscription & Payment System</div>
+          <div class="ph-sub">ระบบหารายได้: In-App Purchase, Subscription, Trial</div>
+        </div>
+        <div class="ph-meta">
+          <div class="ph-time">สัปดาห์ 17–20</div>
+          <div class="ph-cost">฿18,000–28,000</div>
+        </div>
+      </div>
+      <div class="ph-body">
+        <div class="task-cols">
+          <div class="task-item">Apple In-App Purchase (IAP) — บังคับสำหรับ iOS Subscription</div>
+          <div class="task-item">Google Play Billing — สำหรับ Android Subscription</div>
+          <div class="task-item">RevenueCat SDK: จัดการ Subscription ทั้ง 2 Platform</div>
+          <div class="task-item">Tier: Free / Pro ฿99/เดือน / Premium ฿199/เดือน</div>
+          <div class="task-item">Feature Gating: จำกัด AI Credits ตาม Plan</div>
+          <div class="task-item">7-Day Free Trial (Auto-convert)</div>
+          <div class="task-item">Paywall UI: สวยงาม, Conversion-optimized</div>
+          <div class="task-item">Restore Purchase + Receipt Validation</div>
+        </div>
+        <div class="deliverable-row">
+          <span class="del-tag gold">IAP iOS</span>
+          <span class="del-tag green">Play Billing</span>
+          <span class="del-tag blue">RevenueCat</span>
+          <span class="del-tag">Paywall UI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Phase 6 -->
+    <div class="ph-card">
+      <div class="ph-top">
+        <div class="ph-num-box c6">6</div>
+        <div class="ph-info">
+          <div class="ph-title">🚀 Store Submission & Launch</div>
+          <div class="ph-sub">ส่ง Review, ผ่าน Guideline, Launch, Monitor</div>
+        </div>
+        <div class="ph-meta">
+          <div class="ph-time">สัปดาห์ 21–24</div>
+          <div class="ph-cost">฿10,000–15,000</div>
+        </div>
+      </div>
+      <div class="ph-body">
+        <div class="task-cols">
+          <div class="task-item">Beta Testing: TestFlight (iOS) + Internal Testing (Android)</div>
+          <div class="task-item">Bug Fix รอบสุดท้าย + Performance Tuning</div>
+          <div class="task-item">App Store Assets: Icon, Screenshots, Preview Video</div>
+          <div class="task-item">App Store Listing (EN+TH): Description, Keywords (ASO)</div>
+          <div class="task-item">Submit to App Store Review (Apple) — รอ 1–3 วัน</div>
+          <div class="task-item">Submit to Google Play Review — รอ 1–7 วัน</div>
+          <div class="task-item">Crash Monitoring: Sentry + Firebase Crashlytics</div>
+          <div class="task-item">Analytics: Mixpanel / Amplitude — ติดตาม User Behavior</div>
+        </div>
+        <div class="deliverable-row">
+          <span class="del-tag gold">Live on App Store</span>
+          <span class="del-tag green">Live on Play Store</span>
+          <span class="del-tag teal">Monitoring</span>
+          <span class="del-tag blue">ASO Optimized</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ─── SECTION 3: COST BREAKDOWN ─── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">03</span>
+    <h2>รายละเอียดต้นทุนพัฒนา (CAPEX)</h2>
+  </div>
+
+  <div class="cost-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>รายการ</th>
+          <th>ประเภท</th>
+          <th>ต้นทุน (บาท)</th>
+          <th>หมายเหตุ</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Phase 1: Setup & Architecture</td>
+          <td><span class="cat dev">Dev</span></td>
+          <td class="amt">12,000–20,000</td>
+          <td class="note">Monorepo, DB Design, CI/CD</td>
+        </tr>
+        <tr>
+          <td>Phase 2: Authentication System</td>
+          <td><span class="cat dev">Dev</span></td>
+          <td class="amt">15,000–22,000</td>
+          <td class="note">รวม Apple Sign-In + Biometric</td>
+        </tr>
+        <tr>
+          <td>Phase 3: Core App (โหราศาสตร์)</td>
+          <td><span class="cat dev">Dev</span></td>
+          <td class="amt">25,000–40,000</td>
+          <td class="note">Calculator Engine + UI + Offline</td>
+        </tr>
+        <tr>
+          <td>Phase 4: AI Integration</td>
+          <td><span class="cat ai">AI</span></td>
+          <td class="amt">20,000–35,000</td>
+          <td class="note">Anthropic + Gemini + RAG System</td>
+        </tr>
+        <tr>
+          <td>Phase 5: Payment System</td>
+          <td><span class="cat dev">Dev</span></td>
+          <td class="amt">18,000–28,000</td>
+          <td class="note">IAP + RevenueCat + Paywall</td>
+        </tr>
+        <tr>
+          <td>Phase 6: Submission & Launch</td>
+          <td><span class="cat store">Store</span></td>
+          <td class="amt">10,000–15,000</td>
+          <td class="note">QA, Assets, ASO, Submit</td>
+        </tr>
+        <tr>
+          <td>UI/UX Design (ตลอดโปรเจกต์)</td>
+          <td><span class="cat dev">Design</span></td>
+          <td class="amt">15,000–25,000</td>
+          <td class="note">Figma Prototype + Design System</td>
+        </tr>
+        <tr>
+          <td>Apple Developer Account</td>
+          <td><span class="cat store">Store</span></td>
+          <td class="amt">3,500</td>
+          <td class="note">$99/ปี ≈ ฿3,500 (ต่อปี)</td>
+        </tr>
+        <tr>
+          <td>Google Play Console</td>
+          <td><span class="cat store">Store</span></td>
+          <td class="amt">875</td>
+          <td class="note">$25 ครั้งเดียวตลอดชีพ</td>
+        </tr>
+        <tr>
+          <td>Expo EAS Build (Production)</td>
+          <td><span class="cat infra">Infra</span></td>
+          <td class="amt">0–1,400</td>
+          <td class="note">Free tier มีให้ หรือ $40/mo</td>
+        </tr>
+        <tr>
+          <td>RevenueCat SDK</td>
+          <td><span class="cat infra">Infra</span></td>
+          <td class="amt">0</td>
+          <td class="note">Free ถึง $2,500 MRR แรก</td>
+        </tr>
+        <tr>
+          <td>Supabase Pro (Database)</td>
+          <td><span class="cat infra">Infra</span></td>
+          <td class="amt">875</td>
+          <td class="note">$25/เดือน ปีแรก ≈ ฿875/mo</td>
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="2">รวมต้นทุนพัฒนาทั้งหมด (CAPEX)</td>
+          <td class="amt" style="color:var(--gold2); font-size:18px">฿120,000–190,000</td>
+          <td class="note">ไม่รวมค่า AI API รายเดือน</td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Grand Total -->
+  <div class="grand-total">
+    <div class="gt-label">งบลงทุนพัฒนาแอปทั้งหมด (Full Mobile App)</div>
+    <div class="gt-price">120,000–190,000</div>
+    <div class="gt-unit">บาท · iOS + Android + Web App · ระยะเวลา 5–6 เดือน</div>
+    <div class="range-strip">
+      <div class="rs-item">
+        <div class="rs-lbl">งบประหยัด</div>
+        <div class="rs-val">฿120,000</div>
+      </div>
+      <div class="rs-item highlight">
+        <div class="rs-lbl">งบแนะนำ</div>
+        <div class="rs-val">฿155,000</div>
+      </div>
+      <div class="rs-item">
+        <div class="rs-lbl">งบสมบูรณ์</div>
+        <div class="rs-val">฿190,000</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SECTION 4: MONTHLY OPEX ─── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">04</span>
+    <h2>ต้นทุนรายเดือน หลัง Launch (OPEX)</h2>
+  </div>
+
+  <div class="opex-grid">
+    <div class="opex-card">
+      <div class="oc-icon">🗄️</div>
+      <div class="oc-info">
+        <div class="oc-name">Supabase Pro</div>
+        <div class="oc-note">Database + Auth + Storage + Realtime</div>
+      </div>
+      <div class="oc-price">฿875<div class="oc-sub">/เดือน</div></div>
+    </div>
+    <div class="opex-card">
+      <div class="oc-icon">☁️</div>
+      <div class="oc-info">
+        <div class="oc-name">Cloudflare Workers/Pages</div>
+        <div class="oc-note">Hosting + CDN + KV Cache + Edge</div>
+      </div>
+      <div class="oc-price">฿0–350<div class="oc-sub">/เดือน</div></div>
+    </div>
+    <div class="opex-card">
+      <div class="oc-icon">🧠</div>
+      <div class="oc-info">
+        <div class="oc-name">Anthropic API (Claude)</div>
+        <div class="oc-note">AI Chat + วิเคราะห์ฤกษ์ (ขึ้นอยู่กับ Users)</div>
+      </div>
+      <div class="oc-price">฿500–8,000<div class="oc-sub">/เดือน</div></div>
+    </div>
+    <div class="opex-card">
+      <div class="oc-icon">✨</div>
+      <div class="oc-info">
+        <div class="oc-name">Google Gemini API</div>
+        <div class="oc-note">Structured Analysis + Report Generation</div>
+      </div>
+      <div class="oc-price">฿0–2,000<div class="oc-sub">/เดือน</div></div>
+    </div>
+    <div class="opex-card">
+      <div class="oc-icon">📱</div>
+      <div class="oc-info">
+        <div class="oc-name">Expo EAS (Build + Update)</div>
+        <div class="oc-note">OTA Updates + Build Pipeline</div>
+      </div>
+      <div class="oc-price">฿0–1,400<div class="oc-sub">/เดือน</div></div>
+    </div>
+    <div class="opex-card">
+      <div class="oc-icon">💳</div>
+      <div class="oc-info">
+        <div class="oc-name">RevenueCat (Subscription Mgmt)</div>
+        <div class="oc-note">ฟรีถึง $2,500 MRR แรก จากนั้น 1%</div>
+      </div>
+      <div class="oc-price">฿0–1%<div class="oc-sub">of MRR</div></div>
+    </div>
+    <div class="opex-card">
+      <div class="oc-icon">🍎</div>
+      <div class="oc-info">
+        <div class="oc-name">Apple Developer Account</div>
+        <div class="oc-note">ค่าต่ออายุรายปี + Apple เก็บ 15–30%</div>
+      </div>
+      <div class="oc-price">฿292<div class="oc-sub">/เดือน</div></div>
+    </div>
+    <div class="opex-card">
+      <div class="oc-icon">📊</div>
+      <div class="oc-info">
+        <div class="oc-name">Analytics + Monitoring</div>
+        <div class="oc-note">Sentry + Mixpanel Free tier</div>
+      </div>
+      <div class="oc-price">฿0–600<div class="oc-sub">/เดือน</div></div>
+    </div>
+  </div>
+
+  <div style="background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 20px 24px; margin-top: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <div style="font-family: 'Prompt', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px;">รวม OPEX รายเดือน (ช่วงเริ่มต้น)</div>
+      <div style="font-size: 13px; color: var(--muted2);">ยังไม่รวม Commission ของ Apple (15–30%) และ Google (15–30%)</div>
+    </div>
+    <div style="font-family: 'Prompt', sans-serif; font-size: 28px; font-weight: 900; color: var(--gold2);">฿1,667–13,350 / เดือน</div>
+  </div>
+</div>
+
+<!-- ─── SECTION 5: STORE GUIDE ─── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">05</span>
+    <h2>ขั้นตอนส่งขึ้น Store จริง</h2>
+  </div>
+
+  <div class="store-grid">
+    <div class="store-card android">
+      <div class="s-head">
+        <span class="s-icon">🤖</span>
+        <div>
+          <div class="s-name">Google Play Store</div>
+          <div class="s-sub">ค่าสมัคร $25 (ครั้งเดียวตลอดชีพ)</div>
+        </div>
+      </div>
+      <div class="store-step">
+        <div class="s-step">
+          <div class="step-n">1</div>
+          <div class="step-txt"><strong>สมัคร Google Play Console</strong> — play.google.com/console จ่าย $25 ครั้งเดียว</div>
+        </div>
+        <div class="s-step">
+          <div class="step-n">2</div>
+          <div class="step-txt"><strong>สร้าง App Listing</strong> — ชื่อ, คำอธิบาย (EN+TH), Category, Content Rating</div>
+        </div>
+        <div class="s-step">
+          <div class="step-n">3</div>
+          <div class="step-txt"><strong>อัปโหลด Assets</strong> — Icon 512px, Feature Graphic 1024×500, Screenshots 5+ ภาพ</div>
+        </div>
+        <div class="s-step">
+          <div class="step-n">4</div>
+          <div class="step-txt"><strong>EAS Build Android</strong> — <code>eas build --platform android</code> → ได้ .aab file</div>
+        </div>
+        <div class="s-step">
+          <div class="step-n">5</div>
+          <div class="step-txt"><strong>Internal/Beta Testing</strong> — เทสกับ 20 คนก่อน ผ่าน Google Play Internal</div>
+        </div>
+        <div class="s-step">
+          <div class="step-n">6</div>
+          <div class="step-txt"><strong>Submit for Review</strong> — รอ 1–7 วัน ผ่านแล้วขึ้น Production</div>
+        </div>
+      </div>
+      <div class="fee-row">
+        <span class="fee-lbl">Commission Google เก็บ</span>
+        <span class="fee-val">15% (ยอดแรก ฿875K/ปี) / 30%</span>
+      </div>
+    </div>
+
+    <div class="store-card ios">
+      <div class="s-head">
+        <span class="s-icon">🍎</span>
+        <div>
+          <div class="s-name">Apple App Store</div>
+          <div class="s-sub">ค่าสมัคร $99/ปี ≈ ฿3,500/ปี</div>
+        </div>
+      </div>
+      <div class="store-step">
+        <div class="s-step">
+          <div class="step-n">1</div>
+          <div class="step-txt"><strong>สมัคร Apple Developer Program</strong> — developer.apple.com จ่าย $99/ปี</div>
+        </div>
+        <div class="s-step">
+          <div class="step-n">2</div>
+          <div class="step-txt"><strong>สร้าง App ID + Provisioning</strong> — ใน Xcode / App Store Connect</div>
+        </div>
+        <div class="s-step">
+          <div class="step-n">3</div>
+          <div class="step-txt"><strong>สร้าง App Listing ใน App Store Connect</strong> — ชื่อ, คำอธิบาย, Screenshots ทุก Device</div>
+        </div>
+        <div class="s-step">
+          <div class="step-n">4</div>
+          <div class="step-txt"><strong>EAS Build iOS</strong> — <code>eas build --platform ios</code> → ได้ .ipa file (ไม่ต้องมี Mac!)</div>
+        </div>
+        <div class="s-step">
+          <div class="step-n">5</div>
+          <div class="step-txt"><strong>TestFlight Beta</strong> — ส่ง 100 Tester ทดสอบก่อน Launch จริง</div>
+        </div>
+        <div class="s-step">
+          <div class="step-n">6</div>
+          <div class="step-txt"><strong>Submit for App Review</strong> — Apple Review 1–3 วัน (อาจมี Rejection ครั้งแรก ปกติ)</div>
+        </div>
+      </div>
+      <div class="fee-row">
+        <span class="fee-lbl">Commission Apple เก็บ</span>
+        <span class="fee-val">15% (ยอดแรก $1M/ปี) / 30%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <strong>⚠️ ข้อสำคัญ App Store (iOS):</strong> Apple บังคับให้ Subscription ทุกอย่างในแอปต้องใช้ In-App Purchase เท่านั้น (ไม่ให้ link ออกไปชำระเงินข้างนอก) และเก็บ 15–30% Commission ดังนั้นต้องตั้งราคาให้บวก Commission ของ Apple ไว้แล้ว เช่น ต้องการรายได้สุทธิ ฿99 → ตั้งราคาใน Store ที่ ฿120–135
+  </div>
+</div>
+
+<!-- ─── SECTION 6: ROI ─── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">06</span>
+    <h2>ประมาณการรายได้ (Revenue Forecast)</h2>
+  </div>
+
+  <div class="roi-grid">
+    <div class="roi-card">
+      <div class="roi-period">เดือนที่ 1–2</div>
+      <div class="roi-users">50–150<br><span style="font-size:13px; color:var(--muted2); font-weight:400">Subscribers</span></div>
+      <div class="roi-rev">฿5,000–15,000</div>
+      <div class="roi-note">Early Adopters<br>Soft Launch</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-period">เดือนที่ 3–4</div>
+      <div class="roi-users">200–500<br><span style="font-size:13px; color:var(--muted2); font-weight:400">Subscribers</span></div>
+      <div class="roi-rev">฿20,000–50,000</div>
+      <div class="roi-note">Word of Mouth<br>ASO Traffic</div>
+    </div>
+    <div class="roi-card">
+      <div class="roi-period">เดือนที่ 5–8</div>
+      <div class="roi-users">500–1,500<br><span style="font-size:13px; color:var(--muted2); font-weight:400">Subscribers</span></div>
+      <div class="roi-rev">฿50,000–150,000</div>
+      <div class="roi-note">Organic Growth<br>Social Viral</div>
+    </div>
+    <div class="roi-card" style="border-color: rgba(232,184,75,0.3); background: rgba(232,184,75,0.04);">
+      <div class="roi-period">เดือนที่ 9–12</div>
+      <div class="roi-users">2,000+<br><span style="font-size:13px; color:var(--muted2); font-weight:400">Subscribers</span></div>
+      <div class="roi-rev" style="color:var(--gold); font-size:18px">฿200,000+</div>
+      <div class="roi-note">Break-even ✅<br>Profit Zone</div>
+    </div>
+  </div>
+
+  <div class="note-box">
+    <strong>💡 Break-even Analysis:</strong> ถ้าเฉลี่ย ARPU (Average Revenue Per User) อยู่ที่ ฿130/เดือน (หลังหัก Commission Store) ต้องการ Subscribers ประมาณ <strong>1,200 คน</strong> เพื่อคืนทุน ฿155,000 ภายใน <strong>12 เดือน</strong> — ซึ่งในตลาดโหราศาสตร์ไทยที่มีผู้ใช้หลักล้านคน เป็นตัวเลขที่เป็นไปได้มากครับ 🌱
+  </div>
+</div>
+
+<!-- ─── SECTION 7: TIMELINE ─── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sec-num">07</span>
+    <h2>Timeline 6 เดือนสู่ App Store</h2>
+  </div>
+
+  <div class="tl">
+    <div class="tl-item">
+      <div class="tl-label">เดือนที่ 1</div>
+      <div class="tl-title">🏗️ Foundation — Monorepo + DB + EAS Setup</div>
+      <div class="tl-desc">วางโครงสร้างทั้งหมด, Design System, สมัคร Developer Accounts ทั้ง 2 Store</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-label">เดือนที่ 2</div>
+      <div class="tl-title">🔐 Auth + Core UI</div>
+      <div class="tl-desc">ระบบ Login (รวม Apple Sign-In), Onboarding, Profile, Navigation Structure</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-label">เดือนที่ 3</div>
+      <div class="tl-title">🔮 Calculator Engine + MVP</div>
+      <div class="tl-desc">Core Algorithm, หน้าคำนวณ, ผลลัพธ์, History — MVP พร้อม Internal Beta Test</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-label">เดือนที่ 4</div>
+      <div class="tl-title">🧠 AI Integration + Chat</div>
+      <div class="tl-desc">Claude AI Chat, Gemini Analysis, Push Notifications, PDF Report Generator</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-label">เดือนที่ 5</div>
+      <div class="tl-title">💳 Payment + Subscription System</div>
+      <div class="tl-desc">IAP iOS + Google Play Billing + RevenueCat, Paywall, 7-Day Trial Flow</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-label">เดือนที่ 6</div>
+      <div class="tl-title">🚀 TestFlight + Beta + Submit + LAUNCH 🎉</div>
+      <div class="tl-desc">Beta Testing 2 สัปดาห์, ส่ง Review ทั้ง 2 Store, Launch พร้อมกัน, Monitor + Fix</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── FOOTER ─── -->
+<div class="footer">
+  <div class="divider"></div>
+  <div class="f-logo">ครูเด่น มาสเตอร์ฟา · CAP Vision Institute</div>
+  <div class="f-tag">Transform Learning, Transform Organization 💡✨🌱</div>
+  <div style="margin-top: 12px; font-size: 12px; color: var(--muted);">
+    Mobile App Blueprint · iOS + Android · โหรทายหนู AI Edition · พฤษภาคม 2568
+  </div>
+</div>
+
+</div>
+</body>
+</html>
