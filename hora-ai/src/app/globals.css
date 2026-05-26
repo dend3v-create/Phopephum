@@ -2,16 +2,18 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0A0806;
-  --foreground: #F5F0E8;
+  --background: #03071A;
+  --foreground: #F6F4EF;
   
-  --hora-gold: #C9A96E;
-  --hora-gold-light: #E8D5A3;
-  --hora-dark: #0A0806;
-  --hora-dark-card: #12100E;
-  --hora-dark-border: rgba(201, 169, 110, 0.2);
-  --hora-text: #F5F0E8;
-  --hora-text-muted: #8B7E6E;
+  --hora-gold: #C0B7A5;
+  --hora-gold-light: #D4C29A;
+  --hora-gold-cta: #E0C36E;
+  
+  --hora-dark: #03071A;
+  --hora-dark-card: rgba(6, 24, 49, 0.72);
+  --hora-dark-border: rgba(212, 194, 154, 0.18);
+  --hora-text: #F6F4EF;
+  --hora-text-muted: #797C79;
 }
 
 @theme inline {
@@ -20,6 +22,7 @@
   
   --color-hora-gold: var(--hora-gold);
   --color-hora-gold-light: var(--hora-gold-light);
+  --color-hora-gold-cta: var(--hora-gold-cta);
   --color-hora-dark: var(--hora-dark);
   --color-hora-dark-card: var(--hora-dark-card);
   --color-hora-dark-border: var(--hora-dark-border);
@@ -35,33 +38,42 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
 }
 
+/* Glassmorphism Card ตาม Cosmic Luxury Design */
 .glass-hora {
-  background: rgba(18, 16, 14, 0.85);
-  border: 1px solid var(--hora-dark-border);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  background: rgba(6, 24, 49, 0.72);
+  border: 1px solid rgba(212, 194, 154, 0.18);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.45),
+    0 0 40px rgba(192, 183, 165, 0.06);
 }
 
+/* Luxury Primary Button พร้อม Gold Aura Gradient */
 .btn-hora {
-  background: var(--hora-gold);
-  color: var(--hora-dark);
+  background: linear-gradient(135deg, #D4C29A 0%, #E0C36E 100%);
+  color: #03071A;
+  border-radius: 999px;
   font-weight: 600;
-  border-radius: 8px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 14px rgba(201, 169, 110, 0.25);
+  box-shadow: 0 6px 24px rgba(224, 195, 110, 0.24);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.5rem 1.25rem;
+  padding: 0.75rem 1.75rem;
   cursor: pointer;
+  border: none;
+  outline: none;
 }
 
 .btn-hora:hover {
   opacity: 0.95;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(201, 169, 110, 0.35);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(224, 195, 110, 0.36);
 }
 
 .btn-hora:active {
