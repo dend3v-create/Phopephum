@@ -1,0 +1,187 @@
+
+<style>
+.w{padding:1rem 0}
+.sec{font-size:16px;font-weight:500;color:var(--color-text-primary);margin:0 0 12px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:12px}
+.card.featured{border:2px solid var(--color-border-info)}
+.row{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500}
+.b-blue{background:#E6F1FB;color:#0C447C}
+.b-green{background:#EAF3DE;color:#27500A}
+.b-amber{background:#FAEEDA;color:#633806}
+.b-purple{background:#EEEDFE;color:#3C3489}
+.b-gray{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.timeline{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:20px}
+.tcard{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px}
+.tcard.now{border-top:3px solid #185FA5}
+.tcard.mid{border-top:3px solid #3B6D11}
+.tcard.far{border-top:3px solid #534AB7}
+.tphase{font-size:11px;font-weight:500;margin-bottom:4px}
+.now .tphase{color:#185FA5}
+.mid .tphase{color:#3B6D11}
+.far .tphase{color:#534AB7}
+.ttitle{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px}
+.titem{font-size:11px;color:var(--color-text-secondary);margin-bottom:3px;display:flex;gap:5px}
+.titem i{font-size:12px;flex-shrink:0;margin-top:1px}
+.ok{color:#3B6D11}.dot{color:var(--color-text-tertiary)}
+
+.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px}
+.pcard{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem}
+.pcard.core{border-left:3px solid #185FA5}
+.pcard.ai{border-left:3px solid #534AB7}
+.pcard.insight{border-left:3px solid #3B6D11}
+.pcard.tqm{border-left:3px solid #854F0B}
+.pname{font-size:14px;font-weight:500;color:var(--color-text-primary);margin:0 0 4px}
+.pdesc{font-size:12px;color:var(--color-text-secondary);margin:0 0 8px;line-height:1.5}
+.pfeat{font-size:11px;color:var(--color-text-secondary);display:flex;gap:5px;margin-bottom:3px}
+
+.log-box{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:12px;margin-bottom:20px}
+.log-title{font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:8px}
+.log-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:12px}
+.log-row:last-child{border-bottom:none}
+.log-q{color:var(--color-text-secondary);flex:1}
+.log-bar-wrap{width:120px;background:var(--color-border-tertiary);border-radius:3px;height:6px;margin:0 10px}
+.log-bar{height:6px;border-radius:3px}
+
+.cta-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font-size:13px;padding:8px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);cursor:pointer}
+.btn:hover{background:var(--color-background-secondary)}
+</style>
+
+<div class="w">
+
+<p class="sec">Product Vision — จาก Manual Infographic สู่ AI Platform</p>
+
+<div class="card featured">
+  <div class="row">
+    <span class="badge b-blue">Core Insight</span>
+    <span style="font-size:12px;color:var(--color-text-secondary)">พี่เด่นทำ Manual อยู่แล้ว — เราแค่ต้อง Automate + Scale</span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:10px">
+    <div style="text-align:center;padding:10px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)">
+      <div style="font-size:22px;font-weight:500;color:var(--color-text-primary)">1 เพจ</div>
+      <div style="font-size:11px;color:var(--color-text-secondary)">Manual ตอนนี้</div>
+    </div>
+    <div style="text-align:center;padding:10px;background:#E6F1FB;border-radius:var(--border-radius-md)">
+      <div style="font-size:22px;font-weight:500;color:#0C447C">AI Report</div>
+      <div style="font-size:11px;color:#185FA5">Phase 1 → Auto-generate</div>
+    </div>
+    <div style="text-align:center;padding:10px;background:#EEEDFE;border-radius:var(--border-radius-md)">
+      <div style="font-size:22px;font-weight:500;color:#3C3489">Living AI</div>
+      <div style="font-size:11px;color:#534AB7">Phase 3 → จดจำ+ปรับตาม User</div>
+    </div>
+  </div>
+</div>
+
+<p class="sec">3-Year Product Roadmap</p>
+<div class="timeline">
+  <div class="tcard now">
+    <div class="tphase">ปีที่ 1 (2569–2570) — Foundation</div>
+    <div class="ttitle">Hora AI Core</div>
+    <div class="titem"><i class="ti ti-check ok"></i>ยามอัฐกาล + จักรกำเนิด</div>
+    <div class="titem"><i class="ti ti-check ok"></i>ระบบจร (วัย/ปี/เดือน/วัน)</div>
+    <div class="titem"><i class="ti ti-check ok"></i>เลข 7 ตัว 9 ฐาน</div>
+    <div class="titem"><i class="ti ti-check ok"></i>AI Report 1 เพจ อัตโนมัติ</div>
+    <div class="titem"><i class="ti ti-check ok"></i>TQM ชีวิต ตาม Algorithm</div>
+    <div class="titem"><i class="ti ti-check ok"></i>Subscription Web + Mobile</div>
+    <div style="margin-top:8px"><span class="badge b-blue">เป้า: 500 subs</span></div>
+  </div>
+  <div class="tcard mid">
+    <div class="tphase">ปีที่ 2 (2570–2571) — Growth</div>
+    <div class="ttitle">AI Memory + Insights</div>
+    <div class="titem"><i class="ti ti-check ok"></i>Log User Behavior → Feature Map</div>
+    <div class="titem"><i class="ti ti-check ok"></i>Affirmation ประจำตัว (AI-generated)</div>
+    <div class="titem"><i class="ti ti-check ok"></i>Weekly/Monthly Insight Report</div>
+    <div class="titem"><i class="ti ti-check ok"></i>Mood + Energy Tracker ตาม TQM</div>
+    <div class="titem"><i class="ti ti-check ok"></i>Community Platform (B2B API)</div>
+    <div style="margin-top:8px"><span class="badge b-green">เป้า: 2,000 subs + B2B</span></div>
+  </div>
+  <div class="tcard far">
+    <div class="tphase">ปีที่ 3 (2571–2572) — Authority</div>
+    <div class="ttitle">Wisdom Ecosystem</div>
+    <div class="titem"><i class="ti ti-check ok"></i>Living AI Coach (Chat ต่อเนื่อง)</div>
+    <div class="titem"><i class="ti ti-check ok"></i>Legacy Planning (12 ปีข้างหน้า)</div>
+    <div class="titem"><i class="ti ti-check ok"></i>Corporate Package (ทีม / องค์กร)</div>
+    <div class="titem"><i class="ti ti-check ok"></i>IP License ขาย Algorithm</div>
+    <div class="titem"><i class="ti ti-check ok"></i>CAP Vision + Hora = Ecosystem</div>
+    <div style="margin-top:8px"><span class="badge b-purple">เป้า: Authority Platform</span></div>
+  </div>
+</div>
+
+<p class="sec">4 Product Lines หลัก — ดึงจาก Manual ที่พี่ทำอยู่</p>
+<div class="product-grid">
+  <div class="pcard core">
+    <p class="pname"><i class="ti ti-compass" style="font-size:16px;vertical-align:-2px;margin-right:6px" aria-hidden="true"></i>Core Calculator</p>
+    <p class="pdesc">คำนวณยาม ดวงชะตา จักรกำเนิด ระบบจรครบ — Engine หลักที่คู่แข่งไม่มี</p>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>ยามอัฐกาล + โหรทายหนู</div>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>เลข 7 ตัว 9 ฐาน</div>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>วัยจร / ปีจร / เดือนจร / วันจร</div>
+    <span class="badge b-blue">Free + Pro</span>
+  </div>
+  <div class="pcard ai">
+    <p class="pname"><i class="ti ti-sparkles" style="font-size:16px;vertical-align:-2px;margin-right:6px" aria-hidden="true"></i>AI Life Report (1 เพจ)</p>
+    <p class="pdesc">Auto-generate รายงานชีวิตแบบที่พี่ทำ Manual อยู่ — สรุปสิ่งที่ควรทำ + สิ่งที่จะได้รับ</p>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>สรุปดวงวัยจร + จังหวะเวลา</div>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>กลไกแก้ดวงเชิงพฤติกรรม</div>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>Export PDF พร้อม Design</div>
+    <span class="badge b-purple">Pro + Premium</span>
+  </div>
+  <div class="pcard tqm">
+    <p class="pname"><i class="ti ti-calendar-stats" style="font-size:16px;vertical-align:-2px;margin-right:6px" aria-hidden="true"></i>TQM Life Planner</p>
+    <p class="pdesc">บริหารเวลา + พลังงาน ตามดวงรายวัน/รายสัปดาห์ — วันไหนเหมาะทำอะไร</p>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>ปฏิทินฤกษ์รายวัน (MON–SUN)</div>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>พลังวันจร → กิจกรรมที่เหมาะ</div>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>Push Notification ฤกษ์ดี</div>
+    <span class="badge b-amber">Premium</span>
+  </div>
+  <div class="pcard insight">
+    <p class="pname"><i class="ti ti-heart" style="font-size:16px;vertical-align:-2px;margin-right:6px" aria-hidden="true"></i>Affirmation Engine</p>
+    <p class="pdesc">AI สร้าง Affirmation ประจำตัวจากดวงชะตา — เฉพาะบุคคล อัพเดทตามจร</p>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>Daily Affirmation ตามดวงวัน</div>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>Monthly Theme จากปีจร</div>
+    <div class="pfeat"><i class="ti ti-point" style="font-size:10px;margin-top:3px"></i>Shareable Card (LINE, IG)</div>
+    <span class="badge b-green">Phase 2</span>
+  </div>
+</div>
+
+<p class="sec">User Behavior Log → Feature Roadmap Strategy</p>
+<div class="log-box">
+  <div class="log-title">คำถามที่ User จะถามเยอะสุด (Predicted) → Feature ที่ต้องสร้างต่อ</div>
+  <div class="log-row">
+    <span class="log-q">"วันนี้เหมาะทำอะไร / เจรจาได้ไหม?"</span>
+    <div class="log-bar-wrap"><div class="log-bar" style="width:95%;background:#378ADD"></div></div>
+    <span style="font-size:11px;color:#185FA5">→ TQM Daily</span>
+  </div>
+  <div class="log-row">
+    <span class="log-q">"ปีนี้เรื่องเงิน/งานจะเป็นยังไง?"</span>
+    <div class="log-bar-wrap"><div class="log-bar" style="width:88%;background:#378ADD"></div></div>
+    <span style="font-size:11px;color:#185FA5">→ Annual Report</span>
+  </div>
+  <div class="log-row">
+    <span class="log-q">"เมื่อไรดวงจะดีขึ้น / ผ่านช่วงนี้ไปได้?"</span>
+    <div class="log-bar-wrap"><div class="log-bar" style="width:82%;background:#639922"></div></div>
+    <span style="font-size:11px;color:#3B6D11">→ จร Timeline</span>
+  </div>
+  <div class="log-row">
+    <span class="log-q">"ดวงกับคู่ค้า/ลูกน้อง/คู่ชีวิตเป็นยังไง?"</span>
+    <div class="log-bar-wrap"><div class="log-bar" style="width:70%;background:#7F77DD"></div></div>
+    <span style="font-size:11px;color:#534AB7">→ Synastry Feature</span>
+  </div>
+  <div class="log-row">
+    <span class="log-q">"วันฤกษ์ดีสำหรับเปิดกิจการ/ปิดดีล?"</span>
+    <div class="log-bar-wrap"><div class="log-bar" style="width:75%;background:#BA7517"></div></div>
+    <span style="font-size:11px;color:#633806">→ Event Planner</span>
+  </div>
+  <div class="log-row">
+    <span class="log-q">"Affirmation ของฉันคืออะไร?"</span>
+    <div class="log-bar-wrap"><div class="log-bar" style="width:60%;background:#639922"></div></div>
+    <span style="font-size:11px;color:#3B6D11">→ Affirmation AI</span>
+  </div>
+</div>
+
+<div class="cta-row">
+  <button class="btn" onclick="sendPrompt('ออกแบบ AI Life Report 1 เพจ สำหรับ Hora AI ที่ Auto-generate จากดวงชะตา เหมือนที่พี่เด่นทำ Manual')">ออกแบบ AI Life Report ↗</button>
+  <button class="btn" onclick="sendPrompt('วาง TQM Life Planner Feature สำหรับ Hora AI ระบบ MON-SUN ตามพลังดาว')">วาง TQM Planner ↗</button>
+  <button class="btn" onclick="sendPrompt('วาง User Behavior Logging System สำหรับ Hora AI เพื่อ Drive Feature Roadmap')">วาง Log System ↗</button>
+</div>
+</div>

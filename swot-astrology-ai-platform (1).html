@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SWOT Analysis — โหราศาสตร์ AI Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Prompt:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080B14;
+  --bg2: #0E1220;
+  --card: #141826;
+  --card2: #1C2235;
+  --gold: #E8B84B;
+  --gold2: #F5D680;
+  --gold3: rgba(232,184,75,0.12);
+  --green: #3ECF8E;
+  --green2: rgba(62,207,142,0.1);
+  --red: #FF5F5F;
+  --red2: rgba(255,95,95,0.1);
+  --blue: #4F9EFF;
+  --blue2: rgba(79,158,255,0.1);
+  --orange: #FF9F43;
+  --orange2: rgba(255,159,67,0.1);
+  --purple: #A78BFA;
+  --purple2: rgba(167,139,250,0.1);
+  --teal: #2DD4BF;
+  --text: #E8E4F0;
+  --muted: #6B7280;
+  --muted2: #9CA3AF;
+  --border: rgba(255,255,255,0.07);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Sarabun', sans-serif;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 20% 0%, rgba(232,184,75,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 100%, rgba(79,158,255,0.07) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.page { max-width: 1000px; margin: 0 auto; padding: 48px 24px 80px; position: relative; z-index: 1; }
+
+/* ── HERO ── */
+.hero {
+  text-align: center;
+  padding: 56px 0 52px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 56px;
+}
+
+.hero .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(232,184,75,0.1);
+  border: 1px solid rgba(232,184,75,0.25);
+  color: var(--gold2);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  padding: 6px 18px;
+  border-radius: 100px;
+  margin-bottom: 24px;
+}
+
+.hero h1 {
+  font-family: 'Prompt', sans-serif;
+  font-size: 46px;
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 14px;
+}
+
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero .sub { color: var(--muted2); font-size: 16px; max-width: 560px; margin: 0 auto 32px; }
+
+.context-strip {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ctx-pill {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-size: 13px;
+  color: var(--muted2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ctx-pill strong { color: var(--text); font-weight: 700; }
+
+/* ── SECTION ── */
+.sec { margin-bottom: 52px; }
+
+.sec-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.sec-head .sn {
+  font-family: 'Prompt', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  color: var(--gold);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.sec-head h2 {
+  font-family: 'Prompt', sans-serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.sec-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── SWOT GRID ── */
+.swot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 640px) { .swot-grid { grid-template-columns: 1fr; } }
+
+.swot-card {
+  border-radius: 18px;
+  padding: 26px;
+  border: 1px solid;
+  position: relative;
+  overflow: hidden;
+}
+
+.swot-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  opacity: 0.06;
+}
+
+.swot-card.s { border-color: rgba(62,207,142,0.3); background: linear-gradient(135deg, rgba(62,207,142,0.06), var(--card)); }
+.swot-card.s::before { background: var(--green); }
+.swot-card.w { border-color: rgba(255,95,95,0.3); background: linear-gradient(135deg, rgba(255,95,95,0.06), var(--card)); }
+.swot-card.w::before { background: var(--red); }
+.swot-card.o { border-color: rgba(79,158,255,0.3); background: linear-gradient(135deg, rgba(79,158,255,0.06), var(--card)); }
+.swot-card.o::before { background: var(--blue); }
+.swot-card.t { border-color: rgba(255,159,67,0.3); background: linear-gradient(135deg, rgba(255,159,67,0.06), var(--card)); }
+.swot-card.t::before { background: var(--orange); }
+
+.swot-label {
+  font-family: 'Prompt', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.swot-card.s .swot-label { color: var(--green); }
+.swot-card.w .swot-label { color: var(--red); }
+.swot-card.o .swot-label { color: var(--blue); }
+.swot-card.t .swot-label { color: var(--orange); }
+
+.swot-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+
+.swot-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13.5px;
+  line-height: 1.55;
+}
+
+.swot-item:last-child { border-bottom: none; padding-bottom: 0; }
+
+.swot-item .dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 7px;
+}
+
+.swot-card.s .dot { background: var(--green); }
+.swot-card.w .dot { background: var(--red); }
+.swot-card.o .dot { background: var(--blue); }
+.swot-card.t .dot { background: var(--orange); }
+
+.swot-item .item-text { color: #C8C4D8; }
+.swot-item .item-text strong { color: var(--text); font-weight: 600; }
+
+/* ── ASSET ANALYSIS ── */
+.asset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 640px) { .asset-grid { grid-template-columns: 1fr; } }
+
+.asset-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  text-align: center;
+}
+
+.asset-card .a-icon { font-size: 32px; margin-bottom: 10px; }
+.asset-card .a-name {
+  font-family: 'Prompt', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.asset-card .a-val {
+  font-family: 'Prompt', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--gold);
+  margin-bottom: 4px;
+}
+.asset-card .a-note { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+/* ── REVENUE MODEL ── */
+.rev-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+@media (max-width: 640px) { .rev-grid { grid-template-columns: 1fr; } }
+
+.rev-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.rev-top {
+  padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card2);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.rev-top .rt-left .rt-num {
+  font-family: 'Prompt', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: var(--gold);
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
+
+.rev-top .rt-left .rt-name {
+  font-family: 'Prompt', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.rev-top .rt-left .rt-sub { font-size: 12px; color: var(--muted2); }
+
+.rev-top .rt-price {
+  font-family: 'Prompt', sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--gold2);
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.rev-top .rt-price .rp-sub { font-size: 11px; color: var(--muted); font-weight: 400; }
+
+.rev-body { padding: 16px 22px; }
+
+.rev-item {
+  font-size: 13px;
+  color: var(--muted2);
+  padding: 5px 0;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  line-height: 1.5;
+}
+
+.rev-item:last-child { border-bottom: none; }
+
+.rev-item::before {
+  content: '›';
+  color: var(--gold);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: -1px;
+}
+
+.potential-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--gold3);
+  border: 1px solid rgba(232,184,75,0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-top: 12px;
+}
+
+.potential-row .pr-lbl { font-size: 12px; color: var(--muted2); }
+.potential-row .pr-val {
+  font-family: 'Prompt', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--gold2);
+}
+
+/* ── STRATEGY MATRIX ── */
+.matrix-wrap {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+.matrix-wrap table { width: 100%; border-collapse: collapse; }
+
+.matrix-wrap th {
+  padding: 14px 18px;
+  font-family: 'Prompt', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  background: var(--card2);
+}
+
+.matrix-wrap th.h-green { color: var(--green); }
+.matrix-wrap th.h-red { color: var(--red); }
+.matrix-wrap th.h-blue { color: var(--blue); }
+.matrix-wrap th.h-orange { color: var(--orange); }
+
+.matrix-wrap td {
+  padding: 14px 18px;
+  font-size: 13.5px;
+  color: #C8C4D8;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  vertical-align: top;
+  line-height: 1.6;
+}
+
+.matrix-wrap tbody tr:last-child td { border-bottom: none; }
+.matrix-wrap tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+.matrix-wrap td.strat {
+  font-family: 'Prompt', sans-serif;
+  font-weight: 700;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.badge.now { background: rgba(62,207,142,0.15); color: var(--green); border: 1px solid rgba(62,207,142,0.3); }
+.badge.mid { background: rgba(232,184,75,0.15); color: var(--gold); border: 1px solid rgba(232,184,75,0.3); }
+.badge.long { background: rgba(167,139,250,0.15); color: var(--purple); border: 1px solid rgba(167,139,250,0.3); }
+
+/* ── OPPORTUNITY MAP ── */
+.opp-list { display: flex; flex-direction: column; gap: 12px; }
+
+.opp-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 24px;
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 16px;
+  align-items: center;
+}
+
+@media (max-width: 600px) {
+  .opp-item { grid-template-columns: 44px 1fr; }
+  .opp-item .opp-rev { display: none; }
+}
+
+.opp-item .opp-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  flex-shrink: 0;
+}
+
+.opp-item:nth-child(1) .opp-icon { background: rgba(62,207,142,0.12); }
+.opp-item:nth-child(2) .opp-icon { background: rgba(232,184,75,0.12); }
+.opp-item:nth-child(3) .opp-icon { background: rgba(79,158,255,0.12); }
+.opp-item:nth-child(4) .opp-icon { background: rgba(167,139,250,0.12); }
+.opp-item:nth-child(5) .opp-icon { background: rgba(255,95,95,0.12); }
+.opp-item:nth-child(6) .opp-icon { background: rgba(45,212,191,0.12); }
+
+.opp-item .opp-name {
+  font-family: 'Prompt', sans-serif;
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.opp-item .opp-desc { font-size: 13px; color: var(--muted2); line-height: 1.5; }
+
+.opp-item .opp-rev {
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.opp-item .opp-rev .or-val {
+  font-family: 'Prompt', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--gold2);
+  margin-bottom: 2px;
+}
+
+.opp-item .opp-rev .or-note { font-size: 11px; color: var(--muted); }
+
+/* ── GRAND SUMMARY ── */
+.grand {
+  background: var(--card);
+  border: 1px solid var(--gold);
+  border-radius: 20px;
+  padding: 40px 36px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.grand::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 50% 0%, rgba(232,184,75,0.1) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.grand .g-sub {
+  font-family: 'Prompt', sans-serif;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+
+.grand .g-title {
+  font-family: 'Prompt', sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--text);
+  margin-bottom: 10px;
+  line-height: 1.3;
+}
+
+.grand .g-title em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.grand .g-desc { font-size: 15px; color: var(--muted2); max-width: 600px; margin: 0 auto 28px; line-height: 1.7; }
+
+.mkt-size-row {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+  padding: 20px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+
+.ms-item { text-align: center; }
+.ms-item .ms-lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 6px; }
+.ms-item .ms-val {
+  font-family: 'Prompt', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  color: var(--gold2);
+}
+.ms-item .ms-note { font-size: 12px; color: var(--muted2); }
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.action-item {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.action-item .step-n {
+  font-family: 'Prompt', sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--gold);
+  background: var(--gold3);
+  border: 1px solid rgba(232,184,75,0.3);
+  border-radius: 8px;
+  padding: 3px 10px;
+  flex-shrink: 0;
+}
+
+/* ── FOOTER ── */
+.footer {
+  margin-top: 64px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+}
+
+.footer .f-logo {
+  font-family: 'Prompt', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+}
+
+.footer .f-tag { font-size: 13px; color: var(--muted); }
+
+.divider { width: 48px; height: 2px; background: linear-gradient(to right, transparent, var(--gold), transparent); margin: 0 auto 12px; }
+
+.note-teal {
+  background: rgba(45,212,191,0.07);
+  border: 1px solid rgba(45,212,191,0.25);
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 13.5px;
+  color: var(--teal);
+  margin-top: 20px;
+  line-height: 1.65;
+}
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="eyebrow">🔮 Strategic Analysis</div>
+  <h1>SWOT + <em>โอกาสสร้างรายได้</em><br>โหราศาสตร์ AI Platform</h1>
+  <p class="sub">วิเคราะห์จากบริบทจริง: ผู้เชี่ยวชาญโหราศาสตร์ + ระบบคำนวณที่มีอยู่แล้ว + ตลาดที่ยังว่าง</p>
+  <div class="context-strip">
+    <div class="ctx-pill">🎓 <strong>การศึกษาโหราศาสตร์</strong> แบบลึกซึ้ง</div>
+    <div class="ctx-pill">📊 <strong>ระบบ Excel</strong> ยามอัฐกาล + ฤกษ์ 9 + เลข 7 ตัว 9 ฐาน</div>
+    <div class="ctx-pill">🎯 <strong>กลุ่มเป้าหมาย:</strong> นักขาย + ความรัก</div>
+    <div class="ctx-pill">💡 <strong>วิสัยทัศน์:</strong> ระบบคำนวณแบบฟิก</div>
+  </div>
+</div>
+
+<!-- ── SECTION 1: SWOT ── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sn">01</span>
+    <h2>SWOT Analysis</h2>
+  </div>
+
+  <div class="swot-grid">
+
+    <!-- S -->
+    <div class="swot-card s">
+      <div class="swot-label">💪 S</div>
+      <div class="swot-title">จุดแข็ง (Strengths)</div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>การศึกษาโหราศาสตร์แบบลึกซึ้ง</strong> — ระบบโหราศาสตร์ไทยลึก ไม่ใช่แค่ผิวเผิน</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>ระบบ Excel ที่ทำงานจริง</strong> — มี Algorithm ยามอัฐกาล + ฤกษ์ 9 + เลข 7 ตัว 9 ฐาน พร้อมแล้ว</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>ผู้เชี่ยวชาญด้านเนื้อหา</strong> — ข้อมูลถูกต้อง 100% โดยผู้รู้จริง</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>เข้าใจ User Persona ชัดเจน</strong> — นักขาย + ความรัก = กลุ่มที่ยินดีจ่ายสูง</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>มี Mentor ที่ช่วยวางระบบ</strong> — ครูเด่น + AI Dev Framework พร้อมใช้</div></div>
+    </div>
+
+    <!-- W -->
+    <div class="swot-card w">
+      <div class="swot-label">⚠️ W</div>
+      <div class="swot-title">จุดอ่อน (Weaknesses)</div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>ยังเป็น Excel เท่านั้น</strong> — ไม่มีแพลตฟอร์ม Product จริง</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>ทักษะด้าน Tech ยังไม่มี</strong> — ต้องพึ่งนักพัฒนา / AI Tools</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>ยังไม่มี Brand / ชื่อเสียง</strong> — เพิ่งเริ่มสร้าง Online Presence</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>ไม่มีทุนตั้งต้น</strong> — ต้องหา Model ที่ทำได้ด้วย Cost ต่ำก่อน</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>เนื้อหาซับซ้อน</strong> — อธิบายโหราศาสตร์ไทยให้คนทั่วไปเข้าใจยาก</div></div>
+    </div>
+
+    <!-- O -->
+    <div class="swot-card o">
+      <div class="swot-label">🚀 O</div>
+      <div class="swot-title">โอกาส (Opportunities)</div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>ตลาดโหราศาสตร์ไทยโต</strong> — คนไทยเชื่อเรื่องฤกษ์ยามสูงมาก มูลค่าตลาดหลักพันล้าน</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>Cross-Platform ยังว่าง</strong> — ไม่มีแอปคุณภาพสูง + AI ในตลาดนี้เลย</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>AI ช่วย "อธิบาย" ได้ดี</strong> — แปลงข้อมูลซับซ้อนเป็นภาษาง่ายให้ผู้ใช้ทั่วไป</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>นักขาย = กลุ่มจ่ายเงินได้</strong> — ถ้าฤกษ์ช่วยให้ขายของได้ เขายินดีจ่ายทุกเดือน</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>โค้ช/ที่ปรึกษาออนไลน์</strong> — แอปเป็น Tool เสริมให้บริการ Premium Consultation</div></div>
+    </div>
+
+    <!-- T -->
+    <div class="swot-card t">
+      <div class="swot-label">🛡️ T</div>
+      <div class="swot-title">ภัยคุกคาม (Threats)</div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>คู่แข่งสามารถ Copy ได้</strong> — หากไม่มี Moat ชัดเจน อาจถูก Clone ได้ง่าย</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>AI ทำนายเองได้ใน ChatGPT</strong> — คนอาจถาม AI ฟรีแทนจ่ายเงิน</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>ความน่าเชื่อถือ</strong> — ถ้า AI ทำนายผิด ชื่อเสียงเสีย เปลี่ยนยาก</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>ต้นทุน Dev สูง</strong> — ถ้าเริ่ม Mobile App เลย ต้นทุน ฿130K+ อาจเป็นอุปสรรค</div></div>
+      <div class="swot-item"><div class="dot"></div><div class="item-text"><strong>Algorithm Leak</strong> — ถ้าเปิดเผยวิธีคำนวณ คู่แข่งอาจนำไปใช้</div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── SECTION 2: ASSET ── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sn">02</span>
+    <h2>สินทรัพย์ที่มีอยู่แล้ว (มีค่ามาก)</h2>
+  </div>
+
+  <div class="asset-grid">
+    <div class="asset-card">
+      <div class="a-icon">📊</div>
+      <div class="a-name">Excel ยามอัฐกาล + เลข 7 ตัว 9 ฐาน</div>
+      <div class="a-val">Core Engine</div>
+      <div class="a-note">Algorithm ที่ใช้งานจริงแล้ว<br>Convert เป็น TypeScript ได้ทันที</div>
+    </div>
+    <div class="asset-card">
+      <div class="a-icon">🎓</div>
+      <div class="a-name">ความรู้เชิงลึกโหราศาสตร์</div>
+      <div class="a-val">IP ที่ Copy ไม่ได้</div>
+      <div class="a-note">ฤกษ์ 9 + เลข 7 ตัว<br>= Unique Knowledge ในตลาด</div>
+    </div>
+    <div class="asset-card">
+      <div class="a-icon">🎯</div>
+      <div class="a-name">กลุ่มเป้าหมายชัด</div>
+      <div class="a-val">2 Niches</div>
+      <div class="a-note">นักขาย + ความรัก<br>= High-intent, Willing to Pay</div>
+    </div>
+  </div>
+
+  <div class="note-teal">
+    💡 <strong>Insight ครูเด่น:</strong> สิ่งที่มีค่าที่สุดคือ <strong>Algorithm Excel</strong> ที่ทำงานได้จริง + <strong>ความรู้ที่ถูกต้อง</strong> — นี่คือ Moat ที่คู่แข่งสร้างตามได้ยากมาก ถ้านำ 2 สิ่งนี้มาห่อด้วย Technology ที่ดี จะกลายเป็นผลิตภัณฑ์ที่แข็งแกร่งมากครับ 🌱
+  </div>
+</div>
+
+<!-- ── SECTION 3: REVENUE STREAMS ── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sn">03</span>
+    <h2>6 ช่องทางสร้างรายได้อย่างต่อเนื่อง</h2>
+  </div>
+
+  <div class="rev-grid">
+
+    <div class="rev-card">
+      <div class="rev-top">
+        <div class="rt-left">
+          <div class="rt-num">STREAM 01</div>
+          <div class="rt-name">🔮 Subscription App</div>
+          <div class="rt-sub">Recurring Monthly Revenue</div>
+        </div>
+        <div class="rt-price">฿99–299<div class="rp-sub">/เดือน/คน</div></div>
+      </div>
+      <div class="rev-body">
+        <div class="rev-item">Free: ทดลอง 7 วัน ทุก Feature</div>
+        <div class="rev-item">Pro ฿99: Unlimited คำนวณ + Basic AI</div>
+        <div class="rev-item">Premium ฿199: AI Chat โหรส่วนตัว + PDF Report</div>
+        <div class="rev-item">Business ฿299: API Access + Multi-user</div>
+      </div>
+      <div class="potential-row">
+        <span class="pr-lbl">เป้า 500 Subs เดือนที่ 6</span>
+        <span class="pr-val">฿65,000–฿100,000/เดือน</span>
+      </div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-top">
+        <div class="rt-left">
+          <div class="rt-num">STREAM 02</div>
+          <div class="rt-name">🧑‍💼 Premium Consultation</div>
+          <div class="rt-sub">1:1 โหรส่วนตัว Premium</div>
+        </div>
+        <div class="rt-price">฿500–3,000<div class="rp-sub">/session</div></div>
+      </div>
+      <div class="rev-body">
+        <div class="rev-item">Session 30 นาที: ฤกษ์เฉพาะบุคคล + AI Report</div>
+        <div class="rev-item">Package รายปี: ดูดวงทุกไตรมาส ฿5,000/ปี</div>
+        <div class="rev-item">Corporate: ฤกษ์เปิดตัว/ลงนาม ฿3,000+/ครั้ง</div>
+        <div class="rev-item">App เป็น CRM จัดการลูกค้า + Booking</div>
+      </div>
+      <div class="potential-row">
+        <span class="pr-lbl">20 sessions/เดือน</span>
+        <span class="pr-val">฿20,000–฿60,000/เดือน</span>
+      </div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-top">
+        <div class="rt-left">
+          <div class="rt-num">STREAM 03</div>
+          <div class="rt-name">📚 คอร์สออนไลน์</div>
+          <div class="rt-sub">สอนโหราศาสตร์ระบบ AI</div>
+        </div>
+        <div class="rt-price">฿990–9,900<div class="rp-sub">/คอร์ส</div></div>
+      </div>
+      <div class="rev-body">
+        <div class="rev-item">คอร์ส Starter: ใช้แอปให้เป็น + ฤกษ์เบื้องต้น ฿990</div>
+        <div class="rev-item">คอร์ส Pro: ยามอัฐกาล + ฤกษ์ 9 + เลข 7 ตัว 9 ฐาน ฿4,900</div>
+        <div class="rev-item">คอร์ส Master: เรียนระบบเลข 7 ตัว ฿9,900</div>
+        <div class="rev-item">แอปเป็น Learning Platform + Community</div>
+      </div>
+      <div class="potential-row">
+        <span class="pr-lbl">20 นักเรียน/เดือน เฉลี่ย ฿3,000</span>
+        <span class="pr-val">฿60,000/เดือน (ยั่งยืน)</span>
+      </div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-top">
+        <div class="rt-left">
+          <div class="rt-num">STREAM 04</div>
+          <div class="rt-name">🏢 B2B API / White Label</div>
+          <div class="rt-sub">ขาย Algorithm ให้ธุรกิจอื่น</div>
+        </div>
+        <div class="rt-price">฿2,000–10,000<div class="rp-sub">/เดือน/org</div></div>
+      </div>
+      <div class="rev-body">
+        <div class="rev-item">API สำหรับ Dev: เรียก Calculation Engine</div>
+        <div class="rev-item">White Label: แอปใช้ชื่อลูกค้า (โหราศาสตร์อื่น)</div>
+        <div class="rev-item">Integration: ร้านขายทอง, อสังหา, คลินิก</div>
+        <div class="rev-item">Enterprise: ขาย License Algorithm ราคา ฿50,000+</div>
+      </div>
+      <div class="potential-row">
+        <span class="pr-lbl">5 B2B Clients</span>
+        <span class="pr-val">฿25,000–฿50,000/เดือน</span>
+      </div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-top">
+        <div class="rt-left">
+          <div class="rt-num">STREAM 05</div>
+          <div class="rt-name">💎 Community Premium</div>
+          <div class="rt-sub">กลุ่มผู้ใช้ระดับสูง</div>
+        </div>
+        <div class="rt-price">฿299–599<div class="rp-sub">/เดือน</div></div>
+      </div>
+      <div class="rev-body">
+        <div class="rev-item">Community Private: กลุ่ม LINE/Telegram Premium</div>
+        <div class="rev-item">ฤกษ์ดีรายวัน: Push Notification เฉพาะกลุ่ม</div>
+        <div class="rev-item">Live Q&A รายเดือน: ถาม-ตอบกับผู้เชี่ยวชาญ</div>
+        <div class="rev-item">Early Access: Feature ใหม่ก่อนคนอื่น</div>
+      </div>
+      <div class="potential-row">
+        <span class="pr-lbl">200 Members</span>
+        <span class="pr-val">฿60,000–฿120,000/เดือน</span>
+      </div>
+    </div>
+
+    <div class="rev-card">
+      <div class="rev-top">
+        <div class="rt-left">
+          <div class="rt-num">STREAM 06</div>
+          <div class="rt-name">🎁 Physical + Digital Products</div>
+          <div class="rt-sub">สินค้าเสริมที่ต่อยอดจาก Brand</div>
+        </div>
+        <div class="rt-price">Passive Income<div class="rp-sub">หลาย Channel</div></div>
+      </div>
+      <div class="rev-body">
+        <div class="rev-item">E-book: คู่มือฤกษ์นักขาย / ฤกษ์ความรัก ฿299</div>
+        <div class="rev-item">ปฏิทินฤกษ์มงคลรายปี: ฿199/เล่ม (Print + Digital)</div>
+        <div class="rev-item">Affiliate: รับค่าแนะนำแอปให้คนอื่น</div>
+        <div class="rev-item">Sponsorship: แบรนด์ที่ตรงกับกลุ่มผู้ใช้</div>
+      </div>
+      <div class="potential-row">
+        <span class="pr-lbl">Passive + Scalable</span>
+        <span class="pr-val">฿10,000–฿30,000/เดือน</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── SECTION 4: STRATEGY MATRIX ── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sn">04</span>
+    <h2>Strategic Action Matrix (SWOT-Derived)</h2>
+  </div>
+
+  <div class="matrix-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:18%">Timeline</th>
+          <th class="h-green" style="width:27%">S+O (เดินหน้า)</th>
+          <th class="h-red" style="width:27%">W+O (พัฒนาตนเอง)</th>
+          <th class="h-orange" style="width:28%">S+T (ป้องกัน)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="strat"><span class="badge now">ทันที<br>0–3 เดือน</span></td>
+          <td>Convert Excel → Web App MVP<br><small style="color:var(--muted2)">ใช้ Algorithm ที่มีแล้วสร้าง Product แรก</small></td>
+          <td>จ้าง Dev / ใช้ Claude Code<br><small style="color:var(--muted2)">เติม Tech Gap ด้วยเครื่องมือ AI</small></td>
+          <td>จด Copyright Algorithm<br><small style="color:var(--muted2)">ป้องกัน IP ก่อนเปิดตัว</small></td>
+        </tr>
+        <tr>
+          <td class="strat"><span class="badge mid">กลาง<br>4–8 เดือน</span></td>
+          <td>Launch Subscription + AI Chat<br><small style="color:var(--muted2)">เปิด Paid Tier เมื่อ User Base พร้อม</small></td>
+          <td>สร้าง Personal Brand<br><small style="color:var(--muted2)">Content Creator + YouTube โหราศาสตร์ AI</small></td>
+          <td>Build Moat: Community<br><small style="color:var(--muted2)">ชุมชนที่ภักดีต่อ Brand = คู่แข่ง Copy ไม่ได้</small></td>
+        </tr>
+        <tr>
+          <td class="strat"><span class="badge long">ยาว<br>9–18 เดือน</span></td>
+          <td>B2B API + White Label<br><small style="color:var(--muted2)">ขาย Algorithm ให้ตลาดโหราศาสตร์กว้างขึ้น</small></td>
+          <td>คอร์สสอนโหราศาสตร์ AI<br><small style="color:var(--muted2)">เป็น "ผู้เชี่ยวชาญเรื่อง AI + โหราศาสตร์" คนแรก</small></td>
+          <td>Platform Lock-in<br><small style="color:var(--muted2)">Data + History ทำให้ User อยากอยู่ต่อ</small></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ── SECTION 5: OPPORTUNITY MAP ── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sn">05</span>
+    <h2>Opportunity Map — เรียงตาม Quick Win</h2>
+  </div>
+
+  <div class="opp-list">
+    <div class="opp-item">
+      <div class="opp-icon">⚡</div>
+      <div>
+        <div class="opp-name">1. Web App MVP (Convert Excel → Online Tool)</div>
+        <div class="opp-desc">เริ่มเลยวันนี้ ใช้ Next.js + Supabase แปลง Excel เป็น Web App ฟรีก่อน เก็บ Email List ผู้สนใจ — Cost: ฿20,000–30,000</div>
+      </div>
+      <div class="opp-rev">
+        <div class="or-val">ฤดูกาล 1</div>
+        <div class="or-note">0–2 เดือน</div>
+      </div>
+    </div>
+    <div class="opp-item">
+      <div class="opp-icon">💰</div>
+      <div>
+        <div class="opp-name">2. Premium Consultation (เริ่มหารายได้ทันที)</div>
+        <div class="opp-desc">ไม่ต้องรอ App เสร็จ เปิดรับ Booking 1:1 ผ่าน LINE OA เลย ใช้แอปเป็น Tool ช่วย Session — Margin 95%</div>
+      </div>
+      <div class="opp-rev">
+        <div class="or-val">฿20,000+</div>
+        <div class="or-note">/เดือน ทันที</div>
+      </div>
+    </div>
+    <div class="opp-item">
+      <div class="opp-icon">🔁</div>
+      <div>
+        <div class="opp-name">3. Subscription Launch (Recurring Revenue)</div>
+        <div class="opp-desc">เมื่อมี Web App MVP และ User Base 200+ คน เปิด Paid Plan ฿99–199/เดือน ใช้ RevenueCat จัดการ — เดือนที่ 4–6</div>
+      </div>
+      <div class="opp-rev">
+        <div class="or-val">฿50,000+</div>
+        <div class="or-note">/เดือน ปีที่ 1</div>
+      </div>
+    </div>
+    <div class="opp-item">
+      <div class="opp-icon">📱</div>
+      <div>
+        <div class="opp-name">4. Mobile App iOS + Android (ขยายฐาน)</div>
+        <div class="opp-desc">เมื่อ MRR ถึง ฿30,000+ ลงทุนพัฒนา Mobile App จาก Web App ที่มีแล้ว — ใช้ React Native + Expo EAS Cost: ฿130,000–165,000</div>
+      </div>
+      <div class="opp-rev">
+        <div class="or-val">2x Revenue</div>
+        <div class="or-note">เดือนที่ 6–10</div>
+      </div>
+    </div>
+    <div class="opp-item">
+      <div class="opp-icon">🎓</div>
+      <div>
+        <div class="opp-name">5. Online Course (Scalable Knowledge Product)</div>
+        <div class="opp-desc">เมื่อมี Brand แล้ว เปิดคอร์ส "โหราศาสตร์ AI สำหรับนักขาย" — สร้างครั้งเดียว ขายได้ตลอด Passive Income สูงสุด</div>
+      </div>
+      <div class="opp-rev">
+        <div class="or-val">฿60,000+</div>
+        <div class="or-note">/เดือน (passive)</div>
+      </div>
+    </div>
+    <div class="opp-item">
+      <div class="opp-icon">🏢</div>
+      <div>
+        <div class="opp-name">6. B2B API License (Enterprise Revenue)</div>
+        <div class="opp-desc">ขาย Algorithm ให้ธุรกิจอื่น ร้านทอง / อสังหา / ที่ปรึกษาธุรกิจ ที่ต้องการ "ฤกษ์" เป็น Feature ใน Service ตัวเอง</div>
+      </div>
+      <div class="opp-rev">
+        <div class="or-val">฿50,000+</div>
+        <div class="or-note">/เดือน ปีที่ 2</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── GRAND SUMMARY ── -->
+<div class="sec">
+  <div class="sec-head">
+    <span class="sn">06</span>
+    <h2>ภาพรวมศักยภาพทางธุรกิจ</h2>
+  </div>
+
+  <div class="grand">
+    <div class="g-sub">Total Addressable Market</div>
+    <div class="g-title">ตลาดโหราศาสตร์ไทย<br><em>พร้อมให้ Disrupt ด้วย AI</em></div>
+    <div class="g-desc">คนไทยใช้จ่ายกับโหราศาสตร์ปีละหลายพันล้านบาท แต่ยังไม่มีแพลตฟอร์มเทคโนโลยีระดับสูงในตลาดนี้เลย — นี่คือ "หน้าต่างโอกาส" ที่เปิดอยู่ตอนนี้</div>
+
+    <div class="mkt-size-row">
+      <div class="ms-item">
+        <div class="ms-lbl">คนไทยดูดวง/ปี</div>
+        <div class="ms-val">10M+</div>
+        <div class="ms-note">คน</div>
+      </div>
+      <div class="ms-item">
+        <div class="ms-lbl">เป้า Yr 1 MRR</div>
+        <div class="ms-val">฿200K</div>
+        <div class="ms-note">ทุก Stream รวม</div>
+      </div>
+      <div class="ms-item">
+        <div class="ms-lbl">เป้า Yr 2 MRR</div>
+        <div class="ms-val">฿500K</div>
+        <div class="ms-note">B2B + Community</div>
+      </div>
+      <div class="ms-item">
+        <div class="ms-lbl">Break-even</div>
+        <div class="ms-val">เดือน 9</div>
+        <div class="ms-note">~1,200 Subscribers</div>
+      </div>
+    </div>
+
+    <div class="action-list">
+      <div class="action-item"><span class="step-n">ทำทันที</span>ส่ง Excel ให้ครูเด่น → วิเคราะห์ Algorithm → เริ่ม Convert เป็น Web App</div>
+      <div class="action-item"><span class="step-n">สัปดาห์ 2</span>เปิด LINE OA รับ Consultation — เริ่มสร้าง Revenue ก่อนที่ App จะเสร็จ</div>
+      <div class="action-item"><span class="step-n">เดือน 2</span>เปิดตัว Web MVP พร้อม Waiting List — เก็บ Email 500+ คนก่อน Launch จริง</div>
+      <div class="action-item"><span class="step-n">เดือน 4</span>เปิด Subscription + AI Chat — เริ่ม Recurring Revenue ที่แท้จริง</div>
+      <div class="action-item"><span class="step-n">เดือน 8</span>ลงทุน Mobile App เมื่อมีกระแสเงินสดพอ — ขยายฐานผู้ใช้ 3–5 เท่า</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── FOOTER ── -->
+<div class="footer">
+  <div class="divider"></div>
+  <div class="f-logo">ครูเด่น มาสเตอร์ฟา · CAP Vision Institute</div>
+  <div class="f-tag">Transform Learning, Transform Organization 💡✨🌱</div>
+  <div style="margin-top: 12px; font-size: 12px; color: var(--muted);">SWOT Analysis · โหราศาสตร์ AI Platform · พฤษภาคม 2568</div>
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1088 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>App Dev Plan — โหรทายหนู AI Edition</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;600;700&family=Prompt:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #F0D080;
+    --gold-dark: #8B6914;
+    --deep: #0A0A14;
+    --deep2: #111124;
+    --panel: #161630;
+    --panel2: #1C1C3A;
+    --accent: #7B5EA7;
+    --accent2: #4F8EF7;
+    --red: #E05252;
+    --green: #52C07A;
+    --text: #E8E4D8;
+    --muted: #8884A0;
+    --border: rgba(201,168,76,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--deep);
+    color: var(--text);
+    font-family: 'Sarabun', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* Background star field */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 10% 20%, rgba(201,168,76,0.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 30% 60%, rgba(240,208,128,0.3) 0%, transparent 100%),
+      radial-gradient(1px 1px at 70% 15%, rgba(201,168,76,0.5) 0%, transparent 100%),
+      radial-gradient(1px 1px at 85% 75%, rgba(240,208,128,0.2) 0%, transparent 100%),
+      radial-gradient(1px 1px at 55% 45%, rgba(201,168,76,0.3) 0%, transparent 100%),
+      radial-gradient(2px 2px at 20% 80%, rgba(79,142,247,0.3) 0%, transparent 100%),
+      radial-gradient(2px 2px at 90% 30%, rgba(123,94,167,0.4) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 60px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+  }
+
+  .header .badge {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(201,168,76,0.15), rgba(123,94,167,0.15));
+    border: 1px solid var(--border);
+    color: var(--gold-light);
+    font-family: 'Prompt', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    padding: 6px 18px;
+    border-radius: 20px;
+    margin-bottom: 20px;
+  }
+
+  .header h1 {
+    font-family: 'Prompt', sans-serif;
+    font-size: 42px;
+    font-weight: 800;
+    line-height: 1.15;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold), var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  .header .subtitle {
+    color: var(--muted);
+    font-size: 16px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+
+  .header .meta-row {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .meta-item .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+  }
+
+  /* SECTION HEADERS */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    margin-top: 56px;
+  }
+
+  .section-label .num {
+    font-family: 'Prompt', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+    opacity: 0.6;
+  }
+
+  .section-label h2 {
+    font-family: 'Prompt', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ANALYSIS GRID */
+  .analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  @media (max-width: 600px) {
+    .analysis-grid { grid-template-columns: 1fr; }
+    .header h1 { font-size: 28px; }
+  }
+
+  .analysis-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .analysis-card.full { grid-column: 1 / -1; }
+
+  .analysis-card .card-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .analysis-card.gold .card-title { color: var(--gold); }
+  .analysis-card.blue .card-title { color: var(--accent2); }
+  .analysis-card.purple .card-title { color: #A07ED0; }
+  .analysis-card.red .card-title { color: var(--red); }
+  .analysis-card.green .card-title { color: var(--green); }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 8px; }
+
+  .tag {
+    font-size: 12px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1px solid;
+  }
+
+  .tag.plus { border-color: var(--green); color: var(--green); background: rgba(82,192,122,0.08); }
+  .tag.minus { border-color: var(--red); color: var(--red); background: rgba(224,82,82,0.08); }
+  .tag.neutral { border-color: var(--muted); color: var(--muted); background: rgba(136,132,160,0.08); }
+
+  .feature-list { list-style: none; }
+  .feature-list li {
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    font-size: 14px;
+    color: var(--text);
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .feature-list li:last-child { border-bottom: none; }
+  .feature-list li .icon { font-size: 14px; flex-shrink: 0; margin-top: 2px; }
+
+  /* TECH STACK */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  @media (max-width: 600px) {
+    .stack-grid { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .stack-item {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    text-align: center;
+  }
+
+  .stack-item .stack-icon { font-size: 28px; margin-bottom: 8px; }
+  .stack-item .stack-name {
+    font-family: 'Prompt', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 4px;
+  }
+  .stack-item .stack-role { font-size: 11px; color: var(--muted); }
+
+  /* PHASES */
+  .phase-list { display: flex; flex-direction: column; gap: 20px; }
+
+  .phase-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .phase-header {
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel2);
+  }
+
+  .phase-num {
+    font-family: 'Prompt', sans-serif;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--gold);
+    background: rgba(201,168,76,0.12);
+    border: 1px solid rgba(201,168,76,0.3);
+    padding: 4px 12px;
+    border-radius: 20px;
+    flex-shrink: 0;
+  }
+
+  .phase-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .phase-duration {
+    font-size: 12px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .phase-body { padding: 20px 24px; }
+
+  .task-list { list-style: none; margin-bottom: 16px; }
+  .task-list li {
+    font-size: 14px;
+    padding: 5px 0;
+    color: #C8C4DC;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .task-list li::before {
+    content: '◆';
+    font-size: 7px;
+    color: var(--gold);
+    flex-shrink: 0;
+    margin-top: 6px;
+  }
+
+  .cost-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(201,168,76,0.06);
+    border: 1px solid rgba(201,168,76,0.15);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin-top: 12px;
+  }
+
+  .cost-label { font-size: 12px; color: var(--muted); }
+  .cost-value {
+    font-family: 'Prompt', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--gold-light);
+  }
+
+  /* AI FEATURES */
+  .ai-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 600px) { .ai-grid { grid-template-columns: 1fr; } }
+
+  .ai-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+  }
+
+  .ai-card .ai-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--gold-light);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .ai-badge {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 10px;
+  }
+  .ai-badge.anthropic { background: rgba(201,168,76,0.2); color: var(--gold); border: 1px solid rgba(201,168,76,0.3); }
+  .ai-badge.gemini { background: rgba(79,142,247,0.15); color: var(--accent2); border: 1px solid rgba(79,142,247,0.3); }
+  .ai-badge.hybrid { background: rgba(123,94,167,0.2); color: #B090E0; border: 1px solid rgba(123,94,167,0.3); }
+
+  .ai-desc { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* COST TABLE */
+  .cost-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .cost-table thead tr {
+    background: var(--panel2);
+  }
+
+  .cost-table th {
+    padding: 12px 16px;
+    font-family: 'Prompt', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .cost-table tbody tr {
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+  }
+
+  .cost-table tbody tr:hover { background: rgba(201,168,76,0.04); }
+
+  .cost-table td {
+    padding: 12px 16px;
+    font-size: 14px;
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  .cost-table td.amount {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 600;
+    color: var(--gold-light);
+    white-space: nowrap;
+  }
+
+  .cost-table td.note { font-size: 12px; color: var(--muted); }
+
+  .cost-table tfoot tr {
+    background: var(--panel2);
+    border-top: 1px solid var(--border);
+  }
+
+  .cost-table tfoot td {
+    font-family: 'Prompt', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--gold);
+    padding: 14px 16px;
+  }
+
+  /* TOTAL SUMMARY */
+  .total-box {
+    background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(123,94,167,0.1));
+    border: 1px solid var(--gold);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    margin-top: 40px;
+  }
+
+  .total-box .total-label {
+    font-family: 'Prompt', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+
+  .total-box .total-amount {
+    font-family: 'Prompt', sans-serif;
+    font-size: 52px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .total-box .total-sub { font-size: 14px; color: var(--muted); }
+
+  .total-box .range-row {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .range-item { text-align: center; }
+  .range-item .r-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .range-item .r-value {
+    font-family: 'Prompt', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* ROADMAP TIMELINE */
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 28px;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--deep);
+    box-shadow: 0 0 8px rgba(201,168,76,0.6);
+  }
+
+  .timeline-item .t-month {
+    font-family: 'Prompt', sans-serif;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  .timeline-item .t-title {
+    font-family: 'Prompt', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .timeline-item .t-desc { font-size: 13px; color: var(--muted); }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 72px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .footer .logo {
+    font-family: 'Prompt', sans-serif;
+    font-size: 18px;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--gold-light), var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 6px;
+  }
+
+  .footer .tagline { font-size: 13px; color: var(--muted); }
+
+  /* divider */
+  .divider {
+    width: 60px;
+    height: 2px;
+    background: linear-gradient(to right, transparent, var(--gold), transparent);
+    margin: 0 auto 12px;
+  }
+
+  /* highlight text */
+  .hl { color: var(--gold-light); font-weight: 600; }
+  .hl-blue { color: var(--accent2); font-weight: 600; }
+  .hl-purple { color: #B090E0; font-weight: 600; }
+
+  /* risk box */
+  .risk-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  @media (max-width: 600px) { .risk-grid { grid-template-columns: 1fr; } }
+
+  .risk-card {
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 16px;
+    border-left: 3px solid;
+  }
+  .risk-card.low { border-color: var(--green); }
+  .risk-card.med { border-color: #F0A040; }
+  .risk-card.high { border-color: var(--red); }
+
+  .risk-card .risk-level {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .risk-card.low .risk-level { color: var(--green); }
+  .risk-card.med .risk-level { color: #F0A040; }
+  .risk-card.high .risk-level { color: var(--red); }
+
+  .risk-card .risk-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .risk-card .risk-desc { font-size: 12px; color: var(--muted); }
+
+  /* profit */
+  .profit-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 600px) { .profit-grid { grid-template-columns: 1fr; } }
+
+  .profit-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    text-align: center;
+  }
+
+  .profit-card .p-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .profit-card .p-value {
+    font-family: 'Prompt', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--gold-light);
+    margin-bottom: 4px;
+  }
+  .profit-card .p-note { font-size: 11px; color: var(--muted); }
+
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="badge">App Dev AI — Blueprint Document</div>
+    <h1>โหรทายหนู<br>AI Edition</h1>
+    <p class="subtitle">แผนพัฒนาแอปพลิเคชันโหราศาสตร์ไทย เสริม AI อัจฉริยะ<br>วิเคราะห์ตลาด · ออกแบบ Stack · ประมาณการต้นทุน</p>
+    <div class="meta-row">
+      <div class="meta-item"><div class="dot"></div>Next.js + Supabase + Cloudflare</div>
+      <div class="meta-item"><div class="dot"></div>Anthropic + Gemini API</div>
+      <div class="meta-item"><div class="dot"></div>ประมาณ 4–6 เดือน</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: MARKET ANALYSIS -->
+  <div class="section-label">
+    <span class="num">01</span>
+    <h2>วิเคราะห์แอปต้นแบบ "โหรทายหนู"</h2>
+  </div>
+
+  <div class="analysis-grid">
+    <div class="analysis-card gold">
+      <div class="card-title">📱 ข้อมูลแอปปัจจุบัน</div>
+      <ul class="feature-list">
+        <li><span class="icon">⭐</span>Rating 4.2 จาก 26 รีวิว — ฐานผู้ใช้เล็กแต่ความพึงพอใจสูง</li>
+        <li><span class="icon">📥</span>1K+ ดาวน์โหลด — Niche Market ชัดเจน</li>
+        <li><span class="icon">💰</span>ระบบ Unlock ราคา 159 บาท/เครื่อง (one-time)</li>
+        <li><span class="icon">📅</span>อัปเดตล่าสุด ส.ค. 2566 — พัฒนาต่อยาก</li>
+        <li><span class="icon">📲</span>รองรับเฉพาะ Android, หน้าจอ ≥720px</li>
+      </ul>
+    </div>
+
+    <div class="analysis-card blue">
+      <div class="card-title">🎯 Core Features ที่มี</div>
+      <ul class="feature-list">
+        <li><span class="icon">🕐</span>คำนวณฤกษ์ตามวัน/เวลา (โหรทายหนู)</li>
+        <li><span class="icon">📊</span>ตารางดาว + เกณฑ์ดาว</li>
+        <li><span class="icon">🔢</span>แสดงผลเป็นตาราง ลาภ/กุมภะ ฯลฯ</li>
+        <li><span class="icon">🔒</span>ทดลองใช้ได้เฉพาะวันพฤหัสบดี</li>
+        <li><span class="icon">📱</span>UI แบบ Native Android</li>
+      </ul>
+    </div>
+
+    <div class="analysis-card red">
+      <div class="card-title">⚠️ จุดอ่อน / โอกาสพัฒนา</div>
+      <div class="tag-list">
+        <span class="tag minus">ไม่มี iOS</span>
+        <span class="tag minus">ไม่มี Web App</span>
+        <span class="tag minus">UI เก่า ไม่ทันสมัย</span>
+        <span class="tag minus">ไม่มี AI วิเคราะห์</span>
+        <span class="tag minus">ไม่มีประวัติย้อนหลัง</span>
+        <span class="tag minus">Monetization จำกัด</span>
+        <span class="tag minus">ไม่มี Community</span>
+        <span class="tag minus">UX ยังไม่เป็นมิตร</span>
+      </div>
+    </div>
+
+    <div class="analysis-card green">
+      <div class="card-title">✅ โอกาสในตลาด</div>
+      <div class="tag-list">
+        <span class="tag plus">ตลาดโหราศาสตร์ไทยโตต่อเนื่อง</span>
+        <span class="tag plus">ความต้องการ AI ทำนาย</span>
+        <span class="tag plus">Cross-Platform ยังว่าง</span>
+        <span class="tag plus">Subscription Model รายเดือน</span>
+        <span class="tag plus">AI Chat โหรส่วนตัว</span>
+        <span class="tag plus">API สำหรับ Developer</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: TECH STACK -->
+  <div class="section-label">
+    <span class="num">02</span>
+    <h2>Tech Stack ที่เลือกใช้</h2>
+  </div>
+
+  <div class="stack-grid">
+    <div class="stack-item">
+      <div class="stack-icon">⚡</div>
+      <div class="stack-name">Next.js 15</div>
+      <div class="stack-role">Frontend + API Routes<br>SSR / App Router</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon">🗄️</div>
+      <div class="stack-name">Supabase</div>
+      <div class="stack-role">PostgreSQL + Auth<br>Real-time + Storage</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon">☁️</div>
+      <div class="stack-name">Cloudflare</div>
+      <div class="stack-role">Pages Deploy + CDN<br>Workers + D1</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon">🧠</div>
+      <div class="stack-name">Anthropic API</div>
+      <div class="stack-role">Claude Sonnet 4<br>วิเคราะห์ + อธิบาย</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon">✨</div>
+      <div class="stack-name">Gemini API</div>
+      <div class="stack-role">Google Gemini 2.0<br>คำนวณ + ข้อมูล</div>
+    </div>
+    <div class="stack-item">
+      <div class="stack-icon">💳</div>
+      <div class="stack-name">Stripe / PromptPay</div>
+      <div class="stack-role">Payment Gateway<br>Subscription</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: AI FEATURES -->
+  <div class="section-label">
+    <span class="num">03</span>
+    <h2>AI Features ที่จะพัฒนาเพิ่ม</h2>
+  </div>
+
+  <div class="ai-grid">
+    <div class="ai-card">
+      <div class="ai-title">🔮 AI โหรส่วนตัว <span class="ai-badge anthropic">Anthropic</span></div>
+      <div class="ai-desc">Chat กับ AI ที่เข้าใจโหราศาสตร์ไทย อธิบายฤกษ์ วันดี/วันร้าย ในภาษาเข้าใจง่าย ตอบคำถามเฉพาะบุคคล</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-title">📅 วิเคราะห์ฤกษ์อัจฉริยะ <span class="ai-badge gemini">Gemini</span></div>
+      <div class="ai-desc">คำนวณตาราง + ประมวลผลเชิง AI แนะนำวันมงคล เปรียบเทียบหลายช่วงเวลา พร้อม Insight สรุป</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-title">📊 Dashboard ดาวรายปี <span class="ai-badge hybrid">Hybrid</span></div>
+      <div class="ai-desc">สร้าง Personalized Dashboard ดูดาวประจำเดือน/ปี พร้อม AI อธิบายแนวโน้ม โอกาส ความเสี่ยงในชีวิต</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-title">🌟 ฤกษ์มงคลอัตโนมัติ <span class="ai-badge anthropic">Anthropic</span></div>
+      <div class="ai-desc">ใส่ Event (แต่งงาน เปิดบริษัท ฯลฯ) AI หาฤกษ์ที่ดีที่สุดในช่วงเวลาที่กำหนด พร้อมเหตุผล</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-title">🖼️ AI สร้างรายงาน <span class="ai-badge gemini">Gemini</span></div>
+      <div class="ai-desc">Generate PDF Report ดูดวงส่วนตัว รายสัปดาห์/เดือน แชร์ได้ ใช้ Gemini ประมวลภาษาธรรมชาติ</div>
+    </div>
+    <div class="ai-card">
+      <div class="ai-title">💬 Community AI <span class="ai-badge hybrid">Hybrid</span></div>
+      <div class="ai-desc">Forum ชุมชนโหราศาสตร์ มี AI Moderator ตอบคำถาม Summary กระทู้ แนะนำเนื้อหาที่เกี่ยวข้อง</div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: DEVELOPMENT PHASES -->
+  <div class="section-label">
+    <span class="num">04</span>
+    <h2>ขั้นตอนการพัฒนา (4 Phases)</h2>
+  </div>
+
+  <div class="phase-list">
+
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-num">PHASE 1</span>
+        <span class="phase-title">Foundation — Core Web App</span>
+        <span class="phase-duration">สัปดาห์ที่ 1–4</span>
+      </div>
+      <div class="phase-body">
+        <ul class="task-list">
+          <li>Setup Next.js 15 + Supabase + Cloudflare Pages deployment pipeline</li>
+          <li>ออกแบบ Database Schema: users, horoscope_records, subscriptions, calculations</li>
+          <li>พัฒนา Core Calculation Engine (โหรทายหนู Algorithm) — TypeScript</li>
+          <li>สร้าง Authentication: Email, Google OAuth via Supabase Auth</li>
+          <li>UI/UX Design System — Thai Astrology Theme (Dark Mode)</li>
+          <li>พัฒนาหน้า: Home, Calculator, Result, History, Profile</li>
+          <li>Responsive Web + PWA Support (ใช้งานบน Mobile ได้)</li>
+        </ul>
+        <div class="cost-row">
+          <span class="cost-label">ประมาณการค่าพัฒนา Phase 1</span>
+          <span class="cost-value">15,000 – 25,000 บาท</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-num">PHASE 2</span>
+        <span class="phase-title">AI Integration — สมอง AI</span>
+        <span class="phase-duration">สัปดาห์ที่ 5–8</span>
+      </div>
+      <div class="phase-body">
+        <ul class="task-list">
+          <li>Integrate Anthropic Claude API — AI Chat โหรส่วนตัว, อธิบายฤกษ์ภาษาง่าย</li>
+          <li>Integrate Google Gemini API — คำนวณเสริม, Structured Data Output</li>
+          <li>สร้าง Prompt Engineering Library สำหรับโหราศาสตร์ไทย</li>
+          <li>ระบบ AI ค้นหาวันมงคล (Event-based Auspicious Date Finder)</li>
+          <li>สร้าง Streaming Response UI (Real-time AI Chat)</li>
+          <li>Rate Limiting + Token Management (ควบคุมต้นทุน API)</li>
+          <li>Cache Layer ด้วย Cloudflare KV — ลด API calls ซ้ำ</li>
+        </ul>
+        <div class="cost-row">
+          <span class="cost-label">ประมาณการค่าพัฒนา Phase 2</span>
+          <span class="cost-value">20,000 – 35,000 บาท</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-num">PHASE 3</span>
+        <span class="phase-title">Monetization — ระบบหารายได้</span>
+        <span class="phase-duration">สัปดาห์ที่ 9–14</span>
+      </div>
+      <div class="phase-body">
+        <ul class="task-list">
+          <li>ระบบ Subscription Tier: Free / Pro / Premium (฿99 / ฿199 / ฿499 ต่อเดือน)</li>
+          <li>Payment Integration: Stripe + PromptPay QR Code</li>
+          <li>Feature Gating: จำกัด AI credits ตาม Tier</li>
+          <li>สร้าง PDF Report Generator (AI-powered) — ดาวน์โหลดได้</li>
+          <li>Dashboard Analytics สำหรับ Admin (Supabase)</li>
+          <li>Email Notification System (Resend / Supabase Edge Functions)</li>
+          <li>Referral System — ชวนเพื่อนได้ Credits เพิ่ม</li>
+        </ul>
+        <div class="cost-row">
+          <span class="cost-label">ประมาณการค่าพัฒนา Phase 3</span>
+          <span class="cost-value">20,000 – 30,000 บาท</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-header">
+        <span class="phase-num">PHASE 4</span>
+        <span class="phase-title">Growth — ขยายฐานผู้ใช้</span>
+        <span class="phase-duration">สัปดาห์ที่ 15–20</span>
+      </div>
+      <div class="phase-body">
+        <ul class="task-list">
+          <li>Community Forum + AI Moderator (Supabase Realtime)</li>
+          <li>Public API สำหรับ Developer (Rate Limited, API Key Management)</li>
+          <li>LINE Official Account Integration — แจ้งเตือนฤกษ์รายวัน</li>
+          <li>SEO Optimization + Dynamic OG Images (Cloudflare Workers)</li>
+          <li>A/B Testing Framework สำหรับ UI/UX</li>
+          <li>Mobile App Wrapper (Capacitor.js) → Deploy iOS + Android</li>
+          <li>Performance Monitoring + Error Tracking (Sentry)</li>
+        </ul>
+        <div class="cost-row">
+          <span class="cost-label">ประมาณการค่าพัฒนา Phase 4</span>
+          <span class="cost-value">15,000 – 25,000 บาท</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SECTION 5: COST BREAKDOWN -->
+  <div class="section-label">
+    <span class="num">05</span>
+    <h2>ประมาณการต้นทุน (ต่อเดือน หลัง Launch)</h2>
+  </div>
+
+  <table class="cost-table">
+    <thead>
+      <tr>
+        <th>รายการ</th>
+        <th>ผู้ให้บริการ</th>
+        <th>ต้นทุน/เดือน</th>
+        <th>หมายเหตุ</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Supabase (Database + Auth + Storage)</td>
+        <td>Supabase</td>
+        <td class="amount">฿0 – ฿800</td>
+        <td class="note">Free tier ถึง 500MB, Pro $25/mo</td>
+      </tr>
+      <tr>
+        <td>Cloudflare Pages + Workers</td>
+        <td>Cloudflare</td>
+        <td class="amount">฿0 – ฿350</td>
+        <td class="note">Free tier ใช้ได้ระยะแรก</td>
+      </tr>
+      <tr>
+        <td>Anthropic Claude API</td>
+        <td>Anthropic</td>
+        <td class="amount">฿500 – ฿5,000</td>
+        <td class="note">Claude Sonnet ~$3/M tokens ขึ้นอยู่กับ Usage</td>
+      </tr>
+      <tr>
+        <td>Google Gemini API</td>
+        <td>Google</td>
+        <td class="amount">฿0 – ฿1,500</td>
+        <td class="note">Gemini 2.0 Flash มี Free tier</td>
+      </tr>
+      <tr>
+        <td>Domain Name (.com)</td>
+        <td>Cloudflare Registrar</td>
+        <td class="amount">฿30</td>
+        <td class="note">~$10/ปี ≈ ฿350/ปี</td>
+      </tr>
+      <tr>
+        <td>Email Service (Resend)</td>
+        <td>Resend</td>
+        <td class="amount">฿0 – ฿300</td>
+        <td class="note">Free 3,000 emails/mo</td>
+      </tr>
+      <tr>
+        <td>Payment Processing (Stripe)</td>
+        <td>Stripe</td>
+        <td class="amount">2.9% + ฿11/txn</td>
+        <td class="note">หักจากรายได้</td>
+      </tr>
+      <tr>
+        <td>Error Monitoring (Sentry)</td>
+        <td>Sentry</td>
+        <td class="amount">฿0 – ฿800</td>
+        <td class="note">Free plan เพียงพอช่วงแรก</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="2">รวมต้นทุนรายเดือน (ช่วงเริ่มต้น)</td>
+        <td class="amount" style="color: var(--gold-light)">฿530 – ฿8,750</td>
+        <td class="note">ขึ้นกับ User Volume</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- TOTAL INVESTMENT -->
+  <div class="section-label">
+    <span class="num">06</span>
+    <h2>งบลงทุนพัฒนา (ครั้งเดียว)</h2>
+  </div>
+
+  <div class="total-box">
+    <div class="total-label">ประมาณการลงทุนพัฒนาทั้งหมด</div>
+    <div class="total-amount">70,000–115,000</div>
+    <div class="total-sub">บาท (ทั้ง 4 Phases รวม Dev + Design + Testing)</div>
+    <div class="range-row">
+      <div class="range-item">
+        <div class="r-label">งบประหยัด</div>
+        <div class="r-value">฿70,000</div>
+      </div>
+      <div class="range-item">
+        <div class="r-label">งบแนะนำ</div>
+        <div class="r-value">฿90,000</div>
+      </div>
+      <div class="range-item">
+        <div class="r-label">งบสมบูรณ์</div>
+        <div class="r-value">฿115,000</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- REVENUE PROJECTION -->
+  <div class="section-label">
+    <span class="num">07</span>
+    <h2>ประมาณการรายได้ (Revenue Forecast)</h2>
+  </div>
+
+  <div class="profit-grid">
+    <div class="profit-card">
+      <div class="p-label">เดือนที่ 1–3 (Seed)</div>
+      <div class="p-value">฿5,000–15,000</div>
+      <div class="p-note">~50–150 Subscribers<br>Free-to-Paid Conversion</div>
+    </div>
+    <div class="profit-card">
+      <div class="p-label">เดือนที่ 4–6 (Growth)</div>
+      <div class="p-value">฿20,000–50,000</div>
+      <div class="p-note">~200–500 Subscribers<br>Organic + Word of Mouth</div>
+    </div>
+    <div class="profit-card">
+      <div class="p-label">เดือนที่ 7–12 (Scale)</div>
+      <div class="p-value">฿50,000–150,000</div>
+      <div class="p-note">~500–1,500 Subscribers<br>API + Community Revenue</div>
+    </div>
+  </div>
+
+  <!-- RISK -->
+  <div class="section-label">
+    <span class="num">08</span>
+    <h2>Risk Assessment</h2>
+  </div>
+
+  <div class="risk-grid">
+    <div class="risk-card low">
+      <div class="risk-level">Low Risk</div>
+      <div class="risk-title">Tech Stack ที่เลือก</div>
+      <div class="risk-desc">Next.js + Supabase + Cloudflare เป็น Proven Stack ที่ Scale ได้ดี ชุมชนใหญ่</div>
+    </div>
+    <div class="risk-card low">
+      <div class="risk-level">Low Risk</div>
+      <div class="risk-title">AI API Cost Control</div>
+      <div class="risk-desc">ใช้ Cache + Rate Limiting + Tier-based Quota ควบคุมต้นทุน API ได้ดี</div>
+    </div>
+    <div class="risk-card med">
+      <div class="risk-level">Medium Risk</div>
+      <div class="risk-title">User Acquisition</div>
+      <div class="risk-desc">ต้องมีแผน Marketing ที่ชัดเจน ตลาด Niche ต้องเข้าถึงกลุ่ม Community โหราศาสตร์</div>
+    </div>
+    <div class="risk-card med">
+      <div class="risk-level">Medium Risk</div>
+      <div class="risk-title">ความถูกต้องของฤกษ์</div>
+      <div class="risk-desc">ต้องมีผู้เชี่ยวชาญโหราศาสตร์ Verify Algorithm และข้อมูล AI ก่อน Launch จริง</div>
+    </div>
+    <div class="risk-card high">
+      <div class="risk-level">High Risk → Mitigation</div>
+      <div class="risk-title">AI Hallucination ในคำทำนาย</div>
+      <div class="risk-desc">ต้องมี Disclaimer ชัดเจน + RAG Knowledge Base โหราศาสตร์ไทย + Human Review Layer</div>
+    </div>
+    <div class="risk-card low">
+      <div class="risk-level">Low Risk</div>
+      <div class="risk-title">Competitive Moat</div>
+      <div class="risk-desc">คู่แข่งในตลาดไทยยังไม่มี Web App คุณภาพสูง + AI ผสานโหราศาสตร์ไทยโดยตรง</div>
+    </div>
+  </div>
+
+  <!-- ROADMAP TIMELINE -->
+  <div class="section-label">
+    <span class="num">09</span>
+    <h2>Roadmap Timeline</h2>
+  </div>
+
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="t-month">เดือนที่ 1</div>
+      <div class="t-title">🏗️ Foundation Setup</div>
+      <div class="t-desc">Setup Project, Database Design, Core Algorithm, Auth System, Design System</div>
+    </div>
+    <div class="timeline-item">
+      <div class="t-month">เดือนที่ 2</div>
+      <div class="t-title">⚡ Core MVP Launch</div>
+      <div class="t-desc">Web App Version 1 พร้อมใช้งาน, ระบบ Calculator + History + Profile</div>
+    </div>
+    <div class="timeline-item">
+      <div class="t-month">เดือนที่ 3</div>
+      <div class="t-title">🧠 AI Integration</div>
+      <div class="t-desc">เชื่อม Anthropic + Gemini, AI Chat, วันมงคล Finder, Beta Testing กับกลุ่มผู้ใช้แรก</div>
+    </div>
+    <div class="timeline-item">
+      <div class="t-month">เดือนที่ 4</div>
+      <div class="t-title">💳 Subscription Launch</div>
+      <div class="t-desc">เปิด Paid Plan, Stripe + PromptPay, Feature Gating, Email Campaigns</div>
+    </div>
+    <div class="timeline-item">
+      <div class="t-month">เดือนที่ 5</div>
+      <div class="t-title">📱 Mobile App + Community</div>
+      <div class="t-desc">Capacitor.js → iOS + Android, LINE Integration, Community Forum Launch</div>
+    </div>
+    <div class="timeline-item">
+      <div class="t-month">เดือนที่ 6</div>
+      <div class="t-title">📈 Growth & Optimization</div>
+      <div class="t-desc">Public API, SEO, A/B Testing, Performance Tuning, Scale Infrastructure</div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="divider"></div>
+    <div class="logo">ครูเด่น มาสเตอร์ฟา · CAP Vision Institute</div>
+    <div class="tagline">Transform Learning, Transform Organization 💡✨🌱</div>
+    <div style="margin-top: 16px; font-size: 12px; color: var(--muted);">
+      App Dev AI Blueprint · วางแผนพัฒนา โหรทายหนู AI Edition · พฤษภาคม 2568
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

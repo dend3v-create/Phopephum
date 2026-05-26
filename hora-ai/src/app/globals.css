@@ -1,0 +1,69 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Sarabun:ital,wght@0,100..800;1,100..800&display=swap');
+@import "tailwindcss";
+
+:root {
+  --background: #0A0806;
+  --foreground: #F5F0E8;
+  
+  --hora-gold: #C9A96E;
+  --hora-gold-light: #E8D5A3;
+  --hora-dark: #0A0806;
+  --hora-dark-card: #12100E;
+  --hora-dark-border: rgba(201, 169, 110, 0.2);
+  --hora-text: #F5F0E8;
+  --hora-text-muted: #8B7E6E;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  
+  --color-hora-gold: var(--hora-gold);
+  --color-hora-gold-light: var(--hora-gold-light);
+  --color-hora-dark: var(--hora-dark);
+  --color-hora-dark-card: var(--hora-dark-card);
+  --color-hora-dark-border: var(--hora-dark-border);
+  --color-hora-text: var(--hora-text);
+  --color-hora-text-muted: var(--hora-text-muted);
+  
+  --font-sans: 'Sarabun', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+.glass-hora {
+  background: rgba(18, 16, 14, 0.85);
+  border: 1px solid var(--hora-dark-border);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.btn-hora {
+  background: var(--hora-gold);
+  color: var(--hora-dark);
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(201, 169, 110, 0.25);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1.25rem;
+  cursor: pointer;
+}
+
+.btn-hora:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(201, 169, 110, 0.35);
+}
+
+.btn-hora:active {
+  transform: translateY(0);
+}
