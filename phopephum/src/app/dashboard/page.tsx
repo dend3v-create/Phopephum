@@ -13,6 +13,15 @@ import {
   DayOfWeek 
 } from "@/engine/phopephum-calculator";
 import { 
+  calculateSevenBase,
+  HOUSE_NAMES_ROW1,
+  HOUSE_NAMES_ROW2,
+  HOUSE_NAMES_ROW3,
+  HOUSE_NAMES_ROW8,
+  HOUSE_NAMES_ROW9,
+  HOUSE_DESCRIPTIONS
+} from "@/engine/seven-base-calculator";
+import { 
   Sparkles, Calendar, User, Zap, LogOut, ArrowUpRight, 
   ShieldCheck, Download, Compass, Award, Heart, 
   Activity, CheckSquare, Target, Scroll, Map, ChevronDown, ChevronUp 
@@ -28,6 +37,13 @@ export default function DashboardPage() {
   const [ashtaDay, setAshtaDay] = useState<number>(new Date().getDay());
   const [ashtaTime, setAshtaTime] = useState<string>("");
   const [ashtaResult, setAshtaResult] = useState<any>(null);
+
+  // New Seven-Base Astrology states
+  const [activeTab, setActiveTab] = useState<"ashta" | "sevenBase">("ashta");
+  const [sevenBaseDate, setSevenBaseDate] = useState<string>("");
+  const [sevenBaseTime, setSevenBaseTime] = useState<string>("12:00");
+  const [sevenBaseResult, setSevenBaseResult] = useState<any>(null);
+  const [selectedCell, setSelectedCell] = useState<any>(null);
 
   // Accordion states
   const [showTimeMatrix, setShowTimeMatrix] = useState(false);
@@ -73,6 +89,13 @@ export default function DashboardPage() {
     const defaultTime = `${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`;
     setAshtaTime(defaultTime);
     setAshtaDay(now.getDay());
+
+    // Initialize default for Seven-Base Date
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    setSevenBaseDate(`${yyyy}-${mm}-${dd}`);
+    setSevenBaseTime(`${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`);
   }, []);
 
   useEffect(() => {
@@ -80,6 +103,18 @@ export default function DashboardPage() {
       handleAshtaCalculate(ashtaDay, ashtaTime);
     }
   }, [ashtaDay, ashtaTime]);
+
+  useEffect(() => {
+    if (sevenBaseDate) {
+      try {
+        const res = calculateSevenBase(sevenBaseDate, sevenBaseTime || "12:00");
+        setSevenBaseResult(res);
+        setSelectedCell(null);
+      } catch (err) {
+        console.error("Error calculating Seven Base:", err);
+      }
+    }
+  }, [sevenBaseDate, sevenBaseTime]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -103,10 +138,12 @@ export default function DashboardPage() {
           setProfile(prof);
           if (prof.birth_time) {
             setAshtaTime(prof.birth_time.replace(":", "."));
+            setSevenBaseTime(prof.birth_time);
           }
           if (prof.birth_date) {
             const birthDateObj = new Date(prof.birth_date);
             setAshtaDay(birthDateObj.getDay());
+            setSevenBaseDate(prof.birth_date);
           }
 
           // Fetch the latest generated AI report for the dashboard
@@ -316,161 +353,499 @@ export default function DashboardPage() {
         {/* Middle and Right Column */}
         <div className="md:col-span-2 space-y-6 sm:space-y-8">
           
-          {/* 🔮 โซนที่ ๑ : เครื่องมือคำนวณยามอัฐกาลอัตโนมัติ */}
+          {/* 🔮 โซนที่ ๑ : เครื่องมือคำนวณโหราศาสตร์อัตโนมัติ */}
           <div className="glass-hora p-6 sm:p-10 border-gold-500/20 bg-gradient-to-b from-cosmic-900/40 to-cosmic-950/80 relative rounded-[2rem] overflow-hidden">
             <div className="absolute top-0 right-0 w-48 h-48 bg-gold-500/5 rounded-full blur-3xl pointer-events-none" />
             
-            <div className="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-white/5 pb-6">
-              <div>
-                <span className="text-[10px] text-gold-500 font-bold uppercase tracking-[0.3em] flex items-center gap-2 mb-2">
-                  <Sparkles className="w-3.5 h-3.5" /> เครื่องมือคำนวณยาม
-                </span>
-                <h3 className="text-xl sm:text-2xl font-serif font-bold text-gold-300">
-                  ระบบคำนวณยามอัฐกาลอัตโนมัติ
-                </h3>
-              </div>
+            {/* Cosmic Luxury Tab Bar */}
+            <div className="flex border border-white/5 mb-8 p-1 gap-2 bg-cosmic-950/50 rounded-2xl relative z-10">
+              <button
+                onClick={() => setActiveTab("ashta")}
+                className={`flex-1 py-3 px-4 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all cursor-pointer ${
+                  activeTab === "ashta"
+                    ? "bg-gold-500/10 border border-gold-500/30 text-gold-300 shadow-lg shadow-gold-500/5"
+                    : "text-hora-text-muted hover:text-foreground"
+                }`}
+              >
+                🔮 ยามอัฐกาล (Ashta-Kala)
+              </button>
+              <button
+                onClick={() => setActiveTab("sevenBase")}
+                className={`flex-1 py-3 px-4 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all cursor-pointer ${
+                  activeTab === "sevenBase"
+                    ? "bg-gold-500/10 border border-gold-500/30 text-gold-300 shadow-lg shadow-gold-500/5"
+                    : "text-hora-text-muted hover:text-foreground"
+                }`}
+              >
+                ⬡ เลข 7 ตัว 9 ฐาน (100 ปี)
+              </button>
             </div>
 
-            {/* Inputs Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 items-start mb-8">
-              <div className="space-y-2 text-left">
-                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400 ml-2">เลือกวัน</label>
-                <select
-                  value={ashtaDay}
-                  onChange={(e) => setAshtaDay(parseInt(e.target.value))}
-                  className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-2xl px-5 py-4 text-sm text-foreground outline-none transition-all cursor-pointer appearance-none"
-                >
-                  {DAY_NAMES_THAI.map((name, i) => (
-                    <option key={i} value={i} className="bg-cosmic-950 text-foreground">วัน{name}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2 text-left">
-                <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400 ml-2">เวลา (ชั่วโมง.นาที)</label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="เช่น 14.30"
-                    value={ashtaTime}
-                    onChange={(e) => setAshtaTime(e.target.value)}
-                    className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-2xl px-5 py-4 text-sm text-foreground outline-none transition-all placeholder:text-text-secondary/40 font-mono"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const now = new Date();
-                      setAshtaDay(now.getDay());
-                      setAshtaTime(`${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`);
-                    }}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gold-500 hover:text-gold-300 transition-colors uppercase tracking-widest bg-gold-500/10 px-3 py-1.5 rounded-full"
-                  >
-                    ปัจจุบัน
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Dynamic Result Displays */}
-            {activeYam ? (
-              <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                
-                {/* Cards Grid: ยามที่ | ชื่อยาม | ช่วงเวลา | ยามย่อย */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                  
-                  {/* ยามที่ */}
-                  <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ยามที่</span>
-                    <span className="text-4xl font-serif font-bold text-gold-300">{activeYam.yamNumber}</span>
-                  </div>
-
-                  {/* ชื่อยาม */}
-                  <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5 flex flex-col justify-center">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ชื่อยาม</span>
-                    <span className="text-lg font-bold text-foreground block">
-                      {activeYam.period === "day" ? "กลางวัน" : "กลางคืน"}
+            {activeTab === "ashta" ? (
+              <div className="space-y-6">
+                <div className="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-white/5 pb-6">
+                  <div>
+                    <span className="text-[10px] text-gold-500 font-bold uppercase tracking-[0.3em] flex items-center gap-2 mb-2">
+                      <Sparkles className="w-3.5 h-3.5" /> เครื่องมือคำนวณยาม
                     </span>
-                  </div>
-
-                  {/* ช่วงเวลา */}
-                  <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5 flex flex-col justify-center">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ดาวเสวยยาม</span>
-                    <span className="text-lg font-bold text-gold-400 block">
-                      {activeYam.starName}
-                    </span>
-                  </div>
-
-                  {/* ยามย่อย */}
-                  <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5 flex flex-col justify-center">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ยามย่อย</span>
-                    <span className="text-lg font-bold text-foreground block">
-                      {activeYam.activeSubYam.name}
-                    </span>
+                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-gold-300">
+                      ระบบคำนวณยามอัฐกาลอัตโนมัติ
+                    </h3>
                   </div>
                 </div>
 
-                {/* Predictions Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-                  
-                  <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
-                    <div className="flex items-center gap-2 text-pink-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
-                      <span>📢</span> เรื่องที่ได้ยิน
-                    </div>
-                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
-                      {activeYam.predictions.hearing}
-                    </p>
+                {/* Inputs Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 items-start mb-8">
+                  <div className="space-y-2 text-left">
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400 ml-2">เลือกวัน</label>
+                    <select
+                      value={ashtaDay}
+                      onChange={(e) => setAshtaDay(parseInt(e.target.value))}
+                      className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-2xl px-5 py-4 text-sm text-foreground outline-none transition-all cursor-pointer appearance-none"
+                    >
+                      {DAY_NAMES_THAI.map((name, i) => (
+                        <option key={i} value={i} className="bg-cosmic-950 text-foreground">วัน{name}</option>
+                      ))}
+                    </select>
                   </div>
 
-                  <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
-                    <div className="flex items-center gap-2 text-red-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
-                      <span>🏥</span> คนเจ็บไข้
+                  <div className="space-y-2 text-left">
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400 ml-2">เวลา (ชั่วโมง.นาที)</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="เช่น 14.30"
+                        value={ashtaTime}
+                        onChange={(e) => setAshtaTime(e.target.value)}
+                        className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-2xl px-5 py-4 text-sm text-foreground outline-none transition-all placeholder:text-text-secondary/40 font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const now = new Date();
+                          setAshtaDay(now.getDay());
+                          setAshtaTime(`${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`);
+                        }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gold-500 hover:text-gold-300 transition-colors uppercase tracking-widest bg-gold-500/10 px-3 py-1.5 rounded-full"
+                      >
+                        ปัจจุบัน
+                      </button>
                     </div>
-                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
-                      {activeYam.predictions.sick}
-                    </p>
-                  </div>
-
-                  <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
-                    <div className="flex items-center gap-2 text-yellow-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
-                      <span>🔍</span> ของหาย
-                    </div>
-                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
-                      {activeYam.predictions.lost}
-                    </p>
-                  </div>
-
-                  <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
-                    <div className="flex items-center gap-2 text-blue-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
-                      <span>🚗</span> การเดินทาง ({activeYam.activeSubYam.name})
-                    </div>
-                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
-                      {activeYam.predictions.travel}
-                    </p>
                   </div>
                 </div>
 
-                {/* 9 Segment: ยามซอย 9 ฤกษ์ */}
-                <div className="bg-gold-500/5 border border-gold-500/20 rounded-[1.5rem] p-6 sm:p-8 text-left flex flex-col sm:flex-row items-center sm:items-start gap-5">
-                  <div className="w-14 h-14 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center font-bold text-gold-400 text-2xl flex-shrink-0 shadow-lg shadow-gold-500/5">
-                    {activeYam.activeNineSegment.index}
-                  </div>
-                  <div className="flex-1 space-y-2 text-center sm:text-left">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-center sm:justify-start">
-                      <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">ฤกษ์ยามซอย 9 ระดับ:</span>
-                      <span className="bg-gold-500/20 border border-gold-500/30 text-gold-300 px-3 py-1 rounded-lg text-xs font-bold shadow-inner shadow-gold-500/10">
-                        {activeYam.activeNineSegment.name}
-                      </span>
-                    </div>
-                    <p className="text-sm text-text-secondary leading-relaxed font-medium">
-                      {activeYam.activeNineSegment.description}
-                    </p>
-                  </div>
-                </div>
+                {/* Dynamic Result Displays */}
+                {activeYam ? (
+                  <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    
+                    {/* Cards Grid: ยามที่ | ชื่อยาม | ช่วงเวลา | ยามย่อย */}
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                      
+                      {/* ยามที่ */}
+                      <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ยามที่</span>
+                        <span className="text-4xl font-serif font-bold text-gold-300">{activeYam.yamNumber}</span>
+                      </div>
 
+                      {/* ชื่อยาม */}
+                      <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5 flex flex-col justify-center">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ชื่อยาม</span>
+                        <span className="text-lg font-bold text-foreground block">
+                          {activeYam.period === "day" ? "กลางวัน" : "กลางคืน"}
+                        </span>
+                      </div>
+
+                      {/* ช่วงเวลา */}
+                      <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5 flex flex-col justify-center">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ดาวเสวยยาม</span>
+                        <span className="text-lg font-bold text-gold-400 block">
+                          {activeYam.starName}
+                        </span>
+                      </div>
+
+                      {/* ยามย่อย */}
+                      <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5 flex flex-col justify-center">
+                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ยามย่อย</span>
+                        <span className="text-lg font-bold text-foreground block">
+                          {activeYam.activeSubYam.name}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Predictions Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                      
+                      <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
+                        <div className="flex items-center gap-2 text-pink-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
+                          <span>📢</span> เรื่องที่ได้ยิน
+                        </div>
+                        <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
+                          {activeYam.predictions.hearing}
+                        </p>
+                      </div>
+
+                      <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
+                        <div className="flex items-center gap-2 text-red-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
+                          <span>🏥</span> คนเจ็บไข้
+                        </div>
+                        <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
+                          {activeYam.predictions.sick}
+                        </p>
+                      </div>
+
+                      <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
+                        <div className="flex items-center gap-2 text-yellow-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
+                          <span>🔍</span> ของหาย
+                        </div>
+                        <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
+                          {activeYam.predictions.lost}
+                        </p>
+                      </div>
+
+                      <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
+                        <div className="flex items-center gap-2 text-blue-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
+                          <span>🚗</span> การเดินทาง ({activeYam.activeSubYam.name})
+                        </div>
+                        <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
+                          {activeYam.predictions.travel}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 9 Segment: ยามซอย 9 ฤกษ์ */}
+                    <div className="bg-gold-500/5 border border-gold-500/20 rounded-[1.5rem] p-6 sm:p-8 text-left flex flex-col sm:flex-row items-center sm:items-start gap-5">
+                      <div className="w-14 h-14 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center font-bold text-gold-400 text-2xl flex-shrink-0 shadow-lg shadow-gold-500/5">
+                        {activeYam.activeNineSegment.index}
+                      </div>
+                      <div className="flex-1 space-y-2 text-center sm:text-left">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-center sm:justify-start">
+                          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">ฤกษ์ยามซอย 9 ระดับ:</span>
+                          <span className="bg-gold-500/20 border border-gold-500/30 text-gold-300 px-3 py-1 rounded-lg text-xs font-bold shadow-inner shadow-gold-500/10">
+                            {activeYam.activeNineSegment.name}
+                          </span>
+                        </div>
+                        <p className="text-sm text-text-secondary leading-relaxed font-medium">
+                          {activeYam.activeNineSegment.description}
+                        </p>
+                      </div>
+                    </div>
+
+                  </div>
+                ) : (
+                  <div className="h-48 border border-dashed border-white/10 rounded-[2rem] flex items-center justify-center bg-black/10">
+                    <p className="text-xs text-hora-text-muted uppercase tracking-widest font-bold">กรุณากรอกเวลาเพื่อประมวลผลยามอัฐกาล</p>
+                  </div>
+                )}
               </div>
             ) : (
-              <div className="h-48 border border-dashed border-white/10 rounded-[2rem] flex items-center justify-center bg-black/10">
-                <p className="text-xs text-hora-text-muted uppercase tracking-widest font-bold">กรุณากรอกเวลาเพื่อประมวลผลยามอัฐกาล</p>
+              <div className="space-y-8 text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-white/5 pb-6">
+                  <div>
+                    <span className="text-[10px] text-gold-500 font-bold uppercase tracking-[0.3em] flex items-center gap-2 mb-2">
+                      <Sparkles className="w-3.5 h-3.5" /> ผูกดวงชะตาระดับจักรพรรดิ
+                    </span>
+                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-gold-300">
+                      ระบบเลข 7 ตัว 9 ฐาน (จันทรคติ 100 ปี)
+                    </h3>
+                  </div>
+                </div>
+
+                {/* Inputs Grid for Seven-Base */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 items-start mb-8 text-left">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400 ml-2">วันเดือนปีเกิด</label>
+                    <input
+                      type="date"
+                      value={sevenBaseDate}
+                      onChange={(e) => setSevenBaseDate(e.target.value)}
+                      className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-2xl px-5 py-4 text-sm text-foreground outline-none transition-all cursor-pointer font-mono"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400 ml-2">เวลาเกิด (ชั่วโมง:นาที)</label>
+                    <div className="relative">
+                      <input
+                        type="time"
+                        value={sevenBaseTime}
+                        onChange={(e) => setSevenBaseTime(e.target.value)}
+                        className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-2xl px-5 py-4 text-sm text-foreground outline-none transition-all cursor-pointer font-mono"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const now = new Date();
+                          const yyyy = now.getFullYear();
+                          const mm = String(now.getMonth() + 1).padStart(2, "0");
+                          const dd = String(now.getDate()).padStart(2, "0");
+                          setSevenBaseDate(`${yyyy}-${mm}-${dd}`);
+                          setSevenBaseTime(`${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`);
+                        }}
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gold-500 hover:text-gold-300 transition-colors uppercase tracking-widest bg-gold-500/10 px-3 py-1.5 rounded-full"
+                      >
+                        ปัจจุบัน
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {sevenBaseResult ? (
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    
+                    {/* Birth Summary Bar */}
+                    <div className="bg-gold-500/5 border border-gold-500/15 rounded-3xl p-5 text-left flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                      <div>
+                        <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest block mb-1">ปฏิทินจันทรคติไทยเกรดดาราศาสตร์:</span>
+                        <p className="text-sm font-bold text-foreground">
+                          {sevenBaseResult.thaiLunarDateText}
+                        </p>
+                      </div>
+                      <div className="bg-gold-500/15 border border-gold-500/30 text-gold-300 px-4 py-2 rounded-xl text-xs font-bold shadow-inner">
+                        วันโหราศาสตร์: {sevenBaseResult.isWednesdayNight ? "พุธกลางคืน (ราหู)" : `วัน${sevenBaseResult.dayName}`}
+                      </div>
+                    </div>
+
+                    {/* Golden Astrology Grid 7x9 */}
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] font-bold text-gold-500 uppercase tracking-widest">ผังดวงเลข 7 ตัว 9 ฐาน (จิ้มแต่ละช่องเพื่ออ่านคำทำนาย)</span>
+                      </div>
+                      
+                      <div className="overflow-x-auto rounded-[2rem] border border-white/5 bg-cosmic-950/40 p-4 sm:p-6">
+                        <div className="min-w-[680px] space-y-2">
+                          
+                          {/* Column Headers */}
+                          <div className="grid grid-cols-8 gap-2 text-center text-[10px] font-bold text-gold-500 uppercase tracking-widest pb-3 border-b border-white/5">
+                            <div className="text-left pl-2">ฐาน / เสา</div>
+                            <div>ช่อง 1</div>
+                            <div>ช่อง 2</div>
+                            <div>ช่อง 3</div>
+                            <div>ช่อง 4</div>
+                            <div>ช่อง 5</div>
+                            <div>ช่อง 6</div>
+                            <div>ช่อง 7</div>
+                          </div>
+
+                          {/* Row 1 - Row 9 */}
+                          {Array.from({ length: 9 }).map((_, rIdx) => {
+                            const rNum = rIdx + 1;
+                            let rowData: number[] = [];
+                            let houseNames: string[] = [];
+
+                            if (rNum === 1) {
+                              rowData = sevenBaseResult.chart.row1;
+                              houseNames = HOUSE_NAMES_ROW1;
+                            } else if (rNum === 2) {
+                              rowData = sevenBaseResult.chart.row2;
+                              houseNames = HOUSE_NAMES_ROW2;
+                            } else if (rNum === 3) {
+                              rowData = sevenBaseResult.chart.row3;
+                              houseNames = HOUSE_NAMES_ROW3;
+                            } else if (rNum === 4) {
+                              rowData = sevenBaseResult.chart.row4;
+                            } else if (rNum === 5) {
+                              rowData = sevenBaseResult.chart.row5;
+                            } else if (rNum === 6) {
+                              rowData = sevenBaseResult.chart.row6;
+                            } else if (rNum === 7) {
+                              rowData = sevenBaseResult.chart.row7;
+                            } else if (rNum === 8) {
+                              rowData = sevenBaseResult.chart.row8;
+                              houseNames = HOUSE_NAMES_ROW8;
+                            } else if (rNum === 9) {
+                              rowData = sevenBaseResult.chart.row9;
+                              houseNames = HOUSE_NAMES_ROW9;
+                            }
+
+                            let rowLabel = `ฐานที่ ${rNum}`;
+                            if (rNum === 1) rowLabel = "ฐานวัน";
+                            if (rNum === 2) rowLabel = "ฐานเดือน";
+                            if (rNum === 3) rowLabel = "ฐานปี";
+                            if (rNum === 4) rowLabel = "ฐานรวมกำลัง";
+                            if (rNum === 5) rowLabel = "ฐาน 5 (โสฬส)";
+                            if (rNum === 6) rowLabel = "ฐาน 6 (มหาภูติ)";
+                            if (rNum === 7) rowLabel = "ฐาน 7 (กำลังทวี)";
+                            if (rNum === 8) rowLabel = "ฐาน 8 (ยามหน้า)";
+                            if (rNum === 9) rowLabel = "ฐาน 9 (ยามทวน)";
+
+                            const isCalculationRow = rNum === 4 || rNum === 5 || rNum === 6 || rNum === 7;
+
+                            return (
+                              <div key={rIdx} className="grid grid-cols-8 gap-2 items-center">
+                                {/* Row Label */}
+                                <div className="text-[10px] sm:text-xs font-bold text-hora-text-muted text-left pl-2">
+                                  {rowLabel}
+                                </div>
+                                
+                                {/* 7 Cells */}
+                                {rowData.map((val, colIdx) => {
+                                  const houseName = houseNames[colIdx] || "";
+                                  const isSelected = selectedCell?.row === rNum && selectedCell?.col === colIdx + 1;
+                                  
+                                  return (
+                                    <button
+                                      key={colIdx}
+                                      onClick={() => setSelectedCell({
+                                        row: rNum,
+                                        col: colIdx + 1,
+                                        value: val,
+                                        house: houseName,
+                                        rowLabel: rowLabel
+                                      })}
+                                      className={`rounded-xl p-2 sm:p-3 text-center border transition-all cursor-pointer flex flex-col items-center justify-center min-h-[56px] sm:min-h-[64px] ${
+                                        isSelected
+                                          ? "bg-gold-500/20 text-gold-100 border-gold-500 shadow-md shadow-gold-500/10"
+                                          : isCalculationRow
+                                            ? "bg-cosmic-950/30 border-white/5 text-text-secondary/70 hover:border-gold-500/10"
+                                            : "bg-cosmic-950/60 border-white/5 text-foreground hover:border-gold-500/20"
+                                      }`}
+                                    >
+                                      <span className={`text-sm sm:text-base font-serif font-bold ${
+                                        isSelected 
+                                          ? "text-gold-300 scale-110" 
+                                          : isCalculationRow 
+                                            ? "text-text-secondary/80" 
+                                            : "text-gold-400"
+                                      }`}>
+                                        {val}
+                                      </span>
+                                      {houseName && (
+                                        <span className="text-[8px] sm:text-[9px] text-hora-text-muted font-bold truncate max-w-full mt-0.5">
+                                          {houseName}
+                                        </span>
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Selected Cell Description */}
+                      {selectedCell && (
+                        <div className="bg-gold-500/5 border border-gold-500/20 rounded-[2rem] p-6 text-left space-y-4 animate-in fade-in duration-300">
+                          <div className="flex items-center justify-between border-b border-gold-500/10 pb-3">
+                            <div className="flex items-center gap-2">
+                              <span className="w-8 h-8 rounded-lg bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-xs font-bold text-gold-400">
+                                {selectedCell.value}
+                              </span>
+                              <div>
+                                <h4 className="text-sm font-serif font-bold text-gold-300">
+                                  {selectedCell.house ? `ภพ ${selectedCell.house}` : selectedCell.rowLabel}
+                                </h4>
+                                <span className="text-[9px] text-hora-text-muted font-bold uppercase tracking-wider">
+                                  {selectedCell.rowLabel} · ช่องเสาที่ {selectedCell.col}
+                                </span>
+                              </div>
+                            </div>
+                            {selectedCell.house && (
+                              <span className="text-[10px] bg-gold-500/15 border border-gold-500/30 text-gold-300 px-3 py-1 rounded-full font-bold">
+                                ดาวเสวย: {["", "อาทิตย์ (๑)", "จันทร์ (๒)", "อังคาร (๓)", "พุธ (๔)", "พฤหัสบดี (๕)", "ศุกร์ (๖)", "เสาร์ (๗)", "ราหู (๘)", "เกตุ (๙)"][selectedCell.value] || "ดาวกำลังวัน"}
+                              </span>
+                            )}
+                          </div>
+                          
+                          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
+                            {selectedCell.house 
+                              ? `${HOUSE_DESCRIPTIONS[selectedCell.house] || ""} โดยในเกณฑ์ดวงชะตานี้ มีพลังดึงดูดของดาวดวงดังกล่าวส่งอิทธิพลต่อทิศทางชีวิตอย่างลึกซึ้ง` 
+                              : `ฐานนี้เป็นฐานสรุปผลและคำนวณบวกดาว ซึ่งใช้ในการตรวจสอบกำลังดาวจริง มีค่าสะสมรวมเป็น ${selectedCell.value} นำมาใช้ประกอบพิจารณาจุดเด่นและกำลังของโชคชะตา`}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Thaksa & Maha Phute Sections */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 text-left">
+                      {/* ทักษาปกรณ์ 8 ทิศ */}
+                      <div className="bg-cosmic-900/20 border border-white/5 rounded-[2rem] p-6 sm:p-8 space-y-6">
+                        <h4 className="text-sm font-serif font-bold text-gold-300 flex items-center gap-2 border-b border-white/5 pb-4 uppercase tracking-widest">
+                          <Sparkles className="w-5 h-5 text-gold-500" /> ทักษาปกรณ์ 8 ทิศ
+                        </h4>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          {sevenBaseResult.taksa.map((t: any, idx: number) => {
+                            const categoryColors: Record<string, string> = {
+                              "บริวาร": "text-yellow-400 bg-yellow-400/5 border-yellow-400/15",
+                              "อายุ": "text-pink-400 bg-pink-400/5 border-pink-400/15",
+                              "เดช": "text-red-400 bg-red-400/5 border-red-400/15",
+                              "ศรี": "text-green-400 bg-green-400/5 border-green-400/15",
+                              "มูละ": "text-orange-400 bg-orange-400/5 border-orange-400/15",
+                              "อุตสาหะ": "text-blue-400 bg-blue-400/5 border-blue-400/15",
+                              "มนตรี": "text-purple-400 bg-purple-400/5 border-purple-400/15",
+                              "กาลกิณี": "text-rose-500 bg-rose-500/5 border-rose-500/20 font-bold",
+                            };
+                            const colClass = categoryColors[t.category] || "text-foreground bg-white/5 border-white/10";
+                            return (
+                              <div key={idx} className={`p-4 rounded-xl border flex flex-col justify-between space-y-2 hover:border-gold-500/20 transition-all ${colClass}`}>
+                                <span className="text-[10px] uppercase font-bold tracking-wider">{t.category}</span>
+                                <span className="text-sm font-serif font-bold">{t.planet}</span>
+                                <p className="text-[9px] text-hora-text-muted leading-relaxed line-clamp-2">
+                                  {t.description}
+                                </p>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* เศษมหาภูติ 5 */}
+                      <div className="bg-cosmic-900/20 border border-white/5 rounded-[2rem] p-6 sm:p-8 space-y-6 flex flex-col justify-between">
+                        <div>
+                          <h4 className="text-sm font-serif font-bold text-gold-300 flex items-center gap-2 border-b border-white/5 pb-4 uppercase tracking-widest">
+                            <Compass className="w-5 h-5 text-gold-500" /> เศษมหาภูติ 5 (จุลศักราช)
+                          </h4>
+                          
+                          <div className="mt-6 flex items-center gap-5 bg-gold-500/5 border border-gold-500/15 rounded-2xl p-5">
+                            <div className="w-14 h-14 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center font-bold text-gold-300 text-2xl shadow-lg shadow-gold-500/5">
+                              {sevenBaseResult.mahaPhute.remainder}
+                            </div>
+                            <div>
+                              <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest block mb-1">ตำแหน่งมหาภูติ:</span>
+                              <span className="text-lg font-bold text-foreground block">
+                                {sevenBaseResult.mahaPhute.name} (ธาตุ{sevenBaseResult.mahaPhute.element})
+                              </span>
+                            </div>
+                          </div>
+
+                          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium mt-6">
+                            {sevenBaseResult.mahaPhute.description}
+                          </p>
+                        </div>
+
+                        {/* Strengths & Weaknesses Cards */}
+                        <div className="space-y-4 pt-6 border-t border-white/5 mt-6">
+                          {sevenBaseResult.strengths.length > 0 && (
+                            <div className="bg-green-500/5 border border-green-500/15 rounded-xl p-4">
+                              <span className="text-[10px] text-green-400 font-bold uppercase tracking-widest block mb-1">🌟 จุดเด่นมหาอุดมงคล</span>
+                              <ul className="list-disc list-inside text-[11px] text-text-secondary space-y-1 font-medium">
+                                {sevenBaseResult.strengths.map((s: string, idx: number) => (
+                                  <li key={idx}>{s}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+
+                          {sevenBaseResult.weaknesses.length > 0 && (
+                            <div className="bg-red-500/5 border border-red-500/15 rounded-xl p-4">
+                              <span className="text-[10px] text-red-400 font-bold uppercase tracking-widest block mb-1">⚠️ จุดควรระมัดระวัง</span>
+                              <ul className="list-disc list-inside text-[11px] text-text-secondary space-y-1 font-medium">
+                                {sevenBaseResult.weaknesses.map((w: string, idx: number) => (
+                                  <li key={idx}>{w}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                ) : (
+                  <div className="h-48 border border-dashed border-white/10 rounded-[2rem] flex items-center justify-center bg-black/10">
+                    <p className="text-xs text-hora-text-muted uppercase tracking-widest font-bold">กรุณากรอกข้อมูลวันเดือนปีเกิดเพื่อประมวลผลดวงชะตา</p>
+                  </div>
+                )}
               </div>
             )}
           </div>
