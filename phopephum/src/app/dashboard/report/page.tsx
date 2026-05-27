@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase";
 import { calculateHora } from "@/engine/phopephum-calculator";
 import { useReportDownload } from "@/hooks/useReportDownload";
 import PremiumReportTemplate from "@/components/PremiumReportTemplate";
-import { Download, ArrowLeft, Sparkles, Loader2, Calendar, ShieldCheck } from "lucide-react";
+import { Download, ArrowLeft, Sparkles, Loader2, Calendar, ShieldCheck, Compass } from "lucide-react";
 import Link from "next/link";
 
 export default function ReportPage() {
@@ -201,6 +201,26 @@ export default function ReportPage() {
             Luxury Editorial Style · Print-Ready Resolution
           </p>
         </div>
+      </div>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-hora border-t border-white/10 bg-cosmic-950/85 backdrop-blur-lg flex items-center justify-around py-3 px-2 shadow-[0_-10px_20px_rgba(0,0,0,0.8)] pb-safe">
+        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
+          <Compass className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+          <span className="text-[9px] font-medium tracking-wider">ภาพรวมดวง</span>
+        </Link>
+        <Link href="/dashboard/planner" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
+          <Calendar className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+          <span className="text-[9px] font-medium tracking-wider">Planner</span>
+        </Link>
+        <Link href="/dashboard/coach" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
+          <Sparkles className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+          <span className="text-[9px] font-medium tracking-wider">AI Coach</span>
+        </Link>
+        <Link href="/dashboard/report" className="flex flex-col items-center gap-1 text-gold-500">
+          <Download className="w-4 h-4 text-gold-500" />
+          <span className="text-[9px] font-bold tracking-wider">Reports</span>
+        </Link>
       </div>
     </div>
   );

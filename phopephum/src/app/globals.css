@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Sans+Thai:wght@100;200;300;400;500;600;700&family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
 @import "tailwindcss";
 
 :root {
@@ -60,9 +60,12 @@
   --color-hora-text-muted: var(--hora-text-muted);
   --color-text-secondary: var(--text-secondary);
   
-  --font-sans: 'IBM Plex Sans Thai', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Cinzel', 'Cormorant Garamond', serif;
-  --font-prompt: 'Prompt', sans-serif;
+  /* หัวข้อเด่น: Prompt | เนื้อหา/Body: Sarabun */
+  --font-sans: 'Sarabun', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Prompt', 'Cinzel', serif;
+  --font-heading: 'Prompt', sans-serif;
+  --font-body: 'Sarabun', sans-serif;
+  --font-mono: 'Fira Code', 'Consolas', monospace;
 
   /* Extra small text size for mobile labels */
   --text-xxs: 0.625rem;
@@ -127,7 +130,7 @@ html {
 body {
   background: var(--cosmic-950);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: var(--font-body); /* Sarabun — เนื้อหา */
   min-height: 100vh;
   min-height: -webkit-fill-available;
   position: relative;
@@ -135,6 +138,13 @@ body {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
   -webkit-overflow-scrolling: touch;
+}
+
+/* หัวข้อทุกระดับ → Prompt font */
+h1, h2, h3, h4, h5, h6,
+.font-serif,
+.font-heading {
+  font-family: var(--font-heading); /* Prompt */
 }
 
 /* พื้นหลังมิติห้วงจักรวาลระยิบระยับและไหลพริ้ว (Cosmic Luxury Portal) */

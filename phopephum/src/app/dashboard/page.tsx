@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { calculateHora } from "@/engine/phopephum-calculator";
-import { Sparkles, Calendar, User, Zap, LogOut, ArrowUpRight, ShieldCheck, Download, History, Map, Compass, Scroll, Target, Award } from "lucide-react";
+import { Sparkles, Calendar, User, Zap, LogOut, ArrowUpRight, ShieldCheck, Download, History, Map, Compass, Scroll, Target, Award, Heart, Activity, CheckSquare } from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -61,6 +61,18 @@ export default function DashboardPage() {
 
           const result = calculateHora({ date: combinedDate, currentTime: combinedDate });
           setCalculatedResult(result);
+
+          // Fetch the latest generated AI report for the dashboard
+          const { data: latestReport } = await supabase
+            .from("ai_reports")
+            .select("*")
+            .eq("user_id", user.id)
+            .order("created_at", { ascending: false })
+            .limit(1);
+
+          if (latestReport && latestReport.length > 0 && latestReport[0].content) {
+            setReportResult(latestReport[0].content);
+          }
         }
 
         // Fetch mobile screen feature configurations
@@ -350,6 +362,41 @@ export default function DashboardPage() {
             )}
           </div>
 
+          {/* Strategic Systems Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <Link href="/dashboard/planner" className="glass-hora p-6 border-white/5 hover:border-gold-500/30 transition-all bg-cosmic-900/10 group flex flex-col justify-between h-44 text-left">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="w-10 h-10 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 group-hover:scale-110 transition-transform">
+                    <Calendar className="w-5 h-5" />
+                  </span>
+                  <ArrowUpRight className="w-4 h-4 text-text-secondary group-hover:text-gold-500 transition-colors" />
+                </div>
+                <h4 className="text-base font-serif font-bold text-gold-300 group-hover:text-gold-500 transition-colors">TQM Planner</h4>
+                <p className="text-xxs text-text-secondary mt-1 leading-relaxed">
+                  วางแผนธุรกิจและการดำเนินชีวิตรายชั่วโมงตามปฏิทินยามจรและยามอัฐกาลเพื่อพลังขับเคลื่อนสูงสุด
+                </p>
+              </div>
+              <span className="text-[10px] text-gold-500 font-bold uppercase tracking-wider mt-2">เปิดแผนงานยามมงคล →</span>
+            </Link>
+
+            <Link href="/dashboard/coach" className="glass-hora p-6 border-white/5 hover:border-gold-500/30 transition-all bg-cosmic-900/10 group flex flex-col justify-between h-44 text-left">
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <span className="w-10 h-10 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 group-hover:scale-110 transition-transform">
+                    <Sparkles className="w-5 h-5" />
+                  </span>
+                  <ArrowUpRight className="w-4 h-4 text-text-secondary group-hover:text-gold-500 transition-colors" />
+                </div>
+                <h4 className="text-base font-serif font-bold text-gold-300 group-hover:text-gold-500 transition-colors">AI Wisdom Coach</h4>
+                <p className="text-xxs text-text-secondary mt-1 leading-relaxed">
+                  โค้ชจิตวิทยาเชิงบวกปัญญาสามมิติ ปรึกษาทิศทาง แก้ไขปัญหาชีวิตเฉพาะบุคคลแบบ Real-time
+                </p>
+              </div>
+              <span className="text-[10px] text-gold-500 font-bold uppercase tracking-wider mt-2">คุยกับ AI Coach →</span>
+            </Link>
+          </div>
+
           {/* AI Dashboard - Analysis Section */}
           <div className="glass-hora p-8 border-gold-500/30 bg-cosmic-900/30 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/5 rounded-full blur-[100px] pointer-events-none" />
@@ -378,23 +425,150 @@ export default function DashboardPage() {
               <div className="space-y-8 animate-in fade-in duration-1000">
                 {/* Standard Sections */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {[
-                    { title: "ตัวตนและภาพลักษณ์", content: reportResult.identity?.attha, icon: <User className="w-4 h-4" /> },
-                    { title: "เสน่ห์และการสื่อสาร", content: reportResult.charm?.overview, icon: <Sparkles className="w-4 h-4" /> },
-                    { title: "ยุทธศาสตร์อาชีพ", content: reportResult.career, icon: <Target className="w-4 h-4" /> },
-                    { title: "แผนที่การเงิน", content: reportResult.finance, icon: <Zap className="w-4 h-4" /> }
-                  ].map((item, i) => (
-                    <div key={i} className="bg-cosmic-950/40 border border-white/5 rounded-2xl p-6 hover:border-gold-500/30 transition-all group">
+                  
+                  {/* Card 1: Identity & Soul */}
+                  <div className="bg-cosmic-950/40 border border-white/5 rounded-2xl p-6 hover:border-gold-500/30 transition-all group text-left">
+                    <div className="flex items-center gap-3 mb-4 text-gold-500">
+                      <User className="w-4 h-4" />
+                      <h5 className="text-xxs font-bold uppercase tracking-widest">ตัวตนและจิตวิญญาณ</h5>
+                    </div>
+                    <div className="space-y-3 text-xs text-text-secondary leading-relaxed">
+                      <p><strong className="text-gold-300/80">ตัวตนหลัก:</strong> {reportResult.identity?.attha || "—"}</p>
+                      {reportResult.identity?.phanthu && <p><strong className="text-gold-300/80">จิตใจลึกๆ:</strong> {reportResult.identity?.phanthu}</p>}
+                      {reportResult.identity?.tanu && <p><strong className="text-gold-300/80">ออร่าภายนอก:</strong> {reportResult.identity?.tanu}</p>}
+                    </div>
+                  </div>
+
+                  {/* Card 2: Charm & Expression */}
+                  <div className="bg-cosmic-950/40 border border-white/5 rounded-2xl p-6 hover:border-gold-500/30 transition-all group text-left">
+                    <div className="flex items-center gap-3 mb-4 text-gold-500">
+                      <Sparkles className="w-4 h-4" />
+                      <h5 className="text-xxs font-bold uppercase tracking-widest">เสน่ห์และการสื่อสาร</h5>
+                    </div>
+                    <div className="space-y-3 text-xs text-text-secondary leading-relaxed">
+                      <p><strong className="text-gold-300/80">เสน่ห์ชื่อเสียง:</strong> {reportResult.charm?.overview || "—"}</p>
+                      {reportResult.charm?.communication && <p><strong className="text-gold-300/80">วิธีเจรจา (KFC Model):</strong> {reportResult.charm?.communication}</p>}
+                    </div>
+                  </div>
+
+                  {/* Card 3: Career Strategy */}
+                  <div className="bg-cosmic-950/40 border border-white/5 rounded-2xl p-6 hover:border-gold-500/30 transition-all group text-left">
+                    <div className="flex items-center gap-3 mb-4 text-gold-500">
+                      <Target className="w-4 h-4" />
+                      <h5 className="text-xxs font-bold uppercase tracking-widest">ยุทธศาสตร์อาชีพ</h5>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      {reportResult.career || "—"}
+                    </p>
+                  </div>
+
+                  {/* Card 4: Wealth Map */}
+                  <div className="bg-cosmic-950/40 border border-white/5 rounded-2xl p-6 hover:border-gold-500/30 transition-all group text-left">
+                    <div className="flex items-center gap-3 mb-4 text-gold-500">
+                      <Zap className="w-4 h-4" />
+                      <h5 className="text-xxs font-bold uppercase tracking-widest">แผนที่การเงิน</h5>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      {reportResult.finance || "—"}
+                    </p>
+                  </div>
+
+                  {/* Card 5: Love & relationships */}
+                  {reportResult.love && (
+                    <div className="bg-cosmic-950/40 border border-white/5 rounded-2xl p-6 hover:border-gold-500/30 transition-all group text-left">
                       <div className="flex items-center gap-3 mb-4 text-gold-500">
-                        {item.icon}
-                        <h5 className="text-xxs font-bold uppercase tracking-widest">{item.title}</h5>
+                        <Heart className="w-4 h-4" />
+                        <h5 className="text-xxs font-bold uppercase tracking-widest">รูปแบบความรักความสัมพันธ์</h5>
                       </div>
-                      <p className="text-xs text-text-secondary leading-relaxed text-left group-hover:text-foreground transition-colors line-clamp-4">
-                        {item.content}
+                      <p className="text-xs text-text-secondary leading-relaxed">
+                        {reportResult.love}
                       </p>
                     </div>
-                  ))}
+                  )}
+
+                  {/* Card 6: Health & Chakras */}
+                  {reportResult.health && (
+                    <div className="bg-cosmic-950/40 border border-white/5 rounded-2xl p-6 hover:border-gold-500/30 transition-all group text-left">
+                      <div className="flex items-center gap-3 mb-4 text-gold-500">
+                        <Activity className="w-4 h-4" />
+                        <h5 className="text-xxs font-bold uppercase tracking-widest">พลังงานชีวิต & จักระสุขภาพ</h5>
+                      </div>
+                      <p className="text-xs text-text-secondary leading-relaxed">
+                        {reportResult.health}
+                      </p>
+                    </div>
+                  )}
                 </div>
+
+                {/* Section: Actionable Growth Checklist */}
+                {reportResult.development && reportResult.development.length > 0 && (
+                  <div className="bg-cosmic-950/40 border border-white/5 rounded-3xl p-6 text-left space-y-4">
+                    <div className="flex items-center gap-3 text-gold-500">
+                      <CheckSquare className="w-5 h-5" />
+                      <h5 className="text-xs font-bold uppercase tracking-widest">แผนพัฒนาตัวเองตามรหัสดวงชะตา (Actionable Guide)</h5>
+                    </div>
+                    <div className="grid gap-3">
+                      {reportResult.development.map((item: string, i: number) => (
+                        <div key={i} className="flex items-start gap-3 bg-cosmic-900/40 p-3.5 rounded-xl border border-white/5">
+                          <CheckSquare className="w-4 h-4 text-gold-500 flex-shrink-0 mt-0.5" />
+                          <span className="text-xs text-text-secondary">{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Section: Weekly Plan Map */}
+                {reportResult.weeklyPlan && (
+                  <div className="bg-cosmic-950/40 border border-white/5 rounded-3xl p-6 text-left space-y-4">
+                    <div className="flex items-center gap-3 text-gold-500">
+                      <Calendar className="w-5 h-5" />
+                      <h5 className="text-xs font-bold uppercase tracking-widest">ตารางพลังงานและธรรมประธานนำจิตใจรายวัน</h5>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-7 gap-3">
+                      {[
+                        { day: "จันทร์", color: "text-yellow-400", val: reportResult.weeklyPlan.monday },
+                        { day: "อังคาร", color: "text-pink-400", val: reportResult.weeklyPlan.tuesday },
+                        { day: "พุธ", color: "text-green-400", val: reportResult.weeklyPlan.wednesday },
+                        { day: "พฤหัสฯ", color: "text-orange-400", val: reportResult.weeklyPlan.thursday },
+                        { day: "ศุกร์", color: "text-blue-400", val: reportResult.weeklyPlan.friday },
+                        { day: "เสาร์", color: "text-purple-400", val: reportResult.weeklyPlan.saturday },
+                        { day: "อาทิตย์", color: "text-red-400", val: reportResult.weeklyPlan.sunday },
+                      ].map((item, i) => (
+                        <div key={i} className="bg-cosmic-900/30 border border-white/5 p-3.5 rounded-xl text-center space-y-2 flex flex-col justify-between">
+                          <span className={`text-xxs font-bold ${item.color}`}>วัน{item.day}</span>
+                          <p className="text-[10px] text-text-secondary leading-relaxed line-clamp-3 italic">
+                            {item.val || "—"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Section: Branding Strategy */}
+                {reportResult.branding && (
+                  <div className="bg-gold-500/5 border border-gold-500/20 rounded-[2rem] p-6 text-left space-y-4">
+                    <div className="flex items-center gap-3 text-gold-300">
+                      <Scroll className="w-5 h-5" />
+                      <h5 className="text-xs font-bold uppercase tracking-widest">ยุทธศาสตร์การสร้างตัวตน (Personal Branding)</h5>
+                    </div>
+                    <div className="grid sm:grid-cols-3 gap-4 text-xs text-text-secondary">
+                      <div className="bg-cosmic-950/40 p-4 rounded-xl border border-white/5">
+                        <span className="text-[10px] text-gold-500 font-bold uppercase block mb-1">Core Message</span>
+                        <p className="font-medium text-foreground">{reportResult.branding.coreMessage || "—"}</p>
+                      </div>
+                      <div className="bg-cosmic-950/40 p-4 rounded-xl border border-white/5">
+                        <span className="text-[10px] text-gold-500 font-bold uppercase block mb-1">Brand Persona</span>
+                        <p className="font-medium text-foreground">{reportResult.branding.persona || "—"}</p>
+                      </div>
+                      <div className="bg-cosmic-950/40 p-4 rounded-xl border border-white/5">
+                        <span className="text-[10px] text-gold-500 font-bold uppercase block mb-1">Unique Value</span>
+                        <p className="font-medium text-foreground">{reportResult.branding.uniqueValue || "—"}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Premium Exclusive Sections */}
                 {isPremium ? (
@@ -407,14 +581,14 @@ export default function DashboardPage() {
                         { title: "Adaptive Life Script (ฉากทัศน์แห่งโชคชะตา)", content: reportResult.adaptiveLifeScript, icon: <Map className="w-5 h-5" /> },
                         { title: "Imperial Prosperity Map (แผนที่ความมั่งคั่งจักรพรรดิ)", content: reportResult.imperialProsperityMap, icon: <ShieldCheck className="w-5 h-5" /> }
                       ].map((item, i) => (
-                        <div key={i} className="bg-gold-500/5 border border-gold-500/20 rounded-2xl p-8 relative overflow-hidden group">
+                        <div key={i} className="bg-gold-500/5 border border-gold-500/20 rounded-2xl p-8 relative overflow-hidden group text-left">
                           <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                             {item.icon}
                           </div>
                           <h5 className="text-sm font-serif font-bold text-gold-300 mb-4 flex items-center gap-2">
                             {item.icon} {item.title}
                           </h5>
-                          <p className="text-xs text-text-secondary leading-relaxed text-left">
+                          <p className="text-xs text-text-secondary leading-relaxed">
                             {item.content}
                           </p>
                         </div>
@@ -449,6 +623,26 @@ export default function DashboardPage() {
           </div>
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-hora border-t border-white/10 bg-cosmic-950/85 backdrop-blur-lg flex items-center justify-around py-3 px-2 shadow-[0_-10px_20px_rgba(0,0,0,0.8)] pb-safe">
+        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-gold-500">
+          <Compass className="w-4 h-4 text-gold-500" />
+          <span className="text-[9px] font-bold tracking-wider">ภาพรวมดวง</span>
+        </Link>
+        <Link href="/dashboard/planner" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
+          <Calendar className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+          <span className="text-[9px] font-medium tracking-wider">Planner</span>
+        </Link>
+        <Link href="/dashboard/coach" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
+          <Sparkles className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+          <span className="text-[9px] font-medium tracking-wider">AI Coach</span>
+        </Link>
+        <Link href="/dashboard/report" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
+          <Download className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+          <span className="text-[9px] font-medium tracking-wider">Reports</span>
+        </Link>
+      </div>
     </div>
   );
 }

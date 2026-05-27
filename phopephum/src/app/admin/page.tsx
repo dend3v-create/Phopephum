@@ -266,38 +266,28 @@ export default function AdminPage() {
         .update({ is_enabled: !currentStatus })
         .eq("id", featureId);
 
-      if (error) throw error;
-    } catch (err: any) {
-      alert("ไม่สามารถปรับการแสดงผลได้: " + err.message);
-      // คืนค่าเดิมหากผิดพลาด
+      if (error) {
+        // Revert on error
+        setFeatures(
+          features.map((f) => (f.id === featureId ? { ...f, is_enabled: currentStatus } : f))
+        );
+      }
+    } catch {
       setFeatures(
         features.map((f) => (f.id === featureId ? { ...f, is_enabled: currentStatus } : f))
       );
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-hora-dark text-hora-text flex items-center justify-center font-sans">
-        <div className="text-center space-y-4">
-          <div className="w-10 h-10 border-4 border-hora-gold border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-hora-text-muted">กำลังตรวจสอบสิทธิ์ผู้ดูแลระบบ...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAdmin) return null;
-
   return (
-    <div className="min-h-screen bg-hora-dark text-hora-text font-sans pb-20 selection:bg-hora-gold selection:text-hora-dark">
+    <div className="min-h-screen bg-hora-dark text-hora-text font-sans pb-20 relative">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(201,169,110,0.08),transparent_60%)] pointer-events-none" />
 
       {/* Header */}
-      <header className="sticky top-0 z-40 glass-hora border-b border-hora-dark-border">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl font-serif font-bold text-hora-gold tracking-wide">Phopephum</span>
+      <header className="sticky top-0 z-40 glass-hora border-b border-hora-dark-border bg-hora-dark/40 backdrop-blur-2xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-auto min-h-[5rem] py-3 sm:py-0 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center flex-wrap gap-2">
+            <span className="text-xl sm:text-2xl font-serif font-bold text-hora-gold tracking-wide">Phopephum</span>
             <span className="text-xxs bg-red-500/10 border border-red-500/30 text-red-400 px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
               ADMIN CONTROL
             </span>
@@ -305,7 +295,7 @@ export default function AdminPage() {
 
           <Link
             href="/dashboard"
-            className="text-xs hover:text-hora-gold text-hora-text-muted/80 flex items-center gap-1.5 transition-colors cursor-pointer border border-hora-dark-border/60 rounded-lg px-3 py-1.5 glass-hora"
+            className="text-xs hover:text-hora-gold text-hora-text-muted/80 flex items-center gap-1.5 transition-colors cursor-pointer border border-hora-dark-border/60 rounded-lg px-3 py-1.5 glass-hora w-fit"
           >
             <ArrowLeft className="w-3.5 h-3.5" /> กลับหน้าแดชบอร์ด
           </Link>
@@ -313,17 +303,17 @@ export default function AdminPage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-6 pt-10 relative z-10 space-y-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 relative z-10 space-y-8">
 
         {/* ─── User Management Panel ─────────────────────────────── */}
         <div className="glass-hora rounded-2xl border border-hora-gold/30 overflow-hidden">
-          <div className="px-8 py-5 border-b border-hora-dark-border/60 flex items-center justify-between">
+          <div className="px-6 sm:px-8 py-5 border-b border-hora-dark-border/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-hora-gold/10 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-hora-gold/10 flex items-center justify-center flex-shrink-0">
                 <Users className="w-4 h-4 text-hora-gold" />
               </div>
-              <div>
-                <h3 className="text-lg font-serif font-semibold text-hora-gold-light">
+              <div className="text-left">
+                <h3 className="text-base sm:text-lg font-serif font-semibold text-hora-gold-light">
                   👥 จัดการสมาชิก Beta Testers
                 </h3>
                 <p className="text-xxs text-hora-text-muted">
@@ -334,7 +324,7 @@ export default function AdminPage() {
             <button
               onClick={loadMembers}
               disabled={membersLoading}
-              className="flex items-center gap-2 text-xs text-hora-text-muted hover:text-hora-gold border border-hora-dark-border/40 rounded-lg px-3 py-2 transition-colors disabled:opacity-50"
+              className="flex items-center justify-center gap-2 text-xs text-hora-text-muted hover:text-hora-gold border border-hora-dark-border/40 rounded-lg px-3 py-2 transition-colors disabled:opacity-50 w-full sm:w-auto"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${membersLoading ? 'animate-spin' : ''}`} />
               รีเฟรช
@@ -342,7 +332,7 @@ export default function AdminPage() {
           </div>
 
           {memberMsg && (
-            <div className={`mx-8 mt-4 text-xs px-4 py-2.5 rounded-lg ${
+            <div className={`mx-6 sm:mx-8 mt-4 text-xs px-4 py-2.5 rounded-lg text-left ${
               memberMsg.startsWith('✅') || memberMsg.startsWith('📲') 
                 ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
                 : 'bg-red-500/10 text-red-400 border border-red-500/20'
@@ -351,7 +341,96 @@ export default function AdminPage() {
             </div>
           )}
 
-          <div className="overflow-x-auto">
+          {/* Mobile View: Cards Layout */}
+          <div className="block sm:hidden divide-y divide-hora-dark-border/20">
+            {membersLoading ? (
+              <div className="text-center py-12 text-hora-text-muted text-xs">
+                <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-hora-gold" />
+                กำลังโหลดรายชื่อสมาชิก...
+              </div>
+            ) : members.length === 0 ? (
+              <div className="text-center py-12">
+                <Info className="w-8 h-8 text-hora-text-muted mx-auto mb-2" />
+                <p className="text-xs text-hora-text-muted">ยังไม่มีสมาชิกในระบบ</p>
+              </div>
+            ) : (
+              members.map((m) => (
+                <div key={m.id} className="p-4 space-y-3 bg-[#071329]/10 text-left">
+                  <div className="flex justify-between items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-hora-text text-sm truncate">{m.full_name}</p>
+                      <p className="text-xxs text-hora-text-muted truncate">{m.email}</p>
+                    </div>
+                    <span className={`text-xxs px-2 py-0.5 rounded-full border font-bold uppercase tracking-wide flex-shrink-0 ${
+                      m.plan === 'premium' ? 'bg-hora-gold/15 border-hora-gold/40 text-hora-gold' :
+                      m.plan === 'pro' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' :
+                      'bg-gray-500/10 border-gray-500/30 text-gray-400'
+                    }`}>
+                      {m.plan === 'premium' ? '👑 Premium' : m.plan === 'pro' ? '⭐ Pro' : '🔓 Free'}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-hora-text-muted">วันเกิด:</span>
+                    <span className="text-hora-text font-medium">
+                      {m.birth_date ? new Date(m.birth_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
+                      {m.birth_time && ` ${m.birth_time.slice(0,5)} น.`}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center text-xs">
+                    <span className="text-hora-text-muted">สถานะ:</span>
+                    {m.is_approved ? (
+                      <span className="text-green-400 flex items-center gap-1"><ShieldCheck className="w-3.5 h-3.5" /> อนุมัติแล้ว</span>
+                    ) : (
+                      <span className="text-yellow-400 flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> รอการอนุมัติ</span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap items-center justify-end gap-2 pt-2.5 border-t border-hora-dark-border/10">
+                    {!m.is_approved ? (
+                      <>
+                        <button
+                          onClick={() => handleApprove(m.id, 'approve', 'premium')}
+                          disabled={approveLoading === m.id}
+                          className="flex items-center gap-1 text-[10px] bg-hora-gold/15 hover:bg-hora-gold/25 border border-hora-gold/40 text-hora-gold px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50 font-semibold cursor-pointer"
+                        >
+                          <Crown className="w-3 h-3" />
+                          {approveLoading === m.id ? 'อนุมัติ...' : 'อนุมัติ Premium'}
+                        </button>
+                        <button
+                          onClick={() => handleResendLine(m)}
+                          className="flex items-center gap-1 text-[10px] bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 px-2.5 py-1.5 rounded-lg transition-all font-semibold cursor-pointer"
+                        >
+                          <Send className="w-3 h-3" /> Line
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleApprove(m.id, 'reject')}
+                          disabled={approveLoading === m.id}
+                          className="flex items-center gap-1 text-[10px] bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50 font-semibold cursor-pointer"
+                        >
+                          {approveLoading === m.id ? 'ระงับ...' : '🚫 ระงับสิทธิ์'}
+                        </button>
+                        <button
+                          onClick={() => handleApprove(m.id, 'approve', 'premium')}
+                          disabled={approveLoading === m.id}
+                          className="flex items-center gap-1 text-[10px] bg-hora-gold/15 hover:bg-hora-gold/25 border border-hora-gold/40 text-hora-gold px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50 font-semibold cursor-pointer"
+                        >
+                          <Crown className="w-3 h-3" /> อัปสิทธิ์
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop View: Table Layout */}
+          <div className="hidden sm:block overflow-x-auto">
             <table className="w-full text-sm font-sans">
               <thead>
                 <tr className="border-b border-hora-dark-border/40">
@@ -380,16 +459,16 @@ export default function AdminPage() {
                 ) : members.map((m) => (
                   <tr key={m.id} className="border-b border-hora-dark-border/20 hover:bg-hora-gold/3 transition-colors">
                     <td className="px-8 py-4">
-                      <div>
+                      <div className="text-left">
                         <p className="font-semibold text-hora-text text-sm">{m.full_name}</p>
                         <p className="text-xxs text-hora-text-muted">{m.email}</p>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-xs text-hora-text-muted">
+                    <td className="px-4 py-4 text-xs text-hora-text-muted text-left">
                       {m.birth_date ? new Date(m.birth_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
                       {m.birth_time && <span className="block">{m.birth_time.slice(0,5)} น.</span>}
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-4 text-left">
                       <span className={`text-xxs px-2 py-1 rounded-full border font-bold uppercase tracking-wide ${
                         m.plan === 'premium' ? 'bg-hora-gold/15 border-hora-gold/40 text-hora-gold' :
                         m.plan === 'pro' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' :
@@ -403,7 +482,7 @@ export default function AdminPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-4 py-4">
+                    <td className="px-4 py-4 text-left">
                       {m.is_approved ? (
                         <div className="flex items-center gap-1.5 text-green-400">
                           <ShieldCheck className="w-4 h-4" />

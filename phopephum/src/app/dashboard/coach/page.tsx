@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase";
 import { calculateHora, getCurrentHora, PLANETS } from "@/engine/phopephum-calculator";
 import { 
   ArrowLeft, Sparkles, Send, Bot, User, Zap, MessageSquare, 
-  HelpCircle, ShieldCheck, Heart, Award, Moon, Sun, Compass
+  HelpCircle, ShieldCheck, Heart, Award, Moon, Sun, Compass, Calendar, Download
 } from "lucide-react";
 import Link from "next/link";
 
@@ -58,10 +58,11 @@ export default function CoachPage() {
           setMessages([
             {
               role: "assistant",
-              content: `สวัสดีครับคุณ ${prof.full_name} 🪐 ผมคือ **Living Wisdom AI Coach** 
-ยินดีที่ได้ร่วมทางในกระแสแห่งปัญญาและดวงดาวกับคุณในวันนี้
+              content: `สวัสดีครับคุณ ${prof.full_name} ยินดีที่ได้พบกันและร่วมทางในวันนี้นะครับ
 
-ขณะนี้พวกเราคุยกันภายใต้ยามจรที่สำคัญ หากคุณต้องการปรึกษาทิศทาง **การงาน/การเงิน, ความรักความสัมพันธ์ หรือเคล็ดลับการใช้ยามมงคลในการบรรลุความสำเร็จ** สามารถพิมพ์ถามผม หรือกดปุ่มคำสั่งด่วนด้านล่างได้ทันทีเลยครับ ✨`
+ผมคือเพื่อนคู่คิดและโค้ชส่วนตัวของคุณในเรื่องการใช้ชีวิต จิตวิทยาเชิงบวก และจังหวะเวลามงคล (Living Wisdom AI Coach) ครับ
+
+ในห้วงยามอัฐกาลจรที่หมุนเวียนอยู่ในเวลานี้ หากคุณมีเรื่องไม่สบายใจ ต้องการการแนะแนวทาง หรือร่วมเจาะลึกทางออกในมิติ "การงาน อาชีพ ธุรกิจ การเงินความมั่งคั่ง หรือความรักความสัมพันธ์" สามารถพิมพ์ข้อความปรึกษาพูดคุยกับผมได้ทันที หรือเลือกกดปุ่มประเด็นด่วนด้านล่างนี้ได้เลยนะครับ ผมพร้อมอยู่เคียงข้างคอยสนับสนุนคุณเสมอครับ`
             }
           ]);
         }
@@ -288,12 +289,32 @@ export default function CoachPage() {
             </button>
           </div>
 
-          <div className="flex items-center justify-center gap-2 text-xxs text-text-secondary/40 font-bold uppercase tracking-[0.2em]">
+          <div className="flex items-center justify-center gap-2 text-xxs text-text-secondary/40 font-bold uppercase tracking-[0.2em] pb-16 sm:pb-0">
             <ShieldCheck className="w-3.5 h-3.5 text-gold-500/50" />
             <span>Secured by Supabase RLS · AI Wisdom OS</span>
           </div>
         </div>
       </main>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-hora border-t border-white/10 bg-cosmic-950/85 backdrop-blur-lg flex items-center justify-around py-3 px-2 shadow-[0_-10px_20px_rgba(0,0,0,0.8)] pb-safe">
+        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
+          <Compass className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+          <span className="text-[9px] font-medium tracking-wider">ภาพรวมดวง</span>
+        </Link>
+        <Link href="/dashboard/planner" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
+          <Calendar className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+          <span className="text-[9px] font-medium tracking-wider">Planner</span>
+        </Link>
+        <Link href="/dashboard/coach" className="flex flex-col items-center gap-1 text-gold-500">
+          <Sparkles className="w-4 h-4 text-gold-500" />
+          <span className="text-[9px] font-bold tracking-wider">AI Coach</span>
+        </Link>
+        <Link href="/dashboard/report" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
+          <Download className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+          <span className="text-[9px] font-medium tracking-wider">Reports</span>
+        </Link>
+      </div>
     </div>
   );
 }

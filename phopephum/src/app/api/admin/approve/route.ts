@@ -22,6 +22,13 @@ export async function GET(request: Request) {
     const supabase = createAdminClient()
 
     if (action === 'approve') {
+      // ยืนยันอีเมลผู้ใช้ในระบบ Auth เพื่อให้สามารถเข้าสู่ระบบได้ทันทีหลังจากได้รับการอนุมัติ
+      try {
+        await supabase.auth.admin.updateUserById(userId, { email_confirm: true })
+      } catch (authError) {
+        console.warn('[/api/admin/approve] Failed to auto-confirm email, continuing approval:', authError)
+      }
+
       // อัปสิทธิ์เป็น premium + ปลดล็อก AI tokens
       const tokenLimit = plan === 'premium' ? 999999 : (plan === 'pro' ? 500 : 5)
       
@@ -111,6 +118,13 @@ export async function POST(request: Request) {
     const supabase = createAdminClient()
 
     if (action === 'approve') {
+      // ยืนยันอีเมลผู้ใช้ในระบบ Auth เพื่อให้สามารถเข้าสู่ระบบได้ทันทีหลังจากได้รับการอนุมัติ
+      try {
+        await supabase.auth.admin.updateUserById(userId, { email_confirm: true })
+      } catch (authError) {
+        console.warn('[/api/admin/approve] POST Failed to auto-confirm email, continuing approval:', authError)
+      }
+
       const tokenLimit = plan === 'premium' ? 999999 : (plan === 'pro' ? 500 : 5)
       const { data, error } = await supabase
         .from('profiles')
