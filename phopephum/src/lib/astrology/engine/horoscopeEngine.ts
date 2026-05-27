@@ -16,6 +16,8 @@ import { calculateBase, calculateMasterBase, calculateYearBase } from '../calcul
 import { calculatePower, getPowerMeaning } from '../calculators/calculatePower'
 import { calculateHouse, getHouseMeaning } from '../calculators/calculateHouse'
 import { calculateTransit, calculateVayaChorn, calculateTaksa } from '../calculators/calculateTransit'
+import { calculateAtthakarn } from '../calculators/calculateAtthakarn'
+import { calculateNavamsa } from '../calculators/calculateNavamsa'
 import { applyRules } from '../rules/sevenBaseRules'
 import { HoroscopeInput, HoroscopeData, HoroscopeResult } from '../types/horoscope'
 
@@ -46,6 +48,12 @@ export async function horoscopeEngine(
   const taksa      = calculateTaksa(dayOfWeek, base)
   const zodiacYear = ZODIAC_YEARS[year % 12]
 
+  // ─── อัฏฐกาล + นวางค์ ────────────────────────────────────────────────────
+  const atthakarn = input.birthTime
+    ? calculateAtthakarn(input.birthDate, input.birthTime)
+    : undefined
+  const navamsa = calculateNavamsa(day, month, year)
+
   const data: HoroscopeData = {
     base,
     power,
@@ -56,6 +64,8 @@ export async function horoscopeEngine(
     zodiacYear,
     vayaChorn,
     taksa,
+    atthakarn,
+    navamsa,
   }
 
   // ─── Rule Engine ───────────────────────────────────────────────────────

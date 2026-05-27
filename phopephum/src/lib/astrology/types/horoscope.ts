@@ -3,6 +3,11 @@
  * Type definitions for Astrology AI Engine
  */
 
+import type { AtthakarnResult } from '../calculators/calculateAtthakarn'
+import type { NavamsaResult } from '../calculators/calculateNavamsa'
+
+export type { AtthakarnResult, NavamsaResult }
+
 export interface HoroscopeInput {
   name?: string
   birthDate: string   // "YYYY-MM-DD"
@@ -19,6 +24,8 @@ export interface HoroscopeData {
   zodiacYear: string    // ปีนักษัตร
   vayaChorn: string     // วัยจรปัจจุบัน
   taksa: TaksaResult    // ทักษา
+  atthakarn?: AtthakarnResult  // ยามกำเนิด (ต้องมีเวลาเกิด)
+  navamsa: NavamsaResult       // นวางค์ 9 ฐานลึก
 }
 
 export interface TaksaResult {

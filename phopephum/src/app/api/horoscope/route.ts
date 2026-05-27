@@ -48,15 +48,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       data: {
-        base:      data.base,
-        power:     data.power,
-        house:     data.house,
-        transit:   data.transit,
-        vayaChorn: data.vayaChorn,
-        taksa:     data.taksa,
+        base:       data.base,
+        power:      data.power,
+        house:      data.house,
+        transit:    data.transit,
+        vayaChorn:  data.vayaChorn,
+        taksa:      data.taksa,
         zodiacYear: data.zodiacYear,
-        dayName:   data.dayName,
-        rules:     rules.slice(0, 5), // top 5 rules
+        dayName:    data.dayName,
+        atthakarn:  data.atthakarn,
+        navamsa:    data.navamsa,
+        rules:      rules.slice(0, 5), // top 5 rules
       },
       prediction,
     })

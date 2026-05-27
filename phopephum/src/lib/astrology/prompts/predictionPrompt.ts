@@ -15,6 +15,13 @@ export function buildPredictionPrompt(
     .map(r => `• [${r.category}] ${r.insight}`)
     .join('\n')
 
+  const atthakarnLine = data.atthakarn
+    ? `- ยามกำเนิด (อัฏฐกาล): ยาม${data.atthakarn.horaPlanet} ${data.atthakarn.horaSymbol} — ${data.atthakarn.meaning}`
+    : ''
+
+  const navamsaLine = `- นวางค์ลึก: ตัวตน=${data.navamsa.dayNavamsa.planet} | จิตใต้สำนึก=${data.navamsa.monthNavamsa.planet} | พลังสะสม=${data.navamsa.yearNavamsa.planet} | ผลลัพธ์=${data.navamsa.masterNavamsa.planet}
+- ${data.navamsa.deepInsight}`
+
   return `
 ผู้ขอรับการพยากรณ์: ${name ?? 'ผู้ใช้งาน'}
 
@@ -26,6 +33,8 @@ export function buildPredictionPrompt(
 - จังหวะชีวิตเดือนนี้: ${data.transit}
 - วัยจร: ${data.vayaChorn}
 - ทักษา: ${data.taksa.meaning} (${data.taksa.isAuspicious ? 'มงคล' : 'ต้องระวัง'})
+${atthakarnLine}
+${navamsaLine}
 
 Rule Engine ประมวลผลแล้ว:
 ${ruleInsights}
