@@ -60,9 +60,9 @@
   --color-hora-text-muted: var(--hora-text-muted);
   --color-text-secondary: var(--text-secondary);
   
-  /* หัวข้อเด่น: Prompt | เนื้อหา/Body: Sarabun */
+  /* หัวข้อเด่น: English ใช้ Cinzel, Thai ใช้ Prompt | เนื้อหา/Body: English ใช้ระบบ/Inter, Thai ใช้ Sarabun */
   --font-sans: 'Sarabun', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Prompt', 'Cinzel', serif;
+  --font-serif: 'Cinzel', 'Prompt', serif;
   --font-heading: 'Prompt', sans-serif;
   --font-body: 'Sarabun', sans-serif;
   --font-mono: 'Fira Code', 'Consolas', monospace;

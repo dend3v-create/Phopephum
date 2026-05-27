@@ -22,11 +22,25 @@ export async function GET(request: Request) {
     const supabase = createAdminClient()
 
     if (action === 'approve') {
-      // ยืนยันอีเมลผู้ใช้ในระบบ Auth เพื่อให้สามารถเข้าสู่ระบบได้ทันทีหลังจากได้รับการอนุมัติ
+      // ยืนยันอีเมลผู้ใช้ผ่าน Supabase Auth REST API (reliable in edge runtime)
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
       try {
-        await supabase.auth.admin.updateUserById(userId, { email_confirm: true })
+        const confirmRes = await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'apikey': serviceKey,
+            'Authorization': `Bearer ${serviceKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email_confirm: true }),
+        })
+        if (!confirmRes.ok) {
+          const errBody = await confirmRes.text()
+          console.warn('[/api/admin/approve] Auth confirm failed:', confirmRes.status, errBody)
+        }
       } catch (authError) {
-        console.warn('[/api/admin/approve] Failed to auto-confirm email, continuing approval:', authError)
+        console.warn('[/api/admin/approve] Failed to auto-confirm email:', authError)
       }
 
       // อัปสิทธิ์เป็น premium + ปลดล็อก AI tokens
@@ -118,11 +132,25 @@ export async function POST(request: Request) {
     const supabase = createAdminClient()
 
     if (action === 'approve') {
-      // ยืนยันอีเมลผู้ใช้ในระบบ Auth เพื่อให้สามารถเข้าสู่ระบบได้ทันทีหลังจากได้รับการอนุมัติ
+      // ยืนยันอีเมลผู้ใช้ผ่าน Supabase Auth REST API (reliable in edge runtime)
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
+      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
       try {
-        await supabase.auth.admin.updateUserById(userId, { email_confirm: true })
+        const confirmRes = await fetch(`${supabaseUrl}/auth/v1/admin/users/${userId}`, {
+          method: 'PUT',
+          headers: {
+            'apikey': serviceKey,
+            'Authorization': `Bearer ${serviceKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email_confirm: true }),
+        })
+        if (!confirmRes.ok) {
+          const errBody = await confirmRes.text()
+          console.warn('[/api/admin/approve] POST Auth confirm failed:', confirmRes.status, errBody)
+        }
       } catch (authError) {
-        console.warn('[/api/admin/approve] POST Failed to auto-confirm email, continuing approval:', authError)
+        console.warn('[/api/admin/approve] POST Failed to auto-confirm email:', authError)
       }
 
       const tokenLimit = plan === 'premium' ? 999999 : (plan === 'pro' ? 500 : 5)

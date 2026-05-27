@@ -44,6 +44,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl)
   }
 
+  // ตรวจสอบ is_approved — ผู้ใช้ที่ยังไม่ผ่านการอนุมัติให้ไปหน้า /pending
+  if (isProtected && user && !pathname.startsWith('/pending')) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('is_approved')
+      .eq('id', user.id)
+      .single()
+
+    if (profile && profile.is_approved === false) {
+      return NextResponse.redirect(new URL('/pending', request.url))
+    }
+  }
+
   const isAuthPage = AUTH_PATHS.some(p => pathname.startsWith(p))
   if (isAuthPage && user) {
     return NextResponse.redirect(new URL('/dashboard', request.url))

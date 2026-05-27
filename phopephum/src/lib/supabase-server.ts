@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 
 // Server client (อ่าน/เขียน ด้วย user session)
@@ -30,7 +31,6 @@ export async function createServerSupabaseClient() {
 
 // Admin client (service_role — ใช้เฉพาะใน server-side route handlers)
 export function createAdminClient() {
-  const { createClient } = require('@supabase/supabase-js')
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder-project.supabase.co'
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder-service-key'
   return createClient(
