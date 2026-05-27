@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 ข้อมูลของผู้รับการโค้ช:
 - ชื่อ: คุณ${profile.full_name}
 - วันเกิด: ${profile.birth_date} (เวลา: ${profile.birth_time || 'ไม่ระบุ'})
-- ดวงชะตาเลข 7 ตัว 9 ฐาน: ${JSON.stringify(sevenBaseData.seven_base)}
+- ดวงชะตาเลข 7 ตัว 9 ฐาน: ${JSON.stringify(sevenBaseData.chart)}
 - ฐานพลังงานจรเด่น: ${JSON.stringify(sevenBaseData.transit)}
 - ยามอัฐกาลปัจจุบัน: ยามที่ ${currentHoraData.currentHora?.majorIndex} ครองโดยดาว ${currentPlanet.nameThai} (${currentPlanet.symbol}) - ${currentPlanet.description}
 
