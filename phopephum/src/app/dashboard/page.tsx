@@ -196,13 +196,13 @@ export default function DashboardPage() {
 
       {/* Header Bar */}
       <header className="sticky top-0 z-40 glass-hora border-b border-hora-dark-border">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
-            <div className="flex items-center gap-3">
-              <Link href="/" className="text-2xl font-serif font-bold text-hora-gold tracking-wide">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <Link href="/" className="text-xl sm:text-2xl font-serif font-bold text-hora-gold tracking-wide">
                 Phopephum
               </Link>
-              <span className="text-xxs bg-hora-gold/10 border border-hora-gold/30 text-hora-gold px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
+              <span className="hidden sm:inline text-xxs bg-hora-gold/10 border border-hora-gold/30 text-hora-gold px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
                 {profile?.plan || "FREE"} MEMBER
               </span>
             </div>
@@ -244,7 +244,7 @@ export default function DashboardPage() {
       </header>
 
       {/* Main Grid Content */}
-      <main className="max-w-7xl mx-auto px-6 pt-10 grid md:grid-cols-3 gap-8 relative z-10">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 grid md:grid-cols-3 gap-6 sm:gap-8 relative z-10">
         
         {/* Left Column: User Profile & Subscription status */}
         <div className="space-y-8 md:col-span-1">

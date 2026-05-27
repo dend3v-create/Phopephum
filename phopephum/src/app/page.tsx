@@ -1,14 +1,9 @@
-import { calculateHora } from "@/engine/phopephum-calculator";
+import LiveHoraWidget from "@/components/LiveHoraWidget";
 import { Sparkles, Calendar, Zap, CreditCard, ArrowRight, ShieldCheck } from "lucide-react";
 
 export const revalidate = 60; // อัปเดตข้อมูลทุก 60 วินาทีบน Server
 
 export default function Home() {
-  // คำนวณยามอัฐกาล ณ วินาทีปัจจุบัน
-  const now = new Date();
-  const horaResult = calculateHora({ date: now, currentTime: now });
-  const current = horaResult.currentHora;
-
   return (
     <div className="min-h-screen bg-hora-dark text-hora-text font-sans antialiased selection:bg-hora-gold selection:text-hora-dark">
       {/* Background Subtle Gradient Glow */}
@@ -16,27 +11,24 @@ export default function Home() {
 
       {/* Header / Navigation Bar */}
       <header className="sticky top-0 z-50 glass-hora border-b border-hora-dark-border">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-3xl font-serif font-semibold text-hora-gold tracking-wide">Phopephum</span>
-            <span className="text-xs bg-hora-gold/10 border border-hora-gold/30 text-hora-gold px-2 py-0.5 rounded-full font-sans">MVP Phase 1</span>
-          </div>
-          
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+          <span className="text-2xl sm:text-3xl font-serif font-semibold text-hora-gold tracking-wide">Phopephum</span>
+
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-hora-text/80">
             <a href="#live-calc" className="hover:text-hora-gold transition-colors">ยามสดปัจจุบัน</a>
             <a href="#features" className="hover:text-hora-gold transition-colors">คุณสมบัติ</a>
             <a href="#pricing" className="hover:text-hora-gold transition-colors">แพ็กเกจ</a>
           </nav>
 
-          <div className="flex items-center gap-4">
-            <a href="/login" className="text-sm font-medium hover:text-hora-gold transition-colors">เข้าสู่ระบบ</a>
-            <a href="/register" className="btn-hora text-sm shadow-md py-2 px-4 rounded-lg">เริ่มต้นใช้งาน</a>
+          <div className="flex items-center gap-3">
+            <a href="/login" className="hidden sm:inline text-sm font-medium hover:text-hora-gold transition-colors">เข้าสู่ระบบ</a>
+            <a href="/register" className="btn-hora text-xs sm:text-sm shadow-md py-2 px-3 sm:px-4 rounded-lg whitespace-nowrap">เริ่มต้นใช้งาน</a>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-24 pb-20 px-6 max-w-7xl mx-auto text-center">
+      <section className="relative pt-20 sm:pt-24 pb-14 sm:pb-20 px-4 sm:px-6 max-w-7xl mx-auto text-center">
         <div className="inline-flex items-center gap-2 bg-hora-gold/10 border border-hora-gold/20 text-hora-gold px-4 py-1.5 rounded-full text-xs font-semibold mb-8 uppercase tracking-wider">
           <Sparkles className="w-3.5 h-3.5" /> พื้นที่ทางจิตวิญญาณแห่งการจัดการระดับพลังงาน
         </div>
@@ -62,70 +54,12 @@ export default function Home() {
           </a>
         </div>
 
-        {/* Live Widget - ยามอัฐกาลทำงานสดจริง */}
-        <div id="live-calc" className="max-w-4xl mx-auto glass-hora rounded-2xl p-8 border border-hora-dark-border relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-hora-gold/5 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="text-left space-y-3">
-              <span className="text-xs text-hora-gold font-semibold uppercase tracking-widest">Live Widget</span>
-              <h3 className="text-2xl font-serif font-semibold text-hora-gold-light">ยามอัฐกาลประจำวัน{horaResult.dayNameThai}</h3>
-              <p className="text-sm text-hora-text-muted font-sans">
-                อัปเดต ณ เวลาปัจจุบัน: {now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
-              </p>
-              
-              {current && (
-                <div className="space-y-2 pt-2">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-hora-gold animate-pulse" />
-                    <span className="text-base text-hora-text font-medium">
-                      ยามใหญ่ที่ {current.majorIndex} ({current.majorSlot.startTime} - {current.majorSlot.endTime} น.)
-                    </span>
-                  </div>
-                  <p className="text-sm text-hora-text-muted">
-                    ดาวผู้ปกครองยามย่อยนี้คือ <strong className="text-hora-gold">{current.subSlot.planet.nameThai} ({current.subSlot.planet.symbol})</strong> — {current.subSlot.planet.description}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Circular Orbit Display Simulation */}
-            <div className="relative w-44 h-44 flex items-center justify-center rounded-full border-2 border-hora-gold/20 bg-hora-dark-card/50 shadow-inner">
-              <div className="absolute inset-2 rounded-full border border-dashed border-hora-gold/10" />
-              <div className="text-center">
-                <span className="text-5xl block mb-1 filter drop-shadow-[0_0_10px_rgba(201,169,110,0.6)]" style={{ color: current?.subSlot.planet.color }}>
-                  {current?.subSlot.planet.symbol}
-                </span>
-                <span className="text-sm font-semibold text-hora-gold-light">{current?.subSlot.planet.nameThai}</span>
-                <span className="text-xxs block text-hora-text-muted uppercase tracking-widest">ยามปัจจุบัน</span>
-              </div>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8 pt-6 border-t border-hora-dark-border/40 text-left">
-            <div>
-              <span className="text-xs text-hora-text-muted block">วันมงคลเด่น</span>
-              <span className="text-sm font-semibold text-hora-gold-light">วัน{horaResult.dayNameThai}</span>
-            </div>
-            <div>
-              <span className="text-xs text-hora-text-muted block">ดาวเจ้าของวัน</span>
-              <span className="text-sm font-semibold text-hora-gold-light">{horaResult.dayRuler.nameThai}</span>
-            </div>
-            <div>
-              <span className="text-xs text-hora-text-muted block">ช่วงเวลา</span>
-              <span className="text-sm font-semibold text-hora-gold-light">{current?.subSlot.period === "day" ? "กลางวัน" : "กลางคืน"}</span>
-            </div>
-            <div>
-              <span className="text-xs text-hora-text-muted block">ยามย่อยถัดไป</span>
-              <span className="text-sm font-semibold text-hora-gold-light">
-                {current && current.subIndex < 8 
-                  ? current.majorSlot.subSlots[current.subIndex].planet.nameThai 
-                  : "ขึ้นยามใหญ่ถัดไป"}
-              </span>
-            </div>
-          </div>
+        {/* Live Widget - ยามอัฐกาลทำงานสดจริง (Client-side hydrated) */}
+        <div id="live-calc">
+          <LiveHoraWidget />
         </div>
       </section>
+
 
       {/* Features Section */}
       <section id="features" className="py-24 bg-hora-dark-card/40 border-t border-b border-hora-dark-border/30 relative">

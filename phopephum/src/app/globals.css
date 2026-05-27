@@ -31,21 +31,25 @@
   
   --font-sans: 'Sarabun', system-ui, -apple-system, sans-serif;
   --font-serif: 'Prompt', system-ui, -apple-system, sans-serif;
+
+  /* Extra small text size for mobile labels */
+  --text-xxs: 0.625rem;
+  --text-xxs--line-height: 1rem;
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
  * Keyframes — พลังงาน แรงสั่นสะเทือน และการพริ้วไหวอย่างไร้รอยต่อ
  * ───────────────────────────────────────────────────────────────────────────── */
 
-/* การสั่นไหวระยิบระยับของดวงดาวแบบนุ่มนวลช้าๆ (นิ่ง สงบ สบายใจ) */
+/* การสั่นไหวระยิบระยับของดวงดาวแบบนุ่มนวลช้าๆ — ลดช่วง opacity เพื่อไม่ให้กระพริบแสบตา */
 @keyframes twinkle-slow {
-  0%, 100% { opacity: 0.15; transform: scale(0.96); filter: drop-shadow(0 0 2px rgba(224, 195, 110, 0.1)); }
-  50% { opacity: 0.85; transform: scale(1.04); filter: drop-shadow(0 0 8px rgba(224, 195, 110, 0.45)); }
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.68; }
 }
 
 @keyframes twinkle-mid {
-  0%, 100% { opacity: 0.3; transform: scale(1); filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.1)); }
-  50% { opacity: 0.95; transform: scale(1.08); filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.6)); }
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.62; }
 }
 
 /* เนบิวลา/กลุ่มหมอกเลื่อนลอยช้ามากๆ เลียนแบบคลื่นแรงสั่นสะเทือนคลื่นน้ำ (พริ้วไหว แต่มั่นคง) */
@@ -84,13 +88,21 @@
  * Background System — เลเยอร์ประสาน รูป รส กลิ่น เสียง สัมผัส
  * ───────────────────────────────────────────────────────────────────────────── */
 
+html {
+  height: -webkit-fill-available; /* iOS Safari viewport fix */
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
   min-height: 100vh;
+  min-height: -webkit-fill-available; /* iOS Safari viewport fix */
   position: relative;
   overflow-x: hidden;
+  -webkit-text-size-adjust: 100%; /* ป้องกัน iOS ปรับขนาดตัวหนังสือเอง */
+  text-size-adjust: 100%;
+  -webkit-overflow-scrolling: touch; /* smooth scroll บน iOS */
 }
 
 /* พื้นหลังมิติห้วงจักรวาลระยิบระยับและไหลพริ้ว (Cosmic Luxury Portal) */
@@ -112,7 +124,7 @@ body {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: 
+  background-image:
     radial-gradient(2px 2px at 15% 18%, rgba(224, 195, 110, 0.6) 0%, transparent 100%),
     radial-gradient(1.5px 1.5px at 45% 65%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
     radial-gradient(2px 2px at 75% 25%, rgba(224, 195, 110, 0.7) 0%, transparent 100%),
@@ -120,22 +132,26 @@ body {
     radial-gradient(2.5px 2.5px at 30% 40%, rgba(224, 195, 110, 0.8) 0%, transparent 100%),
     radial-gradient(1px 1px at 92% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
     radial-gradient(2.2px 2.2px at 60% 88%, rgba(224, 195, 110, 0.65) 0%, transparent 100%);
-  animation: twinkle-slow 8s ease-in-out infinite;
-  opacity: 0.6;
+  animation: twinkle-slow 12s ease-in-out infinite;
+  opacity: 0.55;
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
 .bg-cosmic-portal::after {
   content: '';
   position: absolute;
   inset: 0;
-  background-image: 
+  background-image:
     radial-gradient(1px 1px at 8% 85%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
     radial-gradient(2.5px 2.5px at 55% 15%, rgba(224, 195, 110, 0.7) 0%, transparent 100%),
     radial-gradient(1.2px 1.2px at 25% 72%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
     radial-gradient(1.8px 1.8px at 80% 55%, rgba(224, 195, 110, 0.6) 0%, transparent 100%);
-  animation: twinkle-mid 5s ease-in-out infinite;
-  animation-delay: 2s;
-  opacity: 0.5;
+  animation: twinkle-mid 9s ease-in-out infinite;
+  animation-delay: 3s;
+  opacity: 0.45;
+  will-change: opacity;
+  transform: translateZ(0);
 }
 
 /* เลเยอร์เนบิวลาพลังงานพริ้วไหวสีทองครามจางๆ ( Cosmic Aura ) */
@@ -197,17 +213,23 @@ body {
  * UI Surfaces — การ์ดแก้วต้องมนต์สะกด คมชัด มั่นคง นิ่งและสงบ
  * ───────────────────────────────────────────────────────────────────────────── */
 
-/* Glassmorphism Card คมชัด นิ่งลึก มั่นคง พร้อมการสั่นสะเทือนเรืองแสงจางๆ */
+/* Glassmorphism Card — static สำหรับ mobile performance และ LINE browser fallback */
 .glass-hora {
-  background: rgba(4, 12, 28, 0.76);
+  background: rgba(4, 12, 28, 0.92); /* solid fallback สำหรับ browser ที่ไม่รองรับ backdrop-filter */
   border: 1px solid rgba(212, 194, 154, 0.18);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
   border-radius: 24px;
-  animation: card-glow-pulse 8s ease-in-out infinite;
-  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), 
-              border-color 0.4s ease, 
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(201, 169, 110, 0.04);
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+              border-color 0.4s ease,
               box-shadow 0.4s ease;
+}
+
+@supports (backdrop-filter: blur(24px)) or (-webkit-backdrop-filter: blur(24px)) {
+  .glass-hora {
+    background: rgba(4, 12, 28, 0.76);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
 }
 
 /* การตอบสนองเมื่อผู้ใช้สัมผัสสัมผัสเมาส์ Hover (พริ้วไหว ยกตัว เบาสบาย) */
@@ -300,4 +322,68 @@ body {
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Mobile & Cross-Browser Optimizations
+ * รองรับ LINE in-app browser, iOS Safari, Android Chrome, และทุก mobile browser
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+/* ลด animation burden บน mobile — nebula และ zodiac wheel หนักกว่าจำเป็น */
+@media (max-width: 768px) {
+  .cosmic-nebula-aura {
+    animation-duration: 60s;
+    filter: blur(40px); /* ลด blur ใน mobile เพื่อ performance */
+  }
+  .cosmic-zodiac-wheel {
+    width: 420px;
+    height: 420px;
+  }
+  /* ยกเลิก hover transform บน touch device — ไม่มี hover state บนมือถือ */
+  .glass-hora:hover {
+    transform: none;
+    border-color: rgba(212, 194, 154, 0.18);
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(201, 169, 110, 0.04);
+  }
+  /* ปุ่ม active state ให้ feedback ชัดบน touch */
+  .btn-hora:active {
+    transform: scale(0.97);
+    opacity: 0.9;
+  }
+  /* ป้องกัน text overflow บนหน้าจอแคบ */
+  .max-w-7xl {
+    overflow-x: hidden;
+  }
+}
+
+/* ปิด animation ทั้งหมดสำหรับผู้ใช้ที่ตั้งค่า prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  .bg-cosmic-portal::before,
+  .bg-cosmic-portal::after,
+  .cosmic-nebula-aura,
+  .cosmic-zodiac-wheel,
+  .float-element {
+    animation: none;
+  }
+}
+
+/* Safe area สำหรับ notch/Dynamic Island (iPhone X+) */
+@supports (padding: max(0px)) {
+  body {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* input/select ป้องกัน iOS auto-zoom เมื่อ focus (ต้อง font-size >= 16px) */
+@media (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  input[type="time"],
+  select,
+  textarea {
+    font-size: 16px !important; /* ป้องกัน iOS zoom เมื่อ tap input */
+  }
 }
