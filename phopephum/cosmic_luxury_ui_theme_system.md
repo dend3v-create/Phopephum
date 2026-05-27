@@ -1,303 +1,341 @@
-# Cosmic Luxury UI Theme
+# ✨ Astral Imperial Flow
 
-## Theme Concept
-A premium celestial-inspired UI system using deep midnight blues and antique gold accents. Designed for luxury astrology, spiritual brands, elegant editorial experiences, premium SaaS dashboards, and mystical modern interfaces.
+“จักรวาลแห่งสายน้ำทอง บนพื้น Midnight Blue”
 
----
+แนวทางนี้จะทำให้ [https://hora-time.pages.dev](https://hora-time.pages.dev) ดู:
+- premium มากขึ้น
+- มีมิติ
+- mystical luxury
+- cinematic
+- modern spiritual tech
+- ดูเหมือน AI Astrology Platform ระดับ global
 
-# Core Palette
-
-## Primary
-
-| Token | HEX | Usage |
-|---|---|---|
-| `--navy-900` | `#03071A` | Main background |
-| `--navy-800` | `#061831` | Surface background |
-| `--navy-700` | `#07304F` | Elevated surface |
-
-## Accent
-
-| Token | HEX | Usage |
-|---|---|---|
-| `--gold-500` | `#C0B7A5` | Primary accent |
-| `--gold-400` | `#D4C29A` | Hover state |
-| `--gold-300` | `#E0C36E` | Premium CTA |
-
-## Neutral
-
-| Token | HEX | Usage |
-|---|---|---|
-| `--slate-500` | `#424D53` | Border / divider |
-| `--gray-400` | `#797C79` | Secondary text |
-| `--white-soft` | `#F6F4EF` | Main text |
+พร้อมรองรับ:
+- Web App
+- Mobile App
+- AI SaaS
+- Dashboard
+- Subscription Platform
 
 ---
 
-# Semantic Color System
+# 🎨 แนวคิด Visual Identity ใหม่
 
-## Backgrounds
+จากภาพอ้างอิง มี “ภาษาภาพ” ชัดมาก:
 
-| Token | HEX |
-|---|---|
-| `--bg-primary` | `#03071A` |
-| `--bg-secondary` | `#061831` |
-| `--bg-elevated` | `#07304F` |
-| `--bg-card` | `rgba(6,24,49,0.72)` |
+## 1. Midnight Ocean
+น้ำเงินเข้มแบบจักรวาล
 
-## Text
+## 2. Liquid Gold
+เส้นทองไหลเหมือนพลังงานจักรวาล
 
-| Token | HEX |
-|---|---|
-| `--text-primary` | `#F6F4EF` |
-| `--text-secondary` | `#C0B7A5` |
-| `--text-muted` | `#797C79` |
+## 3. Celestial Floral
+ดอกไม้ทอง-น้ำเงินแบบ luxury oriental
 
-## Borders
+## 4. Koi Energy
+ปลา = การไหลของโชค วาสนา destiny
 
-| Token | HEX |
-|---|---|
-| `--border-soft` | `rgba(192,183,165,0.15)` |
-| `--border-strong` | `rgba(212,194,154,0.32)` |
+## 5. Layered Darkness
+พื้นหลังไม่ดำสนิท แต่มี depth หลายชั้น
 
 ---
 
-# Recommended Typography
+# 🌌 NEW MASTER PALETTE
 
-## Display / Headlines
+## Primary Cosmic
+| Token | HEX | Usage |
+|---|---|---|
+| `--cosmic-950` | `#020617` | deepest background |
+| `--cosmic-900` | `#071427` | main background |
+| `--cosmic-800` | `#0A2240` | elevated sections |
+| `--cosmic-700` | `#12355B` | cards |
+
+---
+
+## Imperial Gold
+| Token | HEX | Usage |
+|---|---|---|
+| `--gold-500` | `#C6A96B` | premium gold |
+| `--gold-400` | `#D9BC82` | hover |
+| `--gold-300` | `#F2D49B` | glow |
+| `--gold-liquid` | `#E8C46A` | flowing highlight |
+
+---
+
+## Mystic Blue
+| Token | HEX |
+|---|---|
+| `--mystic-500` | `#4B6FAE` |
+| `--mystic-400` | `#6D8FC7` |
+| `--mystic-300` | `#9AB3D9` |
+
+---
+
+## Soft Light
+| Token | HEX |
+|---|---|
+| `--text-primary` | `#F8F6F1` |
+| `--text-secondary` | `#D9CDB7` |
+| `--text-muted` | `#94A3B8` |
+
+---
+
+# 🌊 NEW GRADIENT SYSTEM
+
+## Main Cosmic Ocean
+```css
+background: linear-gradient(
+180deg,
+#020617 0%,
+#071427 45%,
+#0A2240 100%
+);
+```
+
+---
+
+## Liquid Gold Flow
+```css
+background: linear-gradient(
+135deg,
+rgba(232,196,106,0.0),
+rgba(232,196,106,0.25),
+rgba(232,196,106,0.0)
+);
+```
+
+---
+
+## Mystic Glow
+```css
+background: radial-gradient(
+circle,
+rgba(109,143,199,0.22) 0%,
+rgba(109,143,199,0) 70%
+);
+```
+
+---
+
+# ✨ VISUAL LANGUAGE ใหม่
+
+## Hero Section
+เปลี่ยนจาก:
+- dark flat background
+
+เป็น:
+- animated flowing gold particles
+- cosmic fog
+- zodiac constellation
+- layered depth
+- soft aurora movement
+
+---
+
+## Card Design
+จาก:
+- glass card ทั่วไป
+
+เป็น:
+```css
+background: rgba(10,34,64,0.58);
+backdrop-filter: blur(24px);
+border: 1px solid rgba(217,188,130,0.18);
+box-shadow:
+0 10px 60px rgba(0,0,0,0.45),
+0 0 40px rgba(232,196,106,0.08);
+```
+
+---
+
+# 🪷 Mood & Emotion
+## สิ่งที่ user ควรรู้สึก
+- mystical intelligence
+- luxury spirituality
+- premium astrology
+- calm but powerful
+- elegant destiny
+- futuristic eastern wisdom
+
+---
+
+# 🧠 UX Direction ใหม่
+## จาก “เว็บดูดวง”
+ไปเป็น:
+> AI Spiritual Operating System
+
+---
+
+# 📱 Mobile UI Direction
+
+## Bottom Navigation
+ใช้:
+- floating navigation
+- translucent blur
+- gold active state
+- animated ripple
+
+---
+
+## Dashboard
+ควรมี:
+- circular cosmic charts
+- glowing insight cards
+- AI summary panel
+- timeline energy flow
+
+---
+
+# ✨ Motion System
+
+## Animation Language
+| Motion | Style |
+|---|---|
+| Hover | soft glow |
+| Section reveal | fade + float |
+| Hero | particle flow |
+| CTA | liquid shimmer |
+| Background | slow cosmic drift |
+
+---
+
+# 🔤 Typography Upgrade
+
+## Headlines
+ใช้:
 - Cinzel
 - Cormorant Garamond
-- Playfair Display
 
-## UI / Body
-- Inter
-- Montserrat
+---
+
+## Thai UI
+ใช้:
 - IBM Plex Sans Thai
 - Prompt
 
 ---
 
-# Typography Scale
+# 🪐 Recommended Accent Strategy
 
-| Usage | Size | Weight |
-|---|---|---|
-| Hero Title | 64px | 700 |
-| H1 | 48px | 700 |
-| H2 | 36px | 600 |
-| H3 | 28px | 600 |
-| Body Large | 18px | 400 |
-| Body | 16px | 400 |
-| Small | 14px | 400 |
-| Caption | 12px | 400 |
+## 80%
+Dark Cosmic Blue
+
+## 15%
+Soft Gold
+
+## 5%
+Mystic Glow Effects
 
 ---
 
-# UI Surface Style
+# 🎯 UI Sections ที่ควรเพิ่ม
+## 1. Cosmic Time Flow
+timeline พลังงานชีวิต
 
-## Glassmorphism Card
+## 2. AI Insight Cards
+สรุปดวงแบบ AI
 
-```css
-background: rgba(6, 24, 49, 0.72);
-backdrop-filter: blur(20px);
-border: 1px solid rgba(212,194,154,0.18);
-border-radius: 24px;
-box-shadow:
-0 8px 40px rgba(0,0,0,0.45),
-0 0 40px rgba(192,183,165,0.06);
-```
+## 3. Destiny Map
+interactive zodiac wheel
 
----
+## 4. Energy Dashboard
+visualized astrology metrics
 
-# Gradient System
-
-## Main Cosmic Gradient
-
-```css
-background: linear-gradient(
-180deg,
-#03071A 0%,
-#061831 45%,
-#07304F 100%
-);
-```
-
-## Gold Aura Gradient
-
-```css
-background: radial-gradient(
-circle,
-rgba(224,195,110,0.24) 0%,
-rgba(224,195,110,0) 70%
-);
-```
+## 5. Ritual Section
+affirmation / meditation
 
 ---
 
-# Button Styles
-
-## Primary Button
-
-```css
-background: linear-gradient(
-135deg,
-#D4C29A 0%,
-#E0C36E 100%
-);
-color: #03071A;
-border-radius: 999px;
-padding: 14px 28px;
-font-weight: 600;
-box-shadow: 0 6px 24px rgba(224,195,110,0.24);
-```
-
-## Secondary Button
-
-```css
-background: rgba(255,255,255,0.04);
-border: 1px solid rgba(212,194,154,0.22);
-color: #F6F4EF;
-backdrop-filter: blur(12px);
-```
+# 💎 Brand Keywords ใหม่
+- Astral Imperial
+- Liquid Gold
+- Celestial Ocean
+- Cosmic Flow
+- Premium Destiny
+- Spiritual Intelligence
+- Eastern Futurism
 
 ---
 
-# Input Style
+# 🚀 สิ่งที่จะทำให้ Hora Time ดู “ระดับโลก”
 
-```css
-background: rgba(255,255,255,0.03);
-border: 1px solid rgba(192,183,165,0.12);
-color: #F6F4EF;
-border-radius: 18px;
-padding: 14px 18px;
-```
-
-Focus state:
-
-```css
-border-color: #D4C29A;
-box-shadow: 0 0 0 4px rgba(212,194,154,0.08);
-```
+## ไม่ใช้:
+- สีม่วง cliché astrology
+- galaxy stock ทั่วไป
+- neon cyberpunk เยอะเกิน
+- gradient สดเกิน
 
 ---
 
-# Navigation Style
-
-## Top Navigation
-- Transparent dark blur
-- Thin gold divider line
-- Active menu with glowing underline
-- Floating effect with spacing
-
----
-
-# Icon Style
-
-Recommended icon style:
-- Thin line icons
-- Gold stroke
-- Minimal geometry
-- Celestial symbols
-- Constellation-inspired illustrations
-
-Suggested icon libraries:
-- Lucide
-- Phosphor
-- Tabler Icons
+## ใช้:
+- cinematic darkness
+- flowing gold
+- layered textures
+- elegant typography
+- eastern luxury
+- breathing space
 
 ---
 
-# Animation Language
+# 🏗️ Technical Direction (Astro + Tailwind)
 
-## Motion Style
-- Slow fade
-- Floating movement
-- Soft glow pulse
-- Star particle shimmer
-- Smooth opacity transitions
+ควรเพิ่ม:
 
-## Recommended Timing
-
-| Motion | Duration |
-|---|---|
-| Hover | 180ms |
-| Modal | 320ms |
-| Fade In | 600ms |
-| Floating Loop | 6s |
-
----
-
-# Tailwind Theme Example
-
+## Tailwind Tokens
 ```js
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        navy: {
-          900: '#03071A',
-          800: '#061831',
-          700: '#07304F'
-        },
-        gold: {
-          500: '#C0B7A5',
-          400: '#D4C29A',
-          300: '#E0C36E'
-        }
-      },
-      boxShadow: {
-        glow: '0 0 40px rgba(224,195,110,0.18)'
-      },
-      borderRadius: {
-        xl2: '24px'
-      }
-    }
+colors: {
+  cosmic: {
+    950: '#020617',
+    900: '#071427',
+    800: '#0A2240',
+    700: '#12355B'
+  },
+  gold: {
+    500: '#C6A96B',
+    400: '#D9BC82',
+    300: '#F2D49B'
   }
 }
 ```
 
 ---
 
-# Recommended UI Sections
+# 🎨 Recommended Background Assets
+จากภาพ reference:
 
-## Landing Page
-- Fullscreen cosmic hero
-- Gold animated zodiac wheel
-- Floating constellation particles
-- Layered gradients
-
-## Dashboard
-- Glass cards
-- Circular charts
-- Soft illuminated data panels
-- Thin dividers
-
-## Mobile App
-- Dark immersive background
-- Bottom floating navigation
-- Gold active states
-- Rounded modal sheets
+## ใช้เป็น:
+- hero texture
+- section divider
+- subtle overlay
+- particle mask
+- onboarding screen
+- loading screen
+- mobile splash screen
 
 ---
 
-# Brand Keywords
-
-- Cosmic Luxury
-- Celestial Premium
-- Elegant Mystery
-- Spiritual Modern
-- Astral Interface
-- Dark Royalty
-
----
-
-# Best Use Cases
-
-Perfect for:
-- Astrology platforms
-- Tarot apps
-- Luxury jewelry
-- Spiritual coaching
-- Meditation apps
-- Premium AI tools
-- Creator brands
-- Editorial experiences
+# ✨ สรุป Direction ใหม่
+Hora Time ควร evolve จาก:
+```txt
+Astrology Website
+```
+ไปเป็น:
+```txt
+Luxury AI Astrology Ecosystem
+```
+ด้วย Visual Identity:
+```txt
+Midnight Ocean
++ Liquid Gold
++ Celestial Floral
++ Eastern Luxury
++ Cosmic Intelligence
+```
+ซึ่งจะช่วยให้:
+- ดูแพงขึ้นมาก
+- แตกต่างจากเว็บดูดวงทั่วไป
+- รองรับ SaaS ได้
+- รองรับ mobile app ได้
+- เหมาะกับ subscription platform
+- เหมาะกับ AI positioning ระยะยาวครับ
 
