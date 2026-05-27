@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
-import { Sparkles, ArrowLeft, Upload, Trash2, CheckSquare, Square, Info } from "lucide-react";
+import { Sparkles, ArrowLeft, Upload, Trash2, CheckSquare, Square, Info, Users, Crown, ShieldCheck, Clock, RefreshCw, Send } from "lucide-react";
 import Link from "next/link";
 
 interface KnowledgeItem {
@@ -20,6 +20,19 @@ interface FeatureConfig {
   is_enabled: boolean;
 }
 
+interface UserProfile {
+  id: string;
+  full_name: string;
+  email: string;
+  birth_date: string;
+  birth_time?: string;
+  plan: string;
+  role: string;
+  is_approved: boolean;
+  approved_at?: string;
+  created_at: string;
+}
+
 export default function AdminPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -34,6 +47,12 @@ export default function AdminPage() {
 
   // Feature toggle state
   const [features, setFeatures] = useState<FeatureConfig[]>([]);
+
+  // User management state
+  const [members, setMembers] = useState<UserProfile[]>([]);
+  const [membersLoading, setMembersLoading] = useState(false);
+  const [approveLoading, setApproveLoading] = useState<string | null>(null);
+  const [memberMsg, setMemberMsg] = useState('');
 
   const supabase = createClient();
 
@@ -107,6 +126,72 @@ export default function AdminPage() {
       .order("created_at", { ascending: true });
     
     if (ft) setFeatures(ft);
+
+    // 3. ดึงรายการสมาชิกทั้งหมด
+    await loadMembers();
+  };
+
+  const loadMembers = async () => {
+    setMembersLoading(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        headers: { 'Authorization': 'Bearer admin' }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        setMembers(json.users || []);
+      }
+    } catch (err) {
+      console.error('Failed to load members:', err);
+    } finally {
+      setMembersLoading(false);
+    }
+  };
+
+  const handleApprove = async (userId: string, action: 'approve' | 'reject', plan = 'premium') => {
+    setApproveLoading(userId);
+    setMemberMsg('');
+    try {
+      const res = await fetch('/api/admin/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, action, plan })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setMemberMsg(`✅ ${json.message}`);
+        await loadMembers(); // รีโหลดรายการ
+      } else {
+        setMemberMsg(`❌ ${json.error || 'เกิดข้อผิดพลาด'}`);
+      }
+    } catch (err) {
+      setMemberMsg('❌ ไม่สามารถเชื่อมต่อได้');
+    } finally {
+      setApproveLoading(null);
+    }
+  };
+
+  const handleResendLine = async (member: UserProfile) => {
+    try {
+      await fetch('/api/notify/line', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'new_member',
+          member: {
+            id: member.id,
+            full_name: member.full_name,
+            email: member.email,
+            birth_date: member.birth_date,
+            birth_time: member.birth_time,
+            created_at: member.created_at
+          }
+        })
+      });
+      setMemberMsg(`📲 ส่ง Line แจ้งเตือน ${member.full_name} อีกครั้งแล้ว`);
+    } catch {
+      setMemberMsg('❌ ส่ง Line ไม่สำเร็จ');
+    }
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -228,8 +313,159 @@ export default function AdminPage() {
       </header>
 
       {/* Content */}
-      <main className="max-w-7xl mx-auto px-6 pt-10 grid lg:grid-cols-3 gap-8 relative z-10">
-        
+      <main className="max-w-7xl mx-auto px-6 pt-10 relative z-10 space-y-8">
+
+        {/* ─── User Management Panel ─────────────────────────────── */}
+        <div className="glass-hora rounded-2xl border border-hora-gold/30 overflow-hidden">
+          <div className="px-8 py-5 border-b border-hora-dark-border/60 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-hora-gold/10 flex items-center justify-center">
+                <Users className="w-4 h-4 text-hora-gold" />
+              </div>
+              <div>
+                <h3 className="text-lg font-serif font-semibold text-hora-gold-light">
+                  👥 จัดการสมาชิก Beta Testers
+                </h3>
+                <p className="text-xxs text-hora-text-muted">
+                  อนุมัติหรือปฏิเสธสิทธิ์สมาชิกด้วยคลิกเดียว — แจ้งเตือน Line อัตโนมัติเมื่อมีสมาชิกใหม่
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={loadMembers}
+              disabled={membersLoading}
+              className="flex items-center gap-2 text-xs text-hora-text-muted hover:text-hora-gold border border-hora-dark-border/40 rounded-lg px-3 py-2 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-3.5 h-3.5 ${membersLoading ? 'animate-spin' : ''}`} />
+              รีเฟรช
+            </button>
+          </div>
+
+          {memberMsg && (
+            <div className={`mx-8 mt-4 text-xs px-4 py-2.5 rounded-lg ${
+              memberMsg.startsWith('✅') || memberMsg.startsWith('📲') 
+                ? 'bg-green-500/10 text-green-400 border border-green-500/20' 
+                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+            }`}>
+              {memberMsg}
+            </div>
+          )}
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm font-sans">
+              <thead>
+                <tr className="border-b border-hora-dark-border/40">
+                  <th className="text-left px-8 py-4 text-xxs uppercase tracking-wider text-hora-text-muted">ชื่อ / อีเมล</th>
+                  <th className="text-left px-4 py-4 text-xxs uppercase tracking-wider text-hora-text-muted">วันเกิด</th>
+                  <th className="text-left px-4 py-4 text-xxs uppercase tracking-wider text-hora-text-muted">สิทธิ์</th>
+                  <th className="text-left px-4 py-4 text-xxs uppercase tracking-wider text-hora-text-muted">สถานะ</th>
+                  <th className="text-right px-8 py-4 text-xxs uppercase tracking-wider text-hora-text-muted">การจัดการ</th>
+                </tr>
+              </thead>
+              <tbody>
+                {membersLoading ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-12 text-hora-text-muted text-xs">
+                      <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-hora-gold" />
+                      กำลังโหลดรายชื่อสมาชิก...
+                    </td>
+                  </tr>
+                ) : members.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="text-center py-12">
+                      <Info className="w-8 h-8 text-hora-text-muted mx-auto mb-2" />
+                      <p className="text-xs text-hora-text-muted">ยังไม่มีสมาชิกในระบบ</p>
+                    </td>
+                  </tr>
+                ) : members.map((m) => (
+                  <tr key={m.id} className="border-b border-hora-dark-border/20 hover:bg-hora-gold/3 transition-colors">
+                    <td className="px-8 py-4">
+                      <div>
+                        <p className="font-semibold text-hora-text text-sm">{m.full_name}</p>
+                        <p className="text-xxs text-hora-text-muted">{m.email}</p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4 text-xs text-hora-text-muted">
+                      {m.birth_date ? new Date(m.birth_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'short', day: 'numeric' }) : '-'}
+                      {m.birth_time && <span className="block">{m.birth_time.slice(0,5)} น.</span>}
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className={`text-xxs px-2 py-1 rounded-full border font-bold uppercase tracking-wide ${
+                        m.plan === 'premium' ? 'bg-hora-gold/15 border-hora-gold/40 text-hora-gold' :
+                        m.plan === 'pro' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' :
+                        'bg-gray-500/10 border-gray-500/30 text-gray-400'
+                      }`}>
+                        {m.plan === 'premium' ? '👑 Premium' : m.plan === 'pro' ? '⭐ Pro' : '🔓 Free'}
+                      </span>
+                      {m.role === 'admin' && (
+                        <span className="ml-1 text-xxs px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-bold">
+                          ADMIN
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-4">
+                      {m.is_approved ? (
+                        <div className="flex items-center gap-1.5 text-green-400">
+                          <ShieldCheck className="w-4 h-4" />
+                          <span className="text-xxs">อนุมัติแล้ว</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 text-yellow-400">
+                          <Clock className="w-4 h-4" />
+                          <span className="text-xxs">รอการอนุมัติ</span>
+                        </div>
+                      )}
+                    </td>
+                    <td className="px-8 py-4">
+                      <div className="flex items-center justify-end gap-2">
+                        {!m.is_approved ? (
+                          <>
+                            <button
+                              onClick={() => handleApprove(m.id, 'approve', 'premium')}
+                              disabled={approveLoading === m.id}
+                              className="flex items-center gap-1.5 text-xxs bg-hora-gold/15 hover:bg-hora-gold/25 border border-hora-gold/40 text-hora-gold px-3 py-1.5 rounded-lg transition-all disabled:opacity-50 font-semibold cursor-pointer"
+                            >
+                              <Crown className="w-3.5 h-3.5" />
+                              {approveLoading === m.id ? 'กำลังดำเนินการ...' : 'อนุมัติ Premium'}
+                            </button>
+                            <button
+                              onClick={() => handleResendLine(m)}
+                              className="flex items-center gap-1.5 text-xxs bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 px-3 py-1.5 rounded-lg transition-all font-semibold cursor-pointer"
+                            >
+                              <Send className="w-3 h-3" />
+                              Line
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => handleApprove(m.id, 'reject')}
+                              disabled={approveLoading === m.id}
+                              className="flex items-center gap-1.5 text-xxs bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 px-3 py-1.5 rounded-lg transition-all disabled:opacity-50 font-semibold cursor-pointer"
+                            >
+                              {approveLoading === m.id ? 'กำลังดำเนินการ...' : '🚫 ระงับสิทธิ์'}
+                            </button>
+                            <button
+                              onClick={() => handleApprove(m.id, 'approve', 'premium')}
+                              disabled={approveLoading === m.id}
+                              className="flex items-center gap-1.5 text-xxs bg-hora-gold/15 hover:bg-hora-gold/25 border border-hora-gold/40 text-hora-gold px-3 py-1.5 rounded-lg transition-all disabled:opacity-50 font-semibold cursor-pointer"
+                            >
+                              <Crown className="w-3.5 h-3.5" />
+                              อัปสิทธิ์
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ─── Knowledge + Feature Controls ──────────────────────── */}
+        <div className="grid lg:grid-cols-3 gap-8">
         {/* Left 2 Columns: Knowledge Developer System */}
         <div className="lg:col-span-2 space-y-8">
           <div className="glass-hora rounded-2xl p-8 border border-hora-dark-border/80">
@@ -413,6 +649,8 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+
+        </div>{/* end grid */}
 
       </main>
     </div>

@@ -62,6 +62,24 @@ export default function RegisterPage() {
         setErrorMsg(`ลงทะเบียนสำเร็จ แต่ไม่สามารถบันทึกข้อมูลดวงชะตาได้: ${profileError.message}`);
       } else {
         setSuccessMsg("ลงทะเบียนดวงชะตาสำเร็จ! กำลังนำคุณไปยัง Dashboard...");
+
+        // 🔔 แจ้งเตือนครูเด่นผ่าน Line Flex Message (fire-and-forget)
+        fetch('/api/notify/line', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'new_member',
+            member: {
+              id: user.id,
+              full_name: fullName,
+              email: user.email || '',
+              birth_date: birthDate,
+              birth_time: birthTime || null,
+              created_at: new Date().toISOString()
+            }
+          })
+        }).catch(() => { /* silent fail — ไม่บล็อก UX */ });
+
         setTimeout(() => {
           window.location.href = "/dashboard";
         }, 1500);
