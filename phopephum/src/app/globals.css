@@ -1,36 +1,68 @@
-@import url('https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Sarabun:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=IBM+Plex+Sans+Thai:wght@100;200;300;400;500;600;700&family=Prompt:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #020514;
-  --foreground: #F6F4EF;
+  /* Astral Imperial Palette */
+  --cosmic-950: #020617;
+  --cosmic-900: #071427;
+  --cosmic-800: #0A2240;
+  --cosmic-700: #12355B;
   
-  --hora-gold: #C0B7A5;
-  --hora-gold-light: #D4C29A;
-  --hora-gold-cta: #E0C36E;
+  --gold-500: #C6A96B;
+  --gold-400: #D9BC82;
+  --gold-300: #F2D49B;
+  --gold-liquid: #E8C46A;
   
-  --hora-dark: #020514;
-  --hora-dark-card: rgba(4, 12, 28, 0.76);
-  --hora-dark-border: rgba(212, 194, 154, 0.18);
-  --hora-text: #F6F4EF;
-  --hora-text-muted: #797C79;
+  --mystic-500: #4B6FAE;
+  --mystic-400: #6D8FC7;
+  --mystic-300: #9AB3D9;
+
+  --background: var(--cosmic-950);
+  --foreground: #F8F6F1;
+  
+  --hora-gold: var(--gold-500);
+  --hora-gold-light: var(--gold-400);
+  --hora-gold-cta: var(--gold-liquid);
+  
+  --hora-dark: var(--cosmic-950);
+  --hora-dark-card: rgba(10, 34, 64, 0.58);
+  --hora-dark-border: rgba(217, 188, 130, 0.18);
+  --hora-text: #F8F6F1;
+  --hora-text-muted: #94A3B8;
+  --text-secondary: #D9CDB7;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   
+  --color-cosmic-950: var(--cosmic-950);
+  --color-cosmic-900: var(--cosmic-900);
+  --color-cosmic-800: var(--cosmic-800);
+  --color-cosmic-700: var(--cosmic-700);
+  
+  --color-gold-500: var(--gold-500);
+  --color-gold-400: var(--gold-400);
+  --color-gold-300: var(--gold-300);
+  --color-gold-liquid: var(--gold-liquid);
+  
+  --color-mystic-500: var(--mystic-500);
+  --color-mystic-400: var(--mystic-400);
+  --color-mystic-300: var(--mystic-300);
+
   --color-hora-gold: var(--hora-gold);
   --color-hora-gold-light: var(--hora-gold-light);
-  --color-hora-gold-cta: var(--color-hora-gold-cta);
-  --color-hora-dark: var(--color-hora-dark);
+  --color-hora-gold-cta: var(--hora-gold-cta);
+  --color-hora-dark: var(--hora-dark);
   --color-hora-dark-card: var(--hora-dark-card);
   --color-hora-dark-border: var(--hora-dark-border);
   --color-hora-text: var(--hora-text);
-  --color-hora-text-muted: var(--color-hora-text-muted);
+  --color-hora-text-muted: var(--hora-text-muted);
+  --color-text-secondary: var(--text-secondary);
   
-  --font-sans: 'Sarabun', system-ui, -apple-system, sans-serif;
-  --font-serif: 'Prompt', system-ui, -apple-system, sans-serif;
+  --font-sans: 'IBM Plex Sans Thai', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Cinzel', 'Cormorant Garamond', serif;
+  --font-prompt: 'Prompt', sans-serif;
 
   /* Extra small text size for mobile labels */
   --text-xxs: 0.625rem;
@@ -41,99 +73,99 @@
  * Keyframes — พลังงาน แรงสั่นสะเทือน และการพริ้วไหวอย่างไร้รอยต่อ
  * ───────────────────────────────────────────────────────────────────────────── */
 
-/* การสั่นไหวระยิบระยับของดวงดาวแบบนุ่มนวลช้าๆ — ลดช่วง opacity เพื่อไม่ให้กระพริบแสบตา */
+/* การสั่นไหวระยิบระยับของดวงดาวแบบนุ่มนวลช้าๆ */
 @keyframes twinkle-slow {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 0.68; }
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
 }
 
 @keyframes twinkle-mid {
-  0%, 100% { opacity: 0.35; }
-  50% { opacity: 0.62; }
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.55; }
 }
 
-/* เนบิวลา/กลุ่มหมอกเลื่อนลอยช้ามากๆ เลียนแบบคลื่นแรงสั่นสะเทือนคลื่นน้ำ (พริ้วไหว แต่มั่นคง) */
+/* เนบิวลา/กลุ่มหมอกเลื่อนลอยช้ามากๆ เลียนแบบคลื่นแรงสั่นสะเทือนคลื่นน้ำ */
 @keyframes nebula-drift {
-  0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.35; }
-  33% { transform: translate(3%, 4%) scale(1.06) rotate(3deg); opacity: 0.45; }
-  66% { transform: translate(-2%, 2%) scale(0.97) rotate(-2deg); opacity: 0.38; }
-  100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.35; }
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.3; }
+  33% { transform: translate(3%, 4%) scale(1.05) rotate(2deg); opacity: 0.45; }
+  66% { transform: translate(-2%, 2%) scale(0.98) rotate(-1deg); opacity: 0.35; }
+  100% { transform: translate(0, 0) scale(1) rotate(0deg); opacity: 0.3; }
 }
 
-/* การหมุนวนช้ามากๆ ของวงล้อจักรราศีทองอร่ามขอบหลังจอ (ต้องมนต์สะกด มีมิติความลึก) */
+/* การหมุนวนช้ามากๆ ของวงล้อจักรราศี */
 @keyframes zodiac-spin {
   0% { transform: translate(-50%, -50%) rotate(0deg); }
   100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* คลื่นแสงเรืองรองสีทองของการ์ดและกรอบ (นิ่ง สงบ สัจจะบารมี) */
+/* คลื่นแสงเรืองรองสีทองของการ์ดและกรอบ */
 @keyframes card-glow-pulse {
   0%, 100% { 
-    border-color: rgba(212, 194, 154, 0.18);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(201, 169, 110, 0.04);
+    border-color: rgba(217, 188, 130, 0.18);
+    box-shadow: 0 10px 60px rgba(0, 0, 0, 0.45), 0 0 30px rgba(232, 196, 106, 0.04);
   }
   50% { 
-    border-color: rgba(212, 194, 154, 0.32);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5), 0 0 45px rgba(201, 169, 110, 0.09);
+    border-color: rgba(217, 188, 130, 0.32);
+    box-shadow: 0 10px 60px rgba(0, 0, 0, 0.5), 0 0 45px rgba(232, 196, 106, 0.12);
   }
 }
 
-/* การพริ้วไหวขึ้นลงช้าๆ ของการ์ดหรือวงจรดวงดาวเด่น (Floating state) */
-@keyframes float-gentle {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-5px); }
+/* การพริ้วไหวขึ้นลงช้าๆ ของการ์ดหรือวงจรดวงดาวเด่น */
+@keyframes float-astral {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(1deg); }
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * Background System — เลเยอร์ประสาน รูป รส กลิ่น เสียง สัมผัส
+ * Background System
  * ───────────────────────────────────────────────────────────────────────────── */
 
 html {
-  height: -webkit-fill-available; /* iOS Safari viewport fix */
+  height: -webkit-fill-available;
 }
 
 body {
-  background: var(--background);
+  background: var(--cosmic-950);
   color: var(--foreground);
   font-family: var(--font-sans);
   min-height: 100vh;
-  min-height: -webkit-fill-available; /* iOS Safari viewport fix */
+  min-height: -webkit-fill-available;
   position: relative;
   overflow-x: hidden;
-  -webkit-text-size-adjust: 100%; /* ป้องกัน iOS ปรับขนาดตัวหนังสือเอง */
+  -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  -webkit-overflow-scrolling: touch; /* smooth scroll บน iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 /* พื้นหลังมิติห้วงจักรวาลระยิบระยับและไหลพริ้ว (Cosmic Luxury Portal) */
 .bg-cosmic-portal {
   position: fixed;
   inset: 0;
-  background-color: #020514;
+  background-color: #020617;
   background-image: 
-    radial-gradient(ellipse at 50% 0%, rgba(201, 169, 110, 0.08) 0%, transparent 60%),
-    radial-gradient(ellipse at 80% 80%, rgba(123, 94, 167, 0.05) 0%, transparent 60%),
-    radial-gradient(circle at 10% 40%, rgba(79, 142, 247, 0.04) 0%, transparent 50%);
+    radial-gradient(ellipse at 50% 0%, rgba(232, 196, 106, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(75, 111, 174, 0.08) 0%, transparent 60%),
+    radial-gradient(circle at 10% 40%, rgba(109, 143, 199, 0.06) 0%, transparent 50%);
   z-index: -10;
   pointer-events: none;
   overflow: hidden;
 }
 
-/* เลเยอร์ดวงดาวและกาแล็กซี่เกลียววนสีทองระยิบระยับ ( Twinkling Stars ) */
+/* เลเยอร์ดวงดาวและกาแล็กซี่เกลียววนสีทองระยิบระยับ */
 .bg-cosmic-portal::before {
   content: '';
   position: absolute;
   inset: 0;
   background-image:
-    radial-gradient(2px 2px at 15% 18%, rgba(224, 195, 110, 0.6) 0%, transparent 100%),
+    radial-gradient(2px 2px at 15% 18%, rgba(232, 196, 106, 0.6) 0%, transparent 100%),
     radial-gradient(1.5px 1.5px at 45% 65%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
-    radial-gradient(2px 2px at 75% 25%, rgba(224, 195, 110, 0.7) 0%, transparent 100%),
+    radial-gradient(2px 2px at 75% 25%, rgba(232, 196, 106, 0.7) 0%, transparent 100%),
     radial-gradient(1px 1px at 85% 85%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
-    radial-gradient(2.5px 2.5px at 30% 40%, rgba(224, 195, 110, 0.8) 0%, transparent 100%),
+    radial-gradient(2.5px 2.5px at 30% 40%, rgba(232, 196, 106, 0.8) 0%, transparent 100%),
     radial-gradient(1px 1px at 92% 50%, rgba(255, 255, 255, 0.3) 0%, transparent 100%),
-    radial-gradient(2.2px 2.2px at 60% 88%, rgba(224, 195, 110, 0.65) 0%, transparent 100%);
+    radial-gradient(2.2px 2.2px at 60% 88%, rgba(232, 196, 106, 0.65) 0%, transparent 100%);
   animation: twinkle-slow 12s ease-in-out infinite;
-  opacity: 0.55;
+  opacity: 0.5;
   will-change: opacity;
   transform: translateZ(0);
 }
@@ -144,17 +176,17 @@ body {
   inset: 0;
   background-image:
     radial-gradient(1px 1px at 8% 85%, rgba(255, 255, 255, 0.4) 0%, transparent 100%),
-    radial-gradient(2.5px 2.5px at 55% 15%, rgba(224, 195, 110, 0.7) 0%, transparent 100%),
+    radial-gradient(2.5px 2.5px at 55% 15%, rgba(232, 196, 106, 0.7) 0%, transparent 100%),
     radial-gradient(1.2px 1.2px at 25% 72%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
-    radial-gradient(1.8px 1.8px at 80% 55%, rgba(224, 195, 110, 0.6) 0%, transparent 100%);
+    radial-gradient(1.8px 1.8px at 80% 55%, rgba(232, 196, 106, 0.6) 0%, transparent 100%);
   animation: twinkle-mid 9s ease-in-out infinite;
   animation-delay: 3s;
-  opacity: 0.45;
+  opacity: 0.4;
   will-change: opacity;
   transform: translateZ(0);
 }
 
-/* เลเยอร์เนบิวลาพลังงานพริ้วไหวสีทองครามจางๆ ( Cosmic Aura ) */
+/* เลเยอร์เนบิวลาพลังงานพริ้วไหวสีทองครามจางๆ */
 .cosmic-nebula-aura {
   position: absolute;
   width: 140%;
@@ -162,16 +194,16 @@ body {
   top: -20%;
   left: -20%;
   background: 
-    radial-gradient(circle at 40% 40%, rgba(201, 169, 110, 0.04) 0%, transparent 40%),
-    radial-gradient(circle at 70% 60%, rgba(123, 94, 167, 0.03) 0%, transparent 45%),
-    radial-gradient(circle at 20% 80%, rgba(6, 24, 49, 0.6) 0%, transparent 50%);
+    radial-gradient(circle at 40% 40%, rgba(232, 196, 106, 0.06) 0%, transparent 40%),
+    radial-gradient(circle at 70% 60%, rgba(109, 143, 199, 0.04) 0%, transparent 45%),
+    radial-gradient(circle at 20% 80%, rgba(2, 6, 23, 0.6) 0%, transparent 50%);
   filter: blur(80px);
   animation: nebula-drift 32s ease-in-out infinite;
   z-index: -9;
   pointer-events: none;
 }
 
-/* เลเยอร์เงาวงล้อราศีมหาเวทย์สีทองขอบจอหลัง ( Golden Zodiac Wheel ) */
+/* เลเยอร์เงาวงล้อราศีมหาเวทย์สีทองขอบจอหลัง */
 .cosmic-zodiac-wheel {
   position: absolute;
   width: 780px;
@@ -180,25 +212,25 @@ body {
   left: 50%;
   transform: translate(-50%, -50%);
   border-radius: 50%;
-  border: 1px double rgba(212, 194, 154, 0.03);
-  background-image: url('https://pub-16226bd5c8f24ed4be36a292cda80f98.r2.dev/zodiac-wheel-op.png'); /* Fallback image or custom vector CSS below */
+  border: 1px double rgba(217, 188, 130, 0.03);
+  background-image: url('https://pub-16226bd5c8f24ed4be36a292cda80f98.r2.dev/zodiac-wheel-op.png');
   background-size: contain;
   background-position: center;
   background-repeat: no-repeat;
-  opacity: 0.035; /* อ่อน โยน บางเบา ไม่ลบลายตาเนื้อหา */
-  filter: drop-shadow(0 0 15px rgba(224, 195, 110, 0.05));
+  opacity: 0.04;
+  filter: drop-shadow(0 0 15px rgba(232, 196, 106, 0.05));
   animation: zodiac-spin 220s linear infinite;
   z-index: -8;
   pointer-events: none;
 }
 
-/* วงเส้นขอบสีทองเรืองแสงล้อมรอบซ้อนกันเพื่อสร้างมิติดั่งภาพจักรราศีแรก */
+/* วงเส้นขอบสีทองเรืองแสงล้อมรอบซ้อนกัน */
 .cosmic-zodiac-wheel::before {
   content: '';
   position: absolute;
   inset: 20px;
   border-radius: 50%;
-  border: 1px dashed rgba(212, 194, 154, 0.02);
+  border: 1px dashed rgba(217, 188, 130, 0.02);
 }
 
 .cosmic-zodiac-wheel::after {
@@ -206,19 +238,18 @@ body {
   position: absolute;
   inset: 60px;
   border-radius: 50%;
-  border: 1px solid rgba(212, 194, 154, 0.015);
+  border: 1px solid rgba(217, 188, 130, 0.015);
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * UI Surfaces — การ์ดแก้วต้องมนต์สะกด คมชัด มั่นคง นิ่งและสงบ
+ * UI Surfaces
  * ───────────────────────────────────────────────────────────────────────────── */
 
-/* Glassmorphism Card — static สำหรับ mobile performance และ LINE browser fallback */
 .glass-hora {
-  background: rgba(4, 12, 28, 0.92); /* solid fallback สำหรับ browser ที่ไม่รองรับ backdrop-filter */
-  border: 1px solid rgba(212, 194, 154, 0.18);
+  background: rgba(10, 34, 64, 0.92);
+  border: 1px solid rgba(217, 188, 130, 0.18);
   border-radius: 24px;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(201, 169, 110, 0.04);
+  box-shadow: 0 10px 60px rgba(0, 0, 0, 0.45), 0 0 40px rgba(232, 196, 106, 0.08);
   transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
               border-color 0.4s ease,
               box-shadow 0.4s ease;
@@ -226,39 +257,39 @@ body {
 
 @supports (backdrop-filter: blur(24px)) or (-webkit-backdrop-filter: blur(24px)) {
   .glass-hora {
-    background: rgba(4, 12, 28, 0.76);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: rgba(10, 34, 64, 0.58);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
   }
 }
 
-/* การตอบสนองเมื่อผู้ใช้สัมผัสสัมผัสเมาส์ Hover (พริ้วไหว ยกตัว เบาสบาย) */
 .glass-hora:hover {
-  border-color: rgba(224, 195, 110, 0.32);
+  border-color: rgba(232, 196, 106, 0.35);
   transform: translateY(-2px);
   box-shadow: 
-    0 12px 48px rgba(0, 0, 0, 0.55),
-    0 0 50px rgba(224, 195, 110, 0.12);
+    0 15px 70px rgba(0, 0, 0, 0.55),
+    0 0 50px rgba(232, 196, 106, 0.15);
 }
 
-/* Luxury Primary Button พร้อมสิทธิ์แสงประกาย */
 .btn-hora {
-  background: linear-gradient(135deg, #D4C29A 0%, #E0C36E 100%);
-  color: #020514;
+  background: linear-gradient(135deg, #C6A96B 0%, #E8C46A 100%);
+  color: #020617;
   border-radius: 999px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 6px 20px rgba(224, 195, 110, 0.28);
+  box-shadow: 0 6px 24px rgba(232, 196, 106, 0.24);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.75rem 1.75rem;
+  padding: 0.85rem 2rem;
   cursor: pointer;
   border: none;
   outline: none;
   position: relative;
   overflow: hidden;
+  text-transform: uppercase;
+  font-family: var(--font-serif);
 }
 
 .btn-hora::before {
@@ -285,23 +316,21 @@ body {
 }
 
 .btn-hora:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: 0 10px 30px rgba(224, 195, 110, 0.45);
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 10px 32px rgba(232, 196, 106, 0.4);
 }
 
 .btn-hora:active {
   transform: translateY(0) scale(1);
 }
 
-/* เอฟเฟกต์การลอยตัวอย่างแผ่วเบาสง่างาม (Float gentle) ของวงโคจรดาวครองยาม */
 .float-element {
-  animation: float-gentle 6s ease-in-out infinite;
+  animation: float-astral 6s ease-in-out infinite;
 }
 
-/* แถบสแกนความคืบหน้าระยิบระยับของระดับความสำเร็จ TQM */
 .tqm-progress-glow {
-  background: linear-gradient(90deg, #C0B7A5, #E0C36E);
-  box-shadow: 0 0 12px rgba(224, 195, 110, 0.6);
+  background: linear-gradient(90deg, #C6A96B, #F2D49B);
+  box-shadow: 0 0 12px rgba(232, 196, 106, 0.6);
   position: relative;
   overflow: hidden;
 }
@@ -325,58 +354,27 @@ body {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
- * Mobile & Cross-Browser Optimizations
- * รองรับ LINE in-app browser, iOS Safari, Android Chrome, และทุก mobile browser
+ * Mobile Optimizations
  * ───────────────────────────────────────────────────────────────────────────── */
 
-/* ลด animation burden บน mobile — nebula และ zodiac wheel หนักกว่าจำเป็น */
 @media (max-width: 768px) {
   .cosmic-nebula-aura {
     animation-duration: 60s;
-    filter: blur(40px); /* ลด blur ใน mobile เพื่อ performance */
+    filter: blur(40px);
   }
   .cosmic-zodiac-wheel {
     width: 420px;
     height: 420px;
   }
-  /* ยกเลิก hover transform บน touch device — ไม่มี hover state บนมือถือ */
   .glass-hora:hover {
     transform: none;
-    border-color: rgba(212, 194, 154, 0.18);
-    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.45), 0 0 30px rgba(201, 169, 110, 0.04);
+    border-color: rgba(217, 188, 130, 0.18);
+    box-shadow: 0 10px 60px rgba(0, 0, 0, 0.45), 0 0 40px rgba(232, 196, 106, 0.08);
   }
-  /* ปุ่ม active state ให้ feedback ชัดบน touch */
   .btn-hora:active {
     transform: scale(0.97);
     opacity: 0.9;
   }
-  /* ป้องกัน text overflow บนหน้าจอแคบ */
-  .max-w-7xl {
-    overflow-x: hidden;
-  }
-}
-
-/* ปิด animation ทั้งหมดสำหรับผู้ใช้ที่ตั้งค่า prefers-reduced-motion */
-@media (prefers-reduced-motion: reduce) {
-  .bg-cosmic-portal::before,
-  .bg-cosmic-portal::after,
-  .cosmic-nebula-aura,
-  .cosmic-zodiac-wheel,
-  .float-element {
-    animation: none;
-  }
-}
-
-/* Safe area สำหรับ notch/Dynamic Island (iPhone X+) */
-@supports (padding: max(0px)) {
-  body {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
-}
-
-/* input/select ป้องกัน iOS auto-zoom เมื่อ focus (ต้อง font-size >= 16px) */
-@media (max-width: 768px) {
   input[type="text"],
   input[type="email"],
   input[type="password"],
@@ -384,6 +382,6 @@ body {
   input[type="time"],
   select,
   textarea {
-    font-size: 16px !important; /* ป้องกัน iOS zoom เมื่อ tap input */
+    font-size: 16px !important;
   }
 }

@@ -242,11 +242,30 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        {/* Login link */}
-        <div className="mt-6 text-center text-xs text-hora-text-muted font-sans border-t border-hora-dark-border/40 pt-5">
-          มีบัญชีวิเคราะห์อยู่แล้ว?{" "}
-          <Link href="/login" className="text-hora-gold font-bold hover:underline">
-            เข้าสู่ระบบที่นี่
+        {/* Login link — แยก layout ชัดเจนตาม Cosmic Luxury theme */}
+        <div className="mt-6 border-t border-white/5 pt-5 flex flex-col items-center gap-3">
+          <p className="text-[11px] text-hora-text-muted tracking-wide">
+            มีบัญชีวิเคราะห์อยู่แล้ว?
+          </p>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all group"
+            style={{
+              border: "1px solid rgba(198,169,107,0.45)",
+              background: "rgba(198,169,107,0.08)",
+              color: "#D9BC82",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(198,169,107,0.16)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(198,169,107,0.75)";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(198,169,107,0.08)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(198,169,107,0.45)";
+            }}
+          >
+            เข้าสู่ระบบบัญชีที่มีอยู่
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </div>

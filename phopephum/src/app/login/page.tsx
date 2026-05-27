@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase";
-import { Sparkles, ArrowRight, Lock, Mail } from "lucide-react";
+import { ArrowRight, Lock, Mail } from "lucide-react";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -114,11 +114,30 @@ export default function LoginPage() {
           </button>
         </form>
 
-        {/* Register link */}
-        <div className="mt-8 text-center text-xs text-hora-text-muted font-sans border-t border-hora-dark-border/40 pt-6">
-          ยังไม่มีบัญชีผู้ใช้?{" "}
-          <Link href="/register" className="text-hora-gold font-bold hover:underline">
-            ลงทะเบียนฟรีที่นี่
+        {/* Register link — แยก layout ชัดเจนตาม Cosmic Luxury theme */}
+        <div className="mt-8 border-t border-white/5 pt-6 flex flex-col items-center gap-3">
+          <p className="text-[11px] text-hora-text-muted tracking-wide">
+            ยังไม่มีบัญชีผู้ใช้?
+          </p>
+          <Link
+            href="/register"
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold transition-all group"
+            style={{
+              border: "1px solid rgba(198,169,107,0.45)",
+              background: "rgba(198,169,107,0.08)",
+              color: "#D9BC82",
+            }}
+            onMouseEnter={e => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(198,169,107,0.16)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(198,169,107,0.75)";
+            }}
+            onMouseLeave={e => {
+              (e.currentTarget as HTMLElement).style.background = "rgba(198,169,107,0.08)";
+              (e.currentTarget as HTMLElement).style.borderColor = "rgba(198,169,107,0.45)";
+            }}
+          >
+            สร้างบัญชีฟรี — เริ่มต้นใช้งาน
+            <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </div>

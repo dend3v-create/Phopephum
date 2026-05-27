@@ -42,7 +42,7 @@ export async function horoscopeEngine(
   const power   = calculatePower([dayBase, monBase, yearBase, base])
 
   const house      = calculateHouse(base)
-  const houseFull  = getHouseMeaning(base)
+  void getHouseMeaning(base) // for future use
   const transit    = calculateTransit(month)
   const vayaChorn  = calculateVayaChorn(input.birthDate)
   const taksa      = calculateTaksa(dayOfWeek, base)
