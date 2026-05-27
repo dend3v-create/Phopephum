@@ -3,6 +3,7 @@
  * Anthropic Claude API client (via Cloudflare Worker Proxy)
  * ห้ามเรียก Claude API โดยตรงจาก client-side
  */
+import { SEVEN_BASE_ROLE_SYSTEM } from '@/constants/ai-prompts'
 
 export interface ClaudeMessage {
   role: 'user' | 'assistant'
@@ -57,10 +58,12 @@ export async function callClaude(
 
 /**
  * สร้าง System Prompt สำหรับ Phopephum Life Report
+ * ใช้ SEVEN_BASE_ROLE_SYSTEM เป็นฐาน + กำหนด output format JSON
  */
 export function buildHoraReportSystemPrompt(): string {
-  return `คุณคือผู้เชี่ยวชาญโหราศาสตร์ไทยระดับแนวหน้า ผสานความรู้ศาสตร์ยามอัฐกาล ดาวนพเคราะห์ทั้ง 7 ดวง และระบบเลข 7 ตัว 9 ฐาน
-วิเคราะห์ดวงชะตาชีวิตด้วยภาษาที่เป็นมิตร ชัดเจน และให้กำลังใจ โดยใช้หลักโหราศาสตร์ไทยดั้งเดิม
+  return `${SEVEN_BASE_ROLE_SYSTEM}
+
+## OUTPUT FORMAT
 ตอบในรูปแบบ JSON ตาม schema ที่กำหนดเสมอ ไม่ตอบนอกเหนือจากที่ขอ
 ภาษาไทยเป็นหลัก เน้นคำแนะนำเชิงบวกและปฏิบัติได้จริง`
 }

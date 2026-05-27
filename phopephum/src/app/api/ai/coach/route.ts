@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { calculateSevenBase } from '@/engine/seven-base-calculator'
 import { getCurrentHora, PLANETS } from '@/engine/phopephum-calculator'
+import { SEVEN_BASE_ROLE_SYSTEM, HORA_CHAT_SYSTEM } from '@/constants/ai-prompts'
 
 export const runtime = 'edge'
 
@@ -48,19 +49,21 @@ export async function POST(request: Request) {
       .select('title, content, category')
       .limit(3)
 
-    let systemContext = `คุณคือ "ครูเด่น มาสเตอร์ฟา" Personalized Living Wisdom Coach ผู้นำพาปัญญาและโหราศาสตร์ไทยสายเลข 7 ตัว 9 ฐาน ยามอัฐกาล
-ข้อมูลของผู้รับการโค้ช:
+    let systemContext = `${SEVEN_BASE_ROLE_SYSTEM}
+
+${HORA_CHAT_SYSTEM}
+
+## ข้อมูลของผู้รับการโค้ช
 - ชื่อ: คุณ${profile.full_name}
 - วันเกิด: ${profile.birth_date} (เวลา: ${profile.birth_time || 'ไม่ระบุ'})
 - ดวงชะตาเลข 7 ตัว 9 ฐาน: ${JSON.stringify(sevenBaseData.chart)}
 - ฐานพลังงานจรเด่น: ${JSON.stringify(sevenBaseData.transit)}
-- ยามอัฐกาลปัจจุบัน: ยามที่ ${currentHoraData.currentHora?.majorIndex} ครองโดยดาว ${currentPlanet.nameThai} (${currentPlanet.symbol}) - ${currentPlanet.description}
+- ยามอัฐกาลปัจจุบัน: ยามที่ ${currentHoraData.currentHora?.majorIndex} ครองโดยดาว ${currentPlanet.nameThai} (${currentPlanet.symbol}) — ${currentPlanet.description}
 
-หลักการโค้ชและพยากรณ์:
-1. ตอบด้วยคำชี้แนะที่สุภาพ อบอุ่น มีพลัง ดั่งอาจารย์โหรและโค้ชคู่คิด
-2. เน้นการผูกความสัมพันธ์ของดาวและยาม ไม่ใช่แปลความหมายแบบตรงตัวแยกเลข
-3. ให้คำแนะนำเชิงจิตวิทยาเพื่อการลงมือทำจริง (TQM) และการเสริมบารมีบำบัด
-4. ตอบภาษาสวยงามและสั้นกระชับเข้าใจง่าย`
+## KFC MODEL (ใช้ในการตอบ)
+- Key Message: เน้นสาระสำคัญที่สุด 1 ประเด็น
+- Find Your Story: เชื่อมกับชีวิตจริงของผู้ใช้
+- Call To Action: จบด้วยคำแนะนำที่ทำได้จริงทันที`
 
     // ค้นหา API key ใน .env ว่ามีคีย์พร้อมใช้เพื่อยิง AI จริงๆ หรือไม่
     const geminiKey = process.env.GEMINI_API_KEY
