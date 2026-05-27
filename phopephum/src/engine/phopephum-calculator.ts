@@ -1,253 +1,366 @@
 /**
- * hora-calculator.ts
+ * phopephum-calculator.ts
  * Phopephum — ยามอัฐกาล Engine
  *
  * ระบบคำนวณยามอัฐกาล (โหรทายหนู) ตามหลักโหราศาสตร์ไทย
- * แต่ละวันมี 8 ยามใหญ่ (ยามกลางวัน 4 + ยามกลางคืน 4)
- * แต่ละยามใหญ่แบ่งเป็น 8 ยามย่อย
+ * - กลางวัน 8 ยาม (06:00 - 18:00 น.) ยามละ 90 นาที
+ * - กลางคืน 8 ยาม (18:00 - 06:00 น.) ยามละ 90 นาที
+ * - แต่ละยามมี 3 ยามย่อย (ยามต้น, ยามกลาง, ยามปลาย) ยามละ 30 นาที
+ * - แต่ละยามมี 9 ยามซอย (ราหูค้นทรัพย์) ฤกษ์ละ 10 นาที
  *
- * @module hora-calculator
- * @version 1.0.0
+ * @module phopephum-calculator
+ * @version 2.2.0
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Types
+// Types & Backwards Compatibility Types
 // ─────────────────────────────────────────────────────────────────────────────
 
 export type DayOfWeek = 0 | 1 | 2 | 3 | 4 | 5 | 6;
-// 0=อาทิตย์, 1=จันทร์, 2=อังคาร, 3=พุธ, 4=พฤหัส, 5=ศุกร์, 6=เสาร์
+// 0=อาทิตย์, 1=จันทร์, 2=อังคาร, 3=พุธ, 4=พฤหัสบดี, 5=ศุกร์, 6=เสาร์
 
-export type PlanetId =
-  | "sun"    // อาทิตย์
-  | "moon"   // จันทร์
-  | "mars"   // อังคาร
-  | "mercury" // พุธ
-  | "jupiter" // พฤหัส
-  | "venus"  // ศุกร์
-  | "saturn"; // เสาร์
+export type PlanetId = string; // สำหรับความเข้ากันได้แบบย้อนหลัง (Backwards Compatibility)
 
 export type HourPeriod = "day" | "night";
 
 export interface Planet {
-  id: PlanetId;
+  id: string;
   nameThai: string;
   nameEn: string;
   symbol: string;
   color: string;
-  /** เลขดาวโหราศาสตร์ไทย */
   number: number;
-  /** ลักษณะพลังงาน */
-  nature: "benefic" | "malefic" | "neutral";
-  /** คำอธิบายสั้น */
-  description: string;
-  /** ด้านที่ส่งเสริม */
-  promotes: string[];
-  /** ด้านที่ควรระวัง */
-  warns: string[];
+  description?: string;
+  nature?: "benefic" | "malefic" | "neutral";
+  promotes?: string[];
+  warns?: string[];
 }
 
 export interface HoraSlot {
-  /** ลำดับยามย่อยในยามใหญ่ (1–8) */
-  slot: number;
-  planet: Planet;
-  /** เวลาเริ่มต้น (minutes from midnight) */
-  startMinute: number;
-  /** เวลาสิ้นสุด (minutes from midnight) */
-  endMinute: number;
-  /** เวลาเริ่มต้น formatted HH:MM */
+  slot: number; // ยามย่อย 1-3
+  name: string; // "ยามต้น" | "ยามกลาง" | "ยามปลาย"
   startTime: string;
-  /** เวลาสิ้นสุด formatted HH:MM */
   endTime: string;
-  /** กลางวัน / กลางคืน */
-  period: HourPeriod;
+  startMinute: number;
+  endMinute: number;
+  planet: Planet; // สำหรับความเข้ากันได้แบบย้อนหลัง
+  period: HourPeriod; // สำหรับความเข้ากันได้แบบย้อนหลัง
+}
+
+export interface NineSegmentSlot {
+  index: number; // 1-9
+  name: string; // "ทาษา", "คหปติ", ...
+  startTime: string;
+  endTime: string;
+  startMinute: number;
+  endMinute: number;
+  description: string;
 }
 
 export interface HoraMajorSlot {
-  /** ลำดับยามใหญ่ (1–8) */
-  majorSlot: number;
-  /** ชื่อยามใหญ่ */
-  name: string;
+  majorSlot: number; // 1-16 (1-8 กลางวัน, 9-16 กลางคืน)
+  yamNumber: number; // 1-8
+  name: string; // "กลางวัน ยามที่ X" | "กลางคืน ยามที่ X"
   period: HourPeriod;
-  /** ดาวเจ้าของยามใหญ่ */
-  rulerPlanet: Planet;
-  /** 8 ยามย่อยภายใน */
-  subSlots: HoraSlot[];
-  /** เวลาเริ่มต้น formatted */
   startTime: string;
-  /** เวลาสิ้นสุด formatted */
   endTime: string;
+  startMinute: number;
+  endMinute: number;
+  starName: string; // ชื่อดาวประจำยาม เช่น "สุริยะ", "พุทโธ"
+  starNumber: number; // เลขดาว 1-7
+  rulerPlanet: Planet; // สำหรับความเข้ากันได้แบบย้อนหลัง
+  predictions: YamPredictions;
+  subSlots: HoraSlot[]; // 3 ยามย่อย (ยามต้น, ยามกลาง, ยามปลาย)
+  nineSegments: NineSegmentSlot[]; // 9 ยามซอย (ราหูค้นทรัพย์)
+}
+
+export interface YamPredictions {
+  hearing: string;      // เรื่องที่ได้ยิน
+  sick: string;         // คนเจ็บไข้
+  lost: string;         // ของหาย
+  travelStart: string;  // การเดินทาง (ยามต้น)
+  travelMiddle: string; // การเดินทาง (ยามกลาง)
+  travelEnd: string;    // การเดินทาง (ยามปลาย)
+  bestTime: string;     // เวลาที่ดี
 }
 
 export interface HoraResult {
-  /** วันที่คำนวณ */
   date: Date;
-  /** วันในสัปดาห์ (0=อาทิตย์) */
   dayOfWeek: DayOfWeek;
-  /** ชื่อวัน (ไทย) */
   dayNameThai: string;
-  /** ดาวเจ้าของวัน */
   dayRuler: Planet;
-  /** ยามใหญ่ทั้ง 8 ยาม */
   majorSlots: HoraMajorSlot[];
-  /** ยามปัจจุบัน (ถ้าส่ง currentTime) */
   currentHora?: CurrentHoraInfo;
 }
 
 export interface CurrentHoraInfo {
   majorSlot: HoraMajorSlot;
-  subSlot: HoraSlot;
-  /** ยามใหญ่ที่ (1–8) */
-  majorIndex: number;
-  /** ยามย่อยที่ (1–8) */
-  subIndex: number;
-  /** นาทีที่เหลือในยามย่อยนี้ */
+  yamNumber: number;
+  period: HourPeriod;
+  starName: string;
+  starNumber: number;
+  rulerPlanet: Planet;
   minutesRemaining: number;
-  /** % ของยามย่อยที่ผ่านไปแล้ว */
   progressPercent: number;
+  elapsedMinutesInYam: number;
+  activeSubYam: HoraSlot;
+  activeNineSegment: NineSegmentSlot;
+  predictions: {
+    hearing: string;
+    sick: string;
+    lost: string;
+    travel: string;
+    bestTime: string;
+  };
+  // Properties below are for backwards compatibility with coach route & LiveHoraWidget
+  subSlot: HoraSlot;
+  majorIndex: number;
+  subIndex: number;
 }
 
 export interface HoraInput {
   date: Date;
-  /** เวลาปัจจุบัน (optional) — ถ้าส่งจะคืน currentHora */
   currentTime?: Date;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Constants — ดาวทั้ง 7 ดวง
+// Constants & Datasets
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const PLANETS: Record<PlanetId, Planet> = {
-  sun: {
-    id: "sun",
-    nameThai: "อาทิตย์",
-    nameEn: "Sun",
-    symbol: "☉",
-    color: "#F59E0B",
-    number: 1,
-    nature: "benefic",
-    description: "ดาวแห่งอำนาจ อัตตา และพลังชีวิต",
-    promotes: ["ผู้นำ", "การเจรจา", "ความมีชื่อเสียง", "สุขภาพ"],
-    warns: ["อัตตาสูง", "ความเย่อหยิ่ง"],
+export const PLANETS: Record<string, Planet> = {
+  sun: { 
+    id: "sun", nameThai: "อาทิตย์", nameEn: "Sun", symbol: "☉", color: "#EF4444", number: 1, 
+    description: "ดาวแห่งเกียรติยศและอำนาจบารมี", nature: "benefic",
+    promotes: ["ผู้นำ", "การเจรจา", "ความมีชื่อเสียง", "สุขภาพ"], warns: ["อัตตาสูง", "ความเย่อหยิ่ง"] 
   },
-  moon: {
-    id: "moon",
-    nameThai: "จันทร์",
-    nameEn: "Moon",
-    symbol: "☽",
-    color: "#E5E7EB",
-    number: 2,
-    nature: "benefic",
-    description: "ดาวแห่งอารมณ์ ความรู้สึก และสัญชาตญาณ",
-    promotes: ["ความสัมพันธ์", "การดูแล", "ความคิดสร้างสรรค์", "การค้าขาย"],
-    warns: ["อารมณ์แปรปรวน", "ตัดสินใจด้วยอารมณ์"],
+  moon: { 
+    id: "moon", nameThai: "จันทร์", nameEn: "Moon", symbol: "☽", color: "#FBBF24", number: 2, 
+    description: "ดาวแห่งเสน่ห์ เมตตา และความสัมพันธ์", nature: "benefic",
+    promotes: ["ความสัมพันธ์", "การดูแล", "ความคิดสร้างสรรค์", "การค้าขาย"], warns: ["อารมณ์แปรปรวน", "ตัดสินใจด้วยอารมณ์"]
   },
-  mars: {
-    id: "mars",
-    nameThai: "อังคาร",
-    nameEn: "Mars",
-    symbol: "♂",
-    color: "#EF4444",
-    number: 3,
-    nature: "malefic",
-    description: "ดาวแห่งพลังงาน ความกล้า และการต่อสู้",
-    promotes: ["ความกล้าหาญ", "พลังงาน", "ความเด็ดเดี่ยว", "ธุรกิจ"],
-    warns: ["ความขัดแย้ง", "อุบัติเหตุ", "ความโกรธ"],
+  mars: { 
+    id: "mars", nameThai: "อังคาร", nameEn: "Mars", symbol: "♂", color: "#EC4899", number: 3, 
+    description: "ดาวแห่งพลังงาน ความเด็ดเดี่ยว และการต่อสู้", nature: "malefic",
+    promotes: ["ความกล้าหาญ", "พลังงาน", "ความเด็ดเดี่ยว", "ธุรกิจ"], warns: ["ความขัดแย้ง", "อุบัติเหตุ", "ความโกรธ"]
   },
-  mercury: {
-    id: "mercury",
-    nameThai: "พุธ",
-    nameEn: "Mercury",
-    symbol: "☿",
-    color: "#10B981",
-    number: 4,
-    nature: "neutral",
-    description: "ดาวแห่งการสื่อสาร ความฉลาด และการค้า",
-    promotes: ["การสื่อสาร", "ธุรกิจ", "การเรียนรู้", "เทคโนโลยี", "การเขียน"],
-    warns: ["ความไม่ซื่อสัตย์", "ความลังเล"],
+  mercury: { 
+    id: "mercury", nameThai: "พุธ", nameEn: "Mercury", symbol: "☿", color: "#10B981", number: 4, 
+    description: "ดาวแห่งการเจรจา ปัญญา และการค้าขาย", nature: "neutral",
+    promotes: ["การสื่อสาร", "ธุรกิจ", "การเรียนรู้", "เทคโนโลยี", "การเขียน"], warns: ["ความไม่ซื่อสัตย์", "ความลังเล"]
   },
-  jupiter: {
-    id: "jupiter",
-    nameThai: "พฤหัส",
-    nameEn: "Jupiter",
-    symbol: "♃",
-    color: "#F97316",
-    number: 5,
-    nature: "benefic",
-    description: "ดาวแห่งความโชคดี ปัญญา และการขยาย",
-    promotes: ["โชคลาภ", "ปัญญา", "จิตวิญญาณ", "การศึกษา", "กฎหมาย"],
-    warns: ["การสุรุ่ยสุร่าย", "การประมาทเลินเล่อ"],
+  jupiter: { 
+    id: "jupiter", nameThai: "พฤหัส", nameEn: "Jupiter", symbol: "♃", color: "#F97316", number: 5, 
+    description: "ดาวแห่งโชคลาภ ปัญญา และความสำเร็จ", nature: "benefic",
+    promotes: ["โชคลาภ", "ปัญญา", "จิตวิญญาณ", "การศึกษา", "กฎหมาย"], warns: ["การสุรุ่ยสุร่าย", "การประมาทเลินเล่อ"]
   },
-  venus: {
-    id: "venus",
-    nameThai: "ศุกร์",
-    nameEn: "Venus",
-    symbol: "♀",
-    color: "#EC4899",
-    number: 6,
-    nature: "benefic",
-    description: "ดาวแห่งความรัก ความงาม และความสุข",
-    promotes: ["ความรัก", "ศิลปะ", "ความงาม", "ความบันเทิง", "สันติภาพ"],
-    warns: ["ความฟุ่มเฟือย", "ความโลภ"],
+  venus: { 
+    id: "venus", nameThai: "ศุกร์", nameEn: "Venus", symbol: "♀", color: "#3B82F6", number: 6, 
+    description: "ดาวแห่งความสุข ศิลปะ และความรัก", nature: "benefic",
+    promotes: ["ความรัก", "ศิลปะ", "ความงาม", "ความบันเทิง", "สันติภาพ"], warns: ["ความฟุ่มเฟือย", "ความโลภ"]
   },
-  saturn: {
-    id: "saturn",
-    nameThai: "เสาร์",
-    nameEn: "Saturn",
-    symbol: "♄",
-    color: "#6B7280",
-    number: 7,
-    nature: "malefic",
-    description: "ดาวแห่งวินัย ความอดทน และกรรม",
-    promotes: ["ความอดทน", "วินัย", "ความพยายาม", "งานหนัก"],
-    warns: ["ความล่าช้า", "อุปสรรค", "โรคภัย"],
+  saturn: { 
+    id: "saturn", nameThai: "เสารี", nameEn: "Saturn", symbol: "♄", color: "#8B5CF6", number: 7, 
+    description: "ดาวแห่งวินัย ความอดทน และความมั่นคงระยะยาว", nature: "malefic",
+    promotes: ["ความอดทน", "วินัย", "ความพยายาม", "งานหนัก"], warns: ["ความล่าช้า", "อุปสรรค", "โรคภัย"]
   },
 };
 
-// ลำดับดาว 7 ดวงตามระบบโหราศาสตร์ไทย (Chaldean order)
-// ใช้วนซ้ำในการคำนวณยาม
-export const PLANET_CHALDEAN_ORDER: PlanetId[] = [
-  "saturn",  // 1
-  "jupiter", // 2
-  "mars",    // 3
-  "sun",     // 4
-  "venus",   // 5
-  "mercury", // 6
-  "moon",    // 7
-];
-
-// ดาวเจ้าของแต่ละวันในสัปดาห์
-// index = dayOfWeek (0=อาทิตย์, 1=จันทร์, ..., 6=เสาร์)
-export const DAY_RULERS: PlanetId[] = [
-  "sun",     // 0 = อาทิตย์
-  "moon",    // 1 = จันทร์
-  "mars",    // 2 = อังคาร
-  "mercury", // 3 = พุธ
-  "jupiter", // 4 = พฤหัส
-  "venus",   // 5 = ศุกร์
-  "saturn",  // 6 = เสาร์
-];
-
 export const DAY_NAMES_THAI = [
-  "อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์",
+  "อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"
 ];
 
-// ชื่อยามใหญ่ทั้ง 8
-export const MAJOR_HORA_NAMES = [
-  "ยามที่ 1 (ยามเช้า)",
-  "ยามที่ 2",
-  "ยามที่ 3",
-  "ยามที่ 4 (ยามเที่ยง)",
-  "ยามที่ 5",
-  "ยามที่ 6",
-  "ยามที่ 7",
-  "ยามที่ 8 (ยามดึก)",
+// ดาวประจำวัน
+export const DAY_RULERS_PLANETS = [
+  PLANETS.sun,     // 0 = อาทิตย์
+  PLANETS.moon,    // 1 = จันทร์
+  PLANETS.mars,    // 2 = อังคาร
+  PLANETS.mercury, // 3 = พุธ
+  PLANETS.jupiter, // 4 = พฤหัสบดี
+  PLANETS.venus,   // 5 = ศุกร์
+  PLANETS.saturn,  // 6 = เสาร์
 ];
 
+// ยามกลางวัน (ยาม 1 - 8)
+export const DAYTIME_YAM_STARS: Record<DayOfWeek, string[]> = {
+  0: ["สุริยะ", "ศุกระ", "พุทธะ", "จันเทา", "เสารี", "ครู", "ภุมมะ", "สุริยะ"], // อาทิตย์
+  1: ["จันเทา", "เสารี", "ครู", "ภุมมะ", "สุริยะ", "ศุกระ", "พุทธะ", "จันเทา"], // จันทร์
+  2: ["ภุมมะ", "สุริยะ", "ศุกระ", "พุทธะ", "จันเทา", "เสารี", "ครู", "ภุมมะ"], // อังคาร
+  3: ["พุทธะ", "จันเทา", "เสารี", "ครู", "ภุมมะ", "สุริยะ", "ศุกระ", "พุทธะ"], // พุธ
+  4: ["ครู", "ภุมมะ", "สุริยะ", "ศุกระ", "พุทธะ", "จันเทา", "เสารี", "ครู"], // พฤหัสบดี
+  5: ["ศุกระ", "พุทธะ", "จันเทา", "เสารี", "ครู", "ภุมมะ", "สุริยะ", "ศุกระ"], // ศุกร์
+  6: ["เสารี", "ครู", "ภุมมะ", "สุริยะ", "ศุกระ", "พุทธะ", "จันเทา", "เสารี"], // เสาร์
+};
+
+// ยามกลางคืน (ยาม 1 - 8)
+export const NIGHTTIME_YAM_STARS: Record<DayOfWeek, string[]> = {
+  0: ["ระวิ", "ชีโว", "คะศิ", "ศุโกร", "ภุมโม", "โสโร", "พุทโธ", "ระวิ"], // อาทิตย์
+  1: ["คะศิ", "ศุโกร", "ภุมโม", "โสโร", "พุทโธ", "ระวิ", "ชีโว", "คะศิ"], // จันทร์
+  2: ["ภุมโม", "โสโร", "พุทโธ", "ระวิ", "ชีโว", "คะศิ", "ศุโกร", "ภุมโม"], // อังคาร
+  3: ["พุทโธ", "ระวิ", "ชีโว", "คะศิ", "ศุโกร", "ภุมโม", "โสโร", "พุทโธ"], // พุธ
+  4: ["ชีโว", "คะศิ", "ศุโกร", "ภุมโม", "โสโร", "พุทโธ", "ระวิ", "ชีโว"], // พฤหัสบดี
+  5: ["ศุโกร", "ภุมโม", "โสโร", "พุทโธ", "ระวิ", "ชีโว", "คะศิ", "ศุโกร"], // ศุกร์
+  6: ["โสโร", "พุทโธ", "ระวิ", "ชีโว", "คะศิ", "ศุโกร", "ภุมโม", "โสโร"], // เสาร์
+};
+
+// แผนผังคำทำนายดาวประจำยาม (1 - 7)
+export const PREDICTION_DATABASE: Record<number, YamPredictions & { starNameDay: string; starNameNight: string }> = {
+  1: {
+    starNameDay: "สุริยะ",
+    starNameNight: "ระวิ",
+    hearing: "เชื่อถือได้ เป็นเรื่องจริง ทำจริง มีเรื่องร้อนใจ",
+    sick: "จะตาย",
+    lost: "จะได้คืน ของอยู่ในที่สูง ใกล้กับสิ่งสีแดงๆ มีแสงสว่าง แสงแวววาว",
+    travelStart: "เดินทางไกลจะมีเคราะห์ร้าย อันตราย",
+    travelMiddle: "เดินทางได้ลาภ",
+    travelEnd: "เดินทางไม่ดีจะมีเคราะห์ร้าย เสื่อมเสียศักดิ์ศรี",
+    bestTime: "ยามกลาง",
+  },
+  2: {
+    starNameDay: "จันเทา",
+    starNameNight: "คะศิ",
+    hearing: "จริงครึ่ง เท็จครึ่ง พูดด้วยอารมณ์อ่อนไหว มีจริตมารยา พูดกลับไปกลับมา",
+    sick: "รักษานาน เป็นๆ หายๆ รักษาไม่หายขาดเป็นตายเท่ากัน",
+    lost: "อยู่ในน้ำ หรือที่ชื้นแฉะ อาจได้คืนช้า หรือไม่ได้คืน",
+    travelStart: "เดินทางไกล ให้ระวังจะประสบอุบัติเหตุ",
+    travelMiddle: "เดินทางไกลได้ลาภ แต่ห้ามเดินทางเพราะจะเคราะห์ร้าย",
+    travelEnd: "ห้ามเดินทางไกล จะมีเคราะห์ร้าย เสียทรัพย์สิน",
+    bestTime: "ยามกลาง",
+  },
+  3: {
+    starNameDay: "ภุมมะ",
+    starNameNight: "ภุมโม",
+    hearing: "เป็นเรื่องเท็จ เชื่อถือไม่ได้",
+    sick: "จะหาย เป็นเร็ว หายเร็ว ไม่ตายง่าย",
+    lost: "ไม่ได้คืน อาจอยู่ใกล้เครื่องใช้ไฟฟ้า ศาสตราวุธ ของมีคม เครื่องมือต่างๆ",
+    travelStart: "เดินทางมีเคราะห์ร้าย ในต้นอุบัติเหตุ",
+    travelMiddle: "เดินทางไกลจะเกิดไฟไหม้ ถูกโจรปล้นทรัพย์สินเงินทอง ระหว่างเดินทาง",
+    travelEnd: "เดินทางไกลได้ลาภเป็นเงินเป็นทองมากมาย พบมิตร ระหว่างทาง จะคบกันไปได้นานๆ",
+    bestTime: "ยามปลาย",
+  },
+  4: {
+    starNameDay: "พุทธะ",
+    starNameNight: "พุทโธ",
+    hearing: "เป็นเรื่องจริง เชื่อถือได้",
+    sick: "จะตาย (หากรักษาด้วยยาสมุนไพร หรือของที่หาได้จากธรรมชาติ มีโอกาสรอดบ้าง)",
+    lost: "จะได้คืน อยู่แถวเสื้อผ้า กองกระดาษ เครื่องมือสื่อสาร ในครัว หรือต้องถามหาจากคนในบ้าน อาจมีผู้เก็บรักษาไว้ให้",
+    travelStart: "เดินทางไกลๆ จะมีเคราะห์ร้าย ติดขัดไปหมดทุกทาง",
+    travelMiddle: "เดินทางได้ลาภเงินทองจำนวนมาก พบปะ เจรจาความใดๆ บรรลุผลด้วยดี",
+    travelEnd: "เดินทางได้ลาภมากมาย เจรจาความกับผู้ใหญ่ก็ได้สมประสงค์",
+    bestTime: "ยามกลาง และยามปลาย",
+  },
+  5: {
+    starNameDay: "ครู",
+    starNameNight: "ชีโว",
+    hearing: "จริงเท่าเทียมกัน อย่างพึ่งเชื่อ",
+    sick: "เป็นๆ หายๆ ต้องใช้ยาเป็นประจำ (ถ้าป่วยหนัก เป็นตายเท่ากัน)",
+    lost: "จะได้คืน หรือไม่ได้เท่ากัน อาจจะอยู่ใกล้ตู้ยา เครื่องมือแพทย์ ตำรา หนังสือต่างๆ ใกล้สิ่งศักดิ์สิทธิ์",
+    travelStart: "เดินทางไกลได้ลาภมากมาย มิตรนำลาภมาให้พบปะผู้ใหญ่ให้คุณดีมาก",
+    travelMiddle: "เดินทางไกลจะเสียผลประโยชน์ ติดขัด เจรจาความใดๆ ไม่สำเร็จ",
+    travelEnd: "เดินทางไกลจะเสียผลประโยชน์จำนวนมาก เจอศัตรู หมู่มาร",
+    bestTime: "ยามต้น",
+  },
+  6: {
+    starNameDay: "ศุกระ",
+    starNameNight: "ศุโกร",
+    hearing: "เป็นเรื่องไม่จริง เชื่อถือไม่ได้",
+    sick: "ไม่ตาย หายได้เร็วขึ้นอยู่กับกำลังใจของคนไข้",
+    lost: "ไม่ได้คืน อาจจะถูกเปลี่ยนเป็นเงิน หรือให้ต่อไปแล้ว (ลองหาดูในกระเป๋าสตางค์ โต๊ะ เครื่องแป้ง ในห้องนอน ตามเสื้อผ้า เครื่องแต่งตัว)",
+    travelStart: "ห้ามเดินทางไกล จะมีเคราะห์ร้าย การสูญเสีย บุตร ภรรยา สามี พบศัตรูกลางทาง",
+    travelMiddle: "ห้ามเดินทางไกล แม้จะได้ลาภมากก็จะหมดไป หรือถูกขโมยขึ้น",
+    travelEnd: "เดินทางไกลได้ลาภมากมาย พบมิตร และเพื่อนต่างเพศ ช่วยเหลือดี",
+    bestTime: "ยามปลาย",
+  },
+  7: {
+    starNameDay: "เสารี",
+    starNameNight: "โสโร",
+    hearing: "เป็นเรื่องจริง เชื่อถือได้",
+    sick: "จะตาย หรือต้องรักษานานมาก",
+    lost: "จะได้คืน ให้ค้นหาตามที่มืดๆ ใกล้ของสีดำๆ ของสกปรก ท่อระบายน้ำ เตาไฟ ถ่าน",
+    travelStart: "ห้ามเดินทางไกล จะพบศัตรู จะเดือดร้อน",
+    travelMiddle: "เดินทางดีมาก ได้ลาภจำนวนมากมาย",
+    travelEnd: "เดินทางไกลได้ลาภ เงินทอง ของกำนัล",
+    bestTime: "ยามกลาง และยามปลาย",
+  },
+};
+
+// รายละเอียดของ 9 ยามซอย (ราหูค้นทรัพย์)
+export const NINE_SEGMENTS_DATA = [
+  { name: "ทาษา", description: "เหมาะสำหรับหาลูกจ้าง คนรับใช้ หรือผู้ที่มีตำแหน่งไม่สูงนัก (ไม่ดีสำหรับงานใหญ่)" },
+  { name: "คหปติ", description: "เหมาะสำหรับงานค้าขาย ธุรกิจ นายหน้า ติดต่อขอกู้เงิน หรือติดต่อผู้มีฐานะ" },
+  { name: "โจรา", description: "เหมาะสำหรับงานทวงหนี้ บุกเข้าหาศัตรู หรือการแข่งขันที่ต้องใช้ความเด็ดขาด (ไม่เหมาะกับงานมงคลทั่วไป)" },
+  { name: "เสนาปติ", description: "เหมาะสำหรับติดต่อราชการ สมัครงาน หรือการสอบแข่งขัน" },
+  { name: "กาลทัณฑ์", description: "ผู้คุมนักโทษ คนขี้คุก คนจัญไร ใช้เข้าเยี่ยมนักโทษ หามือปืนรับจ้าง สอบปากคำ" },
+  { name: "กัลยาณ์", description: "เหมาะสำหรับพบปะสังสรรค์ เข้าหาผู้ใหญ่ หรือเข้าสังคม" },
+  { name: "มหายักษ์", description: "เหมาะสำหรับพิธีกรรมทางไสยศาสตร์ ปลุกเสกเครื่องราง ถอนศาล (ไม่ดีสำหรับงานมงคลปกติ)" },
+  { name: "ธนบดินทร์", description: "เหมาะสำหรับเข้าเฝ้าเจ้านาย ผู้ใหญ่ หรือผู้ปกครองระดับสูง" },
+  { name: "นักพรต", description: "เหมาะสำหรับพิธีกรรมทางศาสนา สวดมนต์ ถือศีล หรือทำบุญ" },
+];
+
+// แปลงดาวครองยามภาษาไทย เป็นหมายเลขดาวครองยาม 1-7
+export function getStarNumber(starName: string): number {
+  if (starName === "สุริยะ" || starName === "ระวิ") return 1;
+  if (starName === "จันเทา" || starName === "คะศิ") return 2;
+  if (starName === "ภุมมะ" || starName === "ภุมโม") return 3;
+  if (starName === "พุทธะ" || starName === "พุทโธ") return 4;
+  if (starName === "ครู" || starName === "ชีโว") return 5;
+  if (starName === "ศุกระ" || starName === "ศุโกร") return 6;
+  if (starName === "เสารี" || starName === "โสโร") return 7;
+  return 1;
+}
+
+// ดึงรายละเอียด Object Planet ตาม Star Number
+export function getPlanetByNumber(starNum: number, starName: string, predictions: YamPredictions): Planet {
+  const basePlanets = [PLANETS.sun, PLANETS.moon, PLANETS.mars, PLANETS.mercury, PLANETS.jupiter, PLANETS.venus, PLANETS.saturn];
+  const base = basePlanets[starNum - 1] || PLANETS.sun;
+  return {
+    ...base,
+    nameThai: starName,
+    description: predictions.hearing,
+  };
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
-// Utility helpers
+// Backwards Compatibility Constants and Functions (For Tests, Types & Widgets)
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** แปลง minutes-from-midnight → "HH:MM" (floor ทศนิยม) */
+export const PLANET_CHALDEAN_ORDER: PlanetId[] = ["saturn", "jupiter", "mars", "sun", "venus", "mercury", "moon"];
+export const DAY_RULERS: PlanetId[] = ["sun", "moon", "mars", "mercury", "jupiter", "venus", "saturn"];
+
+export function getPlanetChaldeanIndex(id: PlanetId): number {
+  return PLANET_CHALDEAN_ORDER.indexOf(id);
+}
+
+export function getPlanetAtOffset(startIndex: number, offset: number): Planet {
+  const idx = (startIndex + offset) % 7;
+  return PLANETS[PLANET_CHALDEAN_ORDER[idx]];
+}
+
+export function getHoraAt(date: Date, time: Date): HoraResult {
+  return calculateHora({ date, currentTime: time });
+}
+
+export function findAuspiciousHoras(date: Date, preferredIds: PlanetId[]): HoraSlot[] {
+  const result = calculateHora({ date });
+  const auspicious: HoraSlot[] = [];
+  for (const major of result.majorSlots) {
+    for (const sub of major.subSlots) {
+      if (preferredIds.includes(sub.planet.id)) {
+        auspicious.push(sub);
+      }
+    }
+  }
+  return auspicious;
+}
+
+export function getHoraSummary(date: Date): HoraSlot[] {
+  const result = calculateHora({ date });
+  return result.majorSlots.flatMap((m) => m.subSlots);
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function minutesToTimeStr(totalMinutes: number): string {
   const normalized = ((Math.floor(totalMinutes) % 1440) + 1440) % 1440;
   const h = Math.floor(normalized / 60);
@@ -255,99 +368,123 @@ export function minutesToTimeStr(totalMinutes: number): string {
   return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
 }
 
-/** แปลง Date → minutes from midnight (local time) */
 export function dateToMinutes(d: Date): number {
   return d.getHours() * 60 + d.getMinutes();
 }
 
-/**
- * หา index ของดาวใน PLANET_CHALDEAN_ORDER
- */
-export function getPlanetChaldeanIndex(id: PlanetId): number {
-  return PLANET_CHALDEAN_ORDER.indexOf(id);
-}
-
-/**
- * คำนวณดาวเจ้าของยามจาก Chaldean index offset
- * @param startIndex  - index แรกใน PLANET_CHALDEAN_ORDER (ดาวเจ้าของวัน)
- * @param offset      - ยามที่ต้องการ (0-based)
- */
-export function getPlanetAtOffset(startIndex: number, offset: number): Planet {
-  const idx = (startIndex + offset) % 7;
-  return PLANETS[PLANET_CHALDEAN_ORDER[idx]];
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
-// Core Calculation
+// Core Calculator Logic
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * คำนวณยามอัฐกาลทั้งหมดสำหรับวันที่กำหนด
- *
- * กฎการคำนวณ:
- * - 1 วัน = 24 ชั่วโมง = 1440 นาที
- * - ยามกลางวัน: 06:00 – 18:00 (720 นาที) → 4 ยามใหญ่ × 180 นาที
- * - ยามกลางคืน: 18:00 – 06:00 (720 นาที) → 4 ยามใหญ่ × 180 นาที
- * - แต่ละยามใหญ่ = 8 ยามย่อย × 22.5 นาที (= 22 นาที 30 วินาที)
- * - ดาวเจ้าของยามใหญ่ที่ 1 (กลางวัน) = ดาวเจ้าของวัน
- * - ดาวเจ้าของยามถัดไปเดิน +1 ตาม Chaldean order (เวียนซ้ำ 7)
- * - ยามใหญ่กลางคืนเดินต่อจากยามกลางวัน (ยามใหญ่ที่ 5–8)
- */
 export function calculateHora(input: HoraInput): HoraResult {
   const { date, currentTime } = input;
   const dayOfWeek = date.getDay() as DayOfWeek;
-  const dayRulerId = DAY_RULERS[dayOfWeek];
-  const dayRuler = PLANETS[dayRulerId];
+  const dayRuler = DAY_RULERS_PLANETS[dayOfWeek];
 
-  // Chaldean index ของดาวเจ้าของวัน → จุดเริ่มต้นวนดาว
-  const startChaldeanIndex = getPlanetChaldeanIndex(dayRulerId);
-
-  // แต่ละยามใหญ่ = 180 นาที (3 ชั่วโมง)
-  const MAJOR_SLOT_MINUTES = 180;
-  // แต่ละยามย่อย = 22.5 นาที
-  const SUB_SLOT_MINUTES = MAJOR_SLOT_MINUTES / 8; // 22.5
-
-  // ยามกลางวันเริ่ม 06:00 = 360 นาที
-  const DAY_START_MINUTES = 360;
+  const daytimeStars = DAYTIME_YAM_STARS[dayOfWeek];
+  const nighttimeStars = NIGHTTIME_YAM_STARS[dayOfWeek];
 
   const majorSlots: HoraMajorSlot[] = [];
 
-  for (let major = 0; major < 8; major++) {
-    const period: HourPeriod = major < 4 ? "day" : "night";
-    const majorStartMinute = DAY_START_MINUTES + major * MAJOR_SLOT_MINUTES;
-    const majorEndMinute = majorStartMinute + MAJOR_SLOT_MINUTES;
+  // 1. คำนวณฝั่งกลางวัน 8 ยาม (06:00 - 18:00)
+  for (let i = 0; i < 8; i++) {
+    const startMin = 360 + i * 90; // 06:00 คือ 360 นาที
+    const endMin = startMin + 90;
+    const starName = daytimeStars[i];
+    const starNum = getStarNumber(starName);
+    const predictions = PREDICTION_DATABASE[starNum];
+    const rulerPlanet = getPlanetByNumber(starNum, starName, predictions);
 
-    // ดาวเจ้าของยามใหญ่
-    const rulerPlanet = getPlanetAtOffset(startChaldeanIndex, major);
+    // สร้าง 3 ยามย่อย (ยามละ 30 นาที)
+    const subSlots: HoraSlot[] = [
+      { slot: 1, name: "ยามต้น", startMinute: startMin, endMinute: startMin + 30, startTime: minutesToTimeStr(startMin), endTime: minutesToTimeStr(startMin + 30), planet: rulerPlanet, period: "day" },
+      { slot: 2, name: "ยามกลาง", startMinute: startMin + 30, endMinute: startMin + 60, startTime: minutesToTimeStr(startMin + 30), endTime: minutesToTimeStr(startMin + 60), planet: rulerPlanet, period: "day" },
+      { slot: 3, name: "ยามปลาย", startMinute: startMin + 60, endMinute: endMin, startTime: minutesToTimeStr(startMin + 60), endTime: minutesToTimeStr(endMin), planet: rulerPlanet, period: "day" },
+    ];
 
-    // ยามย่อย 8 ยาม
-    const subSlots: HoraSlot[] = [];
-    for (let sub = 0; sub < 8; sub++) {
-      const subOffset = major * 8 + sub;
-      const subPlanet = getPlanetAtOffset(startChaldeanIndex, subOffset);
-
-      const subStartMinute = majorStartMinute + sub * SUB_SLOT_MINUTES;
-      const subEndMinute = subStartMinute + SUB_SLOT_MINUTES;
-
-      subSlots.push({
-        slot: sub + 1,
-        planet: subPlanet,
-        startMinute: subStartMinute,
-        endMinute: subEndMinute,
-        startTime: minutesToTimeStr(subStartMinute),
-        endTime: minutesToTimeStr(subEndMinute),
-        period,
+    // สร้าง 9 ยามซอย (ราหูค้นทรัพย์ - ฤกษ์ละ 10 นาที)
+    const nineSegments: NineSegmentSlot[] = [];
+    for (let j = 0; j < 9; j++) {
+      const segStart = startMin + j * 10;
+      const segEnd = segStart + 10;
+      const segData = NINE_SEGMENTS_DATA[j];
+      nineSegments.push({
+        index: j + 1,
+        name: segData.name,
+        description: segData.description,
+        startMinute: segStart,
+        endMinute: segEnd,
+        startTime: minutesToTimeStr(segStart),
+        endTime: minutesToTimeStr(segEnd),
       });
     }
 
     majorSlots.push({
-      majorSlot: major + 1,
-      name: MAJOR_HORA_NAMES[major],
-      period,
+      majorSlot: i + 1,
+      yamNumber: i + 1,
+      name: `กลางวัน ยามที่ ${i + 1}`,
+      period: "day",
+      startTime: minutesToTimeStr(startMin),
+      endTime: minutesToTimeStr(endMin),
+      startMinute: startMin,
+      endMinute: endMin,
+      starName,
+      starNumber: starNum,
       rulerPlanet,
+      predictions,
       subSlots,
-      startTime: minutesToTimeStr(majorStartMinute),
-      endTime: minutesToTimeStr(majorEndMinute),
+      nineSegments,
+    });
+  }
+
+  // 2. คำนวณฝั่งกลางคืน 8 ยาม (18:00 - 06:00)
+  for (let i = 0; i < 8; i++) {
+    const startMin = 1080 + i * 90; // 18:00 คือ 1080 นาที
+    const endMin = startMin + 90;
+    const starName = nighttimeStars[i];
+    const starNum = getStarNumber(starName);
+    const predictions = PREDICTION_DATABASE[starNum];
+    const rulerPlanet = getPlanetByNumber(starNum, starName, predictions);
+
+    // สร้าง 3 ยามย่อย (ยามละ 30 นาที)
+    const subSlots: HoraSlot[] = [
+      { slot: 1, name: "ยามต้น", startMinute: startMin, endMinute: startMin + 30, startTime: minutesToTimeStr(startMin), endTime: minutesToTimeStr(startMin + 30), planet: rulerPlanet, period: "night" },
+      { slot: 2, name: "ยามกลาง", startMinute: startMin + 30, endMinute: startMin + 60, startTime: minutesToTimeStr(startMin + 30), endTime: minutesToTimeStr(startMin + 60), planet: rulerPlanet, period: "night" },
+      { slot: 3, name: "ยามปลาย", startMinute: startMin + 60, endMinute: endMin, startTime: minutesToTimeStr(startMin + 60), endTime: minutesToTimeStr(endMin), planet: rulerPlanet, period: "night" },
+    ];
+
+    // สร้าง 9 ยามซอย (ราหูค้นทรัพย์ - ฤกษ์ละ 10 นาที)
+    const nineSegments: NineSegmentSlot[] = [];
+    for (let j = 0; j < 9; j++) {
+      const segStart = startMin + j * 10;
+      const segEnd = segStart + 10;
+      const segData = NINE_SEGMENTS_DATA[j];
+      nineSegments.push({
+        index: j + 1,
+        name: segData.name,
+        description: segData.description,
+        startMinute: segStart,
+        endMinute: segEnd,
+        startTime: minutesToTimeStr(segStart),
+        endTime: minutesToTimeStr(segEnd),
+      });
+    }
+
+    majorSlots.push({
+      majorSlot: i + 9,
+      yamNumber: i + 1,
+      name: `กลางคืน ยามที่ ${i + 1}`,
+      period: "night",
+      startTime: minutesToTimeStr(startMin),
+      endTime: minutesToTimeStr(endMin),
+      startMinute: startMin,
+      endMinute: endMin,
+      starName,
+      starNumber: starNum,
+      rulerPlanet,
+      predictions,
+      subSlots,
+      nineSegments,
     });
   }
 
@@ -359,7 +496,6 @@ export function calculateHora(input: HoraInput): HoraResult {
     majorSlots,
   };
 
-  // หายามปัจจุบัน (optional)
   if (currentTime) {
     result.currentHora = findCurrentHora(majorSlots, currentTime);
   }
@@ -367,102 +503,86 @@ export function calculateHora(input: HoraInput): HoraResult {
   return result;
 }
 
-/**
- * หายามปัจจุบันจาก majorSlots
- */
 function findCurrentHora(
   majorSlots: HoraMajorSlot[],
   currentTime: Date
 ): CurrentHoraInfo | undefined {
   const currentMinute = dateToMinutes(currentTime);
 
-  for (let mi = 0; mi < majorSlots.length; mi++) {
-    const major = majorSlots[mi];
-    for (let si = 0; si < major.subSlots.length; si++) {
-      const sub = major.subSlots[si];
+  for (const major of majorSlots) {
+    let start = major.startMinute % 1440;
+    let end = major.endMinute % 1440;
 
-      // handle midnight wrap (endMinute > 1440)
-      const start = sub.startMinute % 1440;
-      const end = sub.endMinute % 1440;
+    // ตรวจสอบการข้ามคืน (เช่น 23:30 - 01:00)
+    let isInSlot = false;
+    if (end > start) {
+      isInSlot = currentMinute >= start && currentMinute < end;
+    } else {
+      isInSlot = currentMinute >= start || currentMinute < end;
+    }
 
-      const isInSlot =
-        end > start
-          ? currentMinute >= start && currentMinute < end
-          : currentMinute >= start || currentMinute < end;
+    if (isInSlot) {
+      const elapsed = end > start
+        ? currentMinute - start
+        : currentMinute >= start
+        ? currentMinute - start
+        : currentMinute + (1440 - start);
 
-      if (isInSlot) {
-        const elapsed =
-          end > start
-            ? currentMinute - start
-            : currentMinute >= start
-            ? currentMinute - start
-            : currentMinute + (1440 - start);
+      const duration = 90;
+      const minutesRemaining = Math.max(0, duration - elapsed);
+      const progressPercent = Math.min(100, (elapsed / duration) * 100);
 
-        const duration = sub.endMinute - sub.startMinute; // 22.5
-        const minutesRemaining = Math.max(0, duration - elapsed);
-        const progressPercent = Math.min(100, (elapsed / duration) * 100);
-
-        return {
-          majorSlot: major,
-          subSlot: sub,
-          majorIndex: mi + 1,
-          subIndex: si + 1,
-          minutesRemaining: Math.round(minutesRemaining * 10) / 10,
-          progressPercent: Math.round(progressPercent * 10) / 10,
-        };
+      // ค้นหายามย่อย (ยามต้น, ยามกลาง, ยามปลาย)
+      let activeSubYam = major.subSlots[0];
+      if (elapsed >= 60) {
+        activeSubYam = major.subSlots[2];
+      } else if (elapsed >= 30) {
+        activeSubYam = major.subSlots[1];
       }
+
+      // ค้นหายามซอย 9 ฤกษ์ (ราหูค้นทรัพย์)
+      // ใช้สูตร Math.floor(elapsed / 10) เพื่อให้ได้ index 0-8 สอดคล้องกับ Google Sheet เป๊ะๆ
+      const segmentIndex = Math.min(8, Math.floor(elapsed / 10));
+      const activeNineSegment = major.nineSegments[segmentIndex];
+
+      // ดึงคำทำนายการเดินทางตามยามย่อยย่อย
+      let travelPrediction = major.predictions.travelStart;
+      if (activeSubYam.slot === 2) {
+        travelPrediction = major.predictions.travelMiddle;
+      } else if (activeSubYam.slot === 3) {
+        travelPrediction = major.predictions.travelEnd;
+      }
+
+      return {
+        majorSlot: major,
+        yamNumber: major.yamNumber,
+        period: major.period,
+        starName: major.starName,
+        starNumber: major.starNumber,
+        rulerPlanet: major.rulerPlanet,
+        minutesRemaining: Math.round(minutesRemaining * 10) / 10,
+        progressPercent: Math.round(progressPercent * 10) / 10,
+        elapsedMinutesInYam: elapsed,
+        activeSubYam,
+        activeNineSegment,
+        predictions: {
+          hearing: major.predictions.hearing,
+          sick: major.predictions.sick,
+          lost: major.predictions.lost,
+          travel: travelPrediction,
+          bestTime: major.predictions.bestTime,
+        },
+        subSlot: activeSubYam,
+        majorIndex: major.majorSlot,
+        subIndex: activeSubYam.slot,
+      };
     }
   }
 
   return undefined;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Convenience helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * คำนวณยามปัจจุบัน (shorthand)
- */
 export function getCurrentHora(now?: Date): HoraResult {
   const d = now ?? new Date();
   return calculateHora({ date: d, currentTime: d });
-}
-
-/**
- * หาว่าเวลาที่กำหนดเป็นยามใดในวันที่กำหนด
- */
-export function getHoraAt(date: Date, time: Date): HoraResult {
-  return calculateHora({ date, currentTime: time });
-}
-
-/**
- * หายามที่ดีที่สุดสำหรับกิจกรรมที่กำหนดในวันที่กำหนด
- * @param date         - วันที่ต้องการ
- * @param preferredIds - PlanetId[] ที่ต้องการ (เช่น ['jupiter','venus'] สำหรับธุรกิจ)
- */
-export function findAuspiciousHoras(
-  date: Date,
-  preferredIds: PlanetId[]
-): HoraSlot[] {
-  const result = calculateHora({ date });
-  const auspicious: HoraSlot[] = [];
-
-  for (const major of result.majorSlots) {
-    for (const sub of major.subSlots) {
-      if (preferredIds.includes(sub.planet.id)) {
-        auspicious.push(sub);
-      }
-    }
-  }
-
-  return auspicious;
-}
-
-/**
- * สรุปยามรายวัน — list ยามย่อยทั้งหมดพร้อมข้อมูล
- */
-export function getHoraSummary(date: Date): HoraSlot[] {
-  const result = calculateHora({ date });
-  return result.majorSlots.flatMap((m) => m.subSlots);
 }

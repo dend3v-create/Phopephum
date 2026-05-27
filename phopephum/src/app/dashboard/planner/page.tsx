@@ -392,7 +392,7 @@ export default function PlannerPage() {
                 ปฏิทินยามอัฐกาลและแผนงาน TQM รายสล็อต
               </h3>
               <span className="text-xxs bg-hora-gold/10 border border-hora-gold/30 text-hora-gold px-2.5 py-1 rounded-full uppercase tracking-wider font-bold">
-                8 HORA CALENDAR
+                16 HORA CALENDAR
               </span>
             </div>
 

@@ -2,8 +2,21 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
-import { calculateHora } from "@/engine/phopephum-calculator";
-import { Sparkles, Calendar, User, Zap, LogOut, ArrowUpRight, ShieldCheck, Download, History, Map, Compass, Scroll, Target, Award, Heart, Activity, CheckSquare } from "lucide-react";
+import { 
+  calculateHora, 
+  DAYTIME_YAM_STARS, 
+  NIGHTTIME_YAM_STARS, 
+  PREDICTION_DATABASE, 
+  NINE_SEGMENTS_DATA, 
+  DAY_NAMES_THAI,
+  minutesToTimeStr,
+  DayOfWeek 
+} from "@/engine/phopephum-calculator";
+import { 
+  Sparkles, Calendar, User, Zap, LogOut, ArrowUpRight, 
+  ShieldCheck, Download, Compass, Award, Heart, 
+  Activity, CheckSquare, Target, Scroll, Map, ChevronDown, ChevronUp 
+} from "lucide-react";
 import Link from "next/link";
 
 export default function DashboardPage() {
@@ -11,11 +24,14 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // Hora calculation state
-  const [inputDate, setInputDate] = useState("");
-  const [inputTime, setInputTime] = useState("");
-  const [calculatedResult, setCalculatedResult] = useState<any>(null);
-  const [isCalculating, setIsCalculating] = useState(false);
+  // New Ashta-Kala manual calculator states
+  const [ashtaDay, setAshtaDay] = useState<number>(new Date().getDay());
+  const [ashtaTime, setAshtaTime] = useState<string>("");
+  const [ashtaResult, setAshtaResult] = useState<any>(null);
+
+  // Accordion states
+  const [showTimeMatrix, setShowTimeMatrix] = useState(false);
+  const [showPredictionDb, setShowPredictionDb] = useState(false);
 
   // AI report generation
   const [generatingReport, setGeneratingReport] = useState(false);
@@ -28,6 +44,42 @@ export default function DashboardPage() {
     birth_details: true,
     subscription_card: true,
   });
+
+  // Helper for Ashta-Kala calculation
+  const handleAshtaCalculate = (day: number, timeVal: string) => {
+    try {
+      if (!timeVal) return;
+      const cleanTime = timeVal.replace(":", ".");
+      const [hStr, mStr] = cleanTime.split(".");
+      const hours = parseInt(hStr || "0") % 24;
+      const minutes = parseInt(mStr || "0") % 60;
+
+      const date = new Date();
+      const currentDay = date.getDay();
+      const diff = day - currentDay;
+      date.setDate(date.getDate() + diff);
+      date.setHours(hours, minutes, 0, 0);
+
+      const result = calculateHora({ date, currentTime: date });
+      setAshtaResult(result);
+    } catch (err) {
+      console.error("Error calculating Ashta-Kala:", err);
+    }
+  };
+
+  useEffect(() => {
+    const now = new Date();
+    // Default format "HH.MM"
+    const defaultTime = `${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`;
+    setAshtaTime(defaultTime);
+    setAshtaDay(now.getDay());
+  }, []);
+
+  useEffect(() => {
+    if (ashtaTime) {
+      handleAshtaCalculate(ashtaDay, ashtaTime);
+    }
+  }, [ashtaDay, ashtaTime]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -49,18 +101,13 @@ export default function DashboardPage() {
         
         if (prof) {
           setProfile(prof);
-          // Set initial date/time for calculator based on birthdate
-          setInputDate(prof.birth_date);
-          setInputTime(prof.birth_time || "12:00");
-          
-          // Pre-calculate
-          const birthDateObj = new Date(prof.birth_date);
-          const timeParts = (prof.birth_time || "12:00").split(":");
-          const combinedDate = new Date(birthDateObj);
-          combinedDate.setHours(parseInt(timeParts[0]), parseInt(timeParts[1]));
-
-          const result = calculateHora({ date: combinedDate, currentTime: combinedDate });
-          setCalculatedResult(result);
+          if (prof.birth_time) {
+            setAshtaTime(prof.birth_time.replace(":", "."));
+          }
+          if (prof.birth_date) {
+            const birthDateObj = new Date(prof.birth_date);
+            setAshtaDay(birthDateObj.getDay());
+          }
 
           // Fetch the latest generated AI report for the dashboard
           const { data: latestReport } = await supabase
@@ -103,25 +150,6 @@ export default function DashboardPage() {
     window.location.href = "/";
   };
 
-  const handleRecalculate = (e?: React.FormEvent) => {
-    if (e) e.preventDefault();
-    if (!inputDate) return;
-
-    setIsCalculating(true);
-    setTimeout(() => {
-      const dateObj = new Date(inputDate);
-      const combinedDate = new Date(dateObj);
-      if (inputTime) {
-        const timeParts = inputTime.split(":");
-        combinedDate.setHours(parseInt(timeParts[0]), parseInt(timeParts[1]));
-      }
-      
-      const result = calculateHora({ date: combinedDate, currentTime: combinedDate });
-      setCalculatedResult(result);
-      setIsCalculating(false);
-    }, 400);
-  };
-
   const handleGenerateReport = async () => {
     if (generatingReport) return;
     setGeneratingReport(true);
@@ -142,7 +170,6 @@ export default function DashboardPage() {
       if (res.ok && data.success) {
         setReportResult(data.data.content);
       } else {
-        // Fallback or show error
         console.error("Failed to generate report");
       }
     } catch (err) {
@@ -163,18 +190,18 @@ export default function DashboardPage() {
     );
   }
 
-  const current = calculatedResult?.currentHora;
   const isPremium = profile?.plan === "pro" || profile?.plan === "premium";
+  const activeYam = ashtaResult?.currentHora;
 
   return (
-    <div className="min-h-screen bg-cosmic-950 text-foreground font-sans pb-20 selection:bg-gold-500 selection:text-cosmic-950">
+    <div className="min-h-screen bg-cosmic-950 text-foreground font-sans pb-20 selection:bg-gold-500 selection:text-cosmic-950 relative overflow-x-hidden">
       {/* Background layers */}
       <div className="bg-cosmic-portal" />
       <div className="cosmic-nebula-aura" />
       <div className="cosmic-zodiac-wheel" />
 
       {/* Header Bar */}
-      <header className="sticky top-0 z-40 glass-hora border-b border-white/5">
+      <header className="sticky top-0 z-40 glass-hora border-b border-white/5 backdrop-blur-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center gap-8">
             <div className="flex items-center gap-2 sm:gap-3">
@@ -205,7 +232,7 @@ export default function DashboardPage() {
             {(profile?.role === "admin" || profile?.full_name?.includes("ครูเด่น")) && (
               <Link
                 href="/admin"
-                className="text-[10px] text-gold-300 hover:text-gold-500 bg-gold-500/10 border border-gold-500/30 rounded-full px-4 py-2 glass-hora transition-colors font-bold flex items-center gap-1.5 uppercase tracking-widest shadow-inner flex"
+                className="text-[10px] text-gold-300 hover:text-gold-500 bg-gold-500/10 border border-gold-500/30 rounded-full px-4 py-2 glass-hora transition-colors font-bold flex items-center gap-1.5 uppercase tracking-widest shadow-inner"
               >
                 ⚙️ แผงควบคุมแอดมิน
               </Link>
@@ -273,10 +300,10 @@ export default function DashboardPage() {
 
                 {!isPremium && (
                   <div className="pt-6 border-t border-white/5">
-                    <p className="text-xs text-text-secondary leading-relaxed mb-6 italic">
+                    <p className="text-xs text-text-secondary leading-relaxed mb-6 italic text-left">
                       &ldquo;ปลดล็อกพลังมหาอุจจ์ เพื่อรับการวิเคราะห์ยามมงคลเฉพาะบุคคลและรายงาน PDF ระดับ Imperial&rdquo;
                     </p>
-                    <Link href="/#pricing" className="btn-hora w-full text-xs">
+                    <Link href="/#pricing" className="btn-hora w-full text-xs flex justify-center items-center">
                       อัปเกรดแผนพรีเมียม <ArrowUpRight className="ml-2 w-4 h-4" />
                     </Link>
                   </div>
@@ -286,85 +313,370 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Middle and Right */}
+        {/* Middle and Right Column */}
         <div className="md:col-span-2 space-y-8">
           
-          {/* Calculator */}
-          <div className="glass-hora p-6 sm:p-8">
-            <div className="mb-8">
-              <h3 className="text-xl font-serif font-bold text-gold-500 flex items-center gap-3 uppercase tracking-widest">
-                <Target className="w-6 h-6" /> คำนวณยามอัฐกาล
-              </h3>
-              <p className="text-xs text-text-secondary mt-2 font-medium">ระบุเวลาเพื่อเปิดรหัสยามมงคลเฉพาะกิจ</p>
+          {/* 🔮 โซนที่ ๑ : เครื่องมือคำนวณยามอัฐกาลอัตโนมัติ */}
+          <div className="glass-hora p-6 sm:p-8 border-gold-500/20 bg-gradient-to-b from-cosmic-900/40 to-cosmic-950/80 relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gold-500/5 rounded-full blur-2xl pointer-events-none" />
+            
+            <div className="mb-6 flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-white/5 pb-4">
+              <div>
+                <span className="text-xxs text-gold-500 font-bold uppercase tracking-[0.3em] flex items-center gap-2">
+                  🔮 ระบบคำนวณยามอัฐกาลอัตโนมัติ
+                </span>
+                <h3 className="text-lg sm:text-xl font-serif font-bold text-gold-300 mt-1">
+                  ⬡ โซนที่ ๑ : เครื่องมือคำนวณยาม
+                </h3>
+              </div>
             </div>
 
-            <form onSubmit={handleRecalculate} className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end mb-8">
-              <div className="space-y-2">
-                <label className="text-xxs font-bold uppercase tracking-widest text-hora-text-muted ml-1">วันเดือนปี</label>
-                <input
-                  type="date"
-                  required
-                  value={inputDate}
-                  onChange={(e) => setInputDate(e.target.value)}
-                  className="w-full bg-cosmic-950/50 border border-white/10 focus:border-gold-500/50 rounded-xl px-4 py-3 text-sm outline-none transition-all"
-                />
+            {/* Inputs Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-start mb-6">
+              <div className="space-y-2 text-left">
+                <label className="text-xxs font-bold uppercase tracking-widest text-gold-400 ml-1">เลือกวัน:</label>
+                <select
+                  value={ashtaDay}
+                  onChange={(e) => setAshtaDay(parseInt(e.target.value))}
+                  className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-xl px-4 py-3 text-sm text-foreground outline-none transition-all cursor-pointer"
+                >
+                  {DAY_NAMES_THAI.map((name, i) => (
+                    <option key={i} value={i} className="bg-cosmic-950 text-foreground">วัน{name}</option>
+                  ))}
+                </select>
               </div>
-              <div className="space-y-2">
-                <label className="text-xxs font-bold uppercase tracking-widest text-hora-text-muted ml-1">เวลาเกิด</label>
-                <input
-                  type="time"
-                  required
-                  value={inputTime}
-                  onChange={(e) => setInputTime(e.target.value)}
-                  className="w-full bg-cosmic-950/50 border border-white/10 focus:border-gold-500/50 rounded-xl px-4 py-3 text-sm outline-none transition-all"
-                />
-              </div>
-              <button type="submit" disabled={isCalculating} className="btn-hora w-full">
-                {isCalculating ? "ประมวลผล..." : "เปิดรหัสยาม"}
-              </button>
-            </form>
 
-            {calculatedResult && (
-              <div className="border-t border-white/5 pt-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-                <div className="flex items-center gap-3 bg-gold-500/5 border border-gold-500/10 rounded-full px-5 py-2.5 mb-8 w-fit mx-auto sm:mx-0">
-                  <span className="text-xxs text-gold-500 font-bold uppercase tracking-widest">ยามกำเนิด</span>
-                  <div className="w-1 h-1 rounded-full bg-gold-500/30" />
-                  <span className="text-xxs text-text-secondary font-medium tracking-wide">
-                    {new Date(inputDate).toLocaleDateString('th-TH', { dateStyle: 'long' })} · {inputTime} น.
-                  </span>
+              <div className="space-y-2 text-left">
+                <label className="text-xxs font-bold uppercase tracking-widest text-gold-400 ml-1">กรอกเวลา (ชั่วโมง.นาที เช่น 14.30):</label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="เช่น 23.22"
+                    value={ashtaTime}
+                    onChange={(e) => setAshtaTime(e.target.value)}
+                    className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-xl px-4 py-3 text-sm text-foreground outline-none transition-all placeholder:text-text-secondary/40 font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const now = new Date();
+                      setAshtaDay(now.getDay());
+                      setAshtaTime(`${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`);
+                    }}
+                    className="absolute right-3 top-3.5 text-[10px] font-bold text-gold-500 hover:text-gold-300 transition-colors uppercase tracking-widest"
+                  >
+                    ⏰ ปัจจุบัน
+                  </button>
                 </div>
+              </div>
+            </div>
 
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-8 bg-cosmic-900/40 p-6 rounded-3xl border border-white/5">
-                  <div className="text-center sm:text-left flex-1">
-                    <h4 className="text-2xl font-serif font-bold text-gold-300 mb-2">วัน{calculatedResult.dayNameThai}</h4>
-                    {current && (
-                      <div className="space-y-3">
-                        <div className="flex flex-col gap-1">
-                          <span className="text-xxs font-bold uppercase tracking-widest text-hora-text-muted">ยามใหญ่ที่ {current.majorIndex}</span>
-                          <span className="text-lg font-medium text-foreground">{current.majorSlot.startTime} – {current.majorSlot.endTime} น.</span>
-                        </div>
-                        <div className="pt-2">
-                          <span className="text-xxs font-bold uppercase tracking-widest text-gold-500/60 block mb-1">ดาวครองยาม</span>
-                          <p className="text-sm font-semibold text-gold-400">
-                            {current.subSlot.planet.nameThai} ({current.subSlot.planet.symbol})
-                          </p>
-                          <p className="text-xs text-text-secondary mt-1 max-w-sm italic">{current.subSlot.planet.description}</p>
-                        </div>
-                      </div>
-                    )}
+            {/* Dynamic Result Displays */}
+            {activeYam ? (
+              <div className="space-y-6 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                
+                {/* Cards Grid: ยามที่ | ชื่อยาม | ช่วงเวลา | ยามย่อย */}
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                  
+                  {/* ยามที่ */}
+                  <div className="bg-cosmic-950/60 border border-white/5 rounded-2xl p-4 text-center">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-hora-text-muted block mb-1">ยามที่:</span>
+                    <span className="text-3xl font-serif font-bold text-gold-300">{activeYam.yamNumber}</span>
                   </div>
 
-                  {featureToggles.planet_orbit && (
-                    <div className="relative w-36 h-36 flex items-center justify-center rounded-full border border-gold-500/20 bg-cosmic-950 shadow-[0_0_50px_rgba(198,169,107,0.05)] float-element">
-                      <div className="absolute inset-2 rounded-full border border-dashed border-gold-500/10 animate-[spin_60s_linear_infinite]" />
-                      <div className="text-center z-10">
-                        <span className="text-5xl block mb-1 filter drop-shadow-[0_0_15px_rgba(198,169,107,0.5)]" style={{ color: current?.subSlot.planet.color }}>
-                          {current?.subSlot.planet.symbol}
-                        </span>
-                        <span className="text-xxs font-bold text-gold-300 uppercase tracking-widest">{current?.subSlot.planet.nameThai}</span>
-                      </div>
+                  {/* ชื่อยาม */}
+                  <div className="bg-cosmic-950/60 border border-white/5 rounded-2xl p-4 text-center">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-hora-text-muted block mb-1">ชื่อยาม:</span>
+                    <span className="text-base sm:text-lg font-bold text-foreground block mt-1.5">
+                      {activeYam.period === "day" ? "กลางวัน" : "กลางคืน"}
+                    </span>
+                  </div>
+
+                  {/* ช่วงเวลา */}
+                  <div className="bg-cosmic-950/60 border border-white/5 rounded-2xl p-4 text-center">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-hora-text-muted block mb-1">ช่วงเวลา:</span>
+                    <span className="text-base sm:text-lg font-bold text-gold-400 block mt-1.5">
+                      {activeYam.starName}
+                    </span>
+                  </div>
+
+                  {/* ยามย่อย */}
+                  <div className="bg-cosmic-950/60 border border-white/5 rounded-2xl p-4 text-center">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-hora-text-muted block mb-1">ยามย่อย:</span>
+                    <span className="text-base sm:text-lg font-bold text-foreground block mt-1.5">
+                      {activeYam.activeSubYam.name}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Predictions Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                  
+                  {/* เรื่องที่ได้ยิน */}
+                  <div className="bg-cosmic-900/30 border border-white/5 rounded-2xl p-5 hover:border-gold-500/25 transition-all">
+                    <div className="flex items-center gap-2 text-pink-400 font-bold text-xs uppercase tracking-wider mb-2.5">
+                      <span>📢</span> เรื่องที่ได้ยิน
                     </div>
-                  )}
+                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
+                      {activeYam.predictions.hearing}
+                    </p>
+                  </div>
+
+                  {/* คนเจ็บไข้ */}
+                  <div className="bg-cosmic-900/30 border border-white/5 rounded-2xl p-5 hover:border-gold-500/25 transition-all">
+                    <div className="flex items-center gap-2 text-red-400 font-bold text-xs uppercase tracking-wider mb-2.5">
+                      <span>🏥</span> คนเจ็บไข้
+                    </div>
+                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
+                      {activeYam.predictions.sick}
+                    </p>
+                  </div>
+
+                  {/* ของหาย */}
+                  <div className="bg-cosmic-900/30 border border-white/5 rounded-2xl p-5 hover:border-gold-500/25 transition-all">
+                    <div className="flex items-center gap-2 text-yellow-400 font-bold text-xs uppercase tracking-wider mb-2.5">
+                      <span>🔍</span> ของหาย
+                    </div>
+                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
+                      {activeYam.predictions.lost}
+                    </p>
+                  </div>
+
+                  {/* การเดินทาง */}
+                  <div className="bg-cosmic-900/30 border border-white/5 rounded-2xl p-5 hover:border-gold-500/25 transition-all">
+                    <div className="flex items-center gap-2 text-blue-400 font-bold text-xs uppercase tracking-wider mb-2.5">
+                      <span>🚗</span> การเดินทาง ({activeYam.activeSubYam.name})
+                    </div>
+                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
+                      {activeYam.predictions.travel}
+                    </p>
+                  </div>
+                </div>
+
+                {/* 9 Segment: ยามซอย 9 ฤกษ์ (ราหูค้นทรัพย์) */}
+                <div className="bg-gold-500/5 border border-gold-500/20 rounded-2xl p-5 text-left flex flex-col sm:flex-row items-center sm:items-start gap-4">
+                  <div className="w-10 h-10 rounded-xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center font-bold text-gold-400 text-lg flex-shrink-0">
+                    {activeYam.activeNineSegment.index}
+                  </div>
+                  <div className="flex-1 space-y-1.5 text-center sm:text-left">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 justify-center sm:justify-start">
+                      <span className="text-xxs font-bold text-gold-400 uppercase tracking-widest">ยามซอยราหูค้นทรัพย์:</span>
+                      <span className="bg-gold-500/20 border border-gold-500/30 text-gold-300 px-2 py-0.5 rounded-md text-[10px] font-bold">
+                        {activeYam.activeNineSegment.name}
+                      </span>
+                    </div>
+                    <p className="text-xs text-text-secondary leading-relaxed">
+                      {activeYam.activeNineSegment.description}
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            ) : (
+              <div className="h-48 border border-dashed border-white/5 rounded-2xl flex items-center justify-center">
+                <p className="text-xs text-hora-text-muted uppercase tracking-widest font-bold">กรุณากรอกเวลาเพื่อประมวลผลยามอัฐกาล</p>
+              </div>
+            )}
+          </div>
+
+          {/* ⬡ โซนที่ ๒ : คลังข้อมูลตารางเวลา (Time Matrix) Accordion */}
+          <div className="glass-hora border-white/5 overflow-hidden">
+            <button
+              onClick={() => setShowTimeMatrix(!showTimeMatrix)}
+              className="w-full px-6 py-5 flex items-center justify-between text-left font-serif font-bold text-gold-500 hover:text-gold-300 transition-colors border-b border-white/5 cursor-pointer bg-cosmic-900/10"
+            >
+              <span className="flex items-center gap-2.5 text-sm sm:text-base uppercase tracking-widest">
+                <Map className="w-5 h-5 text-gold-500" /> ⬡ โซนที่ ๒ : คลังข้อมูลตารางเวลา (Time Matrix)
+              </span>
+              {showTimeMatrix ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </button>
+            
+            {showTimeMatrix && (
+              <div className="p-6 space-y-8 animate-in slide-in-from-top-2 duration-300">
+                
+                {/* ✦ ตารางยามกลางวัน */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-gold-300 flex items-center gap-2">
+                    ✦ ตารางยามกลางวัน (06:00 - 18:00)
+                  </h4>
+                  <div className="overflow-x-auto rounded-xl border border-white/5">
+                    <table className="w-full text-center border-collapse text-[10px] sm:text-xs">
+                      <thead>
+                        <tr className="bg-cosmic-950 text-gold-500 font-bold border-b border-white/5">
+                          <th className="p-3 text-left">วัน / ยาม</th>
+                          {Array.from({ length: 8 }).map((_, idx) => (
+                            <th key={idx} className="p-3 whitespace-nowrap">
+                              ยาม {idx + 1}<br/>
+                              <span className="text-[9px] text-text-secondary/60">
+                                {minutesToTimeStr(360 + idx * 90)}-{minutesToTimeStr(360 + (idx + 1) * 90)}
+                              </span>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 font-medium">
+                        {DAY_NAMES_THAI.map((name, dIdx) => (
+                          <tr 
+                            key={dIdx} 
+                            className={`hover:bg-white/5 transition-colors ${ashtaDay === dIdx && activeYam?.period === "day" ? "bg-gold-500/10 text-gold-200" : "text-text-secondary"}`}
+                          >
+                            <td className="p-3 font-bold text-left bg-cosmic-950/40 text-foreground">{name}</td>
+                            {DAYTIME_YAM_STARS[dIdx as DayOfWeek].map((star, yIdx) => {
+                              const isCurrentCell = ashtaDay === dIdx && activeYam?.period === "day" && activeYam?.yamNumber === (yIdx + 1);
+                              return (
+                                <td 
+                                  key={yIdx} 
+                                  className={`p-3 whitespace-nowrap ${isCurrentCell ? "bg-gold-500/25 text-gold-300 border border-gold-500/40 font-bold" : ""}`}
+                                >
+                                  {star}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* ✦ ตารางยามกลางคืน */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-gold-300 flex items-center gap-2">
+                    ✦ ตารางยามกลางคืน (18:00 - 06:00)
+                  </h4>
+                  <div className="overflow-x-auto rounded-xl border border-white/5">
+                    <table className="w-full text-center border-collapse text-[10px] sm:text-xs">
+                      <thead>
+                        <tr className="bg-cosmic-950 text-gold-500 font-bold border-b border-white/5">
+                          <th className="p-3 text-left">วัน / ยาม</th>
+                          {Array.from({ length: 8 }).map((_, idx) => (
+                            <th key={idx} className="p-3 whitespace-nowrap">
+                              ยาม {idx + 1}<br/>
+                              <span className="text-[9px] text-text-secondary/60">
+                                {minutesToTimeStr(1080 + idx * 90)}-{minutesToTimeStr(1080 + (idx + 1) * 90)}
+                              </span>
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 font-medium">
+                        {DAY_NAMES_THAI.map((name, dIdx) => (
+                          <tr 
+                            key={dIdx} 
+                            className={`hover:bg-white/5 transition-colors ${ashtaDay === dIdx && activeYam?.period === "night" ? "bg-gold-500/10 text-gold-200" : "text-text-secondary"}`}
+                          >
+                            <td className="p-3 font-bold text-left bg-cosmic-950/40 text-foreground">{name}</td>
+                            {NIGHTTIME_YAM_STARS[dIdx as DayOfWeek].map((star, yIdx) => {
+                              const isCurrentCell = ashtaDay === dIdx && activeYam?.period === "night" && activeYam?.yamNumber === (yIdx + 1);
+                              return (
+                                <td 
+                                  key={yIdx} 
+                                  className={`p-3 whitespace-nowrap ${isCurrentCell ? "bg-gold-500/25 text-gold-300 border border-gold-500/40 font-bold" : ""}`}
+                                >
+                                  {star}
+                                </td>
+                              );
+                            })}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* ✦ ตารางช่วงยามย่อย */}
+                <div className="space-y-4">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-gold-300 flex items-center gap-2">
+                    ✦ ตารางช่วงยามย่อย (ยามต้น / ยามกลาง / ยามปลาย)
+                  </h4>
+                  <div className="overflow-x-auto rounded-xl border border-white/5">
+                    <table className="w-full text-center border-collapse text-[10px] sm:text-xs">
+                      <thead>
+                        <tr className="bg-cosmic-950 text-gold-500 font-bold border-b border-white/5">
+                          <th className="p-3 text-left">ยามที่</th>
+                          <th className="p-3">ยามต้น (30 นาทีแรก)</th>
+                          <th className="p-3">ยามกลาง (30 นาทีกลาง)</th>
+                          <th className="p-3">ยามปลาย (30 นาทีสุดท้าย)</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5 font-medium text-text-secondary">
+                        {Array.from({ length: 8 }).map((_, idx) => (
+                          <tr key={idx} className="hover:bg-white/5 transition-colors">
+                            <td className="p-3 font-bold text-left bg-cosmic-950/40 text-foreground">กลางวัน ยาม {idx + 1}</td>
+                            <td className="p-3">{minutesToTimeStr(360 + idx * 90)} - {minutesToTimeStr(360 + idx * 90 + 30)}</td>
+                            <td className="p-3">{minutesToTimeStr(360 + idx * 90 + 30)} - {minutesToTimeStr(360 + idx * 90 + 60)}</td>
+                            <td className="p-3">{minutesToTimeStr(360 + idx * 90 + 60)} - {minutesToTimeStr(360 + (idx + 1) * 90)}</td>
+                          </tr>
+                        ))}
+                        {Array.from({ length: 8 }).map((_, idx) => (
+                          <tr key={idx} className="hover:bg-white/5 transition-colors">
+                            <td className="p-3 font-bold text-left bg-cosmic-950/40 text-foreground">กลางคืน ยาม {idx + 1}</td>
+                            <td className="p-3">{minutesToTimeStr(1080 + idx * 90)} - {minutesToTimeStr(1080 + idx * 90 + 30)}</td>
+                            <td className="p-3">{minutesToTimeStr(1080 + idx * 90 + 30)} - {minutesToTimeStr(1080 + idx * 90 + 60)}</td>
+                            <td className="p-3">{minutesToTimeStr(1080 + idx * 90 + 60)} - {minutesToTimeStr(1080 + (idx + 1) * 90)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+              </div>
+            )}
+          </div>
+
+          {/* ⬡ โซนที่ ๓ : คลังข้อมูลคำทำนาย (Prediction Database) Accordion */}
+          <div className="glass-hora border-white/5 overflow-hidden">
+            <button
+              onClick={() => setShowPredictionDb(!showPredictionDb)}
+              className="w-full px-6 py-5 flex items-center justify-between text-left font-serif font-bold text-gold-500 hover:text-gold-300 transition-colors border-b border-white/5 cursor-pointer bg-cosmic-900/10"
+            >
+              <span className="flex items-center gap-2.5 text-sm sm:text-base uppercase tracking-widest">
+                <Scroll className="w-5 h-5 text-gold-500" /> ⬡ โซนที่ ๓ : คลังข้อมูลคำทำนาย (Prediction Database)
+              </span>
+              {showPredictionDb ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+            </button>
+            
+            {showPredictionDb && (
+              <div className="p-6 space-y-6 animate-in slide-in-from-top-2 duration-300">
+                <div className="overflow-x-auto rounded-xl border border-white/5">
+                  <table className="w-full text-left border-collapse text-[10px] sm:text-xs">
+                    <thead>
+                      <tr className="bg-cosmic-950 text-gold-500 font-bold border-b border-white/5">
+                        <th className="p-3">ยามที่</th>
+                        <th className="p-3 whitespace-nowrap">ชื่อยาม</th>
+                        <th className="p-3">เรื่องที่ได้ยิน</th>
+                        <th className="p-3">คนเจ็บไข้</th>
+                        <th className="p-3">ของหาย</th>
+                        <th className="p-3">การเดินทาง (ยามต้น)</th>
+                        <th className="p-3">การเดินทาง (ยามกลาง)</th>
+                        <th className="p-3">การเดินทาง (ยามปลาย)</th>
+                        <th className="p-3">เวลาที่ดี</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5 font-medium text-text-secondary leading-relaxed">
+                      {Object.keys(PREDICTION_DATABASE).map((key) => {
+                        const num = parseInt(key);
+                        const data = PREDICTION_DATABASE[num];
+                        return (
+                          <tr key={key} className={`hover:bg-white/5 transition-colors ${activeYam?.starNumber === num ? "bg-gold-500/10 text-gold-200" : ""}`}>
+                            <td className="p-3 font-bold text-center text-foreground bg-cosmic-950/40">{num}</td>
+                            <td className="p-3 font-bold whitespace-nowrap bg-cosmic-950/20 text-gold-400">
+                              {data.starNameDay} (วัน)<br/>
+                              {data.starNameNight} (คืน)
+                            </td>
+                            <td className="p-3 min-w-[150px]">{data.hearing}</td>
+                            <td className="p-3 min-w-[100px]">{data.sick}</td>
+                            <td className="p-3 min-w-[150px]">{data.lost}</td>
+                            <td className="p-3 min-w-[150px]">{data.travelStart}</td>
+                            <td className="p-3 min-w-[150px]">{data.travelMiddle}</td>
+                            <td className="p-3 min-w-[150px]">{data.travelEnd}</td>
+                            <td className="p-3 font-bold text-gold-500 whitespace-nowrap">{data.bestTime}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}
