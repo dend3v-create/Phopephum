@@ -10,7 +10,14 @@ export type SevenBaseCategory =
   | "phopephum_meaning"
   | "definition"
   | "prediction_guideline"
-  | "reading_logic";
+  | "reading_logic"
+  | "seven_base_9_stars"
+  | "hora_tai_noo"
+  | "thai_astrology"
+  | "attakarn_hora"
+  | "psychology_philosophy"
+  | "chakra_energy"
+  | "therapy_life_guide";
 
 export interface SevenBaseChart {
   row1: number[]; // แถวที่ 1: วันเกิด (1-7)

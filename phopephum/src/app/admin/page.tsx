@@ -264,6 +264,13 @@ export default function AdminPage() {
                     <option value="definition">คำจำกัดความบางอย่าง (Definitions)</option>
                     <option value="prediction_guideline">แนวทางการทำนาย (Prediction Guidelines)</option>
                     <option value="reading_logic">Logic การอ่านคำทำนาย (Prediction Logic)</option>
+                    <option value="seven_base_9_stars">เลข 7 ตัว 9 ฐาน (7 Base 9 Stars)</option>
+                    <option value="hora_tai_noo">โหรทายหนู (Hora Tai Noo)</option>
+                    <option value="thai_astrology">โหราศาสตร์ไทย (Thai Astrology)</option>
+                    <option value="attakarn_hora">ยามอัฐกาล (Attakarn Hora)</option>
+                    <option value="psychology_philosophy">จิตวิทยาและปรัชญา (Psychology & Philosophy)</option>
+                    <option value="chakra_energy">จักระและพลังงาน (Chakra & Energy)</option>
+                    <option value="therapy_life_guide">การบำบัดและไกด์ชีวิต (Therapy & Life Guide)</option>
                   </select>
                 </div>
               </div>
@@ -333,6 +340,13 @@ export default function AdminPage() {
                           {item.category === "definition" && "คำจำกัดความ"}
                           {item.category === "prediction_guideline" && "แนวทางการทำนาย"}
                           {item.category === "reading_logic" && "Logic การทำนาย"}
+                          {item.category === "seven_base_9_stars" && "เลข 7 ตัว 9 ฐาน"}
+                          {item.category === "hora_tai_noo" && "โหรทายหนู"}
+                          {item.category === "thai_astrology" && "โหราศาสตร์ไทย"}
+                          {item.category === "attakarn_hora" && "ยามอัฐกาล"}
+                          {item.category === "psychology_philosophy" && "จิตวิทยาและปรัชญา"}
+                          {item.category === "chakra_energy" && "จักระและพลังงาน"}
+                          {item.category === "therapy_life_guide" && "การบำบัดและไกด์ชีวิต"}
                         </span>
                       </div>
                       <p className="text-xs text-hora-text-muted line-clamp-3 leading-relaxed text-left whitespace-pre-wrap">
