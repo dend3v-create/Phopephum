@@ -202,6 +202,14 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-4">
+            {profile?.role === "admin" && (
+              <Link
+                href="/admin"
+                className="text-[10px] text-gold-300 hover:text-gold-500 bg-gold-500/10 border border-gold-500/30 rounded-full px-4 py-2 glass-hora transition-colors font-bold flex items-center gap-1.5 uppercase tracking-widest shadow-inner hidden sm:flex"
+              >
+                ⚙️ แผงควบคุมแอดมิน
+              </Link>
+            )}
             <span className="text-sm text-text-secondary hidden sm:flex items-center gap-2">
               <User className="w-4 h-4 text-gold-500" /> {profile?.full_name}
             </span>
