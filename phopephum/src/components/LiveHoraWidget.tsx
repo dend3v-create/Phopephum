@@ -2,14 +2,13 @@
 
 import React, { useState, useEffect } from "react";
 import { calculateHora, HoraResult } from "@/engine/phopephum-calculator";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Clock, Target, Compass } from "lucide-react";
 
 export default function LiveHoraWidget() {
   const [now, setNow] = useState(new Date());
   const [horaResult, setHoraResult] = useState<HoraResult | null>(null);
 
   useEffect(() => {
-    // อัปเดตเวลาทุกวินาทีเพื่อให้เข็มวินาทีหรือนาฬิกาเดินจริง
     const timer = setInterval(() => {
       const currentTime = new Date();
       setNow(currentTime);
@@ -17,7 +16,6 @@ export default function LiveHoraWidget() {
       setHoraResult(result);
     }, 1000);
 
-    // คำนวณครั้งแรกทันทีที่ mount
     const initialResult = calculateHora({ date: now, currentTime: now });
     setHoraResult(initialResult);
 
@@ -26,8 +24,8 @@ export default function LiveHoraWidget() {
 
   if (!horaResult || !horaResult.currentHora) {
     return (
-      <div className="max-w-4xl mx-auto glass-hora rounded-2xl p-8 border border-hora-dark-border min-h-[300px] flex items-center justify-center">
-        <div className="text-hora-gold animate-pulse">กำลังคำนวณยามอัฐกาล...</div>
+      <div className="max-w-4xl mx-auto glass-hora rounded-3xl p-8 border border-white/5 min-h-[300px] flex items-center justify-center">
+        <div className="text-gold-500 animate-pulse font-serif tracking-widest uppercase text-xs">ประมวลผลกระแสดวงดาว...</div>
       </div>
     );
   }
@@ -35,64 +33,67 @@ export default function LiveHoraWidget() {
   const { currentHora: current } = horaResult;
 
   return (
-    <div className="max-w-4xl mx-auto glass-hora rounded-2xl p-4 sm:p-6 border border-hora-dark-border relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-24 h-24 bg-hora-gold/5 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Header label — ยามสด ณ ปัจจุบัน */}
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs text-hora-gold font-semibold uppercase tracking-widest flex items-center gap-2">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-hora-gold opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-hora-gold"></span>
+    <div className="max-w-4xl mx-auto glass-hora rounded-[2rem] p-5 sm:p-8 border border-white/5 relative overflow-hidden bg-cosmic-900/30">
+      <div className="absolute top-0 right-0 w-48 h-48 bg-gold-500/5 rounded-full blur-[80px] pointer-events-none" />
+      
+      {/* Header label */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold-500 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-gold-500 shadow-[0_0_10px_rgba(198,169,107,0.8)]"></span>
+          </div>
+          <span className="text-xxs font-bold text-gold-500 uppercase tracking-[0.3em]">ยามอัฐกาลสด ณ ปัจจุบัน</span>
+        </div>
+        <div className="flex items-center gap-2 bg-cosmic-950/50 px-4 py-2 rounded-full border border-white/5 shadow-inner">
+          <Clock className="w-3.5 h-3.5 text-gold-500/60" />
+          <span className="text-xs font-bold text-gold-300 tracking-widest font-mono">
+            {now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
           </span>
-          ยามอัฐกาลสด ณ ปัจจุบัน
-        </span>
-        <span className="text-xs font-mono text-hora-gold bg-hora-gold/10 px-2 py-0.5 rounded-full">
-          {now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-        </span>
+        </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col md:flex-row items-center justify-between gap-10">
         {/* Left: Info */}
-        <div className="text-left space-y-2 flex-1 min-w-0">
-          <h3 className="text-base sm:text-xl font-serif font-semibold text-hora-gold-light">
-            วัน{horaResult.dayNameThai}
-          </h3>
-
-          <div className="flex items-center gap-2">
-            <div className="bg-hora-gold/10 p-1.5 rounded-lg flex-shrink-0">
-              <Sparkles className="w-4 h-4 text-hora-gold" />
-            </div>
-            <div className="min-w-0">
-              <span className="text-sm text-hora-text font-medium block leading-snug">
-                ยามใหญ่ที่ {current.majorIndex} ({current.majorSlot.startTime}–{current.majorSlot.endTime} น.)
-              </span>
-              <span className="text-[10px] text-hora-gold/60 uppercase tracking-wider">{current.majorSlot.name}</span>
-            </div>
+        <div className="text-left space-y-6 flex-1 w-full">
+          <div className="space-y-1">
+            <h3 className="text-3xl sm:text-4xl font-serif font-bold text-gradient-gold">
+              วัน{horaResult.dayNameThai}
+            </h3>
+            <p className="text-xxs font-bold text-text-secondary/60 uppercase tracking-[0.2em] flex items-center gap-2">
+              <Target className="w-3 h-3" /> ยามใหญ่ที่ {current.majorIndex} · {current.majorSlot.name}
+            </p>
           </div>
 
-          <div className="bg-white/5 border border-white/5 rounded-xl p-3">
-            <p className="text-[11px] text-hora-text-muted mb-1.5">ดาวผู้ปกครองยามย่อย:</p>
-            <div className="flex items-center gap-2.5">
-              <span className="text-2xl sm:text-3xl flex-shrink-0" style={{ color: current.subSlot.planet.color }}>
-                {current.subSlot.planet.symbol}
-              </span>
-              <div className="min-w-0">
-                <strong className="text-hora-gold text-sm block">{current.subSlot.planet.nameThai}</strong>
-                <p className="text-[11px] text-hora-text/60 leading-snug line-clamp-2">{current.subSlot.planet.description}</p>
+          <div className="grid grid-cols-1 gap-4">
+            <div className="bg-cosmic-950/40 border border-white/5 rounded-2xl p-5 shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                <Sparkles className="w-12 h-12 text-gold-500" />
+              </div>
+              <span className="text-[10px] font-bold text-gold-500/50 uppercase tracking-widest mb-2 block">ดาวผู้ปกครองยามย่อย</span>
+              <div className="flex items-center gap-4">
+                <span className="text-4xl sm:text-5xl filter drop-shadow-[0_0_15px_rgba(198,169,107,0.4)]" style={{ color: current.subSlot.planet.color }}>
+                  {current.subSlot.planet.symbol}
+                </span>
+                <div className="min-w-0">
+                  <strong className="text-lg font-serif font-bold text-foreground block tracking-wide">{current.subSlot.planet.nameThai}</strong>
+                  <p className="text-xs text-text-secondary/80 leading-relaxed italic line-clamp-2 mt-0.5">{current.subSlot.planet.description}</p>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Progress bar */}
-          <div className="space-y-1">
-            <div className="flex justify-between text-[10px] text-hora-text-muted">
-              <span>ความคืบหน้ายามย่อย</span>
-              <span className="text-hora-gold">เหลือ {current.minutesRemaining} นาที</span>
+          <div className="space-y-2.5 px-1">
+            <div className="flex justify-between items-end">
+              <span className="text-[10px] font-bold text-text-secondary/40 uppercase tracking-widest flex items-center gap-1.5">
+                <Compass className="w-3 h-3" /> กระแสพลังยาม
+              </span>
+              <span className="text-xxs font-bold text-gold-300 bg-gold-500/10 px-2 py-0.5 rounded uppercase">เหลือ {current.minutesRemaining} นาที</span>
             </div>
-            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="h-1.5 w-full bg-cosmic-950 rounded-full overflow-hidden border border-white/5">
               <div
-                className="h-full tqm-progress-glow transition-all duration-1000 ease-linear"
+                className="h-full tqm-progress-glow transition-all duration-1000 ease-linear shadow-[0_0_10px_rgba(198,169,107,0.4)]"
                 style={{ width: `${current.progressPercent}%` }}
               />
             </div>
@@ -100,50 +101,43 @@ export default function LiveHoraWidget() {
         </div>
 
         {/* Right: Planet orbit circle */}
-        <div className="relative w-28 h-28 sm:w-36 sm:h-36 flex-shrink-0 flex items-center justify-center rounded-full border border-hora-gold/20 bg-hora-dark-card/50 shadow-inner">
-          <div className="absolute inset-2 rounded-full border border-dashed border-hora-gold/10 animate-[spin_60s_linear_infinite]" />
-          <div className="absolute inset-3 rounded-full border border-hora-gold/5" />
+        <div className="relative w-48 h-48 sm:w-56 sm:h-56 flex-shrink-0 flex items-center justify-center rounded-full border border-gold-500/20 bg-cosmic-950/50 shadow-[0_0_80px_rgba(198,169,107,0.05)] float-element">
+          <div className="absolute inset-2 rounded-full border border-dashed border-gold-500/10 animate-[spin_120s_linear_infinite]" />
+          <div className="absolute inset-4 rounded-full border border-white/5 animate-[spin_80s_linear_reverse_infinite]" />
           <div className="text-center z-10">
             <span
-              className="text-4xl sm:text-5xl block mb-0.5 filter drop-shadow-[0_0_12px_rgba(201,169,110,0.4)]"
+              className="text-6xl sm:text-7xl block mb-2 filter drop-shadow-[0_0_20px_rgba(198,169,107,0.6)]"
               style={{ color: current.subSlot.planet.color }}
             >
               {current.subSlot.planet.symbol}
             </span>
-            <span className="text-xs font-serif font-bold text-hora-gold-light block">
+            <span className="text-xs font-serif font-bold text-gold-300 uppercase tracking-[0.2em] block">
               {current.subSlot.planet.nameThai}
             </span>
-            <span className="text-[9px] block text-hora-text-muted uppercase tracking-wider mt-0.5">
-              ดาวครองยาม
+            <span className="text-[9px] block text-text-secondary/40 font-bold uppercase tracking-widest mt-1">
+              ASTRA REGENT
             </span>
           </div>
         </div>
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4 pt-4 border-t border-hora-dark-border/40 text-left">
-        <div>
-          <span className="text-[10px] text-hora-text-muted block uppercase tracking-wider mb-0.5">วันมงคลเด่น</span>
-          <span className="text-xs font-semibold text-hora-gold-light">วัน{horaResult.dayNameThai}</span>
-        </div>
-        <div>
-          <span className="text-[10px] text-hora-text-muted block uppercase tracking-wider mb-0.5">ดาวเจ้าของวัน</span>
-          <span className="text-xs font-semibold text-hora-gold-light">{horaResult.dayRuler.nameThai}</span>
-        </div>
-        <div>
-          <span className="text-[10px] text-hora-text-muted block uppercase tracking-wider mb-0.5">ช่วงเวลา</span>
-          <span className="text-xs font-semibold text-hora-gold-light">
-            {current.subSlot.period === "day" ? "กลางวัน" : "กลางคืน"}
-          </span>
-        </div>
-        <div>
-          <span className="text-[10px] text-hora-text-muted block uppercase tracking-wider mb-0.5">ยามย่อยถัดไป</span>
-          <span className="text-xs font-semibold text-hora-gold-cta">
-            {current.subIndex < 8
-              ? current.majorSlot.subSlots[current.subIndex].planet.nameThai
-              : "ยามใหญ่ถัดไป"}
-          </span>
-        </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-10 pt-8 border-t border-white/5">
+        {[
+          { label: "วันมงคลเด่น", value: `วัน${horaResult.dayNameThai}`, icon: <Target className="w-3 h-3" /> },
+          { label: "ดาวเจ้าของวัน", value: horaResult.dayRuler.nameThai, icon: <Compass className="w-3 h-3" /> },
+          { label: "ภาคกาล", value: current.subSlot.period === "day" ? "กลางวัน (ทิวา)" : "กลางคืน (ราตรี)", icon: <Clock className="w-3 h-3" /> },
+          { label: "ยามถัดไป", value: current.subIndex < 8 ? current.majorSlot.subSlots[current.subIndex].planet.nameThai : "ยามใหญ่ถัดไป", icon: <Sparkles className="w-3 h-3" />, premium: true }
+        ].map((stat, i) => (
+          <div key={i} className="space-y-1.5 p-3 rounded-xl hover:bg-white/5 transition-colors">
+            <span className="text-[10px] font-bold text-text-secondary/40 uppercase tracking-widest flex items-center gap-1.5">
+              {stat.icon} {stat.label}
+            </span>
+            <span className={`text-xs font-bold block tracking-wide ${stat.premium ? 'text-gold-liquid' : 'text-foreground'}`}>
+              {stat.value}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
   );

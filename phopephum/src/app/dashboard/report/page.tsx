@@ -5,13 +5,14 @@ import { createClient } from "@/lib/supabase";
 import { calculateHora } from "@/engine/phopephum-calculator";
 import { useReportDownload } from "@/hooks/useReportDownload";
 import PremiumReportTemplate from "@/components/PremiumReportTemplate";
-import { Download, ArrowLeft, Sparkles, Loader2 } from "lucide-react";
+import { Download, ArrowLeft, Sparkles, Loader2, Calendar, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 export default function ReportPage() {
   const [profile, setProfile] = useState<any>(null);
   const [horaResult, setHoraResult] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [latestReport, setLatestReport] = useState<any>(null);
   const [scale, setScale] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -19,7 +20,6 @@ export default function ReportPage() {
     `phopephum-life-blueprint-${new Date().toISOString().slice(0, 10)}.pdf`
   );
 
-  // Responsive scale for preview
   useEffect(() => {
     const updateScale = () => {
       if (containerRef.current) {
@@ -56,6 +56,18 @@ export default function ReportPage() {
           const result = calculateHora({ date: birthDate, currentTime: birthDate });
           setHoraResult(result);
         }
+
+        const { data: report } = await supabase
+          .from("ai_reports")
+          .select("*")
+          .eq("user_id", user.id)
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (report) {
+          setLatestReport(report.content);
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -67,8 +79,11 @@ export default function ReportPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-hora-dark flex items-center justify-center">
-        <div className="text-hora-gold animate-pulse text-sm">กำลังโหลดรายงาน...</div>
+      <div className="min-h-screen bg-cosmic-950 flex items-center justify-center font-sans">
+        <div className="text-center space-y-4">
+          <div className="w-10 h-10 border-4 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-gold-500/60 uppercase tracking-[0.2em] font-bold">กำลังอัญเชิญปัญญาแห่งดวงดาว...</p>
+        </div>
       </div>
     );
   }
@@ -77,98 +92,82 @@ export default function ReportPage() {
     name: profile?.full_name,
     birthDate: profile?.birth_date,
     birthTime: profile?.birth_time,
+    content: latestReport,
     horaResult,
   };
 
   return (
-    <div className="min-h-screen bg-hora-dark text-hora-text font-sans pb-16">
-      {/* Radial glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(201,169,110,0.08),transparent_60%)] pointer-events-none" />
+    <div className="min-h-screen bg-cosmic-950 text-foreground font-sans pb-16">
+      <div className="bg-cosmic-portal" />
+      <div className="cosmic-nebula-aura" />
 
-      {/* Header */}
-      <header className="sticky top-0 z-40 glass-hora border-b border-hora-dark-border">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 glass-hora border-b border-white/5 bg-cosmic-950/40 backdrop-blur-2xl">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 text-sm text-hora-text-muted hover:text-hora-gold transition-colors"
+            className="flex items-center gap-2 text-xxs font-bold text-text-secondary/60 hover:text-gold-500 transition-all uppercase tracking-widest"
           >
             <ArrowLeft size={14} />
             กลับ Dashboard
           </Link>
-          <div className="flex items-center gap-2">
-            <Sparkles size={14} className="text-hora-gold" />
-            <span className="text-sm font-semibold text-hora-gold-light">รายงานชะตาชีวิต Premium</span>
+          <div className="flex items-center gap-3">
+            <div className="bg-gold-500/10 p-2 rounded-xl">
+              <Sparkles size={16} className="text-gold-500" />
+            </div>
+            <span className="text-xs font-serif font-bold text-gradient-gold tracking-widest uppercase">รายงานพรีเมียม Imperial</span>
           </div>
           <button
             onClick={download}
             disabled={isDownloading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-all"
-            style={{
-              background: isDownloading
-                ? "rgba(212,175,55,0.15)"
-                : "linear-gradient(135deg, rgba(212,175,55,0.9), rgba(176,141,87,0.9))",
-              color: isDownloading ? "rgba(212,175,55,0.5)" : "#0B1C2E",
-              border: "1px solid rgba(212,175,55,0.4)",
-              cursor: isDownloading ? "not-allowed" : "pointer",
-            }}
+            className="btn-hora !py-2 !px-6 !text-[10px] flex items-center gap-2"
           >
             {isDownloading ? (
               <Loader2 size={14} className="animate-spin" />
             ) : (
               <Download size={14} />
             )}
-            {isDownloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF"}
+            {isDownloading ? "Generating..." : "Download PDF"}
           </button>
         </div>
       </header>
 
-      {/* Info bar */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-        <div className="glass-hora rounded-xl border border-hora-dark-border p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <p className="text-sm font-semibold text-hora-gold-light">{profile?.full_name || "ผู้ใช้งาน"}</p>
-            <p className="text-xs text-hora-text-muted">
-              {profile?.birth_date
-                ? new Date(profile.birth_date).toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" })
-                : "—"}
-              {profile?.birth_time ? ` · ${profile.birth_time} น.` : ""}
-            </p>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <div className="glass-hora rounded-3xl border border-gold-500/20 p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-cosmic-900/40 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-gold-500/5 rounded-full blur-3xl pointer-events-none" />
+          <div className="flex items-center gap-5">
+            <div className="w-12 h-12 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 shadow-lg">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <p className="text-base font-serif font-bold text-foreground tracking-wide">{profile?.full_name || "ผู้ใช้งาน"}</p>
+              <p className="text-xxs text-gold-500/60 font-bold uppercase tracking-widest mt-1 flex items-center gap-2">
+                <Calendar size={12} className="w-3 h-3" />
+                {profile?.birth_date
+                  ? new Date(profile.birth_date).toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" })
+                  : "—"}
+                {profile?.birth_time ? ` · ${profile.birth_time} น.` : ""}
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-xs text-hora-text-muted">
-            <span className="w-2 h-2 rounded-full bg-hora-gold animate-pulse inline-block" />
-            <span>รายงานพรีเมียม A4 · พยากรณ์เฉพาะบุคคล</span>
+          <div className="flex flex-col items-end gap-2">
+            <span className="text-xxs font-bold text-gold-300 bg-gold-500/10 border border-gold-500/20 px-4 py-1.5 rounded-full uppercase tracking-widest shadow-inner">
+              IMPERIAL ACCESS
+            </span>
+            <p className="text-[10px] text-text-secondary/40 font-bold uppercase tracking-[0.2em]">High-Resolution A4 Format</p>
           </div>
-          <button
-            onClick={download}
-            disabled={isDownloading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold sm:hidden transition-all"
-            style={{
-              background: "rgba(212,175,55,0.15)",
-              color: "#D4AF37",
-              border: "1px solid rgba(212,175,55,0.3)",
-            }}
-          >
-            <Download size={12} />
-            {isDownloading ? "กำลังสร้าง PDF..." : "ดาวน์โหลด PDF"}
-          </button>
         </div>
       </div>
 
-      {/* Preview container */}
-      <div ref={containerRef} className="max-w-4xl mx-auto px-4 sm:px-6 pb-8">
-        <div className="text-xs text-hora-text-muted text-center mb-4 opacity-60">
-          ตัวอย่างรายงาน · คลิก &ldquo;ดาวน์โหลด PDF&rdquo; เพื่อรับไฟล์ A4 คุณภาพสูง
+      <div ref={containerRef} className="max-w-5xl mx-auto px-4 sm:px-6 pb-12">
+        <div className="text-xxs font-bold text-text-secondary/30 text-center mb-8 uppercase tracking-[0.4em]">
+          PREVIEW · พิมพ์เขียวแห่งโชคชะตาฉบับพรีเมียม
         </div>
 
-        {/* Scaled preview wrapper */}
         <div
+          className="mx-auto overflow-hidden rounded-[2.5rem] shadow-[0_40px_100px_rgba(0,0,0,0.8)] border border-white/5"
           style={{
             width: `${794 * scale}px`,
             height: `${1123 * scale}px`,
-            margin: "0 auto",
-            overflow: "hidden",
-            borderRadius: "8px",
-            boxShadow: "0 0 0 1px rgba(212,175,55,0.2), 0 20px 60px rgba(0,0,0,0.5)",
           }}
         >
           <div
@@ -183,33 +182,23 @@ export default function ReportPage() {
           </div>
         </div>
 
-        {/* Download CTA */}
-        <div className="mt-6 text-center">
+        <div className="mt-16 text-center">
           <button
             onClick={download}
             disabled={isDownloading}
-            className="inline-flex items-center gap-3 px-8 py-3 rounded-xl text-sm font-semibold transition-all"
-            style={{
-              background: isDownloading
-                ? "rgba(212,175,55,0.1)"
-                : "linear-gradient(135deg, rgba(212,175,55,0.9), rgba(176,141,87,0.85))",
-              color: isDownloading ? "rgba(212,175,55,0.4)" : "#0B1C2E",
-              border: "1px solid rgba(212,175,55,0.35)",
-              cursor: isDownloading ? "not-allowed" : "pointer",
-              boxShadow: isDownloading ? "none" : "0 4px 20px rgba(212,175,55,0.2)",
-            }}
+            className="btn-hora !text-xs !py-4 !px-12 inline-flex items-center gap-4 group"
           >
             {isDownloading ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={18} className="animate-spin" />
             ) : (
-              <Download size={16} />
+              <Download size={18} className="group-hover:scale-110 transition-transform" />
             )}
             {isDownloading
-              ? "กำลังสร้าง PDF คุณภาพสูง..."
-              : "ดาวน์โหลด Life Blueprint PDF"}
+              ? "Creating High-Res PDF..."
+              : "Download Life Blueprint PDF"}
           </button>
-          <p className="text-xs text-hora-text-muted mt-2 opacity-50">
-            ฟอร์แมต A4 · ความละเอียดสูง · พร้อมพิมพ์
+          <p className="text-xxs text-text-secondary/40 font-bold uppercase tracking-[0.3em] mt-6 italic">
+            Luxury Editorial Style · Print-Ready Resolution
           </p>
         </div>
       </div>
