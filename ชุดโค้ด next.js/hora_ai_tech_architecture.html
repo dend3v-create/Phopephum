@@ -1,0 +1,182 @@
+
+<style>
+.w{padding:1rem 0}
+.sec{font-size:15px;font-weight:500;color:var(--color-text-primary);margin:0 0 12px}
+.stack-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.sc{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:12px 14px}
+.sc.highlight{border:2px solid var(--color-border-info)}
+.sc-num{font-size:10px;font-weight:500;color:var(--color-text-tertiary);letter-spacing:.08em;margin-bottom:4px}
+.sc-name{font-size:14px;font-weight:500;color:var(--color-text-primary);margin-bottom:2px}
+.sc-role{font-size:12px;color:var(--color-text-secondary);margin-bottom:6px}
+.sc-detail{font-size:11px;color:var(--color-text-tertiary);line-height:1.5}
+.badge{display:inline-block;font-size:10px;padding:2px 7px;border-radius:10px;margin-right:4px;font-weight:500}
+.b-blue{background:#E6F1FB;color:#0C447C}
+.b-green{background:#EAF3DE;color:#27500A}
+.b-amber{background:#FAEEDA;color:#633806}
+.b-purple{background:#EEEDFE;color:#3C3489}
+.b-gray{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+
+.folder-block{background:var(--color-background-secondary);border-radius:var(--border-radius-lg);padding:14px 16px;font-family:var(--font-mono);font-size:12px;margin-bottom:20px;line-height:1.8;overflow-x:auto}
+.f-root{color:var(--color-text-primary);font-weight:500}
+.f-dir{color:var(--color-text-info)}
+.f-file{color:var(--color-text-secondary)}
+.f-comment{color:var(--color-text-tertiary);font-style:italic}
+.f-ip{color:#854F0B;font-weight:500}
+
+.tier-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:20px}
+.tier-table th{text-align:left;padding:8px 10px;font-weight:500;font-size:11px;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary)}
+.tier-table td{padding:8px 10px;border-bottom:0.5px solid var(--color-border-tertiary);vertical-align:middle}
+.tier-table tr:last-child td{border-bottom:none}
+.check{color:#3B6D11;font-size:14px}
+.cross{color:#A32D2D;font-size:14px}
+
+.flow-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;padding:12px;background:var(--color-background-secondary);border-radius:var(--border-radius-md)}
+.flow-box{background:var(--color-background-primary);border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);padding:6px 10px;font-size:12px;color:var(--color-text-primary);white-space:nowrap}
+.flow-arr{color:var(--color-text-tertiary);font-size:13px}
+
+.cta-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn{font-size:13px;padding:8px 16px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:transparent;color:var(--color-text-primary);cursor:pointer}
+.btn:hover{background:var(--color-background-secondary)}
+</style>
+
+<div class="w">
+<p class="sec">Tech Stack — 8 Layers (มาตรฐาน 8-Stack ครูเด่น + Phopephum Extensions)</p>
+
+<div class="stack-grid">
+  <div class="sc highlight">
+    <div class="sc-num">STACK 1 + 2</div>
+    <div class="sc-name">Next.js 15 + TypeScript</div>
+    <div class="sc-role">Full-stack App Router + Type Safety</div>
+    <div class="sc-detail">
+      <span class="badge b-blue">App Router</span>
+      <span class="badge b-blue">Server Components</span>
+      <span class="badge b-blue">Strict Mode</span>
+    </div>
+  </div>
+  <div class="sc">
+    <div class="sc-num">STACK 3</div>
+    <div class="sc-name">Tailwind CSS + shadcn/ui</div>
+    <div class="sc-role">Design System (Dark Premium)</div>
+    <div class="sc-detail">
+      <span class="badge b-gray">--hora-gold #C9A96E</span>
+      <span class="badge b-gray">--hora-dark #0A0806</span>
+    </div>
+  </div>
+  <div class="sc highlight">
+    <div class="sc-num">STACK 4</div>
+    <div class="sc-name">Supabase</div>
+    <div class="sc-role">DB + Auth + RLS + Realtime</div>
+    <div class="sc-detail">
+      <span class="badge b-green">profiles</span>
+      <span class="badge b-green">calculations</span>
+      <span class="badge b-green">ai_reports</span>
+      <span class="badge b-green">behavior_logs</span>
+    </div>
+  </div>
+  <div class="sc">
+    <div class="sc-num">STACK 5</div>
+    <div class="sc-name">Cloudflare R2</div>
+    <div class="sc-role">PDF Report Storage + CDN</div>
+    <div class="sc-detail">presigned upload → public URL → cdn.phopephum.com</div>
+  </div>
+  <div class="sc">
+    <div class="sc-num">STACK 6</div>
+    <div class="sc-name">Cloudflare Pages + Workers</div>
+    <div class="sc-role">Hosting + CDN + Claude Proxy</div>
+    <div class="sc-detail">
+      <span class="badge b-amber">Edge Runtime</span>
+      <span class="badge b-amber">AI Proxy</span>
+    </div>
+  </div>
+  <div class="sc">
+    <div class="sc-num">STACK 7</div>
+    <div class="sc-name">Resend</div>
+    <div class="sc-role">Transactional Email</div>
+    <div class="sc-detail">Welcome, Report Ready, Subscription Alert</div>
+  </div>
+  <div class="sc">
+    <div class="sc-num">STACK 8</div>
+    <div class="sc-name">LINE Notify</div>
+    <div class="sc-role">Admin Alert + User Push</div>
+    <div class="sc-detail">แจ้ง Admin เมื่อ User ใหม่ / Upgrade</div>
+  </div>
+  <div class="sc highlight">
+    <div class="sc-num">HORA EXTENSION</div>
+    <div class="sc-name">Anthropic Claude Sonnet 4</div>
+    <div class="sc-role">AI Report Generation</div>
+    <div class="sc-detail">
+      <span class="badge b-purple">Via CF Workers Proxy</span>
+      <span class="badge b-purple">Streaming</span>
+    </div>
+  </div>
+</div>
+
+<p class="sec">Core Engine — src/engine/ (IP เฉพาะ ห้าม Expose)</p>
+<div class="folder-block">
+<span class="f-ip">src/engine/</span>  <span class="f-comment">← 🔐 Core Algorithm — IP เฉพาะ</span>
+  <span class="f-ip">├── hora-calculator.ts</span>      <span class="f-comment">← ยามอัฐกาล engine</span>
+  <span class="f-ip">├── chart-calculator.ts</span>     <span class="f-comment">← จักรกำเนิด + เลข 9 ฐาน</span>
+  <span class="f-ip">├── transit-calculator.ts</span>   <span class="f-comment">← วัยจร/ปีจร/เดือนจร/วันจร</span>
+  <span class="f-ip">├── seven-numbers.ts</span>        <span class="f-comment">← เลข 7 ตัว 9 ฐาน (Unique IP)</span>
+  <span class="f-file">└── hora-utils.ts</span>           <span class="f-comment">← Thai calendar helpers</span>
+
+<span class="f-dir">src/app/api/calculate/</span>  <span class="f-comment">← API routes เรียก engine เท่านั้น</span>
+  <span class="f-file">├── hora/route.ts</span>          <span class="f-comment">← POST: ยามอัฐกาล</span>
+  <span class="f-file">├── chart/route.ts</span>         <span class="f-comment">← POST: จักรกำเนิด</span>
+  <span class="f-file">└── transit/route.ts</span>       <span class="f-comment">← POST: ระบบจร</span>
+</div>
+
+<p class="sec">Request Flow — AI Report Generation</p>
+<div class="flow-row">
+  <div class="flow-box"><i class="ti ti-user" style="font-size:12px" aria-hidden="true"></i> User กด Generate</div>
+  <span class="flow-arr">→</span>
+  <div class="flow-box">Next.js Route Handler</div>
+  <span class="flow-arr">→</span>
+  <div class="flow-box">Engine: คำนวณดวง</div>
+  <span class="flow-arr">→</span>
+  <div class="flow-box">CF Workers Proxy</div>
+  <span class="flow-arr">→</span>
+  <div class="flow-box">Claude Sonnet 4</div>
+  <span class="flow-arr">→</span>
+  <div class="flow-box">Stream ผลลัพธ์</div>
+  <span class="flow-arr">→</span>
+  <div class="flow-box">Save Supabase + R2</div>
+</div>
+
+<p class="sec">Subscription Tiers + Feature Gate</p>
+<table class="tier-table">
+  <thead>
+    <tr>
+      <th>Feature</th>
+      <th>Free</th>
+      <th>Pro ฿149</th>
+      <th>Premium ฿299</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="color:var(--color-text-secondary);font-size:12px">ยามอัฐกาล</td><td>5/วัน</td><td>ไม่จำกัด</td><td>ไม่จำกัด</td></tr>
+    <tr><td style="color:var(--color-text-secondary);font-size:12px">จักรกำเนิด</td><td>พื้นฐาน</td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+    <tr><td style="color:var(--color-text-secondary);font-size:12px">ระบบจร (วัย/ปี/เดือน/วัน)</td><td><span class="cross">✗</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+    <tr><td style="color:var(--color-text-secondary);font-size:12px">เลข 7 ตัว 9 ฐาน</td><td><span class="cross">✗</span></td><td><span class="cross">✗</span></td><td><span class="check">✓</span></td></tr>
+    <tr><td style="color:var(--color-text-secondary);font-size:12px">AI Report</td><td>1/เดือน</td><td>10/เดือน</td><td>ไม่จำกัด</td></tr>
+    <tr><td style="color:var(--color-text-secondary);font-size:12px">Export PDF</td><td><span class="cross">✗</span></td><td><span class="check">✓</span></td><td><span class="check">✓</span></td></tr>
+  </tbody>
+</table>
+
+<p class="sec">Behavior Logging — Log เพื่อ Drive Feature Roadmap</p>
+<div class="folder-block" style="font-family:inherit;line-height:1.7">
+<span class="f-comment">Event ที่ต้อง Log ทุกตัว:</span>
+<span class="f-file">calc_hora</span>       <span class="f-comment">→ รู้ว่าวันไหนใช้เยอะ (→ TQM Daily Phase 2)</span>
+<span class="f-file">calc_transit</span>    <span class="f-comment">→ feature ที่ Pro ใช้บ่อย (→ Affirmation Phase 2)</span>
+<span class="f-file">ai_report_gen</span>   <span class="f-comment">→ Section ไหนที่คนดูนานสุด (→ Deepen content)</span>
+<span class="f-file">feature_blocked</span> <span class="f-comment">→ บอกว่าอยาก Upgrade (→ Sales insight)</span>
+<span class="f-file">upgrade_click</span>   <span class="f-comment">→ Funnel conversion (→ Pricing optimization)</span>
+<span class="f-file">pdf_export</span>      <span class="f-comment">→ ใครใช้ PDF (→ B2B signal)</span>
+</div>
+
+<div class="cta-row">
+  <button class="btn" onclick="sendPrompt('เขียน hora-calculator.ts engine สำหรับยามอัฐกาล TypeScript พร้อม Unit Tests')">เขียน Hora Calculator Engine ↗</button>
+  <button class="btn" onclick="sendPrompt('เขียน Supabase Schema SQL ครบทุกตาราง + RLS Policies สำหรับ Phopephum Phase 1')">เขียน Supabase Schema ↗</button>
+  <button class="btn" onclick="sendPrompt('เขียน AI Report Generation API Route สำหรับ Phopephum ที่เรียก Claude ผ่าน CF Workers')">เขียน AI Report API ↗</button>
+</div>
+</div>
