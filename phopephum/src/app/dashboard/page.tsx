@@ -197,13 +197,28 @@ export default function DashboardPage() {
       {/* Header Bar */}
       <header className="sticky top-0 z-40 glass-hora border-b border-hora-dark-border">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="text-2xl font-serif font-bold text-hora-gold tracking-wide">
-              Phopephum
-            </Link>
-            <span className="text-xxs bg-hora-gold/10 border border-hora-gold/30 text-hora-gold px-2 py-0.5 rounded-full uppercase tracking-wider">
-              {profile?.plan || "FREE"} MEMBER
-            </span>
+          <div className="flex items-center gap-8">
+            <div className="flex items-center gap-3">
+              <Link href="/" className="text-2xl font-serif font-bold text-hora-gold tracking-wide">
+                Phopephum
+              </Link>
+              <span className="text-xxs bg-hora-gold/10 border border-hora-gold/30 text-hora-gold px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">
+                {profile?.plan || "FREE"} MEMBER
+              </span>
+            </div>
+            
+            {/* Quick Navigation Menu for Wisdom OS */}
+            <nav className="hidden md:flex items-center gap-6 text-xxs font-semibold uppercase tracking-widest pt-0.5">
+              <Link href="/dashboard" className="text-hora-gold font-bold hover:text-hora-gold-light transition-colors">
+                ภาพรวมดวง
+              </Link>
+              <Link href="/dashboard/planner" className="text-hora-text-muted hover:text-hora-gold transition-colors flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-hora-gold" /> TQM Planner
+              </Link>
+              <Link href="/dashboard/coach" className="text-hora-text-muted hover:text-hora-gold transition-colors flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-hora-gold" /> AI Coach
+              </Link>
+            </nav>
           </div>
 
           <div className="flex items-center gap-4">

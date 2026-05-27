@@ -123,7 +123,7 @@ export default function RegisterPage() {
             {/* Birth Date */}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5 text-hora-gold" /> วันเกิด
+                <Calendar className="w-3.5 h-3.5 text-hora-gold" /> วันเกิด <span className="text-[10px] text-hora-gold/60 font-normal">(กรุณาใช้ปี ค.ศ. เช่น 1982)</span>
               </label>
               <input
                 type="date"
@@ -132,6 +132,9 @@ export default function RegisterPage() {
                 onChange={(e) => setBirthDate(e.target.value)}
                 className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all"
               />
+              <p className="text-[10px] text-hora-text-muted/80 leading-normal">
+                * ต้องระบุปีเกิดเป็น **ค.ศ.** เท่านั้น (ปี พ.ศ. เกิด ลบด้วย 543)
+              </p>
             </div>
 
             {/* Birth Time */}

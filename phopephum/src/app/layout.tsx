@@ -19,8 +19,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="th" className="scroll-smooth">
-      <body className="min-h-screen flex flex-col bg-hora-dark text-hora-text font-sans antialiased">
+    <html lang="th" className="scroll-smooth font-sans">
+      <body className="min-h-screen flex flex-col bg-[#020514] text-[#F6F4EF] antialiased relative">
+        {/* Layer Sensory Cosmic Background: มิติระยิบระยับและการพริ้วไหวต้องมนต์สะกด */}
+        <div className="bg-cosmic-portal">
+          <div className="cosmic-nebula-aura" />
+          <div className="cosmic-zodiac-wheel" />
+        </div>
+        
         {children}
       </body>
     </html>
