@@ -43,7 +43,14 @@ export async function POST(request: Request) {
     const sevenBaseData = calculateSevenBase(birthDate, birthTime || "12:00")
 
     // สร้าง prompt
-    const userMessage = `${HORA_REPORT_PROMPT}
+    let reportPrompt = HORA_REPORT_PROMPT
+    const isPremium = profile.plan === 'pro' || profile.plan === 'premium'
+    
+    if (!isPremium) {
+      reportPrompt += "\n\n(Note: สำหรับผู้ใช้งานทั่วไป กรุณาเว้นว่างหัวข้อ goldenHourExecution, karmicBlueprint, adaptiveLifeScript และ imperialProsperityMap หรือใส่เป็น string ว่า 'Upgrade to Premium for this insight')"
+    }
+
+    const userMessage = `${reportPrompt}
 
 ข้อมูลเกิด: วันที่ ${birthDate}${birthTime ? ` เวลา ${birthTime}` : ''}
 ข้อมูลยามอัฐกาลวันนี้: ${JSON.stringify(horaData ?? {})}

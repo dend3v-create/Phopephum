@@ -29,6 +29,11 @@ export interface AIReportContent {
   auspiciousDays: string
   affirmation: string
   weeklyPlan: WeeklyPlan
+  // Premium Sections
+  goldenHourExecution?: string
+  karmicBlueprint?: string
+  adaptiveLifeScript?: string
+  imperialProsperityMap?: string
 }
 
 export interface AIReport {
