@@ -322,82 +322,88 @@ export default function DashboardPage() {
         <div className="md:col-span-2 space-y-8">
           
           {/* Interactive Calculator Section */}
-          <div className="glass-hora rounded-2xl p-6 border border-hora-dark-border/80">
-            <h3 className="text-xl font-serif font-semibold text-hora-gold-light mb-6 flex items-center gap-2">
-              🪐 เครื่องคำนวณยามอัฐกาลอัจฉริยะ
-            </h3>
+          <div className="glass-hora rounded-2xl p-4 sm:p-6 border border-hora-dark-border/80">
+            <div className="flex items-start justify-between mb-4 sm:mb-5">
+              <div>
+                <h3 className="text-base sm:text-lg font-serif font-semibold text-hora-gold-light flex items-center gap-2">
+                  🪐 คำนวณยามอัฐกาล
+                </h3>
+                <p className="text-xs text-hora-text-muted mt-0.5">ป้อนวันเกิด หรือวันที่ต้องการคำนวณ</p>
+              </div>
+            </div>
 
-            <form onSubmit={handleRecalculate} className="grid sm:grid-cols-3 gap-4 items-end mb-8 font-sans">
-              <div className="space-y-1.5">
-                <label className="text-xs text-hora-text-muted">เลือกวันที่</label>
+            <form onSubmit={handleRecalculate} className="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-3 sm:gap-3 sm:items-end mb-5 font-sans">
+              <div className="space-y-1">
+                <label className="text-xs text-hora-text-muted">วันที่</label>
                 <input
                   type="date"
                   required
                   value={inputDate}
                   onChange={(e) => setInputDate(e.target.value)}
-                  className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none"
+                  className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-3 py-2.5 text-sm text-hora-text outline-none"
                 />
               </div>
-              <div className="space-y-1.5">
-                <label className="text-xs text-hora-text-muted">เลือกเวลา</label>
+              <div className="space-y-1">
+                <label className="text-xs text-hora-text-muted">เวลา</label>
                 <input
                   type="time"
                   required
                   value={inputTime}
                   onChange={(e) => setInputTime(e.target.value)}
-                  className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none"
+                  className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-3 py-2.5 text-sm text-hora-text outline-none"
                 />
               </div>
               <button
                 type="submit"
                 disabled={isCalculating}
-                className="btn-hora w-full py-2.5 rounded-lg font-semibold text-sm h-[42px] cursor-pointer"
+                className="btn-hora w-full py-2.5 rounded-lg font-semibold text-sm cursor-pointer"
               >
-                {isCalculating ? "กำลังพยากรณ์..." : "คำนวณยามดวงชะตา"}
+                {isCalculating ? "กำลังคำนวณ..." : "คำนวณยาม"}
               </button>
             </form>
 
             {calculatedResult && (
-              <div className="border-t border-hora-dark-border/40 pt-6 space-y-6">
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-                  
+              <div className="border-t border-hora-dark-border/40 pt-4 space-y-4">
+                {/* Label ชี้แจงว่าเป็นยามของวันที่ป้อน ไม่ใช่ยามปัจจุบัน */}
+                <div className="flex items-center gap-2 bg-hora-gold/5 border border-hora-gold/20 rounded-lg px-3 py-2">
+                  <span className="text-xs text-hora-gold font-semibold">ยามกำเนิด</span>
+                  <span className="text-xs text-hora-text-muted">—</span>
+                  <span className="text-xs text-hora-text-muted">วันที่ {inputDate} เวลา {inputTime} น.</span>
+                </div>
+
+                <div className="flex items-center justify-between gap-4">
                   {featureToggles.live_widget ? (
-                    <div className="space-y-2 text-left">
-                      <span className="text-xxs text-hora-gold uppercase font-bold tracking-widest">Result</span>
-                      <h4 className="text-2xl font-serif font-semibold text-hora-gold-light">
-                        ยามอัฐกาลประจำวัน{calculatedResult.dayNameThai}
+                    <div className="space-y-1 text-left flex-1 min-w-0">
+                      <h4 className="text-base sm:text-lg font-serif font-semibold text-hora-gold-light">
+                        วัน{calculatedResult.dayNameThai}
                       </h4>
-                      <p className="text-sm text-hora-text-muted font-sans">
-                        ผลการคำนวณ ณ วันที่ {inputDate} เวลา {inputTime} น.
-                      </p>
-                      
                       {current && (
-                        <div className="space-y-1 pt-2 font-sans">
+                        <div className="space-y-1 font-sans">
                           <p className="text-sm text-hora-text font-medium">
-                            ยามใหญ่ลำดับที่ {current.majorIndex} ({current.majorSlot.startTime} - {current.majorSlot.endTime} น.)
+                            ยามใหญ่ที่ {current.majorIndex} ({current.majorSlot.startTime}–{current.majorSlot.endTime} น.)
                           </p>
-                          <p className="text-xs text-hora-text-muted">
-                            ดาวผู้ปกครองย่อยหลัก: <strong className="text-hora-gold">{current.subSlot.planet.nameThai} ({current.subSlot.planet.symbol})</strong> — {current.subSlot.planet.description}
+                          <p className="text-xs text-hora-text-muted leading-relaxed">
+                            ดาวครองยาม: <strong className="text-hora-gold">{current.subSlot.planet.nameThai} ({current.subSlot.planet.symbol})</strong><br />
+                            <span className="text-hora-text-muted/70">{current.subSlot.planet.description}</span>
                           </p>
                         </div>
                       )}
                     </div>
                   ) : (
-                    <div className="text-sm text-hora-text-muted font-sans py-4">
-                      ระบบยามอัฐกาลสดถูกปิดการแสดงผลโดยแอดมิน
+                    <div className="text-sm text-hora-text-muted font-sans py-2">
+                      ระบบยามอัฐกาลสดถูกปิดโดยแอดมิน
                     </div>
                   )}
 
-                  {/* Circular Orbit Display Simulation */}
                   {featureToggles.planet_orbit && (
-                    <div className="relative w-36 h-36 flex items-center justify-center rounded-full border-2 border-hora-gold/20 bg-hora-dark-card/50 shadow-inner">
+                    <div className="relative w-28 h-28 sm:w-32 sm:h-32 flex-shrink-0 flex items-center justify-center rounded-full border-2 border-hora-gold/20 bg-hora-dark-card/50 shadow-inner">
                       <div className="absolute inset-1.5 rounded-full border border-dashed border-hora-gold/10" />
                       <div className="text-center">
-                        <span className="text-4xl block mb-0.5 filter drop-shadow-[0_0_8px_rgba(201,169,110,0.6)]" style={{ color: current?.subSlot.planet.color }}>
+                        <span className="text-3xl sm:text-4xl block mb-0.5 filter drop-shadow-[0_0_8px_rgba(201,169,110,0.6)]" style={{ color: current?.subSlot.planet.color }}>
                           {current?.subSlot.planet.symbol}
                         </span>
                         <span className="text-xs font-semibold text-hora-gold-light">{current?.subSlot.planet.nameThai}</span>
-                        <span className="text-xxs block text-hora-text-muted tracking-widest">ครองยาม</span>
+                        <span className="text-[10px] block text-hora-text-muted tracking-widest">ครองยาม</span>
                       </div>
                     </div>
                   )}
