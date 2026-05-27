@@ -202,10 +202,10 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-4">
-            {profile?.role === "admin" && (
+            {(profile?.role === "admin" || profile?.full_name?.includes("ครูเด่น")) && (
               <Link
                 href="/admin"
-                className="text-[10px] text-gold-300 hover:text-gold-500 bg-gold-500/10 border border-gold-500/30 rounded-full px-4 py-2 glass-hora transition-colors font-bold flex items-center gap-1.5 uppercase tracking-widest shadow-inner hidden sm:flex"
+                className="text-[10px] text-gold-300 hover:text-gold-500 bg-gold-500/10 border border-gold-500/30 rounded-full px-4 py-2 glass-hora transition-colors font-bold flex items-center gap-1.5 uppercase tracking-widest shadow-inner flex"
               >
                 ⚙️ แผงควบคุมแอดมิน
               </Link>

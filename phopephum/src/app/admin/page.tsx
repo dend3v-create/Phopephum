@@ -54,6 +54,12 @@ export default function AdminPage() {
   const [approveLoading, setApproveLoading] = useState<string | null>(null);
   const [memberMsg, setMemberMsg] = useState('');
 
+  // Role & Package Modal State
+  const [selectedMember, setSelectedMember] = useState<UserProfile | null>(null);
+  const [selectedPlan, setSelectedPlan] = useState<string>('free');
+  const [selectedRole, setSelectedRole] = useState<string>('user');
+  const [isUpdatingRole, setIsUpdatingRole] = useState(false);
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -93,11 +99,11 @@ export default function AdminPage() {
 
         setProfile(prof);
 
-        if (prof && prof.role === "admin") {
+        if (prof && (prof.role === "admin" || prof.role === "operator")) {
           setIsAdmin(true);
           await loadData();
         } else {
-          // ไม่ใช่แอดมิน ให้ดีดไปหน้าแดชบอร์ดผู้ใช้
+          // ไม่ใช่แอดมินหรือโอเปเรอเตอร์ ให้ดีดไปหน้าแดชบอร์ดผู้ใช้
           window.location.href = "/dashboard";
         }
       } catch (err) {
@@ -212,6 +218,10 @@ export default function AdminPage() {
 
   const handleAddKnowledge = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isOperator) {
+      alert("⚠️ สิทธิ์ของคุณคือ Operator (ผู้ควบคุมสิทธิ์) สามารถอ่านข้อมูลได้เท่านั้น ไม่สามารถเพิ่ม แก้ไข หรือสอนระบบ AI ได้ครับ");
+      return;
+    }
     if (!newTitle.trim() || !newContent.trim()) return;
 
     setIsSubmittingKnowledge(true);
@@ -242,6 +252,10 @@ export default function AdminPage() {
   };
 
   const handleDeleteKnowledge = async (id: string) => {
+    if (isOperator) {
+      alert("⚠️ สิทธิ์ของคุณคือ Operator (ผู้ควบคุมสิทธิ์) สามารถอ่านข้อมูลได้เท่านั้น ไม่สามารถลบข้อมูลจากสมอง AI ได้ครับ");
+      return;
+    }
     if (!confirm("คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลความรู้นี้? AI จะสูญเสียปัญญาในด้านนี้ทันที")) return;
 
     const { error } = await supabase
@@ -255,6 +269,10 @@ export default function AdminPage() {
   };
 
   const handleToggleFeature = async (featureId: string, currentStatus: boolean) => {
+    if (isOperator) {
+      alert("⚠️ สิทธิ์ของคุณคือ Operator (ผู้ควบคุมสิทธิ์) ไม่สามารถสลับการเปิด-ปิดฟังก์ชันของหน้าจอมือถือผู้ใช้ได้ครับ");
+      return;
+    }
     // อัปเดต UI ชั่วคราวก่อนเพื่อความลื่นไหล
     setFeatures(
       features.map((f) => (f.id === featureId ? { ...f, is_enabled: !currentStatus } : f))
@@ -276,6 +294,44 @@ export default function AdminPage() {
       setFeatures(
         features.map((f) => (f.id === featureId ? { ...f, is_enabled: currentStatus } : f))
       );
+    }
+  };
+
+  const isOperator = profile?.role === 'operator';
+
+  const openRoleModal = (member: UserProfile) => {
+    setSelectedMember(member);
+    setSelectedPlan(member.plan || 'free');
+    setSelectedRole(member.role || 'user');
+  };
+
+  const handleUpdateRoleAndPlan = async () => {
+    if (!selectedMember) return;
+    setIsUpdatingRole(true);
+    setMemberMsg('');
+    try {
+      const res = await fetch('/api/admin/approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: selectedMember.id,
+          action: 'approve',
+          plan: selectedPlan,
+          role: selectedRole
+        })
+      });
+      const json = await res.json();
+      if (json.success) {
+        setMemberMsg(`✅ อัปเดตสิทธิ์ ${selectedMember.full_name} เรียบร้อยแล้ว`);
+        setSelectedMember(null);
+        await loadMembers();
+      } else {
+        setMemberMsg(`❌ ${json.error || 'เกิดข้อผิดพลาดในการอัปเดต'}`);
+      }
+    } catch (err) {
+      setMemberMsg('❌ เชื่อมต่อล้มเหลว');
+    } finally {
+      setIsUpdatingRole(false);
     }
   };
 
@@ -358,15 +414,24 @@ export default function AdminPage() {
                 <div key={m.id} className="p-4 space-y-3 bg-[#071329]/10 text-left">
                   <div className="flex justify-between items-start gap-2">
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-hora-text text-sm truncate">{m.full_name}</p>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <p className="font-semibold text-hora-text text-sm truncate">{m.full_name}</p>
+                        {m.role === 'admin' && (
+                          <span className="text-[9px] px-1.5 py-0.2 bg-red-500/10 border border-red-500/30 text-red-400 rounded-full font-bold uppercase">ADMIN</span>
+                        )}
+                        {m.role === 'operator' && (
+                          <span className="text-[9px] px-1.5 py-0.2 bg-purple-500/10 border border-purple-500/30 text-purple-400 rounded-full font-bold uppercase">OPERATOR</span>
+                        )}
+                      </div>
                       <p className="text-xxs text-hora-text-muted truncate">{m.email}</p>
                     </div>
                     <span className={`text-xxs px-2 py-0.5 rounded-full border font-bold uppercase tracking-wide flex-shrink-0 ${
+                      m.plan === 'imperial' ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-400' :
                       m.plan === 'premium' ? 'bg-hora-gold/15 border-hora-gold/40 text-hora-gold' :
                       m.plan === 'pro' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' :
                       'bg-gray-500/10 border-gray-500/30 text-gray-400'
                     }`}>
-                      {m.plan === 'premium' ? '👑 Premium' : m.plan === 'pro' ? '⭐ Pro' : '🔓 Free'}
+                      {m.plan === 'imperial' ? '💎 Imperial' : m.plan === 'premium' ? '👑 Premium' : m.plan === 'pro' ? '⭐ Pro' : '🔓 Free'}
                     </span>
                   </div>
 
@@ -391,12 +456,12 @@ export default function AdminPage() {
                     {!m.is_approved ? (
                       <>
                         <button
-                          onClick={() => handleApprove(m.id, 'approve', 'premium')}
+                          onClick={() => openRoleModal(m)}
                           disabled={approveLoading === m.id}
                           className="flex items-center gap-1 text-[10px] bg-hora-gold/15 hover:bg-hora-gold/25 border border-hora-gold/40 text-hora-gold px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50 font-semibold cursor-pointer"
                         >
                           <Crown className="w-3 h-3" />
-                          {approveLoading === m.id ? 'อนุมัติ...' : 'อนุมัติ Premium'}
+                          อนุมัติ & ตั้งค่าสิทธิ์
                         </button>
                         <button
                           onClick={() => handleResendLine(m)}
@@ -415,11 +480,11 @@ export default function AdminPage() {
                           {approveLoading === m.id ? 'ระงับ...' : '🚫 ระงับสิทธิ์'}
                         </button>
                         <button
-                          onClick={() => handleApprove(m.id, 'approve', 'premium')}
+                          onClick={() => openRoleModal(m)}
                           disabled={approveLoading === m.id}
                           className="flex items-center gap-1 text-[10px] bg-hora-gold/15 hover:bg-hora-gold/25 border border-hora-gold/40 text-hora-gold px-2.5 py-1.5 rounded-lg transition-all disabled:opacity-50 font-semibold cursor-pointer"
                         >
-                          <Crown className="w-3 h-3" /> อัปสิทธิ์
+                          <Crown className="w-3 h-3" /> จัดการบทบาท
                         </button>
                       </>
                     )}
@@ -469,18 +534,26 @@ export default function AdminPage() {
                       {m.birth_time && <span className="block">{m.birth_time.slice(0,5)} น.</span>}
                     </td>
                     <td className="px-4 py-4 text-left">
-                      <span className={`text-xxs px-2 py-1 rounded-full border font-bold uppercase tracking-wide ${
-                        m.plan === 'premium' ? 'bg-hora-gold/15 border-hora-gold/40 text-hora-gold' :
-                        m.plan === 'pro' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' :
-                        'bg-gray-500/10 border-gray-500/30 text-gray-400'
-                      }`}>
-                        {m.plan === 'premium' ? '👑 Premium' : m.plan === 'pro' ? '⭐ Pro' : '🔓 Free'}
-                      </span>
-                      {m.role === 'admin' && (
-                        <span className="ml-1 text-xxs px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-bold">
-                          ADMIN
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className={`text-xxs px-2 py-1 rounded-full border font-bold uppercase tracking-wide ${
+                          m.plan === 'imperial' ? 'bg-cyan-500/15 border-cyan-500/40 text-cyan-400' :
+                          m.plan === 'premium' ? 'bg-hora-gold/15 border-hora-gold/40 text-hora-gold' :
+                          m.plan === 'pro' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' :
+                          'bg-gray-500/10 border-gray-500/30 text-gray-400'
+                        }`}>
+                          {m.plan === 'imperial' ? '💎 Imperial · แพ็ก 3' : m.plan === 'premium' ? '👑 Premium · แพ็ก 2' : m.plan === 'pro' ? '⭐ Pro · แพ็ก 1' : '🔓 Free'}
                         </span>
-                      )}
+                        {m.role === 'admin' && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-bold uppercase">
+                            ADMIN
+                          </span>
+                        )}
+                        {m.role === 'operator' && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 font-bold uppercase">
+                            OPERATOR
+                          </span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-4 py-4 text-left">
                       {m.is_approved ? (
@@ -500,12 +573,12 @@ export default function AdminPage() {
                         {!m.is_approved ? (
                           <>
                             <button
-                              onClick={() => handleApprove(m.id, 'approve', 'premium')}
+                              onClick={() => openRoleModal(m)}
                               disabled={approveLoading === m.id}
                               className="flex items-center gap-1.5 text-xxs bg-hora-gold/15 hover:bg-hora-gold/25 border border-hora-gold/40 text-hora-gold px-3 py-1.5 rounded-lg transition-all disabled:opacity-50 font-semibold cursor-pointer"
                             >
                               <Crown className="w-3.5 h-3.5" />
-                              {approveLoading === m.id ? 'กำลังดำเนินการ...' : 'อนุมัติ Premium'}
+                              อนุมัติ & ตั้งค่าสิทธิ์
                             </button>
                             <button
                               onClick={() => handleResendLine(m)}
@@ -525,12 +598,12 @@ export default function AdminPage() {
                               {approveLoading === m.id ? 'กำลังดำเนินการ...' : '🚫 ระงับสิทธิ์'}
                             </button>
                             <button
-                              onClick={() => handleApprove(m.id, 'approve', 'premium')}
+                              onClick={() => openRoleModal(m)}
                               disabled={approveLoading === m.id}
                               className="flex items-center gap-1.5 text-xxs bg-hora-gold/15 hover:bg-hora-gold/25 border border-hora-gold/40 text-hora-gold px-3 py-1.5 rounded-lg transition-all disabled:opacity-50 font-semibold cursor-pointer"
                             >
                               <Crown className="w-3.5 h-3.5" />
-                              อัปสิทธิ์
+                              จัดการสิทธิ์ & บทบาท
                             </button>
                           </>
                         )}
@@ -554,6 +627,11 @@ export default function AdminPage() {
             <p className="text-xs text-hora-text-muted mb-6 leading-relaxed">
               วางข้อมูลดิบ (TXT) หรืออัปโหลดไฟล์หลักทฤษฎีพยากรณ์ เพื่อให้ระบบนำข้อมูลเหล่านั้นแนบไปสอน AI ก่อนส่งคำทำนายแก่ลูกค้า เพิ่มความขลังและความคลาสสิกของแบรนด์
             </p>
+            {isOperator && (
+              <div className="mb-6 p-4 bg-purple-950/40 border border-purple-500/30 text-purple-200 rounded-lg text-xs font-semibold flex items-center gap-2">
+                🛡️ สถานะผู้ควบคุมสิทธิ์ (Operator Mode): คุณสามารถเข้าตรวจสอบรายการความรู้ได้เท่านั้น ไม่มีสิทธิ์เพิ่ม ลบ หรือแก้ไขคลัง RAG เพื่อป้องกันความปลอดภัยของข้อมูลหลักครับ
+              </div>
+            )}
 
             <form onSubmit={handleAddKnowledge} className="space-y-5 text-left font-sans">
               <div className="grid sm:grid-cols-2 gap-4">
@@ -599,36 +677,47 @@ export default function AdminPage() {
                     <p className="text-xxs text-hora-text-muted">ระบบจะอ่านข้อความและกรอกลงฟอร์มข้างล่างให้อัตโนมัติ</p>
                   </div>
                 </div>
-                <label className="btn-hora py-1.5 px-4 text-xs cursor-pointer">
-                  เลือกไฟล์ .txt
-                  <input
-                    type="file"
-                    accept=".txt"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
+                {!isOperator ? (
+                  <label className="btn-hora py-1.5 px-4 text-xs cursor-pointer">
+                    เลือกไฟล์ .txt
+                    <input
+                      type="file"
+                      accept=".txt"
+                      onChange={handleFileUpload}
+                      className="hidden"
+                    />
+                  </label>
+                ) : (
+                  <span className="text-purple-400 text-xxs font-bold uppercase tracking-wider bg-purple-500/10 border border-purple-500/30 px-2.5 py-1 rounded-md">Read Only</span>
+                )}
               </div>
 
               <div className="space-y-1.5">
                 <label className="text-xs text-hora-text-muted">เนื้อหาคลังวิชาการ (ข้อมูลดิบ/กฎและเงื่อนไขพยากรณ์)</label>
                 <textarea
-                  required
+                  required={!isOperator}
+                  disabled={isOperator}
                   rows={8}
-                  placeholder="ป้อนกฎการทำนาย รายละเอียดความหมายของภพภูมิแต่ละฐาน หรือ Logic การเขียนอธิบายชีวิตที่ต้องการให้ AI ปฏิบัติตามอย่างเคร่งครัด..."
+                  placeholder={isOperator ? "บัญชีผู้ควบคุมสิทธิ์ (Operator) สามารถอ่านได้อย่างเดียว ไม่สามารถพิมพ์ RAG ได้..." : "ป้อนกฎการทำนาย รายละเอียดความหมายของภพภูมิแต่ละฐาน หรือ Logic การเขียนอธิบายชีวิตที่ต้องการให้ AI ปฏิบัติตามอย่างเคร่งครัด..."}
                   value={newContent}
                   onChange={(e) => setNewContent(e.target.value)}
-                  className="w-full bg-[#071329] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-3 text-sm text-hora-text outline-none resize-none font-sans"
+                  className="w-full bg-[#071329] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-3 text-sm text-hora-text outline-none resize-none font-sans disabled:opacity-50"
                 />
               </div>
 
-              <button
-                type="submit"
-                disabled={isSubmittingKnowledge}
-                className="btn-hora w-full py-3 rounded-lg font-semibold text-sm cursor-pointer disabled:opacity-50"
-              >
-                {isSubmittingKnowledge ? "กำลังติดตั้งความรู้ลงสมอง AI..." : "ยืนยันการเพิ่มและสอนระบบ AI"}
-              </button>
+              {isOperator ? (
+                <div className="w-full py-3 rounded-lg bg-purple-950/20 border border-purple-500/30 text-purple-400 text-center font-semibold text-xs">
+                  🛡️ ฟังก์ชันการสอนสมอง AI RAG ปิดสำหรับ Operator
+                </div>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={isSubmittingKnowledge}
+                  className="btn-hora w-full py-3 rounded-lg font-semibold text-sm cursor-pointer disabled:opacity-50"
+                >
+                  {isSubmittingKnowledge ? "กำลังติดตั้งความรู้ลงสมอง AI..." : "ยืนยันการเพิ่มและสอนระบบ AI"}
+                </button>
+              )}
             </form>
           </div>
 
@@ -732,6 +821,78 @@ export default function AdminPage() {
         </div>{/* end grid */}
 
       </main>
+
+      {/* ─── Role & Package Configuration Modal ─── */}
+      {selectedMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="w-full max-w-md bg-[#071329] border border-hora-gold/40 rounded-2xl p-6 sm:p-8 shadow-2xl relative space-y-6 text-left font-sans">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-hora-gold/5 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="space-y-1.5">
+              <h3 className="text-lg font-serif font-semibold text-hora-gold-light flex items-center gap-2">
+                ⚙️ กำหนดสิทธิ์และบทบาทสมาชิก
+              </h3>
+              <p className="text-xxs text-hora-text-muted">
+                กำหนดระดับการเข้าถึงระบบและแพ็กเกจของสมาชิกแต่ละท่าน
+              </p>
+            </div>
+
+            <div className="border border-hora-dark-border/20 rounded-xl p-4 bg-black/20 text-xs space-y-1">
+              <p className="text-hora-text font-semibold flex items-center gap-1.5">
+                <Users className="w-3.5 h-3.5 text-hora-gold" /> {selectedMember.full_name}
+              </p>
+              <p className="text-hora-text-muted">{selectedMember.email}</p>
+            </div>
+
+            <div className="space-y-4">
+              {/* Role Select */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-hora-text-muted font-semibold">1. บทบาทการเข้าถึงระบบ (System Role)</label>
+                <select
+                  value={selectedRole}
+                  onChange={(e) => setSelectedRole(e.target.value)}
+                  className="w-full bg-[#030a17] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-3 py-2 text-sm text-hora-text outline-none"
+                >
+                  <option value="user">ผู้ใช้งานทั่วไป (User)</option>
+                  <option value="operator">ผู้ควบคุมสิทธิ์ (Operator) - เทียบเท่าแอดมิน แต่อ่าน RAG ได้อย่างเดียว</option>
+                  <option value="admin">ผู้ดูแลระบบสูงสุด (Admin)</option>
+                </select>
+              </div>
+
+              {/* Plan Select */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-hora-text-muted font-semibold">2. ระดับสิทธิ์แพ็กเกจ (Subscription Plan)</label>
+                <select
+                  value={selectedPlan}
+                  onChange={(e) => setSelectedPlan(e.target.value)}
+                  className="w-full bg-[#030a17] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-3 py-2 text-sm text-hora-text outline-none"
+                >
+                  <option value="free">🔓 สมาชิกทั่วไป (Free Plan) - จำกัดโควตา 5 Token</option>
+                  <option value="pro">⭐ สมาชิกแพ็ก 1 (Pro Plan) - โควตา 500 Token</option>
+                  <option value="premium">👑 สมาชิกแพ็ก 2 (Premium Plan) - โควตา 999,999 Token</option>
+                  <option value="imperial">💎 สมาชิกแพ็ก 3 (Imperial Plan) - โควตาสูงสุดไม่จำกัด</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3 pt-3">
+              <button
+                onClick={() => setSelectedMember(null)}
+                className="flex-1 bg-black/30 hover:bg-black/50 border border-hora-dark-border/50 text-hora-text-muted py-2.5 rounded-lg text-xs font-semibold transition-all cursor-pointer text-center"
+              >
+                ยกเลิก
+              </button>
+              <button
+                onClick={handleUpdateRoleAndPlan}
+                disabled={isUpdatingRole}
+                className="flex-1 bg-gradient-to-r from-hora-gold to-hora-gold-light hover:brightness-110 text-[#071329] py-2.5 rounded-lg text-xs font-bold transition-all disabled:opacity-50 cursor-pointer text-center"
+              >
+                {isUpdatingRole ? "กำลังอัปเดต..." : "บันทึกและอนุมัติ"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

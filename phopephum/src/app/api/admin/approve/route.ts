@@ -123,7 +123,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { userId, action, plan = 'premium' } = body
+    const { userId, action, plan = 'premium', role = 'user' } = body
 
     if (!userId || !action) {
       return NextResponse.json({ error: 'Missing userId or action' }, { status: 400 })
@@ -153,11 +153,17 @@ export async function POST(request: Request) {
         console.warn('[/api/admin/approve] POST Failed to auto-confirm email:', authError)
       }
 
-      const tokenLimit = plan === 'premium' ? 999999 : (plan === 'pro' ? 500 : 5)
+      // ปรับปรุงโควตา AI Tokens ตามแพ็กเกจ
+      // plan 3 (imperial) = 999999999 (ไม่จำกัดสูงสุด)
+      // plan 2 (premium) = 999999 (ไม่จำกัดทั่วไป)
+      // plan 1 (pro) = 500
+      // free = 5
+      const tokenLimit = plan === 'imperial' ? 999999999 : (plan === 'premium' ? 999999 : (plan === 'pro' ? 500 : 5))
       const { data, error } = await supabase
         .from('profiles')
         .update({
           plan,
+          role,
           ai_tokens_limit: tokenLimit,
           is_approved: true,
           approved_at: new Date().toISOString(),
@@ -172,7 +178,7 @@ export async function POST(request: Request) {
       const memberName = (data as any)?.full_name || 'สมาชิก'
       await notifyLine('approve_success', { name: memberName, plan })
 
-      return NextResponse.json({ success: true, message: `อนุมัติ ${memberName} เป็น ${plan} สำเร็จ` })
+      return NextResponse.json({ success: true, message: `อัปเดตสิทธิ์ ${memberName} เป็น ${plan} (${role}) สำเร็จ` })
 
     } else if (action === 'reject') {
       const { data, error } = await supabase
