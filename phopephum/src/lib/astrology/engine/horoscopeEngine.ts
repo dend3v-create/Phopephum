@@ -54,9 +54,15 @@ export async function horoscopeEngine(
 
   // ─── Lunar Data ────────────────────────────────────────────────────────
   const lunar = getThaiLunarDate(input.birthDate)
-  const dNum = (dayOfWeek === 0 ? 7 : dayOfWeek)
+  // ✅ FIX: JS getDay() 0=Sun,1=Mon,...,5=Fri,6=Sat → Thai planet 1=Sun,...,6=Fri,7=Sat
+  const dNum = dayOfWeek + 1
   const mNum = lunar.lunarMonth > 7 ? lunar.lunarMonth - 7 : lunar.lunarMonth
-  const yNum = (lunar.lunarYear % 7) || 7 // Simplified for now
+  // ✅ FIX: ใช้ zodiacNumber จาก thaiLunar แทน lunarYear % 7
+  const thaiYr = birth.getFullYear() + 543
+  const ZODIAC12 = ['ชวด','ฉลู','ขาล','เถาะ','มะโรง','มะเส็ง','มะเมีย','มะแม','วอก','ระกา','จอ','กุน']
+  const zodIdx = ((thaiYr - 2503) % 12 + 12) % 12  // 0=ชวด
+  const zodNum1to12 = zodIdx + 1
+  const yNum = zodNum1to12 > 7 ? zodNum1to12 - 7 : zodNum1to12
 
   // ─── Core Calculations (Full Matrix) ───────────────────────────────────
   const b1 = genBase1to3(dNum)
@@ -98,7 +104,7 @@ export async function horoscopeEngine(
     transit,
     dayOfWeek,
     dayName: DAY_NAMES_THAI[dayOfWeek],
-    zodiacYear: ZODIAC_YEARS[year % 12],
+    zodiacYear: ZODIAC12[zodIdx],
     vayaChorn,
     taksa,
     atthakarn,

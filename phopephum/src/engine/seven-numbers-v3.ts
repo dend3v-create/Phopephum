@@ -143,8 +143,10 @@ export function calculateSevenBaseV3(
     (effectiveDow === 3 && hour >= 18) ||   // พุธ 18:00+
     (originalDayOfWeek === 4 && hour < 6);   // เกิดพฤหัส ก่อน 06:00 → นับเป็นพุธกลางคืน
 
-  // adjustedDayOfWeek: 1=อาทิตย์ … 7=เสาร์ (base-1)
-  const adjustedDayOfWeek = effectiveDow === 0 ? 7 : effectiveDow;
+  // adjustedDayOfWeek: 1=อาทิตย์ … 7=เสาร์
+  // JS getDay(): 0=อาทิตย์,1=จันทร์,...,5=ศุกร์,6=เสาร์
+  // Thai planet: 1=อาทิตย์,2=จันทร์,...,6=ศุกร์,7=เสาร์
+  const adjustedDayOfWeek = effectiveDow + 1;
   // dayNumber สำหรับ taksa/ทักษา (1–7, ราหู=8)
   const dayNumber = isWednesdayNight ? 8 : adjustedDayOfWeek;
   const dayName   = isWednesdayNight ? "พุธกลางคืน (ราหู)" : PLANET_NAMES[adjustedDayOfWeek - 1]!;
