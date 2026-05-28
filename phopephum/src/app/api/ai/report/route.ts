@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
       base4_9: hResult.nineBase,
       emperor: hResult.emperorChart
     },
-    rules: hResult.rules.map(r => r.insight),
+    rules: hResult.rules.map((r: { insight: string }) => r.insight),
     taksa: hResult.data.taksa,
     vayaChorn: hResult.data.vayaChorn,
     transit: hResult.data.transit

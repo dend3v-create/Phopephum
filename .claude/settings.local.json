@@ -7,7 +7,20 @@
       "Bash(npx tsc:*)",
       "Bash(npx tsx -e ':*)",
       "Bash(npx tsx --tsconfig tsconfig.json -e ':*)",
-      "Bash(node -e ':*)"
+      "Bash(node -e ':*)",
+      "Bash(git -C \"E:\\\\00.1_DenD3v_AI\\\\Mobile_app_01_Demo_Horn_Tai_Noo\" status --porcelain)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" status --porcelain)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" ls-files phopephum/src/lib/astrology/datasets/)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" diff phopephum/src/lib/astrology/datasets/lunarLookup.ts)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" diff phopephum/src/lib/astrology/core/thaiLunar.ts)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" log --oneline -5)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" show --stat HEAD)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" log --oneline phopephum/src/lib/astrology/datasets/lunarLookup.ts)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" log --oneline phopephum/src/lib/astrology/core/thaiLunar.ts)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" show HEAD -- phopephum/src/lib/astrology/core/thaiLunar.ts)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" show HEAD -- phopephum/src/lib/astrology/datasets/lunarLookup.ts)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" status)",
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" log --oneline origin/main..HEAD)"
     ]
   }
 }

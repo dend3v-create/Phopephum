@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
     // 2) RAG Context จาก Supabase knowledge_base
     const ragContext = await getRagContext({
       base:       data.base,
-      categories: rules.slice(0, 3).map(r => r.category),
+      categories: rules.slice(0, 3).map((r: { category: string }) => r.category),
     })
 
     // 3) สร้าง Prompt ครบ 9 หัวข้อ
