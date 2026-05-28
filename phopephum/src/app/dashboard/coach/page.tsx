@@ -25,13 +25,63 @@ export default function CoachPage() {
   const [sending, setSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Quick Prompts list
-  const quickPrompts = [
-    { text: "🔮 วิเคราะห์ดวงและภารกิจประจำวัน", icon: <Sparkles className="w-3.5 h-3.5" /> },
-    { text: "💼 นัดหมายสำคัญ & วิเคราะห์ยามงาน", icon: <Award className="w-3.5 h-3.5" /> },
-    { text: "💰 เปิดกระแสทรัพย์ & วิเคราะห์ยามเงิน", icon: <Zap className="w-3.5 h-3.5" /> },
-    { text: "💖 ถอดรหัสยามความรักความสัมพันธ์", icon: <Heart className="w-3.5 h-3.5" /> }
+  // Categories and Prompts data
+  const [activeCategory, setActiveCategory] = useState("all");
+
+  const promptCategories = [
+    { id: "all", name: "ภาพรวม", icon: <Compass className="w-3.5 h-3.5" /> },
+    { id: "work", name: "การงาน", icon: <Award className="w-3.5 h-3.5" /> },
+    { id: "love", name: "ความรัก", icon: <Heart className="w-3.5 h-3.5" /> },
+    { id: "health", name: "สุขภาพ", icon: <Zap className="w-3.5 h-3.5" /> },
+    { id: "finance", name: "การเงิน", icon: <Zap className="w-3.5 h-3.5" /> },
+    { id: "travel", name: "การเดินทาง", icon: <Moon className="w-3.5 h-3.5" /> },
+    { id: "business", name: "ธุรกิจ", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
   ];
+
+  const promptChips: Record<string, { text: string; context: string }[]> = {
+    all: [
+      { text: "ช่วงนี้ดวงชีวิตโดยรวมเป็นอย่างไร?", context: "วิเคราะห์พลังงาน ปีจร เดือนจร และวันจรปัจจุบัน" },
+      { text: "ช่วงไหนของปีนี้เป็นจุดพีคที่สุดในชีวิต?", context: "วิเคราะห์ยามอัฐกาลและเดือนจรที่ดีที่สุด" },
+      { text: "สิ่งที่ควรระวังที่สุดในช่วงนี้คืออะไร?", context: "วิเคราะห์เลข 7 ตัว และมหาภูติจร" },
+      { text: "ฤกษ์ดีสุดของสัปดาห์นี้คือวันไหน เวลาไหน?", context: "วิเคราะห์ยามอัฐกาลรายวัน" },
+    ],
+    work: [
+      { text: "เจรจาธุรกิจสำคัญ ควรนัดช่วงไหนถึงสำเร็จ?", context: "วิเคราะห์ยามอัฐกาล และยามเจ้าของวัน" },
+      { text: "จะขอเพิ่มเงินเดือนหรือเลื่อนตำแหน่ง ช่วงนี้เหมาะไหม?", context: "วิเคราะห์ปีจร และทักษา" },
+      { text: "โปรเจกต์ที่ทำอยู่จะสำเร็จได้ผลดีไหม?", context: "วิเคราะห์เลข 7 ตัว เจ้าเรือนกรรมะ" },
+      { text: "ควรเปลี่ยนงานตอนนี้หรือรอช่วงไหนดีกว่า?", context: "วิเคราะห์วัยจร และเดือนจร" },
+    ],
+    love: [
+      { text: "ช่วงไหนง้อแฟนแล้วหายงอน ยอมคืนดีได้?", context: "วิเคราะห์ยามอัฐกาลดาวศุกร์ และวันจร" },
+      { text: "จะสารภาพรักช่วงไหนให้ได้รับการตอบรับดี?", context: "วิเคราะห์ยามศุกร์ และมหาภูติจร" },
+      { text: "คนที่คบอยู่ตอนนี้ ดวงสมพงษ์กับเราไหม?", context: "วิเคราะห์เลข 7 ตัว และทักษาสัมพันธ์" },
+      { text: "ปีนี้มีโอกาสพบรักหรือแต่งงานไหม?", context: "วิเคราะห์ปีจร เดือนจร และห้องปัตนิ" },
+    ],
+    health: [
+      { text: "ป่วยอยู่ตอนนี้ ดวงบอกว่าจะหายเร็วไหม?", context: "วิเคราะห์ยามอัฐกาล และห้องมรณะ" },
+      { text: "ช่วงไหนควรระวังสุขภาพเป็นพิเศษ?", context: "วิเคราะห์เดือนจร และดาวเสาร์จร" },
+      { text: "ผ่าตัดหรือรักษาพยาบาลสำคัญ วันไหนฤกษ์ดี?", context: "วิเคราะห์ยามอาทิตย์และพฤหัสบดี" },
+      { text: "พลังงานร่างกายจิตใจช่วงนี้ควรดูแลอะไรก่อน?", context: "วิเคราะห์เลข 7 ตัว ฐานอัตตะ" },
+    ],
+    finance: [
+      { text: "ลงทุนหรือซื้อของมูลค่าสูง ช่วงไหนดีที่สุด?", context: "วิเคราะห์ยามพฤหัสบดี และปีจรธนัง" },
+      { text: "ช่วงนี้ดวงการเงินเป็นอย่างไร มีเงินเข้ามาไหม?", context: "วิเคราะห์เดือนจร และเลข 7 ตัว" },
+      { text: "กู้เงินหรือลงนามสัญญาการเงิน วันไหนเหมาะ?", context: "วิเคราะห์ยามอัฐกาล และฤกษ์มงคล" },
+      { text: "โชคลาภหรือเงินก้อนใหญ่ ปีนี้มีโอกาสไหม?", context: "วิเคราะห์ปีจร และมหาภูติจรโภคา" },
+    ],
+    travel: [
+      { text: "จะเดินทางต่างจังหวัด/ต่างประเทศ เวลาไหนดี?", context: "วิเคราะห์ยามอัฐกาล และทิศมงคล" },
+      { text: "เดินทางสัปดาห์นี้ ควรออกเดินทางวันไหน เวลาไหน?", context: "วิเคราะห์ยามวันจร และดาวพุธ" },
+      { text: "การเดินทางครั้งนี้จะราบรื่นหรือมีอุปสรรค?", context: "วิเคราะห์เลข 7 ตัว และมหาภูติจร" },
+      { text: "ย้ายบ้าน/ย้ายที่ทำงาน ฤกษ์ไหนเหมาะที่สุด?", context: "วิเคราะห์ยามอาทิตย์ และทักษาสุขภาพ" },
+    ],
+    business: [
+      { text: "จะเปิดธุรกิจใหม่ ควรเริ่มต้นช่วงไหนดีที่สุด?", context: "วิเคราะห์ยามพฤหัสบดี และปีจรลาภะ" },
+      { text: "จดทะเบียนบริษัทหรือเซ็นสัญญาใหญ่ วันไหนฤกษ์ดี?", context: "วิเคราะห์ยามอัฐกาลมงคล" },
+      { text: "พาร์ทเนอร์ที่จะร่วมทำธุรกิจ ดวงเข้ากันไหม?", context: "วิเคราะห์เลข 7 ตัว และทักษาสัมพันธ์" },
+      { text: "ธุรกิจที่ทำอยู่ตอนนี้จะเติบโตหรือควรปรับทิศทาง?", context: "วิเคราะห์วัยจร และเดือนจรปัจจุบัน" },
+    ],
+  };
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -58,11 +108,9 @@ export default function CoachPage() {
           setMessages([
             {
               role: "assistant",
-              content: `สวัสดีครับคุณ ${prof.full_name} ยินดีที่ได้พบกันและร่วมทางในวันนี้นะครับ
+              content: `กราบสวัสดีครับคุณ ${prof.full_name} ผม AI Wisdom Coach ยินดีที่ได้ร่วมออกแบบเส้นทางชีวิตไปกับคุณครับ
 
-ผมคือเพื่อนคู่คิดและโค้ชส่วนตัวของคุณในเรื่องการใช้ชีวิต จิตวิทยาเชิงบวก และจังหวะเวลามงคล (Living Wisdom AI Coach) ครับ
-
-ในห้วงยามอัฐกาลจรที่หมุนเวียนอยู่ในเวลานี้ หากคุณมีเรื่องไม่สบายใจ ต้องการการแนะแนวทาง หรือร่วมเจาะลึกทางออกในมิติ "การงาน อาชีพ ธุรกิจ การเงินความมั่งคั่ง หรือความรักความสัมพันธ์" สามารถพิมพ์ข้อความปรึกษาพูดคุยกับผมได้ทันที หรือเลือกกดปุ่มประเด็นด่วนด้านล่างนี้ได้เลยนะครับ ผมพร้อมอยู่เคียงข้างคอยสนับสนุนคุณเสมอครับ`
+หากคุณมีข้อสงสัยหรือต้องการคำแนะนำเชิงกลยุทธ์เกี่ยวกับ "การงาน การเงิน ความรัก สุขภาพ หรือธุรกิจ" สามารถพิมพ์ปรึกษาหรือเลือกใช้ Smart Quick Prompts ด้านล่างเพื่อเจาะลึกข้อมูลดวงชะตาได้ทันทีครับ`
             }
           ]);
         }
@@ -85,7 +133,7 @@ export default function CoachPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = async (text: string) => {
+  const handleSendMessage = async (text: string, context?: string) => {
     if (!text.trim() || sending) return;
 
     const userMsg: Message = { role: "user", content: text };
@@ -98,7 +146,8 @@ export default function CoachPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          messages: [...messages, userMsg]
+          messages: [...messages, userMsg],
+          context: context // Smart Context Injection
         })
       });
 
@@ -110,7 +159,7 @@ export default function CoachPage() {
           ...prev, 
           { 
             role: "assistant", 
-            content: "ขออภัยด้วยครับ ดูเหมือนกระแสลมสัญญาณขัดข้องเล็กน้อยในเวลานี้ กรุณาลองถามใหม่อีกครั้งครับ 🪐" 
+            content: "ขออภัยครับ เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูลดวงชะตา กรุณาลองใหม่อีกครั้งครับ" 
           }
         ]);
       }
@@ -120,7 +169,7 @@ export default function CoachPage() {
         ...prev, 
         { 
           role: "assistant", 
-          content: "ขออภัยด้วยครับ เกิดข้อผิดพลาดในการเชื่อมต่อดวงดาวกับระบบ AI กรุณาลองใหม่อีกครั้งครับ 🪐" 
+          content: "เกิดข้อผิดพลาดในการเชื่อมต่อระบบ AI กรุณาลองใหม่อีกครั้งครับ" 
         }
       ]);
     } finally {
@@ -128,8 +177,8 @@ export default function CoachPage() {
     }
   };
 
-  const handleQuickPromptClick = (promptText: string) => {
-    handleSendMessage(promptText);
+  const handleQuickPromptClick = (chip: { text: string; context: string }) => {
+    handleSendMessage(chip.text, chip.context);
   };
 
   if (loading) {
@@ -248,26 +297,43 @@ export default function CoachPage() {
         {/* Bottom Actions */}
         <div className="pt-6 mt-4 border-t border-white/5 space-y-6">
           
-          {/* Quick Prompts */}
-          {messages.length === 1 && (
-            <div className="space-y-3">
-              <p className="text-xxs text-gold-500/60 flex items-center gap-2 font-bold tracking-[0.2em] uppercase ml-1">
-                <Compass className="w-3.5 h-3.5" /> เลือกหัวข้อคำชี้แนะเชิงกลยุทธ์
-              </p>
-              <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-3">
-                {quickPrompts.map((qp, i) => (
-                  <button
-                    key={i}
-                    onClick={() => handleQuickPromptClick(qp.text)}
-                    className="glass-hora hover:border-gold-500/40 border border-white/5 rounded-2xl p-4 text-xxs font-bold text-text-secondary hover:text-gold-300 text-left flex items-center gap-3 cursor-pointer transition-all hover:-translate-y-1 bg-cosmic-900/20 group"
-                  >
-                    <span className="text-gold-500 group-hover:scale-110 transition-transform">{qp.icon}</span>
-                    <span className="tracking-wide">{qp.text.substring(2)}</span>
-                  </button>
-                ))}
-              </div>
+          {/* Categories Horizontal Scroll */}
+          <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-none no-scrollbar">
+            {promptCategories.map((cat) => (
+              <button
+                key={cat.id}
+                onClick={() => setActiveCategory(cat.id)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap border ${
+                  activeCategory === cat.id
+                    ? "bg-gold-500/20 border-gold-500 text-gold-300 shadow-[0_0_15px_rgba(198,169,107,0.2)]"
+                    : "glass-hora border-white/5 text-text-secondary hover:border-white/20"
+                }`}
+              >
+                {cat.icon}
+                {cat.name}
+              </button>
+            ))}
+          </div>
+
+          {/* Quick Prompts Chips */}
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {promptChips[activeCategory]?.map((chip, i) => (
+                <button
+                  key={i}
+                  onClick={() => handleQuickPromptClick(chip)}
+                  className="glass-hora hover:border-gold-500/40 border border-white/5 rounded-2xl p-4 text-left flex flex-col gap-1 cursor-pointer transition-all hover:-translate-y-1 bg-cosmic-900/20 group"
+                >
+                  <span className="text-xs font-bold text-gold-100 group-hover:text-gold-300 transition-colors line-clamp-1">
+                    {chip.text}
+                  </span>
+                  <span className="text-[10px] text-gold-500/60 font-medium tracking-wide">
+                    {chip.context}
+                  </span>
+                </button>
+              ))}
             </div>
-          )}
+          </div>
 
           {/* Input Bar */}
           <div className="flex gap-3 bg-cosmic-900/60 border border-white/10 focus-within:border-gold-500/50 rounded-3xl p-2.5 transition-all shadow-2xl glass-hora">

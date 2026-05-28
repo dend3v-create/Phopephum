@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { messages } = body // [{ role: 'user', content: '...' }]
+    const { messages, context } = body // [{ role: 'user', content: '...' }], optional context string
     
     if (!messages || messages.length === 0) {
       return NextResponse.json({ error: 'Messages are required' }, { status: 400 })
@@ -62,9 +62,13 @@ export async function POST(request: Request) {
 1. วิเคราะห์ภพเรือนและดาวที่เกี่ยวข้อง
 2. วิเคราะห์ต้นเหตุและบริบท (Linkage/Base 4/ทักษาจร)
 3. สรุปผลลัพธ์ปลายทาง (Base 8-9)
-4. เสนอกลยุทธ์แก้เกมหรือแผนการดำเนินงาน
+4. เสนอกลยุทธ์แก้เกมหรือแผนการดำเนินงาน`
 
-ข้อมูลดวงชะตา:
+    if (context) {
+      systemContext += `\n\nหัวข้อคำถามนี้ต้องการเน้นวิเคราะห์: ${context}`
+    }
+
+    systemContext += `\n\nข้อมูลดวงชะตา:
 - ชื่อ: คุณ${profile.full_name}
 - ปฏิทินจันทรคติ: ${sevenBaseData.thaiLunarDateText}
 - ผังดวง: ${JSON.stringify(sevenBaseData.chart)}
