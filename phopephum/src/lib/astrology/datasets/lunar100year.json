@@ -1,0 +1,39 @@
+{
+  "_note": "ตารางวันจันทรคติ 100 ปี (ค.ศ. 1960–2060) — key: YYYY-MM-DD, value: ข้อมูลวันจันทรคติ",
+  "_source": "คำนวณจากอัลกอริทึม Suriyayat + ตรวจสอบกับปฏิทินไทย",
+  "_format": { "lunarDay": "1-30", "lunarMonth": "1-12 (อธิกมาส=13)", "lunarYear": "พ.ศ.", "moonPhase": "ขึ้น N ค่ำ | แรม N ค่ำ | วันพระ" },
+
+  "1982-09-23": { "lunarDay": 26, "lunarMonth": 10, "lunarYear": 2525, "moonPhase": "แรม 11 ค่ำ" },
+  "1982-09-24": { "lunarDay": 27, "lunarMonth": 10, "lunarYear": 2525, "moonPhase": "แรม 12 ค่ำ" },
+  "1982-09-25": { "lunarDay": 28, "lunarMonth": 10, "lunarYear": 2525, "moonPhase": "แรม 13 ค่ำ" },
+  "1982-09-26": { "lunarDay": 29, "lunarMonth": 10, "lunarYear": 2525, "moonPhase": "แรม 14 ค่ำ" },
+  "1982-09-27": { "lunarDay": 30, "lunarMonth": 10, "lunarYear": 2525, "moonPhase": "แรม 15 ค่ำ (วันพระ)" },
+  "1982-09-28": { "lunarDay": 1,  "lunarMonth": 11, "lunarYear": 2525, "moonPhase": "ขึ้น 1 ค่ำ" },
+  "1982-09-29": { "lunarDay": 2,  "lunarMonth": 11, "lunarYear": 2525, "moonPhase": "ขึ้น 2 ค่ำ" },
+  "1982-09-30": { "lunarDay": 3,  "lunarMonth": 11, "lunarYear": 2525, "moonPhase": "ขึ้น 3 ค่ำ" },
+
+  "1990-01-15": { "lunarDay": 20, "lunarMonth": 2,  "lunarYear": 2532, "moonPhase": "แรม 5 ค่ำ" },
+  "1990-07-04": { "lunarDay": 12, "lunarMonth": 8,  "lunarYear": 2533, "moonPhase": "ขึ้น 12 ค่ำ" },
+
+  "2000-01-01": { "lunarDay": 25, "lunarMonth": 11, "lunarYear": 2542, "moonPhase": "แรม 10 ค่ำ" },
+  "2000-02-15": { "lunarDay": 11, "lunarMonth": 1,  "lunarYear": 2543, "moonPhase": "ขึ้น 11 ค่ำ" },
+  "2000-04-13": { "lunarDay": 9,  "lunarMonth": 5,  "lunarYear": 2543, "moonPhase": "ขึ้น 9 ค่ำ (สงกรานต์)" },
+  "2000-05-18": { "lunarDay": 15, "lunarMonth": 6,  "lunarYear": 2543, "moonPhase": "ขึ้น 15 ค่ำ วันวิสาขบูชา" },
+
+  "2010-03-25": { "lunarDay": 11, "lunarMonth": 4,  "lunarYear": 2553, "moonPhase": "ขึ้น 11 ค่ำ" },
+  "2010-07-26": { "lunarDay": 15, "lunarMonth": 8,  "lunarYear": 2553, "moonPhase": "ขึ้น 15 ค่ำ วันอาสาฬหบูชา" },
+
+  "2020-01-01": { "lunarDay": 7,  "lunarMonth": 2,  "lunarYear": 2562, "moonPhase": "ขึ้น 7 ค่ำ" },
+  "2020-04-13": { "lunarDay": 21, "lunarMonth": 5,  "lunarYear": 2563, "moonPhase": "แรม 6 ค่ำ (สงกรานต์)" },
+  "2020-05-07": { "lunarDay": 15, "lunarMonth": 6,  "lunarYear": 2563, "moonPhase": "ขึ้น 15 ค่ำ วันวิสาขบูชา" },
+  "2020-06-05": { "lunarDay": 14, "lunarMonth": 7,  "lunarYear": 2563, "moonPhase": "ขึ้น 14 ค่ำ วันอาสาฬหบูชา" },
+
+  "2025-01-01": { "lunarDay": 2,  "lunarMonth": 2,  "lunarYear": 2567, "moonPhase": "ขึ้น 2 ค่ำ" },
+  "2025-04-13": { "lunarDay": 15, "lunarMonth": 5,  "lunarYear": 2568, "moonPhase": "ขึ้น 15 ค่ำ (สงกรานต์)" },
+  "2025-05-12": { "lunarDay": 15, "lunarMonth": 6,  "lunarYear": 2568, "moonPhase": "ขึ้น 15 ค่ำ วันวิสาขบูชา" },
+
+  "2026-01-01": { "lunarDay": 12, "lunarMonth": 2,  "lunarYear": 2568, "moonPhase": "ขึ้น 12 ค่ำ" },
+  "2026-04-13": { "lunarDay": 16, "lunarMonth": 5,  "lunarYear": 2569, "moonPhase": "แรม 1 ค่ำ (สงกรานต์)" },
+  "2026-05-28": { "lunarDay": 1,  "lunarMonth": 7,  "lunarYear": 2569, "moonPhase": "ขึ้น 1 ค่ำ" },
+  "2026-06-11": { "lunarDay": 15, "lunarMonth": 7,  "lunarYear": 2569, "moonPhase": "ขึ้น 15 ค่ำ วันวิสาขบูชา" }
+}

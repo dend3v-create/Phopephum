@@ -38,10 +38,10 @@ export async function POST(req: NextRequest) {
     // 3) สร้าง Prompt ครบ 9 หัวข้อ
     const prompt = buildPredictionPrompt(data, ragContext, rules, body.name)
 
-    // 4) Generate AI Narrative
+    // 4) Generate AI Narrative (default: gemini — worker proxy removed)
     const prediction = await generateNarrative({
       prompt,
-      provider: body.provider ?? 'claude',
+      provider: body.provider ?? 'gemini',
       maxTokens: 2000,
     })
 
