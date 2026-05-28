@@ -201,7 +201,7 @@ const NAV_TABS: NavTab[] = [
   { id: "horoscope", label: "ดวงชะตา",   icon: "◎",  href: "/dashboard" },
   { id: "planner",   label: "แพลนเนอร์", icon: "📅", href: "/dashboard/planner" },
   { id: "ai-coach",  label: "โค้ช AI",   icon: "✦",  href: "/dashboard/coach" },
-  { id: "report",    label: "รายงาน",    icon: "⬇",  href: "/dashboard/report" },
+  { id: "report",    label: "บริการ",    icon: "☰",  href: "/dashboard/services" },
 ];
 
 function BottomNav() {
@@ -213,7 +213,7 @@ function BottomNav() {
     if (pathname === "/dashboard") return "horoscope";
     if (pathname.startsWith("/dashboard/planner")) return "planner";
     if (pathname.startsWith("/dashboard/coach")) return "ai-coach";
-    if (pathname.startsWith("/dashboard/report")) return "report";
+    if (pathname.startsWith("/dashboard/services")) return "report";
     return "horoscope";
   }, [pathname]);
 

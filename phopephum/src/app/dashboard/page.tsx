@@ -25,13 +25,11 @@ import {
 } from "@/engine/seven-base-calculator";
 import { DashboardLayout, HoraCard, SectionHeader } from "@/components/layout/DashboardLayout";
 import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
-import { AIReportWidget } from "@/components/ai-report/AIReportWidget";
-import { PDFExportButton } from "@/components/pdf/PDFExportModule";
 // updateUserProfile server action replaced with client-side Supabase update to avoid 405 Method Not Allowed on Cloudflare Pages.
 import { 
-  Sparkles, Calendar, User, Zap, LogOut, ArrowUpRight, 
-  ShieldCheck, Download, Compass, Award, Heart, 
-  Activity, CheckSquare, Target, Scroll, Map, ChevronDown, ChevronUp 
+  Sparkles, Calendar, User, Zap, LogOut, ArrowUpRight,
+  ShieldCheck, Compass, Award, Heart,
+  Activity, CheckSquare, Target, Scroll, Map, ChevronDown, ChevronUp
 } from "lucide-react";
 import Link from "next/link";
 
@@ -55,10 +53,6 @@ export default function DashboardPage() {
   // Accordion states
   const [showTimeMatrix, setShowTimeMatrix] = useState(false);
   const [showPredictionDb, setShowPredictionDb] = useState(false);
-
-  // AI report generation
-  const [generatingReport, setGeneratingReport] = useState(false);
-  const [reportResult, setReportResult] = useState<any>(null);
 
   // Mobile feature toggles
   const [featureToggles, setFeatureToggles] = useState<Record<string, boolean>>({
@@ -153,17 +147,6 @@ export default function DashboardPage() {
             setSevenBaseDate(prof.birth_date);
           }
 
-          // Fetch the latest generated AI report for the dashboard
-          const { data: latestReport } = await supabase
-            .from("ai_reports")
-            .select("*")
-            .eq("user_id", user.id)
-            .order("created_at", { ascending: false })
-            .limit(1);
-
-          if (latestReport && latestReport.length > 0 && latestReport[0].content) {
-            setReportResult(latestReport[0].content);
-          }
         }
 
         // Fetch mobile screen feature configurations
@@ -192,35 +175,6 @@ export default function DashboardPage() {
     const supabase = createClient();
     await supabase.auth.signOut();
     window.location.href = "/";
-  };
-
-  const handleGenerateReport = async () => {
-    if (generatingReport) return;
-    setGeneratingReport(true);
-
-    try {
-      const res = await fetch("/api/ai/report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: profile?.full_name || "ผู้ใช้งาน",
-          birthDate: profile?.birth_date,
-          birthTime: profile?.birth_time,
-          birthProvince: profile?.birth_province,
-        }),
-      });
-
-      const data = await res.json();
-      if (res.ok && data.success) {
-        setReportResult(data.data.content);
-      } else {
-        console.error("Failed to generate report");
-      }
-    } catch (err) {
-      console.error("Error generating report:", err);
-    } finally {
-      setGeneratingReport(false);
-    }
   };
 
   if (loading) {
@@ -300,7 +254,7 @@ export default function DashboardPage() {
             {!isPremium && (
               <div className="pt-4 border-t border-white/5">
                 <p className="text-xs text-text-secondary leading-relaxed mb-4 italic">
-                  &quot;อัปเกรดเพื่อรับการวิเคราะห์ยามมงคลเฉพาะบุคคลและรายงาน PDF&quot;
+                  &quot;อัปเกรดเพื่อรับการวิเคราะห์ยามมงคล ยามราหูค้นทรัพย์ และโหรทายหนูเฉพาะบุคคล&quot;
                 </p>
                 <Link href="/#pricing" className="btn-hora w-full text-xs py-3 rounded-full flex justify-center items-center">
                   อัปเกรดแผนพรีเมียม <ArrowUpRight className="ml-2 w-4 h-4" />
@@ -309,53 +263,6 @@ export default function DashboardPage() {
             )}
           </div>
         </HoraCard>
-
-        {/* AI Report Section */}
-        {profile && (
-          <AIReportWidget
-            birthData={{
-              name: profile.full_name,
-              birthDate: profile.birth_date,
-              birthTime: profile.birth_time,
-              birthPlace: profile.birth_province,
-              gender: profile.gender,
-              numerologyData: sevenBaseResult,
-              horaData: ashtaResult,
-            }}
-            tier={profile.plan || "free"}
-            remainingReports={profile.plan === "premium" ? -1 : 1} // Simplified for demo
-          />
-        )}
-
-        {/* PDF Export Section (Visible after AI report is generated) */}
-        {reportResult && profile && (
-          <div className="mt-4">
-            <PDFExportButton
-              data={{
-                name: profile.full_name,
-                birthDate: profile.birth_date,
-                birthTime: profile.birth_time,
-                birthPlace: profile.birth_province,
-                gender: profile.gender,
-                reportText: typeof reportResult === 'string' ? reportResult : JSON.stringify(reportResult),
-                topic: "ภาพรวมชะตาชีวิต",
-                horaInfo: ashtaResult?.currentHora ? {
-                  majorSlot: ashtaResult.currentHora.yamNumber,
-                  planetName: ashtaResult.currentHora.starName,
-                  planetSymbol: "◎",
-                  startTime: minutesToTimeStr(ashtaResult.currentHora.startTime),
-                  endTime: minutesToTimeStr(ashtaResult.currentHora.endTime),
-                } : undefined,
-                numerology: sevenBaseResult ? {
-                  dayBase: sevenBaseResult.chart.row1[0],
-                  monthBase: sevenBaseResult.chart.row2[0],
-                  yearBase: sevenBaseResult.chart.row3[0],
-                  totalBase: sevenBaseResult.chart.row4[0],
-                } : undefined,
-              }}
-            />
-          </div>
-        )}
 
         {/* Tab Selector for Calculators */}
         <div className="flex p-1 gap-1" style={{ background: "rgba(10,34,64,0.58)", backdropFilter: "blur(24px)", border: "1px solid rgba(217,188,130,0.15)", borderRadius: "14px" }}>
