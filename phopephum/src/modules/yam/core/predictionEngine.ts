@@ -1,4 +1,4 @@
-import { yamMeaning }   from "../constants/yamMeaning";
+import { yamMeaning, YamMeaning } from "../constants/yamMeaning";
 import { phaseMeaning } from "../constants/phaseMeaning";
 import {
   PredictionResult,
@@ -8,7 +8,19 @@ import {
 
 /** ดึงคำทำนายเต็มรูปแบบตามชื่อยาม */
 export function getPrediction(yamName: string): PredictionResult | undefined {
-  return yamMeaning[yamName];
+  const m = yamMeaning[yamName]
+  if (!m) return undefined
+  return {
+    news:     m.news,
+    sickness: m.sickness,
+    lostItem: m.lostItem,
+    travel:   m.travel,
+  }
+}
+
+/** ดึง YamMeaning เต็ม (รวม bestTime, yamNumber, dayName, nightName) */
+export function getYamMeaning(yamName: string): YamMeaning | undefined {
+  return yamMeaning[yamName]
 }
 
 /**
@@ -65,13 +77,18 @@ function buildTravelPrediction(
 
 function buildGeneralPrediction(
   yamName: string,
-  meaning: (typeof yamMeaning)[string],
+  meaning: PredictionResult,
   phase: PhaseType,
   phaseInfo: (typeof phaseMeaning)[PhaseType]
 ): string {
+  const full = yamMeaning[yamName]
+  const bestTime = full?.bestTime ? `เวลาที่ดี: ${full.bestTime}` : ''
   return (
     `ยาม${yamName} ${phaseInfo.label}: ${phaseInfo.description}\n` +
     `ข่าวสาร: ${meaning.news}\n` +
-    `คำแนะนำ: ${phaseInfo.advice}`
+    `คนเจ็บไข้: ${meaning.sickness}\n` +
+    `ของหาย: ${meaning.lostItem}\n` +
+    `การเดินทาง: ${buildTravelPrediction(meaning.travel, phase)}\n` +
+    bestTime
   );
 }

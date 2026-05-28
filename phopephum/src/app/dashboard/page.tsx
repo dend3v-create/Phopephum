@@ -405,14 +405,48 @@ export default function DashboardPage() {
               </div>
 
               {activeYam && (
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                  <div className="bg-cosmic-950/60 p-3 rounded-xl text-center border border-white/5">
-                    <span className="text-[9px] text-hora-text-muted uppercase block">ยามที่</span>
-                    <span className="text-xl font-bold text-gold-300">{activeYam.yamNumber}</span>
+                <div className="space-y-3 mt-4">
+                  {/* Yam header */}
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="bg-cosmic-950/60 p-3 rounded-xl text-center border border-white/5">
+                      <span className="text-[9px] text-hora-text-muted uppercase block">ยามที่</span>
+                      <span className="text-xl font-bold text-gold-300">{activeYam.yamNumber}</span>
+                    </div>
+                    <div className="bg-cosmic-950/60 p-3 rounded-xl text-center border border-white/5">
+                      <span className="text-[9px] text-hora-text-muted uppercase block">ดาวเสวย</span>
+                      <span className="text-sm font-bold text-gold-400">{activeYam.starName}</span>
+                    </div>
+                    <div className="bg-cosmic-950/60 p-3 rounded-xl text-center border border-white/5">
+                      <span className="text-[9px] text-hora-text-muted uppercase block">ช่วงยาม</span>
+                      <span className="text-xs font-bold text-purple-300">{activeYam.activeSubYam?.name}</span>
+                      <span className="text-[9px] text-hora-text-muted block">{activeYam.activeSubYam?.startTime}–{activeYam.activeSubYam?.endTime}</span>
+                    </div>
                   </div>
-                  <div className="bg-cosmic-950/60 p-3 rounded-xl text-center border border-white/5">
-                    <span className="text-[9px] text-hora-text-muted uppercase block">ดาวเสวย</span>
-                    <span className="text-sm font-bold text-gold-400">{activeYam.starName}</span>
+
+                  {/* Predictions */}
+                  <div className="space-y-2">
+                    <div className="bg-cosmic-950/60 p-3 rounded-xl border border-white/5">
+                      <span className="text-[9px] text-gold-400 font-bold uppercase block mb-1">เรื่องที่ได้ยิน</span>
+                      <p className="text-xs text-foreground leading-relaxed">{activeYam.predictions?.hearing}</p>
+                    </div>
+                    <div className="bg-cosmic-950/60 p-3 rounded-xl border border-white/5">
+                      <span className="text-[9px] text-gold-400 font-bold uppercase block mb-1">คนเจ็บไข้</span>
+                      <p className="text-xs text-foreground leading-relaxed">{activeYam.predictions?.sick}</p>
+                    </div>
+                    <div className="bg-cosmic-950/60 p-3 rounded-xl border border-white/5">
+                      <span className="text-[9px] text-gold-400 font-bold uppercase block mb-1">ของหาย</span>
+                      <p className="text-xs text-foreground leading-relaxed">{activeYam.predictions?.lost}</p>
+                    </div>
+                    <div className="bg-cosmic-950/60 p-3 rounded-xl border border-white/5">
+                      <span className="text-[9px] text-gold-400 font-bold uppercase block mb-1">การเดินทาง ({activeYam.activeSubYam?.name})</span>
+                      <p className="text-xs text-foreground leading-relaxed">{activeYam.predictions?.travel}</p>
+                    </div>
+                    {activeYam.predictions?.bestTime && (
+                      <div className="bg-gold-500/5 p-3 rounded-xl border border-gold-500/20">
+                        <span className="text-[9px] text-gold-400 font-bold uppercase block mb-1">เวลาที่ดี</span>
+                        <p className="text-xs text-gold-300 font-medium">{activeYam.predictions.bestTime}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
