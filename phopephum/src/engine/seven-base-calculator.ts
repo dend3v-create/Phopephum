@@ -14,7 +14,6 @@ import {
   thaiYearToZodiac, 
   zodiacToNumber, 
   thaiMonthToNumber,
-  approximateThaiMonth,
   genBase1to3,
   genBase4,
   genBase5,
@@ -26,7 +25,9 @@ import {
   HOUSE_NAMES_PALI,
   DAY_NAMES_THAI,
   ZODIAC_NAMES_THAI
-} from "../../seven-numbers";
+} from "./seven-numbers";
+
+import { getThaiMonthFull } from "./thai-lunar-calendar";
 
 export interface SevenBaseChart {
   row1: number[]; // แถวที่ 1: ฐานวัน (1-7)
