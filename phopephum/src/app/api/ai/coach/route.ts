@@ -80,14 +80,13 @@ export async function POST(request: Request) {
         base4_9: hResult.nineBase,
         emperor: hResult.emperorChart
       },
-      rules: hResult.rules.map(r => r.insight),
+      rules: hResult.rules.map((r: any) => r.insight),
       taksa: hResult.data.taksa,
       currentYam: {
         name: currentPlanet.nameThai,
         description: currentPlanet.description,
-        isAuspicious: currentHoraData.currentHora?.isAuspicious,
-        yamNumber: currentMajorYam?.majorSlot || '-',
-        timeRange: `${currentMajorYam?.subSlots?.[0]?.startTime || ''}–${currentMajorYam?.subSlots?.[0]?.endTime || ''}`
+        yamNumber: currentMajorYam?.majorIndex !== undefined ? currentMajorYam.majorIndex + 1 : '-',
+        timeRange: currentMajorYam?.subSlot ? `${currentMajorYam.subSlot.startTime}–${currentMajorYam.subSlot.endTime}` : '-'
       }
     }
 
