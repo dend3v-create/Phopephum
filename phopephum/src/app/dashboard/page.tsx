@@ -287,7 +287,7 @@ export default function DashboardPage() {
             {!isPremium && (
               <div className="pt-4 border-t border-white/5">
                 <p className="text-xs text-text-secondary leading-relaxed mb-4 italic">
-                  "อัปเกรดเพื่อรับการวิเคราะห์ยามมงคลเฉพาะบุคคลและรายงาน PDF"
+                  &quot;อัปเกรดเพื่อรับการวิเคราะห์ยามมงคลเฉพาะบุคคลและรายงาน PDF&quot;
                 </p>
                 <Link href="/#pricing" className="btn-hora w-full text-xs py-3 rounded-full flex justify-center items-center">
                   อัปเกรดแผนพรีเมียม <ArrowUpRight className="ml-2 w-4 h-4" />
