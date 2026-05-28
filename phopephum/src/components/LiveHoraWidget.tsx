@@ -121,6 +121,73 @@ export default function LiveHoraWidget() {
         </div>
       </div>
 
+      {/* Enhanced Prediction Meanings Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-8 pt-8 border-t border-white/5">
+        {/* Left Col: Auspicious and Advice */}
+        <div className="space-y-4">
+          <div className="bg-cosmic-950/30 border border-white/5 rounded-2xl p-4">
+            <span className="text-[10px] font-bold text-gold-500/70 uppercase tracking-widest mb-3 block flex items-center gap-2">
+              <Sparkles className="w-3 h-3" /> พลังงานมงคลและคำแนะนำ
+            </span>
+            <div className="space-y-3">
+              <div>
+                <span className="text-[9px] text-text-secondary/50 uppercase font-bold block mb-1">ด้านมงคลเด่น</span>
+                <p className="text-sm font-bold text-gold-200">{current.predictions.auspicious || "อยู่ระหว่างประมวลผล..."}</p>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <span className="text-[9px] text-green-400/50 uppercase font-bold block mb-1">สิ่งที่ควรทำ</span>
+                  <p className="text-xs text-foreground/90 leading-snug">{current.predictions.shouldDo || "-"}</p>
+                </div>
+                <div>
+                  <span className="text-[9px] text-red-400/50 uppercase font-bold block mb-1">ไม่ควรทำ / ควรระวัง</span>
+                  <p className="text-xs text-foreground/90 leading-snug">{current.predictions.shouldNotDo || "-"}</p>
+                </div>
+              </div>
+              <div>
+                <span className="text-[9px] text-blue-400/50 uppercase font-bold block mb-1">ถ้าจะทำ ทำแบบไหน</span>
+                <p className="text-xs italic text-text-secondary leading-snug">{current.predictions.howTo || "-"}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Col: Phase Results */}
+        <div className="space-y-4">
+          <div className="bg-cosmic-950/30 border border-white/5 rounded-2xl p-4">
+            <span className="text-[10px] font-bold text-gold-500/70 uppercase tracking-widest mb-3 block flex items-center gap-2">
+              <Clock className="w-3 h-3" /> ผลลัพธ์ตามช่วงยาม (ต้น/กลาง/ปลาย)
+            </span>
+            <div className="space-y-2">
+              {[
+                { label: "ยามต้น (0-30 นาทีแรก)", val: current.majorSlot.predictions.travelStart, slot: 1 },
+                { label: "ยามกลาง (30-60 นาที)", val: current.majorSlot.predictions.travelMiddle, slot: 2 },
+                { label: "ยามปลาย (60-90 นาที)", val: current.majorSlot.predictions.travelEnd, slot: 3 },
+              ].map((p, idx) => {
+                const isActive = current.activeSubYam.slot === p.slot;
+                return (
+                  <div key={idx} className={`p-2.5 rounded-xl border transition-all ${
+                    isActive 
+                      ? "bg-gold-500/10 border-gold-500/30 ring-1 ring-gold-500/20 shadow-[0_0_15px_rgba(198,169,107,0.1)]" 
+                      : "bg-white/5 border-transparent opacity-60"
+                  }`}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className={`text-[9px] font-bold uppercase tracking-wider ${isActive ? "text-gold-300" : "text-text-secondary"}`}>
+                        {p.label}
+                      </span>
+                      {isActive && <span className="text-[8px] bg-gold-500 text-cosmic-950 px-1.5 py-0.5 rounded-full font-black uppercase tracking-tighter">ปัจจุบัน</span>}
+                    </div>
+                    <p className={`text-xs leading-relaxed ${isActive ? "text-foreground font-medium" : "text-text-secondary"}`}>
+                      {p.val}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Stats row */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-10 pt-8 border-t border-white/5">
         {[

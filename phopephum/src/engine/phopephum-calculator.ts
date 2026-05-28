@@ -82,6 +82,10 @@ export interface YamPredictions {
   travelMiddle: string; // การเดินทาง (ยามกลาง)
   travelEnd: string;    // การเดินทาง (ยามปลาย)
   bestTime: string;     // เวลาที่ดี
+  auspicious?: string;   // ด้านมงคล
+  shouldDo?: string;     // สิ่งที่ควรทำ
+  shouldNotDo?: string;  // ไม่ควรทำ
+  howTo?: string;        // ถ้าจะทำทำแบบไหน
 }
 
 export interface HoraResult {
@@ -111,6 +115,10 @@ export interface CurrentHoraInfo {
     lost: string;
     travel: string;
     bestTime: string;
+    auspicious?: string;
+    shouldDo?: string;
+    shouldNotDo?: string;
+    howTo?: string;
   };
   // Properties below are for backwards compatibility with coach route & LiveHoraWidget
   subSlot: HoraSlot;
@@ -214,6 +222,10 @@ export const PREDICTION_DATABASE: Record<number, YamPredictions & { starNameDay:
     travelMiddle: "เดินทางได้ลาภ",
     travelEnd: "เดินทางไม่ดีจะมีเคราะห์ร้าย เสื่อมเสียศักดิ์ศรี",
     bestTime: "ยามกลาง",
+    auspicious: "อำนาจ, เกียรติยศ, ชื่อเสียง",
+    shouldDo: "เข้าหาผู้ใหญ่, เจรจางานราชการ, ประกาศตัว",
+    shouldNotDo: "งานเสี่ยงอันตราย, การตัดสินใจด้วยความโกรธ",
+    howTo: "ทำด้วยความสง่างาม, เด็ดขาด, ชัดเจน",
   },
   2: {
     starNameDay: "จันเทา",
@@ -225,6 +237,10 @@ export const PREDICTION_DATABASE: Record<number, YamPredictions & { starNameDay:
     travelMiddle: "เดินทางไกลได้ลาภ แต่ห้ามเดินทางเพราะจะเคราะห์ร้าย",
     travelEnd: "ห้ามเดินทางไกล จะมีเคราะห์ร้าย เสียทรัพย์สิน",
     bestTime: "ยามกลาง",
+    auspicious: "เสน่ห์, เมตตา, การช่วยเหลือ",
+    shouldDo: "เจรจาค้าขาย, งานบริการ, ขอความช่วยเหลือ",
+    shouldNotDo: "ตัดสินใจเรื่องใหญ่ด้วยอารมณ์, งานที่ต้องใช้ความเด็ดขาด",
+    howTo: "ทำด้วยความนุ่มนวล, ใส่ใจความรู้สึก, ประนีประนอม",
   },
   3: {
     starNameDay: "ภุมมะ",
@@ -236,6 +252,10 @@ export const PREDICTION_DATABASE: Record<number, YamPredictions & { starNameDay:
     travelMiddle: "เดินทางไกลจะเกิดไฟไหม้ ถูกโจรปล้นทรัพย์สินเงินทอง ระหว่างเดินทาง",
     travelEnd: "เดินทางไกลได้ลาภเป็นเงินเป็นทองมากมาย พบมิตร ระหว่างทาง จะคบกันไปได้นานๆ",
     bestTime: "ยามปลาย",
+    auspicious: "ความกล้า, พลัง, การลงมือทำ",
+    shouldDo: "ลุยงานยาก, กีฬา, การแข่งขัน, ซ่อมแซม",
+    shouldNotDo: "เริ่มกิจการใหม่, เดินทางไกล, ทะเลาะวิวาท",
+    howTo: "ทำด้วยความเร็ว, มุ่งมั่น, ไม่ลังเล",
   },
   4: {
     starNameDay: "พุทธะ",
@@ -247,6 +267,10 @@ export const PREDICTION_DATABASE: Record<number, YamPredictions & { starNameDay:
     travelMiddle: "เดินทางได้ลาภเงินทองจำนวนมาก พบปะ เจรจาความกับผู้ใหญ่ก็ได้สมประสงค์",
     travelEnd: "เดินทางได้ลาภมากมาย เจรจาความกับผู้ใหญ่ก็ได้สมประสงค์",
     bestTime: "ยามกลาง และยามปลาย",
+    auspicious: "ปัญญา, การสื่อสาร, ธุรกิจ",
+    shouldDo: "เจรจาธุรกิจ, เซ็นสัญญา, เรียนรู้สิ่งใหม่",
+    shouldNotDo: "ความไม่ซื่อสัตย์, การพูดเพ้อเจ้อ, การโกหก",
+    howTo: "ทำด้วยการใช้เหตุผล, เตรียมข้อมูลให้ดี, สื่อสารชัดเจน",
   },
   5: {
     starNameDay: "ครู",
@@ -258,6 +282,10 @@ export const PREDICTION_DATABASE: Record<number, YamPredictions & { starNameDay:
     travelMiddle: "เดินทางไกลจะเสียผลประโยชน์ ติดขัด เจรจาความใดๆ ไม่สำเร็จ",
     travelEnd: "เดินทางไกลจะเสียผลประโยชน์จำนวนมาก เจอศัตรู หมู่มาร",
     bestTime: "ยามต้น",
+    auspicious: "โชคลาภ, ปัญญา, ความสำเร็จ",
+    shouldDo: "ทำบุญ, พบครูบาอาจารย์, ปรึกษาผู้ใหญ่, วางแผนการศึกษา",
+    shouldNotDo: "การประมาท, การใช้จ่ายฟุ่มเฟือย, การขาดวินัย",
+    howTo: "ทำด้วยความซื่อสัตย์, มีศีลธรรม, ใช้ปัญญา",
   },
   6: {
     starNameDay: "ศุกระ",
@@ -269,6 +297,10 @@ export const PREDICTION_DATABASE: Record<number, YamPredictions & { starNameDay:
     travelMiddle: "ห้ามเดินทางไกล แม้จะได้ลาภมากก็จะหมดไป หรือถูกขโมยขึ้น",
     travelEnd: "เดินทางไกลได้ลาภมากมาย พบมิตร และเพื่อนต่างเพศ ช่วยเหลือดี",
     bestTime: "ยามปลาย",
+    auspicious: "ความสุข, ความรัก, ศิลปะ",
+    shouldDo: "งานบันเทิง, ความงาม, เจรจาเรื่องรัก, การตกแต่ง",
+    shouldNotDo: "งานที่ต้องใช้ความเครียดสูง, การขัดแย้งกับคนรัก",
+    howTo: "ทำด้วยความรื่นรมย์, เน้นความสวยงาม, สร้างความประทับใจ",
   },
   7: {
     starNameDay: "เสารี",
@@ -280,6 +312,10 @@ export const PREDICTION_DATABASE: Record<number, YamPredictions & { starNameDay:
     travelMiddle: "เดินทางดีมาก ได้ลาภจำนวนมากมาย",
     travelEnd: "เดินทางไกลได้ลาภ เงินทอง ของกำนัล",
     bestTime: "ยามกลาง และยามปลาย",
+    auspicious: "ความมั่นคง, วินัย, ความอดทน",
+    shouldDo: "งานระยะยาว, งานเกษตร, วางแผนระบบ, งานที่ต้องใช้ความอดทน",
+    shouldNotDo: "การรีบร้อนหวังผลเร็ว, การลงทุนที่มีความเสี่ยงสูง",
+    howTo: "ทำด้วยความอดทน, รอบคอบ, ค่อยเป็นค่อยไป, มั่นคง",
   },
 };
 
@@ -572,6 +608,10 @@ function findCurrentHora(
           lost: major.predictions.lost,
           travel: travelPrediction,
           bestTime: major.predictions.bestTime,
+          auspicious: major.predictions.auspicious,
+          shouldDo: major.predictions.shouldDo,
+          shouldNotDo: major.predictions.shouldNotDo,
+          howTo: major.predictions.howTo,
         },
         subSlot: activeSubYam,
         majorIndex: major.majorSlot,

@@ -416,6 +416,34 @@ export default function DashboardPage() {
                       </div>
                     </div>
 
+                    {/* New Enhanced Guidance Section */}
+                    <div className="p-4 rounded-2xl space-y-3" style={{ background: "rgba(10,34,64,0.4)", border: "1px solid rgba(217,188,130,0.15)" }}>
+                       <div className="flex items-center gap-2 mb-1">
+                          <Zap className="w-3 h-3 text-gold-400" />
+                          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">พลังงานมงคลและคำแนะนำ</span>
+                       </div>
+                       <div className="space-y-3">
+                          <div>
+                             <span className="text-[8px] text-hora-text-muted uppercase font-bold block mb-0.5">ด้านมงคลเด่น:</span>
+                             <p className="text-xs font-bold text-gold-200">{activeYam.predictions.auspicious}</p>
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                             <div>
+                                <span className="text-[8px] text-green-400/60 uppercase font-bold block mb-0.5">สิ่งที่ควรทำ:</span>
+                                <p className="text-[10px] text-foreground/90 leading-snug">{activeYam.predictions.shouldDo}</p>
+                             </div>
+                             <div>
+                                <span className="text-[8px] text-red-400/60 uppercase font-bold block mb-0.5">ไม่ควรทำ:</span>
+                                <p className="text-[10px] text-foreground/90 leading-snug">{activeYam.predictions.shouldNotDo}</p>
+                             </div>
+                          </div>
+                          <div>
+                             <span className="text-[8px] text-blue-400/60 uppercase font-bold block mb-0.5">ถ้าจะทำ ทำแบบไหน:</span>
+                             <p className="text-[10px] italic text-text-secondary leading-snug">{activeYam.predictions.howTo}</p>
+                          </div>
+                       </div>
+                    </div>
+
                     {/* Travel timing guide — all 3 sub-yam */}
                     <div className="p-3 rounded-2xl space-y-2" style={{ background: "rgba(10,34,64,0.5)", border: "1px solid rgba(217,188,130,0.12)" }}>
                       <span className="text-[9px] font-bold uppercase tracking-widest text-hora-text-muted block">🕐 การเดินทางตามช่วงยาม</span>
