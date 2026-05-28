@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { calculateSevenBase } from '@/engine/seven-base-calculator'
+import { horoscopeEngine } from '@/lib/astrology/engine/horoscopeEngine'
 import { getCurrentHora, PLANETS } from '@/engine/phopephum-calculator'
-import { SEVEN_BASE_ROLE_SYSTEM, HORA_CHAT_SYSTEM } from '@/constants/ai-prompts'
+import { HORA_CHAT_SYSTEM } from '@/constants/ai-prompts'
 
 export const runtime = 'edge'
 
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json()
-    const { messages, context } = body // [{ role: 'user', content: '...' }], optional context string
+    const { messages, context } = body 
     
     if (!messages || messages.length === 0) {
       return NextResponse.json({ error: 'Messages are required' }, { status: 400 })
@@ -36,8 +36,12 @@ export async function POST(request: Request) {
 
     const latestMessage = messages[messages.length - 1].content.trim()
 
-    // 1. คำนวณเลข 7 ตัว 9 ฐาน กำเนิดของผู้ใช้
-    const sevenBaseData = calculateSevenBase(profile.birth_date, profile.birth_time || "12:00")
+    // 1. คำนวณดวงชะตาด้วย Engine ตัวเต็ม (v3)
+    const hResult = await horoscopeEngine({
+      birthDate: profile.birth_date,
+      birthTime: profile.birth_time || "12:00",
+      name: profile.full_name
+    })
     
     // 2. คำนวณยามอัฐกาลปัจจุบันที่กำลังรันอยู่ ณ ขณะนี้
     const currentHoraData = getCurrentHora()
@@ -60,47 +64,44 @@ export async function POST(request: Request) {
       return { dayName: thaiDayNames[d.getDay()], date: `${d.getDate()}/${d.getMonth()+1}`, label: i === 0 ? 'วันนี้' : i === 1 ? 'พรุ่งนี้' : `อีก ${i} วัน` }
     })
 
-    // 3. ดึง RAG Knowledge Base จาก Supabase เพื่อใช้ในการพยากรณ์
-    const { data: knowledgeItems } = await supabase
-      .from('knowledge_base')
-      .select('title, content, category')
-      .limit(3)
-
-    let systemContext = `คุณคือ WISDOM COACH (LIVING WISDOM & ASTROLOGY GUIDANCE) ผู้เชี่ยวชาญศาสตร์พยากรณ์เลข 7 ตัว 9 ฐาน และยามอัฐกาล
-ทำหน้าที่ให้คำแนะนำเชิงกลยุทธ์ (Destiny Management) ด้วยภาษาสุภาพ น่าเชื่อถือ และมั่นใจ
-เน้นการตอบที่กระชับมาก (ความยาว 1-3 ประโยค) โดยอ้างอิงข้อมูลจาก "ยามปัจจุบัน" เป็นหลัก
-
-## TONE & STYLE
-- สุภาพ นิ่ง และมีความเป็นมืออาชีพสูง
-- ไม่ใช้อีโมจิหรือสัญลักษณ์
-- **สำคัญ:** ต้องเริ่มต้นหรือระบุถึง "ยามปัจจุบัน" (เช่น ยามระวิ, ยามโสระ) และให้คำแนะนำหรือคำเตือนที่สอดคล้องกับพลังงานของดาวนั้นทันที
-
-## แนวทางการตอบตัวอย่าง:
-- "ยามนี้ ระวิ ให้ระวังเรื่องร้อนใจ คิดใคร่ครวญดี และมีสติก่อนตัดสินใจครับ"
-- "แนะนำให้นอนหลับพักผ่อนหรือหยุดพักก่อน เพื่อรอให้ผ่านพ้นยามนี้ไปก่อนนะครับ"
-- "ในยามชีโวนี้ เป็นจังหวะดีของการเจรจาและการใช้ปัญญาเพื่อหาทางออกที่มั่นคงครับ"`
+    // 3. เตรียม System Context
+    let systemContext = HORA_CHAT_SYSTEM
 
     if (context) {
-      systemContext += `\n\nหัวข้อคำถามนี้ต้องการเน้นวิเคราะห์: ${context}`
+      systemContext += `\n\nหัวข้อที่เน้น: ${context}`
     }
 
-    systemContext += `\n\nข้อมูลดวงชะตา:
-- ชื่อ: คุณ${profile.full_name}
-- ปฏิทินจันทรคติ: ${sevenBaseData.thaiLunarDateText}
-- ผังดวง: ${JSON.stringify(sevenBaseData.chart)}
-- ทักษา: ${JSON.stringify(sevenBaseData.taksa)}
-- มหาภูติ: ${JSON.stringify(sevenBaseData.mahaPhute)}
-- ยามปัจจุบัน: ยามที่ ${currentMajorYam?.yamNumber || '-'} — ดาว${currentPlanet.nameThai} (${currentPlanet.description}) เวลา ${currentMajorYam?.activeSubYam?.startTime || ''}–${currentMajorYam?.activeSubYam?.endTime || ''}
+    // สร้าง Data Snapshot สำหรับ AI
+    const dataSnapshot = {
+      user: profile.full_name,
+      lunarDate: hResult.lunar?.thaiLunarDateText || hResult.data.dayName,
+      chart: {
+        base1_3: hResult.sevenBase,
+        base4_9: hResult.nineBase,
+        emperor: hResult.emperorChart
+      },
+      rules: hResult.rules.map(r => r.insight),
+      taksa: hResult.data.taksa,
+      currentYam: {
+        name: currentPlanet.nameThai,
+        description: currentPlanet.description,
+        isAuspicious: currentHoraData.currentHora?.isAuspicious,
+        yamNumber: currentMajorYam?.majorSlot || '-',
+        timeRange: `${currentMajorYam?.subSlots?.[0]?.startTime || ''}–${currentMajorYam?.subSlots?.[0]?.endTime || ''}`
+      }
+    }
 
-## ข้อมูลเวลาปัจจุบัน (สำหรับวางแผนเชิงกาลเวลา):
+    systemContext += `\n\nข้อมูลดวงชะตาปัจจุบัน:\n${JSON.stringify(dataSnapshot, null, 2)}`
+
+    systemContext += `\n\n## ข้อมูลเวลาปัจจุบัน (สำหรับวางแผนเชิงกาลเวลา):
 - วันที่: ${todayDate}
 - วันนี้คือ: วัน${todayDayName} ${periodLabel}
 - เวลาปัจจุบัน: ${currentTimeStr}
 - 7 วันของสัปดาห์นี้: ${weekDays.map(w => `${w.label} (วัน${w.dayName} ${w.date})`).join(' | ')}
 
-**กฎ:** เมื่อผู้ใช้ถามเรื่อง วัน/เวลา/สัปดาห์ ให้ใช้ข้อมูลวันข้างต้นระบุอย่างชัดเจน เช่น "วัน${todayDayName}นี้" หรือ "วันพุธหน้า (28/5)" เพื่อให้ผู้ใช้นำไปบันทึกใน Planner ได้ทันที`
+**กฎ:** เมื่อผู้ใช้ถามเรื่อง วัน/เวลา/สัปดาห์ ให้ใช้ข้อมูลเวลาด้านบนนี้ระบุอย่างชัดเจน เช่น "วัน${todayDayName}นี้" หรือ "วันหน้า (${weekDays[1]?.date})" เพื่อให้ผู้ใช้นำไปบันทึกใน Planner ได้ทันที`
 
-    // ค้นหา API key ใน .env ว่ามีคีย์พร้อมใช้เพื่อยิง AI จริงๆ หรือไม่
+    // ค้นหา API key ใน .env
     const geminiKey = process.env.GEMINI_API_KEY
     const isGeminiConfigured = geminiKey && geminiKey.includes("AIzaSy")
 
@@ -116,13 +117,13 @@ export async function POST(request: Request) {
                 {
                   role: 'user',
                   parts: [
-                    { text: `${systemContext}\n\nข้อความจากผู้ใช้ล่าสุด: "${latestMessage}"\n\nกรุณาตอบคำถามอย่างสุภาพและกระชับมาก (1-3 ประโยค) โดยอ้างอิงยามปัจจุบันข้างต้น:` }
+                    { text: `${systemContext}\n\nข้อความจากผู้ใช้ล่าสุด: "${latestMessage}"` }
                   ]
                 }
               ],
               generationConfig: {
-                maxOutputTokens: 500,
-                temperature: 0.4
+                maxOutputTokens: 1000,
+                temperature: 0.7
               }
             })
           }
@@ -141,15 +142,14 @@ export async function POST(request: Request) {
           }
         }
       } catch (err) {
-        console.error('[/api/ai/coach] Gemini API error, falling back to rule-engine:', err)
+        console.error('[/api/ai/coach] Gemini API error:', err)
       }
     }
 
-    // --- SMART RULE-BASED HOROSCOPE ENGINE FALLBACK (NEW CONCISE YAM STYLE) ---
-    let responseText = ""
-    const text = latestMessage.toLowerCase()
+    // --- FALLBACK ---
     const pName = currentPlanet.nameThai
-    
+    const text = latestMessage.toLowerCase()
+    let responseText = ""
     if (text.includes("ระวัง") || text.includes("อุปสรรค") || text.includes("ปัญหา")) {
       responseText = `กราบสวัสดีครับ ในยาม${pName}นี้ แนะนำให้คุณระมัดระวังเรื่องอารมณ์และเรื่องร้อนใจเป็นพิเศษครับ ควรใช้สติคิดใคร่ครวญให้รอบคอบก่อนตัดสินใจ หรือหากเป็นไปได้ แนะนำให้พักผ่อนและรอให้ผ่านพ้นช่วงยามนี้ไปก่อนจะดีที่สุดครับ`
     } else if (text.includes("งาน") || text.includes("อาชีพ") || text.includes("ธุรกิจ")) {
@@ -160,11 +160,10 @@ export async function POST(request: Request) {
       responseText = `กราบสวัสดีครับ จากดวงชะตาและยาม${pName}ในขณะนี้ แนะนำให้คุณรักษาสมาธิและจิตใจให้มั่นคงเพื่อรับพลังงานบวกครับ พลังจากฐานดวงที่แข็งแกร่งจะช่วยนำพาคุณไปสู่ทางออกและโอกาสใหม่ๆ ที่กำลังจะเข้ามาในเร็วๆ นี้ครับ`
     }
 
-
     return NextResponse.json({
       success: true,
       message: responseText,
-      source: 'wisdom-rule-engine'
+      source: 'wisdom-fallback'
     })
   } catch (error) {
     console.error('[/api/ai/coach] POST error:', error)
