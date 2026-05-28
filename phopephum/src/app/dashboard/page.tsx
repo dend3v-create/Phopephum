@@ -4,13 +4,6 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { 
   calculateHora, 
-  DAYTIME_YAM_STARS, 
-  NIGHTTIME_YAM_STARS, 
-  PREDICTION_DATABASE, 
-  NINE_SEGMENTS_DATA, 
-  DAY_NAMES_THAI,
-  minutesToTimeStr,
-  DayOfWeek 
 } from "@/engine/phopephum-calculator";
 import {
   calculateSevenBase,
@@ -38,8 +31,8 @@ export default function DashboardPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  // New Ashta-Kala manual calculator states
-  const [ashtaDay, setAshtaDay] = useState<number>(new Date().getDay());
+  // Ashta-Kala manual calculator states (full date + time)
+  const [ashtaDate, setAshtaDate] = useState<string>("");
   const [ashtaTime, setAshtaTime] = useState<string>("");
   const [ashtaResult, setAshtaResult] = useState<any>(null);
 
@@ -62,20 +55,18 @@ export default function DashboardPage() {
     subscription_card: true,
   });
 
-  // Helper for Ashta-Kala calculation
-  const handleAshtaCalculate = (day: number, timeVal: string) => {
+  // Helper for Ashta-Kala calculation (full date + time)
+  const handleAshtaCalculate = (dateStr: string, timeVal: string) => {
     try {
-      if (!timeVal) return;
-      const cleanTime = timeVal.replace(":", ".");
-      const [hStr, mStr] = cleanTime.split(".");
+      if (!dateStr || !timeVal) return;
+      // Parse time as HH:MM
+      const [hStr, mStr] = timeVal.split(":");
       const hours = parseInt(hStr || "0") % 24;
       const minutes = parseInt(mStr || "0") % 60;
 
-      const date = new Date();
-      const currentDay = date.getDay();
-      const diff = day - currentDay;
-      date.setDate(date.getDate() + diff);
-      date.setHours(hours, minutes, 0, 0);
+      // Build date object from selected date string
+      const [yyyy, mm, dd] = dateStr.split("-").map(Number);
+      const date = new Date(yyyy, mm - 1, dd, hours, minutes, 0, 0);
 
       const result = calculateHora({ date, currentTime: date });
       setAshtaResult(result);
@@ -84,26 +75,37 @@ export default function DashboardPage() {
     }
   };
 
-  useEffect(() => {
+  const handleAshtaNow = () => {
     const now = new Date();
-    // Default format "HH.MM"
-    const defaultTime = `${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`;
-    setAshtaTime(defaultTime);
-    setAshtaDay(now.getDay());
-
-    // Initialize default for Seven-Base Date
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, "0");
     const dd = String(now.getDate()).padStart(2, "0");
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mi = String(now.getMinutes()).padStart(2, "0");
+    setAshtaDate(`${yyyy}-${mm}-${dd}`);
+    setAshtaTime(`${hh}:${mi}`);
+  };
+
+  useEffect(() => {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const dd = String(now.getDate()).padStart(2, "0");
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mi = String(now.getMinutes()).padStart(2, "0");
+    setAshtaDate(`${yyyy}-${mm}-${dd}`);
+    setAshtaTime(`${hh}:${mi}`);
+
+    // Initialize default for Seven-Base Date
     setSevenBaseDate(`${yyyy}-${mm}-${dd}`);
-    setSevenBaseTime(`${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`);
+    setSevenBaseTime(`${hh}:${mi}`);
   }, []);
 
   useEffect(() => {
-    if (ashtaTime) {
-      handleAshtaCalculate(ashtaDay, ashtaTime);
+    if (ashtaDate && ashtaTime) {
+      handleAshtaCalculate(ashtaDate, ashtaTime);
     }
-  }, [ashtaDay, ashtaTime]);
+  }, [ashtaDate, ashtaTime]);
 
   useEffect(() => {
     if (sevenBaseDate) {
@@ -138,12 +140,11 @@ export default function DashboardPage() {
         if (prof) {
           setProfile(prof);
           if (prof.birth_time) {
-            setAshtaTime(prof.birth_time.replace(":", "."));
+            setAshtaTime(prof.birth_time); // HH:MM format
             setSevenBaseTime(prof.birth_time);
           }
           if (prof.birth_date) {
-            const birthDateObj = new Date(prof.birth_date);
-            setAshtaDay(birthDateObj.getDay());
+            setAshtaDate(prof.birth_date); // YYYY-MM-DD
             setSevenBaseDate(prof.birth_date);
           }
 
@@ -293,73 +294,164 @@ export default function DashboardPage() {
         {/* Ashta Kala Calculator */}
         {activeTab === "ashta" && (
           <HoraCard>
-            <SectionHeader icon="Sparkles" title="คำนวณยามอัฐกาล" />
+            <SectionHeader icon="Sparkles" title="ระบบคำนวณยามอัฐกาลอัตโนมัติ" />
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              {/* Date + Time Row */}
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gold-400">เลือกวัน</label>
-                  <select
-                    value={ashtaDay}
-                    onChange={(e) => setAshtaDay(parseInt(e.target.value))}
-                    className="w-full bg-cosmic-800 border border-gold-500/20 rounded-xl p-2 text-sm text-foreground focus:border-gold-400/50 focus:outline-none transition-colors"
-                    style={{ background: "rgba(18,53,91,0.6)" }}
-                  >
-                    {DAY_NAMES_THAI.map((name, i) => (
-                      <option key={i} value={i}>วัน{name}</option>
-                    ))}
-                  </select>
+                  <label className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">เลือกวัน</label>
+                  <input
+                    id="ashta-date-picker"
+                    type="date"
+                    value={ashtaDate}
+                    onChange={(e) => setAshtaDate(e.target.value)}
+                    className="w-full border rounded-xl px-3 py-2.5 text-sm text-foreground focus:border-gold-400/50 focus:outline-none transition-colors"
+                    style={{ background: "rgba(18,53,91,0.6)", borderColor: "rgba(198,169,107,0.2)", colorScheme: "dark" }}
+                  />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[10px] font-bold text-gold-400">เวลา (ชั่วโมง.นาที)</label>
-                  <input
-                    type="text"
-                    value={ashtaTime}
-                    onChange={(e) => setAshtaTime(e.target.value)}
-                    className="w-full border rounded-xl p-2 text-sm text-foreground focus:border-gold-400/50 focus:outline-none transition-colors"
-                    style={{ background: "rgba(18,53,91,0.6)", borderColor: "rgba(198,169,107,0.2)" }}
-                  />
+                  <label className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">เวลา (ชั่วโมง:นาที)</label>
+                  <div className="flex gap-2">
+                    <input
+                      id="ashta-time-picker"
+                      type="time"
+                      value={ashtaTime}
+                      onChange={(e) => setAshtaTime(e.target.value)}
+                      className="flex-1 border rounded-xl px-3 py-2.5 text-sm text-foreground focus:border-gold-400/50 focus:outline-none transition-colors"
+                      style={{ background: "rgba(18,53,91,0.6)", borderColor: "rgba(198,169,107,0.2)", colorScheme: "dark" }}
+                    />
+                    <button
+                      id="ashta-now-btn"
+                      onClick={handleAshtaNow}
+                      className="px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all hover:scale-105 active:scale-95"
+                      style={{ background: "linear-gradient(135deg, rgba(198,169,107,0.25) 0%, rgba(232,196,106,0.12) 100%)", border: "1px solid rgba(217,188,130,0.35)", color: "#C6A96B" }}
+                    >
+                      ปัจจุบัน
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              {activeYam && (
-                <div className="space-y-3 mt-4">
-                  {/* Yam header */}
-                  <div className="grid grid-cols-3 gap-2">
-                    {[
-                      { label: "ยามที่", value: activeYam.yamNumber, big: true },
-                      { label: "ดาวเสวย", value: activeYam.starName, big: false },
-                      { label: "ช่วงยาม", value: activeYam.activeSubYam?.name, sub: `${activeYam.activeSubYam?.startTime}–${activeYam.activeSubYam?.endTime}` },
-                    ].map((item, i) => (
-                      <div key={i} className="p-3 rounded-2xl text-center" style={{ background: "rgba(18,53,91,0.45)", border: "1px solid rgba(217,188,130,0.18)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}>
-                        <span className="text-[8px] text-hora-text-muted uppercase tracking-widest block mb-1">{item.label}</span>
-                        <span className={`font-bold text-gold-300 block ${item.big ? "text-2xl" : "text-sm"}`}>{item.value}</span>
-                        {item.sub && <span className="text-[8px] text-hora-text-muted block mt-0.5">{item.sub}</span>}
-                      </div>
-                    ))}
-                  </div>
+              {activeYam && (() => {
+                // Resolve day name for display
+                const [yyyy, mm, dd] = (ashtaDate || "").split("-").map(Number);
+                const dateObj = ashtaDate ? new Date(yyyy, mm - 1, dd) : new Date();
+                const dayDisplayNames = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัสบดี", "ศุกร์", "เสาร์"];
+                const dayName = dayDisplayNames[dateObj.getDay()];
+                const periodLabel = activeYam.period === "day" ? "กลางวัน" : "กลางคืน";
+                const starNum = activeYam.starNumber;
 
-                  {/* Predictions */}
-                  <div className="space-y-2">
-                    {[
-                      { label: "✦ เรื่องที่ได้ยิน", value: activeYam.predictions?.hearing },
-                      { label: "✦ คนเจ็บไข้", value: activeYam.predictions?.sick },
-                      { label: "✦ ของหาย", value: activeYam.predictions?.lost },
-                      { label: `✦ การเดินทาง (${activeYam.activeSubYam?.name})`, value: activeYam.predictions?.travel },
-                    ].map((item, i) => (
-                      <div key={i} className="p-3 rounded-2xl" style={{ background: "rgba(18,53,91,0.35)", border: "1px solid rgba(217,188,130,0.12)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)" }}>
-                        <span className="text-[9px] text-gold-400/80 font-bold uppercase tracking-wider block mb-1.5">{item.label}</span>
-                        <p className="text-xs text-text-secondary leading-relaxed">{item.value}</p>
+                return (
+                  <div className="space-y-4 mt-2">
+                    {/* Day name display */}
+                    <div className="text-center">
+                      <span className="text-[9px] font-bold uppercase tracking-widest px-3 py-1 rounded-full"
+                        style={{ background: "rgba(198,169,107,0.12)", border: "1px solid rgba(217,188,130,0.2)", color: "#C6A96B" }}>
+                        วัน{dayName} — {periodLabel}
+                      </span>
+                    </div>
+
+                    {/* 4-card summary */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {/* ยามที่ */}
+                      <div className="p-4 rounded-2xl text-center" style={{ background: "rgba(18,53,91,0.55)", border: "1px solid rgba(217,188,130,0.18)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}>
+                        <span className="text-[9px] text-hora-text-muted uppercase tracking-widest block mb-2">ยามที่</span>
+                        <span className="text-4xl font-black text-gold-300">{activeYam.yamNumber}</span>
                       </div>
-                    ))}
+                      {/* ชื่อยาม */}
+                      <div className="p-4 rounded-2xl text-center" style={{ background: "rgba(18,53,91,0.55)", border: "1px solid rgba(217,188,130,0.18)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}>
+                        <span className="text-[9px] text-hora-text-muted uppercase tracking-widest block mb-2">ชื่อยาม</span>
+                        <span className="text-base font-bold text-foreground">{periodLabel}</span>
+                      </div>
+                      {/* ดาวเสวยยาม */}
+                      <div className="p-4 rounded-2xl text-center" style={{ background: "rgba(18,53,91,0.55)", border: "1px solid rgba(217,188,130,0.18)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}>
+                        <span className="text-[9px] text-hora-text-muted uppercase tracking-widest block mb-2">ดาวเสวยยาม</span>
+                        <span className="text-base font-bold" style={{ color: ["","#EF4444","#FBBF24","#EC4899","#10B981","#F97316","#3B82F6","#8B5CF6"][starNum] || "#C6A96B" }}>
+                          {activeYam.starName}
+                        </span>
+                      </div>
+                      {/* ยามย่อย */}
+                      <div className="p-4 rounded-2xl text-center" style={{ background: "rgba(18,53,91,0.55)", border: "1px solid rgba(217,188,130,0.18)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}>
+                        <span className="text-[9px] text-hora-text-muted uppercase tracking-widest block mb-2">ยามย่อย</span>
+                        <span className="text-base font-bold text-foreground">{activeYam.activeSubYam?.name}</span>
+                        <span className="text-[8px] text-hora-text-muted block mt-1">
+                          {activeYam.activeSubYam?.startTime}–{activeYam.activeSubYam?.endTime}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Prediction cards */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {/* เรื่องที่ได้ยิน */}
+                      <div className="p-3 rounded-2xl" style={{ background: "rgba(18,53,91,0.35)", border: "1px solid rgba(217,188,130,0.12)" }}>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className="text-base">🚩</span>
+                          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "#C6A96B" }}>เรื่องที่ได้ยิน</span>
+                        </div>
+                        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{activeYam.predictions?.hearing}</p>
+                      </div>
+                      {/* คนเจ็บไข้ */}
+                      <div className="p-3 rounded-2xl" style={{ background: "rgba(18,53,91,0.35)", border: "1px solid rgba(217,188,130,0.12)" }}>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className="text-base">🏥</span>
+                          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "#EC4899" }}>คนเจ็บไข้</span>
+                        </div>
+                        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{activeYam.predictions?.sick}</p>
+                      </div>
+                      {/* ของหาย */}
+                      <div className="p-3 rounded-2xl" style={{ background: "rgba(18,53,91,0.35)", border: "1px solid rgba(217,188,130,0.12)" }}>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className="text-base">🔍</span>
+                          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "#FBBF24" }}>ของหาย</span>
+                        </div>
+                        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{activeYam.predictions?.lost}</p>
+                      </div>
+                      {/* การเดินทาง */}
+                      <div className="p-3 rounded-2xl" style={{ background: "rgba(18,53,91,0.35)", border: "1px solid rgba(217,188,130,0.12)" }}>
+                        <div className="flex items-center gap-1.5 mb-2">
+                          <span className="text-base">🚗</span>
+                          <span className="text-[9px] font-bold uppercase tracking-wider" style={{ color: "#10B981" }}>การเดินทาง ({activeYam.activeSubYam?.name})</span>
+                        </div>
+                        <p className="text-xs leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{activeYam.predictions?.travel}</p>
+                      </div>
+                    </div>
+
+                    {/* Travel timing guide — all 3 sub-yam */}
+                    <div className="p-3 rounded-2xl space-y-2" style={{ background: "rgba(10,34,64,0.5)", border: "1px solid rgba(217,188,130,0.12)" }}>
+                      <span className="text-[9px] font-bold uppercase tracking-widest text-hora-text-muted block">🕐 การเดินทางตามช่วงยาม</span>
+                      {[
+                        { label: "ยามต้น", val: activeYam.majorSlot?.predictions?.travelStart, sub: "slot-1" },
+                        { label: "ยามกลาง", val: activeYam.majorSlot?.predictions?.travelMiddle, sub: "slot-2" },
+                        { label: "ยามปลาย", val: activeYam.majorSlot?.predictions?.travelEnd, sub: "slot-3" },
+                      ].map((t, i) => {
+                        const isActive = activeYam.activeSubYam?.slot === i + 1;
+                        return (
+                          <div key={i} className="flex gap-2 items-start rounded-xl px-2 py-1.5 transition-all"
+                            style={isActive ? { background: "rgba(198,169,107,0.12)", border: "1px solid rgba(217,188,130,0.25)" } : {}}>
+                            <span className={`text-[9px] font-black uppercase tracking-wider shrink-0 pt-0.5 ${
+                              isActive ? "text-gold-300" : "text-hora-text-muted"
+                            }`}>{t.label}{isActive ? " ◀" : ""}</span>
+                            <p className={`text-[10px] leading-relaxed ${
+                              isActive ? "text-foreground" : "text-hora-text-muted"
+                            }`}>{t.val}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Best time highlight */}
                     {activeYam.predictions?.bestTime && (
-                      <div className="p-3 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(198,169,107,0.12) 0%, rgba(232,196,106,0.05) 100%)", border: "1px solid rgba(217,188,130,0.28)", boxShadow: "0 0 20px rgba(232,196,106,0.06)" }}>
-                        <span className="text-[9px] text-gold-300 font-bold uppercase tracking-wider block mb-1">⭐ เวลาที่ดีที่สุด</span>
-                        <p className="text-sm text-gold-300 font-bold">{activeYam.predictions.bestTime}</p>
+                      <div className="p-3 rounded-2xl flex items-center gap-3" style={{ background: "linear-gradient(135deg, rgba(198,169,107,0.15) 0%, rgba(232,196,106,0.06) 100%)", border: "1px solid rgba(217,188,130,0.30)", boxShadow: "0 0 24px rgba(232,196,106,0.08)" }}>
+                        <span className="text-xl">⭐</span>
+                        <div>
+                          <span className="text-[9px] text-gold-400 font-bold uppercase tracking-widest block">เวลามงคลที่ดีที่สุด</span>
+                          <p className="text-sm text-gold-300 font-bold mt-0.5">{activeYam.predictions.bestTime}</p>
+                        </div>
                       </div>
                     )}
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
           </HoraCard>
         )}
