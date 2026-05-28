@@ -188,7 +188,7 @@ export function HoraCard({
 // Bottom Navigation
 // ─────────────────────────────────────────────────────────────────────────────
 
-type TabId = "horoscope" | "planner" | "ai-coach" | "report";
+type TabId = "horoscope" | "planner" | "ai-coach" | "yam";
 
 interface NavTab {
   id: TabId;
@@ -200,8 +200,8 @@ interface NavTab {
 const NAV_TABS: NavTab[] = [
   { id: "horoscope", label: "ดวงชะตา",   icon: "◎",  href: "/dashboard" },
   { id: "planner",   label: "แพลนเนอร์", icon: "📅", href: "/dashboard/planner" },
-  { id: "ai-coach",  label: "โค้ช",   icon: "✦",  href: "/dashboard/coach" },
-  { id: "report",    label: "Wisdom Coach",    icon: "☰",  href: "/dashboard/services" },
+  { id: "ai-coach",  label: "Wisdom Coach",   icon: "✦",  href: "/dashboard/coach" },
+  { id: "yam",    label: "ยามปัจจุบัน",    icon: "⌚",  href: "/dashboard/yam" },
 ];
 
 function BottomNav() {
@@ -213,7 +213,7 @@ function BottomNav() {
     if (pathname === "/dashboard") return "horoscope";
     if (pathname.startsWith("/dashboard/planner")) return "planner";
     if (pathname.startsWith("/dashboard/coach")) return "ai-coach";
-    if (pathname.startsWith("/dashboard/services")) return "report";
+    if (pathname.startsWith("/dashboard/yam")) return "yam";
     return "horoscope";
   }, [pathname]);
 
