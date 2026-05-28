@@ -25,7 +25,7 @@ import { DashboardLayout, HoraCard, SectionHeader } from "@/components/layout/Da
 import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
 import { AIReportWidget } from "@/components/ai-report/AIReportWidget";
 import { PDFExportButton } from "@/components/pdf/PDFExportModule";
-import { updateUserProfile } from "@/app/actions/profile";
+// updateUserProfile server action replaced with client-side Supabase update to avoid 405 Method Not Allowed on Cloudflare Pages.
 import { 
   Sparkles, Calendar, User, Zap, LogOut, ArrowUpRight, 
   ShieldCheck, Download, Compass, Award, Heart, 
@@ -250,13 +250,24 @@ export default function DashboardPage() {
               gender: (profile.gender as any) || "other",
             }}
             onSave={async (data) => {
-              await updateUserProfile({
-                displayName: data.displayName,
-                birthDate: data.birthDate,
-                birthTime: data.birthTime,
-                birthPlace: data.birthPlace,
-                gender: data.gender,
-              });
+              const supabase = createClient();
+              const { error } = await supabase
+                .from("profiles")
+                .update({
+                  full_name: data.displayName,
+                  birth_date: data.birthDate,
+                  birth_time: data.birthTime,
+                  birth_province: data.birthPlace,
+                  gender: data.gender,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq("id", profile.id);
+
+              if (error) {
+                console.error("Error updating profile:", error);
+                throw new Error(error.message);
+              }
+
               // Refresh local profile state
               setProfile((prev: any) => ({
                 ...prev,

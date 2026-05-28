@@ -44,8 +44,17 @@ export async function POST(req: NextRequest) {
   const prompt = buildAIReportPrompt(birthData, topic);
 
   // 5. Forward to CF Worker (AI Proxy) — streaming
+  const workerUrl = process.env.NEXT_PUBLIC_AI_WORKER_URL || process.env.CF_AI_PROXY_URL;
+  
+  if (!workerUrl) {
+    return new Response(JSON.stringify({ error: "AI Worker URL not configured" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const workerRes = await fetch(
-    process.env.CF_AI_PROXY_URL + "/ai/report",
+    workerUrl.trim() + "/ai/report",
     {
       method: "POST",
       headers: {

@@ -17,10 +17,10 @@ export async function updateUserProfile(data: {
   const { error } = await supabase
     .from("profiles")
     .update({
-      display_name: data.displayName,
+      full_name: data.displayName,
       birth_date: data.birthDate,
       birth_time: data.birthTime,
-      birth_place: data.birthPlace,
+      birth_province: data.birthPlace,
       gender: data.gender,
       updated_at: new Date().toISOString(),
     })
