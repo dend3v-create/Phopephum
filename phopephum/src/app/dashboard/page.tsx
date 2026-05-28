@@ -21,6 +21,11 @@ import {
   HOUSE_NAMES_ROW9,
   HOUSE_DESCRIPTIONS
 } from "@/engine/seven-base-calculator";
+import { DashboardLayout, HoraCard, SectionHeader } from "@/components/layout/DashboardLayout";
+import { ProfileEditForm } from "@/components/profile/ProfileEditForm";
+import { AIReportWidget } from "@/components/ai-report/AIReportWidget";
+import { PDFExportButton } from "@/components/pdf/PDFExportModule";
+import { updateUserProfile } from "@/app/actions/profile";
 import { 
   Sparkles, Calendar, User, Zap, LogOut, ArrowUpRight, 
   ShieldCheck, Download, Compass, Award, Heart, 
@@ -231,1067 +236,201 @@ export default function DashboardPage() {
   const activeYam = ashtaResult?.currentHora;
 
   return (
-    <div className="min-h-screen bg-cosmic-950 text-foreground font-sans pb-24 selection:bg-gold-500 selection:text-cosmic-950 relative overflow-x-hidden">
-      {/* Background layers */}
-      <div className="bg-cosmic-portal" />
-      <div className="cosmic-nebula-aura" />
-      <div className="cosmic-zodiac-wheel" />
+    <DashboardLayout pageTitle="แดชบอร์ด">
+      <div className="space-y-6">
+        {/* Profile Section */}
+        {profile && (
+          <ProfileEditForm
+            initialData={{
+              id: profile.id,
+              displayName: profile.full_name || "",
+              birthDate: profile.birth_date || "",
+              birthTime: profile.birth_time || "00:00",
+              birthPlace: profile.birth_province || "",
+              gender: (profile.gender as any) || "other",
+            }}
+            onSave={async (data) => {
+              await updateUserProfile({
+                displayName: data.displayName,
+                birthDate: data.birthDate,
+                birthTime: data.birthTime,
+                birthPlace: data.birthPlace,
+                gender: data.gender,
+              });
+              // Refresh local profile state
+              setProfile((prev: any) => ({
+                ...prev,
+                full_name: data.displayName,
+                birth_date: data.birthDate,
+                birth_time: data.birthTime,
+                birth_province: data.birthPlace,
+                gender: data.gender,
+              }));
+            }}
+          />
+        )}
 
-      {/* Header Bar */}
-      <header className="sticky top-0 z-40 glass-hora border-b border-white/5 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
-          <div className="flex items-center gap-6 sm:gap-8">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Link href="/" className="text-xl sm:text-2xl font-serif font-bold text-hora-gold tracking-widest drop-shadow-sm">
-                PHOPEPHUM
-              </Link>
-              <span className="hidden sm:inline text-[9px] bg-gold-500/10 border border-gold-500/30 text-gold-500 px-2.5 py-1 rounded-full uppercase tracking-widest font-bold">
-                {profile?.plan || "FREE"} MEMBER
+        {/* Subscription Tier Card */}
+        <HoraCard glow>
+          <SectionHeader
+            icon="🏆"
+            title="ระดับบารมี"
+            subtitle="สิทธิ์การใช้งานและฟีเจอร์พรีเมียม"
+          />
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-xs text-hora-text-muted uppercase font-bold tracking-widest">สถานะบัญชี</span>
+              <span className="bg-gold-500/20 text-gold-300 border border-gold-500/30 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
+                {profile?.plan?.toUpperCase() || "FREE"}
               </span>
             </div>
-            
-            {/* Quick Navigation Menu */}
-            <nav className="hidden md:flex items-center gap-8 text-[10px] font-bold uppercase tracking-widest pt-1">
-              <Link href="/dashboard" className="text-gold-500 border-b-2 border-gold-500 pb-1.5">ภาพรวมดวง</Link>
-              <Link href="/dashboard/planner" className="text-text-secondary hover:text-gold-500 transition-colors flex items-center gap-1.5 pb-1.5">
-                <Calendar className="w-3.5 h-3.5" /> Planner
-              </Link>
-              <Link href="/dashboard/coach" className="text-text-secondary hover:text-gold-500 transition-colors flex items-center gap-1.5 pb-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> AI Coach
-              </Link>
-              <Link href="/dashboard/report" className="text-text-secondary hover:text-gold-500 transition-colors flex items-center gap-1.5 pb-1.5">
-                <Download className="w-3.5 h-3.5" /> Reports
-              </Link>
-            </nav>
-          </div>
-
-          <div className="flex items-center gap-3 sm:gap-4">
-            {(profile?.role === "admin" || profile?.full_name?.includes("ครูเด่น")) && (
-              <Link
-                href="/admin"
-                className="text-[9px] text-gold-300 hover:text-gold-500 bg-gold-500/10 border border-gold-500/30 rounded-full px-3 sm:px-4 py-1.5 sm:py-2 glass-hora transition-colors font-bold flex items-center gap-1.5 uppercase tracking-widest"
-              >
-                ⚙️ แอดมิน
-              </Link>
+            {!isPremium && (
+              <div className="pt-4 border-t border-white/5">
+                <p className="text-xs text-text-secondary leading-relaxed mb-4 italic">
+                  "อัปเกรดเพื่อรับการวิเคราะห์ยามมงคลเฉพาะบุคคลและรายงาน PDF"
+                </p>
+                <Link href="/#pricing" className="btn-hora w-full text-xs py-3 rounded-full flex justify-center items-center">
+                  อัปเกรดแผนพรีเมียม <ArrowUpRight className="ml-2 w-4 h-4" />
+                </Link>
+              </div>
             )}
-            <span className="text-xs font-bold text-text-secondary hidden sm:flex items-center gap-2">
-              <User className="w-4 h-4 text-gold-500" /> {profile?.full_name}
-            </span>
-            <button
-              onClick={handleLogout}
-              className="text-[10px] text-text-secondary/70 hover:text-red-400 flex items-center gap-1.5 transition-colors cursor-pointer border border-white/5 rounded-full px-3 py-1.5 sm:px-4 sm:py-2 glass-hora uppercase font-bold tracking-wider"
-            >
-              <LogOut className="w-3.5 h-3.5" /> ออกจากระบบ
-            </button>
           </div>
-        </div>
-      </header>
+        </HoraCard>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-10 grid md:grid-cols-3 gap-6 sm:gap-8 relative z-10">
-        
-        {/* Left Column */}
-        <div className="space-y-6 sm:space-y-8 md:col-span-1">
-          {featureToggles.birth_details && (
-            <div className="glass-hora p-6 sm:p-8 border-white/5 rounded-[2rem]">
-              <h3 className="text-sm font-serif font-bold text-gold-500 mb-6 flex items-center gap-2 uppercase tracking-widest border-b border-white/5 pb-4">
-                <Compass className="w-5 h-5" /> พิกัดกำเนิด
-              </h3>
-              
-              <div className="space-y-5 text-sm">
-                {[
-                  { label: "นามนามา", value: profile?.full_name },
-                  { label: "ศุกรวาร", value: profile?.birth_date ? new Date(profile.birth_date).toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric' }) : "-" },
-                  { label: "นาฬิกา", value: `${profile?.birth_time || "ไม่ระบุ"} น.` },
-                  { label: "ภูมิสถาน", value: profile?.birth_province },
-                  { label: "เพศสถาน", value: profile?.gender === "male" ? "บุรุษ" : profile?.gender === "female" ? "สตรี" : "ไม่ระบุ" }
-                ].map((item, i) => (
-                  <div key={i} className="flex flex-col sm:flex-row justify-between sm:items-center gap-1 group">
-                    <span className="text-[10px] sm:text-xs text-hora-text-muted uppercase tracking-widest group-hover:text-gold-500/70 transition-colors font-bold">{item.label}</span>
-                    <span className="font-bold text-foreground text-xs">{item.value}</span>
+        {/* AI Report Section */}
+        {profile && (
+          <AIReportWidget
+            birthData={{
+              name: profile.full_name,
+              birthDate: profile.birth_date,
+              birthTime: profile.birth_time,
+              birthPlace: profile.birth_province,
+              gender: profile.gender,
+              numerologyData: sevenBaseResult,
+              horaData: ashtaResult,
+            }}
+            tier={profile.plan || "free"}
+            remainingReports={profile.plan === "premium" ? -1 : 1} // Simplified for demo
+          />
+        )}
+
+        {/* PDF Export Section (Visible after AI report is generated) */}
+        {reportResult && profile && (
+          <div className="mt-4">
+            <PDFExportButton
+              data={{
+                name: profile.full_name,
+                birthDate: profile.birth_date,
+                birthTime: profile.birth_time,
+                birthPlace: profile.birth_province,
+                gender: profile.gender,
+                reportText: typeof reportResult === 'string' ? reportResult : JSON.stringify(reportResult),
+                topic: "ภาพรวมชะตาชีวิต",
+                horaInfo: ashtaResult?.currentHora ? {
+                  majorSlot: ashtaResult.currentHora.yamNumber,
+                  planetName: ashtaResult.currentHora.starName,
+                  planetSymbol: "◎",
+                  startTime: minutesToTimeStr(ashtaResult.currentHora.startTime),
+                  endTime: minutesToTimeStr(ashtaResult.currentHora.endTime),
+                } : undefined,
+                numerology: sevenBaseResult ? {
+                  dayBase: sevenBaseResult.chart.row1[0],
+                  monthBase: sevenBaseResult.chart.row2[0],
+                  yearBase: sevenBaseResult.chart.row3[0],
+                  totalBase: sevenBaseResult.chart.row4[0],
+                } : undefined,
+              }}
+            />
+          </div>
+        )}
+
+        {/* Tab Selector for Calculators */}
+        <div className="flex border border-white/5 p-1 gap-2 bg-cosmic-950/50 rounded-2xl">
+          <button
+            onClick={() => setActiveTab("ashta")}
+            className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "ashta" ? "bg-gold-500/10 text-gold-300" : "text-hora-text-muted"
+            }`}
+          >
+            🔮 ยามอัฐกาล
+          </button>
+          <button
+            onClick={() => setActiveTab("sevenBase")}
+            className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
+              activeTab === "sevenBase" ? "bg-gold-500/10 text-gold-300" : "text-hora-text-muted"
+            }`}
+          >
+            ⬡ เลข 7 ตัว 9 ฐาน
+          </button>
+        </div>
+
+        {/* Ashta Kala Calculator */}
+        {activeTab === "ashta" && (
+          <HoraCard>
+            <SectionHeader icon="Sparkles" title="คำนวณยามอัฐกาล" />
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gold-400">เลือกวัน</label>
+                  <select
+                    value={ashtaDay}
+                    onChange={(e) => setAshtaDay(parseInt(e.target.value))}
+                    className="w-full bg-cosmic-950 border border-white/10 rounded-lg p-2 text-sm text-foreground"
+                  >
+                    {DAY_NAMES_THAI.map((name, i) => (
+                      <option key={i} value={i}>วัน{name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-1">
+                  <label className="text-[10px] font-bold text-gold-400">เวลา (ชั่วโมง.นาที)</label>
+                  <input
+                    type="text"
+                    value={ashtaTime}
+                    onChange={(e) => setAshtaTime(e.target.value)}
+                    className="w-full bg-cosmic-950 border border-white/10 rounded-lg p-2 text-sm text-foreground"
+                  />
+                </div>
+              </div>
+
+              {activeYam && (
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <div className="bg-cosmic-950/60 p-3 rounded-xl text-center border border-white/5">
+                    <span className="text-[9px] text-hora-text-muted uppercase block">ยามที่</span>
+                    <span className="text-xl font-bold text-gold-300">{activeYam.yamNumber}</span>
+                  </div>
+                  <div className="bg-cosmic-950/60 p-3 rounded-xl text-center border border-white/5">
+                    <span className="text-[9px] text-hora-text-muted uppercase block">ดาวเสวย</span>
+                    <span className="text-sm font-bold text-gold-400">{activeYam.starName}</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          </HoraCard>
+        )}
+
+        {/* Seven Base Calculator */}
+        {activeTab === "sevenBase" && sevenBaseResult && (
+          <HoraCard>
+            <SectionHeader icon="Sparkles" title="เลข 7 ตัว 9 ฐาน" />
+            <div className="space-y-4">
+              <div className="bg-gold-500/5 p-3 rounded-xl border border-gold-500/10">
+                <span className="text-[9px] text-gold-400 uppercase block">ปฏิทินจันทรคติ</span>
+                <p className="text-xs font-bold">{sevenBaseResult.thaiLunarDateText}</p>
+              </div>
+              {/* Simplified Grid for Mobile */}
+              <div className="grid grid-cols-7 gap-1 overflow-hidden">
+                {sevenBaseResult.chart.row1.map((v: number, i: number) => (
+                  <div key={i} className="bg-cosmic-950 border border-white/5 p-2 text-center rounded text-xs font-bold text-gold-400">
+                    {v}
                   </div>
                 ))}
               </div>
+              <p className="text-[10px] text-hora-text-muted italic text-center">แตะดูผังดวงเต็มรูปแบบในเวอร์ชันเดสก์ท็อป</p>
             </div>
-          )}
-
-          {featureToggles.subscription_card && (
-            <div className="glass-hora p-6 sm:p-8 border-gold-500/20 bg-gold-500/5 rounded-[2rem]">
-              <h3 className="text-sm font-serif font-bold text-gold-300 mb-6 flex items-center gap-2 uppercase tracking-widest border-b border-gold-500/10 pb-4">
-                <Award className="w-5 h-5" /> ระดับบารมี
-              </h3>
-              
-              <div className="space-y-5 text-sm">
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] sm:text-xs text-hora-text-muted uppercase font-bold tracking-widest">สถานะบัญชี</span>
-                  <span className="bg-gold-500/20 text-gold-300 border border-gold-500/30 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">
-                    {profile?.plan || "FREE"}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-[10px] sm:text-xs text-hora-text-muted uppercase font-bold tracking-widest">สิทธิ์ AI วิเคราะห์</span>
-                  <span className="font-bold text-gold-300 text-xs">
-                    {profile?.plan === "free" ? "1 ครั้ง/เดือน" : profile?.plan === "pro" ? "10 ครั้ง/เดือน" : "ไม่จำกัด"}
-                  </span>
-                </div>
-
-                {!isPremium && (
-                  <div className="pt-6 border-t border-white/5 text-center">
-                    <p className="text-xs text-text-secondary leading-relaxed mb-6 italic font-medium">
-                      &ldquo;ปลดล็อกพลังมหาอุจจ์ เพื่อรับการวิเคราะห์ยามมงคลเฉพาะบุคคลและรายงาน PDF ระดับ Imperial&rdquo;
-                    </p>
-                    <Link href="/#pricing" className="btn-hora w-full text-[10px] sm:text-xs py-3 rounded-full flex justify-center items-center shadow-lg shadow-hora-gold/10">
-                      อัปเกรดแผนพรีเมียม <ArrowUpRight className="ml-2 w-4 h-4" />
-                    </Link>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Middle and Right Column */}
-        <div className="md:col-span-2 space-y-6 sm:space-y-8">
-          
-          {/* 🔮 โซนที่ ๑ : เครื่องมือคำนวณโหราศาสตร์อัตโนมัติ */}
-          <div className="glass-hora p-6 sm:p-10 border-gold-500/20 bg-gradient-to-b from-cosmic-900/40 to-cosmic-950/80 relative rounded-[2rem] overflow-hidden">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-gold-500/5 rounded-full blur-3xl pointer-events-none" />
-            
-            {/* Cosmic Luxury Tab Bar */}
-            <div className="flex border border-white/5 mb-8 p-1 gap-2 bg-cosmic-950/50 rounded-2xl relative z-10">
-              <button
-                onClick={() => setActiveTab("ashta")}
-                className={`flex-1 py-3 px-4 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all cursor-pointer ${
-                  activeTab === "ashta"
-                    ? "bg-gold-500/10 border border-gold-500/30 text-gold-300 shadow-lg shadow-gold-500/5"
-                    : "text-hora-text-muted hover:text-foreground"
-                }`}
-              >
-                🔮 ยามอัฐกาล (Ashta-Kala)
-              </button>
-              <button
-                onClick={() => setActiveTab("sevenBase")}
-                className={`flex-1 py-3 px-4 rounded-xl text-[10px] sm:text-xs font-bold uppercase tracking-widest transition-all cursor-pointer ${
-                  activeTab === "sevenBase"
-                    ? "bg-gold-500/10 border border-gold-500/30 text-gold-300 shadow-lg shadow-gold-500/5"
-                    : "text-hora-text-muted hover:text-foreground"
-                }`}
-              >
-                ⬡ เลข 7 ตัว 9 ฐาน (100 ปี)
-              </button>
-            </div>
-
-            {activeTab === "ashta" ? (
-              <div className="space-y-6">
-                <div className="mb-8 flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-white/5 pb-6">
-                  <div>
-                    <span className="text-[10px] text-gold-500 font-bold uppercase tracking-[0.3em] flex items-center gap-2 mb-2">
-                      <Sparkles className="w-3.5 h-3.5" /> เครื่องมือคำนวณยาม
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-gold-300">
-                      ระบบคำนวณยามอัฐกาลอัตโนมัติ
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Inputs Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 items-start mb-8">
-                  <div className="space-y-2 text-left">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400 ml-2">เลือกวัน</label>
-                    <select
-                      value={ashtaDay}
-                      onChange={(e) => setAshtaDay(parseInt(e.target.value))}
-                      className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-2xl px-5 py-4 text-sm text-foreground outline-none transition-all cursor-pointer appearance-none"
-                    >
-                      {DAY_NAMES_THAI.map((name, i) => (
-                        <option key={i} value={i} className="bg-cosmic-950 text-foreground">วัน{name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2 text-left">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400 ml-2">เวลา (ชั่วโมง.นาที)</label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="เช่น 14.30"
-                        value={ashtaTime}
-                        onChange={(e) => setAshtaTime(e.target.value)}
-                        className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-2xl px-5 py-4 text-sm text-foreground outline-none transition-all placeholder:text-text-secondary/40 font-mono"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const now = new Date();
-                          setAshtaDay(now.getDay());
-                          setAshtaTime(`${String(now.getHours()).padStart(2, "0")}.${String(now.getMinutes()).padStart(2, "0")}`);
-                        }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gold-500 hover:text-gold-300 transition-colors uppercase tracking-widest bg-gold-500/10 px-3 py-1.5 rounded-full"
-                      >
-                        ปัจจุบัน
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Dynamic Result Displays */}
-                {activeYam ? (
-                  <div className="space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                    
-                    {/* Cards Grid: ยามที่ | ชื่อยาม | ช่วงเวลา | ยามย่อย */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                      
-                      {/* ยามที่ */}
-                      <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ยามที่</span>
-                        <span className="text-4xl font-serif font-bold text-gold-300">{activeYam.yamNumber}</span>
-                      </div>
-
-                      {/* ชื่อยาม */}
-                      <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5 flex flex-col justify-center">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ชื่อยาม</span>
-                        <span className="text-lg font-bold text-foreground block">
-                          {activeYam.period === "day" ? "กลางวัน" : "กลางคืน"}
-                        </span>
-                      </div>
-
-                      {/* ช่วงเวลา */}
-                      <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5 flex flex-col justify-center">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ดาวเสวยยาม</span>
-                        <span className="text-lg font-bold text-gold-400 block">
-                          {activeYam.starName}
-                        </span>
-                      </div>
-
-                      {/* ยามย่อย */}
-                      <div className="bg-cosmic-950/60 border border-white/5 rounded-[1.5rem] p-5 text-center shadow-inner shadow-white/5 flex flex-col justify-center">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-hora-text-muted block mb-2">ยามย่อย</span>
-                        <span className="text-lg font-bold text-foreground block">
-                          {activeYam.activeSubYam.name}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Predictions Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
-                      
-                      <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
-                        <div className="flex items-center gap-2 text-pink-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
-                          <span>📢</span> เรื่องที่ได้ยิน
-                        </div>
-                        <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
-                          {activeYam.predictions.hearing}
-                        </p>
-                      </div>
-
-                      <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
-                        <div className="flex items-center gap-2 text-red-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
-                          <span>🏥</span> คนเจ็บไข้
-                        </div>
-                        <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
-                          {activeYam.predictions.sick}
-                        </p>
-                      </div>
-
-                      <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
-                        <div className="flex items-center gap-2 text-yellow-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
-                          <span>🔍</span> ของหาย
-                        </div>
-                        <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
-                          {activeYam.predictions.lost}
-                        </p>
-                      </div>
-
-                      <div className="bg-cosmic-900/30 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/25 transition-all">
-                        <div className="flex items-center gap-2 text-blue-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-3">
-                          <span>🚗</span> การเดินทาง ({activeYam.activeSubYam.name})
-                        </div>
-                        <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
-                          {activeYam.predictions.travel}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* 9 Segment: ยามซอย 9 ฤกษ์ */}
-                    <div className="bg-gold-500/5 border border-gold-500/20 rounded-[1.5rem] p-6 sm:p-8 text-left flex flex-col sm:flex-row items-center sm:items-start gap-5">
-                      <div className="w-14 h-14 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center font-bold text-gold-400 text-2xl flex-shrink-0 shadow-lg shadow-gold-500/5">
-                        {activeYam.activeNineSegment.index}
-                      </div>
-                      <div className="flex-1 space-y-2 text-center sm:text-left">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-2 justify-center sm:justify-start">
-                          <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest">ฤกษ์ยามซอย 9 ระดับ:</span>
-                          <span className="bg-gold-500/20 border border-gold-500/30 text-gold-300 px-3 py-1 rounded-lg text-xs font-bold shadow-inner shadow-gold-500/10">
-                            {activeYam.activeNineSegment.name}
-                          </span>
-                        </div>
-                        <p className="text-sm text-text-secondary leading-relaxed font-medium">
-                          {activeYam.activeNineSegment.description}
-                        </p>
-                      </div>
-                    </div>
-
-                  </div>
-                ) : (
-                  <div className="h-48 border border-dashed border-white/10 rounded-[2rem] flex items-center justify-center bg-black/10">
-                    <p className="text-xs text-hora-text-muted uppercase tracking-widest font-bold">กรุณากรอกเวลาเพื่อประมวลผลยามอัฐกาล</p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="space-y-8 text-center sm:text-left">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 border-b border-white/5 pb-6">
-                  <div>
-                    <span className="text-[10px] text-gold-500 font-bold uppercase tracking-[0.3em] flex items-center gap-2 mb-2">
-                      <Sparkles className="w-3.5 h-3.5" /> ผูกดวงชะตาระดับจักรพรรดิ
-                    </span>
-                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-gold-300">
-                      ระบบเลข 7 ตัว 9 ฐาน (จันทรคติ 100 ปี)
-                    </h3>
-                  </div>
-                </div>
-
-                {/* Inputs Grid for Seven-Base */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 sm:gap-6 items-start mb-8 text-left">
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400 ml-2">วันเดือนปีเกิด</label>
-                    <input
-                      type="date"
-                      value={sevenBaseDate}
-                      onChange={(e) => setSevenBaseDate(e.target.value)}
-                      className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-2xl px-5 py-4 text-sm text-foreground outline-none transition-all cursor-pointer font-mono"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-400 ml-2">เวลาเกิด (ชั่วโมง:นาที)</label>
-                    <div className="relative">
-                      <input
-                        type="time"
-                        value={sevenBaseTime}
-                        onChange={(e) => setSevenBaseTime(e.target.value)}
-                        className="w-full bg-cosmic-950/80 border border-white/10 focus:border-gold-500/50 rounded-2xl px-5 py-4 text-sm text-foreground outline-none transition-all cursor-pointer font-mono"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const now = new Date();
-                          const yyyy = now.getFullYear();
-                          const mm = String(now.getMonth() + 1).padStart(2, "0");
-                          const dd = String(now.getDate()).padStart(2, "0");
-                          setSevenBaseDate(`${yyyy}-${mm}-${dd}`);
-                          setSevenBaseTime(`${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`);
-                        }}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-gold-500 hover:text-gold-300 transition-colors uppercase tracking-widest bg-gold-500/10 px-3 py-1.5 rounded-full"
-                      >
-                        ปัจจุบัน
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {sevenBaseResult ? (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                    
-                    {/* Birth Summary Bar */}
-                    <div className="bg-gold-500/5 border border-gold-500/15 rounded-3xl p-5 text-left flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                      <div>
-                        <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest block mb-1">ปฏิทินจันทรคติไทยเกรดดาราศาสตร์:</span>
-                        <p className="text-sm font-bold text-foreground">
-                          {sevenBaseResult.thaiLunarDateText}
-                        </p>
-                      </div>
-                      <div className="bg-gold-500/15 border border-gold-500/30 text-gold-300 px-4 py-2 rounded-xl text-xs font-bold shadow-inner">
-                        วันโหราศาสตร์: {sevenBaseResult.isWednesdayNight ? "พุธกลางคืน (ราหู)" : `วัน${sevenBaseResult.dayName}`}
-                      </div>
-                    </div>
-
-                    {/* Golden Astrology Grid 7x9 */}
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[10px] font-bold text-gold-500 uppercase tracking-widest">ผังดวงเลข 7 ตัว 9 ฐาน (จิ้มแต่ละช่องเพื่ออ่านคำทำนาย)</span>
-                      </div>
-                      
-                      <div className="overflow-x-auto rounded-[2rem] border border-white/5 bg-cosmic-950/40 p-4 sm:p-6">
-                        <div className="min-w-[680px] space-y-2">
-                          
-                          {/* Column Headers */}
-                          <div className="grid grid-cols-8 gap-2 text-center text-[10px] font-bold text-gold-500 uppercase tracking-widest pb-3 border-b border-white/5">
-                            <div className="text-left pl-2">ฐาน / เสา</div>
-                            <div>ช่อง 1</div>
-                            <div>ช่อง 2</div>
-                            <div>ช่อง 3</div>
-                            <div>ช่อง 4</div>
-                            <div>ช่อง 5</div>
-                            <div>ช่อง 6</div>
-                            <div>ช่อง 7</div>
-                          </div>
-
-                          {/* Row 1 - Row 9 */}
-                          {Array.from({ length: 9 }).map((_, rIdx) => {
-                            const rNum = rIdx + 1;
-                            let rowData: number[] = [];
-                            let houseNames: string[] = [];
-
-                            if (rNum === 1) {
-                              rowData = sevenBaseResult.chart.row1;
-                              houseNames = HOUSE_NAMES_ROW1;
-                            } else if (rNum === 2) {
-                              rowData = sevenBaseResult.chart.row2;
-                              houseNames = HOUSE_NAMES_ROW2;
-                            } else if (rNum === 3) {
-                              rowData = sevenBaseResult.chart.row3;
-                              houseNames = HOUSE_NAMES_ROW3;
-                            } else if (rNum === 4) {
-                              rowData = sevenBaseResult.chart.row4;
-                            } else if (rNum === 5) {
-                              rowData = sevenBaseResult.chart.row5;
-                            } else if (rNum === 6) {
-                              rowData = sevenBaseResult.chart.row6;
-                            } else if (rNum === 7) {
-                              rowData = sevenBaseResult.chart.row7;
-                            } else if (rNum === 8) {
-                              rowData = sevenBaseResult.chart.row8;
-                              houseNames = HOUSE_NAMES_ROW8;
-                            } else if (rNum === 9) {
-                              rowData = sevenBaseResult.chart.row9;
-                              houseNames = HOUSE_NAMES_ROW9;
-                            }
-
-                            let rowLabel = `ฐานที่ ${rNum}`;
-                            if (rNum === 1) rowLabel = "ฐานวัน";
-                            if (rNum === 2) rowLabel = "ฐานเดือน";
-                            if (rNum === 3) rowLabel = "ฐานปี";
-                            if (rNum === 4) rowLabel = "ฐานรวมกำลัง";
-                            if (rNum === 5) rowLabel = "ฐาน 5 (อายตนะ)";
-                            if (rNum === 6) rowLabel = "ฐาน 6 (ดวงพริ้ง)";
-                            if (rNum === 7) rowLabel = "ฐาน 7 (อินทภาส)";
-                            if (rNum === 8) rowLabel = "ฐาน 8 (บาทจันทร์)";
-                            if (rNum === 9) rowLabel = "ฐาน 9 (โสฬส)";
-
-                            const isCalculationRow = rNum === 4 || rNum === 5 || rNum === 6 || rNum === 7;
-
-                            return (
-                              <div key={rIdx} className="grid grid-cols-8 gap-2 items-center">
-                                {/* Row Label */}
-                                <div className="text-[10px] sm:text-xs font-bold text-hora-text-muted text-left pl-2">
-                                  {rowLabel}
-                                </div>
-                                
-                                {/* 7 Cells */}
-                                {rowData.map((val, colIdx) => {
-                                  const houseName = houseNames[colIdx] || "";
-                                  const isSelected = selectedCell?.row === rNum && selectedCell?.col === colIdx + 1;
-                                  
-                                  return (
-                                    <button
-                                      key={colIdx}
-                                      onClick={() => setSelectedCell({
-                                        row: rNum,
-                                        col: colIdx + 1,
-                                        value: val,
-                                        house: houseName,
-                                        rowLabel: rowLabel
-                                      })}
-                                      className={`rounded-xl p-2 sm:p-3 text-center border transition-all cursor-pointer flex flex-col items-center justify-center min-h-[56px] sm:min-h-[64px] ${
-                                        isSelected
-                                          ? "bg-gold-500/20 text-gold-100 border-gold-500 shadow-md shadow-gold-500/10"
-                                          : isCalculationRow
-                                            ? "bg-cosmic-950/30 border-white/5 text-text-secondary/70 hover:border-gold-500/10"
-                                            : "bg-cosmic-950/60 border-white/5 text-foreground hover:border-gold-500/20"
-                                      }`}
-                                    >
-                                      <span className={`text-sm sm:text-base font-serif font-bold ${
-                                        isSelected 
-                                          ? "text-gold-300 scale-110" 
-                                          : isCalculationRow 
-                                            ? "text-text-secondary/80" 
-                                            : "text-gold-400"
-                                      }`}>
-                                        {val}
-                                      </span>
-                                      {houseName && (
-                                        <span className="text-[8px] sm:text-[9px] text-hora-text-muted font-bold truncate max-w-full mt-0.5">
-                                          {houseName}
-                                        </span>
-                                      )}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* Selected Cell Description */}
-                      {selectedCell && (
-                        <div className="bg-gold-500/5 border border-gold-500/20 rounded-[2rem] p-6 text-left space-y-4 animate-in fade-in duration-300">
-                          <div className="flex items-center justify-between border-b border-gold-500/10 pb-3">
-                            <div className="flex items-center gap-2">
-                              <span className="w-8 h-8 rounded-lg bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-xs font-bold text-gold-400">
-                                {selectedCell.value}
-                              </span>
-                              <div>
-                                <h4 className="text-sm font-serif font-bold text-gold-300">
-                                  {selectedCell.house ? `ภพ ${selectedCell.house}` : selectedCell.rowLabel}
-                                </h4>
-                                <span className="text-[9px] text-hora-text-muted font-bold uppercase tracking-wider">
-                                  {selectedCell.rowLabel} · ช่องเสาที่ {selectedCell.col}
-                                </span>
-                              </div>
-                            </div>
-                            {selectedCell.house && (
-                              <span className="text-[10px] bg-gold-500/15 border border-gold-500/30 text-gold-300 px-3 py-1 rounded-full font-bold">
-                                ดาวเสวย: {["", "อาทิตย์ (๑)", "จันทร์ (๒)", "อังคาร (๓)", "พุธ (๔)", "พฤหัสบดี (๕)", "ศุกร์ (๖)", "เสาร์ (๗)", "ราหู (๘)", "เกตุ (๙)"][selectedCell.value] || "ดาวกำลังวัน"}
-                              </span>
-                            )}
-                          </div>
-                          
-                          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
-                            {selectedCell.house 
-                              ? `${HOUSE_DESCRIPTIONS[selectedCell.house] || ""} โดยในเกณฑ์ดวงชะตานี้ มีพลังดึงดูดของดาวดวงดังกล่าวส่งอิทธิพลต่อทิศทางชีวิตอย่างลึกซึ้ง` 
-                              : `ฐานนี้เป็นฐานสรุปผลและคำนวณบวกดาว ซึ่งใช้ในการตรวจสอบกำลังดาวจริง มีค่าสะสมรวมเป็น ${selectedCell.value} นำมาใช้ประกอบพิจารณาจุดเด่นและกำลังของโชคชะตา`}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Thaksa & Maha Phute Sections */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 text-left">
-                      {/* ทักษาปกรณ์ 8 ทิศ */}
-                      <div className="bg-cosmic-900/20 border border-white/5 rounded-[2rem] p-6 sm:p-8 space-y-6">
-                        <h4 className="text-sm font-serif font-bold text-gold-300 flex items-center gap-2 border-b border-white/5 pb-4 uppercase tracking-widest">
-                          <Sparkles className="w-5 h-5 text-gold-500" /> ทักษาปกรณ์ 8 ทิศ
-                        </h4>
-                        <div className="grid grid-cols-2 gap-3 text-xs">
-                          {sevenBaseResult.taksa.map((t: any, idx: number) => {
-                            const categoryColors: Record<string, string> = {
-                              "บริวาร": "text-yellow-400 bg-yellow-400/5 border-yellow-400/15",
-                              "อายุ": "text-pink-400 bg-pink-400/5 border-pink-400/15",
-                              "เดช": "text-red-400 bg-red-400/5 border-red-400/15",
-                              "ศรี": "text-green-400 bg-green-400/5 border-green-400/15",
-                              "มูละ": "text-orange-400 bg-orange-400/5 border-orange-400/15",
-                              "อุตสาหะ": "text-blue-400 bg-blue-400/5 border-blue-400/15",
-                              "มนตรี": "text-purple-400 bg-purple-400/5 border-purple-400/15",
-                              "กาลกิณี": "text-rose-500 bg-rose-500/5 border-rose-500/20 font-bold",
-                            };
-                            const colClass = categoryColors[t.category] || "text-foreground bg-white/5 border-white/10";
-                            return (
-                              <div key={idx} className={`p-4 rounded-xl border flex flex-col justify-between space-y-2 hover:border-gold-500/20 transition-all ${colClass}`}>
-                                <span className="text-[10px] uppercase font-bold tracking-wider">{t.category}</span>
-                                <span className="text-sm font-serif font-bold">{t.planet}</span>
-                                <p className="text-[9px] text-hora-text-muted leading-relaxed line-clamp-2">
-                                  {t.description}
-                                </p>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      {/* เศษมหาภูติ 5 */}
-                      <div className="bg-cosmic-900/20 border border-white/5 rounded-[2rem] p-6 sm:p-8 space-y-6 flex flex-col justify-between">
-                        <div>
-                          <h4 className="text-sm font-serif font-bold text-gold-300 flex items-center gap-2 border-b border-white/5 pb-4 uppercase tracking-widest">
-                            <Compass className="w-5 h-5 text-gold-500" /> เศษมหาภูติ 5 (จุลศักราช)
-                          </h4>
-                          
-                          <div className="mt-6 flex items-center gap-5 bg-gold-500/5 border border-gold-500/15 rounded-2xl p-5">
-                            <div className="w-14 h-14 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center font-bold text-gold-300 text-2xl shadow-lg shadow-gold-500/5">
-                              {sevenBaseResult.mahaPhute.remainder}
-                            </div>
-                            <div>
-                              <span className="text-[10px] font-bold text-gold-400 uppercase tracking-widest block mb-1">ตำแหน่งมหาภูติ:</span>
-                              <span className="text-lg font-bold text-foreground block">
-                                {sevenBaseResult.mahaPhute.name} (ธาตุ{sevenBaseResult.mahaPhute.element})
-                              </span>
-                            </div>
-                          </div>
-
-                          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium mt-6">
-                            {sevenBaseResult.mahaPhute.description}
-                          </p>
-                        </div>
-
-                        {/* Strengths & Weaknesses Cards */}
-                        <div className="space-y-4 pt-6 border-t border-white/5 mt-6">
-                          {sevenBaseResult.strengths.length > 0 && (
-                            <div className="bg-green-500/5 border border-green-500/15 rounded-xl p-4">
-                              <span className="text-[10px] text-green-400 font-bold uppercase tracking-widest block mb-1">🌟 จุดเด่นมหาอุดมงคล</span>
-                              <ul className="list-disc list-inside text-[11px] text-text-secondary space-y-1 font-medium">
-                                {sevenBaseResult.strengths.map((s: string, idx: number) => (
-                                  <li key={idx}>{s}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-
-                          {sevenBaseResult.weaknesses.length > 0 && (
-                            <div className="bg-red-500/5 border border-red-500/15 rounded-xl p-4">
-                              <span className="text-[10px] text-red-400 font-bold uppercase tracking-widest block mb-1">⚠️ จุดควรระมัดระวัง</span>
-                              <ul className="list-disc list-inside text-[11px] text-text-secondary space-y-1 font-medium">
-                                {sevenBaseResult.weaknesses.map((w: string, idx: number) => (
-                                  <li key={idx}>{w}</li>
-                                ))}
-                              </ul>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                  </div>
-                ) : (
-                  <div className="h-48 border border-dashed border-white/10 rounded-[2rem] flex items-center justify-center bg-black/10">
-                    <p className="text-xs text-hora-text-muted uppercase tracking-widest font-bold">กรุณากรอกข้อมูลวันเดือนปีเกิดเพื่อประมวลผลดวงชะตา</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* ⬡ โซนที่ ๒ : คลังข้อมูลตารางเวลา (Time Matrix) Accordion */}
-          <div className="glass-hora border-white/5 rounded-[2rem] overflow-hidden">
-            <button
-              onClick={() => setShowTimeMatrix(!showTimeMatrix)}
-              className="w-full px-6 sm:px-8 py-6 flex items-center justify-between text-left font-serif font-bold text-gold-500 hover:text-gold-300 transition-colors border-b border-white/5 cursor-pointer bg-cosmic-900/10"
-            >
-              <span className="flex items-center gap-3 text-sm sm:text-base uppercase tracking-widest">
-                <Map className="w-5 h-5 text-gold-500" /> คลังข้อมูลตารางเวลา (Time Matrix)
-              </span>
-              {showTimeMatrix ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-            </button>
-            
-            {showTimeMatrix && (
-              <div className="p-6 sm:p-8 space-y-8 animate-in slide-in-from-top-2 duration-300">
-                {/* ✦ ตารางยามกลางวัน */}
-                <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-300 flex items-center gap-2">
-                    ✦ ตารางยามกลางวัน (06:00 - 18:00)
-                  </h4>
-                  <div className="overflow-x-auto rounded-2xl border border-white/5 bg-cosmic-950/40">
-                    <table className="w-full text-center border-collapse text-[10px] sm:text-xs">
-                      <thead>
-                        <tr className="bg-cosmic-900/50 text-gold-500 font-bold border-b border-white/5">
-                          <th className="p-4 text-left">วัน / ยาม</th>
-                          {Array.from({ length: 8 }).map((_, idx) => (
-                            <th key={idx} className="p-4 whitespace-nowrap">
-                              ยาม {idx + 1}<br/>
-                              <span className="text-[9px] text-text-secondary/60">
-                                {minutesToTimeStr(360 + idx * 90)}-{minutesToTimeStr(360 + (idx + 1) * 90)}
-                              </span>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5 font-medium">
-                        {DAY_NAMES_THAI.map((name, dIdx) => (
-                          <tr 
-                            key={dIdx} 
-                            className={`hover:bg-white/5 transition-colors ${ashtaDay === dIdx && activeYam?.period === "day" ? "bg-gold-500/10 text-gold-200" : "text-text-secondary"}`}
-                          >
-                            <td className="p-4 font-bold text-left bg-cosmic-900/20 text-foreground">{name}</td>
-                            {DAYTIME_YAM_STARS[dIdx as DayOfWeek].map((star, yIdx) => {
-                              const isCurrentCell = ashtaDay === dIdx && activeYam?.period === "day" && activeYam?.yamNumber === (yIdx + 1);
-                              return (
-                                <td 
-                                  key={yIdx} 
-                                  className={`p-4 whitespace-nowrap ${isCurrentCell ? "bg-gold-500/25 text-gold-300 border border-gold-500/40 font-bold" : ""}`}
-                                >
-                                  {star}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-
-                {/* ✦ ตารางยามกลางคืน */}
-                <div className="space-y-4">
-                  <h4 className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-300 flex items-center gap-2">
-                    ✦ ตารางยามกลางคืน (18:00 - 06:00)
-                  </h4>
-                  <div className="overflow-x-auto rounded-2xl border border-white/5 bg-cosmic-950/40">
-                    <table className="w-full text-center border-collapse text-[10px] sm:text-xs">
-                      <thead>
-                        <tr className="bg-cosmic-900/50 text-gold-500 font-bold border-b border-white/5">
-                          <th className="p-4 text-left">วัน / ยาม</th>
-                          {Array.from({ length: 8 }).map((_, idx) => (
-                            <th key={idx} className="p-4 whitespace-nowrap">
-                              ยาม {idx + 1}<br/>
-                              <span className="text-[9px] text-text-secondary/60">
-                                {minutesToTimeStr(1080 + idx * 90)}-{minutesToTimeStr(1080 + (idx + 1) * 90)}
-                              </span>
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-white/5 font-medium">
-                        {DAY_NAMES_THAI.map((name, dIdx) => (
-                          <tr 
-                            key={dIdx} 
-                            className={`hover:bg-white/5 transition-colors ${ashtaDay === dIdx && activeYam?.period === "night" ? "bg-gold-500/10 text-gold-200" : "text-text-secondary"}`}
-                          >
-                            <td className="p-4 font-bold text-left bg-cosmic-900/20 text-foreground">{name}</td>
-                            {NIGHTTIME_YAM_STARS[dIdx as DayOfWeek].map((star, yIdx) => {
-                              const isCurrentCell = ashtaDay === dIdx && activeYam?.period === "night" && activeYam?.yamNumber === (yIdx + 1);
-                              return (
-                                <td 
-                                  key={yIdx} 
-                                  className={`p-4 whitespace-nowrap ${isCurrentCell ? "bg-gold-500/25 text-gold-300 border border-gold-500/40 font-bold" : ""}`}
-                                >
-                                  {star}
-                                </td>
-                              );
-                            })}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* ⬡ โซนที่ ๓ : คลังข้อมูลคำทำนาย (Prediction Database) Accordion */}
-          <div className="glass-hora border-white/5 rounded-[2rem] overflow-hidden">
-            <button
-              onClick={() => setShowPredictionDb(!showPredictionDb)}
-              className="w-full px-6 sm:px-8 py-6 flex items-center justify-between text-left font-serif font-bold text-gold-500 hover:text-gold-300 transition-colors border-b border-white/5 cursor-pointer bg-cosmic-900/10"
-            >
-              <span className="flex items-center gap-3 text-sm sm:text-base uppercase tracking-widest">
-                <Scroll className="w-5 h-5 text-gold-500" /> คลังข้อมูลคำทำนาย (Prediction Database)
-              </span>
-              {showPredictionDb ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-            </button>
-            
-            {showPredictionDb && (
-              <div className="p-6 sm:p-8 space-y-6 animate-in slide-in-from-top-2 duration-300">
-                <div className="overflow-x-auto rounded-2xl border border-white/5 bg-cosmic-950/40">
-                  <table className="w-full text-left border-collapse text-[10px] sm:text-xs">
-                    <thead>
-                      <tr className="bg-cosmic-900/50 text-gold-500 font-bold border-b border-white/5">
-                        <th className="p-4 text-center">ยามที่</th>
-                        <th className="p-4 whitespace-nowrap">ชื่อยาม</th>
-                        <th className="p-4">เรื่องที่ได้ยิน</th>
-                        <th className="p-4">คนเจ็บไข้</th>
-                        <th className="p-4">ของหาย</th>
-                        <th className="p-4">เวลาที่ดี</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5 font-medium text-text-secondary leading-relaxed">
-                      {Object.keys(PREDICTION_DATABASE).map((key) => {
-                        const num = parseInt(key);
-                        const data = PREDICTION_DATABASE[num];
-                        return (
-                          <tr key={key} className={`hover:bg-white/5 transition-colors ${activeYam?.starNumber === num ? "bg-gold-500/10 text-gold-200" : ""}`}>
-                            <td className="p-4 font-bold text-center text-foreground bg-cosmic-900/20">{num}</td>
-                            <td className="p-4 font-bold whitespace-nowrap text-gold-400">
-                              {data.starNameDay} / {data.starNameNight}
-                            </td>
-                            <td className="p-4 min-w-[150px]">{data.hearing}</td>
-                            <td className="p-4 min-w-[100px]">{data.sick}</td>
-                            <td className="p-4 min-w-[150px]">{data.lost}</td>
-                            <td className="p-4 font-bold text-gold-500 whitespace-nowrap">{data.bestTime}</td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Strategic Systems Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <Link href="/dashboard/planner" className="glass-hora p-6 sm:p-8 border-white/5 hover:border-gold-500/30 transition-all bg-cosmic-900/10 group flex flex-col justify-between h-48 sm:h-56 text-left rounded-[2rem]">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="w-12 h-12 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 group-hover:scale-110 transition-transform">
-                    <Calendar className="w-6 h-6" />
-                  </span>
-                  <ArrowUpRight className="w-5 h-5 text-text-secondary group-hover:text-gold-500 transition-colors" />
-                </div>
-                <h4 className="text-lg font-serif font-bold text-gold-300 group-hover:text-gold-500 transition-colors">TQM Planner</h4>
-                <p className="text-[10px] sm:text-xs text-text-secondary mt-2 leading-relaxed">
-                  วางแผนธุรกิจและการดำเนินชีวิตรายชั่วโมงตามปฏิทินยามจรและยามอัฐกาลเพื่อพลังขับเคลื่อนสูงสุด
-                </p>
-              </div>
-              <span className="text-[10px] text-gold-500 font-bold uppercase tracking-[0.2em] mt-2">เปิดแผนงานยามมงคล →</span>
-            </Link>
-
-            <Link href="/dashboard/coach" className="glass-hora p-6 sm:p-8 border-white/5 hover:border-gold-500/30 transition-all bg-cosmic-900/10 group flex flex-col justify-between h-48 sm:h-56 text-left rounded-[2rem]">
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <span className="w-12 h-12 rounded-2xl bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-500 group-hover:scale-110 transition-transform">
-                    <Sparkles className="w-6 h-6" />
-                  </span>
-                  <ArrowUpRight className="w-5 h-5 text-text-secondary group-hover:text-gold-500 transition-colors" />
-                </div>
-                <h4 className="text-lg font-serif font-bold text-gold-300 group-hover:text-gold-500 transition-colors">AI Wisdom Coach</h4>
-                <p className="text-[10px] sm:text-xs text-text-secondary mt-2 leading-relaxed">
-                  โค้ชจิตวิทยาเชิงบวกปัญญาสามมิติ ปรึกษาทิศทาง แก้ไขปัญหาชีวิตเฉพาะบุคคลแบบ Real-time
-                </p>
-              </div>
-              <span className="text-[10px] text-gold-500 font-bold uppercase tracking-[0.2em] mt-2">คุยกับ AI Coach →</span>
-            </Link>
-          </div>
-
-          {/* AI Dashboard - Analysis Section */}
-          <div className="glass-hora p-6 sm:p-10 border-gold-500/30 bg-cosmic-900/30 relative overflow-hidden rounded-[2.5rem]">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-gold-500/5 rounded-full blur-[100px] pointer-events-none" />
-            
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
-              <div className="space-y-3">
-                <span className="text-[10px] text-gold-500 font-bold uppercase tracking-[0.4em] flex items-center gap-2">
-                  <Sparkles className="w-4 h-4" /> AI WISDOM ASSISTANT
-                </span>
-                <h3 className="text-2xl sm:text-3xl font-serif font-bold text-foreground uppercase tracking-widest">รายงานวิเคราะห์ชะตาชีวิต</h3>
-                <p className="text-xs sm:text-sm text-text-secondary leading-relaxed max-w-lg font-medium">
-                  ประมวลผลดวงชะตา อดีต-ปัจจุบัน-อนาคต และยามอัฐกาลแบบพลวัต ด้วยขุมพลัง AI วิเคราะห์เชิงลึกดั่งมหาอุจจ์
-                </p>
-              </div>
-
-              <button
-                onClick={handleGenerateReport}
-                disabled={generatingReport}
-                className="btn-hora whitespace-nowrap text-xs sm:text-sm py-4 px-8 rounded-full shadow-2xl shadow-gold-500/20 w-full sm:w-auto"
-              >
-                {generatingReport ? "กำลังวิเคราะห์จักรวาล..." : "วิเคราะห์ด้วย AI"}
-              </button>
-            </div>
-
-            {reportResult ? (
-              <div className="space-y-8 animate-in fade-in duration-1000">
-                {/* Standard Sections */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  
-                  {/* Card 1: Identity & Soul */}
-                  <div className="bg-cosmic-950/40 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/30 transition-all group text-left">
-                    <div className="flex items-center gap-3 mb-4 text-gold-500">
-                      <User className="w-5 h-5" />
-                      <h5 className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em]">ตัวตนและจิตวิญญาณ</h5>
-                    </div>
-                    <div className="space-y-3 text-xs text-text-secondary leading-relaxed font-medium">
-                      <p><strong className="text-gold-300/80">ตัวตนหลัก:</strong> {reportResult.identity?.attha || "—"}</p>
-                      {reportResult.identity?.phanthu && <p><strong className="text-gold-300/80">จิตใจลึกๆ:</strong> {reportResult.identity?.phanthu}</p>}
-                      {reportResult.identity?.tanu && <p><strong className="text-gold-300/80">ออร่าภายนอก:</strong> {reportResult.identity?.tanu}</p>}
-                    </div>
-                  </div>
-
-                  {/* Card 2: Charm & Expression */}
-                  <div className="bg-cosmic-950/40 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/30 transition-all group text-left">
-                    <div className="flex items-center gap-3 mb-4 text-gold-500">
-                      <Sparkles className="w-5 h-5" />
-                      <h5 className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em]">เสน่ห์และการสื่อสาร</h5>
-                    </div>
-                    <div className="space-y-3 text-xs text-text-secondary leading-relaxed font-medium">
-                      <p><strong className="text-gold-300/80">เสน่ห์ชื่อเสียง:</strong> {reportResult.charm?.overview || "—"}</p>
-                      {reportResult.charm?.communication && <p><strong className="text-gold-300/80">วิธีเจรจา (KFC Model):</strong> {reportResult.charm?.communication}</p>}
-                    </div>
-                  </div>
-
-                  {/* Card 3: Career Strategy */}
-                  <div className="bg-cosmic-950/40 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/30 transition-all group text-left">
-                    <div className="flex items-center gap-3 mb-4 text-gold-500">
-                      <Target className="w-5 h-5" />
-                      <h5 className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em]">ยุทธศาสตร์อาชีพ</h5>
-                    </div>
-                    <p className="text-xs text-text-secondary leading-relaxed font-medium">
-                      {reportResult.career || "—"}
-                    </p>
-                  </div>
-
-                  {/* Card 4: Wealth Map */}
-                  <div className="bg-cosmic-950/40 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/30 transition-all group text-left">
-                    <div className="flex items-center gap-3 mb-4 text-gold-500">
-                      <Zap className="w-5 h-5" />
-                      <h5 className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em]">แผนที่การเงิน</h5>
-                    </div>
-                    <p className="text-xs text-text-secondary leading-relaxed font-medium">
-                      {reportResult.finance || "—"}
-                    </p>
-                  </div>
-
-                  {/* Card 5: Love & relationships */}
-                  {reportResult.love && (
-                    <div className="bg-cosmic-950/40 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/30 transition-all group text-left">
-                      <div className="flex items-center gap-3 mb-4 text-gold-500">
-                        <Heart className="w-5 h-5" />
-                        <h5 className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em]">ความรักความสัมพันธ์</h5>
-                      </div>
-                      <p className="text-xs text-text-secondary leading-relaxed font-medium">
-                        {reportResult.love}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Card 6: Health & Chakras */}
-                  {reportResult.health && (
-                    <div className="bg-cosmic-950/40 border border-white/5 rounded-[1.5rem] p-6 hover:border-gold-500/30 transition-all group text-left">
-                      <div className="flex items-center gap-3 mb-4 text-gold-500">
-                        <Activity className="w-5 h-5" />
-                        <h5 className="text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em]">พลังงาน & จักระสุขภาพ</h5>
-                      </div>
-                      <p className="text-xs text-text-secondary leading-relaxed font-medium">
-                        {reportResult.health}
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Section: Actionable Growth Checklist */}
-                {reportResult.development && reportResult.development.length > 0 && (
-                  <div className="bg-cosmic-950/40 border border-white/5 rounded-3xl p-6 sm:p-8 text-left space-y-5">
-                    <div className="flex items-center gap-3 text-gold-500">
-                      <CheckSquare className="w-5 h-5" />
-                      <h5 className="text-xs sm:text-sm font-bold uppercase tracking-widest">แผนพัฒนาตัวเองตามรหัสดวงชะตา (Actionable Guide)</h5>
-                    </div>
-                    <div className="grid gap-3">
-                      {reportResult.development.map((item: string, i: number) => (
-                        <div key={i} className="flex items-start gap-4 bg-cosmic-900/40 p-4 rounded-xl border border-white/5">
-                          <CheckSquare className="w-5 h-5 text-gold-500 flex-shrink-0 mt-0.5" />
-                          <span className="text-xs sm:text-sm text-text-secondary font-medium">{item}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Section: Weekly Plan Map */}
-                {reportResult.weeklyPlan && (
-                  <div className="bg-cosmic-950/40 border border-white/5 rounded-3xl p-6 sm:p-8 text-left space-y-5">
-                    <div className="flex items-center gap-3 text-gold-500">
-                      <Calendar className="w-5 h-5" />
-                      <h5 className="text-xs sm:text-sm font-bold uppercase tracking-widest">ตารางพลังงานรายวัน</h5>
-                    </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-7 gap-4">
-                      {[
-                        { day: "จันทร์", color: "text-yellow-400", val: reportResult.weeklyPlan.monday },
-                        { day: "อังคาร", color: "text-pink-400", val: reportResult.weeklyPlan.tuesday },
-                        { day: "พุธ", color: "text-green-400", val: reportResult.weeklyPlan.wednesday },
-                        { day: "พฤหัสฯ", color: "text-orange-400", val: reportResult.weeklyPlan.thursday },
-                        { day: "ศุกร์", color: "text-blue-400", val: reportResult.weeklyPlan.friday },
-                        { day: "เสาร์", color: "text-purple-400", val: reportResult.weeklyPlan.saturday },
-                        { day: "อาทิตย์", color: "text-red-400", val: reportResult.weeklyPlan.sunday },
-                      ].map((item, i) => (
-                        <div key={i} className="bg-cosmic-900/30 border border-white/5 p-4 rounded-2xl text-center space-y-3 flex flex-col justify-between hover:border-gold-500/20 transition-all">
-                          <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-widest ${item.color}`}>วัน{item.day}</span>
-                          <p className="text-[10px] text-text-secondary leading-relaxed line-clamp-3 italic">
-                            {item.val || "—"}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Section: Branding Strategy */}
-                {reportResult.branding && (
-                  <div className="bg-gold-500/5 border border-gold-500/20 rounded-[2rem] p-6 sm:p-8 text-left space-y-5">
-                    <div className="flex items-center gap-3 text-gold-300">
-                      <Scroll className="w-5 h-5" />
-                      <h5 className="text-xs sm:text-sm font-bold uppercase tracking-widest">ยุทธศาสตร์การสร้างตัวตน (Personal Branding)</h5>
-                    </div>
-                    <div className="grid sm:grid-cols-3 gap-5 text-xs text-text-secondary">
-                      <div className="bg-cosmic-950/40 p-5 rounded-2xl border border-white/5">
-                        <span className="text-[10px] text-gold-500 font-bold uppercase tracking-widest block mb-2">Core Message</span>
-                        <p className="font-medium text-foreground leading-relaxed">{reportResult.branding.coreMessage || "—"}</p>
-                      </div>
-                      <div className="bg-cosmic-950/40 p-5 rounded-2xl border border-white/5">
-                        <span className="text-[10px] text-gold-500 font-bold uppercase tracking-widest block mb-2">Brand Persona</span>
-                        <p className="font-medium text-foreground leading-relaxed">{reportResult.branding.persona || "—"}</p>
-                      </div>
-                      <div className="bg-cosmic-950/40 p-5 rounded-2xl border border-white/5">
-                        <span className="text-[10px] text-gold-500 font-bold uppercase tracking-widest block mb-2">Unique Value</span>
-                        <p className="font-medium text-foreground leading-relaxed">{reportResult.branding.uniqueValue || "—"}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {/* Premium Exclusive Sections */}
-                {isPremium ? (
-                  <div className="space-y-6 pt-10 border-t border-gold-500/20">
-                    <h4 className="text-[10px] font-bold text-gold-300 uppercase tracking-[0.4em] text-center mb-8">Premium Imperial Insights</h4>
-                    <div className="grid grid-cols-1 gap-6">
-                      {[
-                        { title: "Golden Hour Execution", subtitle: "ยุทธศาสตร์นาทีทอง", content: reportResult.goldenHourExecution, icon: <Zap className="w-6 h-6" /> },
-                        { title: "Karmic Blueprint", subtitle: "พรสวรรค์จากอดีตชาติ", content: reportResult.karmicBlueprint, icon: <Scroll className="w-6 h-6" /> },
-                        { title: "Adaptive Life Script", subtitle: "ฉากทัศน์แห่งโชคชะตา", content: reportResult.adaptiveLifeScript, icon: <Map className="w-6 h-6" /> },
-                        { title: "Imperial Prosperity Map", subtitle: "แผนที่ความมั่งคั่งจักรพรรดิ", content: reportResult.imperialProsperityMap, icon: <ShieldCheck className="w-6 h-6" /> }
-                      ].map((item, i) => (
-                        <div key={i} className="bg-gold-500/5 border border-gold-500/20 rounded-[2rem] p-6 sm:p-10 relative overflow-hidden group text-left">
-                          <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                            {item.icon}
-                          </div>
-                          <div className="flex items-center gap-3 mb-5 text-gold-300">
-                            {item.icon} 
-                            <div>
-                              <h5 className="text-base font-serif font-bold uppercase tracking-widest">{item.title}</h5>
-                              <span className="text-[10px] text-gold-500/80 font-bold">{item.subtitle}</span>
-                            </div>
-                          </div>
-                          <p className="text-xs sm:text-sm text-text-secondary leading-relaxed font-medium">
-                            {item.content}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-gold-500/5 border border-gold-500/20 rounded-[2rem] p-8 text-center space-y-4">
-                    <p className="text-xs text-gold-500 font-bold uppercase tracking-[0.2em] italic">&ldquo;ปลดล็อก 4 มิติวิเคราะห์ระดับจักรพรรดิ&rdquo;</p>
-                    <p className="text-[10px] text-text-secondary uppercase tracking-widest">Golden Hour · Karmic Blueprint · Adaptive Script · Prosperity Map</p>
-                    <Link href="/#pricing" className="text-xs font-bold text-gold-300 hover:text-gold-500 underline underline-offset-8 flex items-center justify-center gap-2 mt-4">
-                      อัปเกรดเพื่อดูรายงานฉบับสมบูรณ์ <ArrowUpRight className="w-4 h-4" />
-                    </Link>
-                  </div>
-                )}
-
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-6 pt-10 border-t border-white/5">
-                  <div className="text-left">
-                    <p className="text-[10px] font-bold text-gold-500 uppercase tracking-[0.2em] mb-2">Affirmation ประจำตัว</p>
-                    <p className="text-sm italic text-foreground font-medium">&ldquo;{reportResult.summary?.affirmation}&rdquo;</p>
-                  </div>
-                  <Link href="/dashboard/report" className="text-[10px] font-bold uppercase tracking-[0.2em] bg-gold-500/10 text-gold-300 border border-gold-500/30 px-6 py-3 rounded-full hover:bg-gold-500/20 transition-all flex items-center gap-2 whitespace-nowrap">
-                    <Download className="w-4 h-4" /> DOWNLOAD PDF
-                  </Link>
-                </div>
-              </div>
-            ) : (
-              <div className="h-64 flex items-center justify-center border border-dashed border-white/10 rounded-[2.5rem] bg-black/10">
-                <p className="text-xs text-hora-text-muted font-bold uppercase tracking-[0.3em]">กดปุ่มเพื่อเริ่มวิเคราะห์ชะตาชีวิต</p>
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
-
-      {/* Mobile Bottom Navigation Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-hora border-t border-white/10 bg-cosmic-950/90 backdrop-blur-xl flex items-center justify-around py-4 px-2 shadow-[0_-10px_30px_rgba(0,0,0,0.8)] pb-safe">
-        <Link href="/dashboard" className="flex flex-col items-center gap-1.5 text-gold-500">
-          <Compass className="w-5 h-5 text-gold-500" />
-          <span className="text-[9px] font-bold tracking-[0.2em] uppercase">ดวงชะตา</span>
-        </Link>
-        <Link href="/dashboard/planner" className="flex flex-col items-center gap-1.5 text-text-secondary hover:text-gold-500 transition-colors">
-          <Calendar className="w-5 h-5 text-text-secondary hover:text-gold-500 transition-colors" />
-          <span className="text-[9px] font-bold tracking-[0.2em] uppercase">แพลนเนอร์</span>
-        </Link>
-        <Link href="/dashboard/coach" className="flex flex-col items-center gap-1.5 text-text-secondary hover:text-gold-500 transition-colors">
-          <Sparkles className="w-5 h-5 text-text-secondary hover:text-gold-500 transition-colors" />
-          <span className="text-[9px] font-bold tracking-[0.2em] uppercase">โค้ช AI</span>
-        </Link>
-        <Link href="/dashboard/report" className="flex flex-col items-center gap-1.5 text-text-secondary hover:text-gold-500 transition-colors">
-          <Download className="w-5 h-5 text-text-secondary hover:text-gold-500 transition-colors" />
-          <span className="text-[9px] font-bold tracking-[0.2em] uppercase">รายงาน</span>
-        </Link>
+          </HoraCard>
+        )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

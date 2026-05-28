@@ -20,17 +20,26 @@
   --background: var(--cosmic-950);
   --foreground: #F8F6F1;
   
-  --hora-gold: var(--gold-500);
-  --hora-gold-light: var(--gold-400);
+  --hora-gold: #C9A96E;
+  --hora-gold-light: #E8D5A3;
   --hora-gold-cta: var(--gold-liquid);
   
-  --hora-dark: var(--cosmic-950);
-  --hora-dark-card: rgba(10, 34, 64, 0.58);
-  --hora-dark-border: rgba(217, 188, 130, 0.18);
-  --hora-text: #F8F6F1;
-  --hora-text-muted: #94A3B8;
+  --hora-dark: #0A0806;
+  --hora-dark-card: #12100E;
+  --hora-dark-card-2: #1a1714;
+  --hora-dark-border: rgba(201, 169, 110, 0.15);
+  --hora-text: #F5F0E8;
+  --hora-text-muted: #8B7E6E;
+  --hora-text-dim: #5a5148;
   --text-secondary: #D9CDB7;
+
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --bottom-nav-height: 72px;
 }
+
+* { box-sizing: border-box; }
+html, body { overflow-x: hidden; max-width: 100vw; }
 
 @theme inline {
   --color-background: var(--background);
