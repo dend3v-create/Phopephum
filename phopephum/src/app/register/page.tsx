@@ -2,8 +2,13 @@
 
 import { useState } from "react";
 import { createClient } from "@/lib/supabase";
-import { Sparkles, ArrowRight, User, Calendar, MapPin, Mail, Lock } from "lucide-react";
+import { ArrowRight, User, Calendar, MapPin, Mail, Lock } from "lucide-react";
 import Link from "next/link";
+
+const inputStyle = {
+  background: "rgba(4,20,48,0.7)",
+  border: "1px solid rgba(217,188,130,0.18)",
+};
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -26,8 +31,7 @@ export default function RegisterPage() {
 
     try {
       const supabase = createClient();
-      
-      // 1. ลงทะเบียน Supabase Auth
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
@@ -46,7 +50,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // 2. บันทึกข้อมูล Profile ลง Database
       const { error: profileError } = await supabase.from("profiles").insert({
         id: user.id,
         full_name: fullName,
@@ -63,7 +66,6 @@ export default function RegisterPage() {
       } else {
         setSuccessMsg("ลงทะเบียนดวงชะตาสำเร็จ! กำลังนำคุณไปยัง Dashboard...");
 
-        // 🔔 แจ้งเตือนครูเด่นผ่าน Line Flex Message (fire-and-forget)
         fetch('/api/notify/line', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -78,7 +80,7 @@ export default function RegisterPage() {
               created_at: new Date().toISOString()
             }
           })
-        }).catch(() => { /* silent fail — ไม่บล็อก UX */ });
+        }).catch(() => { /* silent fail */ });
 
         setTimeout(() => {
           window.location.href = "/dashboard";
@@ -92,16 +94,22 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-hora-dark text-hora-text py-12 px-6 flex items-center justify-center relative font-sans">
-      {/* Background Subtle Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_10%,rgba(201,169,110,0.1),transparent_60%)] pointer-events-none" />
+    <div
+      className="min-h-screen text-hora-text py-10 px-4 flex items-center justify-center relative font-sans"
+      style={{ background: "linear-gradient(180deg, #020617 0%, #071427 50%, #0A2240 100%)" }}
+    >
+      {/* Background radial glow */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 50% 20%, rgba(201,169,110,0.09) 0%, transparent 60%)" }} />
 
-      <div className="w-full max-w-lg glass-hora rounded-2xl p-8 border border-hora-dark-border relative overflow-hidden shadow-2xl">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-hora-gold/5 rounded-full blur-3xl pointer-events-none" />
-        
+      <div
+        className="w-full max-w-sm relative overflow-hidden shadow-2xl"
+        style={{ background: "rgba(10,34,64,0.62)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)", border: "1px solid rgba(217,188,130,0.20)", borderRadius: 20, padding: "32px 24px 28px" }}
+      >
+        <div className="absolute top-0 right-0 w-28 h-28 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(198,169,107,0.06)" }} />
+
         {/* Brand Header */}
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-block text-3xl font-serif font-semibold text-hora-gold tracking-wide mb-2 hover:opacity-80 transition-opacity">
+        <div className="text-center mb-7">
+          <Link href="/" className="inline-block text-3xl font-serif font-semibold text-hora-gold tracking-wide mb-1.5 hover:opacity-80 transition-opacity">
             Phopephum
           </Link>
           <p className="text-sm text-hora-text-muted">
@@ -110,21 +118,21 @@ export default function RegisterPage() {
         </div>
 
         {errorMsg && (
-          <div className="mb-6 p-4 bg-red-950/40 border border-red-500/30 text-red-200 rounded-lg text-sm font-medium">
+          <div className="mb-5 p-3.5 bg-red-950/40 border border-red-500/30 text-red-200 rounded-lg text-sm font-medium">
             ⚠️ {errorMsg}
           </div>
         )}
 
         {successMsg && (
-          <div className="mb-6 p-4 bg-green-950/40 border border-green-500/30 text-green-200 rounded-lg text-sm font-medium">
+          <div className="mb-5 p-3.5 bg-green-950/40 border border-green-500/30 text-green-200 rounded-lg text-sm font-medium">
             ✨ {successMsg}
           </div>
         )}
 
-        <form onSubmit={handleRegister} className="space-y-5">
+        <form onSubmit={handleRegister} className="space-y-4">
           {/* Full Name */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-2">
+            <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-1.5">
               <User className="w-3.5 h-3.5 text-hora-gold" /> ชื่อ - นามสกุลจริง
             </label>
             <input
@@ -133,46 +141,47 @@ export default function RegisterPage() {
               value={fullName}
               onChange={(e) => setFullName(e.target.value)}
               placeholder="กรอกชื่อ-นามสกุล ของคุณ"
-              className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
+              style={inputStyle}
+              className="w-full focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {/* Birth Date */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-2">
-                <Calendar className="w-3.5 h-3.5 text-hora-gold" /> วันเกิด <span className="text-[10px] text-hora-gold/60 font-normal">(กรุณาใช้ปี ค.ศ. เช่น 1982)</span>
+              <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-hora-gold" /> วันเกิด
               </label>
               <input
                 type="date"
                 required
                 value={birthDate}
                 onChange={(e) => setBirthDate(e.target.value)}
-                className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all"
+                style={inputStyle}
+                className="w-full focus:border-hora-gold/80 rounded-lg px-3 py-2.5 text-sm text-hora-text outline-none transition-all"
               />
-              <p className="text-[10px] text-hora-text-muted/80 leading-normal">
-                * ต้องระบุปีเกิดเป็น **ค.ศ.** เท่านั้น (ปี พ.ศ. เกิด ลบด้วย 543)
-              </p>
+              <p className="text-[9px] text-hora-text-muted/70 leading-normal">ปี ค.ศ. เท่านั้น</p>
             </div>
 
             {/* Birth Time */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-2">
-                ⏱️ เวลาเกิด (โดยประมาณ)
+              <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-1.5">
+                ⏱️ เวลาเกิด
               </label>
               <input
                 type="time"
                 value={birthTime}
                 onChange={(e) => setBirthTime(e.target.value)}
-                className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all"
+                style={inputStyle}
+                className="w-full focus:border-hora-gold/80 rounded-lg px-3 py-2.5 text-sm text-hora-text outline-none transition-all"
               />
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-3">
             {/* Birth Province */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-2">
+              <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-1.5">
                 <MapPin className="w-3.5 h-3.5 text-hora-gold" /> จังหวัดเกิด
               </label>
               <input
@@ -181,31 +190,33 @@ export default function RegisterPage() {
                 value={birthProvince}
                 onChange={(e) => setBirthProvince(e.target.value)}
                 placeholder="เช่น กรุงเทพฯ"
-                className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
+                style={inputStyle}
+                className="w-full focus:border-hora-gold/80 rounded-lg px-3 py-2.5 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
               />
             </div>
 
             {/* Gender */}
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-2">
-                🧬 เพศตามบัตรประชาชน
+              <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-1.5">
+                🧬 เพศ
               </label>
               <select
                 value={gender}
                 onChange={(e: any) => setGender(e.target.value)}
-                className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all"
+                style={inputStyle}
+                className="w-full focus:border-hora-gold/80 rounded-lg px-3 py-2.5 text-sm text-hora-text outline-none transition-all"
               >
                 <option value="male">ชาย</option>
                 <option value="female">หญิง</option>
-                <option value="other">อื่น ๆ / ไม่ระบุ</option>
+                <option value="other">อื่นๆ</option>
               </select>
             </div>
           </div>
 
           {/* Email */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-2">
-              <Mail className="w-3.5 h-3.5 text-hora-gold" /> อีเมลสำหรับการล็อกอิน
+            <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-1.5">
+              <Mail className="w-3.5 h-3.5 text-hora-gold" /> อีเมลสำหรับ Login
             </label>
             <input
               type="email"
@@ -213,13 +224,14 @@ export default function RegisterPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
-              className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
+              style={inputStyle}
+              className="w-full focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
             />
           </div>
 
           {/* Password */}
           <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-2">
+            <label className="text-xs font-semibold text-hora-gold-light flex items-center gap-1.5">
               <Lock className="w-3.5 h-3.5 text-hora-gold" /> ตั้งรหัสผ่าน
             </label>
             <input
@@ -227,22 +239,23 @@ export default function RegisterPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="ตั้งรหัสผ่าน 6 ตัวอักษรขึ้นไป"
-              className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
+              placeholder="6 ตัวอักษรขึ้นไป"
+              style={inputStyle}
+              className="w-full focus:border-hora-gold/80 rounded-lg px-4 py-2.5 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
             />
           </div>
 
-          {/* Submit Button */}
+          {/* Submit */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full btn-hora py-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm disabled:opacity-50 mt-4"
+            className="w-full btn-hora py-3 rounded-lg font-semibold flex items-center justify-center gap-2 text-sm disabled:opacity-50 mt-2"
           >
-            {loading ? "กำลังบันทึกข้อมูลดวงชะตา..." : "บันทึกดวงชะตา & เริ่มวิเคราะห์"} <ArrowRight className="w-4 h-4" />
+            {loading ? "กำลังบันทึกข้อมูล..." : "บันทึกดวงชะตา & เริ่มใช้งาน"} <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        {/* Login link — แยก layout ชัดเจนตาม Cosmic Luxury theme */}
+        {/* Login link */}
         <div className="mt-6 border-t border-white/5 pt-5 flex flex-col items-center gap-3">
           <p className="text-[11px] text-hora-text-muted tracking-wide">
             มีบัญชีวิเคราะห์อยู่แล้ว?

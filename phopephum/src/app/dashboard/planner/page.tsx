@@ -209,7 +209,7 @@ export default function PlannerPage() {
 
   if (loading && !dayHoraData) {
     return (
-      <div className="min-h-screen bg-hora-dark text-hora-text flex items-center justify-center font-sans">
+      <div className="min-h-screen text-hora-text flex items-center justify-center font-sans" style={{ background: "linear-gradient(180deg, #020617 0%, #071427 50%, #0A2240 100%)" }}>
         <div className="text-center space-y-4">
           <div className="w-10 h-10 border-4 border-hora-gold border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm text-hora-text-muted">กำลังคำนวณสล็อตยามอัฐกาลส่วนบุคคล...</p>
@@ -219,12 +219,12 @@ export default function PlannerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-hora-dark text-hora-text font-sans pb-20 selection:bg-hora-gold selection:text-hora-dark">
+    <div className="min-h-screen text-hora-text font-sans pb-20 selection:bg-hora-gold" style={{ background: "linear-gradient(180deg, #020617 0%, #071427 50%, #0A2240 100%)" }}>
       {/* Radial overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(201,169,110,0.08),transparent_60%)] pointer-events-none" />
 
       {/* Header Bar */}
-      <header className="sticky top-0 z-40 glass-hora border-b border-hora-dark-border">
+      <header className="sticky top-0 z-40 border-b border-hora-dark-border" style={{ background: "rgba(2,6,23,0.85)", backdropFilter: "blur(20px)", WebkitBackdropFilter: "blur(20px)" }}>
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link 
@@ -244,7 +244,7 @@ export default function PlannerPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-[#14110C] border border-hora-dark-border/50 rounded-xl px-4 py-2">
+            <div className="flex items-center gap-2 border border-hora-dark-border/50 rounded-xl px-4 py-2" style={{ background: "rgba(4,20,48,0.7)" }}>
               <Calendar className="w-4 h-4 text-hora-gold" />
               <input
                 type="date"
@@ -350,7 +350,7 @@ export default function PlannerPage() {
                   value={journal.journalContent}
                   onChange={(e) => setJournal((prev) => ({ ...prev, journalContent: e.target.value }))}
                   placeholder="วันนี้ได้สัจจะบารมีเรื่องใดบ้าง? หรือมีสิ่งใดให้เรียนรู้เพิ่มเติม..."
-                  className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-xl px-4 py-3 text-xs text-hora-text outline-none resize-none leading-relaxed"
+                  className="w-full bg-[rgba(4,20,48,0.7)] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-xl px-4 py-3 text-xs text-hora-text outline-none resize-none leading-relaxed"
                 />
               </div>
 
@@ -362,7 +362,7 @@ export default function PlannerPage() {
                   value={journal.affirmationReceived}
                   onChange={(e) => setJournal((prev) => ({ ...prev, affirmationReceived: e.target.value }))}
                   placeholder="ความอดทนในวันลำบาก คือความสำเร็จในวันหน้า..."
-                  className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-xl px-4 py-3 text-xs text-hora-text outline-none"
+                  className="w-full bg-[rgba(4,20,48,0.7)] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-xl px-4 py-3 text-xs text-hora-text outline-none"
                 />
               </div>
 
@@ -489,7 +489,7 @@ export default function PlannerPage() {
                           {slotTasks.map((task) => (
                             <div 
                               key={task.id} 
-                              className="flex items-center justify-between bg-[#14110C]/40 border border-hora-dark-border/40 rounded-xl p-3 hover:border-hora-gold/15 group"
+                              className="flex items-center justify-between bg-[rgba(4,20,48,0.7)]/40 border border-hora-dark-border/40 rounded-xl p-3 hover:border-hora-gold/15 group"
                             >
                               <button
                                 onClick={() => handleToggleTask(task.id, task.isCompleted)}

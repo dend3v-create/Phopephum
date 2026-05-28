@@ -39,13 +39,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-hora-dark text-hora-text flex items-center justify-center px-6 relative font-sans">
-      {/* Background Subtle Glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_30%,rgba(201,169,110,0.1),transparent_60%)] pointer-events-none" />
+    <div className="min-h-screen text-hora-text flex items-center justify-center px-4 py-8 relative font-sans" style={{ background: "linear-gradient(180deg, #020617 0%, #071427 50%, #0A2240 100%)" }}>
+      {/* Background radial glow */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(circle at 50% 30%, rgba(201,169,110,0.10) 0%, transparent 60%)" }} />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 rounded-full blur-3xl pointer-events-none" style={{ background: "radial-gradient(circle, rgba(10,34,64,0.7) 0%, transparent 70%)" }} />
 
-      <div className="w-full max-w-md glass-hora rounded-2xl p-8 border border-hora-dark-border relative overflow-hidden shadow-2xl">
+      <div className="w-full max-w-sm relative overflow-hidden shadow-2xl" style={{ background: "rgba(10,34,64,0.62)", backdropFilter: "blur(28px)", WebkitBackdropFilter: "blur(28px)", border: "1px solid rgba(217,188,130,0.20)", borderRadius: 20, padding: "32px 24px 28px" }}>
+        <div className="absolute top-0 right-0 w-28 h-28 rounded-full blur-3xl pointer-events-none" style={{ background: "rgba(198,169,107,0.06)" }} />
         <div className="absolute top-0 right-0 w-24 h-24 bg-hora-gold/5 rounded-full blur-2xl pointer-events-none" />
-        
+
         {/* Brand Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block text-3xl font-serif font-semibold text-hora-gold tracking-wide mb-2 hover:opacity-80 transition-opacity">
@@ -80,7 +82,8 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="name@example.com"
-              className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-3 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
+              style={{ background: "rgba(4,20,48,0.7)", border: "1px solid rgba(217,188,130,0.18)" }}
+              className="w-full focus:border-hora-gold/80 rounded-lg px-4 py-3 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
             />
           </div>
 
@@ -100,7 +103,8 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full bg-[#14110C] border border-hora-dark-border/60 focus:border-hora-gold/80 rounded-lg px-4 py-3 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
+              style={{ background: "rgba(4,20,48,0.7)", border: "1px solid rgba(217,188,130,0.18)" }}
+              className="w-full focus:border-hora-gold/80 rounded-lg px-4 py-3 text-sm text-hora-text outline-none transition-all placeholder:text-hora-text-muted/40"
             />
           </div>
 
