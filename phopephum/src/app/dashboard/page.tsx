@@ -223,9 +223,9 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-cosmic-950 text-foreground flex items-center justify-center font-sans">
+      <div className="min-h-screen text-foreground flex items-center justify-center font-sans" style={{ background: "linear-gradient(180deg, #020617 0%, #071427 45%, #0A2240 100%)" }}>
         <div className="text-center space-y-4">
-          <div className="w-10 h-10 border-4 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-10 h-10 rounded-full animate-spin mx-auto" style={{ border: "3px solid rgba(217,188,130,0.15)", borderTopColor: "#C6A96B" }} />
           <p className="text-xs font-bold uppercase tracking-widest text-hora-text-muted">กำลังเตรียมข้อมูลดวงชะตาส่วนบุคคล...</p>
         </div>
       </div>
@@ -356,20 +356,26 @@ export default function DashboardPage() {
         )}
 
         {/* Tab Selector for Calculators */}
-        <div className="flex border border-white/5 p-1 gap-2 bg-cosmic-950/50 rounded-2xl">
+        <div className="flex p-1 gap-1" style={{ background: "rgba(10,34,64,0.58)", backdropFilter: "blur(24px)", border: "1px solid rgba(217,188,130,0.15)", borderRadius: "14px" }}>
           <button
             onClick={() => setActiveTab("ashta")}
             className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "ashta" ? "bg-gold-500/10 text-gold-300" : "text-hora-text-muted"
+              activeTab === "ashta"
+                ? "text-gold-300"
+                : "text-hora-text-muted hover:text-gold-400"
             }`}
+            style={activeTab === "ashta" ? { background: "linear-gradient(135deg, rgba(198,169,107,0.15) 0%, rgba(232,196,106,0.08) 100%)", border: "1px solid rgba(217,188,130,0.25)" } : {}}
           >
             🔮 ยามอัฐกาล
           </button>
           <button
             onClick={() => setActiveTab("sevenBase")}
             className={`flex-1 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all ${
-              activeTab === "sevenBase" ? "bg-gold-500/10 text-gold-300" : "text-hora-text-muted"
+              activeTab === "sevenBase"
+                ? "text-gold-300"
+                : "text-hora-text-muted hover:text-gold-400"
             }`}
+            style={activeTab === "sevenBase" ? { background: "linear-gradient(135deg, rgba(198,169,107,0.15) 0%, rgba(232,196,106,0.08) 100%)", border: "1px solid rgba(217,188,130,0.25)" } : {}}
           >
             ⬡ เลข 7 ตัว 9 ฐาน
           </button>
@@ -386,7 +392,8 @@ export default function DashboardPage() {
                   <select
                     value={ashtaDay}
                     onChange={(e) => setAshtaDay(parseInt(e.target.value))}
-                    className="w-full bg-cosmic-950 border border-white/10 rounded-lg p-2 text-sm text-foreground"
+                    className="w-full bg-cosmic-800 border border-gold-500/20 rounded-xl p-2 text-sm text-foreground focus:border-gold-400/50 focus:outline-none transition-colors"
+                    style={{ background: "rgba(18,53,91,0.6)" }}
                   >
                     {DAY_NAMES_THAI.map((name, i) => (
                       <option key={i} value={i}>วัน{name}</option>
@@ -399,7 +406,8 @@ export default function DashboardPage() {
                     type="text"
                     value={ashtaTime}
                     onChange={(e) => setAshtaTime(e.target.value)}
-                    className="w-full bg-cosmic-950 border border-white/10 rounded-lg p-2 text-sm text-foreground"
+                    className="w-full border rounded-xl p-2 text-sm text-foreground focus:border-gold-400/50 focus:outline-none transition-colors"
+                    style={{ background: "rgba(18,53,91,0.6)", borderColor: "rgba(198,169,107,0.2)" }}
                   />
                 </div>
               </div>
@@ -407,44 +415,37 @@ export default function DashboardPage() {
               {activeYam && (
                 <div className="space-y-3 mt-4">
                   {/* Yam header */}
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="bg-cosmic-950/60 p-3 rounded-xl text-center border border-white/5">
-                      <span className="text-[9px] text-hora-text-muted uppercase block">ยามที่</span>
-                      <span className="text-xl font-bold text-gold-300">{activeYam.yamNumber}</span>
-                    </div>
-                    <div className="bg-cosmic-950/60 p-3 rounded-xl text-center border border-white/5">
-                      <span className="text-[9px] text-hora-text-muted uppercase block">ดาวเสวย</span>
-                      <span className="text-sm font-bold text-gold-400">{activeYam.starName}</span>
-                    </div>
-                    <div className="bg-cosmic-950/60 p-3 rounded-xl text-center border border-white/5">
-                      <span className="text-[9px] text-hora-text-muted uppercase block">ช่วงยาม</span>
-                      <span className="text-xs font-bold text-purple-300">{activeYam.activeSubYam?.name}</span>
-                      <span className="text-[9px] text-hora-text-muted block">{activeYam.activeSubYam?.startTime}–{activeYam.activeSubYam?.endTime}</span>
-                    </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {[
+                      { label: "ยามที่", value: activeYam.yamNumber, big: true },
+                      { label: "ดาวเสวย", value: activeYam.starName, big: false },
+                      { label: "ช่วงยาม", value: activeYam.activeSubYam?.name, sub: `${activeYam.activeSubYam?.startTime}–${activeYam.activeSubYam?.endTime}` },
+                    ].map((item, i) => (
+                      <div key={i} className="p-3 rounded-2xl text-center" style={{ background: "rgba(18,53,91,0.45)", border: "1px solid rgba(217,188,130,0.18)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}>
+                        <span className="text-[8px] text-hora-text-muted uppercase tracking-widest block mb-1">{item.label}</span>
+                        <span className={`font-bold text-gold-300 block ${item.big ? "text-2xl" : "text-sm"}`}>{item.value}</span>
+                        {item.sub && <span className="text-[8px] text-hora-text-muted block mt-0.5">{item.sub}</span>}
+                      </div>
+                    ))}
                   </div>
 
                   {/* Predictions */}
                   <div className="space-y-2">
-                    <div className="bg-cosmic-950/60 p-3 rounded-xl border border-white/5">
-                      <span className="text-[9px] text-gold-400 font-bold uppercase block mb-1">เรื่องที่ได้ยิน</span>
-                      <p className="text-xs text-foreground leading-relaxed">{activeYam.predictions?.hearing}</p>
-                    </div>
-                    <div className="bg-cosmic-950/60 p-3 rounded-xl border border-white/5">
-                      <span className="text-[9px] text-gold-400 font-bold uppercase block mb-1">คนเจ็บไข้</span>
-                      <p className="text-xs text-foreground leading-relaxed">{activeYam.predictions?.sick}</p>
-                    </div>
-                    <div className="bg-cosmic-950/60 p-3 rounded-xl border border-white/5">
-                      <span className="text-[9px] text-gold-400 font-bold uppercase block mb-1">ของหาย</span>
-                      <p className="text-xs text-foreground leading-relaxed">{activeYam.predictions?.lost}</p>
-                    </div>
-                    <div className="bg-cosmic-950/60 p-3 rounded-xl border border-white/5">
-                      <span className="text-[9px] text-gold-400 font-bold uppercase block mb-1">การเดินทาง ({activeYam.activeSubYam?.name})</span>
-                      <p className="text-xs text-foreground leading-relaxed">{activeYam.predictions?.travel}</p>
-                    </div>
+                    {[
+                      { label: "✦ เรื่องที่ได้ยิน", value: activeYam.predictions?.hearing },
+                      { label: "✦ คนเจ็บไข้", value: activeYam.predictions?.sick },
+                      { label: "✦ ของหาย", value: activeYam.predictions?.lost },
+                      { label: `✦ การเดินทาง (${activeYam.activeSubYam?.name})`, value: activeYam.predictions?.travel },
+                    ].map((item, i) => (
+                      <div key={i} className="p-3 rounded-2xl" style={{ background: "rgba(18,53,91,0.35)", border: "1px solid rgba(217,188,130,0.12)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.02)" }}>
+                        <span className="text-[9px] text-gold-400/80 font-bold uppercase tracking-wider block mb-1.5">{item.label}</span>
+                        <p className="text-xs text-text-secondary leading-relaxed">{item.value}</p>
+                      </div>
+                    ))}
                     {activeYam.predictions?.bestTime && (
-                      <div className="bg-gold-500/5 p-3 rounded-xl border border-gold-500/20">
-                        <span className="text-[9px] text-gold-400 font-bold uppercase block mb-1">เวลาที่ดี</span>
-                        <p className="text-xs text-gold-300 font-medium">{activeYam.predictions.bestTime}</p>
+                      <div className="p-3 rounded-2xl" style={{ background: "linear-gradient(135deg, rgba(198,169,107,0.12) 0%, rgba(232,196,106,0.05) 100%)", border: "1px solid rgba(217,188,130,0.28)", boxShadow: "0 0 20px rgba(232,196,106,0.06)" }}>
+                        <span className="text-[9px] text-gold-300 font-bold uppercase tracking-wider block mb-1">⭐ เวลาที่ดีที่สุด</span>
+                        <p className="text-sm text-gold-300 font-bold">{activeYam.predictions.bestTime}</p>
                       </div>
                     )}
                   </div>
@@ -465,39 +466,39 @@ export default function DashboardPage() {
             
             <div className="space-y-6">
               {/* Lunar Calendar & Astral Details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-cosmic-950/60 p-4 rounded-2xl border border-white/5 flex flex-col justify-between">
-                  <span className="text-[10px] text-gold-400 uppercase font-bold tracking-widest block mb-1">ปฏิทินจันทรคติไทย</span>
+              <div className="grid grid-cols-1 gap-3">
+                <div className="p-4 rounded-2xl flex flex-col gap-1" style={{ background: "rgba(18,53,91,0.45)", border: "1px solid rgba(217,188,130,0.18)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}>
+                  <span className="text-[9px] text-gold-400 uppercase font-bold tracking-widest">ปฏิทินจันทรคติไทย</span>
                   <p className="text-sm font-bold text-foreground leading-relaxed">{sevenBaseResult.thaiLunarDateText}</p>
-                  <span className="text-[9px] text-hora-text-muted mt-2 block">เปลี่ยนปีนักษัตรในวันขึ้น 1 ค่ำ เดือน 5</span>
+                  <span className="text-[9px] text-hora-text-muted">เปลี่ยนปีนักษัตรในวันขึ้น 1 ค่ำ เดือน 5</span>
                 </div>
-                <div className="bg-cosmic-950/60 p-4 rounded-2xl border border-white/5 flex flex-col justify-between">
-                  <span className="text-[10px] text-gold-400 uppercase font-bold tracking-widest block mb-1">ภูมิวิญญาณเด่น (ทักษาจร)</span>
-                  <div className="flex gap-2 flex-wrap mt-1">
+                <div className="p-4 rounded-2xl flex flex-col gap-2" style={{ background: "rgba(18,53,91,0.45)", border: "1px solid rgba(217,188,130,0.18)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}>
+                  <span className="text-[9px] text-gold-400 uppercase font-bold tracking-widest">ภูมิวิญญาณเด่น (ทักษาจร)</span>
+                  <div className="flex gap-2 flex-wrap">
                     {sevenBaseResult.taksa.slice(0, 3).map((t: any, idx: number) => (
-                      <span key={idx} className="bg-gold-500/10 border border-gold-500/20 text-gold-300 px-2.5 py-0.5 rounded-full text-[10px] font-medium">
+                      <span key={idx} style={{ background: "rgba(198,169,107,0.12)", border: "1px solid rgba(198,169,107,0.25)" }} className="text-gold-300 px-2.5 py-0.5 rounded-full text-[10px] font-medium">
                         {t.category}: ดาว {t.planet.split(" ")[0]}
                       </span>
                     ))}
                   </div>
                 </div>
-                <div className="bg-cosmic-950/60 p-4 rounded-2xl border border-white/5 flex flex-col justify-between">
-                  <span className="text-[10px] text-gold-400 uppercase font-bold tracking-widest block mb-1">จิตตั้งต้นภายใน (มหาภูติจร)</span>
+                <div className="p-4 rounded-2xl flex flex-col gap-1" style={{ background: "rgba(18,53,91,0.45)", border: "1px solid rgba(217,188,130,0.18)", boxShadow: "inset 0 1px 0 rgba(255,255,255,0.03)" }}>
+                  <span className="text-[9px] text-gold-400 uppercase font-bold tracking-widest">จิตตั้งต้นภายใน (มหาภูติจร)</span>
                   <p className="text-sm font-bold text-foreground">
                     ตกตำแหน่ง <span className="text-gold-300">{sevenBaseResult.mahaPhute.name}</span> (ธาตุ{sevenBaseResult.mahaPhute.element})
                   </p>
-                  <span className="text-[9px] text-hora-text-muted mt-2 block">{sevenBaseResult.mahaPhute.description}</span>
+                  <span className="text-[9px] text-hora-text-muted">{sevenBaseResult.mahaPhute.description}</span>
                 </div>
               </div>
 
               {/* Precise interactive 9-Base Grid */}
-              <div className="overflow-x-auto pb-2">
+              <div className="overflow-x-auto pb-2 rounded-2xl" style={{ background: "rgba(10,34,64,0.4)", border: "1px solid rgba(217,188,130,0.12)" }}>
                 <table className="w-full border-collapse min-w-[640px]">
                   <thead>
-                    <tr className="border-b border-white/5">
-                      <th className="text-left py-2 px-3 text-[10px] font-bold uppercase tracking-widest text-hora-text-muted w-32">ชื่อฐาน</th>
+                    <tr style={{ borderBottom: "1px solid rgba(217,188,130,0.12)" }}>
+                      <th className="text-left py-3 px-3 text-[9px] font-bold uppercase tracking-widest text-hora-text-muted w-32">ชื่อฐาน</th>
                       {Array.from({ length: 7 }, (_, idx) => (
-                        <th key={idx} className="text-center py-2 px-1 text-[10px] font-bold uppercase tracking-widest text-gold-400 w-16">
+                        <th key={idx} className="text-center py-3 px-1 text-[9px] font-bold uppercase tracking-widest text-gold-400/70 w-16">
                           มิติที่ {idx + 1}
                         </th>
                       ))}
@@ -515,7 +516,7 @@ export default function DashboardPage() {
                       { name: "อาตมา (Row 8)", key: "row8", houses: Array(7).fill("บทวิบาก") },
                       { name: "ภริยัง (Row 9)", key: "row9", houses: Array(7).fill("เป้าหมาย") }
                     ].map((row, rIdx) => (
-                      <tr key={row.key} className="border-b border-white/5 hover:bg-white/[0.01] transition-all">
+                      <tr key={row.key} style={{ borderBottom: "1px solid rgba(217,188,130,0.07)" }} className="hover:bg-white/[0.01] transition-all">
                         <td className="py-2.5 px-3 text-[11px] font-medium text-foreground">{row.name}</td>
                         {(sevenBaseResult.chart as any)[row.key].map((v: number, cIdx: number) => {
                           const house = row.houses[cIdx];
@@ -560,7 +561,7 @@ export default function DashboardPage() {
 
               {/* Selected Cell Astro-Logic Details Card */}
               {selectedCell ? (
-                <div className="bg-gradient-to-r from-gold-500/5 to-cosmic-950/40 p-5 rounded-2xl border border-gold-500/20 space-y-3 animate-fadeIn">
+                <div className="p-5 rounded-2xl space-y-3" style={{ background: "linear-gradient(135deg, rgba(198,169,107,0.10) 0%, rgba(10,34,64,0.6) 100%)", border: "1px solid rgba(217,188,130,0.25)", boxShadow: "0 10px 40px rgba(0,0,0,0.4), 0 0 30px rgba(232,196,106,0.07)" }}>
                   <div className="flex justify-between items-start">
                     <div>
                       <span className="bg-gold-500/20 text-gold-300 border border-gold-500/30 px-3 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-widest">
@@ -597,8 +598,8 @@ export default function DashboardPage() {
                   </div>
                 </div>
               ) : (
-                <div className="bg-cosmic-950/40 p-4 rounded-xl border border-white/5 text-center">
-                  <p className="text-xs text-hora-text-muted">💡 แตะที่เลขดาวในแต่ละมิติตารางเพื่อถอดรหัสคำทำนายดวงชะตาส่วนบุคคล</p>
+                <div className="p-4 rounded-2xl text-center" style={{ background: "rgba(10,34,64,0.4)", border: "1px solid rgba(217,188,130,0.10)" }}>
+                  <p className="text-xs text-hora-text-muted">✦ แตะที่เลขดาวในแต่ละมิติตารางเพื่อถอดรหัสคำทำนายดวงชะตาส่วนบุคคล</p>
                 </div>
               )}
             </div>

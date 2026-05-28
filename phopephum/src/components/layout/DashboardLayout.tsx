@@ -40,7 +40,7 @@ export function DashboardLayout({
         minHeight: "100dvh",       // dvh ดีกว่า vh บน mobile (คิด URL bar)
         maxWidth: "100vw",
         overflow: "hidden",
-        backgroundColor: "var(--hora-dark)",
+        background: "linear-gradient(180deg, #020617 0%, #071427 45%, #0A2240 100%)",
         paddingTop: "var(--safe-top)",
       }}
     >
@@ -51,13 +51,15 @@ export function DashboardLayout({
             position: "sticky",
             top: 0,
             zIndex: 50,
-            backgroundColor: "rgba(10, 8, 6, 0.95)",
-            backdropFilter: "blur(12px)",
-            borderBottom: "1px solid var(--hora-dark-border)",
+            backgroundColor: "rgba(2, 6, 23, 0.92)",
+            backdropFilter: "blur(24px)",
+            WebkitBackdropFilter: "blur(24px)",
+            borderBottom: "1px solid rgba(217, 188, 130, 0.18)",
             padding: "12px 16px",
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
+            boxShadow: "0 4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(232,196,106,0.04)",
           }}
         >
           <span
@@ -161,17 +163,19 @@ export function HoraCard({
   return (
     <div
       style={{
-        backgroundColor: "var(--hora-dark-card)",
-        border: "1px solid var(--hora-dark-border)",
-        borderRadius: "12px",
+        background: "rgba(10, 34, 64, 0.58)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        border: "1px solid rgba(217, 188, 130, 0.18)",
+        borderRadius: "16px",
         padding: CARD_PADDING[padding],
         marginBottom: "12px",
         width: "100%",
-        overflow: "hidden",           // ป้องกัน child overflow
+        overflow: "hidden",
         boxSizing: "border-box",
         boxShadow: glow
-          ? "0 0 20px rgba(201, 169, 110, 0.08)"
-          : "0 2px 8px rgba(0,0,0,0.3)",
+          ? "0 10px 60px rgba(0,0,0,0.45), 0 0 40px rgba(232,196,106,0.10), inset 0 1px 0 rgba(255,255,255,0.04)"
+          : "0 10px 60px rgba(0,0,0,0.45), 0 0 30px rgba(232,196,106,0.04), inset 0 1px 0 rgba(255,255,255,0.03)",
         ...style,
       }}
     >
@@ -221,9 +225,11 @@ function BottomNav() {
         left: 0,
         right: 0,
         zIndex: 100,
-        backgroundColor: "rgba(10, 8, 6, 0.97)",
-        backdropFilter: "blur(16px)",
-        borderTop: "1px solid var(--hora-dark-border)",
+        backgroundColor: "rgba(2, 6, 23, 0.97)",
+        backdropFilter: "blur(24px)",
+        WebkitBackdropFilter: "blur(24px)",
+        borderTop: "1px solid rgba(217, 188, 130, 0.15)",
+        boxShadow: "0 -4px 30px rgba(0,0,0,0.5), 0 0 20px rgba(232,196,106,0.04)",
         display: "flex",
         alignItems: "stretch",
         height: "var(--bottom-nav-height)",
