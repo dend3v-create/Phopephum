@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { horoscopeEngine } from '@/lib/astrology/engine/horoscopeEngine'
-import { getCurrentHora, PLANETS } from '@/engine/phopephum-calculator'
+import { getCurrentHora, PLANETS, calculateHora } from '@/engine/phopephum-calculator'
 import { HORA_CHAT_SYSTEM } from '@/constants/ai-prompts'
 
 export const runtime = 'edge'
@@ -44,12 +44,15 @@ export async function POST(request: Request) {
     })
     
     // 2. คำนวณยามอัฐกาลปัจจุบันที่กำลังรันอยู่ ณ ขณะนี้
-    const currentHoraData = getCurrentHora()
+    // แปลงเวลาให้เป็นเวลาไทย (UTC+7) เพื่อป้องกันปัญหายามไม่ตรงกันบนเซิร์ฟเวอร์
+    const bkkTimeString = new Date().toLocaleString("en-US", { timeZone: "Asia/Bangkok" })
+    const now = new Date(bkkTimeString)
+    
+    const currentHoraData = getCurrentHora(now)
     const currentPlanet = currentHoraData.currentHora?.subSlot.planet || PLANETS.jupiter
     const currentMajorYam = currentHoraData.currentHora
     
     // 2b. ข้อมูลวัน/เวลาปัจจุบัน สำหรับ context เชิงกาลเวลา
-    const now = new Date()
     const thaiDayNames = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์']
     const thaiMonthNames = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม']
     const todayDayName = thaiDayNames[now.getDay()]
@@ -57,11 +60,16 @@ export async function POST(request: Request) {
     const currentTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`
     const periodLabel = now.getHours() >= 6 && now.getHours() < 18 ? 'กลางวัน' : 'กลางคืน'
     
-    // สร้าง 7 วัน ข้างหน้า พร้อมชื่อวัน
+    // สร้าง 7 วัน ข้างหน้า พร้อมชื่อวัน และตารางยามอัฐกาล
     const weekDays = Array.from({ length: 7 }, (_, i) => {
       const d = new Date(now)
       d.setDate(now.getDate() + i)
-      return { dayName: thaiDayNames[d.getDay()], date: `${d.getDate()}/${d.getMonth()+1}`, label: i === 0 ? 'วันนี้' : i === 1 ? 'พรุ่งนี้' : `อีก ${i} วัน` }
+      const dayName = thaiDayNames[d.getDay()]
+      const isToday = i === 0
+      const isTomorrow = i === 1
+      const label = isToday ? 'วันนี้' : isTomorrow ? 'พรุ่งนี้' : `อีก ${i} วัน`
+      const dateStr = `${d.getDate()}/${d.getMonth()+1}`
+      return { dateObj: d, dayName, date: dateStr, label }
     })
 
     // 3. เตรียม System Context
@@ -92,13 +100,24 @@ export async function POST(request: Request) {
 
     systemContext += `\n\nข้อมูลดวงชะตาปัจจุบัน:\n${JSON.stringify(dataSnapshot, null, 2)}`
 
-    systemContext += `\n\n## ข้อมูลเวลาปัจจุบัน (สำหรับวางแผนเชิงกาลเวลา):
+    // สร้างข้อมูลตารางยาม 7 วัน เพื่อให้ AI ใช้วิเคราะห์ได้แม่นยำ
+    const scheduleContext = weekDays.map(w => {
+      const hRes = calculateHora({ date: w.dateObj })
+      const dayYams = hRes.majorSlots.filter(m => m.period === 'day').map(m => `${m.startTime}-${m.endTime}=ยาม${m.starName}`).join(', ')
+      return `- ${w.label} (วัน${w.dayName} ${w.date}): ${dayYams}`
+    }).join('\n')
+
+    systemContext += `\n\n## ข้อมูลเวลาปัจจุบันและตารางยาม 7 วัน (สำหรับวางแผนเชิงกาลเวลา):
 - วันที่: ${todayDate}
 - วันนี้คือ: วัน${todayDayName} ${periodLabel}
 - เวลาปัจจุบัน: ${currentTimeStr}
-- 7 วันของสัปดาห์นี้: ${weekDays.map(w => `${w.label} (วัน${w.dayName} ${w.date})`).join(' | ')}
+- ตารางยามกลางวัน (06:00-18:00) 7 วันข้างหน้า:
+${scheduleContext}
 
-**กฎ:** เมื่อผู้ใช้ถามเรื่อง วัน/เวลา/สัปดาห์ ให้ใช้ข้อมูลเวลาด้านบนนี้ระบุอย่างชัดเจน เช่น "วัน${todayDayName}นี้" หรือ "วันหน้า (${weekDays[1]?.date})" เพื่อให้ผู้ใช้นำไปบันทึกใน Planner ได้ทันที`
+**กฎสำคัญ:** 
+1. เมื่อผู้ใช้ถามเรื่อง วัน/เวลา/สัปดาห์ หรือขอฤกษ์มงคล ให้ใช้ข้อมูลตารางยามด้านบนในการคำนวณและตอบ 
+2. แนะนำ "ยามมงคล" (เช่น ยามที่มีดาวศุภเคราะห์: ครู/ชีโว(พฤหัส), ศุกระ/ศุโกร(ศุกร์), พุทธะ/พุทโธ(พุธ)) ให้ตรงกับเรื่องที่ถาม เช่น ความรักใช้ศุกร์, การงาน/ผู้ใหญ่ใช้พฤหัส 
+3. ตอบอย่างเป็นธรรมชาติและอ้างอิงยามให้ถูกต้องตามข้อมูลที่ให้ไป ห้ามแต่งยามขึ้นเอง`
 
     // ค้นหา API key ใน .env
     const geminiKey = process.env.GEMINI_API_KEY
@@ -107,7 +126,7 @@ export async function POST(request: Request) {
     if (isGeminiConfigured) {
       try {
         const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-001:generateContent?key=${geminiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -128,8 +147,9 @@ export async function POST(request: Request) {
           }
         )
 
+        const resData = await geminiRes.json()
+        
         if (geminiRes.ok) {
-          const resData = await geminiRes.json()
           const aiResponse = resData.candidates?.[0]?.content?.parts?.[0]?.text
 
           if (aiResponse) {
@@ -139,9 +159,11 @@ export async function POST(request: Request) {
               source: 'gemini-ai'
             })
           }
+        } else {
+          console.error('[/api/ai/coach] Gemini API failed with status:', geminiRes.status, resData)
         }
       } catch (err) {
-        console.error('[/api/ai/coach] Gemini API error:', err)
+        console.error('[/api/ai/coach] Gemini API request error:', err)
       }
     }
 
