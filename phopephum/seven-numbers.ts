@@ -332,9 +332,9 @@ export function calculateNineBases(input: SevenNumbersInput): NineBaseResult {
   const b9 = genBase9(b5[0]);
 
   const bases: NineBaseRow[] = [
-    { baseName: "ฐานวัน",        description: `วัน${DAY_NAMES_THAI[dayOfWeek]} = เลข ${dayNumber}`,                       values: b1 },
-    { baseName: "ฐานเดือน",      description: `เดือนไทย ${thaiMonth} = เลข ${monthNumber}`,                               values: b2 },
-    { baseName: "ฐานปี",         description: `ปี${ZODIAC_NAMES_THAI[zodiacAnimal]} พ.ศ.${thaiYear} = เลข ${yearNumber}`, values: b3 },
+    { baseName: "ฐานวัน",        description: `วัน${DAY_NAMES_THAI[dayOfWeek]} = เลข ${lunarInfo.dayNumber}`,                       values: b1 },
+    { baseName: "ฐานเดือน",      description: `เดือนไทย ${lunarInfo.thaiMonth} = เลข ${lunarInfo.monthNumber}`,                               values: b2 },
+    { baseName: "ฐานปี",         description: `ปี${ZODIAC_NAMES_THAI[lunarInfo.zodiacAnimal]} พ.ศ.${lunarInfo.thaiYear} = เลข ${lunarInfo.yearNumber}`, values: b3 },
     { baseName: "ฐานรวมกำลัง",   description: "ผลรวม ฐาน 1+2+3",                                                         values: b4 },
     { baseName: "เอา ๗ ลบ",      description: "ฐาน 4 ลบด้วย 7 (หรือ 14) ให้เหลือ 1–7",                                  values: b5 },
     { baseName: "เอา ๒ คูณ",     description: "ฐาน 5 × 2 (ถ้าเกิน 7 ลบ 7)",                                              values: b6 },
