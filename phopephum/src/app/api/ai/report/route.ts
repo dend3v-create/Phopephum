@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
 
   // 5. Forward to CF Worker (AI Proxy) — streaming
   const workerUrl = process.env.NEXT_PUBLIC_AI_WORKER_URL || process.env.CF_AI_PROXY_URL;
+  const workerSecret = process.env.CF_WORKER_SECRET || process.env.WORKER_SECRET;
   
   if (!workerUrl) {
     return new Response(JSON.stringify({ error: "AI Worker URL not configured" }), {
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-Worker-Secret": process.env.CF_WORKER_SECRET!,
+        "X-Worker-Secret": workerSecret || "",
       },
       body: JSON.stringify({ prompt, topic }),
     }
