@@ -42,6 +42,23 @@ export async function POST(request: Request) {
     // 2. คำนวณยามอัฐกาลปัจจุบันที่กำลังรันอยู่ ณ ขณะนี้
     const currentHoraData = getCurrentHora()
     const currentPlanet = currentHoraData.currentHora?.subSlot.planet || PLANETS.jupiter
+    const currentMajorYam = currentHoraData.currentHora
+    
+    // 2b. ข้อมูลวัน/เวลาปัจจุบัน สำหรับ context เชิงกาลเวลา
+    const now = new Date()
+    const thaiDayNames = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์']
+    const thaiMonthNames = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม']
+    const todayDayName = thaiDayNames[now.getDay()]
+    const todayDate = `${now.getDate()} ${thaiMonthNames[now.getMonth()]} ${now.getFullYear() + 543}`
+    const currentTimeStr = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')} น.`
+    const periodLabel = now.getHours() >= 6 && now.getHours() < 18 ? 'กลางวัน' : 'กลางคืน'
+    
+    // สร้าง 7 วัน ข้างหน้า พร้อมชื่อวัน
+    const weekDays = Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(now)
+      d.setDate(now.getDate() + i)
+      return { dayName: thaiDayNames[d.getDay()], date: `${d.getDate()}/${d.getMonth()+1}`, label: i === 0 ? 'วันนี้' : i === 1 ? 'พรุ่งนี้' : `อีก ${i} วัน` }
+    })
 
     // 3. ดึง RAG Knowledge Base จาก Supabase เพื่อใช้ในการพยากรณ์
     const { data: knowledgeItems } = await supabase
@@ -73,7 +90,15 @@ export async function POST(request: Request) {
 - ผังดวง: ${JSON.stringify(sevenBaseData.chart)}
 - ทักษา: ${JSON.stringify(sevenBaseData.taksa)}
 - มหาภูติ: ${JSON.stringify(sevenBaseData.mahaPhute)}
-- ยามปัจจุบัน: ${currentPlanet.nameThai} (ดาว${currentPlanet.nameThai} - ${currentPlanet.description})`
+- ยามปัจจุบัน: ยามที่ ${currentMajorYam?.yamNumber || '-'} — ดาว${currentPlanet.nameThai} (${currentPlanet.description}) เวลา ${currentMajorYam?.activeSubYam?.startTime || ''}–${currentMajorYam?.activeSubYam?.endTime || ''}
+
+## ข้อมูลเวลาปัจจุบัน (สำหรับวางแผนเชิงกาลเวลา):
+- วันที่: ${todayDate}
+- วันนี้คือ: วัน${todayDayName} ${periodLabel}
+- เวลาปัจจุบัน: ${currentTimeStr}
+- 7 วันของสัปดาห์นี้: ${weekDays.map(w => `${w.label} (วัน${w.dayName} ${w.date})`).join(' | ')}
+
+**กฎ:** เมื่อผู้ใช้ถามเรื่อง วัน/เวลา/สัปดาห์ ให้ใช้ข้อมูลวันข้างต้นระบุอย่างชัดเจน เช่น "วัน${todayDayName}นี้" หรือ "วันพุธหน้า (28/5)" เพื่อให้ผู้ใช้นำไปบันทึกใน Planner ได้ทันที`
 
     // ค้นหา API key ใน .env ว่ามีคีย์พร้อมใช้เพื่อยิง AI จริงๆ หรือไม่
     const geminiKey = process.env.GEMINI_API_KEY

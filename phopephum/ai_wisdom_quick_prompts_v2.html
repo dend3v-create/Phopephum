@@ -1,0 +1,281 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Sarabun:wght@300;400;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#C9A96E;--g2:rgba(201,169,110,0.12);--g3:rgba(201,169,110,0.25);
+  --bd:rgba(201,169,110,0.18);--bda:rgba(201,169,110,0.55);
+  --tx:var(--color-text-primary);--tm:var(--color-text-secondary);--td:var(--color-text-tertiary);
+}
+body{font-family:'Sarabun',sans-serif}
+.root{padding:.5rem 0;max-width:380px}
+
+.hdr{display:flex;align-items:center;gap:10px;padding-bottom:.85rem;border-bottom:.5px solid var(--bd);margin-bottom:.9rem}
+.hdr-icon{width:34px;height:34px;border:1px solid var(--bda);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--g);font-size:15px;flex-shrink:0}
+.hdr-t{font-family:'Cinzel',serif;font-size:12px;font-weight:600;color:var(--g);letter-spacing:.1em}
+.hdr-s{font-size:10px;color:var(--td);margin-top:1px}
+
+/* Category tabs — horizontal scroll */
+.cat-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;margin-bottom:.85rem;scrollbar-width:none}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-tab{flex-shrink:0;padding:6px 12px;border-radius:20px;border:.5px solid var(--bd);background:transparent;cursor:pointer;font-family:'Sarabun',sans-serif;font-size:12px;font-weight:600;color:var(--tm);white-space:nowrap;transition:all .18s;display:flex;align-items:center;gap:5px}
+.cat-tab:hover{border-color:var(--bda);color:var(--g)}
+.cat-tab.on{border:1px solid var(--g);background:var(--g2);color:var(--g)}
+
+/* Quick prompt chips */
+.chips-wrap{display:flex;flex-direction:column;gap:6px;margin-bottom:.85rem}
+.chip{width:100%;text-align:left;padding:10px 13px;border-radius:10px;border:.5px solid var(--bd);background:var(--g2);cursor:pointer;font-family:'Sarabun',sans-serif;font-size:12.5px;color:var(--tx);line-height:1.5;transition:all .18s;display:flex;align-items:flex-start;gap:8px}
+.chip:hover{border-color:var(--bda);background:var(--g3)}
+.chip-ico{font-size:15px;flex-shrink:0;margin-top:1px}
+.chip-txt{flex:1}
+.chip-sub{display:block;font-size:10px;color:var(--td);margin-top:2px}
+
+/* Custom question */
+.custom-wrap{margin-bottom:.85rem}
+.custom-inp{width:100%;background:transparent;border:.5px solid var(--bd);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--tx);font-family:'Sarabun',sans-serif;resize:none;height:72px}
+.custom-inp:focus{outline:none;border-color:var(--g)}
+.custom-inp::placeholder{color:var(--td)}
+
+/* Ask button */
+.ask-btn{width:100%;padding:13px;background:transparent;border:1px solid var(--g);border-radius:10px;color:var(--g);font-family:'Sarabun',sans-serif;font-size:13.5px;font-weight:600;cursor:pointer;letter-spacing:.06em;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .18s;margin-bottom:.85rem}
+.ask-btn:hover:not(:disabled){background:var(--g2)}
+.ask-btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* Result */
+.res-box{background:var(--g2);border:.5px solid var(--bd);border-radius:10px;padding:13px;display:none}
+.res-box.show{display:block}
+.res-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;padding-bottom:7px;border-bottom:.5px solid var(--bd)}
+.res-tag{font-size:10px;font-weight:700;color:var(--g);letter-spacing:.08em;text-transform:uppercase}
+.res-body{font-size:13px;line-height:1.85;color:var(--tx);white-space:pre-wrap}
+.blink{display:inline-block;width:2px;height:13px;background:var(--g);margin-left:2px;vertical-align:middle;animation:bl .75s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:0}}
+.dots{display:flex;gap:4px;align-items:center;padding:10px 0}
+.dots span{width:5px;height:5px;border-radius:50%;background:var(--g);animation:db 1.1s infinite}
+.dots span:nth-child(2){animation-delay:.2s}
+.dots span:nth-child(3){animation-delay:.4s}
+@keyframes db{0%,80%,100%{opacity:.25;transform:scale(.8)}40%{opacity:1;transform:scale(1)}}
+
+/* Birth mini */
+.birth-row{display:flex;gap:7px;margin-bottom:.85rem}
+.birth-row input{flex:1;background:transparent;border:.5px solid var(--bd);border-radius:8px;padding:8px 10px;font-size:12px;color:var(--tx);font-family:'Sarabun',sans-serif}
+.birth-row input:focus{outline:none;border-color:var(--g)}
+</style>
+
+<div class="root">
+<h2 class="sr-only">AI Wisdom Assistant — ถามดวงชะตา 6 หมวด</h2>
+
+<div class="hdr">
+  <div class="hdr-icon" aria-hidden="true"><i class="ti ti-sparkles"></i></div>
+  <div>
+    <div class="hdr-t">AI WISDOM ASSISTANT</div>
+    <div class="hdr-s">ถามดวงชะตาด้วยปัญญาประดิษฐ์ · ยามอัฐกาล · เลข ๗ ตัว</div>
+  </div>
+</div>
+
+<div class="birth-row">
+  <input type="date" id="dob" title="วันเกิด" placeholder="วันเกิด"/>
+  <input type="text" id="uname" placeholder="ชื่อ (ไม่บังคับ)" title="ชื่อ" style="flex:1.4"/>
+</div>
+
+<div class="cat-scroll" role="tablist" aria-label="เลือกหมวด">
+  <button class="cat-tab on" data-cat="overview" onclick="switchCat(this)" role="tab">🌟 ภาพรวม</button>
+  <button class="cat-tab" data-cat="career" onclick="switchCat(this)" role="tab">💼 การงาน</button>
+  <button class="cat-tab" data-cat="love" onclick="switchCat(this)" role="tab">💛 ความรัก</button>
+  <button class="cat-tab" data-cat="health" onclick="switchCat(this)" role="tab">🌿 สุขภาพ</button>
+  <button class="cat-tab" data-cat="wealth" onclick="switchCat(this)" role="tab">💰 การเงิน</button>
+  <button class="cat-tab" data-cat="travel" onclick="switchCat(this)" role="tab">✈️ การเดินทาง</button>
+  <button class="cat-tab" data-cat="biz" onclick="switchCat(this)" role="tab">🚀 ธุรกิจ</button>
+</div>
+
+<div class="chips-wrap" id="chips" role="listbox" aria-label="คำถามแนะนำ"></div>
+
+<div class="custom-wrap">
+  <textarea class="custom-inp" id="cq" placeholder="หรือพิมพ์คำถามเอง เช่น ช่วงไหนเหมาะเซ็นสัญญา..."></textarea>
+</div>
+
+<button class="ask-btn" id="abtn" onclick="askWisdom()" aria-label="ถามดวงชะตา">
+  <i class="ti ti-wand" aria-hidden="true"></i>
+  <span id="abtn-t">ถามดวงชะตา</span>
+</button>
+
+<div class="res-box" id="resbox" role="region" aria-live="polite">
+  <div class="res-head">
+    <span class="res-tag" id="restag">—</span>
+    <i class="ti ti-sparkles" style="color:var(--g);font-size:13px" aria-hidden="true"></i>
+  </div>
+  <div id="loadd" class="dots" style="display:none"><span></span><span></span><span></span></div>
+  <div class="res-body" id="resbody"></div>
+</div>
+</div>
+
+<script>
+const CATS = {
+  overview:{label:'ภาพรวม',icon:'🌟',chips:[
+    {q:'ช่วงนี้ดวงชีวิตโดยรวมเป็นอย่างไร?',hint:'พลังงาน ปีจร เดือนจร วันนี้'},
+    {q:'ช่วงไหนของปีนี้เป็นจุดพีคที่สุดในชีวิต?',hint:'ยามอัฐกาล + เดือนจรที่ดี'},
+    {q:'สิ่งที่ควรระวังที่สุดในช่วงนี้คืออะไร?',hint:'เลข 7 ตัว + มหาภูติจร'},
+    {q:'ฤกษ์ดีสุดของสัปดาห์นี้คือวันไหน เวลาไหน?',hint:'ยามอัฐกาลรายวัน'},
+  ]},
+  career:{label:'การงาน',icon:'💼',chips:[
+    {q:'เจรจาธุรกิจสำคัญ ควรนัดช่วงไหนถึงสำเร็จ?',hint:'ยามอัฐกาล + ยามเจ้าของวัน'},
+    {q:'จะขอเพิ่มเงินเดือนหรือเลื่อนตำแหน่ง ช่วงนี้เหมาะไหม?',hint:'ปีจร + ทักษา'},
+    {q:'โปรเจกต์ที่ทำอยู่จะสำเร็จได้ผลดีไหม?',hint:'เลข 7 ตัว เจ้าเรือน'},
+    {q:'ควรเปลี่ยนงานตอนนี้หรือรอช่วงไหนดีกว่า?',hint:'วัยจร + เดือนจร'},
+  ]},
+  love:{label:'ความรัก',icon:'💛',chips:[
+    {q:'ช่วงไหนง้อแฟนแล้วหายงอน ยอมคืนดีได้?',hint:'ยามอัฐกาลดาวศุกร์ + วันจร'},
+    {q:'จะสารภาพรักช่วงไหนให้ได้รับการตอบรับดี?',hint:'ยามศุกร์ + มหาภูติจร'},
+    {q:'คนที่คบอยู่ตอนนี้ ดวงสมพงษ์กับเราไหม?',hint:'เลข 7 ตัว + ทักษา'},
+    {q:'ปีนี้มีโอกาสพบรักหรือแต่งงานไหม?',hint:'ปีจร เดือนจร ห้องปัตนิ'},
+  ]},
+  health:{label:'สุขภาพ',icon:'🌿',chips:[
+    {q:'ป่วยอยู่ตอนนี้ ดวงบอกว่าจะหายเร็วไหม?',hint:'ยามอัฐกาล + ห้องมรณะ'},
+    {q:'ช่วงไหนควรระวังสุขภาพเป็นพิเศษ?',hint:'เดือนจร + ดาวเสาร์ผ่าน'},
+    {q:'ผ่าตัดหรือรักษาพยาบาลสำคัญ วันไหนฤกษ์ดี?',hint:'ยามอาทิตย์/พฤหัส'},
+    {q:'พลังงานร่างกายจิตใจช่วงนี้ควรดูแลอะไรก่อน?',hint:'เลข 7 ตัว ฐานอัตตะ'},
+  ]},
+  wealth:{label:'การเงิน',icon:'💰',chips:[
+    {q:'ลงทุนหรือซื้อของมูลค่าสูง ช่วงไหนดีที่สุด?',hint:'ยามพฤหัส + ปีจรธนัง'},
+    {q:'ช่วงนี้ดวงการเงินเป็นอย่างไร มีเงินเข้ามาไหม?',hint:'เดือนจร + เลข 7 ตัว'},
+    {q:'กู้เงินหรือลงนามสัญญาการเงิน วันไหนเหมาะ?',hint:'ยามอัฐกาล + ฤกษ์ดี'},
+    {q:'โชคลาภหรือเงินก้อนใหญ่ ปีนี้มีโอกาสไหม?',hint:'ปีจร + มหาภูติจรโภคา'},
+  ]},
+  travel:{label:'การเดินทาง',icon:'✈️',chips:[
+    {q:'จะเดินทางต่างจังหวัด/ต่างประเทศ เวลาไหนดี?',hint:'ยามอัฐกาล + ทิศมงคล'},
+    {q:'เดินทางสัปดาห์นี้ ควรออกเดินทางวันไหน เวลาไหน?',hint:'ยามวันจร + ดาวพุธ'},
+    {q:'การเดินทางครั้งนี้จะราบรื่นหรือมีอุปสรรค?',hint:'เลข 7 ตัว + มหาภูติจร'},
+    {q:'ย้ายบ้าน/ย้ายที่ทำงาน ฤกษ์ไหนเหมาะที่สุด?',hint:'ยามอาทิตย์ + ทักษา'},
+  ]},
+  biz:{label:'ธุรกิจ',icon:'🚀',chips:[
+    {q:'จะเปิดธุรกิจใหม่ ควรเริ่มต้นช่วงไหนดีที่สุด?',hint:'ยามพฤหัส + ปีจรลาภ'},
+    {q:'จดทะเบียนบริษัทหรือเซ็นสัญญาใหญ่ วันไหนฤกษ์ดี?',hint:'ยามอัฐกาลมงคล'},
+    {q:'พาร์ทเนอร์ที่จะร่วมทำธุรกิจ ดวงเข้ากันไหม?',hint:'เลข 7 ตัว + ทักษาสัมพันธ์'},
+    {q:'ธุรกิจที่ทำอยู่ตอนนี้จะเติบโตหรือควรปรับทิศทาง?',hint:'วัยจร + เดือนจรปัจจุบัน'},
+  ]},
+};
+
+let curCat='overview', curQ='', busy=false;
+
+function switchCat(btn){
+  if(busy)return;
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  curCat=btn.dataset.cat;
+  curQ='';
+  renderChips();
+  document.getElementById('cq').value='';
+}
+
+function renderChips(){
+  const data=CATS[curCat];
+  const wrap=document.getElementById('chips');
+  wrap.innerHTML=data.chips.map((c,i)=>`
+    <button class="chip${curQ===c.q?' on':''}" onclick="pickChip(${i})" role="option" aria-selected="${curQ===c.q}">
+      <span class="chip-ico" aria-hidden="true">${data.icon}</span>
+      <span class="chip-txt">${c.q}<span class="chip-sub">${c.hint}</span></span>
+    </button>`).join('');
+  wrap.querySelectorAll('.chip').forEach(c=>{
+    c.style.borderColor=c.classList.contains('on')?'var(--bda)':'var(--bd)';
+    c.style.background=c.classList.contains('on')?'var(--g3)':'var(--g2)';
+  });
+}
+
+function pickChip(i){
+  if(busy)return;
+  const q=CATS[curCat].chips[i].q;
+  curQ=q;
+  document.getElementById('cq').value=q;
+  renderChips();
+}
+
+async function askWisdom(){
+  if(busy)return;
+  const q=(document.getElementById('cq').value||'').trim();
+  if(!q){document.getElementById('cq').focus();return;}
+  const dob=document.getElementById('dob').value;
+  const nm=(document.getElementById('uname').value||'').trim();
+  const cat=CATS[curCat];
+
+  busy=true;
+  const btn=document.getElementById('abtn');
+  btn.disabled=true;
+  document.getElementById('abtn-t').textContent='กำลังอ่านดวง...';
+
+  const rb=document.getElementById('resbox');
+  const rt=document.getElementById('restag');
+  const ld=document.getElementById('loadd');
+  const body=document.getElementById('resbody');
+
+  rb.classList.add('show');
+  rt.textContent=cat.icon+' '+cat.label+' · AI Wisdom';
+  body.innerHTML='';
+  ld.style.display='flex';
+
+  const dobStr=dob?`วันเกิด: ${new Date(dob+'T12:00:00').toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'})}`:'(ไม่ระบุวันเกิด)';
+  const nameStr=nm?`ชื่อ: ${nm}`:'(ไม่ระบุชื่อ)';
+
+  const sysPrompt=`คุณคือผู้เชี่ยวชาญโหราศาสตร์ไทยระดับสูง ที่ผสานความรู้ด้าน:
+• ยามอัฐกาล (โหรทายหนู) — ดาว 7 ดวง วนทุก 8 ยามใหญ่ 64 ยามย่อย
+• เลข 7 ตัว 9 ฐาน — เลขวัน เลขเดือน เลขปีนักษัตร
+• ทักษา — กำลังดาวประจำวัน 1–8
+• มหาภูติจร — ธาตุหลักที่จรผ่านในช่วงเวลา
+• ระบบจร — ปีจร เดือนจร วันจร วัยจร
+• 7 เรือน — อัตตะ หินะ ธนัง ปิตา มาตา โภคา มัชฌิมา
+
+ตอบเป็นภาษาไทยที่อบอุ่น ลึกซึ้ง ให้กำลังใจ พร้อมระบุช่วงเวลาที่ชัดเจน หลีกเลี่ยงคำฟุ่มเฟือย ความยาว 200-300 คำ`;
+
+  const userMsg=`${nameStr} | ${dobStr}
+
+คำถาม (หมวด${cat.label}): ${q}
+
+กรุณาวิเคราะห์โดยอ้างอิงหลักยามอัฐกาล, เลข 7 ตัว 9 ฐาน, ทักษา, มหาภูติจร, ปีจร/เดือนจร/วันจร ที่เกี่ยวข้อง และให้คำแนะนำเชิงปฏิบัติ`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        stream:true,
+        system:sysPrompt,
+        messages:[{role:'user',content:userMsg}]
+      })
+    });
+    ld.style.display='none';
+    if(!res.ok)throw new Error('API '+res.status);
+    const rdr=res.body.getReader();
+    const dec=new TextDecoder();
+    let buf='';
+    const cur=document.createElement('span');
+    cur.className='blink';
+    body.appendChild(cur);
+    while(true){
+      const{done,value}=await rdr.read();
+      if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');
+      buf=lines.pop();
+      for(const ln of lines){
+        if(!ln.startsWith('data: '))continue;
+        const d=ln.slice(6).trim();
+        if(d==='[DONE]')continue;
+        try{
+          const p=JSON.parse(d);
+          const t=p?.delta?.text||'';
+          if(t)cur.insertAdjacentText('beforebegin',t);
+        }catch{}
+      }
+    }
+    cur.remove();
+  }catch(e){
+    ld.style.display='none';
+    body.textContent='⚠️ เกิดข้อผิดพลาด กรุณาลองใหม่';
+  }
+  busy=false;
+  btn.disabled=false;
+  document.getElementById('abtn-t').textContent='ถามอีกครั้ง ↗';
+}
+
+renderChips();
+</script>

@@ -40,46 +40,46 @@ export default function CoachPage() {
 
   const promptChips: Record<string, { text: string; context: string }[]> = {
     all: [
-      { text: "ช่วงนี้ดวงชีวิตโดยรวมเป็นอย่างไร?", context: "วิเคราะห์พลังงาน ปีจร เดือนจร และวันจรปัจจุบัน" },
-      { text: "ช่วงไหนของปีนี้เป็นจุดพีคที่สุดในชีวิต?", context: "วิเคราะห์ยามอัฐกาลและเดือนจรที่ดีที่สุด" },
-      { text: "สิ่งที่ควรระวังที่สุดในช่วงนี้คืออะไร?", context: "วิเคราะห์เลข 7 ตัว และมหาภูติจร" },
-      { text: "ฤกษ์ดีสุดของสัปดาห์นี้คือวันไหน เวลาไหน?", context: "วิเคราะห์ยามอัฐกาลรายวัน" },
+      { text: "วันนี้ยามไหนเสวยอยู่? พลังงานโดยรวมเป็นอย่างไร?", context: "วิเคราะห์ยามอัฐกาลปัจจุบัน + พลังงานปีจร เดือนจร" },
+      { text: "สัปดาห์นี้วันไหนเป็นจุดพีคของผม?", context: "วิเคราะห์ยามอัฐกาลรายวัน 7 วันข้างหน้า" },
+      { text: "ช่วงเวลาไหนของวันนี้ทำเรื่องสำคัญให้เป็นการดี?", context: "วิเคราะห์ยามมงคลและยามไม่มงคลประจำวัน" },
+      { text: "อีก 3 วันข้างหน้าดวงจะเป็นอย่างไร?", context: "วิเคราะห์ยามอัฐกาลรายวัน + เดือนจร" },
     ],
     work: [
-      { text: "เจรจาธุรกิจสำคัญ ควรนัดช่วงไหนถึงสำเร็จ?", context: "วิเคราะห์ยามอัฐกาล และยามเจ้าของวัน" },
-      { text: "จะขอเพิ่มเงินเดือนหรือเลื่อนตำแหน่ง ช่วงนี้เหมาะไหม?", context: "วิเคราะห์ปีจร และทักษา" },
-      { text: "โปรเจกต์ที่ทำอยู่จะสำเร็จได้ผลดีไหม?", context: "วิเคราะห์เลข 7 ตัว เจ้าเรือนกรรมะ" },
-      { text: "ควรเปลี่ยนงานตอนนี้หรือรอช่วงไหนดีกว่า?", context: "วิเคราะห์วัยจร และเดือนจร" },
+      { text: "วันนี้ยามไหนเหมาะเจรจาธุรกิจที่สุด?", context: "วิเคราะห์ยามอัฐกาลปัจจุบัน + ยามเจ้าของวัน" },
+      { text: "สัปดาห์นี้วันไหนเหมาะขอเพิ่มเงินเดือน/เลื่อนตำแหน่ง?", context: "วิเคราะห์ยามอัฐกาลรายวัน + ปีจรและทักษา" },
+      { text: "เสนองานสำคัญช่วงไหนของสัปดาห์นี้ดีที่สุด?", context: "วิเคราะห์ยามครึ่งวัน/ครึ่งคืน + เลข 7 ตัว เจ้าเรือนกรรมะ" },
+      { text: "ควรเปลี่ยนงานสัปดาห์นี้หรือรอช่วงไหนดีกว่า?", context: "วิเคราะห์วัยจร + เดือนจร" },
     ],
     love: [
-      { text: "ช่วงไหนง้อแฟนแล้วหายงอน ยอมคืนดีได้?", context: "วิเคราะห์ยามอัฐกาลดาวศุกร์ และวันจร" },
-      { text: "จะสารภาพรักช่วงไหนให้ได้รับการตอบรับดี?", context: "วิเคราะห์ยามศุกร์ และมหาภูติจร" },
-      { text: "คนที่คบอยู่ตอนนี้ ดวงสมพงษ์กับเราไหม?", context: "วิเคราะห์เลข 7 ตัว และทักษาสัมพันธ์" },
-      { text: "ปีนี้มีโอกาสพบรักหรือแต่งงานไหม?", context: "วิเคราะห์ปีจร เดือนจร และห้องปัตนิ" },
+      { text: "วันนี้ยามไหนดีที่สุดในเรื่องความรัก?", context: "วิเคราะห์ยามอัฐกาลดาวศุกร์ + วันจร" },
+      { text: "สัปดาห์นี้ไปวันไหนโอกาสเจอคนใหม่มากที่สุด?", context: "วิเคราะห์ยามศุกร์ + มหาภูติจร" },
+      { text: "คืนดีแฟนควรง้อช่วงเวลาไหนของวันนี้?", context: "วิเคราะห์ยามอัฐกาล + ยามย่อยที่เอื้อ" },
+      { text: "สัปดาห์นี้มีโอกาสพบรักหรือแต่งงานไหม?", context: "วิเคราะห์ปีจร เดือนจร และห้องปัตนี" },
     ],
     health: [
-      { text: "ป่วยอยู่ตอนนี้ ดวงบอกว่าจะหายเร็วไหม?", context: "วิเคราะห์ยามอัฐกาล และห้องมรณะ" },
-      { text: "ช่วงไหนควรระวังสุขภาพเป็นพิเศษ?", context: "วิเคราะห์เดือนจร และดาวเสาร์จร" },
-      { text: "ผ่าตัดหรือรักษาพยาบาลสำคัญ วันไหนฤกษ์ดี?", context: "วิเคราะห์ยามอาทิตย์และพฤหัสบดี" },
-      { text: "พลังงานร่างกายจิตใจช่วงนี้ควรดูแลอะไรก่อน?", context: "วิเคราะห์เลข 7 ตัว ฐานอัตตะ" },
+      { text: "ช่วงเวลาไหนของวันนี้ควรรักษาสุขภาพเป็นพิเศษ?", context: "วิเคราะห์ยามอัฐกาล + ห้องมรณะ" },
+      { text: "สัปดาห์นี้ควรระวังสุขภาพวันไหนเป็นพิเศษ?", context: "วิเคราะห์เดือนจร + ดาวเสาร์จร" },
+      { text: "ผ่าตัดหรือรักษาพยาบาลสำคัญ วันไหนยามไหนควรนัด?", context: "วิเคราะห์ยามอาทิตย์และพฤหัสบดี" },
+      { text: "สัปดาห์นี้พลังงานร่างกายจิตใจควรดูแลอะไรก่อน?", context: "วิเคราะห์เลข 7 ตัว ฐานอัตตะ" },
     ],
     finance: [
-      { text: "ลงทุนหรือซื้อของมูลค่าสูง ช่วงไหนดีที่สุด?", context: "วิเคราะห์ยามพฤหัสบดี และปีจรธนัง" },
-      { text: "ช่วงนี้ดวงการเงินเป็นอย่างไร มีเงินเข้ามาไหม?", context: "วิเคราะห์เดือนจร และเลข 7 ตัว" },
-      { text: "กู้เงินหรือลงนามสัญญาการเงิน วันไหนเหมาะ?", context: "วิเคราะห์ยามอัฐกาล และฤกษ์มงคล" },
-      { text: "โชคลาภหรือเงินก้อนใหญ่ ปีนี้มีโอกาสไหม?", context: "วิเคราะห์ปีจร และมหาภูติจรโภคา" },
+      { text: "วันนี้เหมาะลงทุนหรือซื้อของมูลค่าสูงไหม?", context: "วิเคราะห์ยามพฤหัสบดี + ปีจรธนัง" },
+      { text: "สัปดาห์นี้ดวงการเงินเป็นอย่างไร มีเงินเข้ามาไหม?", context: "วิเคราะห์เดือนจร + เลข 7 ตัว" },
+      { text: "กู้เงินหรือลงนามสัญญาการเงิน วันไหนเหมาะ?", context: "วิเคราะห์ยามอัฐกาล + ฤกษ์มงคล" },
+      { text: "โชคลาภหรือเงินก้อนใหญ่ สัปดาห์นี้มีโอกาสไหม?", context: "วิเคราะห์ปีจร + มหาภูติจรโภคา" },
     ],
     travel: [
-      { text: "จะเดินทางต่างจังหวัด/ต่างประเทศ เวลาไหนดี?", context: "วิเคราะห์ยามอัฐกาล และทิศมงคล" },
-      { text: "เดินทางสัปดาห์นี้ ควรออกเดินทางวันไหน เวลาไหน?", context: "วิเคราะห์ยามวันจร และดาวพุธ" },
+      { text: "เดินทางสัปดาห์นี้ ควรออกเดินทางวันไหน เวลาไหน?", context: "วิเคราะห์ยามวันจร + ดาวพุธ" },
+      { text: "วันนี้ยามไหนสำหรับการออกเดินทางดีที่สุด?", context: "วิเคราะห์ยามอัฐกาลปัจจุบัน + ทิศมงคล" },
       { text: "การเดินทางครั้งนี้จะราบรื่นหรือมีอุปสรรค?", context: "วิเคราะห์เลข 7 ตัว และมหาภูติจร" },
       { text: "ย้ายบ้าน/ย้ายที่ทำงาน ฤกษ์ไหนเหมาะที่สุด?", context: "วิเคราะห์ยามอาทิตย์ และทักษาสุขภาพ" },
     ],
     business: [
-      { text: "จะเปิดธุรกิจใหม่ ควรเริ่มต้นช่วงไหนดีที่สุด?", context: "วิเคราะห์ยามพฤหัสบดี และปีจรลาภะ" },
-      { text: "จดทะเบียนบริษัทหรือเซ็นสัญญาใหญ่ วันไหนฤกษ์ดี?", context: "วิเคราะห์ยามอัฐกาลมงคล" },
-      { text: "พาร์ทเนอร์ที่จะร่วมทำธุรกิจ ดวงเข้ากันไหม?", context: "วิเคราะห์เลข 7 ตัว และทักษาสัมพันธ์" },
-      { text: "ธุรกิจที่ทำอยู่ตอนนี้จะเติบโตหรือควรปรับทิศทาง?", context: "วิเคราะห์วัยจร และเดือนจรปัจจุบัน" },
+      { text: "สัปดาห์นี้วันไหนเหมาะเปิดตัวธุรกิจใหม่?", context: "วิเคราะห์ยามพฤหัสบดี + ปีจรลาภะ" },
+      { text: "จดทะเบียนบริษัทหรือเซ็นสัญญาใหญ่ วันไหนของสัปดาห์นี้ฤกษ์ดี?", context: "วิเคราะห์ยามอัฐกาลมงคล" },
+      { text: "พาร์ทเนอร์ที่จะร่วมทำธุรกิจ ดวงเข้ากันไหม?", context: "วิเคราะห์เลข 7 ตัว + ทักษาสัมพันธ์" },
+      { text: "ธุรกิจที่ทำอยู่จะเติบโตหรือควรปรับทิศทางสัปดาห์นี้?", context: "วิเคราะห์วัยจร + เดือนจรปัจจุบัน" },
     ],
   };
 
@@ -108,7 +108,7 @@ export default function CoachPage() {
           setMessages([
             {
               role: "assistant",
-              content: `กราบสวัสดีครับคุณ ${prof.full_name} ผม AI Wisdom Coach ยินดีที่ได้ร่วมออกแบบเส้นทางชีวิตไปกับคุณครับ
+              content: `กราบสวัสดีครับคุณ ${prof.full_name} ผม Wisdom Coach ยินดีที่ได้ร่วมออกแบบเส้นทางชีวิตไปกับคุณครับ
 
 หากคุณมีข้อสงสัยหรือต้องการคำแนะนำเชิงกลยุทธ์เกี่ยวกับ "การงาน การเงิน ความรัก สุขภาพ หรือธุรกิจ" สามารถพิมพ์ปรึกษาหรือเลือกใช้ Smart Quick Prompts ด้านล่างเพื่อเจาะลึกข้อมูลดวงชะตาได้ทันทีครับ`
             }
@@ -214,7 +214,7 @@ export default function CoachPage() {
             </Link>
             <div>
               <h1 className="text-xl font-serif font-bold text-gradient-gold tracking-widest flex items-center gap-2">
-                AI WISDOM COACH
+                WISDOM COACH
               </h1>
               <p className="text-xxs text-text-secondary uppercase tracking-[0.2em] hidden sm:block font-bold opacity-70">
                 LIVING WISDOM & ASTROLOGY GUIDANCE
@@ -357,27 +357,29 @@ export default function CoachPage() {
 
           <div className="flex items-center justify-center gap-2 text-xxs text-text-secondary/40 font-bold uppercase tracking-[0.2em] pb-16 sm:pb-0">
             <ShieldCheck className="w-3.5 h-3.5 text-gold-500/50" />
-            <span>Secured by Supabase RLS · AI Wisdom OS</span>
+            <span>Secured by Supabase RLS · Wisdom OS</span>
           </div>
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-hora border-t border-white/10 bg-cosmic-950/85 backdrop-blur-lg flex items-center justify-around py-3 px-2 shadow-[0_-10px_20px_rgba(0,0,0,0.8)] pb-safe">
-        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
-          <Compass className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+      {/* Bottom Navigation — Persistent */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 flex items-stretch shadow-[0_-4px_30px_rgba(0,0,0,0.8)]"
+        style={{ backgroundColor: "rgba(2,6,23,0.97)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", height: "64px" }}>
+        <Link href="/dashboard" className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors" style={{ color: "var(--hora-text-muted)" }}>
+          <span className="text-lg leading-none">◉</span>
           <span className="text-[9px] font-medium tracking-wider">ภาพรวมดวง</span>
         </Link>
-        <Link href="/dashboard/planner" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
-          <Calendar className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+        <Link href="/dashboard/planner" className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors" style={{ color: "var(--hora-text-muted)" }}>
+          <span className="text-lg leading-none">📅</span>
           <span className="text-[9px] font-medium tracking-wider">Planner</span>
         </Link>
-        <Link href="/dashboard/coach" className="flex flex-col items-center gap-1 text-gold-500">
-          <Sparkles className="w-4 h-4 text-gold-500" />
-          <span className="text-[9px] font-bold tracking-wider">AI Coach</span>
+        <Link href="/dashboard/coach" className="flex-1 flex flex-col items-center justify-center gap-1 relative" style={{ background: "linear-gradient(180deg, rgba(217,188,130,0.06) 0%, transparent 100%)" }}>
+          <span className="text-lg leading-none" style={{ color: "var(--hora-gold)", filter: "drop-shadow(0 0 8px rgba(217,188,130,0.6))" }}>✦</span>
+          <span className="text-[9px] font-bold tracking-wider" style={{ color: "var(--hora-gold)" }}>Wisdom Coach</span>
+          <span className="absolute bottom-0 w-8 h-0.5 rounded-t-full" style={{ background: "linear-gradient(90deg, transparent, var(--hora-gold), transparent)" }} />
         </Link>
-        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
-          <Clock className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+        <Link href="/dashboard" className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors" style={{ color: "var(--hora-text-muted)" }}>
+          <span className="text-lg leading-none">🕐</span>
           <span className="text-[9px] font-medium tracking-wider">ยามปัจจุบัน</span>
         </Link>
       </div>

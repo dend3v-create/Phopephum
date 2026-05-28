@@ -12,31 +12,39 @@
  *                               AI Narrative → string
  */
 
-import { calculateBase, calculateMasterBase, calculateYearBase } from '../calculators/calculateBase'
+import { calculateMasterBase } from '../calculators/calculateBase'
 import { calculatePower, getPowerMeaning } from '../calculators/calculatePower'
 import { calculateHouse, getHouseMeaning } from '../calculators/calculateHouse'
 import { calculateTransit, calculateVayaChorn, calculateTaksa } from '../calculators/calculateTransit'
 import { calculateAtthakarn } from '../calculators/calculateAtthakarn'
 import { calculateNavamsa } from '../calculators/calculateNavamsa'
 import { applyRules } from '../rules/sevenBaseRules'
-import { HoroscopeInput, HoroscopeData, HoroscopeResult } from '../types/horoscope'
+import { HoroscopeInput, HoroscopeData } from '../types/horoscope'
 // ── New modules (lunar-based + ephemeris) ──────────────────────────────────────
 import { getThaiLunarDate } from '../core/lunarCalendar'
-import { getProvinceCoords, getProvinceLatLng } from '../core/geoLocation'
-import { convertBirthTime } from '../core/astroTime'
-import { calculateSevenBaseFull } from '../calculators/sevenBase'
-import { calculateNineBaseFull } from '../calculators/nineBase'
-import { calculateTaksa as calculateTaksa8, getCurrentTaksa } from '../calculators/taksa'
+import { 
+  r7, 
+  genBase1to3, 
+  genBase4, 
+  genBase5, 
+  genBase6, 
+  genBase7, 
+  genBase8, 
+  genBase9,
+  HOUSE_NAMES_THAI,
+  HOUSE_NAMES_PALI
+} from '@/engine/seven-numbers'
 import { calculateAgeCycle } from '../calculators/ageCycle'
 import { buildEmperorChart } from '../calculators/emperorChart'
-import { buildBirthChart } from './chartBuilder'
 
 const DAY_NAMES_THAI = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์']
 const ZODIAC_YEARS = ['ชวด', 'ฉลู', 'ขาล', 'เถาะ', 'มะโรง', 'มะเส็ง', 'มะเมีย', 'มะแม', 'วอก', 'ระกา', 'จอ', 'กุน']
 
+const HOUSE_NAMES_ROW3 = ["มรณะ", "สุภะ", "กัมมะ", "ลาภะ", "พยายะ", "ทาสา", "ทาสี"]
+
 export async function horoscopeEngine(
   input: HoroscopeInput & { province?: string }
-): Promise<Omit<HoroscopeResult, 'ragContext' | 'prediction'> & Record<string, unknown>> {
+): Promise<any> {
   const birth = new Date(input.birthDate)
 
   const day   = birth.getDate()
@@ -44,25 +52,44 @@ export async function horoscopeEngine(
   const year  = birth.getFullYear()
   const dayOfWeek = birth.getDay() // 0=อาทิตย์
 
-  // ─── Core Calculations ─────────────────────────────────────────────────
+  // ─── Lunar Data ────────────────────────────────────────────────────────
+  const lunar = getThaiLunarDate(input.birthDate)
+  const dNum = (dayOfWeek === 0 ? 7 : dayOfWeek)
+  const mNum = lunar.lunarMonth > 7 ? lunar.lunarMonth - 7 : lunar.lunarMonth
+  const yNum = (lunar.lunarYear % 7) || 7 // Simplified for now
+
+  // ─── Core Calculations (Full Matrix) ───────────────────────────────────
+  const b1 = genBase1to3(dNum)
+  const b2 = genBase1to3(mNum)
+  const b3 = genBase1to3(yNum)
+  const b4 = genBase4(b1, b2, b3)
+  const b5 = genBase5(b4)
+  const b6 = genBase6(b5)
+  const b7 = genBase7(b6)
+  const b8 = genBase8(b5[0])
+  const b9 = genBase9(b5[0])
+
+  const matrix = {
+    row1: { name: "ฐานวัน", houses: HOUSE_NAMES_THAI, values: b1 },
+    row2: { name: "ฐานเดือน", houses: HOUSE_NAMES_PALI, values: b2 },
+    row3: { name: "ฐานปี", houses: HOUSE_NAMES_ROW3, values: b3 },
+    row4: { name: "ฐานรวมกำลัง", values: b4 },
+    row5: { name: "ฐานสรุปพลัง", values: b5 },
+    row6: { name: "ฐาน Solution 1", values: b6 },
+    row7: { name: "ฐาน Solution 2", values: b7 },
+    row8: { name: "อาตมา", values: b8 },
+    row9: { name: "ภริยัง", values: b9 },
+  }
+
+  // ─── Other Calculations ────────────────────────────────────────────────
   const base    = calculateMasterBase(day, month, year)
-  const dayBase = calculateBase(day)
-  const monBase = calculateBase(month)
-  const yearBase = calculateYearBase(year)
-  const power   = calculatePower([dayBase, monBase, yearBase, base])
-
-  const house      = calculateHouse(base)
-  void getHouseMeaning(base) // for future use
-  const transit    = calculateTransit(month)
-  const vayaChorn  = calculateVayaChorn(input.birthDate)
-  const taksa      = calculateTaksa(dayOfWeek, base)
-  const zodiacYear = ZODIAC_YEARS[year % 12]
-
-  // ─── อัฏฐกาล + นวางค์ ────────────────────────────────────────────────────
-  const atthakarn = input.birthTime
-    ? calculateAtthakarn(input.birthDate, input.birthTime)
-    : undefined
+  const power   = calculatePower([b1[0], b2[0], b3[0], base])
+  const house   = calculateHouse(base)
+  const transit = calculateTransit(month)
+  const vayaChorn = calculateVayaChorn(input.birthDate)
+  const taksa   = calculateTaksa(dayOfWeek, base)
   const navamsa = calculateNavamsa(day, month, year)
+  const atthakarn = input.birthTime ? calculateAtthakarn(input.birthDate, input.birthTime) : undefined
 
   const data: HoroscopeData = {
     base,
@@ -71,57 +98,31 @@ export async function horoscopeEngine(
     transit,
     dayOfWeek,
     dayName: DAY_NAMES_THAI[dayOfWeek],
-    zodiacYear,
+    zodiacYear: ZODIAC_YEARS[year % 12],
     vayaChorn,
     taksa,
     atthakarn,
     navamsa,
   }
 
-  // ─── Rule Engine ───────────────────────────────────────────────────────
   const rules = applyRules(data)
 
-  // ─── Lunar + Ephemeris Layer (เพิ่มเติม) ──────────────────────────────
-  const lunar          = getThaiLunarDate(input.birthDate)
-  const astroTime      = input.birthTime ? convertBirthTime(input.birthTime) : null
-  const sevenBase      = calculateSevenBaseFull(lunar.lunarDay, lunar.lunarMonth, lunar.lunarYear)
-  const nineBase       = calculateNineBaseFull([sevenBase.dayBase, sevenBase.monthBase, sevenBase.yearBase])
-  const taksa8         = calculateTaksa8(dayOfWeek)
-  const currentTaksa8  = getCurrentTaksa(dayOfWeek)
-  const ageCycle       = calculateAgeCycle(birth.getFullYear())
-  const emperorChart   = buildEmperorChart(
-    [sevenBase.dayBase, sevenBase.monthBase, sevenBase.yearBase],
-    nineBase.bases,
-    taksa8,
-  )
-
-  // Province + BirthChart (optional — ต้องมี province)
-  const province    = (input as HoroscopeInput & { province?: string }).province
-  const coords      = province ? getProvinceCoords(province) : null
-  const birthChart  = (province && input.birthTime)
-    ? await buildBirthChart(
-        input.birthDate,
-        input.birthTime,
-        coords!.lat,
-        coords!.lng,
-      ).catch(() => null)
-    : null
+  // เตรียม Taksa List สำหรับ Emperor Chart
+  const taksaNames = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี']
+  const taksaList = taksaNames.map((_, i) => taksaNames[(taksa.position - 1 + i) % 8]!)
 
   return {
     input,
     data,
+    matrix,
     rules,
-    // Extended lunar layer
     lunar,
-    astroTime,
-    sevenBase,
-    nineBase,
-    taksa8,
-    currentTaksa8,
-    ageCycle,
-    emperorChart,
-    coordinates: coords ? { lat: coords.lat, lng: coords.lng, province: coords.province } : null,
-    birthChart,
+    ageCycle: calculateAgeCycle(birth.getFullYear()),
+    emperorChart: buildEmperorChart(
+      [b1[0], b2[0], b3[0]],
+      [b5[0], b6[0], b7[0]],
+      taksaList
+    )
   }
 }
 

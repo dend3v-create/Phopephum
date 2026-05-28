@@ -3,7 +3,11 @@
     "allow": [
       "Bash(npm run:*)",
       "Bash(npm install:*)",
-      "Bash(node -e \"require\\('./.next/server/app/dashboard/page_client-reference-manifest.js'\\)\")"
+      "Bash(node -e \"require\\('./.next/server/app/dashboard/page_client-reference-manifest.js'\\)\")",
+      "Bash(npx tsc:*)",
+      "Bash(npx tsx -e ':*)",
+      "Bash(npx tsx --tsconfig tsconfig.json -e ':*)",
+      "Bash(node -e ':*)"
     ]
   }
 }

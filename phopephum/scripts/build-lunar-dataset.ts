@@ -1,58 +1,146 @@
 /**
- * thaiLunar.ts — Thai Lunar Calendar Engine v3
+ * build-lunar-dataset.ts
  *
- * แปลงวันที่สากล (Gregorian) → วันที่จันทรคติไทย
+ * Thai Lunar Calendar Dataset Builder
+ * สร้าง Lookup Table วันขึ้น 1 ค่ำ ของทุกเดือนจันทรคติไทย
+ * ครอบคลุม CE 1757–2157 (พ.ศ. 2300–2700)
  *
- * ✅ ใช้ Meeus astronomical algorithm
- * ✅ Lookup table สำหรับปีที่ verified แล้ว (fallback)
- * ✅ รองรับ intercalary month (เดือนแปดสอง/อธิกมาส)
- * ✅ Zodiac year cutoff ถูกต้อง: เปลี่ยนที่ ขึ้น 1 ค่ำ เดือน 5
- *    (ไม่ใช่ 1 ม.ค. หรือ 13 เม.ย.)
+ * Run: npx tsx scripts/build-lunar-dataset.ts
+ *
+ * Output: src/lib/astrology/datasets/lunarLookup.ts
+ *
+ * Data sources:
+ *  - CE 1957–2028: Verified data from thaiLunar.ts (traditional Thai calculation)
+ *    * CE 1957–2028 entries are copied verbatim from the authoritative table
+ *    * "1973-10a" (intercalary month 10 of Thai year 1973) normalized to "1973-88"
+ *
+ *  - CE 1757–1956, 2029–2157: Meeus Ch.49 astronomical algorithm (approximate)
+ *    * Algorithm accuracy: ±1–4 days vs traditional Thai calendar
+ *    * Some intercalary years may be shifted ±1 year (see note below)
+ *
+ * Algorithm for extended range (non-verified years):
+ *   For CE year Y:
+ *   1. Compute all new moons in CE year Y (Bangkok UTC+7)
+ *   2. janCount = count of moons in January of CE year Y
+ *   3. n = total moon count
+ *
+ *   Case A (n >= 13, janCount >= 2):
+ *     Thai year Y is NORMAL (12 months).
+ *     moon[0] (early Jan 1–3) belongs to Thai year Y-1 as เดือน 12.
+ *     Thai year Y uses moons[1..12].
+ *
+ *   Case B (n >= 13, janCount == 1):
+ *     Thai year Y is INTERCALARY (13 months = อธิกมาส).
+ *     Thai year Y uses all moons[0..12].
+ *     Month sequence: 1,2,3,4,5,6,7,8,88,9,10,11,12
+ *     (เดือน 88 = เดือนแปดสอง, default position between เดือน 8 and เดือน 9)
+ *
+ *   Case C (n == 12):
+ *     Thai year Y is NORMAL (12 months).
+ *     Thai year Y uses moons[0..11].
+ *
+ * Known limitation:
+ *   The traditional Thai calendar sometimes has intercalary years where
+ *   CE year Y has only 12 Meeus-computed moons but Thai year Y is intercalary
+ *   (with เดือน 12 borrowing from January of CE year Y+1). This case is not
+ *   detected by the extended-range algorithm (CE years outside 1957–2028).
+ *   Affected pairs: e.g., Thai 1958/1959, 1968/1969, 1977/1978, etc.
+ *   For these years, use the verified data (covered by CE 1957–2028 range).
  */
 
-import { newMoonsInYear, nextNewMoonAfter } from "./newMoon";
-import { LUNAR_LOOKUP_EXTENDED } from "../datasets/lunarLookup";
+// ─── Inline Meeus New Moon Engine (no external imports) ─────────────────────
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────────────────────────────────────
+const DEG = Math.PI / 180;
+const J2000_UNIX_MS = 946728000000;
+const J2000_JDE     = 2451545.0;
+const MEAN_LUNATION = 29.530588861;
 
-export interface ThaiLunarResult {
-  /** เดือนไทย 1–12, หรือ 88 สำหรับ เดือนแปดสอง (อธิกมาส) */
-  thaiMonth: number;
-  thaiMonthName: string;
-  /** ข้างขึ้น = true, ข้างแรม = false */
-  isWaxing: boolean;
-  /** วันที่ 1–15 (ขึ้น) หรือ 1–14/15 (แรม) */
-  lunarDay: number;
-  /** เช่น "ขึ้น 3 ค่ำ" */
-  moonPhaseText: string;
-  /** เลขเดือน 1–7 สำหรับคำนวณฐาน */
-  monthNumber: number;
-  /** วันที่เริ่มต้นของเดือนนี้ (ขึ้น 1 ค่ำ) */
-  monthStart: Date;
-  /** เป็น exact (lookup) หรือ astronomical (computed) */
-  source: "lookup" | "astronomical";
+function r(d: number): number { return d * DEG; }
+
+function newMoonJDE(k: number): number {
+  const T  = k / 1236.85;
+  const T2 = T * T;
+  const T3 = T2 * T;
+  const T4 = T3 * T;
+  let JDE = 2451550.09766
+    + MEAN_LUNATION * k
+    + 0.00015437 * T2
+    - 0.000000150 * T3
+    + 0.00000000073 * T4;
+  const M  = r(2.5534    + 29.10535670  * k - 0.0000014  * T2 - 0.00000011 * T3);
+  const Mp = r(201.5643  + 385.81693528 * k + 0.0107582  * T2 + 0.00001238 * T3 - 0.000000058 * T4);
+  const F  = r(160.7108  + 390.67050284 * k - 0.0016118  * T2 - 0.00000227 * T3 + 0.000000011 * T4);
+  const Om = r(124.7746  - 1.56375588   * k + 0.0020672  * T2 + 0.00000215 * T3);
+  const E  = 1 - 0.002516 * T - 0.0000074 * T2;
+  JDE +=
+    - 0.40720 * Math.sin(Mp)
+    + 0.17241 * E * Math.sin(M)
+    + 0.01608 * Math.sin(2 * Mp)
+    + 0.01039 * Math.sin(2 * F)
+    + 0.00739 * E * Math.sin(Mp - M)
+    - 0.00514 * E * Math.sin(Mp + M)
+    + 0.00208 * E * E * Math.sin(2 * M)
+    - 0.00111 * Math.sin(Mp - 2 * F)
+    - 0.00057 * Math.sin(Mp + 2 * F)
+    + 0.00056 * E * Math.sin(2 * Mp + M)
+    - 0.00042 * Math.sin(3 * Mp)
+    + 0.00042 * E * Math.sin(M + 2 * F)
+    + 0.00038 * E * Math.sin(M - 2 * F)
+    - 0.00024 * E * Math.sin(2 * Mp - M)
+    - 0.00017 * Math.sin(Om)
+    - 0.00007 * Math.sin(Mp + 2 * M)
+    + 0.00004 * Math.sin(2 * Mp - 2 * F)
+    + 0.00004 * Math.sin(3 * M)
+    + 0.00003 * Math.sin(Mp + M - 2 * F)
+    + 0.00003 * Math.sin(2 * Mp + 2 * F)
+    - 0.00003 * Math.sin(Mp + M + 2 * F)
+    + 0.00003 * Math.sin(Mp - M + 2 * F)
+    - 0.00002 * Math.sin(Mp - M - 2 * F)
+    - 0.00002 * Math.sin(3 * Mp + M)
+    + 0.00002 * Math.sin(4 * Mp);
+  return JDE;
 }
 
-export interface ZodiacYearResult {
-  /** ปี พ.ศ. ตามปีนักษัตรไทย (เปลี่ยนที่เดือน 5) */
-  thaiYear: number;
-  /** ชื่อปีนักษัตร เช่น "จอ" */
-  zodiacName: string;
-  /** เลขปีนักษัตร 1–7 */
-  zodiacNumber: number;
-  /** วันที่เปลี่ยนปีนักษัตรของปีนั้น (ขึ้น 1 ค่ำ เดือน 5) */
-  yearStart: Date;
+function jdeToUnixMs(jde: number): number {
+  return J2000_UNIX_MS + (jde - J2000_JDE) * 86400000;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Lookup Table — ขึ้น 1 ค่ำ ของแต่ละเดือนไทย (verified จาก primary sources)
-// Key: "ceYear-thaiMonth" → ISO date string
-// ─────────────────────────────────────────────────────────────────────────────
+/** BKK date for a UTC ms value (UTC+7) */
+function bkkDate(utcMs: number): { y: number; m: number; d: number } {
+  const dt = new Date(utcMs + 7 * 3600000);
+  return { y: dt.getUTCFullYear(), m: dt.getUTCMonth() + 1, d: dt.getUTCDate() };
+}
 
-const LUNAR_MONTH_STARTS: Record<string, string> = {
-  // ── พ.ศ. 2500–2503 (CE 1957–1960) ──────────────────────────────────────
+function pad2(n: number): string { return String(n).padStart(2, '0'); }
+function isoDate(y: number, m: number, d: number): string {
+  return `${y}-${pad2(m)}-${pad2(d)}`;
+}
+function isoDateFromBkk(b: { y: number; m: number; d: number }): string {
+  return isoDate(b.y, b.m, b.d);
+}
+
+/** All new moons (BKK date) in CE year ceYear */
+function newMoonsInYear(ceYear: number): { y: number; m: number; d: number }[] {
+  const kApprox = Math.floor((ceYear - 2000) * 12.3685) - 1;
+  const results: { y: number; m: number; d: number }[] = [];
+  for (let dk = 0; dk <= 15; dk++) {
+    const k = kApprox + dk;
+    const jde = newMoonJDE(k);
+    const utcMs = jdeToUnixMs(jde);
+    const bkk = bkkDate(utcMs);
+    if (bkk.y === ceYear) results.push(bkk);
+  }
+  results.sort((a, b) => (a.m - b.m) || (a.d - b.d));
+  return results;
+}
+
+// ─── Verified Data 1957–2028 ─────────────────────────────────────────────────
+// Copied verbatim from src/lib/astrology/core/thaiLunar.ts LUNAR_MONTH_STARTS
+// Normalization: "1973-10a" (intercalary เดือน 10 of Thai year 1973) → "1973-88"
+// The downstream lookup code iterates over month keys [..., 88, ...] only.
+
+const VERIFIED_1957_2028: Record<string, string> = {
+  // ── CE 1957–1960 ──────────────────────────────────────────────────────────
   "1957-1":"1957-01-28","1957-2":"1957-02-26","1957-3":"1957-03-27","1957-4":"1957-04-26",
   "1957-5":"1957-05-25","1957-6":"1957-06-24","1957-7":"1957-07-23","1957-8":"1957-08-22",
   "1957-9":"1957-09-20","1957-10":"1957-10-20","1957-11":"1957-11-18","1957-12":"1957-12-18",
@@ -124,9 +212,10 @@ const LUNAR_MONTH_STARTS: Record<string, string> = {
   "1972-5":"1972-05-11","1972-6":"1972-06-10","1972-7":"1972-07-09","1972-8":"1972-08-07",
   "1972-9":"1972-09-06","1972-10":"1972-10-05","1972-11":"1972-11-04","1972-12":"1972-12-03",
 
+  // 1973: intercalary month was originally keyed "1973-10a" — normalized to "1973-88"
   "1973-1":"1973-01-02","1973-2":"1973-02-01","1973-3":"1973-03-02","1973-4":"1973-04-01",
   "1973-5":"1973-04-30","1973-6":"1973-05-30","1973-7":"1973-06-28","1973-8":"1973-07-28",
-  "1973-9":"1973-08-26","1973-10":"1973-09-25","1973-10a":"1973-10-24","1973-11":"1973-11-23",
+  "1973-9":"1973-08-26","1973-10":"1973-09-25","1973-88":"1973-10-24","1973-11":"1973-11-23",
   "1973-12":"1973-12-22",
 
   "1974-1":"1974-01-21","1974-2":"1974-02-19","1974-3":"1974-03-20","1974-4":"1974-04-19",
@@ -334,7 +423,7 @@ const LUNAR_MONTH_STARTS: Record<string, string> = {
   "2019-5":"2019-05-05","2019-6":"2019-06-03","2019-7":"2019-07-02","2019-8":"2019-08-01",
   "2019-9":"2019-08-30","2019-10":"2019-09-29","2019-11":"2019-10-28","2019-12":"2019-11-26",
 
-  // ── CE 2020–2026 ──────────────────────────────────────────────────────────
+  // ── CE 2020–2028 ──────────────────────────────────────────────────────────
   "2020-1":"2020-01-25","2020-2":"2020-02-23","2020-3":"2020-03-24","2020-4":"2020-04-23",
   "2020-5":"2020-05-22","2020-6":"2020-06-21","2020-7":"2020-07-21","2020-88":"2020-08-19",
   "2020-8":"2020-09-17","2020-9":"2020-10-17","2020-10":"2020-11-15","2020-11":"2020-12-15",
@@ -376,248 +465,186 @@ const LUNAR_MONTH_STARTS: Record<string, string> = {
   "2028-12":"2029-01-12",
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Thai Month Names
-// ─────────────────────────────────────────────────────────────────────────────
+// ─── Extended Range Algorithm ─────────────────────────────────────────────────
+// For CE years 1757–1956 and 2029–2157 (approximate, not verified)
 
-export const THAI_MONTH_NAMES: Record<number, string> = {
-  1: "เดือนอ้าย", 2: "เดือนยี่",       3: "เดือนสาม",
-  4: "เดือนสี่",  5: "เดือนห้า",       6: "เดือนหก",
-  7: "เดือนเจ็ด", 8: "เดือนแปด",      9: "เดือนเก้า",
-  10: "เดือนสิบ", 11: "เดือนสิบเอ็ด", 12: "เดือนสิบสอง",
-  88: "เดือนแปดสอง (อธิกมาส)",
+type LookupEntry = Record<string, string>;
+
+/**
+ * Build Thai lunar month entries for Thai year = ceYear (EXTENDED RANGE ONLY).
+ *
+ * Case A: n >= 13, janCount >= 2 → NORMAL (skip moon[0])
+ * Case B: n >= 13, janCount == 1 → INTERCALARY (months 1,2,3,4,5,6,7,8,88,9,10,11,12)
+ * Case C: n == 12               → NORMAL
+ */
+function buildExtendedYearEntries(ceYear: number): LookupEntry {
+  const result: LookupEntry = {};
+  const moons = newMoonsInYear(ceYear);
+  const n = moons.length;
+  const janCount = moons.filter(m => m.m === 1).length;
+
+  if (n >= 13 && janCount >= 2) {
+    // Case A: Two January moons → NORMAL, skip moon[0] (= Thai year Y-1 เดือน 12)
+    for (let i = 0; i < 12; i++) {
+      const bkk = moons[i + 1];
+      if (bkk) result[`${ceYear}-${i + 1}`] = isoDateFromBkk(bkk);
+    }
+  } else if (n >= 13 && janCount === 1) {
+    // Case B: Single January moon with 13 total → INTERCALARY
+    // เดือน 88 default position: between months 8 and 9
+    const monthNums = [1, 2, 3, 4, 5, 6, 7, 8, 88, 9, 10, 11, 12];
+    for (let i = 0; i < 13; i++) {
+      const bkk = moons[i];
+      if (bkk) result[`${ceYear}-${monthNums[i]}`] = isoDateFromBkk(bkk);
+    }
+  } else {
+    // Case C: 12 moons → NORMAL
+    const limit = Math.min(12, n);
+    for (let i = 0; i < limit; i++) {
+      result[`${ceYear}-${i + 1}`] = isoDateFromBkk(moons[i]);
+    }
+    // Safety: pad to 12 if fewer moons found (shouldn't happen)
+    if (n < 12) {
+      const moonsNext = newMoonsInYear(ceYear + 1);
+      for (let i = n; i < 12; i++) {
+        const bkk = moonsNext[i - n];
+        if (bkk) result[`${ceYear}-${i + 1}`] = isoDateFromBkk(bkk);
+      }
+    }
+  }
+
+  return result;
+}
+
+// ─── Main Build ──────────────────────────────────────────────────────────────
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+const VERIFIED_START = 1957;
+const VERIFIED_END   = 2028;
+const START_YEAR     = 1757; // พ.ศ. 2300
+const END_YEAR       = 2157; // พ.ศ. 2700
+
+console.log(`Building Thai Lunar Dataset: CE ${START_YEAR}–${END_YEAR}`);
+console.log(`  Verified range: CE ${VERIFIED_START}–${VERIFIED_END} (from thaiLunar.ts)`);
+console.log(`  Extended range: CE ${START_YEAR}–${VERIFIED_START-1} + CE ${VERIFIED_END+1}–${END_YEAR} (Meeus algorithm)`);
+console.log(`${'─'.repeat(60)}`);
+
+const generated: Record<string, string> = {};
+
+// 1. Extended range: CE 1757–1956
+for (let y = START_YEAR; y < VERIFIED_START; y++) {
+  const entries = buildExtendedYearEntries(y);
+  Object.assign(generated, entries);
+}
+
+// 2. Verified range: CE 1957–2028
+Object.assign(generated, VERIFIED_1957_2028);
+
+// 3. Extended range: CE 2029–2157
+for (let y = VERIFIED_END + 1; y <= END_YEAR; y++) {
+  const entries = buildExtendedYearEntries(y);
+  Object.assign(generated, entries);
+}
+
+// Stats
+const verifiedCount = Object.keys(VERIFIED_1957_2028).length;
+const totalCount    = Object.keys(generated).length;
+const extCount      = totalCount - verifiedCount;
+const intercalaryVerified   = Object.keys(VERIFIED_1957_2028).filter(k => k.endsWith('-88')).length;
+const intercalaryExtended   = Object.keys(generated).filter(k => k.endsWith('-88')).length - intercalaryVerified;
+
+console.log(`\nGenerated: ${totalCount} entries`);
+console.log(`  Verified (1957–2028): ${verifiedCount} entries, ${intercalaryVerified} intercalary years`);
+console.log(`  Extended range:       ${extCount} entries, ${intercalaryExtended} intercalary years (approx)`);
+
+// ─── Quick Sanity Check ──────────────────────────────────────────────────────
+// Check a few known verified data points
+
+const SPOT_CHECK: Record<string, string> = {
+  "1958-88": "1958-09-10",
+  "1962-88": "1962-08-29",
+  "1973-88": "1973-10-24",
+  "2013-88": "2013-06-08",
+  "2028-12": "2029-01-12",
+  "1959-1":  "1959-01-06",
+  "1958-12": "1959-01-06",
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Zodiac System
-// ─────────────────────────────────────────────────────────────────────────────
+console.log('\nSpot check (verified range):');
+let spotPass = 0;
+let spotFail = 0;
+for (const [key, expected] of Object.entries(SPOT_CHECK)) {
+  const got = generated[key];
+  const ok = got === expected;
+  if (ok) { spotPass++; }
+  else { console.log(`  FAIL ${key}: expected ${expected}, got ${got ?? 'MISSING'}`); spotFail++; }
+}
+console.log(`  ${spotPass}/${Object.keys(SPOT_CHECK).length} passed`);
 
-/** ปีนักษัตร ตามลำดับ index 0–11 */
-const ZODIAC_CYCLE = [
-  "ชวด","ฉลู","ขาล","เถาะ","มะโรง","มะเส็ง",
-  "มะเมีย","มะแม","วอก","ระกา","จอ","กุน",
-] as const;
+// ─── Output TypeScript File ──────────────────────────────────────────────────
 
-export type ZodiacAnimal = typeof ZODIAC_CYCLE[number];
+const outPath = path.join(__dirname, '../src/lib/astrology/datasets/lunarLookup.ts');
 
-/** พ.ศ. 2503 = ชวด (index 0) */
-function zodiacFromThaiYear(thaiYear: number): ZodiacAnimal {
-  const idx = ((thaiYear - 2503) % 12 + 12) % 12;
-  return ZODIAC_CYCLE[idx];
+// Sort keys: by CE year first, then by thai month number
+const sortedEntries = Object.entries(generated).sort((a, b) => {
+  const [ayStr, amStr] = a[0].split('-');
+  const [byStr, bmStr] = b[0].split('-');
+  const ay = parseInt(ayStr), by = parseInt(byStr);
+  if (ay !== by) return ay - by;
+  const am = parseInt(amStr), bm = parseInt(bmStr);
+  // Month order: 1..8, 88, 9..12
+  const monthOrder = [1,2,3,4,5,6,7,8,88,9,10,11,12];
+  return monthOrder.indexOf(am) - monthOrder.indexOf(bm);
+});
+
+// Group by CE year for formatting
+const byYear: Record<number, string[]> = {};
+for (const [key, val] of sortedEntries) {
+  const year = parseInt(key.split('-')[0]);
+  if (!byYear[year]) byYear[year] = [];
+  byYear[year].push(`"${key}":"${val}"`);
 }
 
-/** ปีนักษัตร → เลข 1–7 */
-function zodiacToNumber(animal: ZodiacAnimal): number {
-  const idx = ZODIAC_CYCLE.indexOf(animal) + 1; // 1–12
-  return idx > 7 ? idx - 7 : idx;
+const lines: string[] = [];
+lines.push('/**');
+lines.push(' * lunarLookup.ts — Thai Lunar Calendar Extended Lookup Table');
+lines.push(' *');
+lines.push(` * Generated by scripts/build-lunar-dataset.ts`);
+lines.push(` * Coverage: CE ${START_YEAR}–${END_YEAR} (พ.ศ. ${START_YEAR+543}–${END_YEAR+543})`);
+lines.push(` * Total entries: ${sortedEntries.length}`);
+lines.push(' *');
+lines.push(' * Data sources:');
+lines.push(` *   CE ${VERIFIED_START}–${VERIFIED_END}: Verified (traditional Thai calendar, from thaiLunar.ts)`);
+lines.push(` *   CE ${START_YEAR}–${VERIFIED_START-1}, ${VERIFIED_END+1}–${END_YEAR}: Approximate (Meeus algorithm, ±1–4 days)`);
+lines.push(' *');
+lines.push(' * Key format: "ceYear-thaiMonth" → "YYYY-MM-DD" (ขึ้น 1 ค่ำ, Bangkok time)');
+lines.push(' * Special: thaiMonth 88 = เดือนแปดสอง (intercalary month, อธิกมาส)');
+lines.push(' *   In verified range: exact position varies by year (between months 5–10)');
+lines.push(' *   In extended range: default position between เดือน 8 and เดือน 9');
+lines.push(' *');
+lines.push(' * Known limitation for extended range:');
+lines.push(' *   Some intercalary years where Thai เดือน 12 falls in January of CE Y+1');
+lines.push(' *   are NOT detected (those occur in the verified 1957–2028 range instead).');
+lines.push(' */');
+lines.push('');
+lines.push(`export const LUNAR_LOOKUP_EXTENDED: Record<string, string> = {`);
+
+const yearKeys = Object.keys(byYear).map(Number).sort((a, b) => a - b);
+for (let i = 0; i < yearKeys.length; i++) {
+  const year = yearKeys[i];
+  const thaiYear = year + 543;
+  lines.push(`  // CE ${year} (พ.ศ. ${thaiYear})`);
+  lines.push(`  ${byYear[year].join(',')},`);
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Core: ค้นหา Thai Month จาก Lookup Table
-// ─────────────────────────────────────────────────────────────────────────────
+lines.push('};');
+lines.push('');
+lines.push('export default LUNAR_LOOKUP_EXTENDED;');
 
-function lookupThaiLunar(date: Date): ThaiLunarResult | null {
-  const ceYear = date.getFullYear();
-  const dateMs  = date.getTime();
-
-  // รวบรวม entries ของปีนั้น + ปีก่อนหน้า (เผื่อเดือนข้ามปี)
-  const entries: Array<{ month: number; startMs: number }> = [];
-
-  for (const yearOffset of [0, -1]) {
-    const y = ceYear + yearOffset;
-    for (const m of [1,2,3,4,5,6,7,8,88,9,10,11,12]) {
-      const key = `${y}-${m}`;
-      if (LUNAR_MONTH_STARTS[key]) {
-        const startDate = new Date(LUNAR_MONTH_STARTS[key] + "T00:00:00");
-        entries.push({ month: m, startMs: startDate.getTime() });
-      }
-    }
-  }
-
-  if (entries.length === 0) return null;
-
-  entries.sort((a, b) => a.startMs - b.startMs);
-
-  // หา entry ที่ date >= startMs
-  let current = entries[0];
-  for (const e of entries) {
-    if (e.startMs <= dateMs) current = e;
-    else break;
-  }
-
-  if (current.startMs > dateMs) return null;
-
-  const daysIn  = Math.floor((dateMs - current.startMs) / 86400000);
-  const isWaxing = daysIn < 15;
-  const lunarDay = isWaxing ? daysIn + 1 : daysIn - 14;
-  const thaiMonth = current.month;
-  // monthNumber: เดือน 1–7 = ตัวเลขตรง, เดือน 8+ ลบ 7
-  const monthNumber = thaiMonth === 88 ? 1 : (thaiMonth > 7 ? thaiMonth - 7 : thaiMonth);
-
-  return {
-    thaiMonth,
-    thaiMonthName: THAI_MONTH_NAMES[thaiMonth] ?? `เดือน ${thaiMonth}`,
-    isWaxing,
-    lunarDay: Math.max(1, lunarDay),
-    moonPhaseText: `${isWaxing ? "ขึ้น" : "แรม"} ${Math.max(1, lunarDay)} ค่ำ`,
-    monthNumber,
-    monthStart: new Date(current.startMs),
-    source: "lookup",
-  };
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Core: Extended Lookup (CE 1757–1956, 2029–2157 via LUNAR_LOOKUP_EXTENDED)
-// ─────────────────────────────────────────────────────────────────────────────
-
-function lookupExtendedThaiLunar(date: Date): ThaiLunarResult | null {
-  const ceYear  = date.getFullYear();
-  const dateMs  = date.getTime();
-
-  // Skip — verified range is handled by lookupThaiLunar
-  if (ceYear >= 1957 && ceYear <= 2029) return null;
-
-  const entries: Array<{ month: number; startMs: number }> = [];
-
-  for (const yearOffset of [0, -1]) {
-    const y = ceYear + yearOffset;
-    for (const m of [1,2,3,4,5,6,7,8,88,9,10,11,12]) {
-      const key = `${y}-${m}`;
-      if (LUNAR_LOOKUP_EXTENDED[key]) {
-        const startDate = new Date(LUNAR_LOOKUP_EXTENDED[key] + "T00:00:00");
-        entries.push({ month: m, startMs: startDate.getTime() });
-      }
-    }
-  }
-
-  if (entries.length === 0) return null;
-  entries.sort((a, b) => a.startMs - b.startMs);
-
-  let current = entries[0];
-  for (const e of entries) {
-    if (e.startMs <= dateMs) current = e;
-    else break;
-  }
-
-  if (current.startMs > dateMs) return null;
-
-  const daysIn    = Math.floor((dateMs - current.startMs) / 86400000);
-  const isWaxing  = daysIn < 15;
-  const lunarDay  = isWaxing ? daysIn + 1 : daysIn - 14;
-  const thaiMonth = current.month;
-  const monthNumber = thaiMonth === 88 ? 1 : (thaiMonth > 7 ? thaiMonth - 7 : thaiMonth);
-
-  return {
-    thaiMonth,
-    thaiMonthName: THAI_MONTH_NAMES[thaiMonth] ?? `เดือน ${thaiMonth}`,
-    isWaxing,
-    lunarDay: Math.max(1, lunarDay),
-    moonPhaseText: `${isWaxing ? "ขึ้น" : "แรม"} ${Math.max(1, lunarDay)} ค่ำ`,
-    monthNumber,
-    monthStart: new Date(current.startMs),
-    source: "lookup",
-  };
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Core: Astronomical Fallback
-// ─────────────────────────────────────────────────────────────────────────────
-
-function astronomicalThaiLunar(date: Date): ThaiLunarResult {
-  // หา new moon ก่อนหน้า date
-  const { nearestNewMoon, nextNewMoonAfter } = require("./newMoon") as typeof import("./newMoon");
-  const dateMs = date.getTime();
-  let nm = nearestNewMoon(date);
-
-  // ถ้า nm > date, เอา new moon ก่อนหน้า
-  while (nm.getTime() > dateMs) {
-    const prev = new Date(nm.getTime() - 30 * 86400000);
-    nm = nearestNewMoon(prev);
-  }
-
-  const monthStart = nm;
-  const daysIn     = Math.floor((dateMs - monthStart.getTime()) / 86400000);
-  const isWaxing   = daysIn < 15;
-  const lunarDay   = isWaxing ? daysIn + 1 : daysIn - 14;
-
-  // ประมาณเดือนไทยจาก Gregorian month (rough mapping)
-  const gMonth = monthStart.getMonth() + 1; // 1–12
-  // เดือนไทย ≈ Gregorian month + 2, wrap 1–12
-  let thaiMonth = ((gMonth + 1) % 12) + 1;
-  const monthNumber = thaiMonth > 7 ? thaiMonth - 7 : thaiMonth;
-
-  return {
-    thaiMonth,
-    thaiMonthName: THAI_MONTH_NAMES[thaiMonth] ?? `เดือน ${thaiMonth}`,
-    isWaxing,
-    lunarDay: Math.max(1, lunarDay),
-    moonPhaseText: `${isWaxing ? "ขึ้น" : "แรม"} ${Math.max(1, lunarDay)} ค่ำ (ประมาณ)`,
-    monthNumber,
-    monthStart,
-    source: "astronomical",
-  };
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Public API: แปลง Gregorian → Thai Lunar Date
-// ─────────────────────────────────────────────────────────────────────────────
-
-export function gregorianToThaiLunarV3(date: Date): ThaiLunarResult {
-  return lookupThaiLunar(date) ?? lookupExtendedThaiLunar(date) ?? astronomicalThaiLunar(date);
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Public API: ดึง Zodiac Year (ถูกต้องตามปฏิทินไทย — เปลี่ยนที่เดือน 5)
-// ─────────────────────────────────────────────────────────────────────────────
-
-export function getZodiacYear(birthDate: Date): ZodiacYearResult {
-  const ceYear  = birthDate.getFullYear();
-  const dateMs  = birthDate.getTime();
-
-  // หาวันที่ เดือน 5 เริ่มต้น สำหรับปีนั้น (ลองทั้ง verified และ extended table)
-  function getMonth5Start(y: number): Date | null {
-    const key = `${y}-5`;
-    const val = LUNAR_MONTH_STARTS[key] ?? LUNAR_LOOKUP_EXTENDED[key];
-    if (val) return new Date(val + "T00:00:00");
-    return null;
-  }
-
-  // ลองหา เดือน 5 ของปีปัจจุบันก่อน
-  const m5ThisYear = getMonth5Start(ceYear);
-  const m5PrevYear = getMonth5Start(ceYear - 1);
-
-  let thaiYearBase: number;
-
-  if (m5ThisYear && dateMs >= m5ThisYear.getTime()) {
-    // เกิดหลัง เดือน 5 ของปีนี้ → ปีนักษัตรใหม่
-    thaiYearBase = ceYear + 543;
-  } else if (m5PrevYear && dateMs >= m5PrevYear.getTime()) {
-    // เกิดก่อน เดือน 5 ของปีนี้ แต่หลัง เดือน 5 ของปีก่อน → ปีนักษัตรปีนี้ (เดิม)
-    thaiYearBase = ceYear + 543;
-  } else {
-    // Fallback
-    thaiYearBase = ceYear + 543;
-  }
-
-  // ✅ KEY FIX: ถ้า birthDate ก่อน เดือน 5 ของปีนี้ → ใช้ zodiac ของ (thaiYear - 1)
-  const useThaiYear = m5ThisYear && dateMs < m5ThisYear.getTime()
-    ? thaiYearBase - 1
-    : thaiYearBase;
-
-  const zodiacName   = zodiacFromThaiYear(useThaiYear);
-  const zodiacNumber = zodiacToNumber(zodiacName);
-  const yearStart    = m5ThisYear ?? new Date(ceYear, 3, 13); // fallback: April 13
-
-  return {
-    thaiYear: useThaiYear,
-    zodiacName,
-    zodiacNumber,
-    yearStart,
-  };
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Export helpers
-// ─────────────────────────────────────────────────────────────────────────────
-
-export { zodiacFromThaiYear, zodiacToNumber, ZODIAC_CYCLE };
+const content = lines.join('\n');
+fs.writeFileSync(outPath, content, 'utf-8');
+console.log(`\n✅ Written: ${outPath}`);
+console.log(`   Lines: ${lines.length}`);
+console.log(`   Size: ${(Buffer.byteLength(content) / 1024).toFixed(1)} KB`);

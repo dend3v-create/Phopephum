@@ -70,7 +70,7 @@ export default function Home() {
             <span className="text-[10px] text-hora-gold font-bold uppercase tracking-[0.4em] block mb-4">Master Science</span>
             <h2 className="text-3xl sm:text-5xl md:text-6xl font-serif font-bold text-hora-gold-light mb-6">ฟังก์ชันระดับ Imperial สำหรับคุณ</h2>
             <p className="text-lg text-hora-text-muted/80 font-sans leading-relaxed">
-              เรานำศาสตร์พยากรณ์ชั้นสูงที่คัดสรรเป็นพิเศษมาผสานกับระบบ AI ประมวลผลอันทันสมัย เพื่อผลลัพธ์ดวงชะตาที่แม่นยำและเป็นเลิศที่สุด
+              เรานำศาสตร์พยากรณ์ชั้นสูงที่คัดสรรเป็นพิเศษมาผสานกับระบบประมวลผลอันทันสมัย เพื่อผลลัพธ์ดวงชะตาที่แม่นยำและเป็นเลิศที่สุด
             </p>
           </div>
 
@@ -159,7 +159,7 @@ export default function Home() {
               <ul className="space-y-5 mb-10 text-sm text-hora-text font-sans border-t border-hora-gold/20 pt-8">
                 <li className="flex items-center gap-3"><ShieldCheck className="w-5 h-5 text-hora-gold" /> <strong>ยามอัฐกาลไม่จำกัด</strong></li>
                 <li className="flex items-center gap-3"><ShieldCheck className="w-5 h-5 text-hora-gold" /> <strong>ระบบจร (วัยจร/ปีจร) ครบถ้วน</strong></li>
-                <li className="flex items-center gap-3"><ShieldCheck className="w-5 h-5 text-hora-gold" /> AI Life Report 10 ครั้ง/เดือน</li>
+                <li className="flex items-center gap-3"><ShieldCheck className="w-5 h-5 text-hora-gold" /> Life Report 10 ครั้ง/เดือน</li>
                 <li className="flex items-center gap-3"><ShieldCheck className="w-5 h-5 text-hora-gold" /> Export รายงาน PDF พรีเมียม</li>
               </ul>
             </div>

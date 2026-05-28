@@ -128,7 +128,7 @@ export function AIReportWidget({
             color: "#C9A96E",
             fontFamily: "'Playfair Display', serif",
           }}>
-            AI WISDOM ASSISTANT
+            WISDOM ASSISTANT
           </h3>
           <p style={{ margin: 0, fontSize: "11px", color: "#8B7E6E" }}>
             รายงานวิเคราะห์ชะตาชีวิต
@@ -175,8 +175,8 @@ export function AIReportWidget({
           }}
         >
           {!canGenerate
-            ? "🔒 อัปเกรดเพื่อใช้งาน AI"
-            : "≡ วิเคราะห์ดวงชะตาด้วย AI"}
+            ? "🔒 อัปเกรดเพื่อใช้งาน"
+            : "≡ วิเคราะห์ดวงชะตา"}
         </button>
       ) : null}
 

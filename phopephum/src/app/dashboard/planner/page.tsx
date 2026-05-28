@@ -530,23 +530,25 @@ export default function PlannerPage() {
         </div>
       </main>
 
-      {/* Mobile Bottom Navigation Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-hora border-t border-white/10 bg-cosmic-950/85 backdrop-blur-lg flex items-center justify-around py-3 px-2 shadow-[0_-10px_20px_rgba(0,0,0,0.8)] pb-safe">
-        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
-          <Compass className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+      {/* Bottom Navigation — Persistent */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 flex items-stretch shadow-[0_-4px_30px_rgba(0,0,0,0.8)]"
+        style={{ backgroundColor: "rgba(2,6,23,0.97)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", height: "64px" }}>
+        <Link href="/dashboard" className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors" style={{ color: "var(--hora-text-muted)" }}>
+          <span className="text-lg leading-none">◉</span>
           <span className="text-[9px] font-medium tracking-wider">ภาพรวมดวง</span>
         </Link>
-        <Link href="/dashboard/planner" className="flex flex-col items-center gap-1 text-gold-500">
-          <Calendar className="w-4 h-4 text-gold-500" />
-          <span className="text-[9px] font-bold tracking-wider">Planner</span>
+        <Link href="/dashboard/planner" className="flex-1 flex flex-col items-center justify-center gap-1 relative" style={{ background: "linear-gradient(180deg, rgba(217,188,130,0.06) 0%, transparent 100%)" }}>
+          <span className="text-lg leading-none" style={{ color: "var(--hora-gold)", filter: "drop-shadow(0 0 8px rgba(217,188,130,0.6))" }}>📅</span>
+          <span className="text-[9px] font-bold tracking-wider" style={{ color: "var(--hora-gold)" }}>Planner</span>
+          <span className="absolute bottom-0 w-8 h-0.5 rounded-t-full" style={{ background: "linear-gradient(90deg, transparent, var(--hora-gold), transparent)" }} />
         </Link>
-        <Link href="/dashboard/coach" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
-          <Sparkles className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
-          <span className="text-[9px] font-medium tracking-wider">AI Coach</span>
+        <Link href="/dashboard/coach" className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors" style={{ color: "var(--hora-text-muted)" }}>
+          <span className="text-lg leading-none">✦</span>
+          <span className="text-[9px] font-medium tracking-wider">Wisdom Coach</span>
         </Link>
-        <Link href="/dashboard/report" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
-          <Download className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
-          <span className="text-[9px] font-medium tracking-wider">Reports</span>
+        <Link href="/dashboard" className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors" style={{ color: "var(--hora-text-muted)" }}>
+          <span className="text-lg leading-none">🕐</span>
+          <span className="text-[9px] font-medium tracking-wider">ยามปัจจุบัน</span>
         </Link>
       </div>
     </div>

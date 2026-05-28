@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { horoscopeEngine } from "@/lib/astrology/engine/horoscopeEngine";
+import { HORA_REPORT_PROMPT } from "@/constants/ai-prompts";
 
 export const runtime = "edge";
 
@@ -23,7 +25,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  // 3. Check remaining reports (Supabase)
+  // 3. Check remaining reports
   const { data: usage } = await supabase
     .from("ai_report_usage")
     .select("count")
@@ -40,10 +42,48 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 4. Build prompt
-  const prompt = buildAIReportPrompt(birthData, topic);
+  // 4. Calculate full astrology data
+  const hResult = await horoscopeEngine({
+    birthDate: birthData.birthDate,
+    birthTime: birthData.birthTime || "12:00",
+    name: birthData.name || "ผู้ใช้งาน"
+  });
 
-  // 5. Call Gemini directly (streaming)
+  // 5. Build prompt
+  const thaiTopics: Record<string, string> = {
+    overall:     "ภาพรวมชะตาชีวิตทุกด้าน",
+    career:      "การงานและอาชีพ",
+    love:        "ความรักและความสัมพันธ์",
+    health:      "สุขภาพและพลังงาน",
+    wealth:      "การเงินและโชคลาภ",
+    "lucky-hour": "ฤกษ์มงคลและช่วงเวลาที่ดี",
+  };
+  const topicThai = thaiTopics[topic] ?? topic;
+
+  const dataSnapshot = {
+    user: birthData.name || "ผู้ใช้งาน",
+    lunarDate: hResult.lunar?.thaiLunarDateText || hResult.data.dayName,
+    chart: {
+      base1_3: hResult.sevenBase,
+      base4_9: hResult.nineBase,
+      emperor: hResult.emperorChart
+    },
+    rules: hResult.rules.map(r => r.insight),
+    taksa: hResult.data.taksa,
+    vayaChorn: hResult.data.vayaChorn,
+    transit: hResult.data.transit
+  };
+
+  const finalPrompt = `
+${HORA_REPORT_PROMPT}
+
+หัวข้อที่ต้องเน้นเป็นพิเศษ: ${topicThai}
+
+ข้อมูลดวงชะตาเชิงลึก:
+${JSON.stringify(dataSnapshot, null, 2)}
+`.trim();
+
+  // 6. Call Gemini directly (streaming)
   const geminiKey = process.env.GEMINI_API_KEY;
   if (!geminiKey) {
     return new Response(
@@ -60,9 +100,9 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        contents: [{ role: "user", parts: [{ text: finalPrompt }] }],
         generationConfig: {
-          maxOutputTokens: 2048,
+          maxOutputTokens: 4096,
           temperature: 0.7,
         },
       }),
@@ -82,14 +122,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 6. Log usage (non-blocking)
+  // 7. Log usage (non-blocking)
   void supabase.from("ai_report_usage").insert({
     user_id: user.id,
     topic,
     tier,
   });
 
-  // 7. Transform Gemini SSE → client SSE format: data: {"text":"..."}\n\n
+  // 8. Transform Gemini SSE
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
   const encoder = new TextEncoder();
@@ -145,43 +185,4 @@ export async function POST(req: NextRequest) {
       "X-Accel-Buffering": "no",
     },
   });
-}
-
-// ─── Prompt Builder ────────────────────────────────────────────────────────────
-
-function buildAIReportPrompt(birthData: any, topic: string): string {
-  const thaiTopics: Record<string, string> = {
-    overall:     "ภาพรวมชะตาชีวิตทุกด้าน",
-    career:      "การงานและอาชีพ",
-    love:        "ความรักและความสัมพันธ์",
-    health:      "สุขภาพและพลังงาน",
-    wealth:      "การเงินและโชคลาภ",
-    "lucky-hour": "ฤกษ์มงคลและช่วงเวลาที่ดี",
-  };
-
-  const topicThai = thaiTopics[topic] ?? topic;
-
-  return `
-คุณคือผู้พยากรณ์โหราศาสตร์ไทยผู้เชี่ยวชาญระดับสูง
-ผู้มีความรู้ลึกซึ้งในระบบเลข 7 ตัว 9 ฐาน, ยามอัฐกาล และการพยากรณ์แบบ Therapeutic Divination
-
-ข้อมูลผู้ถามพยากรณ์:
-- ชื่อ: ${birthData.name || "ผู้ใช้งาน"}
-- วันเกิด: ${birthData.birthDate}
-- เวลาเกิด: ${birthData.birthTime || "ไม่ระบุ"} น.
-- สถานที่เกิด: ${birthData.birthPlace || "ไม่ระบุ"}
-- เพศ: ${birthData.gender || "ไม่ระบุ"}
-${birthData.numerologyData ? `- ข้อมูลเลข 7 ตัว: ${JSON.stringify(birthData.numerologyData)}` : ""}
-
-หัวข้อพยากรณ์: ${topicThai}
-
-กรุณาวิเคราะห์และพยากรณ์อย่างละเอียดในหัวข้อ "${topicThai}" โดย:
-1. เริ่มด้วยการอ่านพลังงานโดยรวมจากวันเกิด
-2. วิเคราะห์ตามหัวข้อที่กำหนดอย่างเจาะลึก
-3. ให้แนวทางปฏิบัติที่ชัดเจน 3-5 ข้อ
-4. จบด้วยข้อความให้กำลังใจและสร้างแรงบันดาลใจ
-
-ใช้ภาษาไทยที่อ่านง่าย อบอุ่น และให้พลังบวก
-ความยาวประมาณ 400-600 คำ
-`.trim();
 }

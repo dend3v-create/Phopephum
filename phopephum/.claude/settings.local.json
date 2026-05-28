@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx tsc:*)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/stripe/package.json'\\).version\\)\")",
+      "Read(//e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo/**)",
+      "WebFetch(domain:myhora.com)"
+    ]
+  }
+}
