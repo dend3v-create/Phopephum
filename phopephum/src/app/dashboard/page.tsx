@@ -12,8 +12,10 @@ import {
   minutesToTimeStr,
   DayOfWeek 
 } from "@/engine/phopephum-calculator";
-import { 
+import {
   calculateSevenBase,
+} from "@/engine/seven-numbers-v3";
+import {
   HOUSE_NAMES_ROW1,
   HOUSE_NAMES_ROW2,
   HOUSE_NAMES_ROW3,
