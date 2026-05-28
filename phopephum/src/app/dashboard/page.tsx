@@ -662,11 +662,11 @@ export default function DashboardPage() {
                             if (rNum === 2) rowLabel = "ฐานเดือน";
                             if (rNum === 3) rowLabel = "ฐานปี";
                             if (rNum === 4) rowLabel = "ฐานรวมกำลัง";
-                            if (rNum === 5) rowLabel = "ฐาน 5 (โสฬส)";
-                            if (rNum === 6) rowLabel = "ฐาน 6 (มหาภูติ)";
-                            if (rNum === 7) rowLabel = "ฐาน 7 (กำลังทวี)";
-                            if (rNum === 8) rowLabel = "ฐาน 8 (ยามหน้า)";
-                            if (rNum === 9) rowLabel = "ฐาน 9 (ยามทวน)";
+                            if (rNum === 5) rowLabel = "ฐาน 5 (อายตนะ)";
+                            if (rNum === 6) rowLabel = "ฐาน 6 (ดวงพริ้ง)";
+                            if (rNum === 7) rowLabel = "ฐาน 7 (อินทภาส)";
+                            if (rNum === 8) rowLabel = "ฐาน 8 (บาทจันทร์)";
+                            if (rNum === 9) rowLabel = "ฐาน 9 (โสฬส)";
 
                             const isCalculationRow = rNum === 4 || rNum === 5 || rNum === 6 || rNum === 7;
 

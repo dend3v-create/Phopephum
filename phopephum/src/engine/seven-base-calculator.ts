@@ -7,15 +7,15 @@
  */
 
 export interface SevenBaseChart {
-  row1: number[]; // แถวที่ 1: วันเกิด (1-7)
-  row2: number[]; // แถวที่ 2: เดือนเกิด (1-7)
-  row3: number[]; // แถวที่ 3: ปีเกิด (1-7)
-  row4: number[]; // แถวที่ 4: ฐานบวก / มหาอุตม์ (วัน + เดือน + ปี)
-  row5: number[]; // แถวที่ 5: โสฬสมงคล 
-  row6: number[]; // แถวที่ 6: ทรัพย์พยากร
-  row7: number[]; // แถวที่ 7: กำลังดาว
-  row8: number[]; // แถวที่ 8: ยามหน้า
-  row9: number[]; // แถวที่ 9: ยามทวน
+  row1: number[]; // แถวที่ 1: ฐานวัน (1-7)
+  row2: number[]; // แถวที่ 2: ฐานเดือน (1-7)
+  row3: number[]; // แถวที่ 3: ฐานปี (1-7)
+  row4: number[]; // แถวที่ 4: ฐานกำลังพระเคราะห์ (ผลรวม row1+row2+row3 raw)
+  row5: number[]; // แถวที่ 5: ฐานอายตนะ (วัน+ปี) mod 7
+  row6: number[]; // แถวที่ 6: ฐานดวงพริ้ง (ฐาน4) mod 7
+  row7: number[]; // แถวที่ 7: ฐานอินทภาส (เดือน×2+วัน) mod 7
+  row8: number[]; // แถวที่ 8: ฐานบาทจันทร์ (ฐาน4−ปี+7) mod 7
+  row9: number[]; // แถวที่ 9: ฐานโสฬส (ฐาน5+6+8) mod 9
 }
 
 export interface TransitInfo {
@@ -91,8 +91,8 @@ export const PLANET_NAMES = [
 export const HOUSE_NAMES_ROW1 = ["อัตตา", "หินะ", "ธนัง", "ปิตา", "มาตา", "โภคา", "มัชฌิมา"];
 export const HOUSE_NAMES_ROW2 = ["ตนุ", "กดุมพะ", "สหัชชะ", "พันธุ", "ปุตตะ", "อริ", "ปัตนิ"];
 export const HOUSE_NAMES_ROW3 = ["มรณะ", "สุภะ", "กัมมะ", "ลาภะ", "พยายะ", "ทาสา", "ทาสี"];
-export const HOUSE_NAMES_ROW8 = ["ยามหน้า1", "ยามหน้า2", "ยามหน้า3", "ยามหน้า4", "ยามหน้า5", "ยามหน้า6", "ยามหน้า7"];
-export const HOUSE_NAMES_ROW9 = ["ยามทวน1", "ยามทวน2", "ยามทวน3", "ยามทวน4", "ยามทวน5", "ยามทวน6", "ยามทวน7"];
+export const HOUSE_NAMES_ROW8: string[] = []; // ฐานบาทจันทร์ — ไม่มีชื่อภพ (ฐานหนุน)
+export const HOUSE_NAMES_ROW9: string[] = []; // ฐานโสฬส    — ไม่มีชื่อภพ (ฐานสรุปกำลัง)
 
 export const HOUSE_DESCRIPTIONS: Record<string, string> = {
   "อัตตา": "ตัวตน ลักษณะนิสัยที่แท้จริงเบื้องลึก",
@@ -160,14 +160,23 @@ export function calculateSevenBase(birthDateStr: string, birthTimeStr: string = 
   const row2 = Array.from({ length: 7 }, (_, j) => ((baseM + j - 1) % 7) === 0 ? 7 : ((baseM + j - 1) % 7));
   const row3 = Array.from({ length: 7 }, (_, j) => ((baseY + j - 1) % 7) === 0 ? 7 : ((baseY + j - 1) % 7));
 
+  // ฐาน 4: ผลรวม raw (ไม่ลดทอน)
   const row4 = row1.map((val, idx) => val + row2[idx] + row3[idx]);
-  const row5 = row4.map(v => v % 7 === 0 ? 7 : v % 7);
-  const row6 = row5.map(v => (v * 2) % 7 === 0 ? 7 : (v * 2) % 7);
-  const row7 = row6.map(v => (v * 2) % 7 === 0 ? 7 : (v * 2) % 7);
-  
-  // สมมติฐาน 8 และ 9
-  const row8 = row1.map(v => (v + 1) > 7 ? 1 : v + 1);
-  const row9 = row1.map(v => (v - 1) < 1 ? 7 : v - 1);
+
+  // ฐาน 5: ฐานอายตนะ — (วัน + ปี) mod 7
+  const row5 = row1.map((v, i) => { const r = (v + row3[i]) % 7; return r === 0 ? 7 : r; });
+
+  // ฐาน 6: ฐานดวงพริ้ง — ฐาน4 mod 7
+  const row6 = row4.map(v => v % 7 === 0 ? 7 : v % 7);
+
+  // ฐาน 7: ฐานอินทภาส — (เดือน×2 + วัน) mod 7
+  const row7 = row2.map((v, i) => { const r = (v * 2 + row1[i]) % 7; return r === 0 ? 7 : r; });
+
+  // ฐาน 8: ฐานบาทจันทร์ — (ฐาน4 − ปี + 7) mod 7
+  const row8 = row4.map((v, i) => { const r = (v - row3[i] + 7) % 7; return r === 0 ? 7 : r; });
+
+  // ฐาน 9: ฐานโสฬส — (ฐาน5 + ฐาน6 + ฐาน8) mod 9
+  const row9 = row5.map((v, i) => { const r = (v + row6[i] + row8[i]) % 9; return r === 0 ? 9 : r; });
 
   // คำนวณมหาภูติ
   const chulaSakarat = (jsYear + 543) - 1181;
