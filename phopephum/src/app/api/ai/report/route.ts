@@ -64,8 +64,7 @@ export async function POST(req: NextRequest) {
     user: birthData.name || "ผู้ใช้งาน",
     lunarDate: hResult.lunar?.thaiLunarDateText || hResult.data.dayName,
     chart: {
-      base1_3: hResult.sevenBase,
-      base4_9: hResult.nineBase,
+      matrix: hResult.matrix,
       emperor: hResult.emperorChart
     },
     rules: hResult.rules.map((r: { insight: string }) => r.insight),

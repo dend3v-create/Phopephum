@@ -200,7 +200,7 @@ interface NavTab {
 const NAV_TABS: NavTab[] = [
   { id: "horoscope", label: "ดวงชะตา",   icon: "◎",  href: "/dashboard" },
   { id: "planner",   label: "แพลนเนอร์", icon: "📅", href: "/dashboard/planner" },
-  { id: "ai-coach",  label: "Wisdom Coach",   icon: "✦",  href: "/dashboard/coach" },
+  { id: "ai-coach",  label: "พยากรณ์พื้นดวง",   icon: "✦",  href: "/dashboard/coach" },
   { id: "yam",    label: "ยามปัจจุบัน",    icon: "⌚",  href: "/dashboard/yam" },
 ];
 

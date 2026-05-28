@@ -41,12 +41,13 @@ export async function POST(request: Request) {
       user: profile.full_name,
       lunarDate: hResult.lunar?.thaiLunarDateText || hResult.data.dayName,
       chart: {
-        base1_3: hResult.sevenBase,
-        base4_9: hResult.nineBase,
+        matrix: hResult.matrix,
         emperor: hResult.emperorChart
       },
       rules: hResult.rules.map((r: any) => r.insight),
       taksa: hResult.data.taksa,
+      vayaChorn: hResult.data.vayaChorn,
+      transit: hResult.data.transit,
     }
 
     systemContext += `\n\nข้อมูลดวงชะตาพื้นฐานของคุณ:\n${JSON.stringify(dataSnapshot, null, 2)}`
@@ -60,7 +61,7 @@ export async function POST(request: Request) {
     if (isGeminiConfigured) {
       try {
         const geminiRes = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiKey}`,
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${geminiKey}`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -74,7 +75,7 @@ export async function POST(request: Request) {
                 }
               ],
               generationConfig: {
-                maxOutputTokens: 2000,
+                maxOutputTokens: 3000,
                 temperature: 0.7
               }
             })

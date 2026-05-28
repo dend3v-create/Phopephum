@@ -1,90 +1,90 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
-import { calculateHora, getCurrentHora, PLANETS } from "@/engine/phopephum-calculator";
+import { calculateSevenBase } from "@/engine/seven-numbers-v3";
+import {
+  HOUSE_NAMES_ROW1,
+  HOUSE_NAMES_ROW2,
+  HOUSE_NAMES_ROW3,
+  HOUSE_DESCRIPTIONS
+} from "@/engine/seven-base-calculator";
 import { 
-  ArrowLeft, Sparkles, Send, Bot, User, Zap, MessageSquare, 
-  HelpCircle, ShieldCheck, Heart, Award, Moon, Sun, Compass, Calendar, Download, Clock
+  DashboardLayout, 
+  HoraCard, 
+  SectionHeader 
+} from "@/components/layout/DashboardLayout";
+import { 
+  Sparkles, Zap, Award, Heart, Moon, Compass, Calendar, 
+  ShieldCheck, ArrowLeft, Copy, Printer, RotateCcw, 
+  Activity, Star, User, BookOpen, ChevronRight, HelpCircle
 } from "lucide-react";
 import Link from "next/link";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
+interface SevenBaseResult {
+  dayName: string;
+  thaiLunarDateText: string;
+  zodiacName: string;
+  phaseText: string;
+  chart: {
+    row1: number[];
+    row2: number[];
+    row3: number[];
+    row4: number[];
+    row5: number[];
+    row6: number[];
+    row7: number[];
+    row8: number[];
+    row9: number[];
+  };
+  taksa: {
+    category: string;
+    planet: string;
+    number: number;
+    description: string;
+  }[];
+  mahaPhute: {
+    name: string;
+    element: string;
+    description: string;
+  };
 }
 
 export default function CoachPage() {
   const [profile, setProfile] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [currentHora, setCurrentHora] = useState<any>(null);
+  const [sevenBaseResult, setSevenBaseResult] = useState<SevenBaseResult | null>(null);
   
-  // Chat states
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [inputValue, setInputValue] = useState("");
-  const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  // Forecast generating states
+  const [generating, setGenerating] = useState(false);
+  const [prediction, setPrediction] = useState<string>("");
+  const [loaderStep, setLoaderStep] = useState(0);
 
-  // Categories and Prompts data
-  const [activeCategory, setActiveCategory] = useState("all");
+  // UI state
+  const [activeTab, setActiveTab] = useState<"charm" | "brand" | "growth" | "guide" | "full">("charm");
+  const [selectedCell, setSelectedCell] = useState<any>(null);
+  const [copySuccess, setCopySuccess] = useState(false);
 
-  const promptCategories = [
-    { id: "all", name: "ภาพรวม", icon: <Compass className="w-3.5 h-3.5" /> },
-    { id: "work", name: "การงาน", icon: <Award className="w-3.5 h-3.5" /> },
-    { id: "love", name: "ความรัก", icon: <Heart className="w-3.5 h-3.5" /> },
-    { id: "health", name: "สุขภาพ", icon: <Zap className="w-3.5 h-3.5" /> },
-    { id: "finance", name: "การเงิน", icon: <Zap className="w-3.5 h-3.5" /> },
-    { id: "travel", name: "การเดินทาง", icon: <Moon className="w-3.5 h-3.5" /> },
-    { id: "business", name: "ธุรกิจ", icon: <ShieldCheck className="w-3.5 h-3.5" /> },
+  const loaderSteps = [
+    "🔮 กำลังเปิดประตูมิติจิตวิญญาณแห่งดวงดาว...",
+    "🧮 กำลังถอดรหัสเลข 7 ตัว 9 ฐาน (จันทรคติ 100 ปี)...",
+    "🌟 กำลังผูกสัมพันธ์ภพภูมิ ทักษาจร และมหาภูติจร...",
+    "👑 กำลังเชื่อมต่อกำลังจักรพรรดิและดาวพระพุธ (๔) ผู้สถิตเสน่ห์...",
+    "✍️ กำลังรวบรวมคำพยากรณ์เชิงบำบัดจิตวิทยา (Therapeutic Destiny Map)..."
   ];
 
-  const promptChips: Record<string, { text: string; context: string }[]> = {
-    all: [
-      { text: "วันนี้ยามไหนเสวยอยู่? พลังงานโดยรวมเป็นอย่างไร?", context: "วิเคราะห์ยามอัฐกาลปัจจุบัน + พลังงานปีจร เดือนจร" },
-      { text: "สัปดาห์นี้วันไหนเป็นจุดพีคของผม?", context: "วิเคราะห์ยามอัฐกาลรายวัน 7 วันข้างหน้า" },
-      { text: "ช่วงเวลาไหนของวันนี้ทำเรื่องสำคัญให้เป็นการดี?", context: "วิเคราะห์ยามมงคลและยามไม่มงคลประจำวัน" },
-      { text: "อีก 3 วันข้างหน้าดวงจะเป็นอย่างไร?", context: "วิเคราะห์ยามอัฐกาลรายวัน + เดือนจร" },
-    ],
-    work: [
-      { text: "วันนี้ยามไหนเหมาะเจรจาธุรกิจที่สุด?", context: "วิเคราะห์ยามอัฐกาลปัจจุบัน + ยามเจ้าของวัน" },
-      { text: "สัปดาห์นี้วันไหนเหมาะขอเพิ่มเงินเดือน/เลื่อนตำแหน่ง?", context: "วิเคราะห์ยามอัฐกาลรายวัน + ปีจรและทักษา" },
-      { text: "เสนองานสำคัญช่วงไหนของสัปดาห์นี้ดีที่สุด?", context: "วิเคราะห์ยามครึ่งวัน/ครึ่งคืน + เลข 7 ตัว เจ้าเรือนกรรมะ" },
-      { text: "ควรเปลี่ยนงานสัปดาห์นี้หรือรอช่วงไหนดีกว่า?", context: "วิเคราะห์วัยจร + เดือนจร" },
-    ],
-    love: [
-      { text: "วันนี้ยามไหนดีที่สุดในเรื่องความรัก?", context: "วิเคราะห์ยามอัฐกาลดาวศุกร์ + วันจร" },
-      { text: "สัปดาห์นี้ไปวันไหนโอกาสเจอคนใหม่มากที่สุด?", context: "วิเคราะห์ยามศุกร์ + มหาภูติจร" },
-      { text: "คืนดีแฟนควรง้อช่วงเวลาไหนของวันนี้?", context: "วิเคราะห์ยามอัฐกาล + ยามย่อยที่เอื้อ" },
-      { text: "สัปดาห์นี้มีโอกาสพบรักหรือแต่งงานไหม?", context: "วิเคราะห์ปีจร เดือนจร และห้องปัตนี" },
-    ],
-    health: [
-      { text: "ช่วงเวลาไหนของวันนี้ควรรักษาสุขภาพเป็นพิเศษ?", context: "วิเคราะห์ยามอัฐกาล + ห้องมรณะ" },
-      { text: "สัปดาห์นี้ควรระวังสุขภาพวันไหนเป็นพิเศษ?", context: "วิเคราะห์เดือนจร + ดาวเสาร์จร" },
-      { text: "ผ่าตัดหรือรักษาพยาบาลสำคัญ วันไหนยามไหนควรนัด?", context: "วิเคราะห์ยามอาทิตย์และพฤหัสบดี" },
-      { text: "สัปดาห์นี้พลังงานร่างกายจิตใจควรดูแลอะไรก่อน?", context: "วิเคราะห์เลข 7 ตัว ฐานอัตตะ" },
-    ],
-    finance: [
-      { text: "วันนี้เหมาะลงทุนหรือซื้อของมูลค่าสูงไหม?", context: "วิเคราะห์ยามพฤหัสบดี + ปีจรธนัง" },
-      { text: "สัปดาห์นี้ดวงการเงินเป็นอย่างไร มีเงินเข้ามาไหม?", context: "วิเคราะห์เดือนจร + เลข 7 ตัว" },
-      { text: "กู้เงินหรือลงนามสัญญาการเงิน วันไหนเหมาะ?", context: "วิเคราะห์ยามอัฐกาล + ฤกษ์มงคล" },
-      { text: "โชคลาภหรือเงินก้อนใหญ่ สัปดาห์นี้มีโอกาสไหม?", context: "วิเคราะห์ปีจร + มหาภูติจรโภคา" },
-    ],
-    travel: [
-      { text: "เดินทางสัปดาห์นี้ ควรออกเดินทางวันไหน เวลาไหน?", context: "วิเคราะห์ยามวันจร + ดาวพุธ" },
-      { text: "วันนี้ยามไหนสำหรับการออกเดินทางดีที่สุด?", context: "วิเคราะห์ยามอัฐกาลปัจจุบัน + ทิศมงคล" },
-      { text: "การเดินทางครั้งนี้จะราบรื่นหรือมีอุปสรรค?", context: "วิเคราะห์เลข 7 ตัว และมหาภูติจร" },
-      { text: "ย้ายบ้าน/ย้ายที่ทำงาน ฤกษ์ไหนเหมาะที่สุด?", context: "วิเคราะห์ยามอาทิตย์ และทักษาสุขภาพ" },
-    ],
-    business: [
-      { text: "สัปดาห์นี้วันไหนเหมาะเปิดตัวธุรกิจใหม่?", context: "วิเคราะห์ยามพฤหัสบดี + ปีจรลาภะ" },
-      { text: "จดทะเบียนบริษัทหรือเซ็นสัญญาใหญ่ วันไหนของสัปดาห์นี้ฤกษ์ดี?", context: "วิเคราะห์ยามอัฐกาลมงคล" },
-      { text: "พาร์ทเนอร์ที่จะร่วมทำธุรกิจ ดวงเข้ากันไหม?", context: "วิเคราะห์เลข 7 ตัว + ทักษาสัมพันธ์" },
-      { text: "ธุรกิจที่ทำอยู่จะเติบโตหรือควรปรับทิศทางสัปดาห์นี้?", context: "วิเคราะห์วัยจร + เดือนจรปัจจุบัน" },
-    ],
-  };
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (generating) {
+      interval = setInterval(() => {
+        setLoaderStep((prev) => (prev < loaderSteps.length - 1 ? prev + 1 : prev));
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [generating]);
 
   useEffect(() => {
-    const loadInitialData = async () => {
+    const loadUserData = async () => {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
@@ -94,7 +94,7 @@ export default function CoachPage() {
           return;
         }
 
-        // Load profile
+        // 1. ดึงข้อมูลโปรไฟล์ผู้ใช้งาน
         const { data: prof } = await supabase
           .from("profiles")
           .select("*")
@@ -104,81 +104,214 @@ export default function CoachPage() {
         if (prof) {
           setProfile(prof);
           
-          // Initial greeting from Coach - Refined to persona
-          setMessages([
-            {
-              role: "assistant",
-              content: `กราบสวัสดีครับคุณ ${prof.full_name} ผม Wisdom Coach ยินดีที่ได้ร่วมออกแบบเส้นทางชีวิตไปกับคุณครับ
+          // 2. คำนวณผังเลข 7 ตัว 9 ฐาน
+          if (prof.birth_date) {
+            const birthTime = prof.birth_time || "12:00";
+            const res = calculateSevenBase(prof.birth_date, birthTime);
+            setSevenBaseResult(res as any);
+          }
 
-หากคุณมีข้อสงสัยหรือต้องการคำแนะนำเชิงกลยุทธ์เกี่ยวกับ "การงาน การเงิน ความรัก สุขภาพ หรือธุรกิจ" สามารถพิมพ์ปรึกษาหรือเลือกใช้ Smart Quick Prompts ด้านล่างเพื่อเจาะลึกข้อมูลดวงชะตาได้ทันทีครับ`
-            }
-          ]);
+          // 3. ดึงคำทำนายจาก cache (localStorage)
+          const cachedForecast = localStorage.getItem(`phopephum_general_forecast_${user.id}`);
+          if (cachedForecast) {
+            setPrediction(cachedForecast);
+          }
         }
-
-        // Calculate current hora slot
-        const horaResult = getCurrentHora();
-        setCurrentHora(horaResult);
       } catch (err) {
-        console.error("Error loading initial data:", err);
+        console.error("Error loading profile or chart data:", err);
       } finally {
         setLoading(false);
       }
     };
 
-    loadInitialData();
+    loadUserData();
   }, []);
 
-  // Scroll to bottom when messages change
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  const handleGenerateForecast = async () => {
+    if (!profile || generating) return;
 
-  const handleSendMessage = async (text: string, context?: string) => {
-    if (!text.trim() || sending) return;
-
-    const userMsg: Message = { role: "user", content: text };
-    setMessages((prev) => [...prev, userMsg]);
-    setInputValue("");
-    setSending(true);
+    setGenerating(true);
+    setLoaderStep(0);
+    setPrediction("");
 
     try {
       const res = await fetch("/api/ai/coach", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          messages: [...messages, userMsg],
-          context: context // Smart Context Injection
-        })
+        headers: { "Content-Type": "application/json" }
       });
 
       const data = await res.json();
-      if (res.ok && data.success) {
-        setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
+      if (res.ok && data.success && data.message) {
+        setPrediction(data.message);
+        // บันทึกลง cache ทันทีเพื่อประหยัดโทเคนและประสิทธิภาพ
+        localStorage.setItem(`phopephum_general_forecast_${profile.id}`, data.message);
       } else {
-        setMessages((prev) => [
-          ...prev, 
-          { 
-            role: "assistant", 
-            content: "ขออภัยครับ เกิดข้อผิดพลาดในการเชื่อมต่อข้อมูลดวงชะตา กรุณาลองใหม่อีกครั้งครับ" 
-          }
-        ]);
+        alert("เกิดข้อผิดพลาดในการคำนวณและพยากรณ์ดวงชะตา กรุณาลองใหม่อีกครั้งครับ");
       }
     } catch (err) {
-      console.error("Error sending message:", err);
-      setMessages((prev) => [
-        ...prev, 
-        { 
-          role: "assistant", 
-          content: "เกิดข้อผิดพลาดในการเชื่อมต่อระบบ AI กรุณาลองใหม่อีกครั้งครับ" 
-        }
-      ]);
+      console.error("Error generating destiny forecast:", err);
+      alert("ไม่สามารถเชื่อมต่อระบบวิเคราะห์ดวงชะตาได้ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่อีกครั้งครับ");
     } finally {
-      setSending(false);
+      setGenerating(false);
     }
   };
 
-  const handleQuickPromptClick = (chip: { text: string; context: string }) => {
-    handleSendMessage(chip.text, chip.context);
+  const handleReset = () => {
+    if (window.confirm("คุณต้องการคำนวณและสร้างคำทำนายใหม่หรือไม่? (การคำนวณใหม่จะวิเคราะห์ดวงชะตาจรตามปัจจุบันอีกครั้ง)")) {
+      setPrediction("");
+      if (profile) {
+        localStorage.removeItem(`phopephum_general_forecast_${profile.id}`);
+      }
+    }
+  };
+
+  const handleCopy = () => {
+    if (!prediction) return;
+    navigator.clipboard.writeText(prediction);
+    setCopySuccess(true);
+    setTimeout(() => setCopySuccess(false), 2000);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  // --- พาร์เซอร์คำทำนายแยกเซกชันสำหรับระบบแท็บย่อย ---
+  const getSectionContent = (text: string, currentNum: number, nextNum: number): string => {
+    const findIndex = (num: number) => {
+      const regexes = [
+        new RegExp(`(?:^|\\n)(?:##?\\s*)?${num}\\.\\s*`, 'i'),
+        new RegExp(`(?:^|\\n)(?:##?\\s*)?${num}\\s+`, 'i'),
+        new RegExp(`(?:^|\\n)(?:\\*\\*\\s*)${num}\\.\\s*`, 'i'),
+      ];
+      for (const r of regexes) {
+        const match = text.match(r);
+        if (match && match.index !== undefined) {
+          return match.index + match[0].length;
+        }
+      }
+      return -1;
+    };
+
+    const start = findIndex(currentNum);
+    if (start === -1) return "";
+    
+    const end = nextNum ? findIndex(nextNum) : text.length;
+    
+    let sectionText = "";
+    if (end !== -1 && end > start) {
+      // เอาความยาวของหัวข้อถัดไปหักออก
+      const nextMatch = text.match(new RegExp(`(?:^|\\n)(?:##?\\s*)?${nextNum}\\.\\s*`, 'i')) || 
+                        text.match(new RegExp(`(?:^|\\n)(?:##?\\s*)?${nextNum}\\s+`, 'i')) ||
+                        text.match(new RegExp(`(?:^|\\n)(?:\\*\\*\\s*)${nextNum}\\.\\s*`, 'i'));
+      const offset = nextMatch ? nextMatch[0].length : 0;
+      sectionText = text.slice(start, end - offset);
+    } else {
+      sectionText = text.slice(start);
+    }
+    
+    return sectionText.trim();
+  };
+
+  const getSectionHtml = (secId: "charm" | "brand" | "growth" | "guide") => {
+    if (!prediction) return "";
+    
+    switch (secId) {
+      case "charm":
+        return getSectionContent(prediction, 1, 2) || prediction.slice(0, 1500) + "...";
+      case "brand":
+        const part1 = getSectionContent(prediction, 2, 3);
+        const part2 = getSectionContent(prediction, 4, 5);
+        return `${part1}\n\n${part2}`.trim() || "ไม่สามารถแยกข้อมูลภาพลักษณ์ได้อย่างสมบูรณ์ กรุณาดูในแท็บรายงานฉบับเต็ม";
+      case "growth":
+        return getSectionContent(prediction, 3, 4) || "ไม่สามารถแยกข้อมูลการพัฒนาตนเองได้อย่างสมบูรณ์ กรุณาดูในแท็บรายงานฉบับเต็ม";
+      case "guide":
+        const gPart1 = getSectionContent(prediction, 5, 6);
+        const gPart2 = getSectionContent(prediction, 6, 7); // เอาสรุปด้วย
+        return `${gPart1}\n\n${gPart2}`.trim() || "ไม่สามารถแยกข้อมูลไกด์เส้นทางชีวิตได้อย่างสมบูรณ์ กรุณาดูในแท็บรายงานฉบับเต็ม";
+      default:
+        return prediction;
+    }
+  };
+
+  // --- เรนเดอร์มาร์กดาวน์แบบง่ายแต่พรีเมียม (Premium Elements) ---
+  const renderStyledMarkdown = (text: string) => {
+    if (!text) return <p className="text-hora-text-muted italic">ไม่มีคำทำนายในส่วนนี้</p>;
+
+    const lines = text.split("\n");
+    return (
+      <div className="space-y-4 print:text-black">
+        {lines.map((line, idx) => {
+          const trimmed = line.trim();
+          if (!trimmed) return <div key={idx} className="h-2" />;
+
+          // 1. หัวข้อหลัก (H1/H2)
+          if (trimmed.startsWith("# ") || trimmed.startsWith("## ") || trimmed.startsWith("### ")) {
+            const cleanTitle = trimmed.replace(/^#+\s*/, "").replace(/\*+/g, "");
+            return (
+              <h3 key={idx} className="text-base font-bold text-gold-300 font-serif pt-4 pb-1 border-b border-white/5 flex items-center gap-2 tracking-wide print:text-yellow-800 print:border-black/10">
+                <span className="w-1.5 h-4 bg-gradient-to-b from-gold-400 to-gold-liquid rounded-full shrink-0" />
+                {cleanTitle}
+              </h3>
+            );
+          }
+
+          // 2. คำคม/กล่องเน้นย้ำ (Blockquote)
+          if (trimmed.startsWith(">")) {
+            const cleanQuote = trimmed.slice(1).trim().replace(/\*+/g, "");
+            return (
+              <div key={idx} className="p-4 rounded-2xl glass-hora border border-gold-500/25 bg-cosmic-950/45 my-4 italic text-gold-200 text-xs sm:text-sm leading-relaxed tracking-wide shadow-[inset_0_1px_0_rgba(255,255,255,0.03)] print:text-black print:border-black print:bg-white">
+                📝 {cleanQuote}
+              </div>
+            );
+          }
+
+          // 3. รายการแบบมีบัลเล็ต (Bullet Points)
+          if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+            const cleanItem = trimmed.slice(2).replace(/\*+/g, "**");
+            // แยกตัวหนาภายในข้อความ
+            const parts = cleanItem.split("**");
+            return (
+              <div key={idx} className="flex gap-2.5 items-start pl-2 text-xs sm:text-sm leading-relaxed text-text-secondary print:text-black">
+                <span className="text-[10px] text-gold-400 shrink-0 pt-1">✦</span>
+                <p>
+                  {parts.map((part, pIdx) => 
+                    pIdx % 2 === 1 ? <strong key={pIdx} className="text-gold-200 font-bold print:text-black">{part}</strong> : part
+                  )}
+                </p>
+              </div>
+            );
+          }
+
+          // 4. รายการแบบตัวเลข (Numbered Bullet Points)
+          if (/^\d+\.\s+/.test(trimmed)) {
+            const num = trimmed.match(/^\d+\./)?.[0] || "";
+            const cleanItem = trimmed.replace(/^\d+\.\s+/, "").replace(/\*+/g, "**");
+            const parts = cleanItem.split("**");
+            return (
+              <div key={idx} className="flex gap-2.5 items-start pl-2 text-xs sm:text-sm leading-relaxed text-text-secondary print:text-black">
+                <span className="text-xs text-gold-400 font-serif font-black shrink-0">{num}</span>
+                <p>
+                  {parts.map((part, pIdx) => 
+                    pIdx % 2 === 1 ? <strong key={pIdx} className="text-gold-200 font-bold print:text-black">{part}</strong> : part
+                  )}
+                </p>
+              </div>
+            );
+          }
+
+          // 5. บรรทัดทั่วไป (เน้นตัวหนา)
+          const parts = trimmed.split("**");
+          return (
+            <p key={idx} className="text-xs sm:text-sm text-text-secondary/90 leading-relaxed tracking-wide pl-1 print:text-black">
+              {parts.map((part, pIdx) => 
+                pIdx % 2 === 1 ? <strong key={pIdx} className="text-gold-200 font-bold print:text-black">{part}</strong> : part
+              )}
+            </p>
+          );
+        })}
+      </div>
+    );
   };
 
   if (loading) {
@@ -186,203 +319,405 @@ export default function CoachPage() {
       <div className="min-h-screen bg-cosmic-950 text-foreground flex items-center justify-center font-sans">
         <div className="text-center space-y-4">
           <div className="w-10 h-10 border-4 border-gold-500 border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-hora-text-muted">กำลังเปิดมิติจิตวิทยาการโค้ชดวงชะตา...</p>
+          <p className="text-xs font-bold text-hora-text-muted tracking-widest uppercase">กำลังเชื่อมมิติดวงชะตาระดับพรีเมียม...</p>
         </div>
       </div>
     );
   }
 
-  const slot = currentHora?.currentHora?.subSlot;
-  const planet = slot?.planet;
+  const isPremium = profile?.plan === "pro" || profile?.plan === "premium" || profile?.plan === "imperial";
 
   return (
-    <div className="min-h-screen bg-cosmic-950 text-foreground font-sans pb-10 flex flex-col justify-between selection:bg-gold-500 selection:text-cosmic-950">
-      {/* Background layers */}
-      <div className="bg-cosmic-portal" />
-      <div className="cosmic-nebula-aura" />
-      <div className="cosmic-zodiac-wheel" />
+    <DashboardLayout pageTitle="พยากรณ์พื้นดวง" isAdmin={profile?.role === "admin" || profile?.role === "operator"}>
+      
+      <div className="space-y-6 max-w-6xl mx-auto pb-20 print:bg-white print:text-black print:pb-0">
+        
+        {/* Visual Background Elements for Web */}
+        <div className="bg-cosmic-portal pointer-events-none" />
+        <div className="cosmic-nebula-aura pointer-events-none" />
 
-      {/* Header Bar */}
-      <header className="sticky top-0 z-40 glass-hora border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link 
-              href="/dashboard" 
-              className="hover:text-gold-500 text-text-secondary/80 flex items-center gap-1 transition-colors cursor-pointer border border-white/5 rounded-xl p-2.5 glass-hora"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </Link>
-            <div>
-              <h1 className="text-xl font-serif font-bold text-gradient-gold tracking-widest flex items-center gap-2">
-                WISDOM COACH
+        {/* 1. Header Hero Card with General 7-Base Philosophy */}
+        <HoraCard glow>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 p-2">
+            <div className="space-y-2">
+              <span className="bg-gold-500/10 text-gold-300 border border-gold-500/25 px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest leading-none">
+                ศาสตร์เลข 7 ตัว 9 ฐาน (จันทรคติ 100 ปี)
+              </span>
+              <h1 className="text-2xl font-serif font-black text-gradient-gold tracking-widest">
+                ถอดรหัสชะตากำเนิดพยากรณ์ทั่วไป
               </h1>
-              <p className="text-xxs text-text-secondary uppercase tracking-[0.2em] hidden sm:block font-bold opacity-70">
-                LIVING WISDOM & ASTROLOGY GUIDANCE
+              <p className="text-xs text-hora-text-muted max-w-2xl leading-relaxed">
+                ตามหลักเกณฑ์วิเคราะห์ 9 มิติ: **ฐาน 1–3** เป็นแกนชีวิตและเหตุการณ์สำคัญ, **ฐาน 4** เป็นพลังขับเคลื่อนสนับสนุน, **ฐาน 5–7** คือกลไกการแก้ไขอุปสรรคและพัฒนาศักยภาพ, และ **ฐาน 8–9** คือผลลัพธ์วาสนาแห่งชีวิต
               </p>
             </div>
+            
+            {profile && (
+              <div className="shrink-0 flex items-center gap-3 bg-white/5 border border-white/5 rounded-2xl px-5 py-4 glass-hora print:border-black/25 print:text-black">
+                <div className="w-10 h-10 rounded-xl bg-gold-500/10 border border-gold-500/35 flex items-center justify-center text-gold-300">
+                  <User className="w-5 h-5" />
+                </div>
+                <div>
+                  <span className="text-[10px] text-gold-400 font-bold uppercase tracking-wider block leading-none mb-1">ดวงชะตากำเนิด</span>
+                  <span className="text-sm font-bold text-foreground print:text-black">{profile.full_name}</span>
+                  <span className="text-[10px] text-text-secondary block print:text-black">
+                    {sevenBaseResult?.thaiLunarDateText || profile.birth_date}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
+        </HoraCard>
 
-          {/* Current Hora Widget in Header */}
-          {planet && (
-            <div className="flex items-center gap-4 bg-cosmic-900/50 border border-white/5 rounded-2xl px-5 py-2.5 text-left glass-hora">
-              <span className="text-2xl filter drop-shadow-[0_0_8px_rgba(198,169,107,0.5)]" style={{ color: planet.color }}>
-                {planet.symbol}
-              </span>
-              <div>
-                <span className="text-[10px] text-gold-500/60 block font-bold uppercase tracking-widest leading-none mb-1">ยามจรปัจจุบัน</span>
-                <span className="text-xs text-gold-300 font-bold tracking-wide">
-                  {planet.nameThai} ({slot.startTime} - {slot.endTime} น.)
-                </span>
+        {/* 2. Destiny Matrix Grid Visualizer */}
+        {sevenBaseResult && (
+          <HoraCard>
+            <SectionHeader 
+              icon="⬡" 
+              title="ผังดวงชะตาชีวิต 7 ตัว 9 ฐาน (Birth Chart Matrix)" 
+              subtitle="แตะช่องตัวเลขเพื่ออ่านความหมายเบื้องต้น หรือดูสรุปคำพยากรณ์ฉบับเต็มจาก AI"
+            />
+            
+            <div className="space-y-4">
+              <div className="overflow-x-auto pb-1 rounded-2xl border border-white/5 bg-cosmic-950/20 scrollbar-thin">
+                <table className="w-full border-collapse min-w-[600px]">
+                  <thead>
+                    <tr className="border-b border-white/5">
+                      <th className="text-left py-3 px-4 text-[9px] font-bold uppercase tracking-widest text-hora-text-muted w-28">ฐานวิเคราะห์</th>
+                      {Array.from({ length: 7 }, (_, idx) => (
+                        <th key={idx} className="text-center py-3 px-1 text-[9px] font-bold uppercase tracking-widest text-gold-400/60 w-16">
+                          ฐานที่ {idx + 1}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { name: "ฐาน 1 (วันเกิด)", key: "row1", houses: HOUSE_NAMES_ROW1, desc: "ฐานวัน (อัตตะ - มัชฌิมา)" },
+                      { name: "ฐาน 2 (เดือนเกิด)", key: "row2", houses: HOUSE_NAMES_ROW2, desc: "ฐานเดือน (ตนุ - ปัตนิ)" },
+                      { name: "ฐาน 3 (ปีเกิด)", key: "row3", houses: HOUSE_NAMES_ROW3, desc: "ฐานปี (มรณะ - ทาสี)" },
+                      { name: "ฐาน 4 (พลังรวม)", key: "row4", houses: Array(7).fill("กำลังดาว"), desc: "พลังสนับสนุนพฤติกรรม" },
+                      { name: "ฐาน 5 (สรุปพลัง)", key: "row5", houses: Array(7).fill(" Solution 1"), desc: "แนวทางรับมือปัญหา" },
+                      { name: "ฐาน 6 (คูณสอง)", key: "row6", houses: Array(7).fill("Solution 2"), desc: "ศักยภาพสลักลึก" },
+                      { name: "ฐาน 7 (คูณสอง)", key: "row7", houses: Array(7).fill(" Solution 3"), desc: "การฟื้นตัวจากอุปสรรค" },
+                      { name: "ฐาน 8 (อาตมา)", key: "row8", houses: Array(7).fill("วาสนาหลัก"), desc: "อาตมะ/วิบากวาสนา" },
+                      { name: "ฐาน 9 (ภริยัง)", key: "row9", houses: Array(7).fill(" เป้าหมาย"), desc: "ภริยัง/เส้นทางชีวิตสูงสุด" }
+                    ].map((row) => (
+                      <tr key={row.key} className="border-b border-white/5 hover:bg-white/[0.01] transition-all">
+                        <td className="py-2.5 px-4 text-[10px] font-medium text-foreground">{row.name}</td>
+                        {sevenBaseResult.chart[row.key as keyof typeof sevenBaseResult.chart].map((v: number, cIdx: number) => {
+                          const house = (row.key === "row1") ? HOUSE_NAMES_ROW1[cIdx] : 
+                                        (row.key === "row2") ? HOUSE_NAMES_ROW2[cIdx] : 
+                                        (row.key === "row3") ? ["มรณะ", "สุภะ", "กัมมะ", "ลาภะ", "พยายะ", "ทาสา", "ทาสี"][cIdx] :
+                                        (row.key === "row8") ? ["อาตมะ", "ทาสา", "สิทธิโชค", "โภคทรัพย์", "โจร", "อุบาทว์", "อุปถัมภ์"][cIdx] :
+                                        (row.key === "row9") ? ["อัตตะ", "สักกะ", "ญาติ", "ธะนัง", "เคหัง", "นาวัง", "ภริยัง"][cIdx] :
+                                        row.houses[cIdx];
+
+                          const isSelected = selectedCell && selectedCell.row === row.key && selectedCell.col === cIdx;
+                          
+                          // สีตามกำลังดาวเคราะห์
+                          const colors: Record<number, string> = {
+                            1: "bg-[#F59E0B]/15 text-[#FBBF24] border-[#F59E0B]/30", 
+                            2: "bg-[#E5E7EB]/15 text-[#F3F4F6] border-[#E5E7EB]/30", 
+                            3: "bg-[#EF4444]/15 text-[#F87171] border-[#EF4444]/30", 
+                            4: "bg-[#10B981]/15 text-[#34D399] border-[#10B981]/30", 
+                            5: "bg-[#F97316]/15 text-[#FB923C] border-[#F97316]/30", 
+                            6: "bg-[#EC4899]/15 text-[#F472B6] border-[#EC4899]/30", 
+                            7: "bg-[#6B7280]/15 text-[#9CA3AF] border-[#6B7280]/30", 
+                            8: "bg-[#8B5CF6]/15 text-[#A78BFA] border-[#8B5CF6]/30", 
+                            9: "bg-[#3B82F6]/15 text-[#60A5FA] border-[#3B82F6]/30"  
+                          };
+                          
+                          const colorClass = colors[v] || "bg-white/5 text-white/70 border-white/10";
+                          
+                          return (
+                            <td key={cIdx} className="p-0.5 text-center">
+                              <button
+                                onClick={() => setSelectedCell({ row: row.key, col: cIdx, val: v, house, rowName: row.name, desc: row.desc })}
+                                className={`w-full py-2 px-1 rounded-xl text-xxs font-bold border transition-all flex flex-col items-center justify-center gap-0.5 ${colorClass} ${
+                                  isSelected ? "ring-2 ring-gold-400 ring-offset-1 ring-offset-cosmic-950 scale-105" : "hover:scale-105"
+                                }`}
+                              >
+                                <span className="text-[7.5px] text-white/50 font-normal uppercase block truncate max-w-full">
+                                  {house}
+                                </span>
+                                <span className="text-xs font-black block">{v}</span>
+                              </button>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Selected Cell details info */}
+              {selectedCell ? (
+                <div className="p-4 rounded-2xl space-y-2 border border-gold-500/25 bg-gradient-to-br from-gold-500/5 to-cosmic-950 shadow-xl animate-in fade-in slide-in-from-top-1">
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <Zap className="w-4 h-4 text-gold-400" />
+                      <h4 className="text-xs font-bold text-gold-300">
+                        วิเคราะห์มิติ: {selectedCell.desc} • คอลัมน์ที่ {selectedCell.col + 1}
+                      </h4>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedCell(null)}
+                      className="text-xxs text-hora-text-muted hover:text-white transition-all bg-white/5 hover:bg-white/10 w-5 h-5 rounded-full flex items-center justify-center"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <p className="text-xs text-text-secondary leading-relaxed">
+                    ดาวเคราะห์เสวยดวงชะตาคือ **ดาว{[
+                      "อาทิตย์ (1) - เกียรติยศ ผู้นำ ธาตุไฟ", 
+                      "จันทร์ (2) - เสน่ห์ บริการ โอบอ้อมอารี ธาตุดิน", 
+                      "อังคาร (3) - ขยันขันแข็ง บ้าบิ่น ต่อสู้ ธาตุลม", 
+                      "พุธ (4) - เจรจา ค้าขาย สติปัญญาดี ธาตุน้ำ", 
+                      "พฤหัสบดี (5) - คุณธรรม ปัญญา ครูผู้สอน ธาตุไฟ", 
+                      "ศุกร์ (6) - ศิลปะ เงินทอง ทรัพย์สมบัติ ธาตุดิน", 
+                      "เสาร์ (7) - อดทน วางแผน ยืดเยื้อ วิตกกังวล ธาตุลม",
+                      "ราหู (8) - ไหวพริบ พลิกแพลง ต่างประเทศ ธาตุน้ำ",
+                      "เกตุ (9) - สิ่งศักดิ์สิทธิ์ ความคิดลึกซึ้ง ธาตุทอง"
+                    ][selectedCell.val - 1] || `กำลังดาวแฝง (${selectedCell.val})`}** สถิตในตำแหน่งเรือนชะตา **{selectedCell.house}** 
+                    {HOUSE_DESCRIPTIONS[selectedCell.house] ? ` ซึ่งเป็นมิติดวงเกี่ยวกับการ "${HOUSE_DESCRIPTIONS[selectedCell.house]}" ` : " "} 
+                    สิ่งนี้เป็นกลไกส่งผ่านแรงบันดาลใจและพฤติกรรมของคุณ สามารถอ่านคำพยากรณ์เชื่อมโยงเชิงลึกได้ทางด้านล่างครับ
+                  </p>
+                </div>
+              ) : (
+                <div className="p-3 rounded-2xl text-center border border-white/5 bg-cosmic-950/10">
+                  <p className="text-xxs text-hora-text-muted">💡 แตะที่ช่องตัวเลขดวงชะตา เพื่อถอดรหัสความหมายและกำลังดาวเบื้องต้นได้ทันที</p>
+                </div>
+              )}
+            </div>
+          </HoraCard>
+        )}
+
+        {/* 3. Generating State / Cosmic Loader */}
+        {generating && (
+          <HoraCard glow>
+            <div className="py-16 text-center space-y-6 max-w-lg mx-auto">
+              <div className="relative w-24 h-24 mx-auto">
+                {/* Spinning zodiac wheel icon placeholder */}
+                <div className="absolute inset-0 border-4 border-gold-500/10 border-t-gold-500 rounded-full animate-spin" />
+                <div className="absolute inset-2 border-2 border-gold-300/10 border-b-gold-300 rounded-full animate-spin [animation-direction:reverse] [animation-duration:1.5s]" />
+                <div className="absolute inset-0 flex items-center justify-center text-3xl animate-pulse">
+                  🔮
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <h3 className="text-lg font-serif font-bold text-gradient-gold tracking-widest animate-pulse">
+                  กำลังคำนวณและประมวลผลคำพยากรณ์
+                </h3>
+                <div className="h-6 overflow-hidden relative">
+                  <p className="text-xs text-gold-300/80 font-bold uppercase tracking-wider transition-all duration-500 absolute w-full left-0">
+                    {loaderSteps[loaderStep]}
+                  </p>
+                </div>
+              </div>
+
+              <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden border border-white/5">
+                <div 
+                  className="bg-gradient-to-r from-gold-500 to-gold-liquid h-full rounded-full transition-all duration-1000"
+                  style={{ width: `${((loaderStep + 1) / loaderSteps.length) * 100}%` }}
+                />
+              </div>
+              <p className="text-[10px] text-hora-text-muted uppercase tracking-[0.2em] font-bold">
+                การวิเคราะห์ใช้เวลาประมาณ 10-15 วินาที กรุณาอย่าปิดหน้านี้
+              </p>
+            </div>
+          </HoraCard>
+        )}
+
+        {/* 4. Default / Empty State (No Prediction yet) */}
+        {!prediction && !generating && (
+          <HoraCard glow>
+            <div className="py-12 px-6 text-center space-y-6 max-w-2xl mx-auto">
+              <div className="w-16 h-16 rounded-3xl bg-gold-500/10 border border-gold-500/25 flex items-center justify-center text-gold-400 text-3xl mx-auto shadow-2xl">
+                ✦
+              </div>
+
+              <div className="space-y-2">
+                <h2 className="text-xl font-serif font-bold text-gold-200 tracking-wider">
+                  เริ่มถอดรหัสชะตากรรมเนิด 7 ตัว 9 ฐาน
+                </h2>
+                <p className="text-xs text-text-secondary leading-relaxed">
+                  ระบบ AI จะประมวลผลแผนผัง 9 ฐานดวงชะตา ทักษา มหากำลังดาวแถวที่ 4 ดาวพระพุธผู้สถิตคำเจรจา และตำแหน่งธาตุเกิด เพื่อเขียนรายงานพยากรณ์ส่วนบุคคลเชิงลึกครบถ้วน 6 หัวข้อ ตามหลักสูตร Branding planner & Therapeutic reading
+                </p>
+              </div>
+
+              {/* Rulings checklist block */}
+              <div className="p-4 rounded-2xl bg-cosmic-950/45 border border-white/5 text-left grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-xl mx-auto text-xs">
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <ShieldCheck className="w-4 h-4 text-green-400 shrink-0" />
+                  <span>วิเคราะห์เสน่ห์อัตตะ, พันธุ, ตนุ, ศุภะ</span>
+                </div>
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <ShieldCheck className="w-4 h-4 text-green-400 shrink-0" />
+                  <span>วิเคราะห์การเจรจา (ปิตา + ดาวพระพุธ ๔)</span>
+                </div>
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <ShieldCheck className="w-4 h-4 text-green-400 shrink-0" />
+                  <span>สร้างอัตลักษณ์ด้วย Branding Planner</span>
+                </div>
+                <div className="flex items-center gap-2 text-text-secondary">
+                  <ShieldCheck className="w-4 h-4 text-green-400 shrink-0" />
+                  <span>กิจกรรมพัฒนาตนเอง เสริมบารมี</span>
+                </div>
+                <div className="flex items-center gap-2 text-text-secondary col-span-1 sm:col-span-2">
+                  <ShieldCheck className="w-4 h-4 text-green-400 shrink-0" />
+                  <span>บำบัดชะตาชีวิตจร (การงาน การเงิน สุขภาพ โอกาสใหม่ ครอบครัว)</span>
+                </div>
+              </div>
+
+              <div className="pt-2">
+                <button
+                  onClick={handleGenerateForecast}
+                  className="px-8 py-4 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-gradient-to-br from-gold-500 via-gold-liquid to-gold-600 text-cosmic-950 hover:scale-105 active:scale-95 transition-all shadow-[0_10px_35px_rgba(198,169,107,0.25)] hover:shadow-[0_10px_45px_rgba(198,169,107,0.4)] cursor-pointer"
+                >
+                  คำนวณและพยากรณ์ดวงชะตา ⬡
+                </button>
               </div>
             </div>
-          )}
-        </div>
-      </header>
+          </HoraCard>
+        )}
 
-      {/* Chat Window */}
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 pt-6 flex flex-col justify-between overflow-hidden relative z-10">
-        
-        {/* Messages list */}
-        <div className="flex-1 overflow-y-auto pr-2 space-y-8 max-h-[calc(100vh-320px)] sm:max-h-[calc(100vh-280px)] scrollbar-thin scrollbar-thumb-white/5">
-          {messages.map((msg, index) => {
-            const isAI = msg.role === "assistant";
-            return (
-              <div 
-                key={index} 
-                className={`flex gap-5 max-w-[90%] sm:max-w-[85%] ${
-                  isAI ? "self-start text-left" : "self-end flex-row-reverse ml-auto text-right"
-                } animate-in fade-in slide-in-from-bottom-2 duration-500`}
-              >
-                {/* Avatar */}
-                <div 
-                  className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 border ${
-                    isAI 
-                      ? "bg-gold-500/10 border-gold-500/30 text-gold-500" 
-                      : "bg-cosmic-900 border-white/10 text-gold-300"
-                  } glass-hora shadow-lg`}
+        {/* 5. Forecast Result Viewer (With Premium Tabbed Interface) */}
+        {prediction && !generating && (
+          <div className="space-y-6 animate-in fade-in duration-700 print:space-y-4">
+            
+            {/* Toolbar Buttons */}
+            <div className="flex items-center justify-between gap-4 flex-wrap bg-cosmic-900/40 border border-white/5 rounded-2xl p-3 glass-hora print:hidden">
+              <span className="text-[10px] text-gold-400 font-bold uppercase tracking-widest pl-2">
+                ✨ รายงานชะตาชีวิตของคุณเสร็จสมบูรณ์แล้ว
+              </span>
+              
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleCopy}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xxs font-bold uppercase tracking-wider text-gold-300 border border-gold-500/20 bg-gold-500/5 hover:bg-gold-500/10 active:scale-95 transition-all cursor-pointer"
                 >
-                  {isAI ? <Bot className="w-5 h-5" /> : <User className="w-5 h-5" />}
-                </div>
+                  <Copy className="w-3.5 h-3.5" />
+                  {copySuccess ? "คัดลอกแล้ว!" : "คัดลอกคำทำนาย"}
+                </button>
+                
+                <button
+                  onClick={handlePrint}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xxs font-bold uppercase tracking-wider text-gold-300 border border-gold-500/20 bg-gold-500/5 hover:bg-gold-500/10 active:scale-95 transition-all cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  พิมพ์รายงาน / PDF
+                </button>
 
-                {/* Message Bubble */}
-                <div 
-                  className={`rounded-3xl p-5 sm:p-6 font-sans leading-relaxed text-sm shadow-2xl ${
-                    isAI 
-                      ? "glass-hora border border-white/5 text-foreground bg-cosmic-900/40" 
-                      : "bg-gradient-to-br from-gold-500 to-gold-liquid text-cosmic-950 font-bold shadow-[0_10px_30px_rgba(198,169,107,0.15)]"
+                <button
+                  onClick={handleReset}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xxs font-bold uppercase tracking-wider text-text-secondary hover:text-white border border-white/5 hover:border-white/20 hover:bg-white/5 active:scale-95 transition-all cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  พยากรณ์ใหม่
+                </button>
+              </div>
+            </div>
+
+            {/* Printable Header - Only visible when printing */}
+            <div className="hidden print:block text-center border-b-2 border-black pb-4 mb-4">
+              <h1 className="text-2xl font-serif font-black tracking-wide text-black">
+                รายงานคำพยากรณ์ชีวิต เลข 7 ตัว 9 ฐาน (Phopephum)
+              </h1>
+              <p className="text-xs text-black/60 mt-1">
+                สำหรับคุณ {profile?.full_name} • วันเกิด {sevenBaseResult?.thaiLunarDateText}
+              </p>
+            </div>
+
+            {/* Tab Selectors */}
+            <div className="flex overflow-x-auto gap-1.5 pb-2 border-b border-white/5 scrollbar-none print:hidden">
+              {[
+                { id: "charm", label: "🌟 เสน่ห์พื้นดวง", desc: "Natal Charm" },
+                { id: "brand", label: "👑 ภาพลักษณ์ & Brand", desc: "Identity" },
+                { id: "growth", label: "🌱 การพัฒนาตนเอง", desc: "Self-Growth" },
+                { id: "guide", label: "🗺️ ไกด์เส้นทางชีวิต", desc: "Destiny Guide" },
+                { id: "full", label: "📋 รายงานฉบับเต็ม", desc: "Full Report" }
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex flex-col items-center justify-center px-5 py-3 rounded-2xl text-[10px] sm:text-xs font-bold transition-all whitespace-nowrap border cursor-pointer shrink-0 ${
+                    activeTab === tab.id
+                      ? "bg-gold-500/10 border-gold-500 text-gold-300 shadow-[0_0_15px_rgba(198,169,107,0.15)]"
+                      : "glass-hora border-white/5 text-text-secondary hover:border-white/15 hover:text-gold-200"
                   }`}
                 >
-                  <p className="whitespace-pre-line text-xs sm:text-sm tracking-wide">{msg.content}</p>
-                </div>
-              </div>
-            );
-          })}
-          {sending && (
-            <div className="flex gap-5 max-w-[80%] self-start text-left animate-pulse">
-              <div className="w-10 h-10 rounded-2xl flex items-center justify-center border bg-gold-500/10 border-gold-500/30 text-gold-500 glass-hora">
-                <Bot className="w-5 h-5" />
-              </div>
-              <div className="glass-hora border border-white/5 rounded-3xl px-6 py-5 bg-cosmic-900/40">
-                <div className="flex gap-2 items-center justify-center py-1">
-                  <div className="w-2 h-2 bg-gold-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <div className="w-2 h-2 bg-gold-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <div className="w-2 h-2 bg-gold-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-                </div>
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Bottom Actions */}
-        <div className="pt-6 mt-4 border-t border-white/5 space-y-6">
-          
-          {/* Categories Horizontal Scroll */}
-          <div className="flex overflow-x-auto gap-2 pb-2 scrollbar-none no-scrollbar">
-            {promptCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap border ${
-                  activeCategory === cat.id
-                    ? "bg-gold-500/20 border-gold-500 text-gold-300 shadow-[0_0_15px_rgba(198,169,107,0.2)]"
-                    : "glass-hora border-white/5 text-text-secondary hover:border-white/20"
-                }`}
-              >
-                {cat.icon}
-                {cat.name}
-              </button>
-            ))}
-          </div>
-
-          {/* Quick Prompts Chips */}
-          <div className="space-y-3">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {promptChips[activeCategory]?.map((chip, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleQuickPromptClick(chip)}
-                  className="glass-hora hover:border-gold-500/40 border border-white/5 rounded-2xl p-4 text-left flex flex-col gap-1 cursor-pointer transition-all hover:-translate-y-1 bg-cosmic-900/20 group"
-                >
-                  <span className="text-xs font-bold text-gold-100 group-hover:text-gold-300 transition-colors line-clamp-1">
-                    {chip.text}
-                  </span>
-                  <span className="text-[10px] text-gold-500/60 font-medium tracking-wide">
-                    {chip.context}
-                  </span>
+                  <span>{tab.label}</span>
+                  <span className="text-[7.5px] uppercase tracking-widest opacity-60 font-medium mt-0.5">{tab.desc}</span>
                 </button>
               ))}
             </div>
-          </div>
 
-          {/* Input Bar */}
-          <div className="flex gap-3 bg-cosmic-900/60 border border-white/10 focus-within:border-gold-500/50 rounded-3xl p-2.5 transition-all shadow-2xl glass-hora">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage(inputValue)}
-              placeholder="ปรึกษาปัญญาแห่งดวงดาว... เช่น 'ยามนี้เหมาะเจรจาธุรกิจอย่างไร?'"
-              className="flex-1 bg-transparent border-none text-xs sm:text-sm text-foreground outline-none px-4 py-2 cursor-text placeholder:text-text-secondary/40"
-              disabled={sending}
-            />
-            <button
-              onClick={() => handleSendMessage(inputValue)}
-              disabled={sending || !inputValue.trim()}
-              className="w-12 h-12 rounded-2xl bg-gradient-to-br from-gold-500 to-gold-liquid text-cosmic-950 flex items-center justify-center cursor-pointer transition-all hover:scale-105 active:scale-95 disabled:opacity-50 flex-shrink-0 shadow-lg"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </div>
+            {/* Structured Report Content Block */}
+            <HoraCard glow>
+              <div className="p-2 sm:p-4 leading-relaxed print:p-0 print:border-none print:shadow-none">
+                {activeTab === "full" ? (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 pb-3 border-b border-white/5 print:hidden">
+                      <BookOpen className="w-5 h-5 text-gold-400" />
+                      <h2 className="text-base font-serif font-bold text-gradient-gold uppercase tracking-wider">
+                        รายงานคำทำนายดวงชะตากำเนิดฉบับเต็ม
+                      </h2>
+                    </div>
+                    {renderStyledMarkdown(prediction)}
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-2 pb-3 border-b border-white/5 print:hidden">
+                      {activeTab === "charm" && <Sparkles className="w-5 h-5 text-gold-400" />}
+                      {activeTab === "brand" && <Award className="w-5 h-5 text-gold-400" />}
+                      {activeTab === "growth" && <Activity className="w-5 h-5 text-gold-400" />}
+                      {activeTab === "guide" && <Compass className="w-5 h-5 text-gold-400" />}
+                      
+                      <h2 className="text-base font-serif font-bold text-gradient-gold uppercase tracking-wider">
+                        {activeTab === "charm" && "ถอดรหัสเสน่ห์พื้นดวงชะตา (Natal Charm)"}
+                        {activeTab === "brand" && "ภาพลักษณ์ดึงดูด & branding planner"}
+                        {activeTab === "growth" && "แนวทางการพัฒนาตนเองและกิจกรรมเสริมพลัง"}
+                        {activeTab === "guide" && "พยากรณ์บำบัดและเข็มทิศไกด์เส้นทางชีวิต (Destiny Map)"}
+                      </h2>
+                    </div>
+                    {renderStyledMarkdown(getSectionHtml(activeTab))}
+                  </div>
+                )}
+              </div>
+            </HoraCard>
 
-          <div className="flex items-center justify-center gap-2 text-xxs text-text-secondary/40 font-bold uppercase tracking-[0.2em] pb-16 sm:pb-0">
-            <ShieldCheck className="w-3.5 h-3.5 text-gold-500/50" />
-            <span>Secured by Supabase RLS · Wisdom OS</span>
-          </div>
-        </div>
-      </main>
+            {/* Printable Footer */}
+            <div className="hidden print:block text-center border-t border-black/20 pt-4 mt-8 text-xxs text-black/40">
+              เอกสารลิขสิทธิ์เฉพาะบุคคลระบบพยากรณ์ 7 ตัว 9 ฐาน Phopephum • Secured by Supabase RLS
+            </div>
 
-      {/* Bottom Navigation — Persistent */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t border-white/10 flex items-stretch shadow-[0_-4px_30px_rgba(0,0,0,0.8)]"
-        style={{ backgroundColor: "rgba(2,6,23,0.97)", backdropFilter: "blur(24px)", WebkitBackdropFilter: "blur(24px)", height: "64px" }}>
-        <Link href="/dashboard" className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors" style={{ color: "var(--hora-text-muted)" }}>
-          <span className="text-lg leading-none">◉</span>
-          <span className="text-[9px] font-medium tracking-wider">ภาพรวมดวง</span>
-        </Link>
-        <Link href="/dashboard/planner" className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors" style={{ color: "var(--hora-text-muted)" }}>
-          <span className="text-lg leading-none">📅</span>
-          <span className="text-[9px] font-medium tracking-wider">Planner</span>
-        </Link>
-        <Link href="/dashboard/coach" className="flex-1 flex flex-col items-center justify-center gap-1 relative" style={{ background: "linear-gradient(180deg, rgba(217,188,130,0.06) 0%, transparent 100%)" }}>
-          <span className="text-lg leading-none" style={{ color: "var(--hora-gold)", filter: "drop-shadow(0 0 8px rgba(217,188,130,0.6))" }}>✦</span>
-          <span className="text-[9px] font-bold tracking-wider" style={{ color: "var(--hora-gold)" }}>Wisdom Coach</span>
-          <span className="absolute bottom-0 w-8 h-0.5 rounded-t-full" style={{ background: "linear-gradient(90deg, transparent, var(--hora-gold), transparent)" }} />
-        </Link>
-        <Link href="/dashboard" className="flex-1 flex flex-col items-center justify-center gap-1 transition-colors" style={{ color: "var(--hora-text-muted)" }}>
-          <span className="text-lg leading-none">🕐</span>
-          <span className="text-[9px] font-medium tracking-wider">ยามปัจจุบัน</span>
-        </Link>
+            {/* Proactive branding card at bottom */}
+            <div className="p-5 rounded-2xl flex flex-col sm:flex-row items-center gap-4 bg-gradient-to-br from-gold-500/10 via-cosmic-950 to-cosmic-950 border border-gold-500/20 shadow-xl print:hidden">
+              <div className="w-12 h-12 rounded-full bg-gold-500/10 border border-gold-500/30 flex items-center justify-center text-gold-300 text-lg shrink-0">
+                ⭐
+              </div>
+              <div className="space-y-1 text-center sm:text-left">
+                <h4 className="text-xs font-bold text-gold-200">
+                  ต้องการเจาะลึกคำพยากรณ์รายวัน หรือวิเคราะห์ยามมงคลเพื่อเริ่มต้นกิจการสำคัญ?
+                </h4>
+                <p className="text-[10px] text-hora-text-muted leading-relaxed">
+                  คุณสามารถเปิดใช้ระบบ **แพลนเนอร์กาลเวลา (Planner)** ในแถบเมนูนำทาง เพื่อเช็กปฏิทินยามจรแบบวินาทีต่อวินาทีเฉพาะดวงชะตาของบุคคลได้ทันทีครับ
+                </p>
+              </div>
+              <Link 
+                href="/dashboard/planner" 
+                className="px-5 py-2.5 rounded-xl text-xxs font-bold uppercase tracking-wider bg-gold-500 text-cosmic-950 hover:bg-gold-400 active:scale-95 transition-all ml-auto shrink-0"
+              >
+                เปิดแพลนเนอร์ 📅
+              </Link>
+            </div>
+            
+          </div>
+        )}
+
       </div>
-    </div>
+    </DashboardLayout>
   );
 }
