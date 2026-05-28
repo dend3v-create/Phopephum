@@ -142,19 +142,19 @@ export interface CalendarRange {
 }
 
 const LUNAR_CALENDAR_2569: CalendarRange[] = [
-  { start: new Date("2026-01-01"), end: new Date("2026-01-17"), monthVal: 2, monthName: "เดือน 2", zodiac: "มะเส็ง" },
-  { start: new Date("2026-01-18"), end: new Date("2026-02-16"), monthVal: 3, monthName: "เดือน 3", zodiac: "มะเส็ง" },
-  { start: new Date("2026-02-17"), end: new Date("2026-03-17"), monthVal: 4, monthName: "เดือน 4", zodiac: "มะเส็ง" },
-  { start: new Date("2026-03-18"), end: new Date("2026-04-16"), monthVal: 5, monthName: "เดือน 5", zodiac: "มะเมีย" }, // เริ่มปีมะเมีย ขึ้น 1 ค่ำ เดือน 5
-  { start: new Date("2026-04-17"), end: new Date("2026-05-15"), monthVal: 6, monthName: "เดือน 6", zodiac: "มะเมีย" },
-  { start: new Date("2026-05-16"), end: new Date("2026-06-14"), monthVal: 7, monthName: "เดือน 7", zodiac: "มะเมีย" },
-  { start: new Date("2026-06-15"), end: new Date("2026-07-13"), monthVal: 8, monthName: "เดือน 8 (แรก)", zodiac: "มะเมีย" },
-  { start: new Date("2026-07-14"), end: new Date("2026-08-12"), monthVal: 13, monthName: "เดือน 8 หลัง (8-8)", zodiac: "มะเมีย" }, // เดือน 8-8 (แปดหลัง)
-  { start: new Date("2026-08-13"), end: new Date("2026-09-10"), monthVal: 9, monthName: "เดือน 9", zodiac: "มะเมีย" },
-  { start: new Date("2026-09-11"), end: new Date("2026-10-10"), monthVal: 10, monthName: "เดือน 10", zodiac: "มะเมีย" },
-  { start: new Date("2026-10-11"), end: new Date("2026-11-08"), monthVal: 11, monthName: "เดือน 11", zodiac: "มะเมีย" },
-  { start: new Date("2026-11-09"), end: new Date("2026-12-08"), monthVal: 12, monthName: "เดือน 12", zodiac: "มะเมีย" },
-  { start: new Date("2026-12-09"), end: new Date("2026-12-31"), monthVal: 1, monthName: "เดือน 1 (อ้าย)", zodiac: "มะเมีย" }
+  { start: new Date("2026-01-01"), end: new Date("2026-01-17"), monthVal: 2, monthName: "เดือน 2", zodiac: "snake" },
+  { start: new Date("2026-01-18"), end: new Date("2026-02-16"), monthVal: 3, monthName: "เดือน 3", zodiac: "snake" },
+  { start: new Date("2026-02-17"), end: new Date("2026-03-17"), monthVal: 4, monthName: "เดือน 4", zodiac: "snake" },
+  { start: new Date("2026-03-18"), end: new Date("2026-04-16"), monthVal: 5, monthName: "เดือน 5", zodiac: "horse" }, // เริ่มปีมะเมีย ขึ้น 1 ค่ำ เดือน 5
+  { start: new Date("2026-04-17"), end: new Date("2026-05-15"), monthVal: 6, monthName: "เดือน 6", zodiac: "horse" },
+  { start: new Date("2026-05-16"), end: new Date("2026-06-14"), monthVal: 7, monthName: "เดือน 7", zodiac: "horse" },
+  { start: new Date("2026-06-15"), end: new Date("2026-07-13"), monthVal: 8, monthName: "เดือน 8 (แรก)", zodiac: "horse" },
+  { start: new Date("2026-07-14"), end: new Date("2026-08-12"), monthVal: 13, monthName: "เดือน 8 หลัง (8-8)", zodiac: "horse" }, // เดือน 8-8 (แปดหลัง)
+  { start: new Date("2026-08-13"), end: new Date("2026-09-10"), monthVal: 9, monthName: "เดือน 9", zodiac: "horse" },
+  { start: new Date("2026-09-11"), end: new Date("2026-10-10"), monthVal: 10, monthName: "เดือน 10", zodiac: "horse" },
+  { start: new Date("2026-10-11"), end: new Date("2026-11-08"), monthVal: 11, monthName: "เดือน 11", zodiac: "horse" },
+  { start: new Date("2026-11-09"), end: new Date("2026-12-08"), monthVal: 12, monthName: "เดือน 12", zodiac: "horse" },
+  { start: new Date("2026-12-09"), end: new Date("2026-12-31"), monthVal: 1, monthName: "เดือน 1 (อ้าย)", zodiac: "horse" }
 ];
 
 export function getPreciseLunarInfo(date: Date, overrideMonth?: number, overrideZodiac?: ZodiacAnimal): PreciseLunarInfo {
