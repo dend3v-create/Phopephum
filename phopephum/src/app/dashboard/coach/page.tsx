@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase";
 import { calculateHora, getCurrentHora, PLANETS } from "@/engine/phopephum-calculator";
 import { 
   ArrowLeft, Sparkles, Send, Bot, User, Zap, MessageSquare, 
-  HelpCircle, ShieldCheck, Heart, Award, Moon, Sun, Compass, Calendar, Download
+  HelpCircle, ShieldCheck, Heart, Award, Moon, Sun, Compass, Calendar, Download, Clock
 } from "lucide-react";
 import Link from "next/link";
 
@@ -376,9 +376,9 @@ export default function CoachPage() {
           <Sparkles className="w-4 h-4 text-gold-500" />
           <span className="text-[9px] font-bold tracking-wider">AI Coach</span>
         </Link>
-        <Link href="/dashboard/report" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
-          <Download className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
-          <span className="text-[9px] font-medium tracking-wider">Reports</span>
+        <Link href="/dashboard" className="flex flex-col items-center gap-1 text-text-secondary hover:text-gold-500 transition-colors">
+          <Clock className="w-4 h-4 text-text-secondary hover:text-gold-500 transition-colors" />
+          <span className="text-[9px] font-medium tracking-wider">ยามปัจจุบัน</span>
         </Link>
       </div>
     </div>
