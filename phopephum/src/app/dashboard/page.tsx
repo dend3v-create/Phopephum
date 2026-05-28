@@ -236,7 +236,7 @@ export default function DashboardPage() {
   const activeYam = ashtaResult?.currentHora;
 
   return (
-    <DashboardLayout pageTitle="แดชบอร์ด">
+    <DashboardLayout pageTitle="แดชบอร์ด" isAdmin={profile?.role === "admin" || profile?.role === "operator"}>
       <div className="space-y-6">
         {/* Profile Section */}
         {profile && (

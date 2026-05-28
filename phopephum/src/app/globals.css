@@ -404,3 +404,15 @@ h1, h2, h3, h4, h5, h6,
     font-size: 16px !important;
   }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+ * Safe Area Utilities (iOS notch / Android gesture bar)
+ * ───────────────────────────────────────────────────────────────────────────── */
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 0px);
+}

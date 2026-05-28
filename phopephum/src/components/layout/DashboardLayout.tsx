@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { usePathname, useRouter } from "next/navigation";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types
@@ -14,6 +15,8 @@ export interface DashboardLayoutProps {
   showHeader?: boolean;
   /** ชื่อหน้า */
   pageTitle?: string;
+  /** แสดงปุ่ม Admin */
+  isAdmin?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -25,7 +28,10 @@ export function DashboardLayout({
   hideBottomNav = false,
   showHeader = true,
   pageTitle,
+  isAdmin = false,
 }: DashboardLayoutProps) {
+  const router = useRouter();
+
   return (
     <div
       style={{
@@ -65,16 +71,37 @@ export function DashboardLayout({
           >
             PHOPEPHUM
           </span>
-          {pageTitle && (
-            <span
-              style={{
-                color: "var(--hora-text-muted)",
-                fontSize: "13px",
-              }}
-            >
-              {pageTitle}
-            </span>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {pageTitle && (
+              <span
+                style={{
+                  color: "var(--hora-text-muted)",
+                  fontSize: "13px",
+                }}
+              >
+                {pageTitle}
+              </span>
+            )}
+            {isAdmin && (
+              <button
+                onClick={() => router.push("/admin")}
+                style={{
+                  fontSize: "10px",
+                  fontWeight: 700,
+                  letterSpacing: "0.1em",
+                  textTransform: "uppercase",
+                  color: "#ef4444",
+                  background: "rgba(239,68,68,0.08)",
+                  border: "1px solid rgba(239,68,68,0.3)",
+                  borderRadius: "6px",
+                  padding: "4px 10px",
+                  cursor: "pointer",
+                }}
+              >
+                ADMIN
+              </button>
+            )}
+          </div>
         </header>
       )}
 
@@ -167,15 +194,24 @@ interface NavTab {
 }
 
 const NAV_TABS: NavTab[] = [
-  { id: "horoscope", label: "ดวงชะตา", icon: "◎", href: "/dashboard" },
-  { id: "planner",   label: "แพลนเนอร์", icon: "📅", href: "/planner" },
-  { id: "ai-coach",  label: "โค้ช AI",   icon: "✦",  href: "/ai-coach" },
-  { id: "report",    label: "รายงาน",   icon: "⬇",  href: "/report" },
+  { id: "horoscope", label: "ดวงชะตา",   icon: "◎",  href: "/dashboard" },
+  { id: "planner",   label: "แพลนเนอร์", icon: "📅", href: "/dashboard/planner" },
+  { id: "ai-coach",  label: "โค้ช AI",   icon: "✦",  href: "/dashboard/coach" },
+  { id: "report",    label: "รายงาน",    icon: "⬇",  href: "/dashboard/report" },
 ];
 
 function BottomNav() {
-  // ใน Next.js จริงใช้ usePathname() แทน
-  const [active, setActive] = React.useState<TabId>("horoscope");
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // หา active tab จาก pathname จริง
+  const active = React.useMemo<TabId>(() => {
+    if (pathname === "/dashboard") return "horoscope";
+    if (pathname.startsWith("/dashboard/planner")) return "planner";
+    if (pathname.startsWith("/dashboard/coach")) return "ai-coach";
+    if (pathname.startsWith("/dashboard/report")) return "report";
+    return "horoscope";
+  }, [pathname]);
 
   return (
     <nav
@@ -197,7 +233,7 @@ function BottomNav() {
       {NAV_TABS.map((tab) => (
         <button
           key={tab.id}
-          onClick={() => setActive(tab.id)}
+          onClick={() => router.push(tab.href)}
           style={{
             flex: 1,
             display: "flex",
@@ -211,6 +247,7 @@ function BottomNav() {
             paddingTop: "8px",
             paddingBottom: "4px",
             transition: "opacity 0.15s",
+            position: "relative",
           }}
         >
           <span style={{ fontSize: "18px", lineHeight: 1 }}>{tab.icon}</span>
