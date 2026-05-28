@@ -429,7 +429,7 @@ export default function DashboardPage() {
                 <div className="bg-cosmic-950/60 p-4 rounded-2xl border border-white/5 flex flex-col justify-between">
                   <span className="text-[10px] text-gold-400 uppercase font-bold tracking-widest block mb-1">ภูมิวิญญาณเด่น (ทักษาจร)</span>
                   <div className="flex gap-2 flex-wrap mt-1">
-                    {sevenBaseResult.taksa.slice(0, 3).map((t, idx) => (
+                    {sevenBaseResult.taksa.slice(0, 3).map((t: any, idx: number) => (
                       <span key={idx} className="bg-gold-500/10 border border-gold-500/20 text-gold-300 px-2.5 py-0.5 rounded-full text-[10px] font-medium">
                         {t.category}: ดาว {t.planet.split(" ")[0]}
                       </span>
