@@ -200,8 +200,8 @@ interface NavTab {
 const NAV_TABS: NavTab[] = [
   { id: "horoscope", label: "ดวงชะตา",   icon: "◎",  href: "/dashboard" },
   { id: "planner",   label: "แพลนเนอร์", icon: "📅", href: "/dashboard/planner" },
-  { id: "ai-coach",  label: "โค้ช AI",   icon: "✦",  href: "/dashboard/coach" },
-  { id: "report",    label: "บริการ",    icon: "☰",  href: "/dashboard/services" },
+  { id: "ai-coach",  label: "โค้ช",   icon: "✦",  href: "/dashboard/coach" },
+  { id: "report",    label: "Wisdom Coach",    icon: "☰",  href: "/dashboard/services" },
 ];
 
 function BottomNav() {
