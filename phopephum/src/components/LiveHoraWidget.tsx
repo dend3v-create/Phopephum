@@ -72,12 +72,12 @@ export default function LiveHoraWidget() {
               </div>
               <span className="text-[10px] font-bold text-gold-500/50 uppercase tracking-widest mb-2 block">ดาวผู้ปกครองยามย่อย</span>
               <div className="flex items-center gap-4">
-                <span className="text-4xl sm:text-5xl filter drop-shadow-[0_0_15px_rgba(198,169,107,0.4)]" style={{ color: current.subSlot.planet.color }}>
-                  {current.subSlot.planet.symbol}
+                <span className="text-4xl sm:text-5xl filter drop-shadow-[0_0_15px_rgba(198,169,107,0.4)]" style={{ color: current.subSlot?.planet?.color }}>
+                  {current.subSlot?.planet?.symbol}
                 </span>
                 <div className="min-w-0">
-                  <strong className="text-lg font-serif font-bold text-foreground block tracking-wide">{current.subSlot.planet.nameThai}</strong>
-                  <p className="text-xs text-text-secondary/80 leading-relaxed italic line-clamp-2 mt-0.5">{current.subSlot.planet.description}</p>
+                  <strong className="text-lg font-serif font-bold text-foreground block tracking-wide">{current.subSlot?.planet?.nameThai}</strong>
+                  <p className="text-xs text-text-secondary/80 leading-relaxed italic line-clamp-2 mt-0.5">{current.subSlot?.planet?.description}</p>
                 </div>
               </div>
             </div>
@@ -107,12 +107,12 @@ export default function LiveHoraWidget() {
           <div className="text-center z-10">
             <span
               className="text-6xl sm:text-7xl block mb-2 filter drop-shadow-[0_0_20px_rgba(198,169,107,0.6)]"
-              style={{ color: current.subSlot.planet.color }}
+              style={{ color: current.subSlot?.planet?.color }}
             >
-              {current.subSlot.planet.symbol}
+              {current.subSlot?.planet?.symbol}
             </span>
             <span className="text-xs font-serif font-bold text-gold-300 uppercase tracking-[0.2em] block">
-              {current.subSlot.planet.nameThai}
+              {current.subSlot?.planet?.nameThai}
             </span>
             <span className="text-[9px] block text-text-secondary/40 font-bold uppercase tracking-widest mt-1">
               ASTRA REGENT
@@ -126,8 +126,8 @@ export default function LiveHoraWidget() {
         {[
           { label: "วันมงคลเด่น", value: `วัน${horaResult.dayNameThai}`, icon: <Target className="w-3 h-3" /> },
           { label: "ดาวเจ้าของวัน", value: horaResult.dayRuler.nameThai, icon: <Compass className="w-3 h-3" /> },
-          { label: "ภาคกาล", value: current.subSlot.period === "day" ? "กลางวัน (ทิวา)" : "กลางคืน (ราตรี)", icon: <Clock className="w-3 h-3" /> },
-          { label: "ยามถัดไป", value: current.subIndex < 8 ? current.majorSlot.subSlots[current.subIndex].planet.nameThai : "ยามใหญ่ถัดไป", icon: <Sparkles className="w-3 h-3" />, premium: true }
+          { label: "ภาคกาล", value: current.subSlot?.period === "day" ? "กลางวัน (ทิวา)" : "กลางคืน (ราตรี)", icon: <Clock className="w-3 h-3" /> },
+          { label: "ยามถัดไป", value: current.majorSlot.subSlots[current.subIndex]?.planet?.nameThai || "ยามใหญ่ถัดไป", icon: <Sparkles className="w-3 h-3" />, premium: true }
         ].map((stat, i) => (
           <div key={i} className="space-y-1.5 p-3 rounded-xl hover:bg-white/5 transition-colors">
             <span className="text-[10px] font-bold text-text-secondary/40 uppercase tracking-widest flex items-center gap-1.5">
