@@ -61,3 +61,17 @@ export function getProvincesByRegion(region: 'กลาง' | 'เหนือ' 
     .filter(([, v]) => v.region === region)
     .map(([k]) => k)
 }
+
+/**
+ * ดึงพิกัดรูปแบบ { latitude, longitude } (สำหรับ chartBuilder / ephemeris)
+ * @param provinceName ชื่อจังหวัดภาษาไทย
+ * @throws Error ถ้าไม่พบจังหวัด
+ */
+export function getProvinceLatLng(provinceName: string): { latitude: number; longitude: number } {
+  const data = provincesData as Record<string, { lat: number; lng: number; region: string }>
+  const province = data[provinceName]
+  if (!province) {
+    throw new Error(`ไม่พบข้อมูลจังหวัด: "${provinceName}"`)
+  }
+  return { latitude: province.lat, longitude: province.lng }
+}

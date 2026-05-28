@@ -20,13 +20,23 @@ import { calculateAtthakarn } from '../calculators/calculateAtthakarn'
 import { calculateNavamsa } from '../calculators/calculateNavamsa'
 import { applyRules } from '../rules/sevenBaseRules'
 import { HoroscopeInput, HoroscopeData, HoroscopeResult } from '../types/horoscope'
+// ── New modules (lunar-based + ephemeris) ──────────────────────────────────────
+import { getThaiLunarDate } from '../core/lunarCalendar'
+import { getProvinceCoords, getProvinceLatLng } from '../core/geoLocation'
+import { convertBirthTime } from '../core/astroTime'
+import { calculateSevenBaseFull } from '../calculators/sevenBase'
+import { calculateNineBaseFull } from '../calculators/nineBase'
+import { calculateTaksa as calculateTaksa8, getCurrentTaksa } from '../calculators/taksa'
+import { calculateAgeCycle } from '../calculators/ageCycle'
+import { buildEmperorChart } from '../calculators/emperorChart'
+import { buildBirthChart } from './chartBuilder'
 
 const DAY_NAMES_THAI = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัส', 'ศุกร์', 'เสาร์']
 const ZODIAC_YEARS = ['ชวด', 'ฉลู', 'ขาล', 'เถาะ', 'มะโรง', 'มะเส็ง', 'มะเมีย', 'มะแม', 'วอก', 'ระกา', 'จอ', 'กุน']
 
 export async function horoscopeEngine(
-  input: HoroscopeInput
-): Promise<Omit<HoroscopeResult, 'ragContext' | 'prediction'>> {
+  input: HoroscopeInput & { province?: string }
+): Promise<Omit<HoroscopeResult, 'ragContext' | 'prediction'> & Record<string, unknown>> {
   const birth = new Date(input.birthDate)
 
   const day   = birth.getDate()
@@ -71,7 +81,48 @@ export async function horoscopeEngine(
   // ─── Rule Engine ───────────────────────────────────────────────────────
   const rules = applyRules(data)
 
-  return { input, data, rules }
+  // ─── Lunar + Ephemeris Layer (เพิ่มเติม) ──────────────────────────────
+  const lunar          = getThaiLunarDate(input.birthDate)
+  const astroTime      = input.birthTime ? convertBirthTime(input.birthTime) : null
+  const sevenBase      = calculateSevenBaseFull(lunar.lunarDay, lunar.lunarMonth, lunar.lunarYear)
+  const nineBase       = calculateNineBaseFull([sevenBase.dayBase, sevenBase.monthBase, sevenBase.yearBase])
+  const taksa8         = calculateTaksa8(dayOfWeek)
+  const currentTaksa8  = getCurrentTaksa(dayOfWeek)
+  const ageCycle       = calculateAgeCycle(birth.getFullYear())
+  const emperorChart   = buildEmperorChart(
+    [sevenBase.dayBase, sevenBase.monthBase, sevenBase.yearBase],
+    nineBase.bases,
+    taksa8,
+  )
+
+  // Province + BirthChart (optional — ต้องมี province)
+  const province    = (input as HoroscopeInput & { province?: string }).province
+  const coords      = province ? getProvinceCoords(province) : null
+  const birthChart  = (province && input.birthTime)
+    ? await buildBirthChart(
+        input.birthDate,
+        input.birthTime,
+        coords!.lat,
+        coords!.lng,
+      ).catch(() => null)
+    : null
+
+  return {
+    input,
+    data,
+    rules,
+    // Extended lunar layer
+    lunar,
+    astroTime,
+    sevenBase,
+    nineBase,
+    taksa8,
+    currentTaksa8,
+    ageCycle,
+    emperorChart,
+    coordinates: coords ? { lat: coords.lat, lng: coords.lng, province: coords.province } : null,
+    birthChart,
+  }
 }
 
 export { getPowerMeaning, getHouseMeaning }

@@ -25,6 +25,14 @@ type LunarRecord = {
 }
 
 /**
+ * ดึงข้อมูลวันจันทรคติจาก string "YYYY-MM-DD"
+ * ใช้ตาราง 100 ปี → fallback Suriyayat (ไม่ throw)
+ */
+export function getThaiLunarDate(dateStr: string): LunarDate {
+  return getLunarDate(new Date(dateStr))
+}
+
+/**
  * ดึงข้อมูลวันจันทรคติจาก Date (Gregorian)
  * ใช้ตาราง 100 ปี → fallback Suriyayat
  */
