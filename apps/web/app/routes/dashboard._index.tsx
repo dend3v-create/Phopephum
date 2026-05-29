@@ -188,7 +188,7 @@ export default function DashboardIndex() {
       </div>
 
       {/* Upgrade banner (free tier) */}
-      {subscription === "free" && (
+      {membershipType === "free" && (
         <Card className="border-[#C9A96E]/30 bg-gradient-to-br from-[#15120F] to-[#1A1410]">
           <div className="flex items-center justify-between gap-4">
             <div>
