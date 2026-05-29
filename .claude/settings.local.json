@@ -34,7 +34,9 @@
       "Bash(pnpm run:*)",
       "Bash(find apps/web/app -name \"*.js\" -type f -delete)",
       "Bash(pnpm --filter @phopephum/engine typecheck)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(node -e ':*)",
+      "Bash(pnpm build:*)"
     ]
   }
 }

@@ -6,8 +6,8 @@
  *
  * Lookup priority (highest → lowest):
  *   1. THAI_LUNAR_NEW_MONTH  — hand-verified specific years (override)
- *   2. LUNAR_LOOKUP_EXTENDED — 400-year table (CE 1757–2157)
- *   3. lunar100year.json     — generated via SunCalc (CE 1920–2040), loaded lazily
+ *   2. lunar100year.json     — Meeus algorithm ±2 min (CE 1920–2040)
+ *   3. LUNAR_LOOKUP_EXTENDED — 400-year table (CE 1757–2157)
  *   4. Suriyayat approximation fallback
  *
  * Key format: "ceYear-thaiMonth" → "YYYY-MM-DD" (ขึ้น 1 ค่ำ, Bangkok time)
@@ -48,8 +48,14 @@ const THAI_MONTH_NAMES: Record<number, string> = {
 // Source: ปฏิทินสุริยยาตร์มาตรฐาน พ.ศ. 2500-2570
 
 import rawLunarData from '../datasets/thaiLunarCalendar.json';
+import rawMeeus from '../datasets/lunar100year.json';
 
 const THAI_LUNAR_NEW_MONTH: Record<string, string> = rawLunarData;
+
+// Meeus-generated 121-year table — strip metadata keys (prefix "_")
+const LUNAR_MEEUS: Record<string, string> = Object.fromEntries(
+  Object.entries(rawMeeus as Record<string, string>).filter(([k]) => !k.startsWith('_'))
+);
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -70,11 +76,11 @@ function zodiacToNumber(animal: ZodiacKey): number {
   return idx > 7 ? idx - 7 : idx
 }
 
-// ─── Merged lookup: LUNAR_LOOKUP_EXTENDED + THAI_LUNAR_NEW_MONTH ─────────────
-// THAI_LUNAR_NEW_MONTH (hand-verified) overrides LUNAR_LOOKUP_EXTENDED
+// ─── Merged lookup (priority: hand-verified > Meeus > Extended) ──────────────
 const MERGED_LOOKUP: Record<string, string> = {
-  ...LUNAR_LOOKUP_EXTENDED,
-  ...THAI_LUNAR_NEW_MONTH,
+  ...LUNAR_LOOKUP_EXTENDED,   // layer 3: 400-year table baseline
+  ...LUNAR_MEEUS,             // layer 2: Meeus ±2 min overrides 1920-2040
+  ...THAI_LUNAR_NEW_MONTH,    // layer 1: hand-verified (highest authority)
 }
 
 // ─── Core: Gregorian → Thai Lunar Month ──────────────────────────────────────

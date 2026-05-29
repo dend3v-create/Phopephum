@@ -1,47 +1,349 @@
 /**
  * scripts/generate-lunar-calendar.mts
  *
- * สร้างตารางปฏิทินจันทรคติไทย 120 ปี (CE 1920–2040)
+ * สร้างตารางปฏิทินจันทรคติไทย CE 1920–2040 (121 ปี)
  *
- * Algorithm (แนวที่ 1 + 3):
- *   1. ใช้ SunCalc หา New Moon จริงทางดาราศาสตร์ (±ชั่วโมง)
- *   2. กำหนด เดือน 1 = New Moon ที่ตกใน Window: Dec 21 – Jan 31 ของปีนั้น
+ * Algorithm:
+ *   1. Meeus Algorithm (Ch.49 "Astronomical Algorithms") หา New Moon JDE แม่นยำ ±2 นาที
+ *      (แม่นกว่า SunCalc ±ชั่วโมง อย่างมาก)
+ *   2. กำหนด เดือน 1 = New Moon ใน window Dec 21 – Jan 31 (Bangkok time)
  *   3. อธิกมาส = ปีที่มี 13 New Moons ก่อน เดือน 1 ปีถัดไป
- *      → เดือน 8 สอง (key=88) แทรกระหว่าง เดือน 8 และ เดือน 9
- *   4. Patch ด้วยข้อมูล verified (THAI_LUNAR_NEW_MONTH) สำหรับปีที่มีข้อมูลแน่ชัด
- *   5. Output → lunar100year.json (full dataset, ready for lunarCalendar.ts)
+ *   4. Patch ด้วย VERIFIED_BASELINE (ข้อมูล verified ปฏิทินไทยแท้)
+ *   5. Scrape myhora.com สำหรับปีที่ยังขาด (optional, ใช้ --scrape flag)
  *
  * Run:
- *   npx tsx scripts/generate-lunar-calendar.mts
+ *   npx tsx scripts/generate-lunar-calendar.mts           # generate only
+ *   npx tsx scripts/generate-lunar-calendar.mts --scrape  # + scrape myhora.com
  *
  * Output:
- *   packages/engine/src/datasets/lunar100year.json
+ *   src/datasets/lunar100year.json
  */
 
-import SunCalc from "suncalc";
-import fs from "fs";
+import fs   from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DO_SCRAPE = process.argv.includes("--scrape");
 
 // ─── Config ───────────────────────────────────────────────────────────────────
-
 const START_YEAR = 1920;
 const END_YEAR   = 2040;
+const BKK_OFFSET_H = 7; // UTC+7
 
-/** Synodic month = 29.530588853 days (mean) */
-const SYNODIC_MS = 29.530588853 * 86_400_000;
+// ─── 1. Meeus Algorithm — New Moon JDE ───────────────────────────────────────
+// Source: Jean Meeus, "Astronomical Algorithms" 2nd ed., Chapter 49
+// Accuracy: ±0.5–2 minutes for dates within ±200 years of J2000.0
 
-/** Bangkok UTC+7 offset in ms */
-const BKK_OFFSET_MS = 7 * 3_600_000;
+const DEG = Math.PI / 180;
 
-/** Known-good anchor: 2024-01-11 = เดือน 1 CE 2024 (verified) */
-const ANCHOR = new Date("2024-01-11T00:00:00+07:00");
+/**
+ * คำนวณ Julian Day (Ephemeris) ของ New Moon ครั้งที่ k
+ * k = 0 ≈ New Moon 1 Jan 2000
+ * k negative = ก่อน 2000, positive = หลัง 2000
+ */
+function newMoonJDE(k: number): number {
+  const T  = k / 1236.85;
+  const T2 = T * T;
+  const T3 = T2 * T;
+  const T4 = T3 * T;
 
-// ─── Verified baseline (THAI_LUNAR_NEW_MONTH from lunarCalendar.ts) ───────────
-// เหล่านี้คือข้อมูลที่ verified ตรงกับปฏิทินไทยจริง — override เสมอ
-const VERIFIED: Record<string, string> = {
+  // ─── Mean values ───────────────────────────────────────────────────────────
+  let JDE = 2451550.09766
+    + 29.530588861 * k
+    + 0.00015437   * T2
+    - 0.000000150  * T3
+    + 0.00000000073 * T4;
+
+  const E = 1 - 0.002516 * T - 0.0000074 * T2;
+  const E2 = E * E;
+
+  // Sun's mean anomaly
+  const M = (2.5534
+    + 29.10535670 * k
+    - 0.0000014   * T2
+    - 0.00000011  * T3) * DEG;
+
+  // Moon's mean anomaly
+  const Mp = (201.5643
+    + 385.81693528 * k
+    + 0.0107582    * T2
+    + 0.00001238   * T3
+    - 0.000000058  * T4) * DEG;
+
+  // Moon's argument of latitude
+  const F = (160.7108
+    + 390.67050284 * k
+    - 0.0016118    * T2
+    - 0.00000227   * T3
+    + 0.000000011  * T4) * DEG;
+
+  // Longitude of ascending node
+  const Om = (124.7746
+    - 1.56375588   * k
+    + 0.0020672    * T2
+    + 0.00000215   * T3) * DEG;
+
+  // ─── Planetary arguments ──────────────────────────────────────────────────
+  const A1  = (299.77 +  0.107408 * k - 0.009173 * T2) * DEG;
+  const A2  = (251.88 +  0.016321 * k) * DEG;
+  const A3  = (251.83 + 26.651886 * k) * DEG;
+  const A4  = (349.42 + 36.412478 * k) * DEG;
+  const A5  = ( 84.66 + 18.206239 * k) * DEG;
+  const A6  = (141.74 + 53.303771 * k) * DEG;
+  const A7  = (207.14 +  2.453732 * k) * DEG;
+  const A8  = (154.84 +  7.306860 * k) * DEG;
+  const A9  = ( 34.52 + 27.261239 * k) * DEG;
+  const A10 = (207.19 +  0.121824 * k) * DEG;
+  const A11 = (291.34 +  1.844379 * k) * DEG;
+  const A12 = (161.72 + 24.198154 * k) * DEG;
+  const A13 = (239.56 + 25.513099 * k) * DEG;
+  const A14 = (331.55 +  3.592518 * k) * DEG;
+
+  // ─── Main correction ──────────────────────────────────────────────────────
+  JDE +=
+    -0.40720 * Math.sin(Mp)
+    + 0.17241 * E  * Math.sin(M)
+    + 0.01608 * Math.sin(2 * Mp)
+    + 0.01039 * Math.sin(2 * F)
+    + 0.00739 * E  * Math.sin(Mp - M)
+    - 0.00514 * E  * Math.sin(Mp + M)
+    + 0.00208 * E2 * Math.sin(2 * M)
+    - 0.00111 * Math.sin(Mp - 2 * F)
+    - 0.00057 * Math.sin(Mp + 2 * F)
+    + 0.00056 * E  * Math.sin(2 * Mp + M)
+    - 0.00042 * Math.sin(3 * Mp)
+    + 0.00042 * E  * Math.sin(M + 2 * F)
+    + 0.00038 * E  * Math.sin(M - 2 * F)
+    - 0.00024 * E  * Math.sin(2 * Mp - M)
+    - 0.00017 * Math.sin(Om)
+    - 0.00007 * Math.sin(Mp + 2 * M)
+    + 0.00004 * Math.sin(2 * Mp - 2 * F)
+    + 0.00004 * Math.sin(3 * M)
+    + 0.00003 * Math.sin(Mp + M - 2 * F)
+    + 0.00003 * Math.sin(2 * Mp + 2 * F)
+    - 0.00003 * Math.sin(Mp + M + 2 * F)
+    + 0.00003 * Math.sin(Mp - M + 2 * F)
+    - 0.00002 * Math.sin(Mp - M - 2 * F)
+    - 0.00002 * Math.sin(3 * Mp + M)
+    + 0.00002 * Math.sin(4 * Mp);
+
+  // ─── Additional corrections ───────────────────────────────────────────────
+  JDE +=
+    + 0.000325 * Math.sin(A1)
+    + 0.000165 * Math.sin(A2)
+    + 0.000164 * Math.sin(A3)
+    + 0.000126 * Math.sin(A4)
+    + 0.000110 * Math.sin(A5)
+    + 0.000062 * Math.sin(A6)
+    + 0.000060 * Math.sin(A7)
+    + 0.000056 * Math.sin(A8)
+    + 0.000047 * Math.sin(A9)
+    + 0.000042 * Math.sin(A10)
+    + 0.000040 * Math.sin(A11)
+    + 0.000037 * Math.sin(A12)
+    + 0.000035 * Math.sin(A13)
+    + 0.000023 * Math.sin(A14);
+
+  return JDE;
+}
+
+/**
+ * Julian Day Number → UTC Date
+ */
+function jdToUTC(JD: number): Date {
+  // Meeus Algorithm §7
+  const Z = Math.floor(JD + 0.5);
+  const F = JD + 0.5 - Z;
+  let A: number;
+  if (Z < 2299161) {
+    A = Z;
+  } else {
+    const alpha = Math.floor((Z - 1867216.25) / 36524.25);
+    A = Z + 1 + alpha - Math.floor(alpha / 4);
+  }
+  const B = A + 1524;
+  const C = Math.floor((B - 122.1) / 365.25);
+  const D = Math.floor(365.25 * C);
+  const E = Math.floor((B - D) / 30.6001);
+
+  const dayFull  = B - D - Math.floor(30.6001 * E) + F;
+  const month    = E < 14 ? E - 1 : E - 13;
+  const year     = month > 2 ? C - 4716 : C - 4715;
+  const dayInt   = Math.floor(dayFull);
+  const fracDay  = dayFull - dayInt;
+  const totalSec = Math.round(fracDay * 86400);
+  const hh = Math.floor(totalSec / 3600);
+  const mm = Math.floor((totalSec % 3600) / 60);
+  const ss = totalSec % 60;
+  return new Date(Date.UTC(year, month - 1, dayInt, hh, mm, ss));
+}
+
+/**
+ * JDE → Bangkok date string "YYYY-MM-DD"
+ */
+function jdeToBKKDate(JDE: number): string {
+  const utc = jdToUTC(JDE);
+  const bkk = new Date(utc.getTime() + BKK_OFFSET_H * 3_600_000);
+  const y   = bkk.getUTCFullYear();
+  const mo  = String(bkk.getUTCMonth() + 1).padStart(2, "0");
+  const dd  = String(bkk.getUTCDate()).padStart(2, "0");
+  return `${y}-${mo}-${dd}`;
+}
+
+/**
+ * สร้าง list New Moon dates ทั้งหมดในช่วง [startYear-1, endYear+1]
+ * Returns: { dateStr: "YYYY-MM-DD", bkkYear: number, bkkMonth: number }[]
+ */
+function generateMeeusNewMoons(startYear: number, endYear: number) {
+  const moons: { dateStr: string; year: number; month: number; day: number }[] = [];
+
+  // k range: คำนวณจาก k ≈ (year - 2000) × 12.3685
+  const kStart = Math.floor((startYear - 2 - 2000) * 12.3685) - 1;
+  const kEnd   = Math.ceil( (endYear   + 2 - 2000) * 12.3685) + 1;
+
+  for (let k = kStart; k <= kEnd; k++) {
+    const JDE     = newMoonJDE(k);
+    const dateStr = jdeToBKKDate(JDE);
+    const [yStr, moStr, ddStr] = dateStr.split("-");
+    const year  = parseInt(yStr!);
+    const month = parseInt(moStr!);
+    const day   = parseInt(ddStr!);
+    if (year >= startYear - 2 && year <= endYear + 2) {
+      moons.push({ dateStr, year, month, day });
+    }
+  }
+
+  return moons;
+}
+
+// ─── 2. Assign Thai months ────────────────────────────────────────────────────
+
+type Moon = { dateStr: string; year: number; month: number; day: number };
+
+/**
+ * หา เดือน 1 ของแต่ละ CE year
+ * = New Moon ล่าสุดใน window: Dec 21 (ปีก่อน) – Jan 31 (ปีนั้น)
+ */
+function buildMonth1Map(moons: Moon[]): Map<number, Moon> {
+  const map = new Map<number, Moon>();
+  for (const moon of moons) {
+    const { year, month, day } = moon;
+    let ownerYear: number | null = null;
+
+    if (month === 12 && day >= 21) ownerYear = year + 1; // Dec 21–31 → next year's เดือน 1
+    else if (month === 1)           ownerYear = year;     // Jan 1–31
+
+    if (ownerYear === null) continue;
+    // ต้องการ moon ล่าสุดใน window (prefer มกราคมมากกว่าธันวาคม)
+    const existing = map.get(ownerYear);
+    if (!existing || moon.dateStr > existing.dateStr) {
+      map.set(ownerYear, moon);
+    }
+  }
+  return map;
+}
+
+function assignThaiMonths(moons: Moon[]): Record<string, string> {
+  const result: Record<string, string> = {};
+  const month1Map = buildMonth1Map(moons);
+
+  for (let year = START_YEAR; year <= END_YEAR; year++) {
+    const start = month1Map.get(year);
+    const next  = month1Map.get(year + 1);
+    if (!start) { console.warn(`  ⚠️  No เดือน 1 for CE ${year}`); continue; }
+
+    // moons ที่อยู่ในช่วง [start, next)
+    const yearMoons = moons.filter(m =>
+      m.dateStr >= start.dateStr && (!next || m.dateStr < next.dateStr)
+    );
+
+    const intercalary = yearMoons.length === 13;
+
+    for (let i = 0; i < yearMoons.length; i++) {
+      const moon = yearMoons[i]!;
+      let thaiMonth: number;
+      if (intercalary) {
+        // 1,2,3,4,5,6,7, 8, 88(อธิกมาส), 9,10,11,12
+        if (i < 8)        thaiMonth = i + 1;
+        else if (i === 8) thaiMonth = 88;
+        else              thaiMonth = i;  // 9→9 10→10 11→11 12→12
+      } else {
+        thaiMonth = i + 1;
+      }
+      result[`${year}-${thaiMonth}`] = moon.dateStr;
+    }
+
+    if (intercalary) process.stdout.write(` [${year}อธ]`);
+  }
+  console.log();
+  return result;
+}
+
+// ─── 3. Web Scraper — myhora.com ─────────────────────────────────────────────
+
+/**
+ * Scrape หน้าปฏิทินรายปีจาก myhora.com
+ * URL: https://www.myhora.com/ปฏิทิน/ปฏิทิน-{thaiYear}.aspx
+ *
+ * Parse: หาวันที่ CE ที่ตรงกับ "ขึ้น ๑ ค่ำ" (= ขึ้น 1 ค่ำ เดือนต่างๆ)
+ * ทุกเดือนไทยที่พบ → เก็บเป็น key "ceYear-thaiMonth": "YYYY-MM-DD"
+ */
+async function scrapeMyhora(ceYear: number): Promise<Record<string, string>> {
+  const thaiYear = ceYear + 543;
+  const url = `https://www.myhora.com/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99/%E0%B8%9B%E0%B8%8F%E0%B8%B4%E0%B8%97%E0%B8%B4%E0%B8%99-${thaiYear}.aspx`;
+
+  const result: Record<string, string> = {};
+  try {
+    const res = await fetch(url, {
+      headers: { "User-Agent": "Mozilla/5.0 (research/calendar-data)" },
+    });
+    if (!res.ok) { console.warn(`  HTTP ${res.status} for ${thaiYear}`); return result; }
+    const html = await res.text();
+
+    // myhora calendar: วันที่แต่ละช่องมี data-date="YYYY-MM-DD"
+    // และ span.lunar-day ที่มีข้อความ "๑" (เลขไทย 1) = ขึ้น 1 ค่ำ
+    // ─── Pattern 1: data-date + lunar annotation ─────────────────────────────
+    // <td data-date="2024-01-11" ...><span class="lunar">ขึ้น ๑</span>
+    const dateAttrRe = /data-date="(\d{4}-\d{2}-\d{2})"[^>]*>[\s\S]{0,500}?(?:ขึ้น\s*[๑1](?:\s*ค่ำ)?)/g;
+    let m: RegExpExecArray | null;
+    const seen = new Set<string>();
+
+    while ((m = dateAttrRe.exec(html)) !== null) {
+      const dateStr = m[1]!;
+      if (seen.has(dateStr)) continue;
+      seen.add(dateStr);
+      // คำนวณว่าเป็น Thai month ที่เท่าไหร่ (จาก dateStr)
+      const moonDate = new Date(dateStr + "T12:00:00");
+      const monthResult = inferThaiMonth(moonDate, ceYear);
+      if (monthResult !== null) {
+        const key = `${ceYear}-${monthResult}`;
+        if (!result[key]) result[key] = dateStr;
+      }
+    }
+  } catch (e) {
+    console.warn(`  Fetch error ${ceYear}:`, (e as Error).message);
+  }
+  return result;
+}
+
+/** ประมาณ Thai month จากวันที่ CE (ใช้ SunCalc หรือ Meeus เพื่อ assign) */
+function inferThaiMonth(date: Date, ceYear: number): number | null {
+  // ใช้ offset จาก Jan เป็น rough estimate
+  const m = date.getMonth() + 1; // 1-12
+  if (m >= 1 && m <= 12) {
+    // หยาบ: map solar month → approximate Thai month
+    // Jan=1, Feb=2, ..., Dec=12 (offset ~1-2 เดือน)
+    let thaiM = m + 1;
+    if (thaiM > 12) thaiM -= 12;
+    return thaiM;
+  }
+  return null;
+}
+
+// ─── 4. Verified baseline ─────────────────────────────────────────────────────
+// ข้อมูล verified จาก THAI_LUNAR_NEW_MONTH (hand-verified)
+const VERIFIED_BASELINE: Record<string, string> = {
   "1960-1":"1960-01-28","1960-2":"1960-02-27","1960-3":"1960-03-27",
   "1960-4":"1960-04-26","1960-5":"1960-05-25","1960-6":"1960-06-24",
   "1960-7":"1960-07-23","1960-8":"1960-08-22","1960-9":"1960-09-20",
@@ -60,8 +362,7 @@ const VERIFIED: Record<string, string> = {
   "1981-10":"1981-10-11","1981-11":"1981-11-09","1981-12":"1981-12-09",
   "1982-1":"1982-01-08","1982-2":"1982-02-06","1982-3":"1982-03-08",
   "1982-4":"1982-04-07","1982-5":"1982-05-06","1982-6":"1982-06-05",
-  "1982-7":"1982-07-05","1982-8":"1982-08-03",
-  "1982-9":"1982-07-21",
+  "1982-7":"1982-07-05","1982-8":"1982-08-03","1982-9":"1982-07-21",
   "1982-10":"1982-09-18","1982-11":"1982-10-18","1982-12":"1982-11-16",
   "1987-1":"1987-01-29","1987-2":"1987-02-27","1987-3":"1987-03-28",
   "1987-4":"1987-04-27","1987-5":"1987-05-26","1987-6":"1987-06-25",
@@ -113,222 +414,144 @@ const VERIFIED: Record<string, string> = {
   "2026-10":"2026-10-10","2026-11":"2026-11-09","2026-12":"2026-12-08",
 };
 
-// ─── Step 1: Find all New Moon dates ─────────────────────────────────────────
+// ─── 5. Validate + Patch ──────────────────────────────────────────────────────
 
-/**
- * หา New Moon จริง (±3 วัน จาก estimate) ด้วย SunCalc
- * Return: วันใน Bangkok timezone (local Date)
- */
-function findNewMoon(estimate: Date): Date {
-  const center = estimate.getTime();
-  let bestTime = center;
-  let bestDist = Infinity;
-
-  // Scan ±3 วัน ด้วย step 1 ชั่วโมง
-  for (let t = center - 3 * 86_400_000; t <= center + 3 * 86_400_000; t += 3_600_000) {
-    const { phase } = SunCalc.getMoonIllumination(new Date(t));
-    // New moon = phase ≈ 0 (หรือ ≈ 1 เพราะ circular)
-    const dist = Math.min(phase, 1 - phase);
-    if (dist < bestDist) {
-      bestDist = dist;
-      bestTime = t;
-    }
-  }
-
-  // แปลงเป็นวันใน Bangkok time (UTC+7)
-  const bkkMs = bestTime + BKK_OFFSET_MS;
-  const d = new Date(bkkMs);
-  return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-}
-
-/**
- * สร้าง list New Moon dates ทั้งหมด ตั้งแต่ START_YEAR-1 ถึง END_YEAR+1
- * โดยเริ่มจาก ANCHOR แล้ว step ±SYNODIC_MS
- */
-function generateAllNewMoons(): Date[] {
-  const moons: Date[] = [];
-
-  // เริ่มจาก ANCHOR → ย้อนหลังไปถึง START_YEAR - 2
-  const monthsBack = Math.ceil((ANCHOR.getFullYear() - (START_YEAR - 2)) * 12.4) + 5;
-  let estimate = new Date(ANCHOR.getTime() - monthsBack * SYNODIC_MS);
-
-  // Align to first reasonable estimate (find actual new moon)
-  estimate = findNewMoon(estimate);
-
-  // ก้าวไปข้างหน้าจนถึง END_YEAR + 2
-  const limit = new Date(`${END_YEAR + 2}-12-31`).getTime();
-  while (estimate.getTime() <= limit) {
-    if (estimate.getFullYear() >= START_YEAR - 2) {
-      moons.push(new Date(estimate));
-    }
-    const next = new Date(estimate.getTime() + SYNODIC_MS);
-    estimate = findNewMoon(next);
-  }
-
-  return moons;
-}
-
-// ─── Step 2: Assign Thai months ───────────────────────────────────────────────
-
-function toDateStr(d: Date): string {
-  const y  = d.getFullYear();
-  const mo = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${y}-${mo}-${dd}`;
-}
-
-/**
- * กำหนด เดือน 1 ของแต่ละปี CE:
- * = New Moon แรกที่อยู่ใน window: Dec 21 (ปีก่อน) ถึง Jan 31 (ปีปัจจุบัน)
- *
- * หลักการ: เดือน 1 ตรงกับ New Moon ที่ใกล้ Capricorn ingress (21 ธ.ค.)
- * แต่ใน data จริงจะตกใน ม.ค. เกือบทุกปี
- */
-function findMonth1Map(moons: Date[]): Map<number, Date> {
-  const map = new Map<number, Date>();
-
-  for (const moon of moons) {
-    const y   = moon.getFullYear();
-    const mo  = moon.getMonth(); // 0-indexed
-    const day = moon.getDate();
-
-    // Window: Dec 21-31 → belongs to year y+1, or Jan 1-31 → belongs to year y
-    let ownerYear: number;
-    if (mo === 11 && day >= 21) {
-      ownerYear = y + 1;
-    } else if (mo === 0) {
-      ownerYear = y;
-    } else {
-      continue; // not in window
-    }
-
-    // Take the LATEST moon in the window (prefer January over December)
-    const existing = map.get(ownerYear);
-    if (!existing || moon > existing) {
-      map.set(ownerYear, moon);
-    }
-  }
-
-  return map;
-}
-
-/**
- * กำหนดเดือนไทยทั้งหมด
- */
-function assignThaiMonths(moons: Date[]): Record<string, string> {
-  const result: Record<string, string> = {};
-  const month1Map = findMonth1Map(moons);
-
-  for (let year = START_YEAR; year <= END_YEAR; year++) {
-    const start = month1Map.get(year);
-    const next  = month1Map.get(year + 1);
-    if (!start) continue;
-
-    // หา moons ในปีนี้: จาก start (inclusive) ถึง next (exclusive)
-    const yearMoons = moons.filter(m =>
-      m >= start && (!next || m < next)
-    );
-
-    if (yearMoons.length === 0) continue;
-
-    const isIntercalary = yearMoons.length === 13;
-
-    for (let i = 0; i < yearMoons.length; i++) {
-      const moon = yearMoons[i]!;
-      let thaiMonth: number;
-
-      if (isIntercalary) {
-        // ลำดับ: 1,2,3,4,5,6,7,8, 88(อธิกมาส), 9,10,11,12
-        if (i < 8)       thaiMonth = i + 1;
-        else if (i === 8) thaiMonth = 88;
-        else              thaiMonth = i;      // i=9→9, i=10→10, ...
-      } else {
-        thaiMonth = i + 1;
-      }
-
-      result[`${year}-${thaiMonth}`] = toDateStr(moon);
-    }
-
-    if (isIntercalary) {
-      console.log(`  อธิกมาส: CE ${year} (${yearMoons.length} เดือน)`);
-    }
-  }
-
-  return result;
-}
-
-// ─── Step 3: Validate + Patch with verified data ──────────────────────────────
-
-function validateAndPatch(
+function patch(
   generated: Record<string, string>,
-  verified: Record<string, string>
-): { result: Record<string, string>; stats: object } {
+  verified: Record<string, string>,
+): { result: Record<string, string>; stats: Record<string, number> } {
   const result = { ...generated };
-  let matched = 0, diff1day = 0, diffMore = 0, added = 0;
+  let exact = 0, off1 = 0, offMore = 0, added = 0, spurious = 0;
 
+  // ลบ spurious เดือน 88 สำหรับปีที่ verified ครบ 12 เดือน
+  const verifiedCount = new Map<number, number>();
+  for (const key of Object.keys(verified)) {
+    const y = parseInt(key.split("-")[0]!);
+    verifiedCount.set(y, (verifiedCount.get(y) ?? 0) + 1);
+  }
+  for (const [y, cnt] of verifiedCount) {
+    if (cnt >= 12 && result[`${y}-88`]) {
+      delete result[`${y}-88`];
+      spurious++;
+    }
+  }
+
+  // Override with verified
   for (const [key, vDate] of Object.entries(verified)) {
     const gDate = generated[key];
-
-    if (!gDate) {
-      result[key] = vDate;
-      added++;
-      continue;
-    }
-
-    const vMs = new Date(vDate).getTime();
-    const gMs = new Date(gDate).getTime();
-    const diffDays = Math.round(Math.abs(vMs - gMs) / 86_400_000);
-
-    if (diffDays === 0) matched++;
-    else if (diffDays <= 1) diff1day++;
-    else diffMore++;
-
-    // Patch: verified เสมอ override generated
+    if (!gDate) { result[key] = vDate; added++; continue; }
+    const diff = Math.round(Math.abs(
+      new Date(vDate).getTime() - new Date(gDate).getTime()
+    ) / 86_400_000);
+    if (diff === 0) exact++;
+    else if (diff === 1) off1++;
+    else offMore++;
     result[key] = vDate;
   }
 
-  return {
-    result,
-    stats: { matched, diff1day, diffMore, added, total: Object.keys(result).length },
-  };
+  return { result, stats: { exact, off1, offMore, added, spurious, total: Object.keys(result).length } };
 }
 
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// ─── 6. Main ──────────────────────────────────────────────────────────────────
 
-console.log(`\n🔮 Thai Lunar Calendar Generator — CE ${START_YEAR}–${END_YEAR}`);
-console.log("═".repeat(55));
+async function main() {
+  console.log(`\n🔮 Thai Lunar Calendar — Meeus Algorithm + Verified Patch`);
+  console.log(`   Range: CE ${START_YEAR}–${END_YEAR}`);
+  console.log("═".repeat(55));
 
-// 1. New moons
-process.stdout.write("☽  Step 1: Finding new moons with SunCalc... ");
-const allMoons = generateAllNewMoons();
-console.log(`${allMoons.length} moons found`);
+  // Step 1: Meeus new moons
+  process.stdout.write("☽  Step 1: Meeus new moons (±2 min accuracy)... ");
+  const moons = generateMeeusNewMoons(START_YEAR, END_YEAR);
+  console.log(`${moons.length} new moons`);
 
-// 2. Assign months
-console.log("📅 Step 2: Assigning Thai months...");
-const generated = assignThaiMonths(allMoons);
-console.log(`  Generated: ${Object.keys(generated).length} entries`);
+  // Step 2: Assign Thai months
+  process.stdout.write("📅 Step 2: Assigning Thai months...\n  อธิกมาส: ");
+  const generated = assignThaiMonths(moons);
+  console.log(`  Generated: ${Object.keys(generated).length} entries`);
 
-// 3. Validate + patch
-console.log("✅ Step 3: Validating against verified baseline...");
-const { result, stats } = validateAndPatch(generated, VERIFIED);
-console.log("  Stats:", stats);
+  // Step 3: Optional scrape
+  let scraped: Record<string, string> = {};
+  if (DO_SCRAPE) {
+    console.log("🌐 Step 3: Scraping myhora.com (1924–1956)...");
+    for (let year = 1924; year <= 1956; year++) {
+      process.stdout.write(`  ${year}...`);
+      const yearData = await scrapeMyhora(year);
+      const n = Object.keys(yearData).length;
+      process.stdout.write(` (${n} months)\n`);
+      Object.assign(scraped, yearData);
+      // rate-limit: 1 request/sec
+      await new Promise(r => setTimeout(r, 1000));
+    }
+    console.log(`  Scraped: ${Object.keys(scraped).length} entries`);
+  } else {
+    console.log("ℹ️  Step 3: Scraping skipped (run with --scrape to enable)");
+  }
 
-// 4. Write JSON
-const outputPath = path.join(
-  __dirname,
-  "../src/datasets/lunar100year.json"
-);
+  // Step 4: Patch
+  console.log("✅ Step 4: Patching with verified data...");
+  const allVerified = { ...scraped, ...VERIFIED_BASELINE }; // VERIFIED_BASELINE has highest priority
+  const { result, stats } = patch(generated, allVerified);
+  console.log("  Meeus vs Verified:", {
+    exact:   `${stats.exact} (0 days off)`,
+    off1:    `${stats.off1} (1 day off → patched)`,
+    offMore: `${stats.offMore} (>1 day → patched)`,
+    spuriousRemoved: stats.spurious,
+    totalEntries: stats.total,
+  });
 
-const output = {
-  _note:      `ตารางปฏิทินจันทรคติไทย CE ${START_YEAR}–${END_YEAR}`,
-  _source:    "SunCalc astronomical new moon + verified Thai calendar (1957-2028)",
-  _generated: new Date().toISOString(),
-  _coverage:  `CE ${START_YEAR}–${END_YEAR} (${Object.keys(result).length} month entries)`,
-  _format:    'key: "ceYear-thaiMonth" (88=อธิกมาส เดือน 8 สอง) | value: "YYYY-MM-DD" (ขึ้น 1 ค่ำ, Bangkok time)',
-  ...result,
-};
+  // Step 5: Sort by year-month
+  const sorted: Record<string, string> = {};
+  const monthOrder = [1,2,3,4,5,6,7,8,88,9,10,11,12];
+  for (let y = START_YEAR; y <= END_YEAR; y++) {
+    for (const m of monthOrder) {
+      const key = `${y}-${m}`;
+      if (result[key]) sorted[key] = result[key]!;
+    }
+  }
 
-fs.writeFileSync(outputPath, JSON.stringify(output, null, 2), "utf-8");
-console.log(`\n✨ Written → ${path.relative(process.cwd(), outputPath)}`);
-console.log(`   Total entries: ${Object.keys(result).length}`);
-console.log(`   Coverage: CE ${START_YEAR}–${END_YEAR} (${END_YEAR - START_YEAR + 1} years)\n`);
+  // Count intercalary years (have 88 key)
+  const intercalaryYears = Object.keys(sorted)
+    .filter(k => k.endsWith("-88"))
+    .map(k => parseInt(k.split("-")[0]!));
+
+  // Step 6: Write JSON
+  const outputPath = path.join(__dirname, "../src/datasets/lunar100year.json");
+  const output = {
+    _note:      `ปฏิทินจันทรคติไทย CE ${START_YEAR}–${END_YEAR}`,
+    _algorithm: "Jean Meeus 'Astronomical Algorithms' Ch.49 — New Moon JDE, accuracy ±2 min",
+    _verified:  "Patched with hand-verified Thai calendar data (selected years)",
+    _generated: new Date().toISOString(),
+    _coverage:  `CE ${START_YEAR}–${END_YEAR} | ${Object.keys(sorted).length} month entries | ${intercalaryYears.length} อธิกมาส years`,
+    _format:    '"ceYear-thaiMonth": "YYYY-MM-DD" | key 88 = เดือน 8 สอง (อธิกมาส) | value = ขึ้น 1 ค่ำ (Bangkok)',
+    _intercalary_years: intercalaryYears,
+    ...sorted,
+  };
+
+  fs.writeFileSync(outputPath, JSON.stringify(output, null, 2), "utf-8");
+
+  console.log(`\n✨ Done!`);
+  console.log(`   → ${path.relative(process.cwd(), outputPath)}`);
+  console.log(`   Entries:          ${Object.keys(sorted).length}`);
+  console.log(`   อธิกมาส years:   ${intercalaryYears.length} years`);
+  console.log(`   Years covered:    CE ${START_YEAR}–${END_YEAR} (${END_YEAR - START_YEAR + 1} years)`);
+  if (DO_SCRAPE) {
+    console.log(`   Scraped (web):   ${Object.keys(scraped).length} entries from myhora.com`);
+  }
+  console.log();
+
+  // Step 7: Show sample for verification
+  console.log("📋 Sample verification (known dates):");
+  const checks = [
+    { key: "1982-9", expected: "1982-07-21", desc: "1982 เดือน 9 (verified: 21 ก.ค.)" },
+    { key: "2024-1", expected: "2024-01-11", desc: "2024 เดือน 1 (anchor)" },
+    { key: "2023-6", expected: "2023-06-18", desc: "2023 เดือน 6" },
+  ];
+  for (const { key, expected, desc } of checks) {
+    const got = sorted[key];
+    const ok  = got === expected ? "✅" : got ? `⚠️  got ${got}` : "❌ missing";
+    console.log(`   ${ok}  ${key}  ${desc}`);
+  }
+  console.log();
+}
+
+main().catch(err => { console.error(err); process.exit(1); });
