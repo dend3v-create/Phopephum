@@ -40,7 +40,8 @@ export async function generateAIReport(
   });
 
   if (!response.ok) {
-    throw new Error(`AI Worker error: ${response.status}`);
+    const errText = await response.text().catch(() => "No text");
+    throw new Error(`AI Worker error: ${response.status} - ${errText}`);
   }
 
   if (!response.body) {
