@@ -1,11 +1,13 @@
 import { json, redirect } from "@remix-run/cloudflare";
 import { Form, useLoaderData, useNavigation, useActionData } from "@remix-run/react";
+import { useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { generateAIReport } from "~/services/ai.server";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
+import { Input } from "~/components/ui/Input";
 import type { Env } from "~/env.server";
 
 export const meta: MetaFunction = () => [
@@ -31,28 +33,41 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
-  const profile = await getProfile(user.id, request, env);
 
   const formData = await request.formData();
   const reportType = String(formData.get("reportType") ?? "general_prediction");
+  
+  const displayName = String(formData.get("displayName") ?? "");
+  const birthDate = String(formData.get("birthDate") ?? "");
+  const birthTime = String(formData.get("birthTime") ?? "");
+  const birthPlace = String(formData.get("birthPlace") ?? "");
 
-  if (!profile?.birth_date) {
+  if (!birthDate) {
     return json(
-      { error: "กรุณากรอกวันเกิดในหน้าตั้งค่าก่อนสร้างรายงาน" },
+      { error: "กรุณากรอกวันเกิดก่อนสร้างรายงาน" },
       { status: 400 }
     );
   }
 
   try {
+    // Optional: Update the user's profile with the new data so it's saved for next time
+    const { supabase } = createSupabaseClient(request, env);
+    await supabase.rpc("update_profile", {
+      p_display_name: displayName,
+      p_birth_date: birthDate || null,
+      p_birth_time: birthTime || null,
+      p_birth_place: birthPlace || null,
+    });
+
     const stream = await generateAIReport(
       {
         userId: user.id,
         reportType,
         context: {
-          birthDate:  profile.birth_date,
-          birthTime:  profile.birth_time  ?? null,
-          birthPlace: profile.birth_place ?? null,
-          displayName: profile.display_name ?? "ผู้ใช้งาน",
+          birthDate:  birthDate,
+          birthTime:  birthTime  || null,
+          birthPlace: birthPlace || null,
+          displayName: displayName || "ผู้ใช้งาน",
         },
       },
       env
@@ -69,7 +84,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     // Save to DB
-    const { supabase } = createSupabaseClient(request, env);
     const { data: report, error } = await supabase
       .from("ai_reports")
       .insert({
@@ -97,7 +111,7 @@ export default function NewReportPage() {
   const navigation  = useNavigation();
   const isGenerating = navigation.state === "submitting";
 
-  const hasProfile = Boolean(profile?.birth_date);
+  const [selectedType, setSelectedType] = useState<string>("general_prediction");
 
   return (
     <div className="space-y-6 max-w-2xl">
@@ -110,17 +124,6 @@ export default function NewReportPage() {
         </p>
       </div>
 
-      {/* No profile warning */}
-      {!hasProfile && (
-        <div className="rounded-xl border border-[#D9BC82]/30 bg-[#D9BC82]/5 px-5 py-4 text-sm text-[#D9BC82]">
-          กรุณา{" "}
-          <a href="/dashboard/settings" className="underline underline-offset-2 hover:text-[#F2D49B]">
-            กรอกวันเกิด
-          </a>{" "}
-          ในหน้าตั้งค่าก่อนสร้างรายงาน
-        </div>
-      )}
-
       {/* Error */}
       {actionData?.error && (
         <div className="rounded-xl border border-red-400/30 bg-red-400/5 px-5 py-4 text-sm text-red-400">
@@ -128,36 +131,83 @@ export default function NewReportPage() {
         </div>
       )}
 
-      <Form method="post">
+      <Form method="post" className="space-y-8">
         {/* Report type grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
-          {REPORT_TYPES.map((type) => (
-            <label key={type.value} className="cursor-pointer group">
-              <input
-                type="radio"
-                name="reportType"
-                value={type.value}
-                defaultChecked={type.value === "general_prediction"}
-                className="sr-only peer"
-              />
-              <div className="card-glass p-4 flex items-start gap-3 peer-checked:border-[#C6A96B]/60 peer-checked:bg-[#C6A96B]/8 transition-all group-hover:border-[#C6A96B]/30">
-                <span className="text-2xl mt-0.5">{type.icon}</span>
-                <div>
-                  <p className="text-[#F8F6F1] font-medium text-sm peer-checked:text-[#D9BC82]">
-                    {type.label}
-                  </p>
-                  <p className="text-[#94A3B8] text-xs mt-0.5">{type.desc}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {REPORT_TYPES.map((type) => {
+            const isSelected = selectedType === type.value;
+            return (
+              <label key={type.value} className="cursor-pointer group">
+                <input
+                  type="radio"
+                  name="reportType"
+                  value={type.value}
+                  checked={isSelected}
+                  onChange={() => setSelectedType(type.value)}
+                  className="sr-only"
+                />
+                <div className={`card-glass p-4 flex items-start gap-3 transition-all ${
+                  isSelected 
+                    ? "border-[#C6A96B]/60 bg-[#C6A96B]/8" 
+                    : "border-transparent group-hover:border-[#C6A96B]/30"
+                }`}>
+                  <span className="text-2xl mt-0.5">{type.icon}</span>
+                  <div>
+                    <p className={`font-medium text-sm transition-colors ${
+                      isSelected ? "text-[#D9BC82]" : "text-[#F8F6F1]"
+                    }`}>
+                      {type.label}
+                    </p>
+                    <p className="text-[#94A3B8] text-xs mt-0.5">{type.desc}</p>
+                  </div>
                 </div>
-              </div>
-            </label>
-          ))}
+              </label>
+            );
+          })}
+        </div>
+
+        {/* Profile Editing Section */}
+        <div className="pt-6 border-t border-slate-800">
+          <h2 className="text-lg font-semibold text-[#F8F6F1] mb-1">ข้อมูลสำหรับผูกดวง</h2>
+          <p className="text-[#94A3B8] text-xs mb-4">ข้อมูลดึงมาจากโปรไฟล์ของคุณ สามารถแก้ไขเพื่อใช้ในรายงานนี้ได้</p>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <Input
+                name="displayName"
+                label="ชื่อที่ใช้แสดง"
+                defaultValue={profile?.display_name ?? ""}
+                required
+              />
+            </div>
+            <Input
+              name="birthDate"
+              type="date"
+              label="วันเกิด (ค.ศ.)"
+              defaultValue={profile?.birth_date ?? ""}
+              required
+            />
+            <Input
+              name="birthTime"
+              type="time"
+              label="เวลาเกิด (ถ้าทราบ)"
+              defaultValue={profile?.birth_time ?? ""}
+            />
+            <div className="sm:col-span-2">
+              <Input
+                name="birthPlace"
+                label="จังหวัดที่เกิด"
+                defaultValue={profile?.birth_place ?? profile?.birth_location ?? ""}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Submit */}
         <Button
           type="submit"
           loading={isGenerating}
-          disabled={!hasProfile || isGenerating}
+          disabled={isGenerating}
           className="w-full btn-gold-shine border-0"
         >
           {isGenerating ? "กำลังวิเคราะห์ด้วย AI..." : "สร้างรายงาน"}
