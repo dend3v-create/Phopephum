@@ -25,6 +25,16 @@ export async function requireAdmin(request: Request, env: Env) {
   return { user, profile };
 }
 
+export async function requireOperator(request: Request, env: Env) {
+  const user = await requireAuth(request, env);
+  const profile = await getProfile(user.id, request, env);
+  // Admin can also do operator tasks
+  if (profile?.role !== "operator" && profile?.role !== "admin") {
+    throw redirect("/dashboard");
+  }
+  return { user, profile };
+}
+
 export async function redirectIfAuthed(request: Request, env: Env) {
   const user = await getUser(request, env);
   if (user) throw redirect("/dashboard");

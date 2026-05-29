@@ -6,6 +6,7 @@ import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { getCurrentYam, calculateMoonPhase } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
+import { MembershipBadge, MembershipStatusBadge } from "~/components/MembershipBadge";
 import type { Env } from "~/env.server";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -27,10 +28,18 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     พุทธะ:"☿",พุทโธ:"☿",ครู:"♃",ชีโว:"♃",ศุกระ:"♀",ศุโกร:"♀",เสารี:"♄",โสโร:"♄",
   };
 
+  let daysRemaining = 0;
+  if (profile?.membership_expires_at) {
+    const expiresAt = new Date(profile.membership_expires_at).getTime();
+    const now = Date.now();
+    daysRemaining = Math.max(0, Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24)));
+  }
+
   return json({
     user,
     profile,
     reportCount: reportCount ?? 0,
+    daysRemaining,
     yam: {
       yamName:   yam.yamName,
       yamNumber: yam.yamNumber,
@@ -47,20 +56,37 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 }
 
 export default function DashboardIndex() {
-  const { profile, reportCount, yam, moon } = useLoaderData<typeof loader>();
+  const { profile, reportCount, daysRemaining, yam, moon } = useLoaderData<typeof loader>();
   const displayName = profile?.display_name ?? "ผู้ใช้งาน";
-  const subscription = profile?.subscription ?? "free";
+  
+  // fallback to 'subscription' field if membership_type not populated yet
+  const membershipType = profile?.membership_type || profile?.subscription || "free";
+  const membershipStatus = profile?.membership_status || "active";
 
   const greeting = getGreeting();
 
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div>
-        <p className="text-[#8A8070] text-sm mb-1">{greeting}</p>
-        <h1 className="font-display text-3xl font-bold text-[#F3EFE8]">
-          สวัสดี, {displayName}
-        </h1>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <p className="text-[#8A8070] text-sm mb-1">{greeting}</p>
+          <div className="flex items-center gap-3">
+            <h1 className="font-display text-3xl font-bold text-[#F3EFE8]">
+              สวัสดี, {displayName}
+            </h1>
+            <MembershipBadge type={membershipType} />
+          </div>
+        </div>
+        {membershipType !== "free" && (
+          <div className="flex items-center gap-2 text-sm bg-slate-800/50 px-4 py-2 rounded-lg border border-slate-700/50">
+            <span className="text-[#8A8070]">สถานะ:</span>
+            <MembershipStatusBadge status={membershipStatus} />
+            {daysRemaining > 0 && (
+              <span className="text-slate-300 ml-2">เหลือ {daysRemaining} วัน</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Stats row */}
@@ -72,9 +98,9 @@ export default function DashboardIndex() {
         />
         <StatCard
           label="แพ็กเกจ"
-          value={subscription === "free" ? "ฟรี" : subscription}
+          value={membershipType === "free" ? "ฟรี" : membershipType.toUpperCase()}
           sub="แผนปัจจุบัน"
-          highlight={subscription !== "free"}
+          highlight={membershipType !== "free"}
         />
         <StatCard
           label="วันนี้"

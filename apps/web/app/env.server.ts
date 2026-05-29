@@ -15,6 +15,11 @@ export interface Env {
   // Resend
   RESEND_API_KEY: string;
 
+  // LINE Messaging API
+  LINE_CHANNEL_ACCESS_TOKEN: string;  // Channel Access Token (Long-lived)
+  LINE_ADMIN_USER_ID: string;         // Admin's LINE User ID (U...)
+  APP_URL: string;                    // e.g. https://phopephum-web.pages.dev
+
   // Cloudflare Bindings
   KV_CACHE: KVNamespace;
   R2_REPORTS: R2Bucket;

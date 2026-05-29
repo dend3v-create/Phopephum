@@ -35,7 +35,7 @@ const PLANS = [
       { icon: "⟁", text: "Export รายงาน PDF พรีเมียม" },
     ],
     cta: "เลือกแพ็กเกจ PRO",
-    ctaTo: "/register?plan=pro",
+    ctaTo: "/dashboard/upgrade",
     style: "pro",
   },
   {
@@ -51,7 +51,7 @@ const PLANS = [
       { icon: "⟁", text: "Priority Wisdom Support" },
     ],
     cta: "เลือกแพ็กเกจ IMPERIAL",
-    ctaTo: "/register?plan=imperial",
+    ctaTo: "/dashboard/upgrade",
     style: "imperial",
   },
 ] as const;

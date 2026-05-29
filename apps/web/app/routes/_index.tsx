@@ -27,149 +27,290 @@ const STARS = [
   { x: 95, y: 48, s: 1,   delay: 0.5, blue: true  },
 ];
 
-const DOMAINS = [
-  { icon: "☽", label: "ยามอัฐกาล",     sub: "เลขยาม ๘ ยาม ๙ ฐาน" },
-  { icon: "✦", label: "ชะตาจร",        sub: "ดาวพระเคราะห์จรราศี" },
-  { icon: "⊕", label: "จักรกำเนิด",    sub: "แผนภูมิดวงดาวแรกเกิด" },
-  { icon: "◈", label: "เลขศาสตร์",     sub: "เลขทักษา นพเคราะห์" },
-  { icon: "⟁", label: "วาสนาชาติ",     sub: "กรรมและบุญบารมี" },
-  { icon: "⌘", label: "มงคลฤกษ์",     sub: "ยามนาทีมงคลรายวัน" },
+const FEATURES = [
+  {
+    icon: "☽",
+    title: "ยามอัฐกาลสด",
+    desc: "คำนวณยามปัจจุบันแบบ real-time พร้อม countdown ถึงยามถัดไป ใช้สูตรโบราณดั้งเดิมที่แม่นยำระดับนาที",
+  },
+  {
+    icon: "✦",
+    title: "เลข 7 ตัว 9 ฐาน",
+    desc: "ระบบคำนวณดวงชะตาเชิงลึกด้วยเลขฐาน 1-7 จากวัน เดือน ปีนักษัตร ตามศาสตร์ไทยแท้",
+  },
+  {
+    icon: "⊕",
+    title: "ผังดวงจักรพรรดิ",
+    desc: "Emperor Chart คำนวณจักรกำเนิด วัยจร ปีจร และทิศทางชีวิตทุกช่วงอายุในรูปแบบหรูหราพรีเมียม",
+  },
+  {
+    icon: "◈",
+    title: "Life Report AI",
+    desc: "รายงานวิเคราะห์ชีวิตเชิงลึก 6 ประเภท สร้างโดย AI ที่ฝึกด้วยตำราโหราศาสตร์ไทยโบราณแท้",
+  },
+  {
+    icon: "⟁",
+    title: "TQM Planner",
+    desc: "วางแผนชีวิตสอดคล้องกับยามมงคลประจำวัน ตั้งเจตนา ลำดับความสำคัญ และสะท้อนความสำเร็จ",
+  },
+  {
+    icon: "⌘",
+    title: "ปฏิทิน 100 ปี",
+    desc: "ฐานข้อมูลจันทรคติไทยครบถ้วน 121 ปี คำนวณด้วย Meeus Algorithm ±2 นาที จาก CE 1920–2040",
+  },
+];
+
+const STEPS = [
+  { num: "01", title: "ลงทะเบียนฟรี", desc: "ใส่ชื่อและอีเมล เริ่มต้นได้ทันทีโดยไม่ต้องใช้บัตรเครดิต" },
+  { num: "02", title: "กรอกวันเกิด", desc: "วัน เดือน ปี และเวลาเกิด (ถ้ามี) เพื่อความแม่นยำสูงสุด" },
+  { num: "03", title: "รับผลทันที", desc: "ระบบคำนวณดวงชะตาและยามมงคลให้คุณแบบ real-time ทันที" },
+];
+
+const TESTIMONIALS = [
+  { name: "คุณสุรีย์", role: "นักธุรกิจ", text: "ใช้ยามอัฐกาลเลือกวันทำสัญญาสำคัญ ผลออกมาดีกว่าที่คิดมาก แนะนำสำหรับผู้ที่เชื่อในศาสตร์ไทย" },
+  { name: "คุณมาลี", role: "แม่บ้านนักลงทุน", text: "Life Report วิเคราะห์ดวงได้ละเอียดมาก อ่านแล้วรู้สึกว่าเข้าใจตัวเองมากขึ้น ข้อมูลครบและหรูหรา" },
+  { name: "คุณวิชัย", role: "โหรสมัครเล่น", text: "เลข 7 ตัวแม่นยำตามตำราที่เคยศึกษามา ระบบปฏิทินจันทรคติครบถ้วนมาก ใช้อ้างอิงได้เลย" },
 ];
 
 export default function Index() {
   return (
-    <main className="relative min-h-screen flex flex-col items-center justify-center px-4 overflow-hidden">
+    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#020617" }}>
 
-      {/* ── Cosmic atmosphere ── */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div
-          className="absolute w-[700px] h-[700px] -top-60 -left-60 rounded-full animate-aura-pulse"
-          style={{ background: "radial-gradient(circle, rgba(75,111,174,0.16) 0%, transparent 65%)" }}
-        />
-        <div
-          className="absolute w-[500px] h-[500px] -bottom-32 -right-32 rounded-full animate-aura-pulse"
-          style={{ background: "radial-gradient(circle, rgba(109,143,199,0.12) 0%, transparent 65%)", animationDelay: "2.5s" }}
-        />
-        <div
-          className="absolute inset-0"
-          style={{ background: "radial-gradient(ellipse 50% 40% at 50% 45%, rgba(232,196,106,0.07) 0%, transparent 70%)" }}
-        />
+      {/* ── Stars background ── */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute w-[700px] h-[700px] -top-60 -left-60 rounded-full animate-aura-pulse"
+          style={{ background: "radial-gradient(circle, rgba(75,111,174,0.14) 0%, transparent 65%)" }} />
+        <div className="absolute w-[500px] h-[500px] -bottom-32 -right-32 rounded-full animate-aura-pulse"
+          style={{ background: "radial-gradient(circle, rgba(109,143,199,0.10) 0%, transparent 65%)", animationDelay: "2.5s" }} />
+        <div className="absolute inset-0"
+          style={{ background: "radial-gradient(ellipse 50% 40% at 50% 20%, rgba(232,196,106,0.06) 0%, transparent 70%)" }} />
         {STARS.map((star, i) => (
-          <div
-            key={i}
-            className="absolute rounded-full animate-twinkle"
+          <div key={i} className="absolute rounded-full animate-twinkle"
             style={{
-              left: `${star.x}%`,
-              top: `${star.y}%`,
-              width: `${star.s}px`,
-              height: `${star.s}px`,
+              left: `${star.x}%`, top: `${star.y}%`,
+              width: `${star.s}px`, height: `${star.s}px`,
               background: star.blue ? "#9AB3D9" : "#D9BC82",
               animationDelay: `${star.delay}s`,
-            }}
-          />
+            }} />
         ))}
       </div>
 
-      {/* ── Hero ── */}
-      <div className="relative text-center max-w-3xl mx-auto">
+      {/* ── Navbar ── */}
+      <nav className="relative z-50 flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
+        {/* Logo */}
+        <Link to="/" className="flex items-center gap-2">
+          <span className="text-[#C6A96B] text-lg">✦</span>
+          <span className="font-display text-[#F8F6F1] font-bold text-lg tracking-wide">PhopePhum</span>
+        </Link>
 
-        {/* Lotus */}
-        <div className="flex justify-center mb-6 animate-float">
+        {/* Nav links (desktop) */}
+        <div className="hidden md:flex items-center gap-6 text-sm text-[#94A3B8]">
+          <Link to="/pricing" className="hover:text-[#C6A96B] transition-colors">แผนสมาชิก</Link>
+          <a href="#features" className="hover:text-[#C6A96B] transition-colors">ฟีเจอร์</a>
+          <a href="#how" className="hover:text-[#C6A96B] transition-colors">วิธีใช้</a>
+        </div>
+
+        {/* Auth buttons */}
+        <div className="flex items-center gap-3">
+          <Link
+            to="/login"
+            className="text-sm font-medium text-[#D9BC82] border border-[#C6A96B]/30 px-5 py-2 rounded-full hover:bg-[#C6A96B]/10 hover:border-[#C6A96B]/60 transition-all"
+          >
+            เข้าสู่ระบบ
+          </Link>
+          <Link
+            to="/register"
+            className="text-sm font-bold px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95"
+            style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)", color: "#020617" }}
+          >
+            เริ่มต้นใช้งาน
+          </Link>
+        </div>
+      </nav>
+
+      {/* ── Hero ── */}
+      <section className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-12 pb-24">
+        <div className="flex justify-center mb-8 animate-float">
           <LotusSymbol />
         </div>
 
-        {/* Brand label */}
-        <p
-          className="text-[#D9BC82] text-[9px] tracking-[0.4em] uppercase mb-3 animate-fade-up"
-          style={{ animationDelay: "0.1s" }}
-        >
+        <p className="text-[#D9BC82] text-[9px] tracking-[0.4em] uppercase mb-4 animate-fade-up"
+          style={{ animationDelay: "0.1s" }}>
           Living Wisdom Operating System
         </p>
 
-        {/* Main title */}
-        <h1
-          className="font-display text-6xl md:text-7xl font-bold text-[#F8F6F1] glow-gold mb-3 animate-fade-up"
-          style={{ animationDelay: "0.2s" }}
-        >
+        <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold text-[#F8F6F1] glow-gold mb-4 animate-fade-up leading-none"
+          style={{ animationDelay: "0.2s" }}>
           PhopePhum
         </h1>
 
-        {/* Hero headline */}
-        <p
-          className="font-cormorant text-[#9AB3D9] text-2xl md:text-3xl italic mb-1 animate-fade-up"
-          style={{ animationDelay: "0.28s" }}
-        >
+        <p className="font-cormorant text-[#9AB3D9] text-2xl md:text-3xl italic mb-2 animate-fade-up"
+          style={{ animationDelay: "0.28s" }}>
           เปิดประตูสู่อนาคตด้วย
         </p>
-        <p
-          className="font-display text-[#D9BC82] text-xl md:text-2xl font-semibold tracking-wide mb-5 animate-fade-up"
-          style={{ animationDelay: "0.32s" }}
-        >
+        <p className="font-display text-[#D9BC82] text-xl md:text-2xl font-semibold tracking-wide mb-6 animate-fade-up"
+          style={{ animationDelay: "0.32s" }}>
           ศาสตร์ยามอัฐกาลชันสูง
         </p>
 
-        {/* Description */}
-        <p
-          className="text-[#94A3B8] text-sm md:text-base leading-relaxed max-w-xl mx-auto mb-2 animate-fade-up"
-          style={{ animationDelay: "0.38s" }}
-        >
-          คำนวณยามมงคลและชะตาจรระดับนาทีด้วยสูตรโบราณดั้งเดิม
-          <br />
-          พร้อมบทวิเคราะห์ดวงชะตาเชิงลึก ส่งรายงานวิเคราะห์ชีวิตสู่มือคุณอย่างหรูหราพรีเมียม
+        <p className="text-[#94A3B8] text-sm md:text-base leading-relaxed max-w-xl mx-auto mb-10 animate-fade-up"
+          style={{ animationDelay: "0.38s" }}>
+          คำนวณยามมงคลและชะตาจรระดับนาทีด้วยสูตรโบราณดั้งเดิม<br />
+          พร้อมบทวิเคราะห์ดวงชะตาเชิงลึก ส่งรายงานวิเคราะห์ชีวิตสู่มือคุณ
         </p>
 
-        {/* Ornament */}
-        <div
-          className="flex items-center justify-center gap-3 my-7 animate-fade-up"
-          style={{ animationDelay: "0.42s" }}
-        >
-          <div className="h-px w-20 bg-gradient-to-r from-transparent to-[#C6A96B]/40" />
-          <span className="text-[#C6A96B]/60 text-xs">✦</span>
-          <div className="h-px w-20 bg-gradient-to-l from-transparent to-[#C6A96B]/40" />
-        </div>
-
-        {/* CTAs */}
-        <div
-          className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up"
-          style={{ animationDelay: "0.48s" }}
-        >
+        {/* Hero CTAs */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up"
+          style={{ animationDelay: "0.44s" }}>
           <Link
             to="/register"
-            className="btn-gold-shine px-10 py-3.5 rounded-full shadow-lg shadow-[#C6A96B]/25 transition-transform hover:scale-105 active:scale-95"
+            className="inline-flex items-center justify-center gap-2 px-10 py-4 rounded-full font-bold text-[#020617] shadow-lg shadow-[#C6A96B]/25 transition-all hover:scale-105 active:scale-95 text-base"
+            style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}
           >
-            คำนวณดวงชะตาของคุณ →
+            เริ่มต้นใช้งาน ฟรี →
           </Link>
           <Link
             to="/login"
-            className="border border-[#C6A96B]/40 text-[#D9BC82] font-medium px-10 py-3.5 rounded-full hover:bg-[#C6A96B]/10 hover:border-[#C6A96B]/70 transition-all"
+            className="inline-flex items-center justify-center gap-2 px-10 py-4 rounded-full font-medium border border-[#C6A96B]/40 text-[#D9BC82] hover:bg-[#C6A96B]/10 hover:border-[#C6A96B]/70 transition-all text-base"
           >
-            ดูยามสดขณะนี้
+            เข้าสู่ระบบ
           </Link>
         </div>
 
-        {/* 6 Imperial Spiritual Domains */}
-        <div
-          className="mt-14 animate-fade-up"
-          style={{ animationDelay: "0.62s" }}
-        >
-          <p className="text-[#C6A96B] text-[9px] tracking-[0.35em] uppercase mb-5 opacity-70">
-            ๖ พื้นที่ทางจิตวิญญาณแห่งจักรพรรดิ
+        {/* Trust line */}
+        <p className="text-[#94A3B8]/50 text-xs mt-5 animate-fade-up" style={{ animationDelay: "0.52s" }}>
+          ฟรีตลอดชีพ · ไม่ต้องใช้บัตรเครดิต · ยกเลิกได้ทุกเมื่อ
+        </p>
+
+        {/* Divider */}
+        <div className="flex items-center justify-center gap-3 mt-14 animate-fade-up" style={{ animationDelay: "0.56s" }}>
+          <div className="h-px w-24 bg-gradient-to-r from-transparent to-[#C6A96B]/30" />
+          <span className="text-[#C6A96B]/50 text-xs">✦</span>
+          <div className="h-px w-24 bg-gradient-to-l from-transparent to-[#C6A96B]/30" />
+        </div>
+      </section>
+
+      {/* ── Features ── */}
+      <section id="features" className="relative z-10 max-w-6xl mx-auto px-4 py-20">
+        <div className="text-center mb-12">
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">ฟีเจอร์หลัก</p>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] mb-3">
+            ทุกศาสตร์ที่คุณต้องการ
+          </h2>
+          <p className="text-[#94A3B8] text-sm max-w-md mx-auto">
+            รวมทุกเครื่องมือโหราศาสตร์ไทยในที่เดียว ใช้งานได้ทันที
           </p>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-            {DOMAINS.map((d) => (
-              <div
-                key={d.label}
-                className="card-glass flex flex-col items-center gap-1.5 py-4 px-2"
-              >
-                <span className="text-[#C6A96B] text-xl font-light">{d.icon}</span>
-                <p className="text-[#D9CDB7] text-[10px] font-medium leading-tight text-center">{d.label}</p>
-                <p className="text-[#94A3B8] text-[9px] leading-tight text-center hidden sm:block">{d.sub}</p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {FEATURES.map((f) => (
+            <div key={f.title}
+              className="rounded-2xl border border-white/5 p-6 transition-all duration-300 hover:border-[#C6A96B]/20 group"
+              style={{ backdropFilter: "blur(20px)", background: "rgba(10,34,64,0.45)" }}>
+              <div className="text-[#C6A96B] text-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                {f.icon}
               </div>
-            ))}
+              <h3 className="font-display text-[#F8F6F1] font-semibold text-base mb-2">{f.title}</h3>
+              <p className="text-[#94A3B8] text-xs leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── How it works ── */}
+      <section id="how" className="relative z-10 max-w-4xl mx-auto px-4 py-20">
+        <div className="text-center mb-12">
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">วิธีเริ่มต้น</p>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1]">
+            เริ่มใช้ใน 3 ขั้นตอน
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {STEPS.map((step) => (
+            <div key={step.num} className="text-center">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4 mx-auto"
+                style={{ background: "rgba(198,169,107,0.12)", border: "1px solid rgba(198,169,107,0.3)" }}>
+                <span className="font-display text-[#C6A96B] font-bold text-lg">{step.num}</span>
+              </div>
+              <h3 className="font-display text-[#F8F6F1] font-semibold text-base mb-2">{step.title}</h3>
+              <p className="text-[#94A3B8] text-xs leading-relaxed">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Testimonials ── */}
+      <section className="relative z-10 max-w-5xl mx-auto px-4 py-16">
+        <div className="text-center mb-10">
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">เสียงจากผู้ใช้</p>
+          <h2 className="font-display text-3xl font-bold text-[#F8F6F1]">ผู้ใช้พูดว่าอะไร</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {TESTIMONIALS.map((t) => (
+            <div key={t.name}
+              className="rounded-2xl border border-white/5 p-6"
+              style={{ backdropFilter: "blur(20px)", background: "rgba(10,34,64,0.4)" }}>
+              <p className="text-[#C6A96B] text-lg mb-3">"</p>
+              <p className="text-[#D9CDB7] text-xs leading-relaxed mb-4">{t.text}</p>
+              <div className="border-t border-white/5 pt-3">
+                <p className="text-[#F8F6F1] text-xs font-semibold">{t.name}</p>
+                <p className="text-[#94A3B8] text-[10px]">{t.role}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Pricing teaser ── */}
+      <section className="relative z-10 max-w-3xl mx-auto px-4 py-16 text-center">
+        <div className="rounded-3xl border border-[#C6A96B]/20 p-10"
+          style={{ backdropFilter: "blur(24px)", background: "rgba(198,169,107,0.05)", boxShadow: "0 0 80px rgba(198,169,107,0.08)" }}>
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">แผนราคา</p>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] mb-3">
+            เริ่มต้น ฿0 ตลอดชีพ
+          </h2>
+          <p className="text-[#94A3B8] text-sm mb-6 max-w-md mx-auto">
+            ใช้ฟรีได้เลย ไม่มีวันหมดอายุ อัปเกรดเมื่อพร้อม
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+            <Link
+              to="/register"
+              className="inline-flex items-center justify-center px-8 py-3.5 rounded-full font-bold text-[#020617] transition-all hover:scale-105 active:scale-95"
+              style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}
+            >
+              เริ่มต้นใช้งาน ฟรี
+            </Link>
+            <Link
+              to="/pricing"
+              className="inline-flex items-center justify-center px-8 py-3.5 rounded-full font-medium border border-white/15 text-[#94A3B8] hover:border-[#C6A96B]/40 hover:text-[#D9BC82] transition-all"
+            >
+              ดูแผนทั้งหมด →
+            </Link>
           </div>
         </div>
-      </div>
-    </main>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="relative z-10 border-t border-white/5 mt-8 py-10 px-4">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[#C6A96B] text-sm">✦</span>
+            <span className="font-display text-[#F8F6F1] font-bold">PhopePhum</span>
+            <span className="text-[#94A3B8] text-xs ml-2">Living Wisdom OS</span>
+          </div>
+          <div className="flex items-center gap-6 text-xs text-[#94A3B8]">
+            <Link to="/pricing" className="hover:text-[#C6A96B] transition-colors">แผนสมาชิก</Link>
+            <Link to="/login" className="hover:text-[#C6A96B] transition-colors">เข้าสู่ระบบ</Link>
+            <Link to="/register" className="hover:text-[#C6A96B] transition-colors">สมัครสมาชิก</Link>
+          </div>
+          <p className="text-[#94A3B8]/40 text-[10px]">© 2025 PhopePhum · ศาสตร์ไทยแท้ดั้งเดิม</p>
+        </div>
+      </footer>
+
+    </div>
   );
 }
 
@@ -189,7 +330,7 @@ function LotusSymbol() {
       <circle cx="40" cy="40" r="9"  stroke="#C6A96B" strokeWidth="0.8" fill="none" opacity="0.55" />
       <circle cx="40" cy="40" r="5"  stroke="#D9BC82" strokeWidth="0.8" fill="none" opacity="0.75" />
       <circle cx="40" cy="40" r="2"  fill="#E8C46A" opacity="0.95" />
-      {[[40,31],[49,40],[40,49],[31,40]].map(([cx,cy],i) => (
+      {([[40,31],[49,40],[40,49],[31,40]] as [number,number][]).map(([cx,cy],i) => (
         <circle key={i} cx={cx} cy={cy} r="0.8" fill="#9AB3D9" opacity="0.7" />
       ))}
     </svg>

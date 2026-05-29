@@ -3,6 +3,8 @@ import { Form, Link, useActionData, useNavigation } from "@remix-run/react";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { signUp } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
+import { notifyNewRegistration } from "~/services/line.server";
+import { createSupabaseClient } from "~/services/supabase.server";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
@@ -42,9 +44,35 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   if (user) {
-    await logEvent(request, env, EVENTS.USER_REGISTERED, {
-      method: "email",
-    });
+    await logEvent(request, env, EVENTS.USER_REGISTERED, { method: "email" });
+
+    // สร้าง subscription_request และส่ง LINE notification
+    try {
+      const { supabase } = createSupabaseClient(request, env);
+      const now = new Date().toISOString();
+      const { data: reqRow } = await supabase
+        .from("subscription_requests")
+        .insert({
+          user_id: user.id,
+          type: "registration",
+          plan: "basic",
+          status: "pending",
+          created_at: now,
+        })
+        .select("id")
+        .single();
+
+      // ส่ง LINE แบบ non-blocking (ไม่ให้ error หยุด register)
+      await notifyNewRegistration(env, {
+        requestId: reqRow?.id ?? user.id,
+        userId: user.id,
+        displayName,
+        email,
+        createdAt: now,
+      }).catch(console.error);
+    } catch (e) {
+      console.error("[register] LINE notify error:", e);
+    }
   }
 
   return redirect("/dashboard", { headers });

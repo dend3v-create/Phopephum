@@ -44,7 +44,7 @@ export default function AdminLayout() {
         {/* Nav */}
         <nav className="flex flex-col gap-0.5 flex-1">
           <NavLink to="/admin" icon={<IconHome />} label="Overview" />
-          {/* We can add more links here as features are requested */}
+          <NavLink to="/admin/approvals" icon={<IconApprove />} label="อนุมัติคำขอ" />
           <div className="mt-8 mb-2">
             <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider pl-3">Back to App</p>
           </div>
@@ -124,6 +124,15 @@ function IconApp() {
       <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
       <line x1="8" y1="21" x2="16" y2="21" />
       <line x1="12" y1="17" x2="12" y2="21" />
+    </svg>
+  );
+}
+
+function IconApprove() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
     </svg>
   );
 }
