@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 
     systemContext += `\n\nข้อมูลดวงชะตาพื้นฐานของคุณ:\n${JSON.stringify(dataSnapshot, null, 2)}`
     
-    systemContext += `\n\n**ข้อควรจำ:**\nกรุณาส่งมอบคำพยากรณ์ให้ตรงตามโครงสร้าง Task ทั้ง 6 ข้อที่กำหนดไว้อย่างครบถ้วนเท่านั้น ไม่ต้องตอบในรูปแบบแชท`
+    systemContext += `\n\n**ข้อควรจำ:**\nกรุณาส่งมอบคำพยากรณ์ให้ตรงตาม โครงสร้างคำตอบ (Response Structure) 4 ข้อ ที่กำหนดไว้อย่างครบถ้วนเท่านั้น ไม่ต้องตอบในรูปแบบแชท`
 
     // ค้นหา API key ใน .env
     const geminiKey = process.env.GEMINI_API_KEY
