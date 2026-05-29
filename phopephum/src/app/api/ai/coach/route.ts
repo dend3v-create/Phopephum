@@ -96,21 +96,27 @@ export async function POST(request: Request) {
           }
         } else {
           console.error('[/api/ai/coach] Gemini API failed with status:', geminiRes.status, resData)
+          return NextResponse.json({
+            success: true,
+            message: `⚠️ ระบบ AI ขัดข้องชั่วคราว (API Error: ${geminiRes.status}) - ${resData?.error?.message || 'Unknown error'}`,
+            source: 'gemini-error'
+          })
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('[/api/ai/coach] Gemini API request error:', err)
+        return NextResponse.json({
+          success: true,
+          message: `⚠️ ไม่สามารถเชื่อมต่อกับ AI ได้ (Fetch Error: ${err.message})`,
+          source: 'fetch-error'
+        })
       }
+    } else {
+      return NextResponse.json({
+        success: true,
+        message: `⚠️ ไม่พบ GEMINI_API_KEY ในระบบ กรุณาตรวจสอบการตั้งค่า Environment Variables`,
+        source: 'wisdom-fallback'
+      })
     }
-
-    // --- FALLBACK ---
-    const responseText = `ระบบ AI กำลังอยู่ระหว่างการปรับปรุงและอัปเดตโมเดลพยากรณ์ กรุณาลองใหม่อีกครั้งในภายหลังครับ`
-
-
-    return NextResponse.json({
-      success: true,
-      message: responseText,
-      source: 'wisdom-fallback'
-    })
   } catch (error) {
     console.error('[/api/ai/coach] POST error:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
