@@ -20,7 +20,9 @@
       "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" show HEAD -- phopephum/src/lib/astrology/core/thaiLunar.ts)",
       "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" show HEAD -- phopephum/src/lib/astrology/datasets/lunarLookup.ts)",
       "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" status)",
-      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" log --oneline origin/main..HEAD)"
+      "Bash(git -C \"/e/00.1_DenD3v_AI/Mobile_app_01_Demo_Horn_Tai_Noo\" log --oneline origin/main..HEAD)",
+      "Bash(npx @cloudflare/next-on-pages --help)",
+      "Bash(npx @cloudflare/next-on-pages --skip-build)"
     ]
   }
 }
