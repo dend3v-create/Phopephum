@@ -554,7 +554,7 @@ export default function CoachPage() {
 
               <div className="pt-2">
                 <button
-                  onClick={handleGenerateForecast}
+                  onClick={() => handleGenerateForecast()}
                   className="px-8 py-4 rounded-full text-xs font-black uppercase tracking-[0.2em] bg-gradient-to-br from-gold-500 via-gold-liquid to-gold-600 text-cosmic-950 hover:scale-105 active:scale-95 transition-all shadow-[0_10px_35px_rgba(198,169,107,0.25)] hover:shadow-[0_10px_45px_rgba(198,169,107,0.4)] cursor-pointer"
                 >
                   คำนวณและพยากรณ์ดวงชะตา ⬡
