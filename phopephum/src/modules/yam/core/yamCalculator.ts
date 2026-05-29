@@ -17,8 +17,14 @@ export function calculateYam(
   date: Date,
   options: CalculateYamOptions = {}
 ): YamInfo & { sunTimes: ReturnType<typeof getSunTimes> } {
-  const sunTimes = getSunTimes(date, options.lat, options.lng);
-  const dayName  = DAY_INDEX_MAP[date.getDay()];
+  // โคลน Date เพื่อหลีกเลี่ยง side effects
+  const adjustedDate = new Date(date.getTime());
+  if (date.getHours() < 6) {
+    adjustedDate.setDate(adjustedDate.getDate() - 1);
+  }
+
+  const sunTimes = getSunTimes(adjustedDate, options.lat, options.lng);
+  const dayName  = DAY_INDEX_MAP[adjustedDate.getDay()];
   const period   = isDayTime(date, sunTimes) ? "day" : "night";
   const yamIndex = getYamIndex(date, sunTimes);
 

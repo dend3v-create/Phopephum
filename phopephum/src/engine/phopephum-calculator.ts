@@ -415,7 +415,18 @@ export function dateToMinutes(d: Date): number {
 
 export function calculateHora(input: HoraInput): HoraResult {
   const { date, currentTime } = input;
-  const dayOfWeek = date.getDay() as DayOfWeek;
+  
+  // โคลน Date เพื่อหลีกเลี่ยง side effects
+  const adjustedDate = new Date(date.getTime());
+  
+  // ตรวจสอบว่าช่วงเวลาเป็น 00:00 - 05:59 หรือไม่ (นับวันตามโหราศาสตร์ไทย)
+  // หากมี currentTime ให้ใช้ currentTime ในการเช็คชั่วโมง หากไม่มีให้ใช้ date
+  const checkTime = currentTime || date;
+  if (checkTime.getHours() < 6) {
+    adjustedDate.setDate(adjustedDate.getDate() - 1);
+  }
+
+  const dayOfWeek = adjustedDate.getDay() as DayOfWeek;
   const dayRuler = DAY_RULERS_PLANETS[dayOfWeek];
 
   const daytimeStars = DAYTIME_YAM_STARS[dayOfWeek];
@@ -526,7 +537,7 @@ export function calculateHora(input: HoraInput): HoraResult {
   }
 
   const result: HoraResult = {
-    date,
+    date: adjustedDate,
     dayOfWeek,
     dayNameThai: DAY_NAMES_THAI[dayOfWeek],
     dayRuler,

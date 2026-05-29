@@ -20,7 +20,7 @@ import {
   DAY_RULERS,
   DAY_NAMES_THAI,
   PLANET_CHALDEAN_ORDER,
-} from "../engine/hora-calculator";
+} from "./phopephum-calculator";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Test Helpers
@@ -509,5 +509,51 @@ describe("Edge cases", () => {
     expect(() => getCurrentHora()).not.toThrow();
     const result = getCurrentHora();
     expect(result.currentHora).toBeDefined();
+  });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 12. การเปลี่ยนวันทางโหราศาสตร์ไทย (ตัดวันใหม่ที่ 06:00 น.)
+// ─────────────────────────────────────────────────────────────────────────────
+
+describe("การนับวันใหม่และเช้ามืดตามหลักโหราศาสตร์ไทย (ตัดที่ 06:00 น.)", () => {
+  it("เวลา 02:30 น. ของวันศุกร์ที่ 29 พฤษภาคม 2026 ให้นับเป็นวันพฤหัสบดีที่ 28", () => {
+    // 29 พฤษภาคม 2026 เป็นวันศุกร์สากล
+    const date = makeDate("2026-05-29", "02:30");
+    const currentTime = makeDate("2026-05-29", "02:30");
+    const result = calculateHora({ date, currentTime });
+
+    // วันที่และข้อมูลวันในสัปดาห์ต้องเปลี่ยนเป็นวันพฤหัสบดี (4)
+    expect(result.dayOfWeek).toBe(4); // 4 = พฤหัสบดี
+    expect(result.dayNameThai).toBe("พฤหัส");
+    
+    // ดึงดาวของวันพฤหัสบดีมาใช้ (พฤหัส = jupiter)
+    expect(result.dayRuler.id).toBe("jupiter");
+
+    // ตรวจสอบว่าตรงกับยามกลางคืน
+    expect(result.currentHora).toBeDefined();
+    
+    // วันที่ที่เก็บในผลลัพธ์ต้องถอยหลัง 1 วัน เป็นวันที่ 28 พฤษภาคม 2026
+    const resDate = result.date;
+    expect(resDate.getDate()).toBe(28);
+    expect(resDate.getMonth()).toBe(4); // 4 = พฤษภาคม (0-based)
+  });
+
+  it("เวลา 06:00 น. ของวันศุกร์ที่ 29 พฤษภาคม 2026 ให้นับเป็นวันศุกร์ที่ 29 ตามปกติ", () => {
+    const date = makeDate("2026-05-29", "06:00");
+    const currentTime = makeDate("2026-05-29", "06:00");
+    const result = calculateHora({ date, currentTime });
+
+    // วันที่และข้อมูลวันในสัปดาห์ต้องเป็นวันศุกร์ (5)
+    expect(result.dayOfWeek).toBe(5); // 5 = ศุกร์
+    expect(result.dayNameThai).toBe("ศุกร์");
+    expect(result.dayRuler.id).toBe("venus");
+
+    // ยามแรก 06:00 คือยามเช้าของกลางวัน (ยามที่ 1)
+    expect(result.currentHora).toBeDefined();
+
+    // วันที่ในผลลัพธ์ยังเป็นวันที่ 29 ตามเดิม
+    const resDate = result.date;
+    expect(resDate.getDate()).toBe(29);
   });
 });
