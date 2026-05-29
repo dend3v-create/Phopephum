@@ -1,0 +1,44 @@
+ ดี — .dev.vars อยู่ใน .gitignore แล้ว ตอนนี้ kill dev server เก่าออก:
+
+● Bash(kill %1 2>/dev/null; pkill -f "remix vite" 2>/dev/null; echo "stopped")
+  ⎿  stopped
+
+● ---
+  สรุป Routes ที่สร้างแล้ว ✅
+
+  apps/web/app/
+  ├── load-context.ts         ← Cloudflare env type augmentation
+  ├── env.d.ts                ← CSS?url + workers-types declarations
+  ├── services/
+  │   └── auth.server.ts      ← getUser/requireAuth/redirectIfAuthed/signIn/signUp/signOut
+  ├── components/ui/
+  │   ├── Input.tsx           ← Hora Premium styled input
+  │   ├── Button.tsx          ← primary/outline/ghost variants + loading spinner
+  │   ├── Card.tsx            ← dark card with optional glow
+  │   └── NavLink.tsx         ← active-aware sidebar link
+  └── routes/
+      ├── _auth.tsx           ← layout: redirect ถ้า logged in แล้ว
+      ├── _auth.login.tsx     ← Form + action → Supabase signIn
+      ├── _auth.register.tsx  ← Form + action → Supabase signUp + log event
+      ├── logout.tsx          ← action only → signOut → redirect /login
+      ├── dashboard.tsx       ← layout: sidebar nav + user profile + mobile bar
+      ├── dashboard._index.tsx ← overview: stats + quick actions + upgrade banner
+      ├── dashboard.horoscope.tsx ← horoscope form → engine → result display
+      ├── dashboard.reports.tsx   ← list AI reports
+      ├── dashboard.settings.tsx  ← update profile + birthdate
+      └── dashboard.planner.tsx   ← Phase 2 placeholder
+
+  ---
+  ขั้นตอนถัดไป
+
+  กรอก .dev.vars ก่อนรัน:
+  SUPABASE_URL=https://xxx.supabase.co
+  SUPABASE_ANON_KEY=eyJ...
+
+  แล้ว:
+  pnpm dev:web
+
+  ลำดับต่อไป:
+  1. Run Supabase migration — infrastructure/supabase/migrations/001_initial_schema.sql
+  2. Deploy AI Worker — ตาม agents/skill-deploy-worker.md
+  3. สร้าง dashboard/reports/new — หน้าสร้าง AI Report พร้อม streaming

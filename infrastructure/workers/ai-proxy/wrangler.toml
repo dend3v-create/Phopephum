@@ -1,0 +1,16 @@
+name = "phopephum-ai-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+[[kv_namespaces]]
+binding = "KV_PROMPT_CACHE"
+id = "09beb346794041c784a00ff7ef1b2ead"
+preview_id = "68170184b5e047b09b0d98abce21383f"
+
+[vars]
+ENVIRONMENT = "production"
+
+# Secrets (set via wrangler secret put)
+# GEMINI_API_KEY      ← Google AI Studio key
+# AI_WORKER_SECRET    ← shared secret กับ Remix web app

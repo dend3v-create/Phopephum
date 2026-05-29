@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": ["**/*.ts", "**/*.tsx", ".server/**/*.ts", ".server/**/*.tsx", "app/load-context.ts"],
+  "exclude": ["node_modules"],
+  "compilerOptions": {
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["@cloudflare/workers-types/2023-07-01"],
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "noUncheckedIndexedAccess": false,
+    "exactOptionalPropertyTypes": false,
+    "paths": {
+      "~/*": ["./app/*"]
+    }
+  }
+}

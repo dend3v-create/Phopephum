@@ -1,0 +1,16 @@
+name = "phopephum-web"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = "./build/client"
+
+[[kv_namespaces]]
+binding = "KV_CACHE"
+id = "5a67973201314144be56533f29888d09"
+preview_id = "3d84a60e93cb4cd1afff497a9534a8e9"
+
+[[r2_buckets]]
+binding = "R2_REPORTS"
+bucket_name = "phopephum-reports"
+
+[vars]
+ENVIRONMENT = "production"

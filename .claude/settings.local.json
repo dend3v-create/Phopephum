@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm dev:web)",
+      "Bash(cmd /c \"for /f \\\\\"tokens=5\\\\\" %a in \\('netstat -aon ^| findstr :5173'\\) do taskkill /F /PID %a\")",
+      "Bash(cmd /c \"netstat -aon | findstr \\\\\"5173 \\\\|5174 \\\\|5175 \\\\|5176 \\\\|5177 \\\\\"\")",
+      "Bash(cmd /c \"taskkill /F /IM node.exe\")",
+      "Bash(cmd:*)",
+      "Bash(grep -l \"daily_plans\" E:/00.1_DenD3v_AI/phopephum-v2/infrastructure/supabase/migrations/*.sql)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(xargs rm:*)",
+      "Bash(ls E:/00.1_DenD3v_AI/phopephum-v2/*.md)",
+      "mcp__claude_ai_Supabase__list_projects",
+      "mcp__claude_ai_Supabase__apply_migration",
+      "Bash(npx wrangler:*)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm --filter @phopephum/web run build)",
+      "Bash(node -e \"const m = require\\('@remix-run/cloudflare-pages'\\); console.log\\(Object.keys\\(m\\)\\)\")",
+      "Bash(xargs sed:*)",
+      "WebFetch(domain:hora-time.pages.dev)",
+      "Bash(pnpm --filter @phopephum/web typecheck)",
+      "Bash(Get-ChildItem -Path \"E:/00.1_DenD3v_AI/phopephum-v2/apps/web/app\" -Recurse -Filter \"*.js\")",
+      "Bash(Remove-Item -Force)",
+      "Bash(Write-Host \"Done\")",
+      "Bash(find \"E:/00.1_DenD3v_AI/phopephum-v2/apps/web/app\" -name \"*.js\" -delete)",
+      "mcp__claude_ai_Supabase__execute_sql",
+      "mcp__claude_ai_Supabase__get_logs",
+      "WebFetch(domain:docs.google.com)",
+      "WebFetch(domain:doc-0c-5g-sheets.googleusercontent.com)",
+      "Bash(pnpm --filter @phopephum/web build)",
+      "Bash(find E:/00.1_DenD3v_AI/phopephum-v2/apps/web/app -name \"*.js\" -type f -delete)",
+      "Bash(pnpm --filter @phopephum/web deploy)",
+      "Bash(pnpm run:*)",
+      "Bash(find apps/web/app -name \"*.js\" -type f -delete)",
+      "Bash(pnpm --filter @phopephum/engine typecheck)",
+      "Bash(npx tsx:*)"
+    ]
+  }
+}

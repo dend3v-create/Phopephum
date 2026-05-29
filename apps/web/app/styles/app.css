@@ -1,0 +1,164 @@
+@import "tailwindcss";
+
+@theme {
+  /* ── Astral Imperial Flow Palette ── */
+
+  /* Cosmic Blue */
+  --color-cosmic-950: #020617;
+  --color-cosmic-900: #071427;
+  --color-cosmic-800: #0A2240;
+  --color-cosmic-700: #12355B;
+
+  /* Imperial Gold */
+  --color-gold-500: #C6A96B;
+  --color-gold-400: #D9BC82;
+  --color-gold-300: #F2D49B;
+  --color-gold-liquid: #E8C46A;
+
+  /* Mystic Blue */
+  --color-mystic-500: #4B6FAE;
+  --color-mystic-400: #6D8FC7;
+  --color-mystic-300: #9AB3D9;
+
+  /* Text */
+  --color-text-primary:   #F8F6F1;
+  --color-text-secondary: #D9CDB7;
+  --color-text-muted:     #94A3B8;
+
+  /* Borders */
+  --color-border-gold: rgba(217, 188, 130, 0.18);
+  --color-border-dim:  rgba(75, 111, 174, 0.15);
+
+  /* Fonts */
+  --font-family-display:   "Cinzel", "Cormorant Garamond", serif;
+  --font-family-cormorant: "Cormorant Garamond", serif;
+  --font-family-sarabun:   "IBM Plex Sans Thai", "Sarabun", sans-serif;
+}
+
+/* ── Base ── */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-family-sarabun);
+  color: var(--color-text-primary);
+  background:
+    linear-gradient(180deg, #020617 0%, #071427 45%, #0A2240 100%);
+  min-height: 100vh;
+}
+
+.font-display   { font-family: var(--font-family-display); }
+.font-cormorant { font-family: var(--font-family-cormorant); }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: #020617; }
+::-webkit-scrollbar-thumb { background: rgba(198,169,107,0.3); border-radius: 2px; }
+
+/* ── Glow utilities ── */
+.glow-gold {
+  text-shadow:
+    0 0 30px rgba(232,196,106,0.55),
+    0 0 80px rgba(232,196,106,0.20);
+}
+
+.glow-mystic {
+  text-shadow:
+    0 0 30px rgba(109,143,199,0.50),
+    0 0 60px rgba(109,143,199,0.15);
+}
+
+/* ── Glass card ── */
+.card-glass {
+  background: rgba(10, 34, 64, 0.58);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(217, 188, 130, 0.18);
+  border-radius: 1.25rem;
+  box-shadow:
+    0 10px 60px rgba(0, 0, 0, 0.45),
+    0 0  40px rgba(232, 196, 106, 0.06);
+}
+
+/* ── Liquid Gold Overlay ── */
+.liquid-gold-overlay {
+  background: linear-gradient(
+    135deg,
+    rgba(232,196,106,0.00),
+    rgba(232,196,106,0.18),
+    rgba(232,196,106,0.00)
+  );
+}
+
+/* ── Mystic glow bg ── */
+.mystic-glow-bg {
+  background: radial-gradient(
+    circle,
+    rgba(109,143,199,0.22) 0%,
+    rgba(109,143,199,0) 70%
+  );
+}
+
+/* ── Animations ── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.12; transform: scale(1); }
+  50%       { opacity: 0.90; transform: scale(1.5); }
+}
+
+@keyframes cosmicDrift {
+  0%   { transform: translate(0px, 0px)   rotate(0deg); }
+  33%  { transform: translate(6px, -8px)  rotate(1.5deg); }
+  66%  { transform: translate(-4px, 5px)  rotate(-1deg); }
+  100% { transform: translate(0px, 0px)   rotate(0deg); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes auraPulse {
+  0%, 100% { opacity: 0.12; }
+  50%       { opacity: 0.28; }
+}
+
+.animate-float        { animation: float        6s ease-in-out infinite; }
+.animate-twinkle      { animation: twinkle      3s ease-in-out infinite; }
+.animate-cosmic-drift { animation: cosmicDrift 18s ease-in-out infinite; }
+.animate-aura-pulse   { animation: auraPulse    5s ease-in-out infinite; }
+.animate-fade-up      { animation: fadeUp        0.6s ease both; }
+
+/* ── Gold shimmer button ── */
+.btn-gold-shine {
+  background: linear-gradient(
+    105deg,
+    #C6A96B 0%,
+    #F2D49B 40%,
+    #E8C46A 60%,
+    #C6A96B 100%
+  );
+  background-size: 200% auto;
+  animation: shimmer 4s linear infinite;
+  color: #020617;
+  font-weight: 600;
+}
+
+/* ── Cosmic background pattern ── */
+.cosmic-ocean-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(75,111,174,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(75,111,174,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 30% at 50% 50%, rgba(232,196,106,0.05) 0%, transparent 70%),
+    linear-gradient(180deg, #020617 0%, #071427 50%, #0A2240 100%);
+}
