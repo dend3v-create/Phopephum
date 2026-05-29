@@ -331,10 +331,6 @@ export default function CoachPage() {
     <DashboardLayout pageTitle="พยากรณ์พื้นดวง" isAdmin={profile?.role === "admin" || profile?.role === "operator"}>
       
       <div className="space-y-6 max-w-6xl mx-auto pb-20 print:bg-white print:text-black print:pb-0">
-        
-        {/* Visual Background Elements for Web */}
-        <div className="bg-cosmic-portal pointer-events-none" />
-        <div className="cosmic-nebula-aura pointer-events-none" />
 
         {/* 1. Header Hero Card with General 7-Base Philosophy */}
         <HoraCard glow>
@@ -433,8 +429,8 @@ export default function CoachPage() {
                             <td key={cIdx} className="p-0.5 text-center">
                               <button
                                 onClick={() => setSelectedCell({ row: row.key, col: cIdx, val: v, house, rowName: row.name, desc: row.desc })}
-                                className={`w-full py-2 px-1 rounded-xl text-xxs font-bold border transition-all flex flex-col items-center justify-center gap-0.5 ${colorClass} ${
-                                  isSelected ? "ring-2 ring-gold-400 ring-offset-1 ring-offset-cosmic-950 scale-105" : "hover:scale-105"
+                                className={`w-full py-2 px-1 rounded-xl text-xxs font-bold border transition-colors flex flex-col items-center justify-center gap-0.5 ${colorClass} ${
+                                  isSelected ? "ring-2 ring-gold-400 ring-offset-1 ring-offset-cosmic-950" : ""
                                 }`}
                               >
                                 <span className="text-[7.5px] text-white/50 font-normal uppercase block truncate max-w-full">

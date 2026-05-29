@@ -282,12 +282,22 @@ h1, h2, h3, h4, h5, h6,
   }
 }
 
-.glass-hora:hover {
-  border-color: rgba(232, 196, 106, 0.35);
-  transform: translateY(-2px);
-  box-shadow: 
-    0 15px 70px rgba(0, 0, 0, 0.55),
-    0 0 50px rgba(232, 196, 106, 0.15);
+@media (pointer: fine) {
+  .glass-hora:hover {
+    border-color: rgba(232, 196, 106, 0.35);
+    transform: translateY(-2px);
+    box-shadow:
+      0 15px 70px rgba(0, 0, 0, 0.55),
+      0 0 50px rgba(232, 196, 106, 0.15);
+  }
+}
+
+/* Disable expensive nebula animation on mobile/touch devices */
+@media (pointer: coarse) {
+  .cosmic-nebula-aura {
+    animation: none;
+    opacity: 0.5;
+  }
 }
 
 .btn-hora {
