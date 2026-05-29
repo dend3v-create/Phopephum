@@ -77,10 +77,29 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const reader = stream.getReader();
     const decoder = new TextDecoder();
     let text = "";
+    let buffer = "";
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-      text += decoder.decode(value, { stream: true });
+      
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop() ?? "";
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ")) continue;
+        const raw = line.slice(6).trim();
+        if (!raw || raw === "[DONE]") continue;
+
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed.text) {
+            text += parsed.text;
+          }
+        } catch {
+          // skip invalid json chunks
+        }
+      }
     }
 
     // Save to DB
