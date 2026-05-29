@@ -127,7 +127,7 @@ export default function CoachPage() {
     loadUserData();
   }, []);
 
-  const handleGenerateForecast = async () => {
+  const handleGenerateForecast = async (forceRefresh = false) => {
     if (!profile || generating) return;
 
     setGenerating(true);
@@ -137,7 +137,8 @@ export default function CoachPage() {
     try {
       const res = await fetch("/api/ai/coach", {
         method: "POST",
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ forceRefresh })
       });
 
       const data = await res.json();
@@ -145,8 +146,10 @@ export default function CoachPage() {
         setPrediction(data.message);
         // บันทึกลง cache ทันทีเพื่อประหยัดโทเคนและประสิทธิภาพ
         localStorage.setItem(`phopephum_general_forecast_${profile.id}`, data.message);
+      } else if (data.isOutOfCredits) {
+        alert(data.message); // แจ้งเตือนเมื่อโควต้าหมด
       } else {
-        alert("เกิดข้อผิดพลาดในการคำนวณและพยากรณ์ดวงชะตา กรุณาลองใหม่อีกครั้งครับ");
+        alert(data.message || "เกิดข้อผิดพลาดในการคำนวณและพยากรณ์ดวงชะตา กรุณาลองใหม่อีกครั้งครับ");
       }
     } catch (err) {
       console.error("Error generating destiny forecast:", err);
@@ -157,11 +160,11 @@ export default function CoachPage() {
   };
 
   const handleReset = () => {
-    if (window.confirm("คุณต้องการคำนวณและสร้างคำทำนายใหม่หรือไม่? (การคำนวณใหม่จะวิเคราะห์ดวงชะตาจรตามปัจจุบันอีกครั้ง)")) {
-      setPrediction("");
+    if (window.confirm("คุณต้องการคำนวณและสร้างคำทำนายใหม่หรือไม่? (การคำนวณใหม่จะใช้โควต้า AI 1 สิทธิ์)")) {
       if (profile) {
         localStorage.removeItem(`phopephum_general_forecast_${profile.id}`);
       }
+      handleGenerateForecast(true);
     }
   };
 

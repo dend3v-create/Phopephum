@@ -15,7 +15,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // ดึงข้อมูลโปรไฟล์ดวงชะตากำเนิดของผู้ใช้
+    let forceRefresh = false;
+    try {
+      const body = await request.json();
+      if (body?.forceRefresh) forceRefresh = true;
+    } catch(e) {}
+
+    // ดึงข้อมูลโปรไฟล์ดวงชะตากำเนิดของผู้ใช้และโควต้า AI
     const { data: profile } = await supabase
       .from('profiles')
       .select('*')
@@ -24,6 +30,39 @@ export async function POST(request: Request) {
 
     if (!profile) {
       return NextResponse.json({ error: 'Profile not found' }, { status: 404 })
+    }
+
+    // --- STEP 1: CHECK CACHE ---
+    if (!forceRefresh) {
+      const { data: cachedReport } = await supabase
+        .from('ai_reports')
+        .select('content')
+        .eq('user_id', user.id)
+        .eq('report_type', 'general_prediction')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single();
+        
+      if (cachedReport && cachedReport.content?.text) {
+        return NextResponse.json({
+          success: true,
+          message: cachedReport.content.text,
+          source: 'cache'
+        });
+      }
+    }
+
+    // --- STEP 2: CHECK QUOTA ---
+    const tokensUsed = profile.ai_tokens_used || 0;
+    const tokensLimit = profile.ai_tokens_limit ?? 5; // Default free limit
+    
+    if (tokensLimit !== -1 && tokensUsed >= tokensLimit) {
+      return NextResponse.json({
+        success: false,
+        message: `⚠️ โควต้าการพยากรณ์ของคุณหมดแล้ว กรุณาอัปเกรดแพ็กเกจเพื่อใช้งานต่อ`,
+        source: 'out_of_credits',
+        isOutOfCredits: true
+      });
     }
 
     // 1. คำนวณดวงชะตาด้วย Engine ตัวเต็ม (v3)
@@ -86,6 +125,23 @@ export async function POST(request: Request) {
           const aiResponse = resData.candidates?.[0]?.content?.parts?.[0]?.text
 
           if (aiResponse) {
+            // --- STEP 3: UPDATE DB (Deduct Credit & Save Cache) ---
+            
+            // 3.1 Deduct Credit
+            await supabase
+              .from('profiles')
+              .update({ ai_tokens_used: tokensUsed + 1 })
+              .eq('id', user.id);
+              
+            // 3.2 Save to Cache (Delete old then Insert, or just insert and we always fetch newest)
+            await supabase
+              .from('ai_reports')
+              .insert({
+                user_id: user.id,
+                report_type: 'general_prediction',
+                content: { text: aiResponse }
+              });
+
             return NextResponse.json({
               success: true,
               message: aiResponse,
