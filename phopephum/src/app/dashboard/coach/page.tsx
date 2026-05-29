@@ -61,7 +61,7 @@ export default function CoachPage() {
   const [loaderStep, setLoaderStep] = useState(0);
 
   // UI state
-  const [activeTab, setActiveTab] = useState<"charm" | "brand" | "growth" | "guide" | "full">("charm");
+  const [activeTab, setActiveTab] = useState<"charm" | "guide" | "full">("charm");
   const [selectedCell, setSelectedCell] = useState<any>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -179,33 +179,23 @@ export default function CoachPage() {
   // --- พาร์เซอร์คำทำนายแยกเซกชันสำหรับระบบแท็บย่อย ---
   const getSectionContent = (text: string, currentNum: number, nextNum: number): string => {
     const findIndex = (num: number) => {
-      const regexes = [
-        new RegExp(`(?:^|\\n)(?:##?\\s*)?${num}\\.\\s*`, 'i'),
-        new RegExp(`(?:^|\\n)(?:##?\\s*)?${num}\\s+`, 'i'),
-        new RegExp(`(?:^|\\n)(?:\\*\\*\\s*)${num}\\.\\s*`, 'i'),
-      ];
-      for (const r of regexes) {
-        const match = text.match(r);
-        if (match && match.index !== undefined) {
-          return match.index + match[0].length;
-        }
-      }
-      return -1;
+      if (num > 4) return -1;
+      // ค้นหาบรรทัดที่ขึ้นต้นด้วย 1., 2., 3., 4. โดยอนุญาตให้มี # หรือ ** นำหน้าได้
+      const r = new RegExp(`(?:^|\\n)[ \\t]*(?:#+[ \\t]*)?(?:\\*\\*[ \\t]*)?${num}\\.[ \\t]*`, 'i');
+      const match = text.match(r);
+      return match && match.index !== undefined ? match.index : -1;
     };
 
-    const start = findIndex(currentNum);
+    let start = findIndex(currentNum);
+    // Fallback: ถ้าหาข้อ 1 ไม่เจอ ให้เริ่มตั้งแต่ต้นข้อความเลย
+    if (start === -1 && currentNum === 1) start = 0;
     if (start === -1) return "";
     
     const end = nextNum ? findIndex(nextNum) : text.length;
     
     let sectionText = "";
     if (end !== -1 && end > start) {
-      // เอาความยาวของหัวข้อถัดไปหักออก
-      const nextMatch = text.match(new RegExp(`(?:^|\\n)(?:##?\\s*)?${nextNum}\\.\\s*`, 'i')) || 
-                        text.match(new RegExp(`(?:^|\\n)(?:##?\\s*)?${nextNum}\\s+`, 'i')) ||
-                        text.match(new RegExp(`(?:^|\\n)(?:\\*\\*\\s*)${nextNum}\\.\\s*`, 'i'));
-      const offset = nextMatch ? nextMatch[0].length : 0;
-      sectionText = text.slice(start, end - offset);
+      sectionText = text.slice(start, end);
     } else {
       sectionText = text.slice(start);
     }
@@ -213,22 +203,14 @@ export default function CoachPage() {
     return sectionText.trim();
   };
 
-  const getSectionHtml = (secId: "charm" | "brand" | "growth" | "guide") => {
+  const getSectionHtml = (secId: "charm" | "guide" | "full") => {
     if (!prediction) return "";
     
     switch (secId) {
       case "charm":
-        return getSectionContent(prediction, 1, 2) || prediction.slice(0, 1500) + "...";
-      case "brand":
-        const part1 = getSectionContent(prediction, 2, 3);
-        const part2 = getSectionContent(prediction, 4, 5);
-        return `${part1}\n\n${part2}`.trim() || "ไม่สามารถแยกข้อมูลภาพลักษณ์ได้อย่างสมบูรณ์ กรุณาดูในแท็บรายงานฉบับเต็ม";
-      case "growth":
-        return getSectionContent(prediction, 3, 4) || "ไม่สามารถแยกข้อมูลการพัฒนาตนเองได้อย่างสมบูรณ์ กรุณาดูในแท็บรายงานฉบับเต็ม";
+        return getSectionContent(prediction, 1, 3) || prediction;
       case "guide":
-        const gPart1 = getSectionContent(prediction, 5, 6);
-        const gPart2 = getSectionContent(prediction, 6, 7); // เอาสรุปด้วย
-        return `${gPart1}\n\n${gPart2}`.trim() || "ไม่สามารถแยกข้อมูลไกด์เส้นทางชีวิตได้อย่างสมบูรณ์ กรุณาดูในแท็บรายงานฉบับเต็ม";
+        return getSectionContent(prediction, 3, 5) || "ไม่สามารถแยกข้อมูลไกด์เส้นทางชีวิตได้อย่างสมบูรณ์ กรุณาดูในแท็บรายงานฉบับเต็ม";
       default:
         return prediction;
     }
@@ -629,10 +611,8 @@ export default function CoachPage() {
             {/* Tab Selectors */}
             <div className="flex overflow-x-auto gap-1.5 pb-2 border-b border-white/5 scrollbar-none print:hidden">
               {[
-                { id: "charm", label: "🌟 เสน่ห์พื้นดวง", desc: "Natal Charm" },
-                { id: "brand", label: "👑 ภาพลักษณ์ & Brand", desc: "Identity" },
-                { id: "growth", label: "🌱 การพัฒนาตนเอง", desc: "Self-Growth" },
-                { id: "guide", label: "🗺️ ไกด์เส้นทางชีวิต", desc: "Destiny Guide" },
+                { id: "charm", label: "🔮 ถอดรหัสดวงชะตา", desc: "Star Tracing" },
+                { id: "guide", label: "🗺️ แผนผัง & บทสรุป", desc: "Astral Blueprint" },
                 { id: "full", label: "📋 รายงานฉบับเต็ม", desc: "Full Report" }
               ].map((tab) => (
                 <button
@@ -667,15 +647,11 @@ export default function CoachPage() {
                   <div className="space-y-6">
                     <div className="flex items-center gap-2 pb-3 border-b border-white/5 print:hidden">
                       {activeTab === "charm" && <Sparkles className="w-5 h-5 text-gold-400" />}
-                      {activeTab === "brand" && <Award className="w-5 h-5 text-gold-400" />}
-                      {activeTab === "growth" && <Activity className="w-5 h-5 text-gold-400" />}
                       {activeTab === "guide" && <Compass className="w-5 h-5 text-gold-400" />}
                       
                       <h2 className="text-base font-serif font-bold text-gradient-gold uppercase tracking-wider">
-                        {activeTab === "charm" && "ถอดรหัสเสน่ห์พื้นดวงชะตา (Natal Charm)"}
-                        {activeTab === "brand" && "ภาพลักษณ์ดึงดูด & branding planner"}
-                        {activeTab === "growth" && "แนวทางการพัฒนาตนเองและกิจกรรมเสริมพลัง"}
-                        {activeTab === "guide" && "พยากรณ์บำบัดและเข็มทิศไกด์เส้นทางชีวิต (Destiny Map)"}
+                        {activeTab === "charm" && "ถอดรหัสดวงชะตา (Star Tracing)"}
+                        {activeTab === "guide" && "แผนผัง & บทสรุปเส้นทางชีวิต (Astral Blueprint)"}
                       </h2>
                     </div>
                     {renderStyledMarkdown(getSectionHtml(activeTab))}
@@ -696,10 +672,10 @@ export default function CoachPage() {
               </div>
               <div className="space-y-1 text-center sm:text-left">
                 <h4 className="text-xs font-bold text-gold-200">
-                  ต้องการเจาะลึกคำพยากรณ์รายวัน หรือวิเคราะห์ยามมงคลเพื่อเริ่มต้นกิจการสำคัญ?
+                  นำคำพยากรณ์ไปใช้วางแผนลงมือทำ (Action Plan) ด้วยแพลนเนอร์กาลเวลา
                 </h4>
                 <p className="text-[10px] text-hora-text-muted leading-relaxed">
-                  คุณสามารถเปิดใช้ระบบ **แพลนเนอร์กาลเวลา (Planner)** ในแถบเมนูนำทาง เพื่อเช็กปฏิทินยามจรแบบวินาทีต่อวินาทีเฉพาะดวงชะตาของบุคคลได้ทันทีครับ
+                  เชื่อมโยงสรุปสิ่งที่ควรทำ/ไม่ควรทำไปเป็น <b>To-Do List</b> เพื่อใช้ตัดสินใจ และเช็กปฏิทินยามอัฐกาลเพื่อเลือกเวลาเริ่มต้นกิจกรรมได้ทันที (ระบบพร้อมรองรับองค์ความรู้ ปีจร เดือนจร วันจร ในอนาคตเพื่อความแม่นยำสูงสุด)
                 </p>
               </div>
               <Link 
