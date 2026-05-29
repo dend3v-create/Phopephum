@@ -21,9 +21,25 @@ export function getSunTimes(
   };
 }
 
-/** แปลง Date เป็น minutes-since-midnight */
+/** แปลง Date เป็น minutes-since-midnight ตามเวลาประเทศไทย (UTC+7) */
 export function getMinutes(date: Date): number {
-  return date.getHours() * 60 + date.getMinutes();
+  let h = date.getUTCHours() + 7;
+  if (h >= 24) h -= 24;
+  return h * 60 + date.getUTCMinutes();
+}
+
+/** ดึงชั่วโมง (0-23) ตามเวลาประเทศไทย */
+export function getBKKHour(date: Date): number {
+  let h = date.getUTCHours() + 7;
+  if (h >= 24) h -= 24;
+  return h;
+}
+
+/** ดึงวันในสัปดาห์ (0-6) ตามเวลาประเทศไทย */
+export function getBKKDay(date: Date): number {
+  // shift date by +7 hours to get the absolute time in BKK, then use getUTCDay()
+  const bkkDate = new Date(date.getTime() + 7 * 3600 * 1000);
+  return bkkDate.getUTCDay();
 }
 
 /** ตรวจสอบว่าเป็นเวลากลางวัน (sunrise → sunset) */
