@@ -8,6 +8,7 @@ import { getCurrentYam, calculateMoonPhase } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import { MembershipBadge, MembershipStatusBadge } from "~/components/MembershipBadge";
 import type { Env } from "~/env.server";
+import { useState, useEffect } from "react";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -68,8 +69,22 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 }
 
 export default function DashboardIndex() {
-  const { user, profile, reportCount, daysRemaining, greeting, dateLabel, yam, moon } = useLoaderData<typeof loader>();
+  const { user, profile, reportCount, daysRemaining, greeting: initialGreeting, dateLabel: initialDateLabel, yam, moon } = useLoaderData<typeof loader>();
   const displayName = profile?.display_name ?? "ผู้ใช้งาน";
+
+  const [greeting, setGreeting] = useState(initialGreeting);
+  const [dateLabel, setDateLabel] = useState(initialDateLabel);
+
+  useEffect(() => {
+    const now = new Date();
+    const hour = now.getHours();
+    setGreeting(hour < 12 ? "อรุณสวัสดิ์" : hour < 17 ? "สวัสดีตอนบ่าย" : "สวัสดีตอนเย็น");
+    setDateLabel(now.toLocaleDateString("th-TH", {
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    }));
+  }, []);
 
   // ดึงระดับสิทธิ์ใช้งานโดยให้ความสำคัญกับ profile.plan เป็นหลัก เพื่อความสอดคล้องกันของข้อมูล
   const membershipType = profile?.plan || profile?.membership_type || profile?.subscription || "free";
@@ -104,7 +119,7 @@ export default function DashboardIndex() {
       {/* Stats row */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         <StatCard
-          label="รายงาน AI"
+          label="บทวิเคราะห์"
           value={String(reportCount)}
           sub="รายงานทั้งหมด"
         />
@@ -176,8 +191,8 @@ export default function DashboardIndex() {
           />
           <QuickAction
             to="/dashboard/reports"
-            title="รายงาน AI"
-            desc="วิเคราะห์ชีวิตเชิงลึกด้วย AI"
+            title="บทวิเคราะห์ชีวิต"
+            desc="บทวิเคราะห์ชีวิตเชิงลึกจากปัญญาศาสตร์"
             icon="✨"
           />
           <QuickAction
@@ -245,7 +260,7 @@ export default function DashboardIndex() {
                 อัพเกรดเป็น Premium
               </p>
               <p className="text-[#8A8070] text-sm">
-                ปลดล็อกรายงาน AI ไม่จำกัด + พยากรณ์รายปี
+                ปลดล็อกบทวิเคราะห์ไม่จำกัด + พยากรณ์รายปี
               </p>
             </div>
             <Link

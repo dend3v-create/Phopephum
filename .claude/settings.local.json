@@ -36,7 +36,11 @@
       "Bash(pnpm --filter @phopephum/engine typecheck)",
       "Bash(npx tsx:*)",
       "Bash(node -e ':*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(pnpm deploy:workers)",
+      "Bash(pnpm deploy:web)",
+      "Bash(pnpm turbo:*)",
+      "Bash(npm run:*)"
     ]
   }
 }

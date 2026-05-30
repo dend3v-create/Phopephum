@@ -1,5 +1,5 @@
 import { json } from "@remix-run/cloudflare";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, Link } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { requireAdmin } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
@@ -73,9 +73,33 @@ export default function AdminOverview() {
         borderColor: "rgba(56,189,248,0.12)"
       }}>
         <h3 className="text-xl font-semibold text-[#F8F6F1] mb-4">Quick Actions</h3>
-        <p className="text-[#94A3B8] mb-6">
-          More features will be added here based on your requirements (e.g. User Management, System Logs).
-        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Link
+            to="/admin/users"
+            className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#38BDF8]/30 transition-all group"
+          >
+            <div className="p-3 rounded-lg bg-[#38BDF8]/10 text-[#38BDF8]">
+              <IconUsers className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-[#F8F6F1]">จัดการสมาชิก</p>
+              <p className="text-xs text-[#94A3B8]">ดูรายชื่อและแก้ไขสิทธิ์ผู้ใช้</p>
+            </div>
+          </Link>
+
+          <Link
+            to="/admin/approvals"
+            className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#C6A96B]/30 transition-all group"
+          >
+            <div className="p-3 rounded-lg bg-[#C6A96B]/10 text-[#C6A96B]">
+              <IconApprove className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-[#F8F6F1]">อนุมัติคำขอ</p>
+              <p className="text-xs text-[#94A3B8]">จัดการคำอัปเกรดแพ็กเกจ</p>
+            </div>
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -135,6 +159,15 @@ function IconActivity({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className}>
       <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+    </svg>
+  );
+}
+
+function IconApprove({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className}>
+      <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
     </svg>
   );
 }

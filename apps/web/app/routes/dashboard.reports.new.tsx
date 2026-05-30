@@ -11,7 +11,7 @@ import { Input } from "~/components/ui/Input";
 import type { Env } from "~/env.server";
 
 export const meta: MetaFunction = () => [
-  { title: "สร้างรายงาน AI — PhopePhum" },
+  { title: "บทวิเคราะห์ชีวิต — PhopePhum" },
 ];
 
 const REPORT_TYPES = [
@@ -137,7 +137,7 @@ export default function NewReportPage() {
       {/* Header */}
       <div>
         <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-2">สร้างใหม่</p>
-        <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">รายงาน AI</h1>
+        <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">บทวิเคราะห์ชีวิต</h1>
         <p className="text-[#94A3B8] text-sm mt-1">
           เลือกประเภทรายงานที่ต้องการวิเคราะห์
         </p>
@@ -229,7 +229,7 @@ export default function NewReportPage() {
           disabled={isGenerating}
           className="w-full btn-gold-shine border-0"
         >
-          {isGenerating ? "กำลังวิเคราะห์ด้วย AI..." : "สร้างรายงาน"}
+          {isGenerating ? "กำลังเปิดบทวิเคราะห์..." : "สร้างบทวิเคราะห์"}
         </Button>
       </Form>
     </div>

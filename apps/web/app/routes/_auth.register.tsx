@@ -20,26 +20,39 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
+  const fullName = String(formData.get("fullName") ?? "");
   const displayName = String(formData.get("displayName") ?? "");
+  
+  const birthDate = String(formData.get("birthDate") ?? "");
+  const birthTime = String(formData.get("birthTime") ?? "");
+  const birthPlace = String(formData.get("birthPlace") ?? "");
+  const gender = String(formData.get("gender") ?? "ชาย");
 
-  if (!email || !password || !displayName) {
+  if (!email || !password || !fullName || !birthDate || !birthPlace) {
     return json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" }, { status: 400 });
   }
 
-  if (password.length < 8) {
+  if (password.length < 6) {
     return json(
-      { error: "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร" },
+      { error: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร" },
       { status: 400 }
     );
   }
 
-  const { user, error, headers } = await signUp(email, password, displayName, request, env);
+  const { user, error, headers } = await signUp(
+    email, 
+    password, 
+    displayName || fullName, 
+    request, 
+    env,
+    { fullName, birthDate, birthTime, birthPlace, gender }
+  );
 
   if (error) {
     const msg =
       error.message.includes("already registered")
         ? "อีเมลนี้ถูกใช้งานแล้ว"
-        : "เกิดข้อผิดพลาด กรุณาลองใหม่";
+        : "เกิดข้อผิดพลาด กรุณาลองใหม่: " + error.message;
     return json({ error: msg }, { status: 400 });
   }
 
@@ -50,23 +63,25 @@ export async function action({ request, context }: ActionFunctionArgs) {
     try {
       const { supabase } = createSupabaseClient(request, env);
       const now = new Date().toISOString();
+      const isAdmin = email === "dend3v@gmail.com";
+      
       const { data: reqRow } = await supabase
         .from("subscription_requests")
         .insert({
           user_id: user.id,
           type: "registration",
-          plan: "basic",
-          status: "pending",
+          plan: isAdmin ? "imperial" : "basic",
+          status: isAdmin ? "approved" : "pending",
           created_at: now,
+          approved_at: isAdmin ? now : null
         })
         .select("id")
         .single();
 
-      // ส่ง LINE แบบ non-blocking (ไม่ให้ error หยุด register)
       await notifyNewRegistration(env, {
         requestId: reqRow?.id ?? user.id,
         userId: user.id,
-        displayName,
+        displayName: displayName || fullName,
         email,
         createdAt: now,
       }).catch(console.error);
@@ -84,40 +99,76 @@ export default function RegisterPage() {
   const isLoading = navigation.state === "submitting";
 
   return (
-    <Card glow>
-      <h2 className="font-display text-2xl font-semibold text-[#F3EFE8] mb-1">
-        สมัครสมาชิก
-      </h2>
-      <p className="text-[#8A8070] text-sm mb-8">
-        เริ่มต้นเส้นทางปัญญาชีวิตของคุณ
-      </p>
+    <Card glow className="max-w-xl mx-auto my-8">
+      <div className="text-center mb-8">
+        <h2 className="font-display text-2xl font-bold text-[#F3EFE8] mb-2">
+          ลงทะเบียนวิเคราะห์ชะตาชีวิต
+        </h2>
+        <p className="text-[#8A8070] text-sm">
+          ปัญญาศาสตร์ เลข 7 ตัว 9 ฐาน + ยามอัฐกาลเฉพาะบุคคล
+        </p>
+      </div>
 
-      <Form method="post" className="flex flex-col gap-5">
+      <Form method="post" className="flex flex-col gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            name="fullName"
+            type="text"
+            label="ชื่อ-นามสกุลจริง"
+            placeholder="กรอกชื่อ-นามสกุล ของคุณ"
+            required
+          />
+          <div className="flex flex-col gap-1.5">
+             <label className="text-xs font-semibold text-[#8A8070] uppercase tracking-wider ml-1">เพศ</label>
+             <select name="gender" className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#D9BC82]/50">
+                <option value="ชาย">ชาย</option>
+                <option value="หญิง">หญิง</option>
+             </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <Input
+            name="birthDate"
+            type="date"
+            label="วันเกิด (ค.ศ.)"
+            required
+          />
+          <Input
+            name="birthTime"
+            type="time"
+            label="เวลาเกิด"
+            placeholder="00:00"
+          />
+        </div>
+
         <Input
-          name="displayName"
+          name="birthPlace"
           type="text"
-          label="ชื่อที่ใช้แสดง"
-          placeholder="ชื่อของคุณ"
-          autoComplete="name"
+          label="จังหวัดเกิด"
+          placeholder="เช่น กรุงเทพฯ, เชียงใหม่"
           required
         />
+
+        <div className="h-px bg-[#D9BC82]/10 my-2" />
+
         <Input
           name="email"
           type="email"
-          label="อีเมล"
-          placeholder="your@email.com"
-          autoComplete="email"
+          label="อีเมลสำหรับ Login"
+          placeholder="name@example.com"
           required
         />
         <Input
           name="password"
           type="password"
-          label="รหัสผ่าน"
-          placeholder="อย่างน้อย 8 ตัวอักษร"
-          autoComplete="new-password"
+          label="ตั้งรหัสผ่าน"
+          placeholder="6 ตัวอักษรขึ้นไป"
           required
-          minLength={8}
+          minLength={6}
         />
+        
+        <input type="hidden" name="displayName" value="" />
 
         {actionData?.error && (
           <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-3">
@@ -125,24 +176,19 @@ export default function RegisterPage() {
           </p>
         )}
 
-        <Button type="submit" loading={isLoading} className="w-full mt-1">
-          สมัครสมาชิกฟรี
+        <Button type="submit" loading={isLoading} className="w-full mt-2 py-6 text-lg font-bold shadow-lg shadow-gold/20">
+          บันทึกดวงชะตา & เริ่มใช้งาน
         </Button>
       </Form>
 
-      <p className="text-center text-[#8A8070] text-sm mt-6">
-        มีบัญชีแล้ว?{" "}
+      <p className="text-center text-[#8A8070] text-sm mt-8">
+        มีบัญชีวิเคราะห์อยู่แล้ว?{" "}
         <Link
           to="/login"
-          className="text-[#C9A96E] hover:text-[#E8D4A8] transition-colors"
+          className="text-[#C9A96E] hover:text-[#E8D4A8] font-bold transition-colors"
         >
           เข้าสู่ระบบ
         </Link>
-      </p>
-
-      <p className="text-center text-[#8A8070] text-xs mt-4">
-        การสมัครสมาชิกแสดงว่าคุณยอมรับ{" "}
-        <span className="text-[#C9A96E]">ข้อกำหนดการใช้งาน</span>
       </p>
     </Card>
   );
