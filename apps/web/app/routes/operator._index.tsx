@@ -45,14 +45,24 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (intent === "approve") {
     const { error } = await supabase
       .from("profiles")
-      .update({ membership_status: "active" })
+      .update({ 
+        membership_status: "active",
+        plan: "basic",
+        subscription: "basic",
+        membership_type: "basic"
+      })
       .eq("id", targetUserId);
     if (error) return json({ error: error.message }, { status: 500 });
   } 
   else if (intent === "set_premium") {
     const { error } = await supabase
       .from("profiles")
-      .update({ membership_type: "premium" })
+      .update({ 
+        membership_type: "premium",
+        subscription: "premium",
+        plan: "pro",
+        membership_status: "active"
+      })
       .eq("id", targetUserId);
     if (error) return json({ error: error.message }, { status: 500 });
   }
@@ -140,7 +150,7 @@ export default function OperatorDashboard() {
                       {membershipStatus === "pending" && (
                         <Form method="post">
                           <input type="hidden" name="userId" value={u.id} />
-                          <Button size="sm" name="intent" value="approve" className="h-7 text-xs bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border-none">
+                          <Button name="intent" value="approve" className="h-7 text-xs bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 border-none">
                             Approve
                           </Button>
                         </Form>
@@ -148,14 +158,14 @@ export default function OperatorDashboard() {
                       {membershipType !== "premium" && (
                         <Form method="post">
                           <input type="hidden" name="userId" value={u.id} />
-                          <Button size="sm" name="intent" value="set_premium" className="h-7 text-xs bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border-none">
+                          <Button name="intent" value="set_premium" className="h-7 text-xs bg-amber-500/20 text-amber-300 hover:bg-amber-500/30 border-none">
                             Upgrade
                           </Button>
                         </Form>
                       )}
                       <Form method="post">
                         <input type="hidden" name="userId" value={u.id} />
-                        <Button size="sm" name="intent" value="add_30_days" variant="outline" className="h-7 text-xs border-slate-700 hover:bg-slate-800">
+                        <Button name="intent" value="add_30_days" variant="outline" className="h-7 text-xs border-slate-700 hover:bg-slate-800">
                           +30 วัน
                         </Button>
                       </Form>

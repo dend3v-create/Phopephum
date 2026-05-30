@@ -34,15 +34,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   const { supabase } = createSupabaseClient(request, env);
-  const { error } = await supabase.rpc("update_profile", {
-    p_display_name: displayName,
-    p_birth_date: birthDate || null,
-    p_birth_time: birthTime || null,
-    p_birth_place: birthPlace || null,
-  });
+  const { error } = await supabase
+    .from("profiles")
+    .update({
+      display_name:   displayName,
+      birth_date:     birthDate   || null,
+      birth_time:     birthTime   || null,
+      birth_location: birthPlace  || null,
+    })
+    .eq("id", user.id);
 
   if (error) {
-    console.error("[settings] rpc error:", error.code, error.message);
+    console.error("[settings] update error:", error.code, error.message);
     return json({ error: `${error.code}: ${error.message}` }, { status: 500 });
   }
 
@@ -93,7 +96,7 @@ export default function SettingsPage() {
           <Input
             name="birthPlace"
             label="จังหวัดที่เกิด"
-            defaultValue={profile?.birth_place ?? ""}
+            defaultValue={profile?.birth_location ?? profile?.birth_place ?? ""}
             placeholder="เช่น กรุงเทพมหานคร"
           />
 

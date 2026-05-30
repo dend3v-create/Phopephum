@@ -5,6 +5,7 @@ import { requireAdmin } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import { NavLink } from "~/components/ui/NavLink";
 import type { Env } from "~/env.server";
+import { useState } from "react";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -19,14 +20,26 @@ export default function AdminLayout() {
   const { profile } = useLoaderData<typeof loader>();
   const displayName =
     profile?.display_name ?? profile?.email ?? "Admin";
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex bg-[#020617]">
+      {/* Mobile Menu Backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
-        className="hidden md:flex flex-col w-64 p-5 fixed h-full border-r"
+        className={`flex flex-col w-64 p-5 fixed h-full border-r z-40 transition-transform duration-300 ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+        onClick={() => setIsMobileMenuOpen(false)}
         style={{
-          background: "rgba(15,23,42,0.92)",
+          background: "rgba(15,23,42,0.95)",
           backdropFilter: "blur(20px)",
           borderColor: "rgba(56,189,248,0.12)",
         }}
@@ -44,6 +57,7 @@ export default function AdminLayout() {
         {/* Nav */}
         <nav className="flex flex-col gap-0.5 flex-1">
           <NavLink to="/admin" icon={<IconHome />} label="Overview" />
+          <NavLink to="/admin/users" icon={<IconUsers />} label="จัดการสมาชิก" />
           <NavLink to="/admin/approvals" icon={<IconApprove />} label="อนุมัติคำขอ" />
           <div className="mt-8 mb-2">
             <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider pl-3">Back to App</p>
@@ -93,7 +107,13 @@ export default function AdminLayout() {
         <h2 className="font-display text-xl font-bold text-[#F8F6F1]">
           Admin Panel
         </h2>
-        <MobileMenu />
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-1.5 rounded-lg hover:bg-white/5 active:scale-95 transition-all text-[#38BDF8]"
+          aria-label="เมนู"
+        >
+          <MobileMenu />
+        </button>
       </div>
 
       {/* Main content */}

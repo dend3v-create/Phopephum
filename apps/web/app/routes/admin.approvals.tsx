@@ -53,7 +53,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const { data: requests, error } = await query;
   if (error) console.error("[admin/approvals] loader error:", error);
 
-  return json({ requests: (requests ?? []) as RequestRow[], filter, adminId: user.id });
+  return json({ requests: (requests ?? []) as unknown as RequestRow[], filter, adminId: user.id });
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -94,15 +94,50 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "เกิดข้อผิดพลาดในการอัปเดต" }, { status: 500 });
   }
 
-  // ถ้าอนุมัติ package_upgrade → update profile.plan
-  if (decision === "approved" && req.type === "package_upgrade") {
-    await supabase
-      .from("profiles")
-      .update({ plan: req.plan })
-      .eq("id", req.user_id);
-  }
+  // อัปเดตสิทธิ์ผู้ใช้เมื่อแอดมินอนุมัติคำขอ
+  if (decision === "approved") {
+    if (req.type === "package_upgrade") {
+      const isImperial = req.plan === "imperial";
+      const isPro = req.plan === "pro";
+      
+      const mappedSub = isImperial ? "lifetime" : isPro ? "premium" : "basic";
+      const mappedType = isImperial ? "lifetime" : isPro ? "premium" : "basic";
+      
+      let expiresAt: string | null = null;
+      if (!isImperial) {
+        const date = new Date();
+        date.setDate(date.getDate() + 30);
+        expiresAt = date.toISOString();
+      }
 
-  // ถ้าอนุมัติ registration → update profile.plan = basic (already default)
+      await supabase
+        .from("profiles")
+        .update({ 
+          plan: req.plan,
+          subscription: mappedSub,
+          membership_type: mappedType,
+          membership_status: "active",
+          membership_expires_at: expiresAt
+        })
+        .eq("id", req.user_id);
+    } else if (req.type === "registration") {
+      // อนุมัติสิทธิ์ลงทะเบียนใหม่เป็นระดับ Basic (Active)
+      const date = new Date();
+      date.setDate(date.getDate() + 30);
+      const expiresAt = date.toISOString();
+
+      await supabase
+        .from("profiles")
+        .update({
+          plan: "basic",
+          subscription: "basic",
+          membership_type: "basic",
+          membership_status: "active",
+          membership_expires_at: expiresAt
+        })
+        .eq("id", req.user_id);
+    }
+  }
 
   return redirect("/admin/approvals?filter=pending");
 }

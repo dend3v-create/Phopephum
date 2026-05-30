@@ -35,11 +35,23 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     daysRemaining = Math.max(0, Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24)));
   }
 
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting =
+    hour < 12 ? "อรุณสวัสดิ์" : hour < 17 ? "สวัสดีตอนบ่าย" : "สวัสดีตอนเย็น";
+  const dateLabel = now.toLocaleDateString("th-TH", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+  });
+
   return json({
     user,
     profile,
     reportCount: reportCount ?? 0,
     daysRemaining,
+    greeting,
+    dateLabel,
     yam: {
       yamName:   yam.yamName,
       yamNumber: yam.yamNumber,
@@ -56,17 +68,17 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 }
 
 export default function DashboardIndex() {
-  const { profile, reportCount, daysRemaining, yam, moon } = useLoaderData<typeof loader>();
+  const { user, profile, reportCount, daysRemaining, greeting, dateLabel, yam, moon } = useLoaderData<typeof loader>();
   const displayName = profile?.display_name ?? "ผู้ใช้งาน";
-  
-  // fallback to 'subscription' field if membership_type not populated yet
-  const membershipType = profile?.membership_type || profile?.subscription || "free";
-  const membershipStatus = profile?.membership_status || "active";
 
-  const greeting = getGreeting();
+  // ดึงระดับสิทธิ์ใช้งานโดยให้ความสำคัญกับ profile.plan เป็นหลัก เพื่อความสอดคล้องกันของข้อมูล
+  const membershipType = profile?.plan || profile?.membership_type || profile?.subscription || "free";
+  const membershipStatus = profile?.membership_status || "active";
 
   return (
     <div className="space-y-8">
+
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
@@ -104,11 +116,7 @@ export default function DashboardIndex() {
         />
         <StatCard
           label="วันนี้"
-          value={new Date().toLocaleDateString("th-TH", {
-            weekday: "short",
-            day: "numeric",
-            month: "short",
-          })}
+          value={dateLabel}
           sub="วันที่"
           className="col-span-2 md:col-span-1"
         />
@@ -186,6 +194,47 @@ export default function DashboardIndex() {
           />
         </div>
       </div>
+
+      {/* Admin Panel — เห็นเฉพาะ admin */}
+      {profile?.role === "admin" && (
+        <div>
+          <h2 className="text-[#38BDF8] text-xs tracking-widest uppercase mb-4 flex items-center gap-2">
+            <span>⌘</span> ระบบผู้ดูแล
+          </h2>
+          <Link to="/admin" className="group block">
+            <div
+              className="rounded-2xl p-5 flex items-center gap-5 transition-all hover:scale-[1.01] active:scale-[0.99]"
+              style={{
+                background: "linear-gradient(135deg, rgba(14,30,55,0.9), rgba(22,48,88,0.8))",
+                border: "1px solid rgba(56,189,248,0.3)",
+                boxShadow: "0 0 24px rgba(56,189,248,0.08)",
+              }}
+            >
+              <div
+                className="w-12 h-12 rounded-xl flex items-center justify-center shrink-0"
+                style={{
+                  background: "rgba(56,189,248,0.12)",
+                  border: "1px solid rgba(56,189,248,0.25)",
+                }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="#38BDF8" strokeWidth={1.8} className="w-6 h-6">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-[#38BDF8] font-bold text-base mb-0.5 group-hover:text-sky-300 transition-colors">
+                  ผู้จัดการระบบ (แอดมิน)
+                </p>
+                <p className="text-[#94A3B8] text-sm">
+                  จัดการผู้ใช้ · อนุมัติคำขอ · ดูสถิติระบบ
+                </p>
+              </div>
+              <span className="text-[#38BDF8] text-xs opacity-0 group-hover:opacity-100 transition-opacity shrink-0">→</span>
+            </div>
+          </Link>
+        </div>
+      )}
 
       {/* Upgrade banner (free tier) */}
       {membershipType === "free" && (
@@ -270,9 +319,3 @@ function QuickAction({
   );
 }
 
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return "อรุณสวัสดิ์";
-  if (h < 17) return "สวัสดีตอนบ่าย";
-  return "สวัสดีตอนเย็น";
-}

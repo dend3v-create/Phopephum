@@ -5,6 +5,7 @@ import { requireAuth, getProfile } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import { NavLink } from "~/components/ui/NavLink";
 import type { Env } from "~/env.server";
+import { useState } from "react";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -17,17 +18,29 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 }
 
 export default function DashboardLayout() {
-  const { profile } = useLoaderData<typeof loader>();
+  const { user, profile } = useLoaderData<typeof loader>();
   const displayName =
     profile?.display_name ?? profile?.email ?? "ผู้ใช้งาน";
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex">
+      {/* Mobile Menu Backdrop */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside
-        className="hidden md:flex flex-col w-64 p-5 fixed h-full border-r"
+        className={`flex flex-col w-64 p-5 fixed h-full border-r z-40 transition-transform duration-300 ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        }`}
+        onClick={() => setIsMobileMenuOpen(false)}
         style={{
-          background: "rgba(2,6,23,0.92)",
+          background: "rgba(2,6,23,0.95)",
           backdropFilter: "blur(20px)",
           borderColor: "rgba(217,188,130,0.12)",
         }}
@@ -56,35 +69,56 @@ export default function DashboardLayout() {
               <NavLink to="/operator" icon={<IconOperator />} label="ระบบ Operator" />
             </div>
           )}
-          
+
           {profile?.role === 'admin' && (
-            <div className="pt-2">
-              <NavLink to="/admin" icon={<IconAdmin />} label="ระบบแอดมิน" />
+            <div className="mt-2">
+              <NavLink to="/admin/approvals" icon={<IconApprove />} label="อนุมัติคำขอ" />
             </div>
           )}
         </nav>
 
-        {/* User */}
-        <div className="border-t pt-4 mt-4" style={{ borderColor: "rgba(217,188,130,0.12)" }}>
-          <div className="flex items-center gap-3 mb-3">
+        {/* User + Admin CTA */}
+        <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: "rgba(217,188,130,0.12)" }}>
+
+          {/* Admin CTA — เห็นเฉพาะ admin */}
+          {profile?.role === 'admin' && (
+            <a
+              href="/admin"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: "linear-gradient(135deg, #1e3a5f, #2d5490)",
+                border: "1px solid rgba(56,189,248,0.35)",
+                color: "#38BDF8",
+                boxShadow: "0 0 16px rgba(56,189,248,0.12)",
+              }}
+            >
+              <IconAdmin />
+              จัดการระบบ (Admin)
+            </a>
+          )}
+
+          {/* User info */}
+          <div className="flex items-center gap-3">
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-[#D9BC82] text-sm font-semibold"
+              className="w-8 h-8 rounded-full flex items-center justify-center text-[#D9BC82] text-sm font-bold shrink-0"
               style={{ background: "rgba(198,169,107,0.15)", border: "1px solid rgba(217,188,130,0.25)" }}
             >
               {displayName.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-[#F8F6F1] truncate">{displayName}</p>
-              <p className="text-xs text-[#94A3B8] truncate capitalize">
-                {profile?.subscription ?? "free"}
+              <p className="text-sm text-[#F8F6F1] truncate font-medium">{displayName}</p>
+              <p className="text-[10px] text-[#94A3B8]/60 truncate">{user.email}</p>
+              <p className="text-[10px] truncate capitalize font-semibold"
+                style={{ color: profile?.role === 'admin' ? "#38BDF8" : profile?.plan === 'imperial' ? "#C6A96B" : "#94A3B8" }}>
+                {profile?.role === 'admin' ? '⌘ Administrator' : profile?.plan === 'imperial' ? '✦ Imperial' : profile?.plan === 'pro' ? '◈ Pro' : 'Basic'}
               </p>
             </div>
           </div>
+
           <Form method="post" action="/logout">
             <button
               type="submit"
               className="w-full text-left text-xs text-[#94A3B8] hover:text-[#F8F6F1] px-2 py-1.5 rounded-lg transition-colors"
-              style={{ "--hover-bg": "rgba(75,111,174,0.12)" } as React.CSSProperties}
               onMouseEnter={e => (e.currentTarget.style.background = "rgba(75,111,174,0.12)")}
               onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
             >
@@ -106,7 +140,13 @@ export default function DashboardLayout() {
         <h2 className="font-display text-xl font-bold text-[#F8F6F1]">
           PhopePhum
         </h2>
-        <MobileMenu />
+        <button
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-1.5 rounded-lg hover:bg-white/5 active:scale-95 transition-all text-[#C9A96E]"
+          aria-label="เมนู"
+        >
+          <MobileMenu />
+        </button>
       </div>
 
       {/* Main content */}
@@ -181,6 +221,15 @@ function MobileMenu() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-6 h-6 text-[#C9A96E]">
       <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconApprove() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
     </svg>
   );
 }

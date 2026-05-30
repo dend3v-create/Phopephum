@@ -109,23 +109,6 @@ export default function Index() {
           <a href="#features" className="hover:text-[#C6A96B] transition-colors">ฟีเจอร์</a>
           <a href="#how" className="hover:text-[#C6A96B] transition-colors">วิธีใช้</a>
         </div>
-
-        {/* Auth buttons */}
-        <div className="flex items-center gap-3">
-          <Link
-            to="/login"
-            className="text-sm font-medium text-[#D9BC82] border border-[#C6A96B]/30 px-5 py-2 rounded-full hover:bg-[#C6A96B]/10 hover:border-[#C6A96B]/60 transition-all"
-          >
-            เข้าสู่ระบบ
-          </Link>
-          <Link
-            to="/register"
-            className="text-sm font-bold px-5 py-2 rounded-full transition-all hover:scale-105 active:scale-95"
-            style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)", color: "#020617" }}
-          >
-            เริ่มต้นใช้งาน
-          </Link>
-        </div>
       </nav>
 
       {/* ── Hero ── */}
