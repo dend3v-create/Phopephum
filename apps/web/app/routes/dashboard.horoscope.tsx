@@ -273,7 +273,7 @@ export function getTaksaTransitIndicator(star: number, taksaMaha?: any) {
     case "มนตรี":
       return { label: "มนตรี", fullName: "มนตรีจร (ผู้อุปถัมภ์/สนับสนุน)", color: "text-sky-400 bg-sky-950/80 border-sky-500/30" };
     case "เดช":
-      return { label: "เดช", fullName: "เดชจร (เกียรติยศ/อำนาจบารมี)", color: "text-amber-400 bg-amber-950/80 border-amber-500/30" };
+      return { label: "เดช", fullName: "เดชจร (เกียรติยศ/อำนาจบารมี)", color: "text-[#F8F6F1] bg-white/20 border-white/40" };
     case "กาลกิณี":
       return { label: "กาลี", fullName: "กาลกิณีจร (อุปสรรค/ข้อควรระวัง)", color: "text-red-400 bg-red-950/80 border-red-500/30" };
     default:
@@ -294,7 +294,7 @@ export function getMahaTransitIndicator(star: number, taksaMaha?: any) {
   
   switch (bhop) {
     case "โลกาวินาศ":
-      return { label: "วินาศ", fullName: "โลกาวินาศจร (ความแปรปรวน/ความเครียดภายใน)", color: "text-rose-400 bg-rose-950/80 border-rose-500/30" };
+      return { label: "วินาศ", fullName: "โลกาวินาศจร (ความแปรปรวน/ความเครียดภายใน)", color: "text-amber-400 bg-amber-950/80 border-amber-500/30" };
     default:
       return null;
   }
@@ -622,14 +622,40 @@ function FateMatrixPanel({ matrix, activeNum, onNumClick, taksaMaha }: {
                     <p className="text-[#8A8070] text-[9px] uppercase tracking-tighter">{ROW_META[rIdx].sub}</p>
                   </td>
                   {row.map((num, cIdx) => {
-                    const actualNum = num % 7 || 7;
+                    const isBase4 = rIdx === 3;
+                    const getStarFromBase4 = (n: number): number => {
+                      switch (n) {
+                        case 3: return 3;
+                        case 4: return 4;
+                        case 5: return 5;
+                        case 6: return 1;
+                        case 7: return 7;
+                        case 8: return 8;
+                        case 10: return 7;
+                        case 11: return 4;
+                        case 12: return 8;
+                        case 13: return 1;
+                        case 14: return 5;
+                        case 15: return 2;
+                        case 16: return 6;
+                        case 17: return 4;
+                        case 18: return 5;
+                        case 19: return 5;
+                        case 20: return 7;
+                        case 21: return 6;
+                        default: return n % 7 || 7;
+                      }
+                    };
+
+                    const actualNum = isBase4 ? getStarFromBase4(num) : (num % 7 || 7);
                     const isHighlighted = activeNum !== null && (isBase4 ? matrix[2]?.[cIdx] === activeNum : (actualNum === activeNum && isTargetRow));
                     const c = numColor(num, isHighlighted);
                     const houseName = isBase4 ? BASE4_MEANINGS[num] : ROW_META[rIdx].phopNames?.[cIdx];
                     
-                    const skipIndicators = [3, 4, 5, 6].includes(rIdx);
-                    const taksaInd = skipIndicators ? null : getTaksaTransitIndicator(actualNum, taksaMaha);
-                    const mahaInd = skipIndicators ? null : getMahaTransitIndicator(actualNum, taksaMaha);
+                    const skipIndicators = [4, 5, 6].includes(rIdx);
+                    const showInd = !skipIndicators && actualNum !== 9;
+                    const taksaInd = showInd ? getTaksaTransitIndicator(actualNum, taksaMaha) : null;
+                    const mahaInd = showInd ? getMahaTransitIndicator(actualNum, taksaMaha) : null;
 
                     return (
                       <td key={cIdx} className="p-1.5 min-w-[54px]">
@@ -691,7 +717,7 @@ function FateMatrixPanel({ matrix, activeNum, onNumClick, taksaMaha }: {
               <span>มนตรีจร (ผู้อุปถัมภ์/สนับสนุน)</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="px-1 py-[0.5px] rounded border text-[7px] font-bold text-amber-400 bg-amber-950/80 border-amber-500/30">เดช</span>
+              <span className="px-1 py-[0.5px] rounded border text-[7px] font-bold text-[#F8F6F1] bg-white/20 border-white/40">เดช</span>
               <span>เดชจร (เกียรติยศ/อำนาจ)</span>
             </div>
             <div className="flex items-center gap-1.5">
@@ -703,7 +729,7 @@ function FateMatrixPanel({ matrix, activeNum, onNumClick, taksaMaha }: {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-white/5">
             <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[9px]">ปัจจัยภายใน (มหาภูติจร):</span>
             <div className="flex items-center gap-1.5">
-              <span className="px-1 py-[0.5px] rounded border text-[7px] font-bold text-rose-400 bg-rose-950/80 border-rose-500/30">วินาศ</span>
+              <span className="px-1 py-[0.5px] rounded border text-[7px] font-bold text-amber-400 bg-amber-950/80 border-amber-500/30">วินาศ</span>
               <span>โลกาวินาศจร (ความแปรปรวน/ความเครียด)</span>
             </div>
           </div>
