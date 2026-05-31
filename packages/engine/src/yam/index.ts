@@ -6,6 +6,10 @@ export {
   predict,
   predictFromResult,
   type GetYamOptions,
+  // ── Atthakarn (ยามอัฏฐกาล) ──
+  getBirthYamResult,
+  getAtthakarnAt,
+  type AtthakarnBirthYam,
 } from "./services/yamService.js";
 
 export type {
@@ -21,8 +25,10 @@ export type {
 } from "./types/yam.types.js";
 
 export { DAY_INDEX_MAP, DAY_NAMES_THAI } from "./constants/dayMap.js";
-export { yamDayTable }                   from "./constants/yamDayTable.js";
-export { yamNightTable }                 from "./constants/yamNightTable.js";
+export const dummy = 1; // Unused but makes diff clear if needed
+export { yamDayTable, yamDayTicksTable }       from "./constants/yamDayTable.js";
+export { yamNightTable, yamNightTicksTable }   from "./constants/yamNightTable.js";
+
 export { yamMeaning }                    from "./constants/yamMeaning.js";
 export { phaseMeaning }                  from "./constants/phaseMeaning.js";
 

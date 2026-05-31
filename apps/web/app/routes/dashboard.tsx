@@ -69,11 +69,10 @@ export default function DashboardLayout() {
         {/* Nav */}
         <nav className="flex flex-col gap-0.5 flex-1">
           <NavLink to="/dashboard"           icon={<IconHome />}     label="ภาพรวม" />
-          <NavLink to="/dashboard/yam"       icon={<IconYam />}      label="ยามสด" />
-          <NavLink to="/dashboard/horoscope" icon={<IconPlanet />}   label="ดวงชะตา" />
-          <NavLink to="/dashboard/reports"   icon={<IconSparkles />} label="รายงาน" />
+          <NavLink to="/dashboard/yam"       icon={<IconYam />}      label="ฤกษ์งามยามดี" />
+          <NavLink to="/dashboard/horoscope" icon={<IconPlanet />}   label="ตรวจดวงชะตา" />
           <NavLink to="/dashboard/planner"   icon={<IconCalendar />} label="วางแผนชีวิต" />
-          <NavLink to="/dashboard/settings"  icon={<IconSettings />} label="ตั้งค่า" />
+          <NavLink to="/dashboard/settings"  icon={<IconSettings />} label="ตั้งค่าโปรไฟล์" />
           
           {(profile?.role === 'admin' || profile?.role === 'operator') && (
             <div className="mt-4 pt-4 border-t" style={{ borderColor: "rgba(217,188,130,0.12)" }}>

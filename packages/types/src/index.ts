@@ -93,6 +93,7 @@ export interface AIReportRequest {
 }
 
 export type AIReportType =
+  | "general_prediction"
   | "life_overview"
   | "career"
   | "relationship"

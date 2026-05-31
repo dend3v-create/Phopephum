@@ -1,5 +1,5 @@
 import { json, redirect } from "@remix-run/cloudflare";
-import { Form, useLoaderData, useNavigation, useActionData } from "@remix-run/react";
+import { Form, useLoaderData, useNavigation, useActionData, useSearchParams } from "@remix-run/react";
 import { useState } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
@@ -17,54 +17,54 @@ export const meta: MetaFunction = () => [
 const REPORT_TYPES = [
   {
     value: "general_prediction",
-    label: "พยากรณ์ทั่วไป",
+    label: "ภาพรวมชะตาชีวิต",
     icon: "🪐",
-    desc: "ภาพรวมดวงชะตาและเส้นทางชีวิต",
+    desc: "ภาพรวมดวงชะตาและเส้นทางชีวิตหลัก",
     color: "from-violet-500/20 to-purple-500/10",
     border: "border-violet-500/30",
     glow: "shadow-violet-500/10",
   },
   {
     value: "life_overview",
-    label: "ภาพรวมชีวิต",
+    label: "โครงสร้างชีวิต",
     icon: "✨",
-    desc: "วิเคราะห์โครงสร้างชีวิตเชิงลึก",
+    desc: "วิเคราะห์โครงสร้างชะตาชีวิตเชิงลึก",
     color: "from-amber-500/20 to-yellow-500/10",
     border: "border-amber-500/30",
     glow: "shadow-amber-500/10",
   },
   {
     value: "career",
-    label: "การงาน",
+    label: "การงาน & เจรจา",
     icon: "💼",
-    desc: "ดวงและโอกาสด้านการงาน",
+    desc: "ดวงการงาน ธุรกิจ และโอกาสทางวิชาชีพ",
     color: "from-sky-500/20 to-blue-500/10",
     border: "border-sky-500/30",
     glow: "shadow-sky-500/10",
   },
   {
     value: "relationship",
-    label: "ความสัมพันธ์",
-    icon: "💫",
-    desc: "ดวงความรักและการเชื่อมต่อ",
+    label: "ความรัก & คู่ครอง",
+    icon: "💖",
+    desc: "ดวงความรัก เนื้อคู่ และเสน่ห์เมตตา",
     color: "from-rose-500/20 to-pink-500/10",
     border: "border-rose-500/30",
     glow: "shadow-rose-500/10",
   },
   {
     value: "wealth",
-    label: "การเงิน",
+    label: "โชคลาภ & การเงิน",
     icon: "💎",
-    desc: "ดวงทรัพย์และโอกาสการเงิน",
+    desc: "ดวงทรัพย์สิน โชคลาภ และวิถีดึงดูดเงิน",
     color: "from-emerald-500/20 to-green-500/10",
     border: "border-emerald-500/30",
     glow: "shadow-emerald-500/10",
   },
   {
     value: "annual_forecast",
-    label: "พยากรณ์รายปี",
+    label: "จังหวะชะตารายปี",
     icon: "📅",
-    desc: "แผนที่พลังงานรายปี",
+    desc: "แผนที่พลังงานปีจรพยากรณ์รายปี",
     color: "from-cyan-500/20 to-teal-500/10",
     border: "border-cyan-500/30",
     glow: "shadow-cyan-500/10",
@@ -85,12 +85,21 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
   const reportType = String(formData.get("reportType") ?? "general_prediction");
   const displayName = String(formData.get("displayName") ?? "");
-  const birthDate = String(formData.get("birthDate") ?? "");
+  
+  // ── แปลงวันที่เกิด พ.ศ. ➔ ค.ศ. ──
+  const bDay = Number(formData.get("birthDay") ?? "0");
+  const bMonth = Number(formData.get("birthMonth") ?? "0");
+  const bYear = Number(formData.get("birthYear") ?? "0");
+  const bYearCE = bYear - 543;
+  const birthDate = bDay && bMonth && bYear 
+    ? `${bYearCE}-${String(bMonth).padStart(2, "0")}-${String(bDay).padStart(2, "0")}` 
+    : "";
+
   const birthTime = String(formData.get("birthTime") ?? "");
   const birthPlace = String(formData.get("birthPlace") ?? "");
 
   if (!birthDate) {
-    return json({ error: "กรุณากรอกวันเกิดก่อนสร้างรายงาน" });
+    return json({ error: "กรุณาเลือกวันเกิดก่อนสร้างรายงาน" });
   }
 
   try {
@@ -157,7 +166,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .insert({
         user_id: user.id,
         report_type: reportType,
-        content: { text },
+        content: text,
       })
       .select("id")
       .single();
@@ -185,8 +194,17 @@ export default function NewReportPage() {
   const navigation = useNavigation();
   const isGenerating = navigation.state === "submitting";
 
-  const [selectedType, setSelectedType] = useState<string>("general_prediction");
+  const [searchParams] = useSearchParams();
+  const defaultType = searchParams.get("type") || "general_prediction";
+
+  const [selectedType, setSelectedType] = useState<string>(defaultType);
   const selectedMeta = REPORT_TYPES.find((t) => t.value === selectedType);
+
+  // ── คำนวณค่าเริ่มต้นวันเกิด (พ.ศ.) ──
+  const birthDateObj = profile?.birth_date ? new Date(profile.birth_date) : null;
+  const defaultBDay = birthDateObj ? birthDateObj.getDate() : 15;
+  const defaultBMonth = birthDateObj ? birthDateObj.getMonth() + 1 : 6;
+  const defaultBYear = birthDateObj ? birthDateObj.getFullYear() + 543 : 2540;
 
   return (
     <div className="max-w-2xl space-y-8 pb-20">
@@ -279,20 +297,37 @@ export default function NewReportPage() {
                 placeholder="ชื่อของคุณ"
               />
             </div>
-            <Input
-              name="birthDate"
-              type="date"
-              label="วันเกิด (ค.ศ.) *"
-              defaultValue={profile?.birth_date ?? ""}
-              required
-            />
+            
+            {/* ชุดเลือก วันเกิด พ.ศ. Dropdown */}
+            <div className="flex flex-col gap-1.5 sm:col-span-2">
+              <label className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider block">วันเกิด (พ.ศ.) *</label>
+              <div className="grid grid-cols-3 gap-2">
+                <select name="birthDay" defaultValue={defaultBDay} className="bg-slate-950/40 border border-white/10 text-[#F8F6F1] rounded-xl px-4 py-3 text-sm focus:border-[#C9A96E]/50 outline-none">
+                  {Array.from({ length: 31 }).map((_, i) => (
+                    <option key={i + 1} value={i + 1} className="bg-[#020617]">{i + 1}</option>
+                  ))}
+                </select>
+                <select name="birthMonth" defaultValue={defaultBMonth} className="bg-slate-950/40 border border-white/10 text-[#F8F6F1] rounded-xl px-4 py-3 text-sm focus:border-[#C9A96E]/50 outline-none">
+                  {["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"].map((m, i) => (
+                    <option key={i + 1} value={i + 1} className="bg-[#020617]">{m}</option>
+                  ))}
+                </select>
+                <select name="birthYear" defaultValue={defaultBYear} className="bg-slate-950/40 border border-white/10 text-[#F8F6F1] rounded-xl px-4 py-3 text-sm focus:border-[#C9A96E]/50 outline-none">
+                  {Array.from({ length: 120 }).map((_, i) => {
+                    const y = new Date().getFullYear() + 543 - i;
+                    return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
+                  })}
+                </select>
+              </div>
+            </div>
+
             <Input
               name="birthTime"
               type="time"
               label="เวลาเกิด (ถ้าทราบ)"
               defaultValue={profile?.birth_time ?? ""}
             />
-            <div className="sm:col-span-2">
+            <div>
               <Input
                 name="birthPlace"
                 label="จังหวัดที่เกิด"

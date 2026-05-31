@@ -46,15 +46,26 @@ export interface PredictionResult {
   howTo: string;
 }
 
+export interface TravelAuspiciousness {
+  ticks: number; // 0 | 1 | 2 | 3
+  level: "bad" | "good" | "very_good" | "excellent";
+  label: string; // "ไม่ดี/ติดขัด", "ดี", "ดีมาก", "ดีเยี่ยม"
+  description: string; // คำทำนายการเดินทางสำหรับปัจจุบัน (อิงตามเฟส)
+}
+
 export interface YamResult extends YamInfo {
   date: Date;
   phase: PhaseType;
   sunTimes: SunTimes;
   prediction?: PredictionResult;
+  travelAuspiciousness: TravelAuspiciousness; // ระบุระดับความมงคลเดินทาง
 }
 
 export interface GeneratePredictionOptions {
   yam: string;
   phase: PhaseType;
   topic: PredictionTopic;
+  period?: PeriodType;
 }
+
+
