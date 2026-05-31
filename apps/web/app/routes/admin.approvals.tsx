@@ -5,29 +5,27 @@
  * (เข้าถึงได้จากปุ่มใน LINE Flex Message)
  */
 import { json, redirect } from "@remix-run/cloudflare";
-import { Form, useLoaderData, useNavigation, useSearchParams } from "@remix-run/react";
-import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
+import { useLoaderData, Form, useNavigation, useSearchParams } from "@remix-run/react";
+import type { LoaderFunctionArgs, ActionFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAdmin } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import type { Env } from "~/env.server";
 
 export const meta: MetaFunction = () => [{ title: "อนุมัติคำขอ — Admin" }];
 
-type RequestRow = {
+interface RequestRow {
   id: string;
-  type: "registration" | "package_upgrade";
+  user_id: string;
+  type: string;
   plan: string;
-  status: "pending" | "approved" | "rejected";
-  note: string | null;
+  status: string;
   created_at: string;
-  approved_at: string | null;
+  approved_at?: string;
   profiles: {
-    id: string;
-    display_name: string | null;
-    email: string | null;
-    plan: string | null;
-  } | null;
-};
+    display_name: string;
+    email: string;
+  };
+}
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -35,16 +33,12 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase } = createSupabaseClient(request, env);
 
   const url = new URL(request.url);
-  const filter = url.searchParams.get("filter") ?? "pending";
+  const filter = url.searchParams.get("filter") || "pending";
 
-  const query = supabase
+  let query = supabase
     .from("subscription_requests")
-    .select(`
-      id, type, plan, status, note, created_at, approved_at,
-      profiles ( id, display_name, email, plan )
-    `)
-    .order("created_at", { ascending: false })
-    .limit(50);
+    .select("*, profiles(display_name, email)")
+    .order("created_at", { ascending: false });
 
   if (filter !== "all") {
     query.eq("status", filter);
@@ -98,70 +92,46 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (decision === "approved") {
     if (req.type === "package_upgrade") {
       const isImperial = req.plan === "imperial";
-      const isPro = req.plan === "pro";
-      
-      const mappedSub = isImperial ? "lifetime" : isPro ? "premium" : "basic";
-      const mappedType = isImperial ? "lifetime" : isPro ? "premium" : "basic";
-      
-      let expiresAt: string | null = null;
-      if (!isImperial) {
-        const date = new Date();
-        date.setDate(date.getDate() + 30);
-        expiresAt = date.toISOString();
-      }
-
-      await supabase
-        .from("profiles")
-        .update({ 
-          plan: req.plan,
-          subscription: mappedSub,
-          membership_type: mappedType,
-          membership_status: "active",
-          membership_expires_at: expiresAt
-        })
-        .eq("id", req.user_id);
-    } else if (req.type === "registration") {
-      // อนุมัติสิทธิ์ลงทะเบียนใหม่เป็นระดับ Basic (Active)
-      const date = new Date();
-      date.setDate(date.getDate() + 30);
-      const expiresAt = date.toISOString();
-
       await supabase
         .from("profiles")
         .update({
-          plan: "basic",
-          subscription: "basic",
-          membership_type: "basic",
-          membership_status: "active",
-          membership_expires_at: expiresAt
+          subscription: isImperial ? "lifetime" : "basic",
+          plan: req.plan,
+        })
+        .eq("id", req.user_id);
+    } else if (req.type === "registration") {
+       const isImperial = req.plan === "imperial";
+       await supabase
+        .from("profiles")
+        .update({
+          subscription: isImperial ? "lifetime" : "free",
+          plan: req.plan,
         })
         .eq("id", req.user_id);
     }
   }
 
-  return redirect("/admin/approvals?filter=pending");
+  return json({ success: true });
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
-const PLAN_COLOR: Record<string, string> = {
-  basic:    "#94A3B8",
-  pro:      "#C6A96B",
-  imperial: "#4B6FAE",
-};
-
 const TYPE_LABEL: Record<string, string> = {
-  registration:    "สมัครสมาชิกใหม่",
+  registration: "สมัครสมาชิกใหม่",
   package_upgrade: "อัปเกรดแพ็กเกจ",
 };
 
-const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  pending:  { label: "⏳ รออนุมัติ",  color: "#E8A44A" },
-  approved: { label: "✅ อนุมัติแล้ว", color: "#34D399" },
-  rejected: { label: "❌ ปฏิเสธ",     color: "#F87171" },
+const PLAN_COLOR: Record<string, string> = {
+  basic: "#34D399",
+  pro: "#38BDF8",
+  imperial: "#D9BC82",
 };
 
-export default function AdminApprovalsPage() {
+const STATUS_LABEL: Record<string, { label: string; color: string }> = {
+  pending: { label: "รอดำเนินการ", color: "#FBBF24" },
+  approved: { label: "อนุมัติแล้ว", color: "#34D399" },
+  rejected: { label: "ปฏิเสธ", color: "#F87171" },
+};
+
+export default function AdminApprovals() {
   const { requests, filter } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const highlight = searchParams.get("highlight");
@@ -169,31 +139,30 @@ export default function AdminApprovalsPage() {
   const isSubmitting = navigation.state === "submitting";
 
   const tabs = [
-    { key: "pending",  label: "รออนุมัติ" },
-    { key: "approved", label: "อนุมัติแล้ว" },
-    { key: "rejected", label: "ปฏิเสธ" },
-    { key: "all",      label: "ทั้งหมด" },
+    { key: "pending", label: "รอการอนุมัติ" },
+    { key: "approved", label: "ประวัติอนุมัติ" },
+    { key: "all", label: "ทั้งหมด" },
   ];
 
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-3xl font-bold text-[#F8F6F1] mb-1">อนุมัติคำขอ</h1>
-        <p className="text-[#94A3B8] text-sm">
+        <h1 className="font-display text-2xl md:text-3xl font-bold text-[#F8F6F1] mb-1">อนุมัติคำขอ</h1>
+        <p className="text-[#94A3B8] text-xs md:text-sm">
           จัดการคำขอสมาชิกและอัปเกรดแพ็กเกจ · กดปุ่มใน LINE เพื่อเปิดหน้านี้โดยตรง
         </p>
       </header>
 
       {/* Filter tabs */}
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
         {tabs.map((tab) => (
           <a
             key={tab.key}
             href={`/admin/approvals?filter=${tab.key}`}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
+            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
               filter === tab.key
                 ? "text-[#020617]"
-                : "text-[#94A3B8] border border-white/10 hover:border-[#C6A96B]/30 hover:text-[#C6A96B]"
+                : "text-[#94A3B8] border border-white/10 hover:border-[#C6A96B]/30"
             }`}
             style={filter === tab.key ? { background: "linear-gradient(135deg, #C6A96B, #D9BC82)" } : {}}
           >
@@ -205,8 +174,8 @@ export default function AdminApprovalsPage() {
       {/* Empty state */}
       {requests.length === 0 && (
         <div className="text-center py-16 text-[#94A3B8]">
-          <p className="text-4xl mb-3">☽</p>
-          <p className="text-sm">ไม่มีคำขอในขณะนี้</p>
+          <p className="text-3xl mb-3 opacity-50">☽</p>
+          <p className="text-sm italic">ไม่มีคำขอในขณะนี้</p>
         </div>
       )}
 
@@ -221,99 +190,73 @@ export default function AdminApprovalsPage() {
             <div
               key={req.id}
               id={req.id}
-              className={`rounded-2xl border p-5 transition-all ${
-                isHighlighted ? "border-[#C6A96B]/60 shadow-[0_0_30px_rgba(198,169,107,0.15)]" : "border-white/8"
+              className={`rounded-2xl border p-4 md:p-5 transition-all ${
+                isHighlighted ? "border-[#C6A96B]/60 ring-1 ring-[#C6A96B]/20" : "border-white/10"
               }`}
               style={{
-                background: isHighlighted ? "rgba(198,169,107,0.06)" : "rgba(10,34,64,0.5)",
-                backdropFilter: "blur(16px)",
+                background: isHighlighted ? "rgba(198,169,107,0.08)" : "rgba(15,23,42,0.6)",
+                backdropFilter: "blur(12px)",
               }}
             >
-              {/* Top row */}
-              <div className="flex flex-wrap items-start justify-between gap-3 mb-4">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-xs font-bold text-[#F8F6F1]">
-                      {req.profiles?.display_name ?? "—"}
+              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap mb-1.5">
+                    <span className="text-sm font-bold text-[#F8F6F1]">
+                      {req.profiles?.display_name || "ไม่มีชื่อ"}
                     </span>
-                    <span className="text-[10px] text-[#94A3B8]">{req.profiles?.email}</span>
-                    {isHighlighted && (
-                      <span className="text-[9px] px-2 py-0.5 rounded-full font-bold tracking-wider"
-                        style={{ background: "rgba(198,169,107,0.2)", color: "#C6A96B" }}>
-                        NEW
-                      </span>
-                    )}
+                    <span className="text-[10px] text-[#94A3B8] truncate max-w-[150px]">{req.profiles?.email}</span>
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[10px] text-[#94A3B8] border border-white/10 rounded-full px-2 py-0.5">
-                      {TYPE_LABEL[req.type] ?? req.type}
+                  
+                  <div className="flex gap-2 items-center flex-wrap mb-3">
+                    <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[#94A3B8]">
+                      {TYPE_LABEL[req.type] || req.type}
                     </span>
-                    <span className="text-[10px] font-bold uppercase rounded-full px-2 py-0.5 border"
-                      style={{ color: planColor, borderColor: `${planColor}40` }}>
+                    <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-md" 
+                          style={{ backgroundColor: `${planColor}15`, color: planColor, border: `1px solid ${planColor}30` }}>
                       {req.plan}
                     </span>
                   </div>
+
+                  <p className="text-[10px] text-[#8A8070]">
+                    ขอเมื่อ: {new Date(req.created_at).toLocaleString("th-TH")}
+                  </p>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-xs font-semibold" style={{ color: statusInfo.color }}>
+                <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-2">
+                  <span className="text-[10px] font-bold px-2 py-1 rounded-full border"
+                        style={{ color: statusInfo.color, borderColor: `${statusInfo.color}30`, backgroundColor: `${statusInfo.color}10` }}>
                     {statusInfo.label}
-                  </p>
-                  <p className="text-[10px] text-[#94A3B8] mt-0.5">
-                    {new Date(req.created_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" })}
-                  </p>
+                  </span>
+                  
+                  {req.status === "pending" && (
+                    <Form method="post" className="flex items-center gap-2">
+                      <input type="hidden" name="requestId" value={req.id} />
+                      <button
+                        name="decision"
+                        value="approved"
+                        disabled={isSubmitting}
+                        className="bg-[#38BDF8] text-[#020617] px-4 py-2 rounded-xl text-xs font-bold hover:scale-105 active:scale-95 transition-all disabled:opacity-50"
+                      >
+                        อนุมัติ
+                      </button>
+                      <button
+                        name="decision"
+                        value="rejected"
+                        disabled={isSubmitting}
+                        className="bg-red-500/10 text-red-400 border border-red-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-500/20 transition-all disabled:opacity-50"
+                      >
+                        ปฏิเสธ
+                      </button>
+                    </Form>
+                  )}
+                  
+                  {req.approved_at && (
+                    <p className="text-[9px] text-[#8A8070] italic">
+                      Action at: {new Date(req.approved_at).toLocaleDateString("th-TH")}
+                    </p>
+                  )}
                 </div>
               </div>
-
-              {/* Note */}
-              {req.note && (
-                <p className="text-xs text-[#D9CDB7] bg-white/5 rounded-lg px-3 py-2 mb-4">
-                  💬 {req.note}
-                </p>
-              )}
-
-              {/* Actions — only for pending */}
-              {req.status === "pending" && (
-                <Form method="post" className="flex flex-wrap items-end gap-3">
-                  <input type="hidden" name="requestId" value={req.id} />
-                  <div className="flex-1 min-w-[160px]">
-                    <label className="block text-[#94A3B8] text-[10px] mb-1">หมายเหตุแอดมิน (ถ้ามี)</label>
-                    <input
-                      name="note"
-                      type="text"
-                      placeholder="เช่น โอนเงินแล้ว, ยืนยันตัวตนแล้ว"
-                      className="w-full rounded-lg border border-white/10 px-3 py-2 text-xs text-[#F8F6F1] placeholder-[#94A3B8]/40 focus:outline-none focus:border-[#C6A96B]/50"
-                      style={{ background: "rgba(10,34,64,0.6)" }}
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    name="decision"
-                    value="approved"
-                    disabled={isSubmitting}
-                    className="px-5 py-2 rounded-xl text-xs font-bold text-[#020617] transition-all hover:scale-105 active:scale-95 disabled:opacity-60"
-                    style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}
-                  >
-                    ✅ อนุมัติ
-                  </button>
-                  <button
-                    type="submit"
-                    name="decision"
-                    value="rejected"
-                    disabled={isSubmitting}
-                    className="px-5 py-2 rounded-xl text-xs font-medium border border-red-400/30 text-red-400 hover:bg-red-400/10 transition-all disabled:opacity-60"
-                  >
-                    ❌ ปฏิเสธ
-                  </button>
-                </Form>
-              )}
-
-              {/* Approved info */}
-              {req.status === "approved" && req.approved_at && (
-                <p className="text-[10px] text-[#34D399]/70">
-                  อนุมัติเมื่อ: {new Date(req.approved_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" })}
-                </p>
-              )}
             </div>
           );
         })}

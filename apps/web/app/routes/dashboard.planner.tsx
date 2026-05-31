@@ -235,7 +235,7 @@ export default function PlannerPage() {
         {/* 16 HORA CALENDAR */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 text-[#D9BC82] text-xs font-bold uppercase tracking-widest">
-            <Calendar className="w-4 h-4" /> ปฏิทินยามอัฐกาลและแผนงาน TQM
+            <Calendar className="w-4 h-4" /> ปฏิทินยามอัฏฐกาลและแผนงาน TQM
           </div>
           <div className="space-y-3">
             {slots.map((slot, i) => (

@@ -3,6 +3,7 @@ export interface Env {
   // Supabase
   SUPABASE_URL: string;
   SUPABASE_ANON_KEY: string;
+  SUPABASE_SERVICE_ROLE_KEY?: string;
 
   // AI Worker
   AI_WORKER_URL: string;

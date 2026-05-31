@@ -40,7 +40,12 @@
       "Bash(pnpm deploy:workers)",
       "Bash(pnpm deploy:web)",
       "Bash(pnpm turbo:*)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(pnpm --filter @phopephum/engine build)",
+      "Bash(node --input-type=module)",
+      "Bash(2>&1)",
+      "Bash(node:*)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://phopephum-ai-proxy.dend3v.workers.dev/\")"
     ]
   }
 }

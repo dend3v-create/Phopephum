@@ -146,7 +146,7 @@ export default function DashboardIndex() {
               {yam.symbol}
             </span>
             <div className="flex-1 min-w-0">
-              <p className="text-[#94A3B8] text-xs uppercase tracking-wide mb-0.5">ยามอัฐกาลขณะนี้</p>
+              <p className="text-[#94A3B8] text-xs uppercase tracking-wide mb-0.5">ยามอัฏฐกาลขณะนี้</p>
               <p className="font-display text-xl font-bold text-[#D9BC82] group-hover:glow-gold transition-all">
                 ยาม{yam.yamName}
               </p>
@@ -186,7 +186,7 @@ export default function DashboardIndex() {
           <QuickAction
             to="/dashboard/horoscope"
             title="คำนวณดวงชะตา"
-            desc="เลข 7 ตัว 9 ฐาน + ยามอัฐกาล"
+            desc="เลข 7 ตัว 9 ฐาน + ยามอัฏฐกาล"
             icon="🪐"
           />
           <QuickAction

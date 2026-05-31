@@ -1,14 +1,9 @@
 import { z } from "zod";
 
 export const HoroscopeInputSchema = z.object({
-  birthDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "รูปแบบวันเกิด: YYYY-MM-DD"),
-  birthTime: z
-    .string()
-    .regex(/^\d{2}:\d{2}$/, "รูปแบบเวลา: HH:mm")
-    .optional(),
-  birthPlace: z.string().min(1).optional(),
+  birthDate: z.string().min(1, "กรุณากรอกวันเกิด"),
+  birthTime: z.string().optional(),
+  birthPlace: z.string().optional(),
 });
 
 export const AIReportRequestSchema = z.object({

@@ -54,7 +54,7 @@ const THAI_LUNAR_NEW_MONTH: Record<string, string> = rawLunarData;
 
 // Meeus-generated 121-year table — strip metadata keys (prefix "_")
 const LUNAR_MEEUS: Record<string, string> = Object.fromEntries(
-  Object.entries(rawMeeus as Record<string, string>).filter(([k]) => !k.startsWith('_'))
+  Object.entries(rawMeeus as Record<string, any>).filter(([k]) => !k.startsWith('_'))
 );
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

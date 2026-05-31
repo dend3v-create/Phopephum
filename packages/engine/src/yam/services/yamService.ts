@@ -14,7 +14,7 @@ export interface GetYamOptions extends CalculateYamOptions {
 }
 
 /**
- * ดึงข้อมูลยามอัฐกาล ณ วันเวลาที่กำหนด พร้อมคำทำนาย
+ * ดึงข้อมูลยามอัฏฐกาล ณ วันเวลาที่กำหนด พร้อมคำทำนาย
  *
  * @example
  * const result = getYamPrediction(new Date());
@@ -39,7 +39,7 @@ export function getYamPrediction(
 }
 
 /**
- * ดึงยามอัฐกาล ณ ปัจจุบัน (shorthand)
+ * ดึงยามอัฏฐกาล ณ ปัจจุบัน (shorthand)
  */
 export function getCurrentYam(options: GetYamOptions = {}): YamResult {
   return getYamPrediction(new Date(), options);

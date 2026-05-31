@@ -18,7 +18,7 @@ const PLANS = [
     name: "PROFESSIONAL SAGE",
     price: "฿149 / เดือน",
     color: "#C6A96B",
-    features: ["ยามอัฐกาลไม่จำกัด", "ระบบจรครบถ้วน", "Life Report 10 ครั้ง/เดือน", "Export PDF พรีเมียม"],
+    features: ["ยามอัฏฐกาลไม่จำกัด", "ระบบจรครบถ้วน", "Life Report 10 ครั้ง/เดือน", "Export PDF พรีเมียม"],
   },
   {
     id: "imperial",

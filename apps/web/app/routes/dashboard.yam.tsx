@@ -92,7 +92,7 @@ export default function YamPage() {
   const remMin    = Math.floor(remaining / 60000);
   const remSec    = Math.floor((remaining % 60000) / 1000);
 
-  // ยามอัฐกาล นับวันใหม่ที่ 06:00 — ถ้าก่อน 06:00 ให้แสดงวันก่อนหน้า
+  // ยามอัฏฐกาล นับวันใหม่ที่ 06:00 — ถ้าก่อน 06:00 ให้แสดงวันก่อนหน้า
   const yamDisplayDate = new Date(now);
   if (now.getHours() < 6) yamDisplayDate.setDate(yamDisplayDate.getDate() - 1);
 
@@ -104,7 +104,7 @@ export default function YamPage() {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-1">ยามอัฐกาล</p>
+          <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-1">ยามอัฏฐกาล</p>
           <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">ยามสดขณะนี้</h1>
           <p className="text-[#94A3B8] text-sm mt-1">{dateStr}</p>
         </div>

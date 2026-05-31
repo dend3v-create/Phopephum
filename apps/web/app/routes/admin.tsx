@@ -45,13 +45,24 @@ export default function AdminLayout() {
         }}
       >
         {/* Logo */}
-        <div className="mb-8 pl-1">
-          <p className="text-[#38BDF8] text-[9px] tracking-[0.3em] uppercase mb-1.5 opacity-70">
-            System Administration
-          </p>
-          <h2 className="font-display text-2xl font-bold text-[#F8F6F1] drop-shadow-md">
-            PhopePhum
-          </h2>
+        <div className="mb-8 pl-1 flex items-center gap-3">
+          <div className="relative w-10 h-10 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border border-[#38BDF8]/30 bg-[#38BDF8]/5" />
+            <span className="text-[#38BDF8] text-xs font-bold z-10 font-display">P</span>
+            <div className="absolute inset-0 opacity-20">
+               <svg viewBox="0 0 40 40" fill="none">
+                 <circle cx="20" cy="20" r="18" stroke="#38BDF8" strokeWidth="0.5" strokeDasharray="2 2" />
+               </svg>
+            </div>
+          </div>
+          <div>
+            <p className="text-[#38BDF8] text-[8px] tracking-[0.2em] uppercase mb-0.5 opacity-70">
+              System Admin
+            </p>
+            <h2 className="font-display text-xl font-bold text-[#F8F6F1] drop-shadow-md leading-none">
+              PhopePhum
+            </h2>
+          </div>
         </div>
 
         {/* Nav */}

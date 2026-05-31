@@ -10,7 +10,7 @@ export interface CalculateYamOptions {
 }
 
 /**
- * คำนวณยามอัฐกาล ณ เวลาที่กำหนด
+ * คำนวณยามอัฏฐกาล ณ เวลาที่กำหนด
  * รองรับ Dynamic Sunrise/Sunset ผ่าน SunCalc
  */
 export function calculateYam(
@@ -20,7 +20,7 @@ export function calculateYam(
   // โคลน Date เพื่อหลีกเลี่ยง side effects
   const adjustedDate = new Date(date.getTime());
   
-  // ยามอัฐกาลเปลี่ยนวันตอน 06:00
+  // ยามอัฏฐกาลเปลี่ยนวันตอน 06:00
   if (getBKKHour(date) < 6) {
     adjustedDate.setDate(adjustedDate.getDate() - 1);
   }

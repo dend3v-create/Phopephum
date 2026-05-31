@@ -2,8 +2,8 @@ import type { MetaFunction } from "@remix-run/cloudflare";
 import { Link } from "@remix-run/react";
 
 export const meta: MetaFunction = () => [
-  { title: "PhopePhum — ศาสตร์ยามอัฐกาลชันสูง" },
-  { name: "description", content: "คำนวณยามมงคลและชะตาจรระดับนาทีด้วยสูตรโบราณดั้งเดิม พร้อมบทวิเคราะห์ดวงชะตาเชิงลึก" },
+  { title: "ภพภูมิ — PhopePhum | ศาสตร์ยามอัฏฐกาลชั้นสูง" },
+  { name: "description", content: "ภพภูมิ (PhopePhum) - คำนวณยามมงคลและชะตาจรระดับนาทีด้วยสูตรโบราณดั้งเดิม พร้อมบทวิเคราะห์ดวงชะตาเชิงลึก" },
 ];
 
 const STARS = [
@@ -30,7 +30,7 @@ const STARS = [
 const FEATURES = [
   {
     icon: "☽",
-    title: "ยามอัฐกาลสด",
+    title: "ยามอัฏฐกาลสด",
     desc: "คำนวณยามปัจจุบันแบบ real-time พร้อม countdown ถึงยามถัดไป ใช้สูตรโบราณดั้งเดิมที่แม่นยำระดับนาที",
   },
   {
@@ -67,7 +67,7 @@ const STEPS = [
 ];
 
 const TESTIMONIALS = [
-  { name: "คุณสุรีย์", role: "นักธุรกิจ", text: "ใช้ยามอัฐกาลเลือกวันทำสัญญาสำคัญ ผลออกมาดีกว่าที่คิดมาก แนะนำสำหรับผู้ที่เชื่อในศาสตร์ไทย" },
+  { name: "คุณสุรีย์", role: "นักธุรกิจ", text: "ใช้ยามอัฏฐกาลเลือกวันทำสัญญาสำคัญ ผลออกมาดีกว่าที่คิดมาก แนะนำสำหรับผู้ที่เชื่อในศาสตร์ไทย" },
   { name: "คุณมาลี", role: "แม่บ้านนักลงทุน", text: "บทวิเคราะห์ดวงได้ละเอียดมาก อ่านแล้วรู้สึกว่าเข้าใจตัวเองมากขึ้น ข้อมูลครบและหรูหรา" },
   { name: "คุณวิชัย", role: "โหรสมัครเล่น", text: "เลข 7 ตัวแม่นยำตามตำราที่เคยศึกษามา ระบบปฏิทินจันทรคติครบถ้วนมาก ใช้อ้างอิงได้เลย" },
 ];
@@ -98,9 +98,17 @@ export default function Index() {
       {/* ── Navbar ── */}
       <nav className="relative z-50 flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2">
-          <span className="text-[#C6A96B] text-lg">✦</span>
-          <span className="font-display text-[#F8F6F1] font-bold text-lg tracking-wide">PhopePhum</span>
+        <Link to="/" className="flex items-center gap-2 group">
+          <div className="relative w-8 h-8 flex items-center justify-center transition-transform group-hover:rotate-90 duration-700">
+            <div className="absolute inset-0 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/5" />
+            <span className="text-[#C6A96B] text-[10px] font-bold z-10 font-display">P</span>
+            <div className="absolute inset-0 opacity-20">
+               <svg viewBox="0 0 40 40" fill="none">
+                 <circle cx="20" cy="20" r="18" stroke="#C6A96B" strokeWidth="0.5" strokeDasharray="2 2" />
+               </svg>
+            </div>
+          </div>
+          <span className="font-display text-[#F8F6F1] font-bold text-lg tracking-wide group-hover:text-[#C6A96B] transition-colors">PhopePhum</span>
         </Link>
 
         {/* Nav links (desktop) */}
@@ -114,7 +122,7 @@ export default function Index() {
       {/* ── Hero ── */}
       <section className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-12 pb-24">
         <div className="flex justify-center mb-8 animate-float">
-          <LotusSymbol />
+          <LogoSymbol />
         </div>
 
         <p className="text-[#D9BC82] text-[9px] tracking-[0.4em] uppercase mb-4 animate-fade-up"
@@ -122,18 +130,18 @@ export default function Index() {
           Living Wisdom Operating System
         </p>
 
-        <h1 className="font-display text-6xl md:text-7xl lg:text-8xl font-bold text-[#F8F6F1] glow-gold mb-4 animate-fade-up leading-none"
+        <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-[#F8F6F1] glow-gold mb-4 animate-fade-up leading-tight"
           style={{ animationDelay: "0.2s" }}>
           PhopePhum
         </h1>
 
-        <p className="font-cormorant text-[#9AB3D9] text-2xl md:text-3xl italic mb-2 animate-fade-up"
+        <p className="font-cormorant text-[#9AB3D9] text-xl sm:text-2xl md:text-3xl italic mb-1 animate-fade-up"
           style={{ animationDelay: "0.28s" }}>
           เปิดประตูสู่อนาคตด้วย
         </p>
-        <p className="font-display text-[#D9BC82] text-xl md:text-2xl font-semibold tracking-wide mb-6 animate-fade-up"
+        <p className="font-display text-[#D9BC82] text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-6 animate-fade-up"
           style={{ animationDelay: "0.32s" }}>
-          ศาสตร์ยามอัฐกาลชันสูง
+          ศาสตร์ยามอัฏฐกาลชั้นสูง
         </p>
 
         <p className="text-[#94A3B8] text-sm md:text-base leading-relaxed max-w-xl mx-auto mb-10 animate-fade-up"
@@ -297,25 +305,45 @@ export default function Index() {
   );
 }
 
-function LotusSymbol() {
+function LogoSymbol() {
   return (
-    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {[0, 45, 90, 135].map((deg) => (
-        <ellipse key={`o-${deg}`} cx="40" cy="40" rx="7" ry="23"
-          stroke="#C6A96B" strokeWidth="0.8" fill="none" opacity="0.5"
-          transform={`rotate(${deg} 40 40)`} />
-      ))}
-      {[22.5, 67.5, 112.5, 157.5].map((deg) => (
-        <ellipse key={`i-${deg}`} cx="40" cy="40" rx="5" ry="16"
-          stroke="#6D8FC7" strokeWidth="0.6" fill="none" opacity="0.35"
-          transform={`rotate(${deg} 40 40)`} />
-      ))}
-      <circle cx="40" cy="40" r="9"  stroke="#C6A96B" strokeWidth="0.8" fill="none" opacity="0.55" />
-      <circle cx="40" cy="40" r="5"  stroke="#D9BC82" strokeWidth="0.8" fill="none" opacity="0.75" />
-      <circle cx="40" cy="40" r="2"  fill="#E8C46A" opacity="0.95" />
-      {([[40,31],[49,40],[40,49],[31,40]] as [number,number][]).map(([cx,cy],i) => (
-        <circle key={i} cx={cx} cy={cy} r="0.8" fill="#9AB3D9" opacity="0.7" />
-      ))}
-    </svg>
+    <div className="relative">
+      <svg width="120" height="120" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Background glow */}
+        <circle cx="50" cy="50" r="35" fill="url(#logo-glow)" opacity="0.4" />
+        <defs>
+          <radialGradient id="logo-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(50 50) rotate(90) scale(35)">
+            <stop stopColor="#C6A96B" stopOpacity="0.3" />
+            <stop offset="1" stopColor="#C6A96B" stopOpacity="0" />
+          </radialGradient>
+        </defs>
+
+        {/* Outer burst */}
+        {[0, 45, 90, 135].map((deg) => (
+          <ellipse key={`o-${deg}`} cx="50" cy="50" rx="9" ry="32"
+            stroke="#C6A96B" strokeWidth="0.8" fill="none" opacity="0.5"
+            transform={`rotate(${deg} 50 50)`} />
+        ))}
+
+        {/* Inner burst */}
+        {[22.5, 67.5, 112.5, 157.5].map((deg) => (
+          <ellipse key={`i-${deg}`} cx="50" cy="50" rx="6" ry="24"
+            stroke="#6D8FC7" strokeWidth="0.6" fill="none" opacity="0.35"
+            transform={`rotate(${deg} 50 50)`} />
+        ))}
+
+        {/* Center circles */}
+        <circle cx="50" cy="50" r="14" stroke="#C6A96B" strokeWidth="0.5" fill="rgba(2, 6, 23, 0.8)" />
+        <circle cx="50" cy="50" r="12" stroke="#D9BC82" strokeWidth="1" fill="none" opacity="0.8" />
+        
+        {/* The 'P' */}
+        <text x="50" y="58" font-family="Cinzel, serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#F8F6F1" className="drop-shadow-sm">P</text>
+
+        {/* Floating dots */}
+        {([[50,38],[62,50],[50,62],[38,50]] as [number,number][]).map(([cx,cy],i) => (
+          <circle key={i} cx={cx} cy={cy} r="1" fill="#C6A96B" opacity="0.6" />
+        ))}
+      </svg>
+    </div>
   );
 }

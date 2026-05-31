@@ -46,13 +46,24 @@ export default function DashboardLayout() {
         }}
       >
         {/* Logo */}
-        <div className="mb-8 pl-1">
-          <p className="text-[#D9BC82] text-[9px] tracking-[0.3em] uppercase mb-1.5 opacity-70">
-            Living Wisdom OS
-          </p>
-          <h2 className="font-display text-2xl font-bold text-[#F8F6F1] glow-gold">
-            PhopePhum
-          </h2>
+        <div className="mb-8 pl-1 flex items-center gap-3">
+          <div className="relative w-10 h-10 flex items-center justify-center">
+            <div className="absolute inset-0 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/5" />
+            <span className="text-[#C6A96B] text-xs font-bold z-10 font-display">P</span>
+            <div className="absolute inset-0 opacity-20">
+               <svg viewBox="0 0 40 40" fill="none">
+                 <circle cx="20" cy="20" r="18" stroke="#C6A96B" strokeWidth="0.5" strokeDasharray="2 2" />
+               </svg>
+            </div>
+          </div>
+          <div>
+            <p className="text-[#D9BC82] text-[8px] tracking-[0.2em] uppercase mb-0.5 opacity-70">
+              Living Wisdom OS
+            </p>
+            <h2 className="font-display text-xl font-bold text-[#F8F6F1] glow-gold leading-none">
+              PhopePhum
+            </h2>
+          </div>
         </div>
 
         {/* Nav */}

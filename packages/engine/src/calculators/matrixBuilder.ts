@@ -76,8 +76,10 @@ export class MatrixBuilder {
     const row3 = matrix[2] // ฐานปี
     const row4 = matrix[3] // ฐานกำลังพระเคราะห์
 
-    // b5_seed = first element of row5 (matrix[4][0]) — used by rows 8 & 9
-    const b5seed = rowIndex >= 7 ? (matrix[4]?.[0] ?? 1) : 1
+    // ลำดับเลขยามกลางวัน (1->6->4->2->7->5->3)
+    const yamForward = [1, 6, 4, 2, 7, 5, 3];
+    // ลำดับเลขยามกลางวันทวนกลับ (3->5->7->2->4->6->1)
+    const yamBackward = [3, 5, 7, 2, 4, 6, 1];
 
     return Array.from({ length: 7 }, (_, col) => {
       switch (rowIndex) {
@@ -90,11 +92,29 @@ export class MatrixBuilder {
         case 6: // ฐานที่ 7: ฐาน 6 × 2
           return r7((matrix[5]?.[col] ?? 1) * 2)
 
-        case 7: // ฐานที่ 8: เดินยามลง -2 จาก b5[0]
-          return r7(b5seed - col * 2)
+        case 7: { // ฐานที่ 8 (อาตมะ / เดินยามหน้า)
+          // นำ "ตัวเลขตัวแรกสุดของฐานที่ 5" มาวางในช่องแรก
+          const startNum = matrix[4]?.[0] ?? 1;
+          const startIndex = yamForward.indexOf(startNum);
+          // เดินหน้าตามลำดับยามกลางวัน
+          return yamForward[(startIndex + col) % 7];
+        }
 
-        case 8: // ฐานที่ 9: เดินยามขึ้น +2 จาก r7(b5[0]-1)
-          return r7(r7(b5seed - 1) + col * 2)
+        case 8: { // ฐานที่ 9 (ภริยัง / เดินยามทวนกลับ)
+          // นำ "ตัวเลขตัวสุดท้ายของฐานที่ 5" มาบวกกับ "ตัวเลขตัวสุดท้ายของฐานที่ 8"
+          const lastBase5 = matrix[4]?.[6] ?? 1;
+          const lastBase8 = matrix[7]?.[6] ?? 1;
+          const startNum = r7(lastBase5 + lastBase8); // ลบด้วย 7 จนกว่าจะเหลือ 1-7
+          
+          const startIndex = yamBackward.indexOf(startNum);
+          // วางในช่องสุดท้ายทางขวามือ (ภริยัง) แล้วเดินถอยหลังจากขวามาซ้าย
+          // ซึ่งก็คือจากช่องแรก (col=0) ไปยังช่องสุดท้าย (col=6) จะเป็นการเดินย้อนทางของ array yamBackward
+          // แต่เพื่อให้ช่องสุดท้าย (col=6) เป็น startNum เราจะคำนวณ index แบบนี้:
+          // ค่าที่ col = 6 คือ startNum (index ใน yamBackward = startIndex)
+          // ค่าที่ col = 5 คือ ตัวถัดไปใน yamBackward (startIndex + 1)
+          // ดังนั้นที่ col ใดๆ คือ (startIndex + (6 - col)) % 7
+          return yamBackward[(startIndex + (6 - col)) % 7];
+        }
 
         default:
           return 0

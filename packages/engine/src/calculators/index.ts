@@ -22,3 +22,4 @@ export * from './taksa.js'
 // transit.ts — real-time planetary positions (renamed to avoid clash)
 export { calculateTransit as calculatePlanetaryTransit, getMajorTransits } from './transit.js'
 export type { TransitPlanet, TransitResult } from './transit.js'
+

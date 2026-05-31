@@ -3,7 +3,7 @@ import { Link } from "@remix-run/react";
 
 export const meta: MetaFunction = () => [
   { title: "Investment — PhopePhum" },
-  { name: "description", content: "เลือกระดับการเข้าถึงศาสตร์ยามอัฐกาลและชะตากรรมเชิงลึก ระดับจักรพรรดิ" },
+  { name: "description", content: "เลือกระดับการเข้าถึงศาสตร์ยามอัฏฐกาลและชะตากรรมเชิงลึก ระดับจักรพรรดิ" },
 ];
 
 const PLANS = [
@@ -14,7 +14,7 @@ const PLANS = [
     unit: "ตลอดชีพ",
     tag: null,
     features: [
-      { icon: "☽", text: "ยามอัฐกาล 5 ครั้ง/วัน" },
+      { icon: "☽", text: "ยามอัฏฐกาล 5 ครั้ง/วัน" },
       { icon: "✦", text: "จักรกำเนิดพื้นฐาน" },
       { icon: "◈", text: "Life Report 1 ครั้ง/เดือน" },
     ],
@@ -29,7 +29,7 @@ const PLANS = [
     unit: "เดือน",
     tag: "RECOMMENDED",
     features: [
-      { icon: "☽", text: "ยามอัฐกาลไม่จำกัด" },
+      { icon: "☽", text: "ยามอัฏฐกาลไม่จำกัด" },
       { icon: "⊕", text: "ระบบจร (วัยจร/ปีจร) ครบถ้วน" },
       { icon: "◈", text: "Life Report 10 ครั้ง/เดือน" },
       { icon: "⟁", text: "Export รายงาน PDF พรีเมียม" },
@@ -57,7 +57,7 @@ const PLANS = [
 ] as const;
 
 const COMPARE_ROWS = [
-  { label: "ยามอัฐกาล",                basic: "5 ครั้ง/วัน",   pro: "ไม่จำกัด",   imperial: "ไม่จำกัด" },
+  { label: "ยามอัฏฐกาล",                basic: "5 ครั้ง/วัน",   pro: "ไม่จำกัด",   imperial: "ไม่จำกัด" },
   { label: "คำนวณจักรกำเนิด",         basic: "พื้นฐาน",       pro: "ครบถ้วน",     imperial: "ครบถ้วน" },
   { label: "ระบบจร (วัยจร/ปีจร)",     basic: "—",             pro: "✦",           imperial: "✦" },
   { label: "Life Report",              basic: "1/เดือน",       pro: "10/เดือน",    imperial: "ไม่จำกัด" },

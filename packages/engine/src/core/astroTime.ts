@@ -4,7 +4,7 @@
  *
  * ใช้สำหรับ:
  * - ส่งเข้า ephemeris calculation (decimal hour)
- * - ยามอัฐกาล (total minutes)
+ * - ยามอัฏฐกาล (total minutes)
  * - กฎตัดวัน 06:00 AM ของโหราศาสตร์ไทย
  */
 
