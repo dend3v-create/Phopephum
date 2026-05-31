@@ -13,85 +13,69 @@ export const meta: MetaFunction = () => [
   { title: "ตั้งค่าโปรไฟล์และรายได้แนะนำ — PhopePhum" },
 ];
 
+/** สร้าง referral_code แบบ unique จาก userId */
+function generateReferralCode(userId: string): string {
+  return userId.replace(/-/g, "").substring(0, 8).toUpperCase();
+}
+
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
-  const profile = await getProfile(user.id, request, env);
+  let profile = await getProfile(user.id, request, env);
 
-  let referralsCount = 0;
-  let totalEarnings = 0;
-  let pendingPayout = 0;
-  let referralsList: any[] = [];
-  let earningsList: any[] = [];
+  const { supabase } = createSupabaseClient(request, env);
 
-  try {
-    const { supabase } = createSupabaseClient(request, env);
-    
-    // 1. ดึงข้อมูล Referrals
-    const { data: refData } = await supabase
-      .from("affiliate_referrals")
-      .select("created_at, referred_id")
-      .eq("referrer_id", user.id);
-    
-    if (refData && refData.length > 0) {
-      // ดึงรายละเอียดโปรไฟล์คนที่ถูกแนะนำ
-      const referredIds = refData.map(r => r.referred_id);
-      const { data: profilesData } = await supabase
-        .from("profiles")
-        .select("id, display_name, email, subscription")
-        .in("id", referredIds);
-      
-      referralsList = refData.map(r => {
-        const p = profilesData?.find(profile => profile.id === r.referred_id);
-        return {
-          created_at: r.created_at,
-          referred: p || { display_name: "ผู้ใช้ดวงชะตา", email: "hidden", subscription: "free" }
-        };
-      });
-      referralsCount = refData.length;
-    }
-
-    // 2. ดึงข้อมูลรายได้
-    const { data: earnData } = await supabase
-      .from("affiliate_earnings")
-      .select("*")
-      .eq("referrer_id", user.id)
-      .order("created_at", { ascending: false });
-    
-    if (earnData) {
-      earningsList = earnData;
-      totalEarnings = earnData.reduce((acc, curr) => acc + Number(curr.amount), 0);
-      pendingPayout = earnData
-        .filter(item => item.status === "pending")
-        .reduce((acc, curr) => acc + Number(curr.amount), 0);
-    }
-  } catch (e) {
-    console.log("[Settings Loader] Affiliate tables query error or not created yet, using mock fallbacks.");
-    // Fallback Mock Data เมื่อยังไม่ได้นำตารางไปรัน (ให้แสดงผลอย่างงดงามไม่มีล่ม)
-    referralsCount = 3;
-    totalEarnings = 1450.00;
-    pendingPayout = 450.00;
-    referralsList = [
-      { created_at: new Date(Date.now() - 86400000 * 2).toISOString(), referred: { display_name: "กิตติภพ รุ่งเรือง", email: "kittipop@test.com", subscription: "pro" } },
-      { created_at: new Date(Date.now() - 86400000 * 5).toISOString(), referred: { display_name: "วรรณิศา ดวงดี", email: "wannisa@test.com", subscription: "basic" } },
-      { created_at: new Date(Date.now() - 86400000 * 12).toISOString(), referred: { display_name: "ดลธรรม สุขเจริญ", email: "donlatham@test.com", subscription: "free" } }
-    ];
-    earningsList = [
-      { id: "e1", amount: 500.00, status: "paid", created_at: new Date(Date.now() - 86400000 * 2).toISOString() },
-      { id: "e2", amount: 500.00, status: "paid", created_at: new Date(Date.now() - 86400000 * 5).toISOString() },
-      { id: "e3", amount: 450.00, status: "pending", created_at: new Date(Date.now() - 86400000 * 12).toISOString() }
-    ];
+  // Auto-generate referral_code ถ้ายังไม่มี (ทุก member รวมถึง free tier)
+  if (profile && !profile.referral_code) {
+    const newCode = generateReferralCode(user.id);
+    await supabase
+      .from("profiles")
+      .update({ referral_code: newCode })
+      .eq("id", user.id);
+    profile = { ...profile, referral_code: newCode };
   }
 
-  return json({ 
-    user, 
+  // 1. ดึงข้อมูลประวัติกระเป๋าเงิน (Wallet Transactions)
+  const { data: walletHistory } = await supabase
+    .from("wallet_transactions")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  // 2. ดึงข้อมูลคำขอถอนเงิน (Withdrawal Requests)
+  const { data: withdrawals } = await supabase
+    .from("withdrawal_requests")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  // 3. นับจำนวนคนที่แนะนำมา
+  const { count: referralsCount } = await supabase
+    .from("profiles")
+    .select("*", { count: "exact", head: true })
+    .eq("referred_by", profile?.referral_code);
+
+  // 4. ดึงรายชื่อคนที่ชวนมาล่าสุด
+  const { data: referralsList } = await supabase
+    .from("profiles")
+    .select("created_at, display_name, plan")
+    .eq("referred_by", profile?.referral_code)
+    .order("created_at", { ascending: false })
+    .limit(10);
+
+  // 5. คำนวณเปอร์เซ็นต์ตามแผนปัจจุบัน
+  const commissionRate = profile?.plan === 'imperial' ? 10 : profile?.plan === 'pro' ? 5 : 3;
+
+  return json({
+    user,
     profile,
-    affiliate: {
-      referralsCount,
-      totalEarnings,
-      pendingPayout,
-      referralsList,
-      earningsList
+    wallet: {
+      balance: Number(profile?.wallet_balance || 0),
+      history: walletHistory || [],
+      withdrawals: withdrawals || [],
+      referralsCount: referralsCount || 0,
+      referralsList: referralsList || [],
+      commissionRate
     }
   });
 }
@@ -134,70 +118,98 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return redirect("/dashboard/settings?saved=personal");
   }
 
-  if (formType === "affiliate_bank") {
+  if (formType === "withdrawal_request") {
+    const amount = Number(formData.get("amount") ?? 0);
     const bankName = String(formData.get("bankName") ?? "");
-    const bankAccountNo = String(formData.get("bankAccountNo") ?? "");
-    const bankAccountName = String(formData.get("bankAccountName") ?? "");
+    const accountName = String(formData.get("accountName") ?? "");
+    const accountNumber = String(formData.get("accountNumber") ?? "");
 
-    if (!bankName || !bankAccountNo || !bankAccountName) {
-      return json({ error: "กรุณากรอกข้อมูลบัญชีรับรายได้ให้ครบถ้วน" }, { status: 400 });
+    if (amount < 100) {
+      return json({ error: "ยอดถอนขั้นต่ำคือ 100 บาท" }, { status: 400 });
     }
 
-    const { error } = await supabase
-      .from("profiles")
-      .update({
+    if (!bankName || !accountName || !accountNumber) {
+      return json({ error: "กรุณากรอกข้อมูลธนาคารให้ครบถ้วน" }, { status: 400 });
+    }
+
+    // ตรวจสอบยอดเงินคงเหลือ
+    const profile = await getProfile(user.id, request, env);
+    const currentBalance = Number(profile?.wallet_balance || 0);
+
+    if (currentBalance < amount) {
+      return json({ error: "ยอดเงินในกระเป๋าไม่เพียงพอ" }, { status: 400 });
+    }
+
+    // 1. สร้างคำขอถอนเงิน
+    const { error: withdrawError } = await supabase
+      .from("withdrawal_requests")
+      .insert({
+        user_id: user.id,
+        amount,
         bank_name: bankName,
-        bank_account_no: bankAccountNo,
-        bank_account_name: bankAccountName,
-      })
+        account_name: accountName,
+        account_number: accountNumber,
+        status: "pending",
+      });
+
+    if (withdrawError) {
+      return json({ error: `ไม่สามารถส่งคำขอถอนเงินได้: ${withdrawError.message}` }, { status: 500 });
+    }
+
+    // 2. หักเงินจากกระเป๋า
+    await supabase
+      .from("profiles")
+      .update({ wallet_balance: currentBalance - amount })
       .eq("id", user.id);
 
-    if (error) {
-      console.error("[settings] update bank error:", error.code, error.message);
-      return json({ error: `ไม่สามารถบันทึกข้อมูลบัญชีธนาคารได้: ${error.message}` }, { status: 500 });
-    }
+    // 3. บันทึก Transaction
+    await supabase
+      .from("wallet_transactions")
+      .insert({
+        user_id: user.id,
+        amount: -amount,
+        type: "withdrawal",
+        description: `ถอนเงินเข้าบัญชี ${bankName} (${accountNumber})`,
+      });
 
-    return redirect("/dashboard/settings?saved=bank&tab=affiliate");
+    return redirect("/dashboard/settings?saved=withdraw&tab=affiliate");
   }
 
   return json({ error: "รูปแบบการทำงานไม่ถูกต้อง" }, { status: 400 });
 }
 
 export default function SettingsPage() {
-  const { profile, affiliate } = useLoaderData<typeof loader>();
+  const { profile, wallet } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
 
   // จัดการแท็บ
-  const url = typeof window !== "undefined" ? new URL(window.location.href) : null;
-  const initialTab = url?.searchParams.get("tab") || "personal";
-  const [activeTab, setActiveTab] = useState(initialTab);
-
-  const savedParam = url?.searchParams.get("saved");
-  const isSavedPersonal = savedParam === "personal";
-  const isSavedBank = savedParam === "bank";
+  const [activeTab, setActiveTab] = useState("personal");
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
   // รหัสแนะนำเฉพาะตัว
-  const affiliateCode = profile?.affiliate_code || `PP-${profile?.id?.substring(0, 6)?.toUpperCase() || "MEMBER"}`;
-  const referralLink = `https://phopephum-web.pages.dev/register?ref=${affiliateCode}`;
+  const affiliateCode = profile?.referral_code || "";
+  const referralLink = affiliateCode
+    ? `https://phopephum.com/register?ref=${affiliateCode}`
+    : "";
   const [copied, setCopied] = useState(false);
+  const isFreetier = !profile?.subscription || profile.subscription === "free";
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(referralLink);
+    if (!referralLink) return;
+    navigator.clipboard.writeText(referralLink).catch(() => {
+      // fallback สำหรับ browser ที่ไม่รองรับ
+      const el = document.createElement("textarea");
+      el.value = referralLink;
+      document.body.appendChild(el);
+      el.select();
+      document.execCommand("copy");
+      document.body.removeChild(el);
+    });
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
-
-  // จำลองคำนวณวันหมดอายุสมาชิก
-  const subType = profile?.subscription || "free";
-  const expiredAtStr = profile?.membership_expired_at;
-  const expiredDate = expiredAtStr ? new Date(expiredAtStr) : new Date(Date.now() + 86400000 * 25); // จำลอง 25 วันถ้าไม่ได้บันทึก
-  const startedDate = profile?.membership_started_at ? new Date(profile.membership_started_at) : new Date(Date.now() - 86400000 * 5); // เริ่มต้น 5 วันก่อน
-  
-  const totalDays = Math.max(1, Math.round((expiredDate.getTime() - startedDate.getTime()) / 86400000));
-  const remainingDays = Math.max(0, Math.round((expiredDate.getTime() - Date.now()) / 86400000));
-  const progressPercent = Math.min(100, Math.max(0, Math.round((remainingDays / totalDays) * 100)));
 
   return (
     <div className="space-y-6 max-w-4xl pb-16">
@@ -206,7 +218,7 @@ export default function SettingsPage() {
           การตั้งค่า <span className="text-[#C6A96B] font-normal text-base block sm:inline sm:ml-2">Settings & Dashboard</span>
         </h1>
         <p className="text-[#8A8070] text-sm">
-          ปรับแต่งข้อมูลดวงชะตากำเนิด ตรวจสอบระยะเวลาแพ็กเกจ และแผงแนะนำสร้างรายได้
+          ปรับแต่งข้อมูลดวงชะตากำเนิด ตรวจสอบสิทธิ์สมาชิก และแผงควบคุมรายได้ Affiliate
         </p>
       </div>
 
@@ -223,16 +235,6 @@ export default function SettingsPage() {
           ข้อมูลโปรไฟล์ & การเกิด
         </button>
         <button
-          onClick={() => setActiveTab("membership")}
-          className={`py-3 px-5 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
-            activeTab === "membership"
-              ? "border-[#C6A96B] text-[#C6A96B] bg-white/5"
-              : "border-transparent text-[#8A8070] hover:text-[#F8F6F1]"
-          }`}
-        >
-          ระดับสมาชิก & ประวัติ
-        </button>
-        <button
           onClick={() => setActiveTab("affiliate")}
           className={`py-3 px-5 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
             activeTab === "affiliate"
@@ -240,7 +242,7 @@ export default function SettingsPage() {
               : "border-transparent text-[#8A8070] hover:text-[#F8F6F1]"
           }`}
         >
-          ระบบแนะนำเพื่อน (Affiliate)
+          พันธมิตร & รายได้ (Affiliate)
         </button>
       </div>
 
@@ -303,18 +305,6 @@ export default function SettingsPage() {
                   />
                 </div>
 
-                {actionData?.error && activeTab === "personal" && (
-                  <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-3">
-                    {actionData.error}
-                  </p>
-                )}
-
-                {isSavedPersonal && (
-                  <p className="text-sm text-green-400 bg-green-400/10 border border-green-400/20 rounded-lg px-4 py-3">
-                    อัปเดตข้อมูลดวงชะตากำเนิดสำเร็จ เรียบร้อยแล้ว ✓
-                  </p>
-                )}
-
                 <Button type="submit" loading={isLoading} className="mt-2">
                   บันทึกข้อมูลดวงเกิด
                 </Button>
@@ -324,282 +314,115 @@ export default function SettingsPage() {
 
           <div className="space-y-6">
             <Card className="border-[#C6A96B]/20 p-6 bg-gradient-to-b from-[#0A1628] to-[#020617]">
-              <div className="w-12 h-12 rounded-full border border-[#C6A96B]/30 flex items-center justify-center text-xl text-[#C6A96B] mb-4 bg-[#C6A96B]/5">
-                ✡
+              <h3 className="font-display font-bold text-[#F8F6F1] text-base mb-2">ระดับสมาชิกปัจจุบัน</h3>
+              <div className="p-4 rounded-2xl bg-white/5 border border-[#C6A96B]/20 text-center mb-4">
+                 <p className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-widest mb-1">Current Plan</p>
+                 <p className="text-2xl font-black text-[#F8F6F1] uppercase">{profile?.plan || 'FREE'}</p>
               </div>
-              <h3 className="font-display font-bold text-[#F8F6F1] text-base mb-2">ทำไมข้อมูลเกิดถึงสำคัญ?</h3>
-              <p className="text-[#8A8070] text-xs leading-relaxed space-y-2">
-                ระบบของ <b>Phopephum v2</b> คำนวณดวงชะตาอ้างอิงจากคัมภีร์ดวงไทยแบบแท้จริง (วันตัดเวลา 06:00 น. และระบบจันทรคติ 100 ปี) 
-                <br /><br />
-                การระบุ <b>วันเกิด เวลาเกิด และจังหวัดเกิด</b> ที่ถูกต้อง จะช่วยให้ประหยัดเวลา ไม่ต้องกรอกข้อมูลดวงเกิดใหม่ทุกครั้งที่กดเช็คเลข 7 ตัว หรือตรวจยามมงคลครับ ข้อมูลจะถูกจดจำไว้อย่างถาวรและปลอดภัย
+              <p className="text-[#8A8070] text-xs leading-relaxed">
+                สมาชิกระดับสูงจะได้รับเปอร์เซ็นต์ค่าแนะนำเพื่อนที่มากขึ้น (สูงสุด 10%) คุณสามารถอัปเกรดเพื่อรับรายได้ที่สูงขึ้นได้เสมอครับ
               </p>
             </Card>
           </div>
         </div>
       )}
 
-      {/* 2. แท็บระดับสมาชิกและการเตือนต่ออายุ */}
-      {activeTab === "membership" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
-          <div className="lg:col-span-2 space-y-6">
-            {/* Cosmic Card */}
-            <div className="relative overflow-hidden rounded-3xl p-8 border border-[#C6A96B]/30 bg-gradient-to-br from-[#0B1528] via-[#040A16] to-[#020617] shadow-2xl flex flex-col justify-between min-h-[220px]">
-              {/* Background Glow */}
-              <div className="absolute right-0 top-0 w-48 h-48 bg-[#C6A96B]/5 rounded-full blur-3xl pointer-events-none" />
-              <div className="absolute left-1/3 bottom-0 w-32 h-32 bg-[#4B6FAE]/5 rounded-full blur-2xl pointer-events-none" />
-
-              <div className="flex justify-between items-start">
-                <div>
-                  <p className="text-[10px] uppercase tracking-widest text-[#C6A96B] font-bold mb-1">PHOPEPHUM COSMIC CARD</p>
-                  <h3 className="text-2xl font-bold font-display text-[#F8F6F1] capitalize">{subType} Member</h3>
-                </div>
-                <div className="text-right">
-                  <span className="bg-[#C6A96B]/15 border border-[#C6A96B]/30 text-[#C6A96B] px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase">
-                    {subType === "free" ? "ดวงชะตาขั้นพื้นฐาน" : "ดวงชะตาพรีเมียม VIP"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-8 flex justify-between items-end">
-                <div>
-                  <p className="text-[9px] uppercase tracking-tighter text-[#8A8070] mb-1">รหัสสมาชิกดวง</p>
-                  <p className="text-xs font-mono text-[#F8F6F1] tracking-widest">PP-{profile?.id?.substring(0, 13)?.toUpperCase()}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[9px] uppercase tracking-tighter text-[#8A8070] mb-0.5">วันเริ่ม-สิ้นสุดแพ็กเกจ</p>
-                  <p className="text-xs text-[#F8F6F1]">
-                    {startedDate.toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })} - {expiredDate.toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* แจ้งเตือนกระตุ้นต่ออายุสมาชิก */}
-            <Card className="border-[#C6A96B]/10 p-6 bg-slate-950/40">
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <div className="space-y-2 flex-1">
-                  <h3 className="text-[#F8F6F1] font-display text-base font-bold flex items-center gap-2">
-                    <span className="text-yellow-400">🔔</span> ระยะเวลาสมาชิกดวงของคุณ
-                  </h3>
-                  
-                  {subType === "free" ? (
-                    <p className="text-[#8A8070] text-xs leading-relaxed">
-                      คุณกำลังใช้งานระดับ <b>ดวงชะตาขั้นพื้นฐาน (Free Plan)</b> ปลดล็อกความคุ้มค่าเพิ่มขึ้นด้วยการอัปเกรดเพื่อวิเคราะห์ยามอัฏฐกาลแบบเจาะลึก และดูผังดวงจักรพรรดิ 9 ฐานฉบับสมบูรณ์
-                    </p>
-                  ) : (
-                    <div className="space-y-3">
-                      <p className="text-[#8A8070] text-xs leading-relaxed">
-                        ระดับสมาชิก VIP ปัจจุบันของคุณเหลือเวลาอีกประมาณ <span className="text-[#C6A96B] font-bold text-sm">{remainingDays} วัน</span>
-                      </p>
-                      {/* แถบความคืบหน้า */}
-                      <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden border border-white/5">
-                        <div 
-                          className="bg-gradient-to-r from-[#4B6FAE] to-[#C6A96B] h-full rounded-full transition-all duration-500" 
-                          style={{ width: `${progressPercent}%` }}
-                        />
-                      </div>
-                      <p className="text-[10px] text-[#8A8070] text-right italic">
-                        ระยะเวลาคงเหลือ {progressPercent}%
-                      </p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="flex-shrink-0">
-                  <Button 
-                    onClick={() => {
-                      if (typeof window !== "undefined") window.location.href = "/pricing";
-                    }}
-                    className="bg-[#C6A96B] text-[#020617] hover:bg-[#C6A96B]/90 font-bold px-6 text-xs whitespace-nowrap"
-                  >
-                    {subType === "free" ? "อัปเกรดแพ็กเกจพรีเมียม" : "ต่ออายุสมาชิกดวงชะตา"}
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </div>
-
-          <div className="space-y-6">
-            <Card className="border-[#C6A96B]/15 p-6 bg-slate-900/30">
-              <h3 className="font-display font-bold text-[#F8F6F1] text-base mb-3">สิทธิประโยชน์พิเศษสำหรับ VIP</h3>
-              <ul className="space-y-2 text-xs text-[#8A8070] list-disc pl-4">
-                <li>เปิดอ่านบทวิเคราะห์ชะตาชีวิตเจาะลึก 6 รูปแบบครบครัน</li>
-                <li>ดูยามมงคลอัฏฐกาลย้อนหลังและล่วงหน้าได้ไม่จำกัด</li>
-                <li>บันทึกสมุดบันทึกพลังจิต (TQM Planner) ถาวร</li>
-                <li>ระบบคำนวณผังดวงจักรพรรดิแบบละเอียดที่สุด</li>
-              </ul>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {/* 3. แท็บระบบแนะนำเพื่อน Affiliate */}
+      {/* 2. แท็บ Affiliate & E-Wallet */}
       {activeTab === "affiliate" && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          {/* Dashboard Stats */}
+
+          {/* Commission upgrade prompt สำหรับ free member */}
+          {isFreetier && (
+            <div className="rounded-2xl border border-[#C6A96B]/25 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
+              style={{ background: "rgba(198,169,107,0.06)" }}>
+              <div>
+                <p className="text-[#C6A96B] text-xs font-bold mb-0.5">✦ อัปเกรดเพื่อรับคอมมิชชั่นสูงขึ้น</p>
+                <p className="text-[#94A3B8] text-[11px]">
+                  Free: 3% · Basic: 3% · Pro: 5% · Imperial: 10% — ยิ่งระดับสูง ยิ่งได้มากขึ้น
+                </p>
+              </div>
+              <a href="/dashboard/upgrade"
+                className="shrink-0 px-4 py-2 rounded-xl text-xs font-bold text-[#020617] whitespace-nowrap"
+                style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}>
+                อัปเกรดสมาชิก →
+              </a>
+            </div>
+          )}
+
+          {/* Wallet & Stats Dashboard */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-[#C6A96B]/20 p-5 bg-gradient-to-br from-slate-900/50 to-[#0A1628]/30 flex flex-col justify-between">
-              <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-2">รายได้สะสมทั้งหมด (Total Revenue)</p>
-              <div>
-                <p className="text-2xl font-bold font-display text-[#C6A96B]">฿{affiliate.totalEarnings.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</p>
-                <p className="text-[10px] text-[#8A8070] mt-1">อัปเดตแบบเรียลไทม์จากระบบแนะนำ</p>
-              </div>
+            <Card className="relative overflow-hidden border-[#C6A96B]/30 p-6 bg-gradient-to-br from-[#0B1528] to-[#020617] shadow-xl">
+              <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">💰</div>
+              <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-1">ยอดเงินคงเหลือในกระเป๋า</p>
+              <h3 className="text-3xl font-black font-display text-[#F8F6F1]">฿{wallet.balance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</h3>
+              <button
+                onClick={() => setShowWithdrawModal(true)}
+                disabled={wallet.balance < 100}
+                className="mt-4 w-full py-2 rounded-xl text-xs font-bold bg-[#C6A96B] text-[#020617] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
+                title={wallet.balance < 100 ? "ต้องมียอดอย่างน้อย 100฿ จึงจะถอนได้" : undefined}
+              >
+                ถอนเงินเข้าบัญชี {wallet.balance < 100 ? `(ขาดอีก ฿${(100 - wallet.balance).toFixed(0)})` : "(ขั้นต่ำ 100฿)"}
+              </button>
             </Card>
 
-            <Card className="border-[#4B6FAE]/20 p-5 bg-gradient-to-br from-slate-900/50 to-[#0A1628]/30 flex flex-col justify-between">
-              <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-2">ยอดรอชำระเงิน (Pending Payout)</p>
-              <div>
-                <p className="text-2xl font-bold font-display text-[#4B6FAE]">฿{affiliate.pendingPayout.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</p>
-                <p className="text-[10px] text-[#8A8070] mt-1">โอนเข้าบัญชีทุกวันที่ 5 ของเดือน</p>
-              </div>
+            <Card className="border-white/5 p-6 bg-slate-900/40">
+              <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-1">แนะนำเพื่อนสำเร็จ</p>
+              <h3 className="text-3xl font-black font-display text-[#F8F6F1]">{wallet.referralsCount} <span className="text-sm font-normal text-[#8A8070]">ท่าน</span></h3>
+              <p className="text-[10px] text-[#C6A96B] mt-2 font-bold uppercase tracking-tighter">
+                คอมมิชชั่นปัจจุบัน {wallet.commissionRate}%
+                {isFreetier && <span className="text-[#4A5568] ml-1">(อัปเกรดเพื่อเพิ่ม)</span>}
+              </p>
             </Card>
 
-            <Card className="border-[#C6A96B]/10 p-5 bg-slate-900/40 flex flex-col justify-between">
-              <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-2">แนะนำดวงชะตาสำเร็จ (Referrals)</p>
-              <div>
-                <p className="text-2xl font-bold font-display text-[#F8F6F1]">{affiliate.referralsCount} ท่าน</p>
-                <p className="text-[10px] text-[#8A8070] mt-1">ผู้สมัครผ่านลิงก์แนะนำของคุณ</p>
-              </div>
+            <Card className="border-white/5 p-6 bg-slate-900/40">
+              <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-1">รหัสแนะนำของคุณ</p>
+              {affiliateCode ? (
+                <>
+                  <h3 className="text-3xl font-black font-display text-[#C6A96B] tracking-widest">{affiliateCode}</h3>
+                  <button
+                    onClick={handleCopyLink}
+                    className="mt-3 text-[10px] font-bold text-[#F8F6F1] underline hover:text-[#C6A96B] transition-colors"
+                  >
+                    {copied ? "✓ คัดลอกลิงก์แล้ว" : "คัดลอกลิงก์แนะนำเพื่อน"}
+                  </button>
+                </>
+              ) : (
+                <p className="text-[#4A5568] text-xs mt-2 italic">กำลังสร้างรหัส...</p>
+              )}
             </Card>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* ฝั่งซ้าย: Referral Link & Bank account */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Box 1: Referral Link */}
-              <Card className="border-[#C6A96B]/15 p-6 bg-slate-900/40 relative overflow-hidden">
-                <h3 className="text-[#C6A96B] font-display text-sm font-bold uppercase tracking-wider mb-4">
-                  ลิงก์สำหรับส่งแนะนำ (Your Referral Link)
-                </h3>
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="flex-1 bg-[#020617] border border-[#C6A96B]/25 rounded-xl px-4 py-3 text-xs text-[#F8F6F1] font-mono select-all overflow-x-auto whitespace-nowrap">
-                    {referralLink}
-                  </div>
-                  <button
-                    onClick={handleCopyLink}
-                    className={`px-5 py-3 rounded-xl text-xs font-bold font-display transition-all ${
-                      copied 
-                        ? "bg-green-500 text-slate-950 font-bold scale-95" 
-                        : "bg-[#C6A96B] text-slate-950 hover:bg-[#C6A96B]/90"
-                    }`}
-                  >
-                    {copied ? "✓ คัดลอกแล้ว!" : "คัดลอกลิงก์"}
-                  </button>
-                </div>
-                <p className="text-[10px] text-[#8A8070] mt-3">
-                  * ส่งลิงก์นี้ให้กับเพื่อนๆ หรือคนที่สนใจดูล่าสุด เมื่อพวกเขาสมัครสมาชิกดวงและชำระแพ็กเกจพรีเมียม คุณจะได้รับค่าแนะนำทันที <b>30%</b> ทุกรอบการชำระเงิน!
-                </p>
-              </Card>
-
-              {/* Box 2: Bank accounts settings */}
-              <Card className="border-[#C6A96B]/10 p-6 bg-slate-950/40">
-                <h3 className="text-[#F8F6F1] font-display text-base font-bold mb-4 flex items-center gap-2">
-                  <span>🏦</span> บัญชีรับรายได้ค่าแนะนำ
-                </h3>
-
-                <Form method="post" className="space-y-4">
-                  <input type="hidden" name="formType" value="affiliate_bank" />
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="flex flex-col">
-                      <label className="text-[#8A8070] text-[10px] uppercase tracking-widest block mb-2 font-bold">ธนาคารปลายทาง</label>
-                      <select
-                        name="bankName"
-                        defaultValue={profile?.bank_name ?? ""}
-                        className="w-full bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
-                        required
-                      >
-                        <option value="">เลือกธนาคาร...</option>
-                        <option value="กสิกรไทย">ธนาคารกสิกรไทย (KBANK)</option>
-                        <option value="ไทยพาณิชย์">ธนาคารไทยพาณิชย์ (SCB)</option>
-                        <option value="กรุงเทพ">ธนาคารกรุงเทพ (BBL)</option>
-                        <option value="กรุงไทย">ธนาคารกรุงไทย (KTB)</option>
-                        <option value="กรุงศรีอยุธยา">ธนาคารกรุงศรีอยุธยา (BAY)</option>
-                        <option value="ออมสิน">ธนาคารออมสิน (GSB)</option>
-                        <option value="ทหารไทยธนชาต">ธนาคารทหารไทยธนชาต (TTB)</option>
-                      </select>
-                    </div>
-
-                    <Input
-                      name="bankAccountNo"
-                      label="เลขที่บัญชีธนาคาร"
-                      defaultValue={profile?.bank_account_no ?? ""}
-                      placeholder="เช่น 123-4-56789-0"
-                      required
-                    />
-
-                    <Input
-                      name="bankAccountName"
-                      label="ชื่อบัญชี (ภาษาไทย/อังกฤษ)"
-                      defaultValue={profile?.bank_account_name ?? ""}
-                      placeholder="เช่น นายดวงดี รวยยิ่ง"
-                      required
-                    />
-                  </div>
-
-                  {actionData?.error && activeTab === "affiliate" && (
-                    <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-3">
-                      {actionData.error}
-                    </p>
-                  )}
-
-                  {isSavedBank && (
-                    <p className="text-sm text-green-400 bg-green-400/10 border border-green-400/20 rounded-lg px-4 py-3">
-                      บันทึกข้อมูลบัญชีรับเงินโอน Affiliate สำเร็จแล้ว ✓
-                    </p>
-                  )}
-
-                  <Button type="submit" loading={isLoading}>
-                    บันทึกข้อมูลบัญชีธนาคาร
-                  </Button>
-                </Form>
-              </Card>
-
-              {/* Box 3: Referral Table */}
-              <Card className="border-[#C6A96B]/10 p-0 overflow-hidden">
-                <div className="bg-[#C6A96B]/5 px-6 py-4 border-b border-[#C6A96B]/15">
-                  <h3 className="text-[#F8F6F1] font-display text-sm font-bold">ประวัติเพื่อนที่ร่วมดวงชะตา ({affiliate.referralsCount})</h3>
+              {/* Transaction History Table */}
+              <Card className="border-white/5 p-0 overflow-hidden bg-slate-900/40">
+                <div className="px-6 py-4 border-b border-white/5 bg-white/5">
+                  <h3 className="text-[#F8F6F1] font-display text-sm font-bold">ประวัติกระเป๋าเงิน (Wallet History)</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-slate-900/60 text-[#8A8070] border-b border-[#C6A96B]/10 uppercase font-bold tracking-widest text-[9px]">
-                        <th className="px-6 py-3">วันสมัครแนะนำ</th>
-                        <th className="px-6 py-3">ชื่อดวงชะตา</th>
-                        <th className="px-6 py-3">ระดับสมาชิก</th>
-                        <th className="px-6 py-3 text-right">สถานะ</th>
+                      <tr className="bg-slate-950/60 text-[#8A8070] uppercase font-bold tracking-widest text-[9px]">
+                        <th className="px-6 py-3">วัน/เวลา</th>
+                        <th className="px-6 py-3">รายการ</th>
+                        <th className="px-6 py-3 text-right">จำนวนเงิน</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-[#C6A96B]/10">
-                      {affiliate.referralsList.length > 0 ? (
-                        affiliate.referralsList.map((item, index) => (
-                          <tr key={index} className="hover:bg-white/5 transition-all text-[#F8F6F1]">
-                            <td className="px-6 py-4 font-mono text-[10px]">
-                              {new Date(item.created_at).toLocaleDateString("th-TH", {
-                                year: "numeric",
-                                month: "short",
-                                day: "numeric"
-                              })}
+                    <tbody className="divide-y divide-white/5">
+                      {wallet.history.length > 0 ? (
+                        wallet.history.map((tx: any) => (
+                          <tr key={tx.id} className="hover:bg-white/5 text-[#D9CDB7]">
+                            <td className="px-6 py-4 text-[10px]">
+                              {new Date(tx.created_at).toLocaleString("th-TH", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                             </td>
-                            <td className="px-6 py-4 font-medium">
-                              {item.referred.display_name}
-                            </td>
-                            <td className="px-6 py-4 text-[#C6A96B] font-semibold uppercase">
-                              {item.referred.subscription}
-                            </td>
-                            <td className="px-6 py-4 text-right">
-                              <span className="inline-block bg-green-500/10 border border-green-500/20 text-green-400 px-2 py-0.5 rounded-full text-[9px] font-bold">
-                                เปิดใช้งานลิงก์สำเร็จ
-                              </span>
+                            <td className="px-6 py-4">{tx.description}</td>
+                            <td className={`px-6 py-4 text-right font-bold ${tx.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                              {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} ฿
                             </td>
                           </tr>
                         ))
                       ) : (
-                        <tr>
-                          <td colSpan={4} className="px-6 py-8 text-center text-[#8A8070] italic">
-                            ยังไม่มีผู้สมัครใช้งานดวงผ่านลิงก์แนะนำของคุณในขณะนี้
-                          </td>
-                        </tr>
+                        <tr><td colSpan={3} className="px-6 py-10 text-center text-[#8A8070] italic">ยังไม่มีรายการในขณะนี้</td></tr>
                       )}
                     </tbody>
                   </table>
@@ -607,42 +430,84 @@ export default function SettingsPage() {
               </Card>
             </div>
 
-            {/* ฝั่งขวา: รายได้ล่าสุด */}
             <div className="space-y-6">
-              <Card className="border-[#C6A96B]/10 p-0 overflow-hidden">
-                <div className="bg-[#C6A96B]/5 px-5 py-4 border-b border-[#C6A96B]/15">
-                  <h3 className="text-[#F8F6F1] font-display text-sm font-bold">รายการเงินโอนล่าสุด</h3>
+              {/* Withdrawal Status */}
+              <Card className="border-white/5 p-0 overflow-hidden bg-slate-900/40">
+                <div className="px-5 py-4 border-b border-white/5 bg-white/5">
+                  <h3 className="text-[#F8F6F1] font-display text-sm font-bold">สถานะการถอนเงิน</h3>
                 </div>
-                <div className="p-2 space-y-2 max-h-[360px] overflow-y-auto divide-y divide-[#C6A96B]/10">
-                  {affiliate.earningsList.length > 0 ? (
-                    affiliate.earningsList.map((earn) => (
-                      <div key={earn.id} className="pt-3 pb-2 px-3 flex justify-between items-center text-xs">
+                <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto">
+                  {wallet.withdrawals.length > 0 ? (
+                    wallet.withdrawals.map((w: any) => (
+                      <div key={w.id} className="p-3 rounded-xl bg-black/20 border border-white/5 text-xs flex justify-between items-center">
                         <div className="space-y-1">
-                          <p className="font-semibold text-[#F8F6F1]">โบนัสแนะนำเพื่อน</p>
-                          <p className="text-[9px] text-[#8A8070]">
-                            {new Date(earn.created_at).toLocaleDateString("th-TH", { year: "numeric", month: "short", day: "numeric" })}
-                          </p>
+                          <p className="text-[#F8F6F1] font-bold">ถอน ฿{w.amount.toLocaleString()}</p>
+                          <p className="text-[9px] text-[#8A8070]">{new Date(w.created_at).toLocaleDateString("th-TH")}</p>
                         </div>
-                        <div className="text-right space-y-1">
-                          <p className="font-bold text-[#C6A96B] font-display">฿{Number(earn.amount).toFixed(2)}</p>
-                          <span className={`inline-block px-2 py-0.5 rounded-full text-[8px] font-bold ${
-                            earn.status === "paid" 
-                              ? "bg-green-500/15 border border-green-500/30 text-green-400" 
-                              : "bg-yellow-500/15 border border-yellow-500/30 text-yellow-400"
-                          }`}>
-                            {earn.status === "paid" ? "จ่ายเงินแล้ว" : "รอดำเนินการ"}
-                          </span>
-                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${
+                          w.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                          w.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                          'bg-yellow-500/20 text-yellow-400'
+                        }`}>
+                          {w.status === 'completed' ? 'สำเร็จ' : w.status === 'rejected' ? 'ปฏิเสธ' : 'รอดำเนินการ'}
+                        </span>
                       </div>
                     ))
                   ) : (
-                    <div className="py-8 text-center text-[#8A8070] text-xs italic">
-                      ยังไม่มีรายการทำเงินโอนในขณะนี้
-                    </div>
+                    <p className="text-center py-6 text-[#8A8070] italic">ไม่มีคำขอถอนเงิน</p>
                   )}
                 </div>
               </Card>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdrawal Modal */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#020617]/90 backdrop-blur-md">
+          <div className="relative w-full max-w-md bg-[#0a2240] rounded-[2.5rem] border border-white/10 p-8 shadow-2xl">
+            <h3 className="font-display text-2xl font-bold text-[#F8F6F1] mb-6 text-center">ถอนรายได้สะสม</h3>
+            
+            <Form method="post" className="space-y-5" onSubmit={() => setShowWithdrawModal(false)}>
+              <input type="hidden" name="formType" value="withdrawal_request" />
+              
+              <Input 
+                name="amount" 
+                type="number" 
+                label="จำนวนเงินที่ต้องการถอน (฿)" 
+                min={100} 
+                max={wallet.balance} 
+                defaultValue={wallet.balance}
+                required 
+              />
+
+              <div className="space-y-1.5">
+                <label className="text-[#8A8070] text-[10px] uppercase tracking-widest block font-bold">ธนาคาร</label>
+                <select name="bankName" className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1]" required>
+                  <option value="กสิกรไทย">ธนาคารกสิกรไทย (KBANK)</option>
+                  <option value="ไทยพาณิชย์">ธนาคารไทยพาณิชย์ (SCB)</option>
+                  <option value="กรุงเทพ">ธนาคารกรุงเทพ (BBL)</option>
+                  <option value="กรุงไทย">ธนาคารกรุงไทย (KTB)</option>
+                  <option value="กรุงศรีอยุธยา">ธนาคารกรุงศรีอยุธยา (BAY)</option>
+                  <option value="ออมสิน">ธนาคารออมสิน (GSB)</option>
+                </select>
+              </div>
+
+              <Input name="accountNumber" label="เลขที่บัญชี" placeholder="000-0-00000-0" required />
+              <Input name="accountName" label="ชื่อบัญชี (ภาษาไทย/อังกฤษ)" placeholder="ระบุชื่อตามหน้าสมุดบัญชี" required />
+
+              <div className="pt-4 space-y-3">
+                <Button type="submit" className="w-full">ยืนยันการถอนเงิน</Button>
+                <button 
+                  type="button" 
+                  onClick={() => setShowWithdrawModal(false)}
+                  className="w-full py-2 text-[#94A3B8] text-xs hover:text-[#F8F6F1] transition-colors"
+                >
+                  ยกเลิก
+                </button>
+              </div>
+            </Form>
           </div>
         </div>
       )}

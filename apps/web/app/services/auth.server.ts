@@ -42,8 +42,11 @@ export async function requireOperator(request: Request, env: Env) {
 export async function requirePaidPlan(request: Request, env: Env) {
   const user = await requireAuth(request, env);
   const profile = await getProfile(user.id, request, env);
-  const isFree = !profile || profile.subscription === "free";
-  if (isFree) {
+  // isPaid = subscription เป็นค่าชำระเงินแล้ว (basic/pro/lifetime)
+  // null, undefined, "free" ทั้งหมดถือว่า free tier
+  const PAID_SUBS = ["basic", "pro", "lifetime"];
+  const isPaid = profile && PAID_SUBS.includes(profile.subscription ?? "");
+  if (!isPaid) {
     throw redirect("/pricing?upgrade=1");
   }
   return { user, profile };
@@ -80,6 +83,7 @@ export async function signUp(
     birthTime?: string;
     birthPlace?: string;
     gender?: string;
+    referred_by?: string;
   }
 ) {
   const { supabase, headers } = createSupabaseClient(request, env);
@@ -117,6 +121,7 @@ export async function signUp(
       birth_time: metadata?.birthTime || null,
       birth_place: metadata?.birthPlace || null,
       gender: metadata?.gender || null,
+      referred_by: metadata?.referred_by || null,
       role: isAdmin ? "admin" : "user",
       subscription: isAdmin ? "lifetime" : "free",
       plan: isAdmin ? "imperial" : "basic",
