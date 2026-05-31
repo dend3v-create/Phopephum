@@ -1,7 +1,7 @@
 import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { requireAuth, getProfile } from "~/services/auth.server";
+import { requirePaidPlan, getProfile } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import {
   horoscopeEngine,
@@ -52,8 +52,7 @@ export const meta: MetaFunction = () => [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const user = await requireAuth(request, env);
-  const profile = await getProfile(user.id, request, env);
+  const { user, profile } = await requirePaidPlan(request, env);
 
   const { createSupabaseClient } = await import("~/services/supabase.server");
   const { supabase } = createSupabaseClient(request, env);
@@ -181,8 +180,15 @@ export async function action({ request, context }: ActionFunctionArgs) {
 // Page Component
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
+
 export default function HoroscopePage() {
   const { profile, reports, history } = useLoaderData<typeof loader>();
+  const isLocked = profile?.plan === 'free' || profile?.plan === 'basic';
+
+  if (isLocked) {
+    return <UpgradePaywall featureName="ตรวจดวงชะตาเลข 7 ตัว 9 ฐาน" description="ปลดล็อกเพื่อเข้าถึงการวิเคราะห์ดวงชะตาฉบับเต็มด้วยระบบ 7 ตัว 9 ฐาน พร้อมคำพยากรณ์พื้นดวงและดวงจรแบบละเอียด" />;
+  }
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";

@@ -2,7 +2,7 @@ import { json } from "@remix-run/cloudflare";
 import { useLoaderData, useRevalidator } from "@remix-run/react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useEffect, useState } from "react";
-import { requireAuth } from "~/services/auth.server";
+import { requirePaidPlan } from "~/services/auth.server";
 import { 
   getCurrentYam, 
   calculateMoonPhase, 
@@ -123,7 +123,7 @@ function calculateDailyYamSlots(targetDate: Date): YamSlotDetail[] {
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  await requireAuth(request, env);
+  await requirePaidPlan(request, env);
 
   const yam = getCurrentYam();
   const moon = calculateMoonPhase();
@@ -403,9 +403,6 @@ export default function YamPage() {
   const profile = (data as any).profile;
   const isLocked = profile?.plan === 'free' || profile?.plan === 'basic';
 
-  if (isLocked) {
-    return <UpgradePaywall featureName="ฤกษ์งามยามดีเชิงลึก" description="ปลดล็อกเพื่อเข้าถึงการพยากรณ์ยามอัฏฐกาลล่วงหน้า และการวิเคราะห์ช่วงเวลาที่เป็นมงคลส่วนบุคคลแบบละเอียด" />;
-  }
   const { revalidate } = useRevalidator();
   const [now, setNow] = useState<Date>(new Date());
   
@@ -753,7 +750,7 @@ export default function YamPage() {
       </div>
 
       {/* Tab Selectors */}
-      <div className="flex flex-wrap bg-[#0A1628]/60 p-1 rounded-2xl border border-[#D9BC82]/10 gap-1 w-full">
+      <div className="flex flex-wrap bg-[#0A1628]/60 p-1 rounded-2xl border border-[#D9BC82]/10 gap-1 w-full relative">
         <button
           onClick={() => setActiveTab("live")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
@@ -765,46 +762,64 @@ export default function YamPage() {
           ⏱️ ยามสดขณะนี้
         </button>
         <button
-          onClick={() => setActiveTab("ashta")}
+          onClick={() => isLocked ? null : setActiveTab("ashta")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "ashta"
               ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.2)]"
+              : isLocked 
+              ? "text-[#94A3B8]/40 cursor-not-allowed" 
               : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
           }`}
+          title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
-          🔮 คำนวณยามดี
+          🔮 คำนวณยามดี {isLocked && '🔒'}
         </button>
         <button
-          onClick={() => setActiveTab("finder")}
+          onClick={() => isLocked ? null : setActiveTab("finder")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "finder"
               ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.2)]"
+              : isLocked 
+              ? "text-[#94A3B8]/40 cursor-not-allowed" 
               : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
           }`}
+          title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
-          ✨ คำนวณฤกษ์มีชัย
+          ✨ คำนวณฤกษ์มีชัย {isLocked && '🔒'}
         </button>
         <button
-          onClick={() => setActiveTab("grid")}
+          onClick={() => isLocked ? null : setActiveTab("grid")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "grid"
               ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.2)]"
+              : isLocked 
+              ? "text-[#94A3B8]/40 cursor-not-allowed" 
               : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
           }`}
+          title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
-          📅 ตารางยามอัฏฐกาล
+          📅 ตารางยามอัฏฐกาล {isLocked && '🔒'}
         </button>
         <button
-          onClick={() => setActiveTab("compare")}
+          onClick={() => isLocked ? null : setActiveTab("compare")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "compare"
               ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.2)]"
+              : isLocked 
+              ? "text-[#94A3B8]/40 cursor-not-allowed" 
               : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
           }`}
+          title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
-          ✈️ เปรียบเทียบฤกษ์เดินทาง
+          ✈️ เปรียบเทียบฤกษ์เดินทาง {isLocked && '🔒'}
         </button>
       </div>
+
+      {isLocked && activeTab !== "live" && (
+        <div className="animate-fade-in mt-6">
+          <UpgradePaywall featureName="เครื่องมือวิเคราะห์ฤกษ์ยามเชิงลึก" description="การคำนวณยามล่วงหน้า, การหาฤกษ์มีชัย, และการเปรียบเทียบฤกษ์ สงวนสิทธิ์สำหรับสมาชิกระดับ PRO ขึ้นไป" />
+        </div>
+      )}
 
       {/* ⏱️ LIVE WATCH VIEW */}
       {activeTab === "live" && (

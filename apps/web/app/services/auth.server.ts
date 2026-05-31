@@ -35,6 +35,20 @@ export async function requireOperator(request: Request, env: Env) {
   return { user, profile };
 }
 
+/**
+ * ตรวจสอบว่าผู้ใช้เป็นสมาชิกที่ชำระเงินแล้ว
+ * Free tier (subscription="free") → redirect ไป /pricing?upgrade=1
+ */
+export async function requirePaidPlan(request: Request, env: Env) {
+  const user = await requireAuth(request, env);
+  const profile = await getProfile(user.id, request, env);
+  const isFree = !profile || profile.subscription === "free";
+  if (isFree) {
+    throw redirect("/pricing?upgrade=1");
+  }
+  return { user, profile };
+}
+
 export async function redirectIfAuthed(request: Request, env: Env) {
   const user = await getUser(request, env);
   if (user) throw redirect("/dashboard");

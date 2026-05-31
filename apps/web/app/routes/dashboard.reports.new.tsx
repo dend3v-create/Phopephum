@@ -2,7 +2,7 @@ import { json, redirect } from "@remix-run/cloudflare";
 import { Form, useLoaderData, useNavigation, useActionData, useSearchParams } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { requireAuth, getProfile } from "~/services/auth.server";
+import { requirePaidPlan } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { generateAIReport } from "~/services/ai.server";
 import { Card } from "~/components/ui/Card";
@@ -73,8 +73,7 @@ const REPORT_TYPES = [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const user = await requireAuth(request, env);
-  const profile = await getProfile(user.id, request, env);
+  const { profile } = await requirePaidPlan(request, env);
   return json({ profile });
 }
 

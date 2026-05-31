@@ -2,7 +2,7 @@ import { json, redirect } from "@remix-run/cloudflare";
 import { Form, useLoaderData, useNavigation, useActionData, useSubmit } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useState, useRef, useEffect } from "react";
-import { requireAuth } from "~/services/auth.server";
+import { requirePaidPlan } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { calculateMoonPhase, getCurrentYam, calculateAtthakarn } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
@@ -86,7 +86,7 @@ const DAY_NAMES = ["อาทิตย์", "จันทร์", "อังค�
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const user = await requireAuth(request, env);
+  const { user } = await requirePaidPlan(request, env);
   const todayDate = TODAY();
 
   const { supabase } = createSupabaseClient(request, env);
@@ -156,8 +156,15 @@ export async function action({ request, context }: ActionFunctionArgs) {
   return redirect("/dashboard/planner?saved=1");
 }
 
+import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
+
 export default function PlannerPage() {
-  const { plan, moon, dayName, slots } = useLoaderData<typeof loader>();
+  const { profile, plan, moon, dayName, slots } = useLoaderData<typeof loader>();
+  const isLocked = profile?.plan === 'free' || profile?.plan === 'basic';
+
+  if (isLocked) {
+    return <UpgradePaywall featureName="ระบบวางแผนชีวิต TQM" description="ปลดล็อกเพื่อเข้าถึงระบบบันทึกและวางแผนชีวิตตามหลักมงคลกาลวัตถุ เพื่อจัดการเป้าหมายรายวันอย่างมีประสิทธิภาพ" />;
+  }
   const navigation = useNavigation();
   const submit = useSubmit();
   const isSaving = navigation.state === "submitting";
