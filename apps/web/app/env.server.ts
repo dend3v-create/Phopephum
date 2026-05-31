@@ -20,6 +20,7 @@ export interface Env {
   LINE_CHANNEL_ACCESS_TOKEN: string;  // Channel Access Token (Long-lived)
   LINE_ADMIN_USER_ID: string;         // Admin's LINE User ID (U...)
   APP_URL: string;                    // e.g. https://phopephum-web.pages.dev
+  HEALTH_CHECK_SECRET?: string;       // Optional secret for /api/health external monitors
 
   // Cloudflare Bindings
   KV_CACHE: KVNamespace;

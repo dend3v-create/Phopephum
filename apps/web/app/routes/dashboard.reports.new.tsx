@@ -2,9 +2,10 @@ import { json, redirect } from "@remix-run/cloudflare";
 import { Form, useLoaderData, useNavigation, useActionData, useSearchParams } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { requirePaidPlan } from "~/services/auth.server";
+import { requirePaidPlan, requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { generateAIReport } from "~/services/ai.server";
+import { alertAIFailed, alertDatabaseError } from "~/services/alert.server";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import { Input } from "~/components/ui/Input";
@@ -195,6 +196,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     if (insertError || !report) {
       console.error("Report save error:", insertError);
+      alertDatabaseError(env, "insert ai_reports", insertError, user.id).catch(console.error);
       return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` });
     }
 
@@ -212,6 +214,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
     console.error("Report generation critical error:", msg);
+    alertAIFailed(env, err, { userId: user.id, reportType }).catch(console.error);
     return json({ error: `ขออภัย ระบบเกิดข้อผิดพลาด: ${msg}` });
   }
 }

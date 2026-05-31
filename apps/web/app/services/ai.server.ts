@@ -4,6 +4,7 @@ import { buildLifeReportPrompt } from "@phopephum/prompts";
 import { buildHoraContext } from "~/lib/claude";
 import type { AtthakarnBirthYamContext } from "@phopephum/prompts";
 import type { AIReportType } from "@phopephum/types";
+import { sendAdminAlert } from "~/services/alert.server";
 
 // All AI calls go through Cloudflare Worker Proxy — NEVER call AI APIs directly from here
 export async function generateAIReport(
@@ -57,10 +58,24 @@ export async function generateAIReport(
 
   if (!response.ok) {
     const errText = await response.text().catch(() => "No text");
+    sendAdminAlert(env, {
+      type: "ai_worker_unreachable",
+      severity: "critical",
+      message: `AI Worker ตอบกลับ ${response.status}: ${errText.substring(0, 100)}`,
+      userId: payload.userId,
+      reportType: payload.reportType,
+    }).catch(console.error);
     throw new Error(`Oracle Service error: ${response.status} - ${errText}`);
   }
 
   if (!response.body) {
+    sendAdminAlert(env, {
+      type: "ai_worker_unreachable",
+      severity: "critical",
+      message: "AI Worker ไม่ส่ง response body กลับมา",
+      userId: payload.userId,
+      reportType: payload.reportType,
+    }).catch(console.error);
     throw new Error("ระบบพยากรณ์ไม่ตอบสนอง");
   }
 
