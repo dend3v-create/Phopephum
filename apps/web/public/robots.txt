@@ -1,0 +1,38 @@
+# ============================================================
+# robots.txt for PhopePhum (Living Wisdom OS)
+# Optimized for Search Engines (SEO) & AI Answer Engines (AEO/GEO)
+# ============================================================
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /operator/
+
+# Allow major AI search and answer bots to index for citation in answers
+User-agent: GPTBot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /operator/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /operator/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /operator/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /operator/
+
+# Link to sitemap
+Sitemap: https://phopephum.com/sitemap.xml

@@ -1465,9 +1465,23 @@ export const YAM_PREDICTIONS: YamPrediction[] = [
 // ============================================================
 
 /**
- * หาวันในสัปดาห์จาก Date object
+ * หาวันในสัปดาห์จาก Date object (ทางโหราศาสตร์)
+ * กฎ: เปลี่ยนวันเวลา 06:01 น.
+ * ถ้าเป็นเวลา 00:00 - 06:00 จะถือว่าเป็น "วันก่อนหน้า"
  */
 export function getDayOfWeek(date: Date): DayOfWeek {
+  const hour = date.getHours()
+  const minute = date.getMinutes()
+  const totalMinutes = hour * 60 + minute
+
+  // ถ้าเวลาก่อน 06:01 น. (361 นาที)
+  if (totalMinutes < 361) {
+    // ถอยหลังไป 1 วัน
+    const yesterday = new Date(date.getTime() - 24 * 60 * 60 * 1000)
+    const days: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+    return days[yesterday.getDay()]
+  }
+
   const days: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
   return days[date.getDay()]
 }
@@ -1475,7 +1489,7 @@ export function getDayOfWeek(date: Date): DayOfWeek {
 /**
  * หาว่าเวลานั้นเป็นกลางวันหรือกลางคืน
  * กลางวัน: 06:01 - 18:00
- * กลางคืน: 18:01 - 06:00 (วันถัดไป)
+ * กลางคืน: 18:01 - 06:00 (ของเช้าวันถัดไป)
  */
 export function getDayPeriod(date: Date): DayPeriod {
   const hour = date.getHours()
@@ -1486,6 +1500,7 @@ export function getDayPeriod(date: Date): DayPeriod {
   if (totalMinutes >= 361 && totalMinutes <= 1080) {
     return 'day'
   }
+  // นอกช่วงเวลาดังกล่าว (18:01 เป็นต้นไปจนถึง 06:00 ของวันถัดไป) เป็นกลางคืน
   return 'night'
 }
 
@@ -1504,22 +1519,20 @@ export function getYamNumberFromTime(date: Date, period: DayPeriod): { yamNumber
     let startTotal = t.startHour * 60 + t.startMinute
     let endTotal = t.endHour * 60 + t.endMinute
 
-    // handle midnight crossover for night yam 4 (22:31-24:00) and yam 5-8
+    // handle midnight crossover for night yam 4 (22:31-24:00) and yam 5-8 (00:01-06:00)
     if (period === 'night') {
       if (yam === 4) {
-        if (totalMinutes >= 22 * 60 + 31 || totalMinutes <= 24 * 60) {
-          const yamStartFromMidnight = 22 * 60 + 31
-          const pos = (totalMinutes >= yamStartFromMidnight ? totalMinutes - yamStartFromMidnight : totalMinutes + 24*60 - yamStartFromMidnight)
+        // ยาม 4: 22:31 - 24:00
+        if (totalMinutes >= 22 * 60 + 31 || totalMinutes === 0) {
+          const yamStart = 22 * 60 + 31
+          const pos = (totalMinutes >= yamStart ? totalMinutes - yamStart : totalMinutes + 24*60 - yamStart)
           return { yamNumber: yam as YamNumber, subYam: getSubYam(pos, 90) }
         }
       } else if (yam >= 5) {
-        // yam 5: 00:01-01:30 (1-90min from midnight)
-        if (hour >= 0 && hour < 6) {
-          const pos = totalMinutes
-          const yamStart = [0, 0, 91, 181, 271, 1, 91, 181, 271][yam]
-          if (pos >= yamStart && pos < yamStart + 90) {
-            return { yamNumber: yam as YamNumber, subYam: getSubYam(pos - yamStart, 90) }
-          }
+        // ยาม 5-8: หลังเที่ยงคืนถึงเช้า
+        if (totalMinutes >= startTotal && totalMinutes <= (endTotal === 0 ? 360 : endTotal)) {
+          const pos = totalMinutes - startTotal
+          return { yamNumber: yam as YamNumber, subYam: getSubYam(pos, 90) }
         }
       }
     }

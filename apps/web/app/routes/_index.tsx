@@ -2,9 +2,28 @@ import type { MetaFunction } from "@remix-run/cloudflare";
 import { Link } from "@remix-run/react";
 
 export const meta: MetaFunction = () => [
-  { title: "ภพภูมิ — PhopePhum | ศาสตร์ยามอัฏฐกาลชั้นสูง" },
-  { name: "description", content: "ภพภูมิ (PhopePhum) - คำนวณยามมงคลและชะตาจรระดับนาทีด้วยสูตรโบราณดั้งเดิม พร้อมบทวิเคราะห์ดวงชะตาเชิงลึก" },
+  { title: "ภพภูมิ — PhopePhum | ระบบปฏิบัติการนำทางชีวิตด้วยยามมงคลอัฏฐกาลและเลข 7 ตัว 9 ฐาน" },
+  { name: "description", content: "ภพภูมิ (PhopePhum) ระบบปฏิบัติการจัดการชีวิตและคำนวณยามมงคลระดับนาทีด้วยศาสตร์ยามอัฏฐกาลโบราณ, เลข 7 ตัว 9 ฐาน และผังดวงจักรพรรดิ ตรวจสอบฤกษ์มงคล ค้นทรัพย์ และเจรจาได้แบบเรียลไทม์" },
+  
+  // Open Graph / Facebook
+  { property: "og:type", content: "website" },
+  { property: "og:url", content: "https://phopephum.com" },
+  { property: "og:title", content: "ภพภูมิ — PhopePhum | ระบบนำทางชีวิตด้วยยามมงคลอัฏฐกาลและเลข 7 ตัว 9 ฐาน" },
+  { property: "og:description", content: "คำนวณฤกษ์มงคล ยามราหูค้นทรัพย์ และชะตาชีวิตระดับนาทีด้วยสูตรโบราณดั้งเดิม พร้อมบทวิเคราะห์ชะตาชีวิตเชิงลึก" },
+  { property: "og:image", content: "https://phopephum.com/favicon.svg" },
+
+  // Twitter
+  { name: "twitter:card", content: "summary_large_image" },
+  { name: "twitter:url", content: "https://phopephum.com" },
+  { name: "twitter:title", content: "ภพภูมิ — PhopePhum | ระบบนำทางชีวิตด้วยยามมงคลอัฏฐกาล" },
+  { name: "twitter:description", content: "คำนวณฤกษ์มงคล ยามราหูค้นทรัพย์ และชะตาชีวิตระดับนาทีด้วยสูตรโบราณดั้งเดิม" },
+  { name: "twitter:image", content: "https://phopephum.com/favicon.svg" },
+
+  // AEO / GEO / SEO Directives
+  { name: "keywords", content: "ภพภูมิ, PhopePhum, ยามอัฏฐกาล, ยามราหูค้นทรัพย์, เลข 7 ตัว 9 ฐาน, ผังดวงจักรพรรดิ, ดูดวง, ฤกษ์มงคล, ตรวจดวงชะตา, พยากรณ์ชีวิต, ตารางยามรายวัน, ศาสตร์โบราณ" },
+  { name: "author", content: "ครูเด่น มาสเตอร์ฟา" },
 ];
+
 
 const STARS = [
   { x: 8,  y: 12, s: 1.5, delay: 0,   blue: false },
@@ -71,6 +90,84 @@ const TESTIMONIALS = [
   { name: "คุณมาลี", role: "แม่บ้านนักลงทุน", text: "บทวิเคราะห์ดวงได้ละเอียดมาก อ่านแล้วรู้สึกว่าเข้าใจตัวเองมากขึ้น ข้อมูลครบและหรูหรา" },
   { name: "คุณวิชัย", role: "โหรสมัครเล่น", text: "เลข 7 ตัวแม่นยำตามตำราที่เคยศึกษามา ระบบปฏิทินจันทรคติครบถ้วนมาก ใช้อ้างอิงได้เลย" },
 ];
+
+const SCHEMA_MARKUP = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "https://phopephum.com/#person",
+      "name": "ครูเด่น มาสเตอร์ฟา",
+      "alternateName": "Kru Den Master Fa",
+      "jobTitle": "Senior Digital SaaS Architect & Astro-Sage",
+      "description": "ผู้เชี่ยวชาญด้านสถาปัตยกรรมเทคโนโลยีดิจิทัลและโหราศาสตร์โบราณ ผู้พัฒนาศาสตร์ระบบปฏิบัติการนำทางชีวิต ภพภูมิ (PhopePhum)",
+      "url": "https://phopephum.com",
+      "knowsAbout": [
+        "โหราศาสตร์ไทยโบราณ",
+        "ยามอัฏฐกาล",
+        "เลข 7 ตัว 9 ฐาน",
+        "ผังดวงจักรพรรดิ",
+        "Digital Architecture",
+        "SaaS Architecture"
+      ]
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://phopephum.com/#organization",
+      "name": "ภพภูมิ - PhopePhum",
+      "url": "https://phopephum.com",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://phopephum.com/favicon.svg",
+        "width": "100",
+        "height": "100"
+      },
+      "founder": {
+        "@id": "https://phopephum.com/#person"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://phopephum.com/#website",
+      "url": "https://phopephum.com",
+      "name": "ภพภูมิ - PhopePhum",
+      "publisher": {
+        "@id": "https://phopephum.com/#organization"
+      },
+      "description": "ระบบปฏิบัติการจัดการชีวิตด้วยยามมงคลอัฏฐกาลและเลข 7 ตัว 9 ฐาน"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://phopephum.com/#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "ภพภูมิ (PhopePhum) คืออะไร?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ภพภูมิ คือระบบปฏิบัติการนำทางและจัดการชีวิตอัจฉริยะ (Living Wisdom OS) ที่ผสานการคำนวณยามมงคลโบราณระดับนาทีด้วยยามอัฏฐกาล, ยามราหูค้นทรัพย์, เลข 7 ตัว 9 ฐาน, และผังดวงจักรพรรดิ"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "ยามอัฏฐกาลโบราณคำนวณอย่างไร?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ยามอัฏฐกาลคำนวณตามตำราดั้งเดิม โดยการแบ่งเวลาช่วงกลางวันและกลางคืนออกเป็น 8 ช่วงย่อย (รวม 16 ยามย่อย) อ้างอิงจากตำแหน่งดวงดาวจริงและกฎจันทรคติไทยแท้เพื่อค้นหาฤกษ์มงคลระดับนาที"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "การตรวจดวงชะตาด้วยระบบ PhopePhum ปลอดภัยหรือไม่?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "ระบบวิเคราะห์ชีวิตของภพภูมิ มีความปลอดภัยสูงสุด ใช้ข้อมูลดวงเกิดของท่านเพื่อการผูกดวงเฉพาะบุคคลโดยไม่เปิดเผยหรือเก็บข้อมูลส่วนตัวของท่านในรูปแบบสาธารณะ พัฒนาและควบคุมระบบโดยครูเด่น มาสเตอร์ฟา"
+          }
+        }
+      ]
+    }
+  ]
+};
 
 export default function Index() {
   return (
@@ -300,6 +397,12 @@ export default function Index() {
           <p className="text-[#94A3B8]/40 text-[10px]">© 2025 PhopePhum · ศาสตร์ไทยแท้ดั้งเดิม</p>
         </div>
       </footer>
+
+      {/* ── Schema JSON-LD (SEO/AEO/GEO) ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA_MARKUP) }}
+      />
 
     </div>
   );

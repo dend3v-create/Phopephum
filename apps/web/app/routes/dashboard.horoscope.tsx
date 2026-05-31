@@ -31,7 +31,23 @@ import type { YamResult } from "@phopephum/engine";
 import { useState, useEffect, useCallback } from "react";
 
 export const meta: MetaFunction = () => [
-  { title: "คำนวณดวงชะตา — PhopePhum" },
+  { title: "เลข 7 ตัว 9 ฐาน และผังดวงจักรพรรดิ — PhopePhum" },
+  { name: "description", content: "คำนวณผูกดวงชะตาเชิงลึกด้วยคัมภีร์ เลข 7 ตัว 9 ฐาน และ ผังดวงจักรพรรดิ ตรวจสอบวัยจร ปีจร ทักษากำเนิดและมหาภูติตามหลักเกณฑ์จันทรคติไทยแท้" },
+  
+  // Open Graph / Facebook
+  { property: "og:type", content: "website" },
+  { property: "og:url", content: "https://phopephum.com/dashboard/horoscope" },
+  { property: "og:title", content: "เลข 7 ตัว 9 ฐาน และผังดวงจักรพรรดิ — PhopePhum" },
+  { property: "og:description", content: "ถอดรหัสชะตาจรระดับจักรพรรดิ ตรวจทักษา มหาภูติ และคัมภีร์ดวงชะตาชีวิต ด้วยระบบภูมิปัญญาพยากรณ์อัจฉริยะ" },
+  { property: "og:image", content: "https://phopephum.com/favicon.svg" },
+
+  // Twitter
+  { name: "twitter:card", content: "summary_large_image" },
+  { name: "twitter:title", content: "เลข 7 ตัว 9 ฐาน และผังดวงจักรพรรดิ — PhopePhum" },
+  { name: "twitter:description", content: "วิเคราะห์ผูกดวงชะตาด้วยเลข 7 ตัว 9 ฐาน และระบบทักษาจรจันทรคติไทย" },
+
+  // Keywords
+  { name: "keywords", content: "เลข 7 ตัว 9 ฐาน, ผังดวงจักรพรรดิ, ตรวจดวงชะตา, ดูดวงเลข 7 ตัว, ทักษากำเนิด, มหาภูติจร, พยากรณ์ชีวิต, ภพภูมิ, PhopePhum" }
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -41,6 +57,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const { createSupabaseClient } = await import("~/services/supabase.server");
   const { supabase } = createSupabaseClient(request, env);
+  
+  // 1. ดึงรายงานล่าสุด
   const { data: reports } = await supabase
     .from("ai_reports")
     .select("id, report_type, created_at, content")
@@ -48,99 +66,115 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .order("created_at", { ascending: false })
     .limit(5);
 
-  return json({ profile, reports: reports ?? [] });
+  // 2. ดึงประวัติการคำนวณล่าสุด (History)
+  const { data: history } = await supabase
+    .from("calculations")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(3);
+
+  return json({ profile, reports: reports ?? [], history: history ?? [] });
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
-
-  const formData = await request.formData();
-
-  // ── แปลงวันที่เกิด พ.ศ. ➔ ค.ศ. ──
-  const bDay = Number(formData.get("birthDay") ?? "0");
-  const bMonth = Number(formData.get("birthMonth") ?? "0");
-  const bYear = Number(formData.get("birthYear") ?? "0");
-  const bYearCE = bYear - 543;
-  const birthDateStr = bDay && bMonth && bYear 
-    ? `${bYearCE}-${String(bMonth).padStart(2, "0")}-${String(bDay).padStart(2, "0")}` 
-    : "";
-
-  const raw = {
-    birthDate: birthDateStr,
-    birthTime: String(formData.get("birthTime") ?? "") || undefined,
-    birthPlace: String(formData.get("birthPlace") ?? "") || undefined,
-  };
-
-  const parsed = HoroscopeInputSchema.safeParse(raw);
-  if (!parsed.success) {
-    return json({ error: `ข้อมูลไม่ถูกต้อง: ${JSON.stringify(parsed.error.flatten().fieldErrors)}`, result: null }, { status: 400 });
-  }
-
-  const baseResult = await horoscopeEngine(parsed.data);
-  const dayNum = baseResult.sevenNumbers.base[0];
-  const monthNum = baseResult.sevenNumbers.base[1];
-  const yearNum = baseResult.sevenNumbers.base[2];
-  const matrix = calculateSevenNumbersNineBases(dayNum, monthNum, yearNum);
-  const age = baseResult.transitPhase.currentAge;
-  const taksaResult = calculateWisdomTaksa(dayNum, age);
-
-  // ── แปลงวันที่จร พ.ศ. ➔ ค.ศ. ──
-  const tDay = Number(formData.get("transitDay") ?? "0");
-  const tMonth = Number(formData.get("transitMonth") ?? "0");
-  const tYear = Number(formData.get("transitYear") ?? "0");
-  const tYearCE = tYear - 543;
-  const transitDate = tDay && tMonth && tYear 
-    ? `${tYearCE}-${String(tMonth).padStart(2, "0")}-${String(tDay).padStart(2, "0")}` 
-    : new Date().toISOString().split("T")[0];
-
-  const transitTime = String(formData.get("transitTime") ?? "") || "00:00";
-  const transitPlace = String(formData.get("transitPlace") ?? "") || undefined;
-
-  const [ty, tm, td] = transitDate.split("-").map(Number);
-  const [th, tmin] = transitTime.split(":").map(Number);
-  const checkDate = new Date(ty, tm - 1, td, th, tmin, 0);
-
-  // ── ระบบทักษา + มหาภูติ ใหม่ v3 (9-slot algorithm) ──
-  const birthDateObj = new Date(parsed.data.birthDate);
-  const birthYearThai = birthDateObj.getFullYear() + 543;
-  const currentYearThai = checkDate.getFullYear() + 543;
-  const csNatal = buddhToCS(birthYearThai);
-  const csTransit = buddhToCS(currentYearThai);
-
-  const taksaMaha = calcTaksaMaha({
-    birthDate: birthDateObj,
-    checkDate,
-    csNatal,
-    csTransit,
-  });
-
-  await logEvent(request, env, EVENTS.CALC_HORA, {
-    birthYear: parsed.data.birthDate.split("-")[0],
-    province: parsed.data.birthPlace,
-  });
-
   const { createSupabaseClient } = await import("~/services/supabase.server");
   const { supabase } = createSupabaseClient(request, env);
-  await supabase.from("profiles").update({
-    birth_date: parsed.data.birthDate,
-    birth_time: parsed.data.birthTime,
-    birth_place: parsed.data.birthPlace,
-  }).eq("id", user.id);
 
-  return json({
-    result: baseResult,
-    matrix,
-    taksaResult,
-    taksaMaha,
-    birthDate: parsed.data.birthDate,
-    birthYearThai,
-    currentYearThai,
-    transitDate,
-    transitTime,
-    transitPlace,
-    error: null,
-  });
+  try {
+    const formData = await request.formData();
+
+    // ── แปลงวันที่เกิด พ.ศ. ➔ ค.ศ. ──
+    const bDay = Number(formData.get("birthDay") ?? "0");
+    const bMonth = Number(formData.get("birthMonth") ?? "0");
+    const bYear = Number(formData.get("birthYear") ?? "0");
+    const bYearCE = bYear - 543;
+    const birthDateStr = bDay && bMonth && bYear 
+      ? `${bYearCE}-${String(bMonth).padStart(2, "0")}-${String(bDay).padStart(2, "0")}` 
+      : "";
+
+    const raw = {
+      birthDate: birthDateStr,
+      birthTime: String(formData.get("birthTime") ?? "") || undefined,
+      birthPlace: String(formData.get("birthPlace") ?? "") || undefined,
+    };
+
+    const parsed = HoroscopeInputSchema.safeParse(raw);
+    if (!parsed.success) {
+      return json({ error: `ข้อมูลไม่ถูกต้อง: ${JSON.stringify(parsed.error.flatten().fieldErrors)}`, result: null }, { status: 400 });
+    }
+
+    // ── 1. Calculate Integrated Phopephum Result (v2.0 Systematic) ──
+    const tDay = Number(formData.get("transitDay") ?? "0");
+    const tMonth = Number(formData.get("transitMonth") ?? "0");
+    const tYear = Number(formData.get("transitYear") ?? "0");
+    const tYearCE = tYear - 543;
+    const transitDate = tDay && tMonth && tYear 
+      ? `${tYearCE}-${String(tMonth).padStart(2, "0")}-${String(tDay).padStart(2, "0")}` 
+      : new Date().toISOString().split("T")[0];
+
+    const transitTime = String(formData.get("transitTime") ?? "") || "00:00";
+    const [ty, tm, td] = transitDate.split("-").map(Number);
+    const [th, tmin] = transitTime.split(":").map(Number);
+    const checkDate = new Date(ty, tm - 1, td, th, tmin, 0);
+
+    const phopephumResult = await calculatePhopephum(parsed.data, checkDate);
+
+    // ── 2. Legacy Support (Maintain UI compatibility) ──
+    const baseResult = await horoscopeEngine(parsed.data);
+    const matrix = phopephumResult.nineBase.bases;
+    const taksaResult = calculateWisdomTaksa(phopephumResult.nineBase.bases[0][0], phopephumResult.taksaTransit.ageYang);
+
+    // ── 3. Save to History (New calculations table) ──
+    await supabase.from("calculations").insert({
+      user_id: user.id,
+      calc_type: "phopephum_v2",
+      input_data: { 
+        birthDate: parsed.data.birthDate, 
+        birthTime: parsed.data.birthTime,
+        checkDate: checkDate.toISOString() 
+      },
+      result_data: phopephumResult,
+    });
+
+    await logEvent(request, env, EVENTS.CALC_HORA, {
+      birthYear: parsed.data.birthDate.split("-")[0],
+      province: parsed.data.birthPlace,
+    });
+
+    await supabase.from("profiles").update({
+      birth_date: parsed.data.birthDate,
+      birth_time: parsed.data.birthTime,
+      birth_place: parsed.data.birthPlace,
+    }).eq("id", user.id);
+
+    return json({
+      result: baseResult,
+      phopephumResult,
+      matrix,
+      taksaResult,
+      taksaMaha: {
+        taksaNatal: phopephumResult.taksaNatal,
+        taksaTransit: phopephumResult.taksaTransit,
+        mahaNatal: phopephumResult.mahaNatal,
+        mahaTransit: phopephumResult.mahaTransit,
+        elementPairFlags: phopephumResult.crossCheck.elementPairFlags,
+        alerts: phopephumResult.crossCheck.alerts,
+      },
+      birthDate: parsed.data.birthDate,
+      birthYearThai: new Date(parsed.data.birthDate).getFullYear() + 543,
+      currentYearThai: checkDate.getFullYear() + 543,
+      transitDate,
+      transitTime,
+      transitPlace: String(formData.get("transitPlace") ?? ""),
+      error: null,
+    });
+  } catch (err) {
+    console.error("Horoscope Action Error:", err);
+    return json({ error: "เกิดข้อผิดพลาดในการคำนวณชะตาชีวิต กรุณาตรวจสอบข้อมูลวันเดือนปีเกิดอีกครั้ง", result: null }, { status: 500 });
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -148,7 +182,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function HoroscopePage() {
-  const { profile, reports } = useLoaderData<typeof loader>();
+  const { profile, reports, history } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
@@ -169,15 +203,39 @@ export default function HoroscopePage() {
   const defaultTYear = transitDateObj.getFullYear() + 543;
 
   return (
-    <div className="space-y-8 max-w-5xl pb-20">
+    <div className="space-y-8 max-w-5xl pb-20 animate-fade-up">
       <header>
         <h1 className="font-display text-3xl font-bold text-[#F3EFE8] mb-1">
-          ตรวจดวงชะตา <span className="text-[#C9A96E] text-sm font-normal ml-2">Wisdom Standard</span>
+          ถอดรหัสชะตาชีวิต <span className="text-[#C9A96E] text-sm font-normal ml-2 tracking-widest">LIVING WISDOM</span>
         </h1>
         <p className="text-[#8A8070] text-sm italic">
-          เลข 7 ตัว 9 ฐาน · ทักษากำเนิด/จร · มหาภูติ · ปฏิทินจันทรคติ 100 ปี
+          เจาะลึก 7 ตัว 9 ฐาน · ทักษากำเนิด/จร · มหาภูติ · ปฏิทินจันทรคติไทย
         </p>
       </header>
+
+      {/* ── ประวัติการวิเคราะห์ล่าสุด (Sticky History) ── */}
+      {!ad?.phopephumResult && history && history.length > 0 && (
+        <div className="animate-in fade-in slide-in-from-top-4 duration-500">
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.2em] uppercase font-bold mb-3 flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B]" />
+            ดวงชะตาที่วิเคราะห์ล่าสุด
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {history.map((h: any) => (
+              <Card key={h.id} className="border-[#C6A96B]/10 p-4 bg-slate-950/20 hover:border-[#C6A96B]/30 transition-all flex flex-col gap-1.5">
+                <p className="text-[11px] font-bold text-[#F8F6F1]">
+                  {h.result_data.nineBase.lunarDate.thaiDateText}
+                </p>
+                <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-white/5">
+                   <span className="text-[9px] text-[#94A3B8]">
+                     {new Date(h.created_at).toLocaleDateString("th-TH")}
+                   </span>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Form ── */}
       <Card className="border-[#C9A96E]/20 bg-slate-900/40 backdrop-blur-md">
@@ -313,13 +371,13 @@ export default function HoroscopePage() {
       <div className="space-y-6 pt-8 border-t border-[#C9A96E]/20 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div>
           <span className="text-[#C9A96E] text-[10px] tracking-[0.25em] uppercase font-bold block mb-1">
-            ✦ ปัญญาประดิษฐ์พยากรณ์
+            ✦ ระบบภูมิปัญญาพยากรณ์
           </span>
           <h2 className="font-display text-2xl font-bold text-[#F8F6F1] glow-gold">
-            บทวิเคราะห์ชีวิตเชิงลึก (AI Destiny Reports)
+            บทวิเคราะห์ชีวิตเชิงลึก
           </h2>
           <p className="text-[#8A8070] text-sm italic">
-            เลือกหมวดหมู่ที่ต้องการให้ AI ปฏิวัติวิเคราะห์ชะตาชีวิตของท่าน จากระบบทักษา มหาภูติ และคัมภีร์เลข 7 ตัว
+            เลือกหมวดหมู่ที่ต้องการให้ระบบถอดรหัสชะตาชีวิตของท่าน จากระบบทักษา มหาภูติ และคัมภีร์เลข 7 ตัว
           </p>
         </div>
 
@@ -391,7 +449,7 @@ export default function HoroscopePage() {
           {reports.length === 0 ? (
             <Card className="text-center py-8 border-dashed border-white/5 bg-transparent">
               <p className="text-xs text-[#8A8070]">
-                ยังไม่พบรายงานที่ท่านเคยสร้างไว้ เลือกหมวดหมู่การ์ดด้านบนเพื่อเริ่มต้นตรวจดวงชะตาเชิงลึกด้วย AI ชิ้นแรก!
+                ยังไม่พบรายงานที่ท่านเคยสร้างไว้ เลือกหมวดหมู่การ์ดด้านบนเพื่อเริ่มต้นตรวจดวงชะตาเชิงลึกชิ้นแรก!
               </p>
             </Card>
           ) : (

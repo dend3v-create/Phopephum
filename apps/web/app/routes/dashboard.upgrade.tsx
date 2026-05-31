@@ -1,31 +1,38 @@
 /**
  * dashboard.upgrade.tsx
- * หน้ายื่นคำขออัปเกรดแพ็กเกจ (ช่วง manual approval)
+ * หน้ายื่นคำขออัปเกรดแพ็กเกจ (รองรับ GBPrimePay PromptPay)
  */
+import { useState, useEffect } from "react";
 import { json, redirect } from "@remix-run/cloudflare";
-import { Form, Link, useActionData, useLoaderData, useNavigation } from "@remix-run/react";
+import { Form, Link, useActionData, useLoaderData, useNavigation, useFetcher, useNavigate } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
-import { notifyPackageRequest } from "~/services/line.server";
 import type { Env } from "~/env.server";
 
 export const meta: MetaFunction = () => [{ title: "อัปเกรดแพ็กเกจ — PhopePhum" }];
 
 const PLANS = [
   {
+    id: "basic",
+    name: "BASIC SAGE",
+    price: "฿9 / เดือน",
+    color: "#94A3B8",
+    features: ["ยามอัฏฐกาล & ราหู (วันนี้)", "ผัง 7 ตัว 9 ฐาน (ดวงตนเอง)", "Life Report 1 ครั้ง/เดือน"],
+  },
+  {
     id: "pro",
-    name: "PROFESSIONAL SAGE",
-    price: "฿149 / เดือน",
+    name: "PROFESSIONAL MASTER",
+    price: "฿259 / เดือน",
     color: "#C6A96B",
-    features: ["ยามอัฏฐกาลไม่จำกัด", "ระบบจรครบถ้วน", "Life Report 10 ครั้ง/เดือน", "Export PDF พรีเมียม"],
+    features: ["ยามอัฏฐกาลล่วงหน้า 7 วัน", "ระบบจรครบถ้วน", "Life Report 15 ครั้ง/เดือน", "บันทึกดวงผู้อื่น 15 รายชื่อ"],
   },
   {
     id: "imperial",
-    name: "IMPERIAL MASTER",
-    price: "฿299 / เดือน",
+    name: "IMPERIAL EMPEROR",
+    price: "฿789 / เดือน",
     color: "#4B6FAE",
-    features: ["ทุกฟีเจอร์ไม่จำกัด", "เลข 7 ตัว 9 ฐาน (Core IP)", "Life Report ไม่จำกัด", "Priority Wisdom Support"],
+    features: ["ทุกฟีเจอร์ไม่จำกัด", "ดวงสมพงษ์ & ปฏิทิน 100 ปี", "Life Report ไม่จำกัดครั้ง", "Export รายงาน PDF พรีเมียม"],
   },
 ] as const;
 
@@ -34,13 +41,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const user = await requireAuth(request, env);
   const profile = await getProfile(user.id, request, env);
 
-  // ตรวจดู pending request ที่มีอยู่
   const { supabase } = createSupabaseClient(request, env);
   const { data: pending } = await supabase
     .from("subscription_requests")
     .select("id, plan, status, created_at")
     .eq("user_id", user.id)
-    .eq("type", "package_upgrade")
     .eq("status", "pending")
     .order("created_at", { ascending: false })
     .limit(1)
@@ -49,164 +54,199 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   return json({ profile, pending });
 }
 
-export async function action({ request, context }: ActionFunctionArgs) {
-  const env = context.cloudflare.env as Env;
-  const user = await requireAuth(request, env);
-  const profile = await getProfile(user.id, request, env);
-  const { supabase } = createSupabaseClient(request, env);
-
-  const formData = await request.formData();
-  const plan = String(formData.get("plan") ?? "");
-  const note = String(formData.get("note") ?? "").trim();
-
-  if (!["pro", "imperial"].includes(plan)) {
-    return json({ error: "กรุณาเลือกแพ็กเกจที่ถูกต้อง" }, { status: 400 });
-  }
-
-  // ตรวจว่ามี pending request อยู่แล้วไหม
-  const { data: existing } = await supabase
-    .from("subscription_requests")
-    .select("id")
-    .eq("user_id", user.id)
-    .eq("type", "package_upgrade")
-    .eq("status", "pending")
-    .maybeSingle();
-
-  if (existing) {
-    return json({ error: "คุณมีคำขอที่รอการอนุมัติอยู่แล้ว กรุณารอแอดมินตรวจสอบก่อน" }, { status: 400 });
-  }
-
-  const now = new Date().toISOString();
-  const { data: reqRow, error: dbError } = await supabase
-    .from("subscription_requests")
-    .insert({
-      user_id: user.id,
-      type: "package_upgrade",
-      plan,
-      status: "pending",
-      note: note || null,
-      created_at: now,
-    })
-    .select("id")
-    .single();
-
-  if (dbError) {
-    return json({ error: "เกิดข้อผิดพลาด กรุณาลองใหม่" }, { status: 500 });
-  }
-
-  // ส่ง LINE notification ไปหาแอดมิน
-  await notifyPackageRequest(env, {
-    requestId: reqRow.id,
-    userId: user.id,
-    displayName: profile?.display_name ?? "ผู้ใช้",
-    email: profile?.email ?? "",
-    plan,
-    note: note || undefined,
-    createdAt: now,
-  }).catch(console.error);
-
-  return redirect("/dashboard/upgrade?sent=1");
-}
-
 export default function UpgradePage() {
-  const { profile, pending } = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
-  const navigation = useNavigation();
-  const isSubmitting = navigation.state === "submitting";
-  const sent = new URL(typeof window !== "undefined" ? window.location.href : "http://x").searchParams.get("sent");
+  const { profile, pending: initialPending } = useLoaderData<typeof loader>();
+  const fetcher = useFetcher<any>();
+  const statusFetcher = useFetcher<any>();
+  const navigate = useNavigate();
+  
+  const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [showModal, setShowModal] = useState(false);
+
+  // ดึงค่า plan จาก URL มาเป็นค่าเริ่มต้น
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const planFromUrl = urlParams.get("plan");
+    if (planFromUrl && PLANS.some(p => p.id === planFromUrl)) {
+      setSelectedPlan(planFromUrl);
+    }
+  }, []);
+  const [qrCode, setQrCode] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<string | null>(initialPending?.id || null);
+  const [paymentStatus, setPaymentStatus] = useState<string>("pending");
+  const [timeLeft, setTimeLeft] = useState(900); // 15 minutes
+
+  // เมื่อกดจ่ายเงิน
+  const handleUpgrade = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPlan) return;
+    
+    const formData = new FormData();
+    formData.append("plan", selectedPlan);
+    fetcher.submit(formData, { method: "post", action: "/api/payment/checkout" });
+  };
+
+  // จัดการเมื่อได้ QR Code จาก API
+  useEffect(() => {
+    if (fetcher.data?.success) {
+      setQrCode(fetcher.data.qrcode);
+      setRequestId(fetcher.data.requestId);
+      setShowModal(true);
+      setPaymentStatus("pending");
+      setTimeLeft(900);
+    }
+  }, [fetcher.data]);
+
+  // ระบบ Polling ตรวจสอบสถานะการจ่ายเงิน
+  useEffect(() => {
+    let interval: any;
+    if (showModal && requestId && paymentStatus === "pending") {
+      interval = setInterval(() => {
+        statusFetcher.load(`/api/payment/status/${requestId}`);
+      }, 4000);
+    }
+    return () => clearInterval(interval);
+  }, [showModal, requestId, paymentStatus]);
+
+  // ตรวจสอบผลลัพธ์จากการ Polling
+  useEffect(() => {
+    if (statusFetcher.data?.status === "success") {
+      setPaymentStatus("success");
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 2000);
+    }
+  }, [statusFetcher.data]);
+
+  // ระบบนับเวลาถอยหลัง
+  useEffect(() => {
+    if (showModal && timeLeft > 0 && paymentStatus === "pending") {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [showModal, timeLeft, paymentStatus]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
+    <div className="max-w-4xl mx-auto px-4 py-10">
       {/* Header */}
-      <div className="mb-8">
-        <Link to="/pricing" className="text-[#94A3B8] text-xs hover:text-[#C6A96B] transition-colors mb-4 inline-flex items-center gap-1">
-          ← ดูรายละเอียดแผนทั้งหมด
+      <div className="text-center mb-12">
+        <Link to="/pricing" className="text-[#C6A96B] text-xs hover:underline transition-colors mb-4 inline-block tracking-widest uppercase font-bold">
+          ← ดูตารางเปรียบเทียบสิทธิ์
         </Link>
-        <h1 className="font-display text-3xl font-bold text-[#F8F6F1] mt-2">อัปเกรดแพ็กเกจ</h1>
-        <p className="text-[#94A3B8] text-sm mt-1">
-          ช่วงทดสอบระบบ — แอดมินจะอนุมัติและเปิดสิทธิ์ให้คุณภายใน 24 ชั่วโมง
+        <h1 className="font-display text-4xl font-bold text-[#F8F6F1] mt-2">ยกระดับสู่ภูมิปัญญาขั้นสูง</h1>
+        <p className="text-[#94A3B8] text-sm mt-3 max-w-md mx-auto">
+          เลือกแพ็กเกจที่เหมาะสมเพื่อรับการพยากรณ์ที่แม่นยำและลึกซึ้งที่สุด
         </p>
       </div>
 
-      {/* Success state */}
-      {sent === "1" && (
-        <div className="rounded-2xl border border-[#C6A96B]/30 p-6 mb-6"
-          style={{ background: "rgba(198,169,107,0.08)", backdropFilter: "blur(12px)" }}>
-          <p className="text-[#C6A96B] font-semibold text-lg mb-1">✅ ส่งคำขอสำเร็จ!</p>
-          <p className="text-[#D9CDB7] text-sm">
-            แอดมินได้รับการแจ้งเตือนทาง LINE แล้ว จะอนุมัติและเปิดสิทธิ์ให้คุณภายใน 24 ชั่วโมง
-          </p>
-        </div>
-      )}
-
-      {/* Pending request */}
-      {pending && (
-        <div className="rounded-2xl border border-yellow-500/30 p-5 mb-6"
-          style={{ background: "rgba(234,179,8,0.06)" }}>
-          <p className="text-yellow-400 font-semibold text-sm mb-1">⏳ มีคำขอที่รอการอนุมัติอยู่</p>
-          <p className="text-[#94A3B8] text-xs">
-            แพ็กเกจ: <span className="text-[#C6A96B] font-medium uppercase">{pending.plan}</span>
-            {" · "}ส่งเมื่อ: {new Date(pending.created_at).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" })}
-          </p>
-        </div>
-      )}
-
-      {/* Plan selection form */}
-      {!pending && sent !== "1" && (
-        <Form method="post" className="space-y-5">
-          {/* Plan cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {PLANS.map((plan) => (
-              <label key={plan.id} className="cursor-pointer group">
-                <input type="radio" name="plan" value={plan.id} className="sr-only peer" required />
-                <div className="rounded-2xl border border-white/10 p-5 transition-all duration-200 peer-checked:border-[var(--pc)] peer-checked:shadow-[0_0_20px_var(--pc-dim)]"
-                  style={{ "--pc": plan.color, "--pc-dim": `${plan.color}22`, background: "rgba(10,34,64,0.5)", backdropFilter: "blur(16px)" } as React.CSSProperties}>
-                  <p className="font-display text-xs tracking-widest uppercase mb-1" style={{ color: plan.color }}>{plan.name}</p>
-                  <p className="text-[#F8F6F1] font-bold text-xl mb-3">{plan.price}</p>
-                  <ul className="space-y-1.5">
-                    {plan.features.map((f) => (
-                      <li key={f} className="flex items-center gap-2 text-[#94A3B8] text-xs">
-                        <span style={{ color: plan.color }}>✦</span>
-                        {f}
-                      </li>
-                    ))}
-                  </ul>
+      <Form onSubmit={handleUpgrade} className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {PLANS.map((plan) => (
+            <label key={plan.id} className="cursor-pointer group relative">
+              <input 
+                type="radio" 
+                name="plan" 
+                value={plan.id} 
+                className="sr-only peer" 
+                required 
+                checked={selectedPlan === plan.id}
+                onChange={(e) => setSelectedPlan(e.target.value)}
+              />
+              <div className="h-full rounded-3xl border border-white/10 p-6 transition-all duration-300 peer-checked:border-[var(--pc)] peer-checked:bg-white/[0.03] group-hover:border-white/20"
+                style={{ "--pc": plan.color } as React.CSSProperties}>
+                <div className="absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-white/10 peer-checked:bg-[var(--pc)] peer-checked:border-[var(--pc)] transition-colors flex items-center justify-center">
+                   <div className="w-2 h-2 bg-[#020617] rounded-full opacity-0 peer-checked:opacity-100" />
                 </div>
-              </label>
-            ))}
-          </div>
+                <p className="font-display text-[10px] tracking-[0.3em] uppercase mb-1" style={{ color: plan.color }}>{plan.name}</p>
+                <p className="text-[#F8F6F1] font-bold text-2xl mb-4">{plan.price}</p>
+                <ul className="space-y-2.5 mb-2">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-[#94A3B8] text-[11px] leading-relaxed">
+                      <span className="text-base -mt-1" style={{ color: plan.color }}>✧</span>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </label>
+          ))}
+        </div>
 
-          {/* Note */}
-          <div>
-            <label className="block text-[#94A3B8] text-xs mb-1.5">หมายเหตุ (ถ้ามี)</label>
-            <textarea
-              name="note"
-              rows={2}
-              placeholder="เช่น ช่องทางติดต่อ, โปรโมโค้ด ฯลฯ"
-              className="w-full rounded-xl border border-white/10 px-4 py-3 text-sm text-[#F8F6F1] placeholder-[#94A3B8]/40 resize-none focus:outline-none focus:border-[#C6A96B]/50"
-              style={{ background: "rgba(10,34,64,0.5)", backdropFilter: "blur(12px)" }}
-            />
-          </div>
-
-          {actionData?.error && (
-            <p className="text-red-400 bg-red-400/10 border border-red-400/20 rounded-xl px-4 py-3 text-sm">
-              {actionData.error}
-            </p>
-          )}
-
+        <div className="max-w-sm mx-auto">
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full py-3.5 rounded-xl font-bold text-[#020617] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60"
+            disabled={fetcher.state !== "idle" || !selectedPlan}
+            className="w-full py-4 rounded-2xl font-bold text-[#020617] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
             style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}
           >
-            {isSubmitting ? "กำลังส่งคำขอ..." : "ส่งคำขออัปเกรด →"}
+            {fetcher.state !== "idle" ? "กำลังสร้าง QR Code..." : `สมัครสมาชิก ${selectedPlan.toUpperCase()} →`}
           </button>
+        </div>
+      </Form>
 
-          <p className="text-center text-[#94A3B8]/50 text-[11px]">
-            ช่วงทดสอบ: ยังไม่มีการเรียกเก็บเงินอัตโนมัติ แอดมินจะติดต่อกลับหลังอนุมัติ
-          </p>
-        </Form>
+      {/* Payment Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-[#020617]/90 backdrop-blur-md" onClick={() => paymentStatus === 'pending' && setShowModal(false)} />
+          <div className="relative w-full max-w-sm bg-[#0a2240] rounded-[2.5rem] border border-white/10 p-8 shadow-2xl overflow-hidden"
+               style={{ background: "radial-gradient(circle at top right, rgba(198,169,107,0.1), transparent)" }}>
+            
+            {paymentStatus === "pending" ? (
+              <div className="text-center">
+                <div className="mb-6">
+                  <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase font-bold mb-1">สแกนชำระเงินผ่าน PromptPay</p>
+                  <h3 className="text-2xl font-bold text-[#F8F6F1]">฿{PLANS.find(p => p.id === selectedPlan)?.price.split(' ')[0].replace('฿', '')}</h3>
+                </div>
+
+                <div className="bg-white p-4 rounded-3xl mb-6 inline-block shadow-inner">
+                  {qrCode ? (
+                    <img src={qrCode.startsWith('http') ? qrCode : `data:image/png;base64,${qrCode}`} 
+                         alt="PromptPay QR Code" 
+                         className="w-48 h-48 mx-auto" />
+                  ) : (
+                    <div className="w-48 h-48 bg-gray-100 animate-pulse rounded-2xl" />
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center bg-white/5 rounded-2xl px-5 py-3">
+                    <span className="text-[#94A3B8] text-xs">เวลาที่เหลือ</span>
+                    <span className="text-[#F8F6F1] font-mono font-bold">{formatTime(timeLeft)}</span>
+                  </div>
+                  
+                  <p className="text-[#94A3B8] text-[10px] leading-relaxed">
+                    กรุณาเปิดแอปธนาคารเพื่อสแกน QR Code<br />
+                    ระบบจะปรับระดับสมาชิกให้คุณทันทีหลังชำระเงิน
+                  </p>
+
+                  <button 
+                    onClick={() => setShowModal(false)}
+                    className="w-full py-3 text-[#94A3B8] text-xs hover:text-[#F8F6F1] transition-colors"
+                  >
+                    ยกเลิกและปิดหน้าจอนี้
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-10">
+                <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <h3 className="text-2xl font-bold text-[#F8F6F1] mb-2">ชำระเงินสำเร็จ!</h3>
+                <p className="text-[#94A3B8] text-sm">ยินดีต้อนรับสู่สมาชิกระดับ {selectedPlan.toUpperCase()}</p>
+                <p className="text-[#C6A96B] text-xs mt-8 animate-pulse">กำลังพาคุณไปหน้าหลัก...</p>
+              </div>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

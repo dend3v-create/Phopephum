@@ -105,8 +105,8 @@ export async function signUp(
       gender: metadata?.gender || null,
       role: isAdmin ? "admin" : "user",
       subscription: isAdmin ? "lifetime" : "free",
-      plan: isAdmin ? "imperial" : "free",
-      membership_status: "active"
+      plan: isAdmin ? "imperial" : "basic",
+      membership_status: isAdmin ? "active" : "pending"
     });
 
   if (profileError) {

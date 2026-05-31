@@ -193,15 +193,16 @@ export interface ThaiBaseNumbers {
 /**
  * คำนวณเลขฐาน 1-7 สำหรับ ระบบ 7 ตัว 9 ฐาน
  * @param dateStr "YYYY-MM-DD" (ค.ศ.)
- * @param birthTime "HH:MM" optional (ใช้ตรวจ 06:00 cutoff)
+ * @param birthTime "HH:MM" optional (ใช้ตรวจ 06:01 cutoff)
  */
 export function getThaiBaseNumbers(dateStr: string, birthTime?: string): ThaiBaseNumbers {
-  // ── 06:00 Cutoff ──────────────────────────────────────────────────────────
+  // ── 06:01 Cutoff (ทางโหราศาสตร์เปลี่ยนวันตอน 06:01 น.) ──────────────────────
   let effectiveDate = new Date(dateStr + 'T12:00:00') // local noon to avoid UTC shift
   if (birthTime) {
     const [h, m] = birthTime.split(':').map(Number)
     const totalMin = (h ?? 0) * 60 + (m ?? 0)
-    if (totalMin < 360) {
+    // ถ้าก่อน 06:01 น. (361 นาที) ถือเป็นวันก่อนหน้า
+    if (totalMin < 361) {
       effectiveDate = new Date(effectiveDate.getTime() - 86400000)
     }
   }

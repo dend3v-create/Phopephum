@@ -4,7 +4,7 @@ import type { ActionFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { signUp } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import { notifyNewRegistration } from "~/services/line.server";
-import { createSupabaseClient } from "~/services/supabase.server";
+import { createSupabaseClient, createServiceRoleClient } from "~/services/supabase.server";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
@@ -23,12 +23,22 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const fullName = String(formData.get("fullName") ?? "");
   const displayName = String(formData.get("displayName") ?? "");
   
-  const birthDate = String(formData.get("birthDate") ?? "");
+  const birthDateRaw = String(formData.get("birthDate") ?? "");
   const birthTime = String(formData.get("birthTime") ?? "");
   const birthPlace = String(formData.get("birthPlace") ?? "");
   const gender = String(formData.get("gender") ?? "ชาย");
 
-  if (!email || !password || !fullName || !birthDate || !birthPlace) {
+  // ประกอบ birthDate จาก 3 ช่อง แล้วแปลง พ.ศ. → ค.ศ.
+  const birthDay   = String(formData.get("birthDay") ?? "");
+  const birthMonth = String(formData.get("birthMonth") ?? "");
+  const birthYearBE = parseInt(String(formData.get("birthYear") ?? "0"), 10);
+  const birthYearCE = birthYearBE >= 2400 ? birthYearBE - 543 : birthYearBE;
+  let birthDate = birthDateRaw; // fallback
+  if (birthDay && birthMonth && birthYearCE) {
+    birthDate = `${birthYearCE}-${birthMonth}-${birthDay}`;
+  }
+
+  if (!email || !password || !fullName || !birthDay || !birthMonth || !birthYearBE || !birthPlace) {
     return json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" }, { status: 400 });
   }
 
@@ -61,7 +71,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     // สร้าง subscription_request และส่ง LINE notification
     try {
-      const { supabase } = createSupabaseClient(request, env);
+      const supabase = createServiceRoleClient(env);
       const now = new Date().toISOString();
       const isAdmin = email === "dend3v@gmail.com";
       
@@ -127,20 +137,52 @@ export default function RegisterPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Input
-            name="birthDate"
-            type="date"
-            label="วันเกิด (ค.ศ.)"
-            required
-          />
-          <Input
-            name="birthTime"
-            type="time"
-            label="เวลาเกิด"
-            placeholder="00:00"
-          />
+        {/* วันเกิด พ.ศ. — แยก 3 ช่อง */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-[#8A8070] uppercase tracking-wider ml-1">
+            วันเกิด (พ.ศ.) <span className="text-red-400">*</span>
+          </label>
+          <div className="grid grid-cols-3 gap-2">
+            <select
+              name="birthDay"
+              required
+              className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-3 py-2.5 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#D9BC82]/50"
+            >
+              <option value="">วัน</option>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={String(d).padStart(2, "0")}>{d}</option>
+              ))}
+            </select>
+            <select
+              name="birthMonth"
+              required
+              className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-3 py-2.5 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#D9BC82]/50"
+            >
+              <option value="">เดือน</option>
+              {["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
+                "กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"]
+                .map((m, i) => (
+                  <option key={i} value={String(i + 1).padStart(2, "0")}>{m}</option>
+                ))}
+            </select>
+            <input
+              name="birthYear"
+              type="number"
+              required
+              min={2400}
+              max={2580}
+              placeholder="พ.ศ."
+              className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-3 py-2.5 text-sm text-[#F8F6F1] placeholder-[#94A3B8]/40 focus:outline-none focus:border-[#D9BC82]/50"
+            />
+          </div>
         </div>
+
+        <Input
+          name="birthTime"
+          type="time"
+          label="เวลาเกิด"
+          placeholder="00:00"
+        />
 
         <Input
           name="birthPlace"

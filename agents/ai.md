@@ -29,11 +29,12 @@ Supabase ai_reports table
 
 ## Prompt Versioning
 ```ts
-// packages/prompts/src/v1/lifeReport.ts
-export const PROMPT_VERSION = 'v1.0.0'
+// packages/prompts/src/v1/lifeReport.ts (Legacy V2)
+// packages/prompts/src/v2/lifeReport.ts (Current V3.0.0 — Star Tracing Method)
+export const PROMPT_VERSION = 'v3.0.0'
 export function buildLifeReportPrompt(...): string { ... }
 
-// เมื่อเปลี่ยน prompt อย่างมีนัยสำคัญ → สร้าง v2/lifeReport.ts
+// เมื่อเปลี่ยน prompt อย่างมีนัยสำคัญ → สร้าง v3/lifeReport.ts (หรือ v3/ index)
 // ห้ามแก้ไฟล์เก่า — เพื่อให้ reproduce รายงานเก่าได้
 ```
 

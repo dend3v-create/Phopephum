@@ -4,34 +4,34 @@ export interface UserProfile {
   id: string;
   email: string;
   displayName: string | null;
-  birthDate: string | null; // ISO date
-  birthTime: string | null; // HH:mm
+  fullName: string | null;
+  birthDate: string | null; // ISO date "YYYY-MM-DD"
+  birthTime: string | null; // "HH:mm"
   birthPlace: string | null;
   subscription: SubscriptionTier;
-  role: "user" | "admin";
+  role: "user" | "admin" | "operator";
+  plan: "free" | "basic" | "pro" | "imperial";
   createdAt: string;
   updatedAt: string;
 }
 
 export type SubscriptionTier = "free" | "basic" | "premium" | "lifetime";
 
-// ─── Horoscope ────────────────────────────────────────────────────────────────
+// ─── Core Astrology Primitives ───────────────────────────────────────────────
 
-export interface HoroscopeInput {
-  birthDate: string; // ISO date "YYYY-MM-DD"
-  birthTime?: string; // "HH:mm"
-  birthPlace?: string; // province name
-}
+/** เลขดาว 1–7 (โหราศาสตร์ไทย) */
+export type StarNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7;
 
-export interface SevenNumbers {
-  base: number[];
-  soul: number;
-  destiny: number;
-  power: number;
-  karmic: number;
-  mission: number;
-  crown: number;
-}
+/** ชื่อดาวภาษาไทย */
+export const STAR_NAMES: Record<StarNumber, string> = {
+  1: "อาทิตย์",
+  2: "จันทร์",
+  3: "อังคาร",
+  4: "พุธ",
+  5: "พฤหัส",
+  6: "ศุกร์",
+  7: "เสาร์",
+} as const;
 
 export interface LunarDateInfo {
   dayName: string;
@@ -45,42 +45,156 @@ export interface LunarDateInfo {
   isApproximate: boolean;
 }
 
-export interface TaksaPosition {
+// ─── 7 Numbers 9 Bases (ผัง 7 ตัว 9 ฐาน) ────────────────────────────────────────
+
+export interface NineBaseResult {
+  lunarDate: LunarDateInfo;
+  /** 9 ฐาน × 7 ช่อง */
+  bases: number[][]; 
+  /** ข้อมูลเสริมสำหรับแต่ละฐาน (ถ้ามี) */
+  metadata?: Record<string, unknown>;
+}
+
+// ─── ทักษา (Taksa) ────────────────────────────────────────────────────────────
+
+export type TaksaBhop =
+  | "บริวาร" | "อายุ" | "เดช" | "ศรี"
+  | "มูละ" | "อุตสาหะ" | "มนตรี" | "กาลกิณี";
+
+export type TaksaMap = Record<StarNumber, TaksaBhop>;
+
+export interface TaksaNatalResult {
+  map: TaksaMap;
+  bariStar: StarNumber;
+  birthStar: StarNumber;
+}
+
+export interface TaksaTransitResult {
+  map: TaksaMap;
+  bariStar: StarNumber;
+  ageYang: number;
+}
+
+// ─── มหาภูติ (Mahabhuti) ────────────────────────────────────────────────────────
+
+export type MahaBhop =
+  | "ราชา" | "อธิบดี" | "ธงชัย" | "ขุมทรัพย์"
+  | "มรณะ" | "โลกาวินาศ" | "อริ";
+
+export type MahaMap = Record<MahaBhop, StarNumber>;
+
+export interface MahaBhutiResult {
+  cs: number;
+  remainder: number;
+  map: MahaMap;
+}
+
+// ─── ยามอัฏฐกาล & ราหู (Time Engines - Systematic v2.0) ──────────────────────────
+
+export interface SystematicAtthakarnResult {
+  majorPlanet: StarNumber;
+  subPlanet: StarNumber;
+  majorSlot: number; // 0–7
+  subSlot: number;   // 0–7
+  isDaytime: boolean;
+  startTime: string; // HH:mm
+  endTime: string;   // HH:mm
+  planetName: string;
+  subPlanetName: string;
+}
+
+export interface SystematicRahuResult {
+  id: number;
   name: string;
-  planet: string;
-  number: number;
+  quality: "good" | "bad" | "neutral";
+  minutesRange: [number, number];
+}
+
+// ─── Integrated Results (สหวิชาพยากรณ์) ──────────────────────────────────────────
+
+export type AlertLevel = "danger" | "warn" | "info" | "good";
+
+export interface StarAlert {
+  level: AlertLevel;
+  star: StarNumber;
+  starName: string;
+  taksaNatal: TaksaBhop;
+  taksaTransit: TaksaBhop;
+  mahaNatal: MahaBhop;
+  mahaTransit: MahaBhop;
+  message: string;
+}
+
+export type ElementType = "ไฟ" | "ดิน" | "ลม" | "น้ำ";
+
+export interface ElementPairFlag {
+  element: ElementType;
+  stars: [StarNumber, StarNumber];
+  nature: string;
+  inNatal: boolean;
+  inTransit: boolean;
+  isPermanent: boolean;
+}
+
+export interface CrossCheckResult {
+  elementPairFlags: ElementPairFlag[];
+  alerts: StarAlert[];
+}
+
+export interface PhopephumResult {
+  nineBase: NineBaseResult;
+  taksaNatal: TaksaNatalResult;
+  taksaTransit: TaksaTransitResult;
+  mahaNatal: MahaBhutiResult;
+  mahaTransit: MahaBhutiResult;
+  crossCheck: CrossCheckResult;
+  atthakarn: SystematicAtthakarnResult;
+  rahu: SystematicRahuResult;
+  timestamp: string;
+}
+
+// ─── Horoscope Legacy (Keep for compatibility) ─────────────────────────────────
+
+export interface HoroscopeInput {
+  birthDate: string; // ISO date "YYYY-MM-DD"
+  birthTime?: string; // "HH:mm"
+  birthPlace?: string; 
+  thaiMonthOverride?: number;
+  zodiacOverride?: string;
 }
 
 export interface HoroscopeResult {
-  sevenNumbers: SevenNumbers;
+  sevenNumbers: {
+    base: number[];
+    soul: number;
+    destiny: number;
+    power: number;
+    karmic: number;
+    mission: number;
+    crown: number;
+  };
   lunarDateInfo: LunarDateInfo;
-  taksa: TaksaPosition[];
-  atthakarn: AtthakarnResult;
-  lagna: LagnaResult;
-  transitPhase: TransitPhase;
-}
-
-export interface AtthakarnResult {
-  hora: string;
-  element: string;
-  ruling: string;
-  quality: string;
-  prediction: string;
-}
-
-export interface LagnaResult {
-  sign: string;
-  degree: number;
-  house: number;
-  strength: number;
-}
-
-export interface TransitPhase {
-  currentAge: number;
-  phase: string;
-  phaseStart: number;
-  phaseEnd: number;
-  keywords: string[];
+  taksa: { name: string; planet: string; number: number }[];
+  atthakarn: {
+    hora: string;
+    element: string;
+    ruling: string;
+    quality: string;
+    prediction: string;
+  };
+  lagna: {
+    sign: string;
+    degree: number;
+    house: number;
+    strength: number;
+  };
+  transitPhase: {
+    currentAge: number;
+    phase: string;
+    phaseStart: number;
+    phaseEnd: number;
+    keywords: string[];
+  };
 }
 
 // ─── AI Report ────────────────────────────────────────────────────────────────
@@ -88,7 +202,7 @@ export interface TransitPhase {
 export interface AIReportRequest {
   userId: string;
   reportType: AIReportType;
-  horoscope: HoroscopeResult;
+  phopephumResult: PhopephumResult;
   userContext?: Record<string, unknown>;
 }
 
@@ -108,16 +222,6 @@ export interface AIReportRecord {
   reportType: AIReportType;
   content: string;
   tokensUsed: number;
-  createdAt: string;
-}
-
-// ─── Analytics ────────────────────────────────────────────────────────────────
-
-export interface AnalyticsEvent {
-  userId: string | null;
-  event: string;
-  properties: Record<string, unknown>;
-  url: string;
   createdAt: string;
 }
 

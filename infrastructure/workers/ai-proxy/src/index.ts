@@ -1,5 +1,5 @@
 // Phopephum AI Proxy — Cloudflare Worker
-// AI Provider: Google Gemini (gemini-2.0-flash)
+// AI Provider: Google Gemini (gemini-1.5-flash)
 // Streams SSE → Remix client via AI_WORKER_SECRET auth
 
 interface Env {
@@ -9,9 +9,10 @@ interface Env {
   ENVIRONMENT: string;
 }
 
-const GEMINI_MODEL = "gemini-2.5-flash";
-const GEMINI_STREAM_URL = (model: string, key: string) =>
-  `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${key}`;
+// ใช้โมเดล alias 'gemini-flash-latest' ตามที่ curl ทดสอบผ่าน
+const GEMINI_MODEL = "gemini-flash-latest";
+const GEMINI_STREAM_URL = (model: string) =>
+  `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`;
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -42,10 +43,17 @@ async function handleGenerate(request: Request, env: Env): Promise<Response> {
     prompt: string;
   }>();
 
+  if (!env.GEMINI_API_KEY) {
+    return corsResponse(new Response("Internal Error: Missing GEMINI_API_KEY in Worker Secrets", { status: 500 }));
+  }
+
   // Call Gemini streaming API
-  const geminiRes = await fetch(GEMINI_STREAM_URL(GEMINI_MODEL, env.GEMINI_API_KEY), {
+  const geminiRes = await fetch(GEMINI_STREAM_URL(GEMINI_MODEL), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "X-goog-api-key": env.GEMINI_API_KEY
+    },
     body: JSON.stringify({
       contents: [{ role: "user", parts: [{ text: body.prompt }] }],
       generationConfig: {
@@ -55,11 +63,15 @@ async function handleGenerate(request: Request, env: Env): Promise<Response> {
     }),
   });
 
-  if (!geminiRes.ok || !geminiRes.body) {
-    const err = await geminiRes.text();
+  if (!geminiRes.ok) {
+    const errText = await geminiRes.text();
     return corsResponse(
-      new Response(`Gemini error: ${err}`, { status: 502 })
+      new Response(`Gemini error (${geminiRes.status}): ${errText}`, { status: 502 })
     );
+  }
+
+  if (!geminiRes.body) {
+    return corsResponse(new Response("Gemini error: Empty response body", { status: 502 }));
   }
 
   // Transform Gemini SSE → phopephum SSE format
@@ -82,26 +94,23 @@ async function handleGenerate(request: Request, env: Env): Promise<Response> {
         buffer = lines.pop() ?? "";
 
         for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
+          if (!line.trim() || !line.startsWith("data: ")) continue;
           const raw = line.slice(6).trim();
-          if (!raw || raw === "[DONE]") continue;
+          if (raw === "[DONE]") break;
 
           try {
             const parsed = JSON.parse(raw);
-            const text =
-              parsed?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+            const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
             if (text) {
-              await writer.write(
-                encoder.encode(
-                  `data: ${JSON.stringify({ text })}\n\n`
-                )
-              );
+              await writer.write(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
             }
           } catch {
             // skip malformed chunks
           }
         }
       }
+    } catch (e) {
+      console.error("Stream processing error:", e);
     } finally {
       await writer.write(encoder.encode("data: [DONE]\n\n"));
       await writer.close();

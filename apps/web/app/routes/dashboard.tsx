@@ -1,20 +1,32 @@
-import { json } from "@remix-run/cloudflare";
-import { Outlet, Form, useLoaderData } from "@remix-run/react";
+import { json, redirect } from "@remix-run/cloudflare";
+import { Outlet, Form, useLoaderData, Link } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import { NavLink } from "~/components/ui/NavLink";
+import { ProtectedContent } from "~/components/ui/ProtectedContent";
 import type { Env } from "~/env.server";
 import { useState } from "react";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
-  const profile = await getProfile(user.id, request, env);
 
-  await logEvent(request, env, EVENTS.DAILY_VISIT, { source: "web" });
+  try {
+    const profile = await getProfile(user.id, request, env);
 
-  return json({ user, profile });
+    // Gate: ถ้า membership ยังรอการอนุมัติ → redirect ไปหน้า pending
+    if (profile?.membership_status === "pending" && profile?.role === "user") {
+      throw redirect("/pending-approval");
+    }
+
+    await logEvent(request, env, EVENTS.DAILY_VISIT, { source: "web" });
+    return json({ user, profile });
+  } catch (err) {
+    if (err instanceof Response) throw err; // re-throw redirects
+    console.error("Dashboard Layout Loader Error:", err);
+    return json({ user, profile: null });
+  }
 }
 
 export default function DashboardLayout() {
@@ -69,9 +81,27 @@ export default function DashboardLayout() {
         {/* Nav */}
         <nav className="flex flex-col gap-0.5 flex-1">
           <NavLink to="/dashboard"           icon={<IconHome />}     label="ภาพรวม" />
-          <NavLink to="/dashboard/yam"       icon={<IconYam />}      label="ฤกษ์งามยามดี" />
-          <NavLink to="/dashboard/horoscope" icon={<IconPlanet />}   label="ตรวจดวงชะตา" />
-          <NavLink to="/dashboard/planner"   icon={<IconCalendar />} label="วางแผนชีวิต" />
+          
+          <NavLink to="/dashboard/yam"       
+            icon={<IconYam />}      
+            label={<span>ฤกษ์งามยามดี {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
+          />
+          
+          <NavLink to="/dashboard/rahu"      
+            icon={<IconRahu />}     
+            label={<span>ยามราหูค้นทรัพย์ {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
+          />
+          
+          <NavLink to="/dashboard/horoscope" 
+            icon={<IconPlanet />}   
+            label={<span>ตรวจดวงชะตา {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
+          />
+          
+          <NavLink to="/dashboard/planner"   
+            icon={<IconCalendar />} 
+            label={<span>วางแผนชีวิต {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
+          />
+          
           <NavLink to="/dashboard/settings"  icon={<IconSettings />} label="ตั้งค่าโปรไฟล์" />
           
           {(profile?.role === 'admin' || profile?.role === 'operator') && (
@@ -89,6 +119,22 @@ export default function DashboardLayout() {
 
         {/* User + Admin CTA */}
         <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: "rgba(217,188,130,0.12)" }}>
+
+          {/* Upgrade CTA — แสดงเมื่อยังไม่เป็น Imperial */}
+          {profile?.plan !== 'imperial' && profile?.role !== 'admin' && (
+            <Link
+              to="/dashboard/upgrade"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: "linear-gradient(135deg, #C6A96B, #D9BC82)",
+                color: "#020617",
+                boxShadow: "0 4px 12px rgba(198,169,107,0.15)",
+              }}
+            >
+              <IconSparkles />
+              อัปเกรดสมาชิก
+            </Link>
+          )}
 
           {/* Admin CTA — เห็นเฉพาะ admin */}
           {profile?.role === 'admin' && (
@@ -161,9 +207,12 @@ export default function DashboardLayout() {
 
       {/* Main content */}
       <main className="flex-1 md:ml-64 pt-16 md:pt-0 min-h-screen">
-        <div className="max-w-5xl mx-auto px-4 py-8">
+        <ProtectedContent
+          userLabel={profile?.display_name ? `${profile.display_name} · ${user.email}` : user.email}
+          className="max-w-5xl mx-auto px-4 py-8"
+        >
           <Outlet />
-        </div>
+        </ProtectedContent>
       </main>
     </div>
   );
@@ -259,6 +308,16 @@ function IconOperator() {
       <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M23 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconRahu() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#C6A96B]">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12c0-2.21.72-4.25 1.94-5.91" />
+      <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
     </svg>
   );
 }

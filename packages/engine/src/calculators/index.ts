@@ -15,6 +15,7 @@ export * from './sevenBase.js'
 export * from './planetaryPower.js'
 export * from './emperorChart.js'
 export * from './ageCycle.js'
+export * from './calculateRahu.js'
 // calculateTransit.ts — life phase transit (month-based)
 export { calculateTransit, calculateVayaChorn } from './calculateTransit.js'
 // taksa.ts — ทักษา planetary assignments

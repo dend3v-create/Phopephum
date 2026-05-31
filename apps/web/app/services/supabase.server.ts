@@ -1,4 +1,5 @@
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createClient } from "@supabase/supabase-js";
 import { serialize, parse } from "cookie";
 import type { Env } from "~/env.server";
 
@@ -35,6 +36,11 @@ export function createSupabaseClient(request: Request, env: Env) {
   });
 
   return { supabase, headers: responseHeaders };
+}
+
+// Service role client — bypasses RLS, ใช้ฝั่ง server เท่านั้น
+export function createServiceRoleClient(env: Env) {
+  return createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
 export async function requireUser(request: Request, env: Env) {

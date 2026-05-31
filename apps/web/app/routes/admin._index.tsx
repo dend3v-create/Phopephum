@@ -54,7 +54,7 @@ export default function AdminOverview() {
           icon={<IconUsers className="w-5 h-5 text-[#38BDF8]" />}
         />
         <StatCard
-          title="AI Reports Generated"
+          title="บทวิเคราะห์ที่สร้างแล้ว"
           value={stats.reports.toString()}
           label="Total generations"
           icon={<IconSparkles className="w-5 h-5 text-[#818CF8]" />}

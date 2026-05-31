@@ -8,7 +8,8 @@ import { json, redirect } from "@remix-run/cloudflare";
 import { useLoaderData, Form, useNavigation, useSearchParams } from "@remix-run/react";
 import type { LoaderFunctionArgs, ActionFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAdmin } from "~/services/auth.server";
-import { createSupabaseClient } from "~/services/supabase.server";
+import { createSupabaseClient, createServiceRoleClient } from "~/services/supabase.server";
+import { sendApprovalEmail, sendWelcomeEmail } from "~/services/resend.server";
 import type { Env } from "~/env.server";
 
 export const meta: MetaFunction = () => [{ title: "อนุมัติคำขอ — Admin" }];
@@ -53,7 +54,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const { user } = await requireAdmin(request, env);
-  const { supabase } = createSupabaseClient(request, env);
+  const supabase = createServiceRoleClient(env);
 
   const formData = await request.formData();
   const requestId = String(formData.get("requestId") ?? "");
@@ -100,14 +101,45 @@ export async function action({ request, context }: ActionFunctionArgs) {
         })
         .eq("id", req.user_id);
     } else if (req.type === "registration") {
-       const isImperial = req.plan === "imperial";
-       await supabase
+      const isImperial = req.plan === "imperial";
+      await supabase
         .from("profiles")
         .update({
           subscription: isImperial ? "lifetime" : "free",
           plan: req.plan,
+          membership_status: "active",
         })
         .eq("id", req.user_id);
+    }
+  }
+
+  // ดึง profile ของ user เพื่อส่ง email
+  const { data: userProfile } = await supabase
+    .from("profiles")
+    .select("email, display_name")
+    .eq("id", req.user_id)
+    .single();
+
+  if (userProfile?.email) {
+    try {
+      if (req.type === "registration" && decision === "approved") {
+        await sendWelcomeEmail(
+          env,
+          userProfile.email,
+          userProfile.display_name ?? "สมาชิก"
+        );
+      } else {
+        await sendApprovalEmail(
+          env,
+          userProfile.email,
+          userProfile.display_name ?? "สมาชิก",
+          req.plan,
+          decision === "approved",
+          note || undefined
+        );
+      }
+    } catch (e) {
+      console.error("[Resend] Email failed:", e);
     }
   }
 

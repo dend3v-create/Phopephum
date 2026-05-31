@@ -2,68 +2,131 @@ import type { MetaFunction } from "@remix-run/cloudflare";
 import { Link } from "@remix-run/react";
 
 export const meta: MetaFunction = () => [
-  { title: "Investment — PhopePhum" },
-  { name: "description", content: "เลือกระดับการเข้าถึงศาสตร์ยามอัฏฐกาลและชะตากรรมเชิงลึก ระดับจักรพรรดิ" },
+  { title: "แผนสมาชิกและสิทธิ์การเข้าถึงระดับจักรพรรดิ — PhopePhum" },
+  { name: "description", content: "เลือกระดับการเข้าถึงระบบภูมิปัญญาพยากรณ์ ภพภูมิ (PhopePhum) ตารางยามอัฏฐกาลไม่จำกัด เลข 7 ตัว 9 ฐาน และบทวิเคราะห์พยากรณ์ชีวิตระดับจักรพรรดิ" },
+  
+  // Open Graph / Facebook
+  { property: "og:type", content: "website" },
+  { property: "og:url", content: "https://phopephum.com/pricing" },
+  { property: "og:title", content: "แผนสมาชิกและสิทธิ์การเข้าถึงระดับจักรพรรดิ — PhopePhum" },
+  { property: "og:description", content: "เลือกระดับการเข้าถึงระบบภูมิปัญญาพยากรณ์ ภพภูมิ (PhopePhum) ตารางยามอัฏฐกาลไม่จำกัด และบทวิเคราะห์ชะตาชีวิตระดับจักรพรรดิ" },
+  { property: "og:image", content: "https://phopephum.com/favicon.svg" },
+
+  // Twitter
+  { name: "twitter:card", content: "summary_large_image" },
+  { name: "twitter:title", content: "แผนสมาชิกและสิทธิ์การเข้าถึงระดับจักรพรรดิ — PhopePhum" },
+  { name: "twitter:description", content: "เลือกระดับการเข้าถึงระบบภูมิปัญญาพยากรณ์ ภพภูมิ" },
+
+  // SEO
+  { name: "keywords", content: "สมัครสมาชิกภพภูมิ, ราคาภพภูมิ, PhopePhum Premium, ยามอัฏฐกาลไม่จำกัด, ผังดวงจักรพรรดิ, เลข 7 ตัว 9 ฐาน Core, Wisdom Destiny Reports" },
+  { name: "author", content: "ครูเด่น มาสเตอร์ฟา" }
 ];
+
+const PRICING_SCHEMA = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Product",
+      "@id": "https://phopephum.com/pricing/#product",
+      "name": "ภพภูมิ (PhopePhum) Premium Access Plans",
+      "image": "https://phopephum.com/favicon.svg",
+      "description": "ระบบวิเคราะห์ยามมงคลและแผนที่ชีวิตระดับจักรพรรดิ ด้วยศาสตร์ยามอัฏฐกาลและเลข 7 ตัว 9 ฐาน",
+      "brand": {
+        "@type": "Brand",
+        "name": "ภพภูมิ - PhopePhum"
+      },
+      "offers": {
+        "@type": "AggregateOffer",
+        "priceCurrency": "THB",
+        "lowPrice": "0",
+        "highPrice": "299",
+        "offerCount": "3",
+        "offers": [
+          {
+            "@type": "Offer",
+            "name": "BASIC INITIATION",
+            "price": "0",
+            "priceCurrency": "THB",
+            "url": "https://phopephum.com/register"
+          },
+          {
+            "@type": "Offer",
+            "name": "PROFESSIONAL SAGE",
+            "price": "149",
+            "priceCurrency": "THB",
+            "url": "https://phopephum.com/dashboard/upgrade"
+          },
+          {
+            "@type": "Offer",
+            "name": "IMPERIAL MASTER",
+            "price": "299",
+            "priceCurrency": "THB",
+            "url": "https://phopephum.com/dashboard/upgrade"
+          }
+        ]
+      }
+    }
+  ]
+};
 
 const PLANS = [
   {
-    tier: "BASIC INITIATION",
-    subtitle: "เปิดประตูแห่งความรู้",
-    price: "0",
-    unit: "ตลอดชีพ",
+    tier: "BASIC SAGE",
+    subtitle: "เริ่มต้นเส้นทางภูมิปัญญา",
+    price: "9",
+    unit: "เดือน",
     tag: null,
     features: [
-      { icon: "☽", text: "ยามอัฏฐกาล 5 ครั้ง/วัน" },
-      { icon: "✦", text: "จักรกำเนิดพื้นฐาน" },
+      { icon: "☽", text: "ยามอัฏฐกาล & ราหู (วันนี้)" },
+      { icon: "✦", text: "ผัง 7 ตัว 9 ฐาน (ดวงตนเอง)" },
       { icon: "◈", text: "Life Report 1 ครั้ง/เดือน" },
     ],
-    cta: "เริ่มต้นใช้ฟรี",
-    ctaTo: "/register",
+    cta: "เริ่มต้นเพียง 9 บาท",
+    ctaTo: "/dashboard/upgrade?plan=basic",
     style: "basic",
   },
   {
-    tier: "PROFESSIONAL SAGE",
-    subtitle: "ปัญญาแห่งโหราจารย์",
-    price: "149",
+    tier: "PROFESSIONAL MASTER",
+    subtitle: "เจาะลึกรหัสชีวิตสมบูรณ์",
+    price: "259",
     unit: "เดือน",
     tag: "RECOMMENDED",
     features: [
-      { icon: "☽", text: "ยามอัฏฐกาลไม่จำกัด" },
+      { icon: "☽", text: "ยามอัฏฐกาลล่วงหน้า 7 วัน" },
       { icon: "⊕", text: "ระบบจร (วัยจร/ปีจร) ครบถ้วน" },
-      { icon: "◈", text: "Life Report 10 ครั้ง/เดือน" },
-      { icon: "⟁", text: "Export รายงาน PDF พรีเมียม" },
+      { icon: "◈", text: "Life Report 15 ครั้ง/เดือน" },
+      { icon: "⟁", text: "บันทึกดวงผู้อื่น 15 รายชื่อ" },
     ],
     cta: "เลือกแพ็กเกจ PRO",
-    ctaTo: "/dashboard/upgrade",
+    ctaTo: "/dashboard/upgrade?plan=pro",
     style: "pro",
   },
   {
-    tier: "IMPERIAL MASTER",
-    subtitle: "อำนาจสูงสุดแห่งจักรพรรดิ",
-    price: "299",
+    tier: "IMPERIAL EMPEROR",
+    subtitle: "อำนาจสูงสุดระดับจักรพรรดิ",
+    price: "789",
     unit: "เดือน",
-    tag: null,
+    tag: "PREMIUM",
     features: [
       { icon: "⌘", text: "ทุกฟีเจอร์คำนวณไม่จำกัด" },
-      { icon: "✦", text: "ศาสตร์เลข 7 ตัว 9 ฐาน (Core IP)" },
+      { icon: "✦", text: "ดวงสมพงษ์ & ปฏิทิน 100 ปี" },
       { icon: "◈", text: "Life Report ไม่จำกัดครั้ง" },
-      { icon: "⟁", text: "Priority Wisdom Support" },
+      { icon: "⟁", text: "Export รายงาน PDF พรีเมียม" },
     ],
     cta: "เลือกแพ็กเกจ IMPERIAL",
-    ctaTo: "/dashboard/upgrade",
+    ctaTo: "/dashboard/upgrade?plan=imperial",
     style: "imperial",
   },
 ] as const;
 
 const COMPARE_ROWS = [
-  { label: "ยามอัฏฐกาล",                basic: "5 ครั้ง/วัน",   pro: "ไม่จำกัด",   imperial: "ไม่จำกัด" },
-  { label: "คำนวณจักรกำเนิด",         basic: "พื้นฐาน",       pro: "ครบถ้วน",     imperial: "ครบถ้วน" },
-  { label: "ระบบจร (วัยจร/ปีจร)",     basic: "—",             pro: "✦",           imperial: "✦" },
-  { label: "Life Report",              basic: "1/เดือน",       pro: "10/เดือน",    imperial: "ไม่จำกัด" },
-  { label: "Export PDF พรีเมียม",      basic: "—",             pro: "✦",           imperial: "✦" },
-  { label: "เลข 7 ตัว 9 ฐาน (Core)",  basic: "—",             pro: "—",           imperial: "✦" },
-  { label: "Priority Wisdom Support",  basic: "—",             pro: "—",           imperial: "✦" },
+  { label: "ผัง 7 ตัว 9 ฐาน",            basic: "ดวงตนเอง",    pro: "15 รายชื่อ",  imperial: "ไม่จำกัด" },
+  { label: "ยามอัฏฐกาล / ราหู",        basic: "เฉพาะวันนี้",   pro: "ล่วงหน้า 7 วัน", imperial: "ไม่จำกัด" },
+  { label: "ระบบจร (วัยจร/ปีจร)",     basic: "—",             pro: "✅",           imperial: "✅" },
+  { label: "AI Life Report",          basic: "1/เดือน",       pro: "15/เดือน",    imperial: "ไม่จำกัด" },
+  { label: "ดวงสมพงษ์ (Match)",       basic: "—",             pro: "—",           imperial: "✅" },
+  { label: "Export PDF พรีเมียม",      basic: "—",             pro: "—",           imperial: "✅" },
+  { label: "ประวัติการคำนวณ",          basic: "ไม่เก็บ",        pro: "เก็บ 30 วัน",   imperial: "เก็บถาวร" },
 ];
 
 export default function PricingPage() {
@@ -155,6 +218,12 @@ export default function PricingPage() {
           </Link>
         </div>
       </div>
+
+      {/* ── Schema JSON-LD (SEO/AEO/GEO) ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(PRICING_SCHEMA) }}
+      />
     </main>
   );
 }

@@ -1,6 +1,6 @@
 import { json, redirect } from "@remix-run/cloudflare";
 import { Form, useLoaderData, useNavigation, useActionData, useSearchParams } from "@remix-run/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
@@ -104,9 +104,22 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   try {
     const { supabase } = createSupabaseClient(request, env);
+    const profile = await getProfile(user.id, request, env);
 
-    // อัปเดต profile โดยตรง (ไม่ใช้ RPC)
-    await supabase
+    // ── 1. Quota Check (for Free Tier) ──
+    if (profile?.plan === "free" || !profile?.plan) {
+      const { data: usageCount, error: usageError } = await supabase
+        .rpc("get_ai_usage_month", { p_user: user.id });
+      
+      if (usageError) {
+        console.error("Quota check error:", usageError);
+      } else if (typeof usageCount === 'number' && usageCount >= 3) {
+        return json({ error: "ท่านใช้สิทธิ์สร้างรายงานสำหรับแผนเริ่มต้นครบ 3 ครั้งในเดือนนี้แล้ว กรุณาอัปเกรดเป็นแผน Pro เพื่อใช้งานไม่จำกัด" });
+      }
+    }
+
+    // ── 2. Update Profile ──
+    const { error: profileUpdateError } = await supabase
       .from("profiles")
       .update({
         ...(displayName && { display_name: displayName }),
@@ -116,6 +129,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
       })
       .eq("id", user.id);
 
+    if (profileUpdateError) {
+      console.warn("Profile update during report gen warning:", profileUpdateError);
+    }
+
+    // ── 3. Call AI Service ──
     const stream = await generateAIReport(
       {
         userId: user.id,
@@ -130,37 +148,42 @@ export async function action({ request, context }: ActionFunctionArgs) {
       env
     );
 
-    // Collect SSE stream → plain text
+    // ── 4. Collect SSE stream → plain text ──
     const reader = stream.getReader();
     const decoder = new TextDecoder();
     let text = "";
     let buffer = "";
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
 
-      for (const line of lines) {
-        if (!line.startsWith("data: ")) continue;
-        const raw = line.slice(6).trim();
-        if (!raw || raw === "[DONE]") continue;
-        try {
-          const parsed = JSON.parse(raw);
-          if (parsed.text) text += parsed.text;
-        } catch {
-          // skip malformed chunks
+        for (const line of lines) {
+          if (!line.trim() || !line.startsWith("data: ")) continue;
+          const raw = line.slice(6).trim();
+          if (raw === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed.text) text += parsed.text;
+          } catch (e) {
+            console.error("Malformed SSE chunk:", raw, e);
+          }
         }
       }
+    } finally {
+      reader.releaseLock();
     }
 
-    if (!text) {
-      return json({ error: "AI ไม่ส่งเนื้อหากลับมา กรุณาลองใหม่อีกครั้ง" });
+    if (!text || text.length < 50) {
+      return json({ error: "ระบบพยากรณ์ไม่ส่งเนื้อหากลับมา หรือเนื้อหาสั้นเกินไป กรุณาลองใหม่อีกครั้ง" });
     }
 
+    // ── 5. Save to Database ──
     const { data: report, error: insertError } = await supabase
       .from("ai_reports")
       .insert({
@@ -172,15 +195,25 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .single();
 
     if (insertError || !report) {
-      console.error("DB insert error:", insertError);
-      return json({ error: "บันทึกรายงานไม่สำเร็จ กรุณาลองใหม่" });
+      console.error("Report save error:", insertError);
+      return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` });
     }
 
+    // ── 6. Record Usage (Non-blocking) ──
+    supabase.from("ai_report_usage").insert({
+      user_id: user.id,
+      report_type: reportType,
+      tier: profile?.plan || "free",
+    }).then(({ error }) => {
+      if (error) console.error("Usage record error:", error);
+    });
+
     return redirect(`/dashboard/reports/${report.id}`);
+
   } catch (err) {
     const msg = err instanceof Error ? err.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
-    console.error("Report generation error:", msg);
-    return json({ error: `ไม่สามารถสร้างรายงานได้: ${msg}` });
+    console.error("Report generation critical error:", msg);
+    return json({ error: `ขออภัย ระบบเกิดข้อผิดพลาด: ${msg}` });
   }
 }
 
@@ -200,14 +233,29 @@ export default function NewReportPage() {
   const [selectedType, setSelectedType] = useState<string>(defaultType);
   const selectedMeta = REPORT_TYPES.find((t) => t.value === selectedType);
 
+  // ── Hydration Fix ──
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // ── คำนวณค่าเริ่มต้นวันเกิด (พ.ศ.) ──
   const birthDateObj = profile?.birth_date ? new Date(profile.birth_date) : null;
   const defaultBDay = birthDateObj ? birthDateObj.getDate() : 15;
   const defaultBMonth = birthDateObj ? birthDateObj.getMonth() + 1 : 6;
   const defaultBYear = birthDateObj ? birthDateObj.getFullYear() + 543 : 2540;
 
+  if (!mounted) {
+    return (
+      <div className="max-w-2xl space-y-8 pb-20 animate-pulse">
+        <div className="h-24 bg-white/5 rounded-2xl" />
+        <div className="h-64 bg-white/5 rounded-2xl" />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-2xl space-y-8 pb-20">
+    <div className="max-w-2xl space-y-8 pb-20 animate-fade-in">
 
       {/* ── Header ── */}
       <div className="relative">
@@ -219,7 +267,7 @@ export default function NewReportPage() {
           บทวิเคราะห์ชีวิต
         </h1>
         <p className="text-[#8A8070] text-sm mt-1">
-          AI วิเคราะห์ดวงชะตาจากระบบ Wisdom Engine · ทักษา · มหาภูติ · เลข 7 ตัว
+          ถอดรหัสชะตาชีวิตด้วยระบบ Living Wisdom Engine · ทักษา · มหาภูติ · เลข 7 ตัว
         </p>
       </div>
 
@@ -229,7 +277,7 @@ export default function NewReportPage() {
           <span className="text-red-400 text-lg flex-shrink-0 mt-0.5">⚠</span>
           <div>
             <p className="text-sm font-semibold text-red-300 mb-0.5">เกิดข้อผิดพลาด</p>
-            <p className="text-sm text-red-400/80">{actionData.error}</p>
+            <p className="text-xs text-red-200/80 leading-relaxed">{actionData.error}</p>
           </div>
         </div>
       )}
@@ -242,98 +290,96 @@ export default function NewReportPage() {
             เลือกประเภทรายงาน
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {REPORT_TYPES.map((type) => {
-              const isSelected = selectedType === type.value;
-              return (
-                <label key={type.value} className="cursor-pointer group select-none">
-                  <input
-                    type="radio"
-                    name="reportType"
-                    value={type.value}
-                    checked={isSelected}
-                    onChange={() => setSelectedType(type.value)}
-                    className="sr-only"
-                  />
-                  <div
-                    className={`relative overflow-hidden rounded-2xl border p-4 flex items-start gap-3 transition-all duration-200 ${
-                      isSelected
-                        ? `bg-gradient-to-br ${type.color} ${type.border} shadow-lg ${type.glow}`
-                        : "border-white/8 bg-slate-800/30 hover:border-white/15 hover:bg-slate-800/50"
-                    }`}
-                  >
-                    {isSelected && (
-                      <div className="absolute top-2.5 right-2.5 w-4 h-4 rounded-full bg-[#C9A96E] flex items-center justify-center">
-                        <span className="text-[8px] text-black font-bold leading-none">✓</span>
-                      </div>
-                    )}
-                    <span className="text-2xl mt-0.5 flex-shrink-0">{type.icon}</span>
-                    <div className="min-w-0 pr-4">
-                      <p className={`font-semibold text-sm ${isSelected ? "text-[#F8F6F1]" : "text-[#D9CDB7]"}`}>
-                        {type.label}
-                      </p>
-                      <p className="text-[#8A8070] text-xs mt-0.5 leading-relaxed">{type.desc}</p>
-                    </div>
+            {REPORT_TYPES.map((type) => (
+              <label
+                key={type.value}
+                className={`
+                  relative cursor-pointer group rounded-2xl border p-4 transition-all duration-300
+                  ${selectedType === type.value 
+                    ? `bg-gradient-to-br ${type.color} ${type.border} shadow-[0_0_20px_rgba(198,169,107,0.05)]` 
+                    : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
+                  }
+                `}
+              >
+                <input
+                  type="radio"
+                  name="reportType"
+                  value={type.value}
+                  checked={selectedType === type.value}
+                  onChange={() => setSelectedType(type.value)}
+                  className="sr-only"
+                />
+                <div className="flex gap-4">
+                  <span className={`text-2xl transition-transform duration-300 ${selectedType === type.value ? 'scale-110' : 'group-hover:scale-105'}`}>
+                    {type.icon}
+                  </span>
+                  <div>
+                    <p className={`text-sm font-bold ${selectedType === type.value ? 'text-[#F8F6F1]' : 'text-[#D9CDB7]'}`}>
+                      {type.label}
+                    </p>
+                    <p className="text-[10px] text-[#8A8070] mt-0.5 leading-relaxed">
+                      {type.desc}
+                    </p>
                   </div>
-                </label>
-              );
-            })}
+                </div>
+              </label>
+            ))}
           </div>
         </div>
 
-        {/* ── Birth Info ── */}
-        <div className="rounded-2xl border border-white/8 bg-slate-900/40 overflow-hidden">
-          <div className="px-5 py-4 border-b border-white/5 bg-white/3">
-            <p className="text-[#F8F6F1] text-sm font-semibold">ข้อมูลสำหรับผูกดวง</p>
-            <p className="text-[#8A8070] text-[11px] mt-0.5">
-              ดึงจากโปรไฟล์อัตโนมัติ — แก้ไขได้เพื่อใช้ในรายงานนี้
+        {/* ── Profile Info ── */}
+        <div className="space-y-6">
+          <div>
+            <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-3 flex items-center justify-between">
+              <span>ข้อมูลสำหรับผูกดวง</span>
+              <span className="font-normal normal-case opacity-60">ดึงจากโปรไฟล์อัตโนมัติ - แก้ไขได้เพื่อใช้ในรายงานนี้</span>
             </p>
-          </div>
-          <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="sm:col-span-2">
+            
+            <div className="card-glass border-white/5 p-6 rounded-2xl space-y-6">
               <Input
                 name="displayName"
                 label="ชื่อที่ใช้แสดงในรายงาน"
-                defaultValue={profile?.display_name ?? ""}
-                placeholder="ชื่อของคุณ"
+                defaultValue={profile?.display_name || ""}
+                placeholder="ระบุชื่อของคุณ"
               />
-            </div>
-            
-            {/* ชุดเลือก วันเกิด พ.ศ. Dropdown */}
-            <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider block">วันเกิด (พ.ศ.) *</label>
-              <div className="grid grid-cols-3 gap-2">
-                <select name="birthDay" defaultValue={defaultBDay} className="bg-slate-950/40 border border-white/10 text-[#F8F6F1] rounded-xl px-4 py-3 text-sm focus:border-[#C9A96E]/50 outline-none">
-                  {Array.from({ length: 31 }).map((_, i) => (
-                    <option key={i + 1} value={i + 1} className="bg-[#020617]">{i + 1}</option>
-                  ))}
-                </select>
-                <select name="birthMonth" defaultValue={defaultBMonth} className="bg-slate-950/40 border border-white/10 text-[#F8F6F1] rounded-xl px-4 py-3 text-sm focus:border-[#C9A96E]/50 outline-none">
-                  {["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"].map((m, i) => (
-                    <option key={i + 1} value={i + 1} className="bg-[#020617]">{m}</option>
-                  ))}
-                </select>
-                <select name="birthYear" defaultValue={defaultBYear} className="bg-slate-950/40 border border-white/10 text-[#F8F6F1] rounded-xl px-4 py-3 text-sm focus:border-[#C9A96E]/50 outline-none">
-                  {Array.from({ length: 120 }).map((_, i) => {
-                    const y = new Date().getFullYear() + 543 - i;
-                    return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
-                  })}
-                </select>
-              </div>
-            </div>
 
-            <Input
-              name="birthTime"
-              type="time"
-              label="เวลาเกิด (ถ้าทราบ)"
-              defaultValue={profile?.birth_time ?? ""}
-            />
-            <div>
-              <Input
-                name="birthPlace"
-                label="จังหวัดที่เกิด"
-                defaultValue={profile?.birth_place ?? ""}
-                placeholder="เช่น กรุงเทพฯ, เชียงใหม่"
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] font-bold text-[#8A8070] uppercase tracking-wider ml-1">วันเกิด (พ.ศ.)</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    <select name="birthDay" defaultValue={defaultBDay} className="bg-black/40 border border-white/10 rounded-xl px-2 py-2.5 text-xs text-[#F8F6F1] focus:border-[#C6A96B] transition-all">
+                      {Array.from({ length: 31 }, (_, i) => (
+                        <option key={i+1} value={i+1}>{i+1}</option>
+                      ))}
+                    </select>
+                    <select name="birthMonth" defaultValue={defaultBMonth} className="bg-black/40 border border-white/10 rounded-xl px-2 py-2.5 text-xs text-[#F8F6F1] focus:border-[#C6A96B] transition-all">
+                      {Array.from({ length: 12 }, (_, i) => (
+                        <option key={i+1} value={i+1}>{i+1}</option>
+                      ))}
+                    </select>
+                    <select name="birthYear" defaultValue={defaultBYear} className="bg-black/40 border border-white/10 rounded-xl px-2 py-2.5 text-xs text-[#F8F6F1] focus:border-[#C6A96B] transition-all">
+                      {Array.from({ length: 100 }, (_, i) => {
+                        const y = new Date().getFullYear() + 543 - i;
+                        return <option key={y} value={y}>{y}</option>;
+                      })}
+                    </select>
+                  </div>
+                </div>
+
+                <Input
+                  name="birthTime"
+                  type="time"
+                  label="เวลาเกิด"
+                  defaultValue={profile?.birth_time || ""}
+                />
+
+                <Input
+                  name="birthPlace"
+                  label="จังหวัดที่เกิด"
+                  defaultValue={profile?.birth_place || ""}
+                  placeholder="เช่น กรุงเทพฯ"
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -347,7 +393,7 @@ export default function NewReportPage() {
               <p className="text-[#8A8070] text-xs">{selectedMeta.desc}</p>
             </div>
             <div className="text-right flex-shrink-0 hidden sm:block">
-              <p className="text-[#C9A96E] text-[10px] font-bold uppercase">AI วิเคราะห์</p>
+              <p className="text-[#C9A96E] text-[10px] font-bold uppercase">ครูเด่นพยากรณ์</p>
               <p className="text-[#8A8070] text-[10px]">~30–60 วิ</p>
             </div>
           </div>
@@ -363,7 +409,7 @@ export default function NewReportPage() {
           {isGenerating ? (
             <span className="flex items-center justify-center gap-2">
               <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              กำลังเปิดบทวิเคราะห์... (30–60 วิ)
+              กำลังประมวลผล... (30–60 วิ)
             </span>
           ) : (
             `✨ สร้างบทวิเคราะห์ · ${selectedMeta?.label ?? ""}`
@@ -371,7 +417,7 @@ export default function NewReportPage() {
         </Button>
 
         <p className="text-center text-[#8A8070] text-[11px]">
-          ระบบ AI ใช้เฉพาะข้อมูลดวงชะตาของคุณ ไม่เก็บข้อมูลส่วนตัวอื่น
+          ระบบ Living Wisdom ใช้เฉพาะข้อมูลดวงชะตาของคุณ ไม่เก็บข้อมูลส่วนตัวอื่น
         </p>
       </Form>
 
@@ -397,7 +443,7 @@ export default function NewReportPage() {
                 {selectedMeta?.label}
               </p>
               <p className="text-[#8A8070] text-xs leading-relaxed">
-                AI กำลังวิเคราะห์ทักษา มหาภูติ และเลข 7 ตัว<br />กรุณารอสักครู่...
+                ระบบกำลังวิเคราะห์ทักษา มหาภูติ และเลข 7 ตัว<br />กรุณารอสักครู่...
               </p>
             </div>
             <div className="flex items-center justify-center gap-2">

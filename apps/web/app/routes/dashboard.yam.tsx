@@ -396,8 +396,16 @@ function getTopicAdvice(topic: "love" | "trade" | "negotiate" | "travel", yamNam
   };
 }
 
+import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
+
 export default function YamPage() {
   const data = useLoaderData<typeof loader>();
+  const profile = (data as any).profile;
+  const isLocked = profile?.plan === 'free' || profile?.plan === 'basic';
+
+  if (isLocked) {
+    return <UpgradePaywall featureName="ฤกษ์งามยามดีเชิงลึก" description="ปลดล็อกเพื่อเข้าถึงการพยากรณ์ยามอัฏฐกาลล่วงหน้า และการวิเคราะห์ช่วงเวลาที่เป็นมงคลส่วนบุคคลแบบละเอียด" />;
+  }
   const { revalidate } = useRevalidator();
   const [now, setNow] = useState<Date>(new Date());
   

@@ -1,100 +1,54 @@
 /**
- * wisdomEngine.ts
+ * wisdomEngine.ts (v2.0)
  * ระบบคำนวณปัญญาศาสตร์มาตรฐาน (เลข 7 ตัว 9 ฐาน, ทักษาคู่ธาตุ, มหาภูติ)
- * อ้างอิงจากคัมภีร์ในโฟลเดอร์ library
+ * Refactored to use the new standardized v2.0 engines.
  */
 
-export const DAY_PLANETS = [1, 2, 3, 4, 5, 6, 7];
-export const YAM_SEQUENCE_DAY = [1, 6, 4, 2, 7, 5, 3]; // ลำดับเลขยามกลางวัน (มาตรฐาน)
+import { calculateNineBases } from "./engine/seven-numbers-v2.js";
+import { calcTaksaNatal, calcTaksaTransit, calcMahabhuti, buddhToCS } from "./taksa-mahabhuti/index.js";
 
 /**
- * 1. ระบบเลข 7 ตัว 9 ฐาน (35 ภพเรือนสมบูรณ์)
+ * 1. ระบบเลข 7 ตัว 9 ฐาน (9 ฐาน 7 ช่อง)
  */
 export function calculateSevenNumbersNineBases(day: number, month: number, year: number) {
-  const fixMod7 = (n: number) => (n > 7 ? (n % 7 || 7) : n);
-  
-  const dBase = fixMod7(day);
-  const mBase = fixMod7(month);
-  const yBase = fixMod7(year);
-
-  // ฐาน 1-3 (21 ภพเรือน)
-  const row1 = Array.from({ length: 7 }, (_, i) => fixMod7(dBase + i));
-  const row2 = Array.from({ length: 7 }, (_, i) => fixMod7(mBase + i));
-  const row3 = Array.from({ length: 7 }, (_, i) => fixMod7(yBase + i));
-
-  // ฐาน 4 (ฐานบวก/มหาจักร)
-  const row4 = row1.map((v, i) => v + row2[i] + row3[i]);
-
-  // ฐาน 5 (ฐานเศษ)
-  const row5 = row4.map(v => v % 7 || 7);
-
-  // ฐาน 6 (กำลังพระเคราะห์ - รอบที่ 1)
-  const row6 = row5.map(v => (v * 2) % 7 || 7);
-
-  // ฐาน 7 (กำลังพระเคราะห์ - รอบที่ 2)
-  const row7 = row6.map(v => (v * 2) % 7 || 7);
-
-  // ฐาน 8 (อาตมะ - เดินยามหน้าตามลำดับยามกลางวัน)
-  const startIdx8 = YAM_SEQUENCE_DAY.indexOf(row5[0]);
-  const row8 = Array.from({ length: 7 }, (_, i) => YAM_SEQUENCE_DAY[(startIdx8 + i) % 7]);
-
-  // ฐาน 9 (ภริยัง - เดินยามทวนกลับ)
-  const last5 = row5[6];
-  const last8 = row8[6];
-  const target9 = (last5 + last8) % 7 || 7;
-  
-  const startIdx9 = YAM_SEQUENCE_DAY.indexOf(target9);
-  const row9 = Array.from({ length: 7 }, (_, i) => {
-    let idx = (startIdx9 - (6 - i)) % 7;
-    if (idx < 0) idx += 7;
-    return YAM_SEQUENCE_DAY[idx];
+  // Mock a HoroscopeInput for calculateNineBases
+  // Since calculateNineBases needs a full date to handle lunar calendar correctly,
+  // we use this helper for direct numeric input if needed, but preferred to use the new engine.
+  const result = calculateNineBases({
+    birthDate: `${year - 543}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   });
-
-  return [row1, row2, row3, row4, row5, row6, row7, row8, row9];
+  return result.bases;
 }
 
 /**
- * 2. ระบบทักษาคู่ธาตุ (Wisdom Standard)
- * ดาวนิ่ง (1-2-3-4-7-5-8-6) ตำแหน่งวิ่ง
+ * 2. ระบบทักษาคู่ธาตุ (Standard v2.0)
  */
 export function calculateWisdomTaksa(birthDayPlanet: number, age: number = 1) {
-  // ลำดับทักษามาตรฐานตามเข็มนาฬิกา
-  const TAKSA_SEQUENCE = [1, 2, 3, 4, 7, 5, 8, 6];
-  const TITLES = ['บริวาร', 'อายุ', 'เดช', 'ศรี', 'มูละ', 'อุตสาหะ', 'มนตรี', 'กาลกิณี'];
+  // Convert planet number to day of week (1=อาทิตย์=0, 2=จันทร์=1, ...)
+  const dayOfWeek = birthDayPlanet === 7 ? 6 : birthDayPlanet - 1;
+  const natal = calcTaksaNatal(dayOfWeek);
   
-  // ปรับแก้กรณีวันพุธกลางคืน (8) หรือค่าอื่นๆ ให้เข้า Index ได้
-  const startIdx = TAKSA_SEQUENCE.indexOf(birthDayPlanet === 8 ? 8 : (birthDayPlanet % 8 || 8));
-  if (startIdx === -1) return { natal: [], transit: [] };
+  // Create a fake transit with age
+  const birthDate = new Date();
+  const checkDate = new Date();
+  checkDate.setFullYear(birthDate.getFullYear() + age - 1);
+  const transit = calcTaksaTransit(birthDate, checkDate);
 
-  // คำนวณตำแหน่งกำเนิด
-  const natal = TITLES.map((title, i) => ({
-    title,
-    planet: TAKSA_SEQUENCE[(startIdx + i) % 8]
+  const format = (map: Record<number, string>) => Object.entries(map).map(([p, t]) => ({
+    title: t,
+    planet: Number(p)
   }));
 
-  // คำนวณตำแหน่งจร (นับวนตามอายุย่าง)
-  const transitIdx = (startIdx + (age - 1)) % 8;
-  const transit = TITLES.map((title, i) => ({
-    title,
-    planet: TAKSA_SEQUENCE[(transitIdx + i) % 8]
-  }));
-
-  return { natal, transit };
+  return { 
+    natal: format(natal.map), 
+    transit: format(transit.map) 
+  };
 }
 
 /**
  * 3. ระบบมหาภูติ (ตามปี จ.ศ.)
  */
 export function calculateMahabhuti(csYear: number) {
-  const titles = ['โลกาวินาศ', 'อริ', 'ขุมทรัพย์', 'มรณะ', 'อธิบดี', 'ราชา', 'ธงชัย'];
-  const startPlanet = csYear % 7 || 7; 
-  
-  const result: Record<string, number> = {};
-  titles.forEach((title, i) => {
-    let p = (startPlanet + i);
-    while (p > 7) p -= 7;
-    result[title] = p;
-  });
-
-  return result;
+  const result = calcMahabhuti(csYear);
+  return result.map;
 }

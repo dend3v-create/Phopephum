@@ -423,7 +423,7 @@ export default function SettingsPage() {
             <Card className="border-[#C6A96B]/15 p-6 bg-slate-900/30">
               <h3 className="font-display font-bold text-[#F8F6F1] text-base mb-3">สิทธิประโยชน์พิเศษสำหรับ VIP</h3>
               <ul className="space-y-2 text-xs text-[#8A8070] list-disc pl-4">
-                <li>เปิดอ่านคำทำนาย AI โหราจร ได้ 6 รูปแบบครบครัน</li>
+                <li>เปิดอ่านบทวิเคราะห์ชะตาชีวิตเจาะลึก 6 รูปแบบครบครัน</li>
                 <li>ดูยามมงคลอัฏฐกาลย้อนหลังและล่วงหน้าได้ไม่จำกัด</li>
                 <li>บันทึกสมุดบันทึกพลังจิต (TQM Planner) ถาวร</li>
                 <li>ระบบคำนวณผังดวงจักรพรรดิแบบละเอียดที่สุด</li>

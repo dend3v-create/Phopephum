@@ -26,10 +26,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const { error, headers } = await signIn(email, password, request, env);
 
   if (error) {
-    return json(
-      { error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" },
-      { status: 401 }
-    );
+    const msg = error.message.toLowerCase().includes("email not confirmed")
+      ? "กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ — ตรวจสอบ inbox ของคุณ"
+      : "อีเมลหรือรหัสผ่านไม่ถูกต้อง";
+    return json({ error: msg }, { status: 401 });
   }
 
   await logEvent(request, env, EVENTS.DAILY_VISIT, { source: "web" });

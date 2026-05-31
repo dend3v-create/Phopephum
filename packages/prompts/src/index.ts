@@ -1,5 +1,5 @@
 // All prompts are versioned — version bump = new file
-export { buildLifeReportPrompt, PROMPT_VERSION } from "./v1/lifeReport.js";
+export { buildLifeReportPrompt, PROMPT_VERSION } from "./v2/lifeReport.js";
 
 // Knowledge Base (RAG) exports
 export {
