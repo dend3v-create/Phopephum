@@ -50,11 +50,11 @@ const PLANS = [
     tier: "BASIC",
     name: "BASIC SAGE",
     subtitle: "เริ่มต้นเส้นทางภูมิปัญญา",
-    price: "9",
+    price: "59",
     unit: "เดือน",
     tag: null,
     style: "basic" as const,
-    ctaLabel: "เริ่มต้นเพียง 9 บาท",
+    ctaLabel: "เริ่มต้นเพียง 59 บาท",
     ctaLoggedIn: "/dashboard/upgrade?plan=basic",
     ctaGuest: "/register?plan=basic",
     features: [

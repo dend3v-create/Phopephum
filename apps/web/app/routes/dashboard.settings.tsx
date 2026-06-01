@@ -3,6 +3,7 @@ import { Form, useLoaderData, useNavigation, useActionData } from "@remix-run/re
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
+import { notifyWithdrawalRequest } from "~/services/line.server";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
@@ -155,6 +156,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
     if (withdrawError) {
       return json({ error: `ไม่สามารถส่งคำขอถอนเงินได้: ${withdrawError.message}` }, { status: 500 });
     }
+
+    // 1.1 ส่ง LINE แจ้งเตือนแอดมิน
+    await notifyWithdrawalRequest(env, {
+      userId: user.id,
+      displayName: profile?.display_name || user.email,
+      amount,
+      bankName,
+      accountName,
+      accountNumber,
+    }).catch(err => console.error("[Settings] LINE notify failed:", err));
 
     // 2. หักเงินจากกระเป๋า
     await supabase

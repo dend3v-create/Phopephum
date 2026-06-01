@@ -9,6 +9,7 @@ import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
 import type { Env } from "~/env.server";
+import { useState, useEffect } from "react";
 
 export const meta: MetaFunction = () => [
   { title: "สมัครสมาชิก — PhopePhum" },
@@ -22,6 +23,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("fullName") ?? "");
   const displayName = String(formData.get("displayName") ?? "");
+  const referralCode = String(formData.get("referralCode") ?? "");
   
   const birthDateRaw = String(formData.get("birthDate") ?? "");
   const birthTime = String(formData.get("birthTime") ?? "");
@@ -55,7 +57,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     displayName || fullName, 
     request, 
     env,
-    { fullName, birthDate, birthTime, birthPlace, gender }
+    { fullName, birthDate, birthTime, birthPlace, gender, referred_by: referralCode }
   );
 
   if (error) {
@@ -107,6 +109,13 @@ export default function RegisterPage() {
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
+
+  // ดึงค่าแนะนำจาก URL ?ref=CODE
+  const [refParam, setRefParam] = useState("");
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    setRefParam(urlParams.get("ref") || "");
+  }, []);
 
   return (
     <Card glow className="max-w-xl mx-auto my-8">
@@ -208,6 +217,15 @@ export default function RegisterPage() {
           placeholder="6 ตัวอักษรขึ้นไป"
           required
           minLength={6}
+        />
+
+        <div className="h-px bg-[#D9BC82]/10 my-2" />
+        
+        <Input
+          name="referralCode"
+          label="รหัสผู้แนะนำ (ถ้ามี)"
+          defaultValue={refParam}
+          placeholder="กรอกรหัสแนะนำ 6 หลัก"
         />
         
         <input type="hidden" name="displayName" value="" />

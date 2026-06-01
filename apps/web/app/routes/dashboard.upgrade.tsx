@@ -16,7 +16,7 @@ const PLANS = [
   {
     id: "basic",
     name: "BASIC SAGE",
-    price: "฿9 / เดือน",
+    price: "฿59 / เดือน",
     color: "#94A3B8",
     features: ["ยามอัฏฐกาล & ราหู (วันนี้)", "ผัง 7 ตัว 9 ฐาน (ดวงตนเอง)", "Life Report 1 ครั้ง/เดือน"],
   },
@@ -76,7 +76,7 @@ export default function UpgradePage() {
   const [paymentStatus, setPaymentStatus] = useState<string>("pending");
   const [timeLeft, setTimeLeft] = useState(900); // 15 minutes
 
-  // เมื่อกดจ่ายเงิน
+  // เมื่อกดจ่ายเงิน (Stripe Checkout)
   const handleUpgrade = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPlan) return;
@@ -86,14 +86,10 @@ export default function UpgradePage() {
     fetcher.submit(formData, { method: "post", action: "/api/payment/checkout" });
   };
 
-  // จัดการเมื่อได้ QR Code จาก API
+  // เมื่อได้ Stripe URL ให้ Redirect ทันที
   useEffect(() => {
-    if (fetcher.data?.success) {
-      setQrCode(fetcher.data.qrcode);
-      setRequestId(fetcher.data.requestId);
-      setShowModal(true);
-      setPaymentStatus("pending");
-      setTimeLeft(900);
+    if (fetcher.data?.success && fetcher.data?.url) {
+      window.location.href = fetcher.data.url;
     }
   }, [fetcher.data]);
 
@@ -185,69 +181,10 @@ export default function UpgradePage() {
             className="w-full py-4 rounded-2xl font-bold text-[#020617] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:hover:scale-100"
             style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}
           >
-            {fetcher.state !== "idle" ? "กำลังสร้าง QR Code..." : `สมัครสมาชิก ${selectedPlan.toUpperCase()} →`}
+            {fetcher.state !== "idle" ? "กำลังพาไปหน้าชำระเงิน..." : `ชำระเงินแพ็กเกจ ${selectedPlan.toUpperCase()} →`}
           </button>
         </div>
       </Form>
-
-      {/* Payment Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-[#020617]/90 backdrop-blur-md" onClick={() => paymentStatus === 'pending' && setShowModal(false)} />
-          <div className="relative w-full max-w-sm bg-[#0a2240] rounded-[2.5rem] border border-white/10 p-8 shadow-2xl overflow-hidden"
-               style={{ background: "radial-gradient(circle at top right, rgba(198,169,107,0.1), transparent)" }}>
-            
-            {paymentStatus === "pending" ? (
-              <div className="text-center">
-                <div className="mb-6">
-                  <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase font-bold mb-1">สแกนชำระเงินผ่าน PromptPay</p>
-                  <h3 className="text-2xl font-bold text-[#F8F6F1]">฿{PLANS.find(p => p.id === selectedPlan)?.price.split(' ')[0].replace('฿', '')}</h3>
-                </div>
-
-                <div className="bg-white p-4 rounded-3xl mb-6 inline-block shadow-inner">
-                  {qrCode ? (
-                    <img src={qrCode.startsWith('http') ? qrCode : `data:image/png;base64,${qrCode}`} 
-                         alt="PromptPay QR Code" 
-                         className="w-48 h-48 mx-auto" />
-                  ) : (
-                    <div className="w-48 h-48 bg-gray-100 animate-pulse rounded-2xl" />
-                  )}
-                </div>
-
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center bg-white/5 rounded-2xl px-5 py-3">
-                    <span className="text-[#94A3B8] text-xs">เวลาที่เหลือ</span>
-                    <span className="text-[#F8F6F1] font-mono font-bold">{formatTime(timeLeft)}</span>
-                  </div>
-                  
-                  <p className="text-[#94A3B8] text-[10px] leading-relaxed">
-                    กรุณาเปิดแอปธนาคารเพื่อสแกน QR Code<br />
-                    ระบบจะปรับระดับสมาชิกให้คุณทันทีหลังชำระเงิน
-                  </p>
-
-                  <button 
-                    onClick={() => setShowModal(false)}
-                    className="w-full py-3 text-[#94A3B8] text-xs hover:text-[#F8F6F1] transition-colors"
-                  >
-                    ยกเลิกและปิดหน้าจอนี้
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-10">
-                <div className="w-20 h-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <h3 className="text-2xl font-bold text-[#F8F6F1] mb-2">ชำระเงินสำเร็จ!</h3>
-                <p className="text-[#94A3B8] text-sm">ยินดีต้อนรับสู่สมาชิกระดับ {selectedPlan.toUpperCase()}</p>
-                <p className="text-[#C6A96B] text-xs mt-8 animate-pulse">กำลังพาคุณไปหน้าหลัก...</p>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

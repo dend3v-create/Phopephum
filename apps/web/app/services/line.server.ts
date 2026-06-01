@@ -282,6 +282,122 @@ export async function notifyPackageRequest(
   await pushMessage(env.LINE_CHANNEL_ACCESS_TOKEN, env.LINE_ADMIN_USER_ID, [message]);
 }
 
+// ─── Payment Success Notification ───────────────────────────────────────────
+
+export async function notifyPaymentSuccess(
+  env: Env,
+  data: {
+    userId: string;
+    displayName: string;
+    plan: string;
+    amount: number;
+    expiresAt: string;
+  }
+) {
+  if (!env.LINE_CHANNEL_ACCESS_TOKEN || !env.LINE_ADMIN_USER_ID) return;
+
+  const planLabel = PLAN_LABEL[data.plan] ?? data.plan;
+  const planColor = PLAN_COLOR[data.plan] ?? "#34D399";
+  const expiryStr = new Date(data.expiresAt).toLocaleDateString("th-TH", { dateStyle: "medium" });
+
+  const message = {
+    type: "flex",
+    altText: `💰 รับเงินสำเร็จ: ฿${data.amount} จาก ${data.displayName}`,
+    contents: {
+      type: "bubble",
+      size: "kilo",
+      header: {
+        type: "box",
+        layout: "vertical",
+        paddingAll: "16px",
+        backgroundColor: "#020617",
+        contents: [
+          { type: "text", text: "💰 PAYMENT RECEIVED", color: "#34D399", weight: "bold", size: "xs", letterSpacing: "0.1em" },
+          { type: "text", text: `฿${data.amount.toLocaleString()}`, color: "#F8F6F1", weight: "bold", size: "xxl", margin: "sm" },
+        ],
+      },
+      body: {
+        type: "box",
+        layout: "vertical",
+        paddingAll: "16px",
+        backgroundColor: "#0A1628",
+        contents: [
+          infoRow("☽", "ลูกค้า", data.displayName),
+          infoRow("✦", "แพ็กเกจ", planLabel),
+          infoRow("📅", "หมดอายุ", expiryStr),
+        ],
+      },
+    },
+  };
+
+  await pushMessage(env.LINE_CHANNEL_ACCESS_TOKEN, env.LINE_ADMIN_USER_ID, [message]);
+}
+
+// ─── Withdrawal Request Notification ─────────────────────────────────────────
+
+export async function notifyWithdrawalRequest(
+  env: Env,
+  data: {
+    userId: string;
+    displayName: string;
+    amount: number;
+    bankName: string;
+    accountName: string;
+    accountNumber: string;
+  }
+) {
+  if (!env.LINE_CHANNEL_ACCESS_TOKEN || !env.LINE_ADMIN_USER_ID) return;
+
+  const appUrl = env.APP_URL || "https://phopephum-web.pages.dev";
+  const manageUrl = `${appUrl}/admin/payouts`; // สมมติว่ามีหน้านี้
+
+  const message = {
+    type: "flex",
+    altText: `💸 คำขอถอนเงิน: ฿${data.amount} จาก ${data.displayName}`,
+    contents: {
+      type: "bubble",
+      size: "kilo",
+      header: {
+        type: "box",
+        layout: "vertical",
+        paddingAll: "16px",
+        backgroundColor: "#020617",
+        contents: [
+          { type: "text", text: "💸 WITHDRAWAL REQUEST", color: "#E8A44A", weight: "bold", size: "xs", letterSpacing: "0.1em" },
+          { type: "text", text: `฿${data.amount.toLocaleString()}`, color: "#F8F6F1", weight: "bold", size: "xxl", margin: "sm" },
+        ],
+      },
+      body: {
+        type: "box",
+        layout: "vertical",
+        paddingAll: "16px",
+        backgroundColor: "#0A1628",
+        contents: [
+          infoRow("👤", "ชื่อผู้ขอ", data.displayName),
+          infoRow("🏦", "ธนาคาร", data.bankName),
+          infoRow("💳", "เลขบัญชี", data.accountNumber),
+          infoRow("📝", "ชื่อบัญชี", data.accountName),
+        ],
+      },
+      footer: {
+        type: "box",
+        layout: "vertical",
+        backgroundColor: "#020617",
+        contents: [
+          {
+            type: "button",
+            style: "primary",
+            color: "#E8A44A",
+            action: { type: "uri", label: "จัดการการโอนเงิน", uri: manageUrl },
+          },
+        ],
+      },
+    },
+  };
+
+  await pushMessage(env.LINE_CHANNEL_ACCESS_TOKEN, env.LINE_ADMIN_USER_ID, [message]);
+}
+
 // ─── Helper: info row ─────────────────────────────────────────────────────────
 
 function infoRow(icon: string, label: string, value: string) {

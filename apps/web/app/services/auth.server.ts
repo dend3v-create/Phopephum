@@ -42,9 +42,9 @@ export async function requireOperator(request: Request, env: Env) {
 export async function requirePaidPlan(request: Request, env: Env) {
   const user = await requireAuth(request, env);
   const profile = await getProfile(user.id, request, env);
-  // isPaid = subscription เป็นค่าชำระเงินแล้ว (basic/pro/lifetime)
+  // isPaid = subscription เป็นค่าชำระเงินแล้ว (basic/premium/lifetime)
   // null, undefined, "free" ทั้งหมดถือว่า free tier
-  const PAID_SUBS = ["basic", "pro", "lifetime"];
+  const PAID_SUBS = ["basic", "premium", "lifetime"];
   const isPaid = profile && PAID_SUBS.includes(profile.subscription ?? "");
   if (!isPaid) {
     throw redirect("/pricing?upgrade=1");

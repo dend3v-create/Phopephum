@@ -91,26 +91,22 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   // อัปเดตสิทธิ์ผู้ใช้เมื่อแอดมินอนุมัติคำขอ
   if (decision === "approved") {
-    if (req.type === "package_upgrade") {
-      const isImperial = req.plan === "imperial";
-      await supabase
-        .from("profiles")
-        .update({
-          subscription: isImperial ? "lifetime" : "basic",
-          plan: req.plan,
-        })
-        .eq("id", req.user_id);
-    } else if (req.type === "registration") {
-      const isImperial = req.plan === "imperial";
-      await supabase
-        .from("profiles")
-        .update({
-          subscription: isImperial ? "lifetime" : "free",
-          plan: req.plan,
-          membership_status: "active",
-        })
-        .eq("id", req.user_id);
-    }
+    const planMapping: Record<string, string> = {
+      free: "free",
+      basic: "basic",
+      pro: "premium",
+      imperial: "lifetime",
+    };
+    const subscriptionTier = planMapping[req.plan] || "free";
+
+    await supabase
+      .from("profiles")
+      .update({
+        subscription: subscriptionTier,
+        plan: req.plan,
+        membership_status: "active",
+      })
+      .eq("id", req.user_id);
   }
 
   // ดึง profile ของ user เพื่อส่ง email
