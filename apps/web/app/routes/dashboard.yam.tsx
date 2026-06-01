@@ -788,30 +788,30 @@ export default function YamPage() {
           ✨ คำนวณฤกษ์มีชัย {isLocked && '🔒'}
         </button>
         <button
-          onClick={() => isLocked ? null : setActiveTab("grid")}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-            activeTab === "grid"
-              ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.2)]"
-              : isLocked 
-              ? "text-[#94A3B8]/40 cursor-not-allowed" 
-              : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
-          }`}
-          title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
-        >
-          📅 ตารางยามอัฏฐกาล {isLocked && '🔒'}
-        </button>
-        <button
           onClick={() => isLocked ? null : setActiveTab("compare")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "compare"
               ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.2)]"
-              : isLocked 
-              ? "text-[#94A3B8]/40 cursor-not-allowed" 
+              : isLocked
+              ? "text-[#94A3B8]/40 cursor-not-allowed"
               : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
           }`}
           title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
           ✈️ เปรียบเทียบฤกษ์เดินทาง {isLocked && '🔒'}
+        </button>
+        <button
+          onClick={() => isLocked ? null : setActiveTab("grid")}
+          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+            activeTab === "grid"
+              ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.2)]"
+              : isLocked
+              ? "text-[#94A3B8]/40 cursor-not-allowed"
+              : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
+          }`}
+          title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
+        >
+          📅 ตารางยามอัฏฐกาล {isLocked && '🔒'}
         </button>
       </div>
 
