@@ -2,6 +2,7 @@ import { redirect } from "@remix-run/cloudflare";
 import { createSupabaseClient } from "./supabase.server";
 import { createClient } from "@supabase/supabase-js"; // เพิ่มการ import client ปกติ
 import type { Env } from "~/env.server";
+import { getUserPlan, canAccess, type Plan } from "./permissions.server";
 
 export async function getUser(request: Request, env: Env) {
   const { supabase } = createSupabaseClient(request, env);
@@ -36,20 +37,24 @@ export async function requireOperator(request: Request, env: Env) {
 }
 
 /**
- * ตรวจสอบว่าผู้ใช้เป็นสมาชิกที่ชำระเงินแล้ว
- * Free tier (subscription="free") → redirect ไป /pricing?upgrade=1
+ * ตรวจสอบว่าผู้ใช้มีแผนขั้นต่ำที่กำหนด
+ * ใช้ getUserPlan() จาก permissions.server เพื่อ normalize plan + membership_status
  */
-export async function requirePaidPlan(request: Request, env: Env) {
+export async function requireMinPlan(minPlan: Plan, request: Request, env: Env) {
   const user = await requireAuth(request, env);
   const profile = await getProfile(user.id, request, env);
-  // isPaid = subscription เป็นค่าชำระเงินแล้ว (basic/premium/lifetime)
-  // null, undefined, "free" ทั้งหมดถือว่า free tier
-  const PAID_SUBS = ["basic", "premium", "lifetime"];
-  const isPaid = profile && PAID_SUBS.includes(profile.subscription ?? "");
-  if (!isPaid) {
-    throw redirect("/pricing?upgrade=1");
+  if (!canAccess(profile, minPlan)) {
+    throw redirect(`/pricing?upgrade=1&require=${minPlan}`);
   }
   return { user, profile };
+}
+
+/**
+ * ตรวจสอบว่าผู้ใช้เป็นสมาชิกที่ชำระเงินแล้ว (basic ขึ้นไป)
+ * @deprecated ใช้ requireMinPlan("basic", ...) แทน
+ */
+export async function requirePaidPlan(request: Request, env: Env) {
+  return requireMinPlan("basic", request, env);
 }
 
 export async function redirectIfAuthed(request: Request, env: Env) {
@@ -124,7 +129,7 @@ export async function signUp(
       referred_by: metadata?.referred_by || null,
       role: isAdmin ? "admin" : "user",
       subscription: isAdmin ? "lifetime" : "free",
-      plan: isAdmin ? "imperial" : "basic",
+      plan: isAdmin ? "imperial" : "free",
       membership_status: isAdmin ? "active" : "pending"
     });
 

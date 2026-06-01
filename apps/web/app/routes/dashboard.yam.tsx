@@ -2,7 +2,8 @@ import { json } from "@remix-run/cloudflare";
 import { useLoaderData, useRevalidator } from "@remix-run/react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useEffect, useState } from "react";
-import { requirePaidPlan } from "~/services/auth.server";
+import { requireMinPlan } from "~/services/auth.server";
+import { canAccess } from "~/services/permissions.server";
 import { 
   getCurrentYam, 
   calculateMoonPhase, 
@@ -123,7 +124,7 @@ function calculateDailyYamSlots(targetDate: Date): YamSlotDetail[] {
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  await requirePaidPlan(request, env);
+  const { profile } = await requireMinPlan("basic", request, env);
 
   const yam = getCurrentYam();
   const moon = calculateMoonPhase();
@@ -159,6 +160,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       guidance:     moon.guidance,
     },
     loadedAt: new Date().toISOString(),
+    isProLocked: !canAccess(profile, "pro"),
   });
 }
 
@@ -400,8 +402,8 @@ import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
 
 export default function YamPage() {
   const data = useLoaderData<typeof loader>();
-  const profile = (data as any).profile;
-  const isLocked = profile?.plan === 'free' || profile?.plan === 'basic';
+  // isLocked = pro+ features (compare, grid) locked for basic users
+  const isLocked = (data as any).isProLocked as boolean;
 
   const { revalidate } = useRevalidator();
   const [now, setNow] = useState<Date>(new Date());
@@ -762,30 +764,24 @@ export default function YamPage() {
           ⏱️ ยามสดขณะนี้
         </button>
         <button
-          onClick={() => isLocked ? null : setActiveTab("ashta")}
+          onClick={() => setActiveTab("ashta")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "ashta"
               ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.2)]"
-              : isLocked 
-              ? "text-[#94A3B8]/40 cursor-not-allowed" 
               : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
           }`}
-          title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
-          🔮 คำนวณยามดี {isLocked && '🔒'}
+          🔮 คำนวณยามดี
         </button>
         <button
-          onClick={() => isLocked ? null : setActiveTab("finder")}
+          onClick={() => setActiveTab("finder")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "finder"
               ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.2)]"
-              : isLocked 
-              ? "text-[#94A3B8]/40 cursor-not-allowed" 
               : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
           }`}
-          title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
-          ✨ คำนวณฤกษ์มีชัย {isLocked && '🔒'}
+          ✨ คำนวณฤกษ์มีชัย
         </button>
         <button
           onClick={() => isLocked ? null : setActiveTab("compare")}
@@ -815,9 +811,9 @@ export default function YamPage() {
         </button>
       </div>
 
-      {isLocked && activeTab !== "live" && (
+      {isLocked && (activeTab === "compare" || activeTab === "grid") && (
         <div className="animate-fade-in mt-6">
-          <UpgradePaywall featureName="เครื่องมือวิเคราะห์ฤกษ์ยามเชิงลึก" description="การคำนวณยามล่วงหน้า, การหาฤกษ์มีชัย, และการเปรียบเทียบฤกษ์ สงวนสิทธิ์สำหรับสมาชิกระดับ PRO ขึ้นไป" />
+          <UpgradePaywall featureName="เครื่องมือวิเคราะห์ฤกษ์ขั้นสูง (PRO)" description="ตารางยามอัฏฐกาลล่วงหน้าและการเปรียบเทียบฤกษ์เดินทาง สงวนสิทธิ์สำหรับสมาชิกระดับ PRO ขึ้นไป" />
         </div>
       )}
 

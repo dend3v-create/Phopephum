@@ -2,7 +2,8 @@ import { json, redirect } from "@remix-run/cloudflare";
 import { Form, useLoaderData, useNavigation, useActionData, useSearchParams } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { requirePaidPlan, requireAuth, getProfile } from "~/services/auth.server";
+import { requireMinPlan, requireAuth, getProfile } from "~/services/auth.server";
+import { getUserPlan, getAiReportLimit } from "~/services/permissions.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { generateAIReport } from "~/services/ai.server";
 import { alertAIFailed, alertDatabaseError } from "~/services/alert.server";
@@ -74,8 +75,9 @@ const REPORT_TYPES = [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const { profile } = await requirePaidPlan(request, env);
-  return json({ profile });
+  const { profile } = await requireMinPlan("basic", request, env);
+  const aiLimit = getAiReportLimit(profile);
+  return json({ profile, aiLimit });
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -106,15 +108,19 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const { supabase } = createSupabaseClient(request, env);
     const profile = await getProfile(user.id, request, env);
 
-    // ── 1. Quota Check (for Free Tier) ──
-    if (profile?.plan === "free" || !profile?.plan) {
+    // ── 1. Quota Check — enforce per-plan monthly limit ──
+    const userPlan = getUserPlan(profile);
+    const monthlyLimit = getAiReportLimit(profile);
+
+    if (monthlyLimit < 9_999) {
       const { data: usageCount, error: usageError } = await supabase
         .rpc("get_ai_usage_month", { p_user: user.id });
-      
+
       if (usageError) {
         console.error("Quota check error:", usageError);
-      } else if (typeof usageCount === 'number' && usageCount >= 3) {
-        return json({ error: "ท่านใช้สิทธิ์สร้างรายงานสำหรับแผนเริ่มต้นครบ 3 ครั้งในเดือนนี้แล้ว กรุณาอัปเกรดเป็นแผน Pro เพื่อใช้งานไม่จำกัด" });
+      } else if (typeof usageCount === 'number' && usageCount >= monthlyLimit) {
+        const planLabel = userPlan === "basic" ? "BASIC (1 ครั้ง/เดือน)" : `PRO (${monthlyLimit} ครั้ง/เดือน)`;
+        return json({ error: `ท่านใช้สิทธิ์สร้างรายงานครบ ${monthlyLimit} ครั้งในเดือนนี้แล้ว (แผน ${planLabel}) กรุณาอัปเกรดเพื่อใช้งานเพิ่มเติม` });
       }
     }
 

@@ -1,8 +1,9 @@
 import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { requirePaidPlan, getProfile } from "~/services/auth.server";
+import { requireMinPlan, getProfile, requireAuth } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
+
 import {
   horoscopeEngine,
   calculateSevenNumbersNineBases,
@@ -52,7 +53,7 @@ export const meta: MetaFunction = () => [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const { user, profile } = await requirePaidPlan(request, env);
+  const { user, profile } = await requireMinPlan("basic", request, env);
 
   const { createSupabaseClient } = await import("~/services/supabase.server");
   const { supabase } = createSupabaseClient(request, env);
@@ -73,7 +74,12 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .order("created_at", { ascending: false })
     .limit(3);
 
-  return json({ profile, reports: reports ?? [], history: history ?? [] });
+  return json({
+    profile,
+    reports: reports ?? [],
+    history: history ?? [],
+    isProLocked: !canAccess(profile, "pro"),
+  });
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -183,12 +189,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
 
 export default function HoroscopePage() {
-  const { profile, reports, history } = useLoaderData<typeof loader>();
-  const isLocked = profile?.plan === 'free' || profile?.plan === 'basic';
-
-  if (isLocked) {
-    return <UpgradePaywall featureName="ตรวจดวงชะตาเลข 7 ตัว 9 ฐาน" description="ปลดล็อกเพื่อเข้าถึงการวิเคราะห์ดวงชะตาฉบับเต็มด้วยระบบ 7 ตัว 9 ฐาน พร้อมคำพยากรณ์พื้นดวงและดวงจรแบบละเอียด" />;
-  }
+  const { profile, reports, history, isProLocked } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
@@ -282,7 +283,12 @@ export default function HoroscopePage() {
             </div>
           </div>
 
-          {/* ส่วนที่ 2: วันจร (ทำนาย) */}
+          {/* ส่วนที่ 2: วันจร (ทำนาย) — PRO+ เท่านั้น */}
+          {isProLocked ? (
+            <div className="pt-4 border-t border-white/5">
+              <UpgradePaywall featureName="ระบบจร (วัยจร / ปีจร)" description="ปลดล็อกระบบคำนวณดวงจรวันจรแบบเต็มสำหรับสมาชิก PRO ขึ้นไป" />
+            </div>
+          ) : (
           <div className="space-y-4 pt-4 border-t border-white/5">
             <div className="flex items-center justify-between border-b border-[#C9A96E]/15 pb-2">
               <span className="text-xs text-[#C9A96E] font-bold uppercase tracking-wider">วันจร (ทำนาย)</span>
@@ -294,7 +300,7 @@ export default function HoroscopePage() {
                   const mSel = document.querySelector('select[name="transitMonth"]') as any;
                   const ySel = document.querySelector('select[name="transitYear"]') as any;
                   const timeInput = document.querySelector('input[name="transitTime"]') as any;
-                  
+
                   if (dSel) dSel.value = String(now.getDate());
                   if (mSel) mSel.value = String(now.getMonth() + 1);
                   if (ySel) ySel.value = String(now.getFullYear() + 543);
@@ -306,7 +312,7 @@ export default function HoroscopePage() {
               </button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              
+
               {/* วันจร พ.ศ. Dropdown */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider">วันที่จร (พ.ศ.) *</label>
@@ -323,7 +329,7 @@ export default function HoroscopePage() {
                   </select>
                   <select name="transitYear" defaultValue={defaultTYear} className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
                     {Array.from({ length: 30 }).map((_, i) => {
-                      const y = new Date().getFullYear() + 543 + 10 - i; // ให้เลือกได้ล่วงหน้า 10 ปี
+                      const y = new Date().getFullYear() + 543 + 10 - i;
                       return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
                     })}
                   </select>
@@ -334,6 +340,7 @@ export default function HoroscopePage() {
               <Input name="transitPlace" label="จังหวัดที่จร" defaultValue={ad?.transitPlace ?? "กรุงเทพมหานคร"} placeholder="กรุงเทพมหานคร" />
             </div>
           </div>
+          )}
 
           <div className="flex justify-end pt-2">
             <Button type="submit" loading={isLoading} className="w-full md:w-auto px-12 h-[46px]">

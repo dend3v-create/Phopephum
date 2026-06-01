@@ -2,7 +2,8 @@ import { json } from "@remix-run/cloudflare";
 import { useLoaderData, useRevalidator } from "@remix-run/react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useEffect, useState, useRef } from "react";
-import { requirePaidPlan } from "~/services/auth.server";
+import { requireMinPlan } from "~/services/auth.server";
+import { canAccess } from "~/services/permissions.server";
 import { 
   calculateRahu,
   RAHU_TIME_BLOCKS,
@@ -50,7 +51,7 @@ export const meta: MetaFunction = () => [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  await requirePaidPlan(request, env);
+  const { profile } = await requireMinPlan("basic", request, env);
 
   const now = new Date();
   const rahuResult = calculateRahu(now);
@@ -58,6 +59,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   return json({
     rahuResult,
     serverTime: now.toISOString(),
+    isProLocked: !canAccess(profile, "pro"),
   });
 }
 
@@ -75,14 +77,7 @@ const DAY_COLOR_THEMES: Record<number, { name: string; bg: string; text: string;
 import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
 
 export default function RahuDashboard() {
-  const data = useLoaderData<typeof loader>();
-  const profile = (data as any).profile;
-  const isLocked = profile?.plan === 'free' || profile?.plan === 'basic';
-
-  if (isLocked) {
-    return <UpgradePaywall featureName="ยามราหูค้นทรัพย์เชิงลึก" description="ปลดล็อกเพื่อเข้าถึงการพยากรณ์ยามราหูค้นทรัพย์แบบละเอียด พร้อมระบบคำนวณช่วงเวลามหาโชคลาภล่วงหน้า" />;
-  }
-  const { rahuResult, serverTime } = data as any;
+  const { rahuResult, serverTime, isProLocked } = useLoaderData<typeof loader>();
   const revalidator = useRevalidator();
 
   const [currentTime, setCurrentTime] = useState(new Date(serverTime));
