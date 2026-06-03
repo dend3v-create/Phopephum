@@ -222,22 +222,22 @@ export default function RahuDashboard() {
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <span className="text-[#C6A96B] text-[10px] tracking-[0.25em] uppercase font-bold block mb-1">
+          <span className="text-[#C6A96B] text-xs tracking-[0.25em] uppercase font-bold block mb-1">
             ✦ คัมภีร์ยามราหูโบราณ
           </span>
-          <h1 className="text-4xl font-display font-bold text-[#F8F6F1] glow-gold mb-2">
+          <h1 className="text-4xl sm:text-5xl font-display font-bold text-[#F8F6F1] glow-gold mb-3">
             ยามราหูค้นทรัพย์
           </h1>
-          <p className="text-[#94A3B8] font-light max-w-2xl text-sm leading-relaxed">
+          <p className="text-[#D9CDB7] font-light max-w-2xl text-base leading-loose">
             สุดยอดศาสตร์แห่งการหาจังหวะมงคลระดับนาทีเพื่อการเจรจา ค้าขาย ปิดยอดขาย และการสัญจร 
             วิเคราะห์ย่อยเวลาเป็น 16 ช่วงหลัก และ 9 ช่วงย่อยตามวิถีแห่งคัมภีร์ประมวลผลดวงดาว
           </p>
         </div>
         
         {/* เวลาปัจจุบันสด */}
-        <div className="bg-[#C6A96B]/8 border border-[#C6A96B]/20 px-6 py-3.5 rounded-2xl backdrop-blur-md shadow-2xl flex gap-6 items-center">
+        <div className="bg-[#C6A96B]/8 border border-[#C6A96B]/20 px-6 py-4 rounded-2xl backdrop-blur-md shadow-2xl flex gap-6 items-center">
           <div>
-            <p className="text-[10px] text-[#C6A96B] uppercase tracking-[0.2em] mb-1 font-bold">เวลาประมวลผล</p>
+            <p className="text-xs text-[#C6A96B] uppercase tracking-[0.2em] mb-1 font-bold">เวลาประมวลผล</p>
             <p className="text-3xl font-display font-bold text-[#F8F6F1] tabular-nums leading-none">
               {currentTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
             </p>
@@ -282,23 +282,23 @@ export default function RahuDashboard() {
         <div className="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           {/* ด้านซ้าย: ยามที่วิเคราะห์ได้ปัจจุบัน */}
-          <div className="lg:col-span-7 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#C6A96B]/10 border border-[#C6A96B]/30 text-[#C6A96B] text-[10px] font-bold uppercase tracking-wider">
+          <div className="lg:col-span-7 space-y-8">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#C6A96B]/10 border border-[#C6A96B]/30 text-[#D9BC82] text-xs font-bold uppercase tracking-wider">
               <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C6A96B] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#C6A96B]"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#D9BC82] opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#D9BC82]"></span>
               </span>
               ยามขณะนี้: {rahuResult.main_block.period_type} รอบที่ {rahuResult.main_block.slot_number} (วัน{rahuResult.day_name})
             </div>
 
             <div>
-              <p className="text-[11px] text-[#8A8070] tracking-widest uppercase mb-1">
+              <p className="text-sm text-[#D9CDB7] tracking-widest uppercase mb-1.5">
                 ยามย่อยตำแหน่ง (Sub-Block)
               </p>
-              <h2 className="text-5xl font-display font-bold text-[#F8F6F1] mb-2 leading-tight">
+              <h2 className="text-6xl font-display font-bold text-[#F8F6F1] mb-3 leading-tight drop-shadow-md">
                 {rahuResult.summary.current_yam_name}
               </h2>
-              <p className="text-lg text-[#C6A96B] font-medium">
+              <p className="text-2xl text-[#D9BC82] font-medium tracking-wide">
                 {rahuResult.yam_rule.yam_name} · {rahuResult.summary.phase}
               </p>
             </div>
@@ -311,24 +311,24 @@ export default function RahuDashboard() {
                 ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
                 : "bg-rose-500/10 border-rose-500/30 text-rose-400"
             }`}>
-              <span className="text-xl">
+              <span className="text-2xl">
                 {rahuResult.is_current_moment_good ? "✨" : rahuResult.sub_block.is_good ? "🔶" : "⚠️"}
               </span>
-              <div>
-                <p className="leading-tight">{rahuResult.summary.overall_verdict}</p>
-                <p className="text-xs font-light text-current/80 mt-0.5">
+              <div className="space-y-1.5">
+                <p className="text-lg leading-relaxed">{rahuResult.summary.overall_verdict}</p>
+                <p className="text-sm font-light text-current/90 leading-relaxed">
                   คำชี้แนะ: {rahuResult.summary.advice}
                 </p>
               </div>
             </div>
 
             {/* รายละเอียดคำแนะนำและขอบเขตเวลา */}
-            <div className="p-4 rounded-xl bg-white/5 border border-white/5 space-y-3.5">
-              <div className="flex gap-3">
-                <Info className="w-5 h-5 text-[#C6A96B] shrink-0 mt-0.5" />
+            <div className="p-5 rounded-xl bg-white/5 border border-white/10 space-y-3.5">
+              <div className="flex gap-4">
+                <Info className="w-5 h-5 text-[#D9BC82] shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-[10px] text-[#8A8070] uppercase font-bold tracking-wider">ขอบเขตเวลาช่วงย่อยนี้</p>
-                  <p className="text-xs text-[#F8F6F1] mt-0.5 leading-relaxed">
+                  <p className="text-xs text-[#D9CDB7] uppercase font-bold tracking-wider">ขอบเขตเวลาช่วงย่อยนี้</p>
+                  <p className="text-sm text-[#F8F6F1] mt-1.5 leading-loose">
                     ยามย่อยมีเวลาช่วงละ 10 นาที โดยยามย่อยนี้จะสิ้นสุดเมื่อพ้นนาทีที่ {subBlockEnd} ของช่วงหลัก ({rahuResult.main_block.start_time} - {rahuResult.main_block.end_time})
                   </p>
                 </div>
@@ -366,7 +366,7 @@ export default function RahuDashboard() {
                   {String(countdownMinutes).padStart(2, "0")}:{String(countdownSeconds).padStart(2, "0")}
                 </p>
                 
-                <p className="text-[10px] text-[#8A8070] mt-1.5 uppercase font-bold tracking-wider">
+                <p className="text-xs text-[#D9CDB7] mt-2 uppercase font-bold tracking-wider">
                   เวลาคงเหลือช่วงย่อย
                 </p>
                 <span className={`mt-2 px-2.5 py-0.5 rounded-full text-[9px] font-bold ${

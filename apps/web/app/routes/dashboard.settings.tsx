@@ -341,6 +341,58 @@ export default function SettingsPage() {
       {/* 2. แท็บ Affiliate & E-Wallet */}
       {activeTab === "affiliate" && (
         <div className="space-y-6 animate-in fade-in duration-300">
+          
+          {/* Affiliate Explanation Card */}
+          <Card className="border-[#C6A96B]/30 bg-gradient-to-br from-[#0B1528] to-[#020617] overflow-hidden">
+            <div className="flex flex-col md:flex-row">
+              <div className="p-6 md:w-2/3 space-y-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">🤝</span>
+                  <h2 className="font-display text-xl font-bold text-[#F8F6F1]">โปรแกรมแนะนำเพื่อน (Affiliate)</h2>
+                </div>
+                <p className="text-[#94A3B8] text-sm leading-relaxed">
+                  ร่วมเป็นส่วนหนึ่งกับ <span className="text-[#C6A96B] font-bold">ภพภูมิ</span> และสร้างรายได้ง่ายๆ เพียงแนะนำเพื่อนให้รู้จักกับระบบภูมิปัญญาพยากรณ์ของเรา <span className="text-[#F8F6F1] font-medium italic">"สมาชิกแบบฟรีก็สร้างรายได้ได้ทันที!"</span>
+                </p>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                  <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
+                    <p className="text-[10px] text-[#8A8070] uppercase font-bold mb-1">สมาชิกทั่วไป/Basic</p>
+                    <p className="text-xl font-black text-[#F8F6F1]">3%</p>
+                  </div>
+                  <div className="bg-[#C6A96B]/10 border border-[#C6A96B]/30 rounded-2xl p-3 text-center relative overflow-hidden">
+                    <div className="absolute top-0 right-0 bg-[#C6A96B] text-[#020617] text-[8px] px-2 font-bold uppercase">Popular</div>
+                    <p className="text-[10px] text-[#C6A96B] uppercase font-bold mb-1">สมาชิกระดับ PRO</p>
+                    <p className="text-xl font-black text-[#C6A96B]">5%</p>
+                  </div>
+                  <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-3 text-center">
+                    <p className="text-[10px] text-indigo-400 uppercase font-bold mb-1">ระดับ IMPERIAL</p>
+                    <p className="text-xl font-black text-indigo-400">10%</p>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-white/5 p-6 md:w-1/3 border-t md:border-t-0 md:border-l border-white/10">
+                <h3 className="text-[#F8F6F1] font-bold text-sm mb-4">เงื่อนไขการรับรายได้</h3>
+                <ul className="space-y-3">
+                  <li className="flex items-start gap-2 text-xs">
+                    <span className="text-[#C6A96B]">✓</span>
+                    <span className="text-[#D9CDB7]">ถอนเงินขั้นต่ำ <span className="font-bold text-[#F8F6F1]">100 บาท</span></span>
+                  </li>
+                  <li className="flex items-start gap-2 text-xs">
+                    <span className="text-[#C6A96B]">✓</span>
+                    <span className="text-[#D9CDB7]">คำนวณยอดเงินแบบเรียลไทม์</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-xs">
+                    <span className="text-[#C6A96B]">✓</span>
+                    <span className="text-[#D9CDB7]">สรุปยอดชัดเจนที่หน้าแดชบอร์ดนี้</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-xs">
+                    <span className="text-[#C6A96B]">✓</span>
+                    <span className="text-[#D9CDB7]">ถอนเข้าบัญชีธนาคารไทยได้ทุกธนาคาร</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </Card>
 
           {/* Commission upgrade prompt สำหรับ free member */}
           {isFreetier && (

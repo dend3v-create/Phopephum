@@ -123,7 +123,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const user = await requireAuth(request, env);
+  const { user } = await requireMinPlan("basic", request, env);
   const todayDate = TODAY();
 
   const formData = await request.formData();
@@ -159,7 +159,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
 
 export default function PlannerPage() {
-  const { profile, plan, moon, dayName, slots } = useLoaderData<typeof loader>();
+  const { plan, moon, dayName, slots } = useLoaderData<typeof loader>();
   const navigation = useNavigation();
   const submit = useSubmit();
   const isSaving = navigation.state === "submitting";

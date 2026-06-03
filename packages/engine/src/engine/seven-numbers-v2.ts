@@ -56,7 +56,8 @@ export function calculateNineBases(input: HoroscopeInput): NineBaseResult {
   // 1. Get Thai Lunar Base Numbers
   const thai = getThaiBaseNumbers(birthDate, birthTime);
   
-  const d = thai.dayNum;
+  // ในระบบ 7 ตัว 9 ฐาน ราหู (8) มีค่าเลขเดียวกับ อาทิตย์ (1) ในการตั้งฐาน
+  const d = thai.dayNum === 8 ? 1 : thai.dayNum;
   const m = thai.monthNum;
   const y = thai.yearNum;
 
@@ -82,6 +83,7 @@ export function calculateNineBases(input: HoroscopeInput): NineBaseResult {
       zodiacName: thai.zodiacName,
       thaiDateText: thai.thaiDateText,
       isApproximate: thai.isApproximate,
+      thaiYear: thai.thaiYear,
     },
     bases: [b1, b2, b3, b4, b5, b6, b7, b8, b9],
   };

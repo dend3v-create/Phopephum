@@ -21,11 +21,11 @@ import type {
   TaksaMahaInput,
   TaksaMahaResult,
 } from "./taksa-mahabhuti.types";
-import { STAR_NAMES } from "./taksa-mahabhuti.types";
+import { STAR_NAMES, DAY_TO_STAR } from "./taksa-mahabhuti.types";
 import {
-  calcTaksaNatal,
-  calcTaksaTransit,
-  calcSawai,
+  calcTaksaNatal_V3,
+  calcTaksaTransit_V3,
+  calcSawai_V3,
   checkElementPairs,
 } from "./taksa-calculator";
 import {
@@ -104,25 +104,24 @@ export function generateAlerts(
  *
  * @example
  * const result = calcTaksaMaha({
- *   birthDate: new Date("1982-07-23"),  // ศุกร์
+ *   birthDate: new Date("1982-07-23"),
  *   checkDate: new Date("2026-05-31"),
- *   csNatal:   1344,                   // buddhToCS(2525)
- *   csTransit: 1388,                   // csFromDate(checkDate)
+ *   birthStar: 6, // ศุกร์
+ *   csNatal:   1344,
+ *   csTransit: 1388,
  * });
- * result.taksaNatal.bariStar   // → 6 (ศุกร์)
- * result.taksaTransit.bariStar // → 5 (พฤหัส) ✅
- * result.taksaTransit.ageYang  // → 44
  */
-export function calcTaksaMaha(input: TaksaMahaInput): TaksaMahaResult {
+export function calcTaksaMaha(input: TaksaMahaInput & { birthStar?: StarNumber }): TaksaMahaResult {
   const { birthDate, checkDate, csNatal, csTransit } = input;
 
-  const dayOfWeek = birthDate.getDay();
+  // ใช้ birthStar ที่ส่งมา (รองรับ ราหู=8) ถ้าไม่มีใช้ birthDate.getDay() (0-6 -> 1-7)
+  const birthStar = input.birthStar || (DAY_TO_STAR[birthDate.getDay()] as StarNumber);
 
-  const taksaNatal   = calcTaksaNatal(dayOfWeek);
-  const taksaTransit = calcTaksaTransit(birthDate, checkDate);
+  const taksaNatal   = calcTaksaNatal_V3(birthStar);
+  const taksaTransit = calcTaksaTransit_V3(birthStar, birthDate, checkDate);
   const mahaNatal    = calcMahabhuti(csNatal);
   const mahaTransit  = calcMahabhuti(csTransit);
-  const sawai        = calcSawai(birthDate, checkDate);
+  const sawai        = calcSawai_V3(birthStar, birthDate, checkDate);
 
   const elementPairFlags = checkElementPairs(taksaNatal.map, taksaTransit.map);
 

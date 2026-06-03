@@ -82,6 +82,11 @@ export default function DashboardLayout() {
         <nav className="flex flex-col gap-0.5 flex-1">
           <NavLink to="/dashboard"           icon={<IconHome />}     label="ภาพรวม" />
           
+          <NavLink to="/dashboard/horoscope" 
+            icon={<IconPlanet />}   
+            label={<span>ตรวจดวงชะตา {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
+          />
+          
           <NavLink to="/dashboard/yam"       
             icon={<IconYam />}      
             label={<span>ฤกษ์งามยามดี {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
@@ -92,14 +97,24 @@ export default function DashboardLayout() {
             label={<span>ยามราหูค้นทรัพย์ {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
           />
           
-          <NavLink to="/dashboard/horoscope" 
-            icon={<IconPlanet />}   
-            label={<span>ตรวจดวงชะตา {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
+          <NavLink to="/dashboard/karnchata" 
+            icon={<IconHourglass />}   
+            label={<span>ทำนายกาลชะตา {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
           />
           
           <NavLink to="/dashboard/planner"   
             icon={<IconCalendar />} 
             label={<span>วางแผนชีวิต {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
+          />
+
+          <NavLink to="/dashboard/calendar"   
+            icon={<IconListCalendar />} 
+            label={<span>ปฏิทิน 100 ปี</span>} 
+          />
+
+          <NavLink to="/dashboard/how-to-use" 
+            icon={<IconHelp />} 
+            label="วิธีการใช้งาน" 
           />
           
           <NavLink to="/dashboard/settings"  icon={<IconSettings />} label="ตั้งค่าโปรไฟล์" />
@@ -318,6 +333,33 @@ function IconRahu() {
       <circle cx="12" cy="12" r="10" />
       <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12c0-2.21.72-4.25 1.94-5.91" />
       <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+    </svg>
+  );
+}
+
+function IconListCalendar() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconHourglass() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#C6A96B]">
+      <path d="M5 2h14M5 22h14M19 2v4a7 7 0 0 1-7 7 7 7 0 0 1-7-7V2M5 22v-4a7 7 0 0 1 7-7 7 7 0 0 1 7 7v4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 2v4M12 18v4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconHelp() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#C9A96E]">
+      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.91894 12.4272 7.03871C13.1255 7.15849 13.7588 7.52152 14.2151 8.06353C14.6713 8.60553 14.9211 9.29152 14.92 10C14.92 12 11.92 13 11.92 13" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 17H12.01" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} />
     </svg>
   );
 }

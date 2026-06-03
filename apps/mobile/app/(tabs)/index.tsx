@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function HomeScreen() {
   const [profile, setProfile] = useState<any>(null);
+  const router = useRouter();
 
   useEffect(() => {
     fetchProfile();
@@ -49,10 +51,36 @@ export default function HomeScreen() {
         {/* Quick Actions */}
         <Text style={styles.sectionTitle}>เมนูแนะนำ</Text>
         <View style={styles.grid}>
-          <ActionCard icon="planet" title="ดวงชะตา" color="#38BDF8" />
-          <ActionCard icon="sparkles" title="รายงาน AI" color="#818CF8" />
-          <ActionCard icon="calendar" title="วางแผนชีวิต" color="#34D399" />
-          <ActionCard icon="settings" title="ตั้งค่า" color="#94A3B8" />
+          <ActionCard 
+            icon="planet" 
+            title="ดวงชะตา" 
+            color="#38BDF8" 
+            onPress={() => router.push('/(tabs)/dashboard')} 
+          />
+          <ActionCard 
+            icon="sparkles" 
+            title="รายงาน AI" 
+            color="#818CF8" 
+            onPress={() => router.push('/(tabs)/report')} 
+          />
+          <ActionCard 
+            icon="calendar" 
+            title="วางแผนชีวิต" 
+            color="#34D399" 
+            onPress={() => router.push('/(tabs)/planner')} 
+          />
+          <ActionCard 
+            icon="help-circle" 
+            title="วิธีการใช้งาน" 
+            color="#C9A96E" 
+            onPress={() => router.push('/how-to-use')} 
+          />
+          <ActionCard 
+            icon="settings" 
+            title="ตั้งค่า" 
+            color="#94A3B8" 
+            onPress={() => router.push('/(tabs)/settings')} 
+          />
         </View>
 
       </ScrollView>
@@ -60,9 +88,9 @@ export default function HomeScreen() {
   );
 }
 
-function ActionCard({ icon, title, color }: { icon: any, title: string, color: string }) {
+function ActionCard({ icon, title, color, onPress }: { icon: any, title: string, color: string, onPress: () => void }) {
   return (
-    <TouchableOpacity style={styles.card}>
+    <TouchableOpacity style={styles.card} onPress={onPress}>
       <View style={[styles.iconBox, { backgroundColor: color + '20' }]}>
         <Ionicons name={icon} size={24} color={color} />
       </View>

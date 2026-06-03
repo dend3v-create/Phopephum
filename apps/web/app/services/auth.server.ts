@@ -4,6 +4,8 @@ import { createClient } from "@supabase/supabase-js"; // เพิ่มกา�
 import type { Env } from "~/env.server";
 import { getUserPlan, canAccess, type Plan } from "./permissions.server";
 
+export { canAccess, type Plan };
+
 export async function getUser(request: Request, env: Env) {
   const { supabase } = createSupabaseClient(request, env);
   const {

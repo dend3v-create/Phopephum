@@ -1,71 +1,64 @@
-import type { HoroscopeInput, HoroscopeResult } from "@phopephum/types";
-import { getThaiBaseNumbers, r7 } from "../core/lunarCalendar.js";
+import { getThaiBaseNumbers } from "../core/lunarCalendar.js";
+import { getProvinceCoords } from "../core/geoLocation.js";
+import { calculateSevenBase } from "../calculators/sevenBase.js";
+import { calculateNineBase } from "../calculators/nineBase.js";
+import { calculateTaksa } from "../calculators/taksa.js";
 import { calculateAgeCycle } from "../calculators/ageCycle.js";
+import { buildEmperorChart } from "../calculators/emperorChart.js";
+import { BirthInput, HoroscopeResult } from "../types/horoscope.js";
 
+/**
+ * Integrated Horoscope Engine (v3.1 - Perfect Master Edition)
+ * strictly follows 100-year calendar and 06:00 AM cutoff.
+ */
 export async function horoscopeEngine(
-  input: HoroscopeInput
+  input: BirthInput,
+  checkDate: Date = new Date()
 ): Promise<HoroscopeResult> {
-  // ── Thai Base Numbers (dayNum/monthNum/yearNum + lunar date info) ──────────
-  // getThaiBaseNumbers handles 06:00 cutoff internally
-  const thai = getThaiBaseNumbers(input.birthDate, input.birthTime);
-
-  const dayNum   = thai.dayNum;
-  const monthNum = thai.monthNum;
-  const yearNum  = thai.yearNum;
-
-  // ── Master Base & Named Numbers ───────────────────────────────────────────
-  const masterBase = r7(dayNum + monthNum + yearNum);
-  const karmic     = r7(dayNum + yearNum);
-  const crown      = r7(monthNum + masterBase);
-  const soulX      = r7(dayNum + monthNum);
-
-  // ── ทักษา 8 ตำแหน่ง ──────────────────────────────────────────────────────
-  const PLANET_NAMES = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
-  const TAKSA_MAP    = ['บริวาร','อายุ','เดช','ศรี','มูละ','อุตสาหะ','มนตรี','กาลกิณี'] as const;
-  // dayNum is 1-7 (1=อาทิตย์...7=เสาร์), planet index = dayNum-1
-  const taksaPositions = TAKSA_MAP.map((name, i) => ({
-    name,
-    planet: PLANET_NAMES[r7(dayNum + i) - 1] ?? '',
-    number: r7(dayNum + i),
-  }));
-
-  // ── วัยจร (Transit Phase) ─────────────────────────────────────────────────
-  const birthYear = new Date(input.birthDate).getFullYear();
-  const ageCycle  = calculateAgeCycle(birthYear);
-  const rangeParts = ageCycle.ageRange.replace(' ปี', '').split('–');
-  const phaseStart = parseInt(rangeParts[0] ?? '0') || 0;
-  const phaseEnd   = parseInt(rangeParts[1] ?? '0') || 0;
-
+  // 1. Core Thai Lunar state (with 06:00 cutoff)
+  const lunar = getThaiBaseNumbers(input.birthDate, input.birthTime);
+  
+  // 2. Location
+  const coordinates = getProvinceCoords(input.province);
+  
+  // 3. 7 Numbers Matrix
+  const [b1, b2, b3] = calculateSevenBase(
+    lunar.dayNum,
+    lunar.monthNum,
+    lunar.yearNum
+  );
+  
+  const nineBase = calculateNineBase(b1!, b2!, b3!);
+  
+  // 4. Taksa
+  const taksaData = calculateTaksa(
+    lunar.dayNum as any,
+    new Date(input.birthDate + 'T12:00:00'),
+    checkDate
+  );
+  
+  // 5. Age Cycle
+  const ageCycle = calculateAgeCycle(
+    lunar.thaiYear,
+    checkDate.getFullYear() + 543
+  );
+  
+  // 6. Emperor Chart
+  const emperorChart = buildEmperorChart(nineBase, taksaData);
+  
   return {
-    sevenNumbers: {
-      base:    [dayNum, monthNum, yearNum, masterBase, karmic, crown, soulX],
-      soul:    dayNum,
-      destiny: masterBase,
-      power:   monthNum,
-      karmic,
-      mission: yearNum,
-      crown,
+    lunar: {
+      lunarDay:   lunar.lunarDay,
+      lunarMonth: lunar.lunarMonth,
+      lunarYear:  lunar.thaiYear,
+      moonPhase:  lunar.moonPhase,
+      thaiDateText: lunar.thaiDateText,
+      isWanPhra:  lunar.isWanPhra
     },
-    lunarDateInfo: {
-      dayName:        thai.dayName,
-      dayPlanet:      thai.dayPlanet,
-      lunarMonth:     thai.lunarMonth,
-      lunarMonthName: thai.lunarMonthName,
-      lunarDay:       thai.lunarDay,
-      moonPhase:      thai.moonPhase,
-      zodiacName:     thai.zodiacName,
-      thaiDateText:   thai.thaiDateText,
-      isApproximate:  thai.isApproximate,
-    },
-    taksa: taksaPositions,
-    atthakarn: { hora: '', element: '', ruling: '', quality: '', prediction: '' },
-    lagna:     { sign: '', degree: 0, house: 0, strength: 0 },
-    transitPhase: {
-      currentAge: ageCycle.age,
-      phase:      `${ageCycle.planet} — ${ageCycle.theme}`,
-      phaseStart,
-      phaseEnd,
-      keywords:   ageCycle.lifePhase.split(/[·,\s]+/).filter(Boolean),
-    },
+    sevenBase: nineBase,
+    taksa: taksaData.transit as any,
+    ageCycle,
+    emperorChart,
+    coordinates
   };
 }

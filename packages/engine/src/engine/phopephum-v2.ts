@@ -1,41 +1,64 @@
 import { calculateNineBases } from "./seven-numbers-v2.js";
 import { calculateAtthakarn as calculateAtthakarnLivingWisdom, calculateRahu as calculateRahuLivingWisdom } from "./time-engines.js";
 import { calcTaksaMaha, buddhToCS } from "../taksa-mahabhuti/index.js";
+import { getThaiBaseNumbers } from "../core/lunarCalendar.js";
+import { calculateVayaJorn, calculateYearlyJorn, calculateMonthlyJorn, calculateDailyJorn } from "../calculators/calculateJorn.js";
+import { calculateLagnaPhopephum, calculateHorary } from "../calculators/calculatePhopephumTime.js";
 import type { PhopephumResult, HoroscopeInput } from "@phopephum/types";
 
 /**
- * Phopephum Living Wisdom Operating System (v2.0)
- * Integrated Prediction Engine
+ * Phopephum Living Wisdom Operating System (v3.0 - Perfect Edition)
+ * Integrated Prediction Engine strictly following:
+ * 1. 100-Year Thai Lunar Calendar (Verified lookup)
+ * 2. 06:00 AM Astrological Day Transition
+ * 3. Month 5 Zodiac Year Transition
  */
 export async function calculatePhopephum(input: HoroscopeInput, checkDate: Date = new Date()): Promise<PhopephumResult> {
-  let birthDateObj = new Date(input.birthDate);
-  if (isNaN(birthDateObj.getTime())) {
-    console.warn("Invalid birthDate provided to calculatePhopephum, defaulting to checkDate");
-    birthDateObj = new Date(checkDate);
-  }
+  // ── 1. Calculate Core Calendar State (V3) ──────────────────────────────────
   
-  // 1. Calculate 7 Numbers 9 Bases
-  const nineBase = calculateNineBases({
-    ...input,
-    birthDate: birthDateObj.toISOString().split('T')[0]
-  });
+  // Birth state (Corrected for 06:00 cutoff and 100-year calendar)
+  const birthThai = getThaiBaseNumbers(input.birthDate, input.birthTime);
   
-  // 2. Calculate Taksa & Mahabhuti (Integrated)
-  const thaiYear = (birthDateObj.getFullYear() || checkDate.getFullYear()) + 543;
-  const currentYear = (checkDate.getFullYear() || new Date().getFullYear()) + 543;
+  // Transit state (Corrected for 06:00 cutoff and 100-year calendar)
+  const checkDateStr = checkDate.toISOString().split('T')[0]!;
+  const checkTimeStr = checkDate.getHours().toString().padStart(2, '0') + ':' + checkDate.getMinutes().toString().padStart(2, '0');
+  const transitThai = getThaiBaseNumbers(checkDateStr, checkTimeStr);
+
+  // ── 2. Calculate 7 Numbers 9 Bases ─────────────────────────────────────────
+  const nineBase = calculateNineBases(input);
   
+  // ── 3. Calculate Taksa & Mahabhuti (V3 Integration) ────────────────────────
   const taksaMaha = calcTaksaMaha({
-    birthDate: birthDateObj,
+    birthDate: new Date(input.birthDate + 'T12:00:00'),
     checkDate: checkDate,
-    birthYearThai: thaiYear,
-    currentYearThai: currentYear,
-    csNatal: buddhToCS(thaiYear),
-    csTransit: buddhToCS(currentYear),
+    birthStar: birthThai.dayNum as any, // 1-8 (Rahu support)
+    csNatal:   buddhToCS(birthThai.thaiYear),
+    csTransit: buddhToCS(transitThai.thaiYear),
   });
   
-  // 3. Calculate Time-based Engines
+  // ── 4. Calculate Time-based Engines ────────────────────────────────────────
   const atthakarn = calculateAtthakarnLivingWisdom(checkDate);
   const rahu = calculateRahuLivingWisdom(checkDate);
+
+  // ── 5. Calculate Jorn (Progressed) & Lagna ────────────────────────────────
+  const ageYang = taksaMaha.taksaTransit.ageYang;
+  const matrix = nineBase.bases;
+
+  const vayaJorn = calculateVayaJorn(matrix, ageYang);
+  const yearlyJorn = calculateYearlyJorn(matrix, ageYang);
+  const monthlyJorn = calculateMonthlyJorn(matrix, transitThai.lunarMonth);
+  const dailyJorn = calculateDailyJorn(matrix, transitThai.dayNum);
+  
+  const birthDateTime = new Date(`${input.birthDate}T${input.birthTime || '12:00'}:00`);
+  const lagna = calculateLagnaPhopephum(matrix, birthDateTime);
+  const lagnaTransit = calculateLagnaPhopephum(matrix, checkDate);
+
+  // ── 6. Calculate Horary (กาลชะตา) ──────────────────────────────────────────
+  const horaryMatrix = calculateHorary(checkDate);
+  const horary: any = {
+    lunarDate: transitThai,
+    bases: horaryMatrix
+  };
   
   return {
     nineBase,
@@ -49,6 +72,13 @@ export async function calculatePhopephum(input: HoroscopeInput, checkDate: Date 
     },
     atthakarn,
     rahu,
+    vayaJorn,
+    yearlyJorn,
+    monthlyJorn,
+    dailyJorn,
+    lagna,
+    lagnaTransit,
+    horary,
     timestamp: checkDate.toISOString(),
   };
 }

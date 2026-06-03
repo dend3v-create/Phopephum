@@ -232,16 +232,16 @@ export default function Index() {
           PhopePhum
         </h1>
 
-        <p className="font-cormorant text-[#9AB3D9] text-xl sm:text-2xl md:text-3xl italic mb-1 animate-fade-up"
+        <p className="font-cormorant text-[#9AB3D9] text-2xl sm:text-3xl md:text-4xl italic mb-1 animate-fade-up"
           style={{ animationDelay: "0.28s" }}>
           เปิดประตูสู่อนาคตด้วย
         </p>
-        <p className="font-display text-[#D9BC82] text-lg sm:text-xl md:text-2xl font-semibold tracking-wide mb-6 animate-fade-up"
+        <p className="font-display text-[#D9BC82] text-xl sm:text-2xl md:text-3xl font-semibold tracking-wide mb-6 animate-fade-up"
           style={{ animationDelay: "0.32s" }}>
           ศาสตร์ยามอัฏฐกาลชั้นสูง
         </p>
 
-        <p className="text-[#94A3B8] text-sm md:text-base leading-relaxed max-w-xl mx-auto mb-10 animate-fade-up"
+        <p className="text-[#94A3B8] text-base md:text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto mb-10 animate-fade-up"
           style={{ animationDelay: "0.38s" }}>
           คำนวณยามมงคลและชะตาจรระดับนาทีด้วยสูตรโบราณดั้งเดิม<br />
           พร้อมบทวิเคราะห์ดวงชะตาเชิงลึก ส่งรายงานวิเคราะห์ชีวิตสู่มือคุณ
@@ -285,7 +285,7 @@ export default function Index() {
           <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] mb-3">
             ทุกศาสตร์ที่คุณต้องการ
           </h2>
-          <p className="text-[#94A3B8] text-sm max-w-md mx-auto">
+          <p className="text-[#94A3B8] text-base max-w-md mx-auto">
             รวมทุกเครื่องมือโหราศาสตร์ไทยในที่เดียว ใช้งานได้ทันที
           </p>
         </div>
@@ -298,8 +298,8 @@ export default function Index() {
               <div className="text-[#C6A96B] text-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
                 {f.icon}
               </div>
-              <h3 className="font-display text-[#F8F6F1] font-semibold text-base mb-2">{f.title}</h3>
-              <p className="text-[#94A3B8] text-xs leading-relaxed">{f.desc}</p>
+              <h3 className="font-display text-[#F8F6F1] font-semibold text-lg mb-2">{f.title}</h3>
+              <p className="text-[#94A3B8] text-sm leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -321,8 +321,8 @@ export default function Index() {
                 style={{ background: "rgba(198,169,107,0.12)", border: "1px solid rgba(198,169,107,0.3)" }}>
                 <span className="font-display text-[#C6A96B] font-bold text-lg">{step.num}</span>
               </div>
-              <h3 className="font-display text-[#F8F6F1] font-semibold text-base mb-2">{step.title}</h3>
-              <p className="text-[#94A3B8] text-xs leading-relaxed">{step.desc}</p>
+              <h3 className="font-display text-[#F8F6F1] font-semibold text-lg mb-2">{step.title}</h3>
+              <p className="text-[#94A3B8] text-sm leading-relaxed">{step.desc}</p>
             </div>
           ))}
         </div>

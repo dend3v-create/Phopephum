@@ -73,7 +73,7 @@ const TAKSA_TABLE: number[][] = [
   [7, 8, 1, 2, 3, 4, 5, 6, 7], // เสาร์
 ]
 
-export function calculateTaksa(dayOfWeek: number, base: number): TaksaResult {
+export function calculateTaksaLegacy(dayOfWeek: number, base: number): TaksaResult {
   const row = TAKSA_TABLE[dayOfWeek % 7] ?? TAKSA_TABLE[0]
   const position = row[(base - 1) % 9] ?? 1
   const info = TAKSA_MEANINGS[position] ?? TAKSA_MEANINGS[1]

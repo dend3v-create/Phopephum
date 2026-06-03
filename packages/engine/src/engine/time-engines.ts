@@ -42,14 +42,14 @@ function getBKKMinutes(date: Date): number {
 }
 
 /**
- * หาวันทางโหราศาสตร์ (เปลี่ยนวันตอน 06:01 น.)
+ * หาวันทางโหราศาสตร์ (เปลี่ยนวันตอน 06:00 น. ตามคำขอผู้ใช้)
  */
 function getAstrologicalBKKDay(date: Date): number {
   const bkkDate = new Date(date.getTime() + (date.getTimezoneOffset() + 420) * 60000);
   const totalMin = bkkDate.getHours() * 60 + bkkDate.getMinutes();
   
-  // ถ้าก่อน 06:01 น. ให้ถอยหลังไป 1 วัน
-  if (totalMin < 361) {
+  // ถ้าก่อน 06:00 น. (360 นาที) ให้ถอยหลังไป 1 วัน
+  if (totalMin < 360) {
     const yesterday = new Date(bkkDate.getTime() - 24 * 60 * 60 * 1000);
     return yesterday.getDay();
   }
@@ -65,8 +65,8 @@ export function calculateAtthakarn(date: Date): SystematicAtthakarnResult {
   const totalMin = getBKKMinutes(date);
   const dow = getAstrologicalBKKDay(date);
 
-  const isDaytime = totalMin >= 361 && totalMin <= 1080; // 06:01–18:00
-  const baseMin = isDaytime ? 361 : (totalMin < 361 ? 1081 - 1440 : 1081);
+  const isDaytime = totalMin >= 360 && totalMin <= 1080; // 06:00–18:00
+  const baseMin = isDaytime ? 360 : (totalMin < 360 ? 1081 - 1440 : 1081);
   const elapsed = (totalMin - baseMin + 1440) % 1440;
 
   const majorIndex = Math.floor(elapsed / 90); // 0–7
@@ -105,8 +105,8 @@ export function calculateAtthakarn(date: Date): SystematicAtthakarnResult {
  */
 export function calculateRahu(date: Date): SystematicRahuResult {
   const totalMin = getBKKMinutes(date);
-  const isDaytime = totalMin >= 361 && totalMin <= 1080;
-  const baseMin = isDaytime ? 361 : (totalMin < 361 ? 1081 - 1440 : 1081);
+  const isDaytime = totalMin >= 360 && totalMin <= 1080;
+  const baseMin = isDaytime ? 360 : (totalMin < 360 ? 1081 - 1440 : 1081);
   const elapsed = (totalMin - baseMin + 1440) % 1440;
 
   const subIdx = Math.floor((elapsed % 90) / 10); // 0–8

@@ -19,8 +19,8 @@ export type SubscriptionTier = "free" | "basic" | "premium" | "lifetime";
 
 // ─── Core Astrology Primitives ───────────────────────────────────────────────
 
-/** เลขดาว 1–7 (โหราศาสตร์ไทย) */
-export type StarNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7;
+/** เลขดาว 1–8 (โหราศาสตร์ไทย รวมราหู=8) */
+export type StarNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
 /** ชื่อดาวภาษาไทย */
 export const STAR_NAMES: Record<StarNumber, string> = {
@@ -31,6 +31,7 @@ export const STAR_NAMES: Record<StarNumber, string> = {
   5: "พฤหัส",
   6: "ศุกร์",
   7: "เสาร์",
+  8: "ราหู",
 } as const;
 
 export interface LunarDateInfo {
@@ -43,6 +44,8 @@ export interface LunarDateInfo {
   zodiacName: string;
   thaiDateText: string;
   isApproximate: boolean;
+  /** ปี พ.ศ. (ไทย) — ใช้ในระบบทักษา-มหาภูติ */
+  thaiYear?: number;
 }
 
 // ─── 7 Numbers 9 Bases (ผัง 7 ตัว 9 ฐาน) ────────────────────────────────────────
@@ -66,13 +69,15 @@ export type TaksaMap = Record<StarNumber, TaksaBhop>;
 export interface TaksaNatalResult {
   map: TaksaMap;
   bariStar: StarNumber;
-  birthStar: StarNumber;
+  birthStar?: StarNumber;   // optional: บางเวอร์ชัน engine ไม่มี
+  kalakiniStar?: StarNumber; // optional: ดาวกาลกิณี
 }
 
 export interface TaksaTransitResult {
   map: TaksaMap;
   bariStar: StarNumber;
   ageYang: number;
+  kalakiniStar?: StarNumber; // optional
 }
 
 // ─── มหาภูติ (Mahabhuti) ────────────────────────────────────────────────────────
@@ -81,7 +86,8 @@ export type MahaBhop =
   | "ราชา" | "อธิบดี" | "ธงชัย" | "ขุมทรัพย์"
   | "มรณะ" | "โลกาวินาศ" | "อริ";
 
-export type MahaMap = Record<MahaBhop, StarNumber>;
+/** แผนที่ ภพมหาภูติ → เลขดาว (number เพราะรองรับ 1-8 จาก engine) */
+export type MahaMap = Record<MahaBhop, number>;
 
 export interface MahaBhutiResult {
   cs: number;
@@ -110,6 +116,25 @@ export interface SystematicRahuResult {
   minutesRange: [number, number];
 }
 
+// ─── Jorn (Progressed Calculations) ──────────────────────────────────────────
+
+export interface JornResult {
+  row: number;        // 1-based row
+  col: number;        // 1-based col
+  houseName: string;
+  star: number;
+  yumStar?: number;
+  yumBase?: number;   // 1-based base index
+  ageRange?: string;  // For Vaya Jorn
+}
+
+export interface LagnaPhopephumResult {
+  row: number;
+  col: number;
+  houseName: string;
+  star: number;
+}
+
 // ─── Integrated Results (สหวิชาพยากรณ์) ──────────────────────────────────────────
 
 export type AlertLevel = "danger" | "warn" | "info" | "good";
@@ -120,8 +145,8 @@ export interface StarAlert {
   starName: string;
   taksaNatal: TaksaBhop;
   taksaTransit: TaksaBhop;
-  mahaNatal: MahaBhop;
-  mahaTransit: MahaBhop;
+  mahaNatal?: MahaBhop;   // optional — ราหู(8) ไม่มีในมหาภูติ
+  mahaTransit?: MahaBhop; // optional
   message: string;
 }
 
@@ -150,6 +175,13 @@ export interface PhopephumResult {
   crossCheck: CrossCheckResult;
   atthakarn: SystematicAtthakarnResult;
   rahu: SystematicRahuResult;
+  vayaJorn?: JornResult;
+  yearlyJorn?: JornResult;
+  monthlyJorn?: JornResult;
+  dailyJorn?: JornResult;
+  lagna?: LagnaPhopephumResult;
+  lagnaTransit?: LagnaPhopephumResult;
+  horary?: NineBaseResult;
   timestamp: string;
 }
 
@@ -163,16 +195,18 @@ export interface HoroscopeInput {
   zodiacOverride?: string;
 }
 
+export interface SevenNumbers {
+  base: number[];
+  soul: number;
+  destiny: number;
+  power: number;
+  karmic: number;
+  mission: number;
+  crown: number;
+}
+
 export interface HoroscopeResult {
-  sevenNumbers: {
-    base: number[];
-    soul: number;
-    destiny: number;
-    power: number;
-    karmic: number;
-    mission: number;
-    crown: number;
-  };
+  sevenNumbers: SevenNumbers;
   lunarDateInfo: LunarDateInfo;
   taksa: { name: string; planet: string; number: number }[];
   atthakarn: {

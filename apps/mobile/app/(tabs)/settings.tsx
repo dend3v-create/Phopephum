@@ -1,16 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert, SafeAreaView, ScrollView } from 'react-native';
 import { supabase } from '../../lib/supabase';
-import { useRouter } from 'expo-router';
+import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
 export default function SettingsScreen() {
   const [profile, setProfile] = useState<any>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile();
+    }, [])
+  );
 
   async function fetchProfile() {
     const { data: { user } } = await supabase.auth.getUser();
@@ -48,7 +50,28 @@ export default function SettingsScreen() {
           <Text style={styles.emailText}>{profile?.email}</Text>
         </View>
 
-        {/* Info Rows */}
+        {/* Main Menu Actions */}
+        <Text style={styles.groupTitle}>เมนูหลัก</Text>
+        <View style={styles.menuGroup}>
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/how-to-use')}>
+            <View style={styles.menuLeft}>
+              <Ionicons name="help-circle-outline" size={22} color="#C9A96E" />
+              <Text style={styles.menuText}>วิธีการใช้งาน</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#8A8070" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/edit-profile')}>
+            <View style={styles.menuLeft}>
+              <Ionicons name="person-circle-outline" size={22} color="#C9A96E" />
+              <Text style={styles.menuText}>ตั้งค่าโปรไฟล์</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={20} color="#8A8070" />
+          </TouchableOpacity>
+        </View>
+
+        {/* Info Section */}
+        <Text style={styles.groupTitle}>ข้อมูลพื้นฐาน</Text>
         <View style={styles.menuGroup}>
            <InfoRow label="วันเกิด" value={profile?.birth_date || '-'} icon="calendar-outline" />
            <InfoRow label="เวลาเกิด" value={profile?.birth_time || '-'} icon="time-outline" />
@@ -58,7 +81,7 @@ export default function SettingsScreen() {
 
         {/* Action Buttons */}
         <View style={styles.actionGroup}>
-          <TouchableOpacity style={[styles.menuItem, styles.logoutButton]} onPress={handleSignOut}>
+          <TouchableOpacity style={[styles.logoutButton]} onPress={handleSignOut}>
             <Ionicons name="log-out-outline" size={22} color="#F87171" />
             <Text style={styles.logoutText}>ออกจากระบบ</Text>
           </TouchableOpacity>
@@ -119,6 +142,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginTop: 4,
   },
+  groupTitle: {
+    color: '#8A8070',
+    fontSize: 12,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    marginBottom: 12,
+    marginLeft: 4,
+  },
   menuGroup: {
     backgroundColor: '#15120F',
     borderRadius: 20,
@@ -126,6 +157,24 @@ const styles = StyleSheet.create({
     borderColor: '#2A2018',
     overflow: 'hidden',
     marginBottom: 24,
+  },
+  menuItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 18,
+    borderBottomWidth: 1,
+    borderBottomColor: '#2A2018',
+  },
+  menuLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  menuText: {
+    color: '#F8F6F1',
+    fontSize: 15,
+    fontWeight: '500',
   },
   infoRow: {
     flexDirection: 'row',
@@ -150,20 +199,18 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   actionGroup: {
-    gap: 12,
+    marginTop: 8,
   },
-  menuItem: {
+  logoutButton: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 18,
-    backgroundColor: '#15120F',
+    backgroundColor: 'rgba(248,113,113,0.05)',
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#2A2018',
-    gap: 12,
-  },
-  logoutButton: {
     borderColor: 'rgba(248,113,113,0.2)',
+    gap: 12,
+    justifyContent: 'center',
   },
   logoutText: {
     color: '#F87171',

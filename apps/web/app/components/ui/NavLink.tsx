@@ -3,7 +3,7 @@ import { NavLink as RemixNavLink } from "@remix-run/react";
 interface NavLinkProps {
   to: string;
   icon: React.ReactNode;
-  label: string;
+  label: React.ReactNode;
 }
 
 export function NavLink({ to, icon, label }: NavLinkProps) {

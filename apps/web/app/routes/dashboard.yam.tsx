@@ -872,30 +872,30 @@ export default function YamPage() {
                 
                 {/* 1. Header Information */}
                 <div>
-                  <span className="text-[10px] text-[#D9BC82] font-bold uppercase tracking-widest block mb-1">
+                  <span className="text-xs text-[#D9BC82] font-bold uppercase tracking-widest block mb-1">
                     🪐 กระแสพลังยามมงคลขณะนี้
                   </span>
-                  <h2 className="font-display text-3xl font-black text-[#F8F6F1] tracking-wide mt-1 drop-shadow-[0_0_8px_rgba(248,246,241,0.05)]">
+                  <h2 className="font-display text-4xl sm:text-5xl font-black text-[#F8F6F1] tracking-wide mt-1 drop-shadow-[0_0_12px_rgba(248,246,241,0.15)]">
                     ยาม{data.yamName}
                   </h2>
-                  <div className="flex gap-2 items-center mt-2.5 flex-wrap">
-                    <span className="px-3 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-[#F8F6F1]">
+                  <div className="flex gap-2 items-center mt-3 flex-wrap">
+                    <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-[#F8F6F1]">
                       ยามใหญ่ที่ {data.yamNumber}
                     </span>
-                    <span className="px-3 py-0.5 rounded-full bg-[#4B6FAE]/15 border border-[#4B6FAE]/25 text-[10px] font-bold text-[#9AB3D9]">
+                    <span className="px-3 py-1 rounded-full bg-[#4B6FAE]/20 border border-[#4B6FAE]/30 text-xs font-bold text-[#D9CDB7]">
                       ช่วง{PERIOD_LABEL[data.period]}
                     </span>
-                    <span className="px-3 py-0.5 rounded-full bg-[#D9BC82]/15 border border-[#D9BC82]/25 text-[10px] font-bold text-[#D9BC82]">
+                    <span className="px-3 py-1 rounded-full bg-[#D9BC82]/20 border border-[#D9BC82]/30 text-xs font-bold text-[#D9BC82]">
                       เฟส{PHASE_LABEL[data.phase]}
                     </span>
                   </div>
                 </div>
 
                 {/* 2. Interactive Progress Meter */}
-                <div className="p-4 rounded-2xl bg-black/20 border border-white/5 space-y-2.5">
-                  <div className="flex justify-between items-baseline text-[10px] font-bold uppercase tracking-wider">
-                    <span className="text-[#94A3B8]">ความเข้มข้นของกระแสพลัง</span>
-                    <span className="text-[#D9BC82] font-display text-xs">เหลือ {remMin} นาที</span>
+                <div className="p-4 rounded-2xl bg-black/30 border border-white/10 space-y-3">
+                  <div className="flex justify-between items-baseline text-xs font-bold uppercase tracking-wider">
+                    <span className="text-[#D9CDB7]">ความเข้มข้นของกระแสพลัง</span>
+                    <span className="text-[#D9BC82] font-display text-sm">เหลือ {remMin} นาที</span>
                   </div>
                   
                   {/* High Tech Progress Bar */}
@@ -912,12 +912,12 @@ export default function YamPage() {
                 </div>
 
                 {/* 3. Solar Times & Astronomical Boundaries */}
-                <div className="flex justify-between items-center pt-4 border-t border-white/5">
-                  <div className="space-y-0.5">
-                    <span className="text-[8px] text-[#8A8070] uppercase tracking-widest block font-bold">ขอบข่ายท้องฟ้า</span>
-                    <div className="flex gap-4 text-xs font-semibold text-[#D9CDB7]">
-                      <span className="flex items-center gap-1">☀️ ขึ้น {sunrise.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</span>
-                      <span className="flex items-center gap-1">☀️ ตก {sunset.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</span>
+                <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                  <div className="space-y-1">
+                    <span className="text-[10px] text-[#D9CDB7] uppercase tracking-widest block font-bold">ขอบข่ายท้องฟ้า</span>
+                    <div className="flex gap-4 text-sm font-semibold text-[#F8F6F1]">
+                      <span className="flex items-center gap-1.5">☀️ ขึ้น {sunrise.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</span>
+                      <span className="flex items-center gap-1.5">☀️ ตก {sunset.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
                   </div>
                   
@@ -943,10 +943,10 @@ export default function YamPage() {
                 ? "bg-white/5 border-white/10"
                 : "bg-red-950/10 border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.05)]"
             }`}>
-              <div className="p-4 bg-white/[0.02] border-b border-white/5 flex items-center justify-between">
+              <div className="p-4 bg-white/[0.03] border-b border-white/10 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-lg">🧭</span>
-                  <span className="text-xs font-bold text-[#F8F6F1] uppercase tracking-widest">ฤกษ์สัญจรและการเดินทาง</span>
+                  <span className="text-xl">🧭</span>
+                  <span className="text-sm font-bold text-[#F8F6F1] uppercase tracking-widest drop-shadow-sm">ฤกษ์สัญจรและการเดินทาง</span>
                 </div>
                 <div className="flex gap-1">
                   {Array.from({ length: 3 }).map((_, i) => (
@@ -980,8 +980,8 @@ export default function YamPage() {
                         : "rgba(239, 68, 68, 0.2)",
                   }}
                 >
-                  <span className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider mb-1">ความมงคล</span>
-                  <span className={`text-base font-bold ${
+                  <span className="text-sm text-[#D9CDB7] font-bold uppercase tracking-wider mb-1">ความมงคล</span>
+                  <span className={`text-xl font-bold ${
                     data.travelAuspiciousness.level === "excellent"
                       ? "text-[#D9BC82] glow-gold"
                       : data.travelAuspiciousness.level === "very_good"
@@ -994,7 +994,7 @@ export default function YamPage() {
                      data.travelAuspiciousness.ticks === 2 ? "ดีมาก" :
                      data.travelAuspiciousness.ticks === 1 ? "ดี" : "ติดขัด"}
                   </span>
-                  <span className="text-[10px] text-[#94A3B8] mt-1 tabular-nums font-bold">
+                  <span className="text-xs text-[#F8F6F1] mt-1 tabular-nums font-bold">
                     {data.travelAuspiciousness.ticks} / 3 ขีด
                   </span>
                 </div>

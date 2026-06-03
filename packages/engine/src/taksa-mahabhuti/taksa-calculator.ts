@@ -151,17 +151,11 @@ export function calcAgeYang(birthDate: Date, checkDate: Date): number {
 
 /**
  * คำนวณทักษากำเนิด (8 ดาว → 8 ภพ 1:1 ตาม SEQ_STARS_8)
- *
- * @example
- * calcTaksaNatal(5) // เกิดวันศุกร์ (dayOfWeek=5) → birthStar=6
- * // map[6]="บริวาร", map[1]="อายุ", map[2]="เดช", map[3]="ศรี",
- * // map[4]="มูละ", map[7]="อุตสาหะ", map[5]="มนตรี", map[8]="กาลกิณี"
  */
-export function calcTaksaNatal(dayOfWeek: number): TaksaNatalResult {
-  const birthStar = DAY_TO_STAR[dayOfWeek] as StarNumber;
-  if (!birthStar) throw new Error(`dayOfWeek ต้องอยู่ระหว่าง 0–6`);
-
+export function calcTaksaNatal_V3(birthStar: StarNumber): TaksaNatalResult {
   const startIdx = SEQ_STARS_8.indexOf(birthStar);
+  if (startIdx === -1) throw new Error(`birthStar ${birthStar} ไม่อยู่ใน SEQ_STARS_8`);
+
   const map = {} as TaksaMap;
   for (let i = 0; i < 8; i++) {
     const star = SEQ_STARS_8[(startIdx + i) % 8];
@@ -170,6 +164,11 @@ export function calcTaksaNatal(dayOfWeek: number): TaksaNatalResult {
   const kalakiniStar = SEQ_STARS_8[(startIdx + 7) % 8];
 
   return { map, bariStar: birthStar, kalakiniStar };
+}
+
+export function calcTaksaNatal(dayOfWeek: number): TaksaNatalResult {
+  const birthStar = DAY_TO_STAR[dayOfWeek] as StarNumber;
+  return calcTaksaNatal_V3(birthStar);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -186,27 +185,13 @@ export interface TaksaTransitResult9 extends TaksaTransitResult {
 }
 
 /**
- * คำนวณทักษาจร ด้วย PATH 9 ช่อง
- *
- * สูตร:
- *   path9 = buildPath9(birthStar)   [9 elements]
- *   transitSlot = path9[(ageYang - 1) % 9]
- *
- * @example
- * // เกิดวันศุกร์ 23/07/2525, ตรวจ 31/05/2569
- * const r = calcTaksaTransit(new Date("1982-07-23"), new Date("2026-05-31"))
- * // r.ageYang = 44
- * // r.path9 = [6, 1, -1, 2, 3, 4, 7, 5, 8]
- * // r.transitIdx = (44-1)%9 = 7
- * // r.bariStar = path9[7] = 5 (พฤหัส) ✅
+ * คำนวณทักษาจร ด้วย PATH 9 ช่อง (V3)
  */
-export function calcTaksaTransit(
+export function calcTaksaTransit_V3(
+  birthStar: StarNumber,
   birthDate: Date,
   checkDate: Date
 ): TaksaTransitResult9 {
-  const dayOfWeek = birthDate.getDay();
-  const birthStar = DAY_TO_STAR[dayOfWeek] as StarNumber;
-
   const ageYang = calcAgeYang(birthDate, checkDate);
   const path9 = buildPath9(birthStar);
   const transitIdx = (ageYang - 1) % 9;
@@ -244,17 +229,27 @@ export function calcTaksaTransit(
   };
 }
 
+export function calcTaksaTransit(
+  birthDate: Date,
+  checkDate: Date
+): TaksaTransitResult9 {
+  const dayOfWeek = birthDate.getDay();
+  const birthStar = DAY_TO_STAR[dayOfWeek] as StarNumber;
+  return calcTaksaTransit_V3(birthStar, birthDate, checkDate);
+}
+
 // ─────────────────────────────────────────────────────────────────────────────
 // ดาวเสวยอายุ (Sawai)
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * คำนวณดาวเสวยอายุ + ดาวแทรก (sub-period)
- * วงจร 108 ปี เริ่มจาก birthStar ใน TAKSA_SEQUENCE
+ * คำนวณดาวเสวยอายุ + ดาวแทรก (V3)
  */
-export function calcSawai(birthDate: Date, checkDate: Date): SawaiResult {
-  const dayOfWeek = birthDate.getDay();
-  const birthStar = DAY_TO_STAR[dayOfWeek] as StarNumber;
+export function calcSawai_V3(
+  birthStar: StarNumber,
+  birthDate: Date,
+  checkDate: Date
+): SawaiResult {
   const startSeqIdx = TAKSA_SEQUENCE.indexOf(birthStar);
 
   const msAge = checkDate.getTime() - birthDate.getTime();
@@ -324,6 +319,12 @@ export function calcSawai(birthDate: Date, checkDate: Date): SawaiResult {
     subDateEnd,
     subDurationDays,
   };
+}
+
+export function calcSawai(birthDate: Date, checkDate: Date): SawaiResult {
+  const dayOfWeek = birthDate.getDay();
+  const birthStar = DAY_TO_STAR[dayOfWeek] as StarNumber;
+  return calcSawai_V3(birthStar, birthDate, checkDate);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

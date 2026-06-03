@@ -1,6 +1,6 @@
 import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
 import { getStripeService } from "~/services/payment.server";
-import { createClient } from "@supabase/supabase-js";
+import { createServiceRoleClient } from "~/services/supabase.server";
 import { sendPaymentSuccessEmail } from "~/services/resend.server";
 import { notifyPaymentSuccess } from "~/services/line.server";
 import type { Env } from "~/env.server";
@@ -29,7 +29,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       const { userId, planId, referralCode } = session.metadata;
       const amount = session.amount_total / 100;
 
-      const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
+      const supabase = createServiceRoleClient(env);
 
       // 0. Mapping Plan to Subscription Tier
       const planMapping: Record<string, string> = {

@@ -15,6 +15,18 @@ export const THAI_PROVINCES: Province[] = [
   // TODO: copy remaining 72 provinces from original geoLocation.ts
 ];
 
+export function getProvinceCoords(provinceName: string) {
+  const province = geoLocation(provinceName);
+  if (!province) {
+    // Default to BKK if not found, to avoid crash
+    return { latitude: 13.7563, longitude: 100.5018 };
+  }
+  return {
+    latitude: province.lat,
+    longitude: province.lng,
+  };
+}
+
 export function geoLocation(provinceName: string): Province | null {
   return (
     THAI_PROVINCES.find(

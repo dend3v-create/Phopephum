@@ -1,67 +1,24 @@
-/**
- * calculators/nineBase.ts
- * เลข 9 ฐาน — คำนวณจากเลข 7 ตัว (แปลงระบบ 7 → ระบบ 9)
- *
- * หลักการ:
- * - ระบบ 9 ฐาน ใช้ดาว 9 ดวง (รวม ราหู + เกตุ)
- * - แปลงค่า 7-base → 9-base ด้วย mod 9
- * - ใช้วิเคราะห์ชะตาในมิติที่ลึกกว่า
- */
-
-/** ดาวประจำฐาน 1-9 (ระบบโหราศาสตร์ไทย) */
-export const NINE_BASE_PLANETS: Record<number, string> = {
-  1: 'อาทิตย์',
-  2: 'จันทร์',
-  3: 'อังคาร',
-  4: 'พุธ',
-  5: 'พฤหัส',
-  6: 'ศุกร์',
-  7: 'เสาร์',
-  8: 'ราหู',
-  9: 'เกตุ',
-}
-
-export const NINE_BASE_SYMBOLS: Record<number, string> = {
-  1: '☉', 2: '☽', 3: '♂', 4: '☿', 5: '♃', 6: '♀', 7: '♄', 8: '☊', 9: '☋',
-}
+import { r7_local } from "../engine/seven-numbers-v2.js";
 
 /**
- * แปลงค่าเดี่ยว → ฐาน 9 (1-9)
+ * Nine Base Calculator (v3.1)
+ * Calculates the full 9-row matrix.
  */
-export function toBase9(n: number): number {
-  return n % 9 || 9
-}
+export function calculateNineBase(
+  b1: number[],
+  b2: number[],
+  b3: number[]
+) {
+  const b4 = b1.map((v, i) => v + b2[i] + b3[i]);
+  const b5 = b4.map(r7_local);
+  const b6 = b5.map((v) => r7_local(v * 2));
+  const b7 = b6.map((v) => r7_local(v * 2));
+  
+  const b5First = b5[0]!;
+  const b8 = Array.from({ length: 7 }, (_, i) => r7_local(b5First - i * 2));
+  
+  const b9Start = r7_local(b5First - 1);
+  const b9 = Array.from({ length: 7 }, (_, i) => r7_local(b9Start + i * 2));
 
-/**
- * แปลงอาร์เรย์ค่า → ฐาน 9 ทั้งหมด
- * @param values ค่าต้นทาง (เช่น sevenBase)
- */
-export function calculateNineBase(values: number[]): number[] {
-  return values.map(toBase9)
-}
-
-export interface NineBaseResult {
-  /** เลข 9 ฐาน 3 ตัว [day, month, year] */
-  bases:    [number, number, number]
-  /** ดาวประจำแต่ละฐาน */
-  planets:  [string, string, string]
-  /** ฐานรวม (master) */
-  master:   number
-  /** ดาวเจ้าฐานรวม */
-  masterPlanet: string
-}
-
-/**
- * คำนวณ 9 ฐานเต็มรูปแบบ
- */
-export function calculateNineBaseFull(sevenBases: [number, number, number]): NineBaseResult {
-  const [d, m, y] = calculateNineBase(sevenBases) as [number, number, number]
-  const master = toBase9(d + m + y)
-
-  return {
-    bases:        [d, m, y],
-    planets:      [NINE_BASE_PLANETS[d] ?? '', NINE_BASE_PLANETS[m] ?? '', NINE_BASE_PLANETS[y] ?? ''],
-    master,
-    masterPlanet: NINE_BASE_PLANETS[master] ?? '',
-  }
+  return [b1, b2, b3, b4, b5, b6, b7, b8, b9];
 }

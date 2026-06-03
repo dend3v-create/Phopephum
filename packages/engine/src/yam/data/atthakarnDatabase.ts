@@ -176,7 +176,7 @@ export const DAY_THAI: Record<DayOfWeek, string> = {
 // ============================================================
 
 export const DAY_YAM_TIMES: Record<YamNumber, TimeRange> = {
-  1: { startHour: 6,  startMinute: 1,  endHour: 7,  endMinute: 30,  label: '06:01-07:30' },
+  1: { startHour: 6,  startMinute: 0,  endHour: 7,  endMinute: 30,  label: '06:00-07:30' },
   2: { startHour: 7,  startMinute: 31, endHour: 9,  endMinute: 0,   label: '07:31-09:00' },
   3: { startHour: 9,  startMinute: 1,  endHour: 10, endMinute: 30,  label: '09:01-10:30' },
   4: { startHour: 10, startMinute: 31, endHour: 12, endMinute: 0,   label: '10:31-12:00' },
@@ -194,7 +194,7 @@ export const NIGHT_YAM_TIMES: Record<YamNumber, TimeRange> = {
   5: { startHour: 0,  startMinute: 1,  endHour: 1,  endMinute: 30,  label: '00:01-01:30' },
   6: { startHour: 1,  startMinute: 31, endHour: 3,  endMinute: 0,   label: '01:31-03:00' },
   7: { startHour: 3,  startMinute: 1,  endHour: 4,  endMinute: 30,  label: '03:01-04:30' },
-  8: { startHour: 4,  startMinute: 31, endHour: 6,  endMinute: 0,   label: '04:31-06:00' }
+  8: { startHour: 4,  startMinute: 31, endHour: 5,  endMinute: 59,  label: '04:31-05:59' }
 }
 
 // ============================================================
@@ -1466,16 +1466,16 @@ export const YAM_PREDICTIONS: YamPrediction[] = [
 
 /**
  * หาวันในสัปดาห์จาก Date object (ทางโหราศาสตร์)
- * กฎ: เปลี่ยนวันเวลา 06:01 น.
- * ถ้าเป็นเวลา 00:00 - 06:00 จะถือว่าเป็น "วันก่อนหน้า"
+ * กฎ: เปลี่ยนวันเวลา 06:00 น.
+ * ถ้าเป็นเวลา 00:00 - 05:59 จะถือว่าเป็น "วันก่อนหน้า"
  */
 export function getDayOfWeek(date: Date): DayOfWeek {
   const hour = date.getHours()
   const minute = date.getMinutes()
   const totalMinutes = hour * 60 + minute
 
-  // ถ้าเวลาก่อน 06:01 น. (361 นาที)
-  if (totalMinutes < 361) {
+  // ถ้าเวลาก่อน 06:00 น. (360 นาที)
+  if (totalMinutes < 360) {
     // ถอยหลังไป 1 วัน
     const yesterday = new Date(date.getTime() - 24 * 60 * 60 * 1000)
     const days: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
@@ -1488,19 +1488,19 @@ export function getDayOfWeek(date: Date): DayOfWeek {
 
 /**
  * หาว่าเวลานั้นเป็นกลางวันหรือกลางคืน
- * กลางวัน: 06:01 - 18:00
- * กลางคืน: 18:01 - 06:00 (ของเช้าวันถัดไป)
+ * กลางวัน: 06:00 - 18:00
+ * กลางคืน: 18:01 - 05:59 (ของเช้าวันถัดไป)
  */
 export function getDayPeriod(date: Date): DayPeriod {
   const hour = date.getHours()
   const minute = date.getMinutes()
   const totalMinutes = hour * 60 + minute
 
-  // กลางวัน: 06:01 (361) ถึง 18:00 (1080)
-  if (totalMinutes >= 361 && totalMinutes <= 1080) {
+  // กลางวัน: 06:00 (360) ถึง 18:00 (1080)
+  if (totalMinutes >= 360 && totalMinutes <= 1080) {
     return 'day'
   }
-  // นอกช่วงเวลาดังกล่าว (18:01 เป็นต้นไปจนถึง 06:00 ของวันถัดไป) เป็นกลางคืน
+  // นอกช่วงเวลาดังกล่าว (18:01 เป็นต้นไปจนถึง 05:59 ของวันถัดไป) เป็นกลางคืน
   return 'night'
 }
 

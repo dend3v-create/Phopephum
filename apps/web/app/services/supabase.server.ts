@@ -40,6 +40,9 @@ export function createSupabaseClient(request: Request, env: Env) {
 
 // Service role client — bypasses RLS, ใช้ฝั่ง server เท่านั้น
 export function createServiceRoleClient(env: Env) {
+  if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error("SUPABASE_SERVICE_ROLE_KEY is not configured");
+  }
   return createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
