@@ -133,6 +133,9 @@ export interface LagnaPhopephumResult {
   col: number;
   houseName: string;
   star: number;
+  subPeriod?: 'early' | 'middle' | 'end';
+  reksName?: string;
+  reksIndex?: number;
 }
 
 // ─── Integrated Results (สหวิชาพยากรณ์) ──────────────────────────────────────────

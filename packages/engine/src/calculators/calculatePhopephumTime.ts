@@ -73,7 +73,15 @@ export function calculateTimeEngine(date: Date): TimeEngineResult {
 /**
  * คำนวณลัคนาเกิด (Birth Ascendant)
  */
-export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: number, col: number, houseName: string, star: number } {
+export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { 
+  row: number;
+  col: number;
+  houseName: string;
+  star: number;
+  subPeriod: 'early' | 'middle' | 'end';
+  reksName: string;
+  reksIndex: number;
+} {
   const time = calculateTimeEngine(date);
   const starToFind = time.yamYai;
   
@@ -83,11 +91,41 @@ export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: 
   // หาว่าดาวดวงนั้นอยู่ใน column ไหนของแถวนั้น
   const col = matrix[row].indexOf(starToFind);
   
+  // คำนวณฤกษ์ 10 นาที (ทาษา ... นักพรต)
+  const h = date.getHours();
+  const m = date.getMinutes();
+  const s = date.getSeconds();
+  const totalMinutes = h * 60 + m + s / 60;
+  
+  let adjustedMinutes = totalMinutes - 360;
+  if (adjustedMinutes < 0) adjustedMinutes += 1440;
+  
+  const isDay = adjustedMinutes < 720;
+  const minutesInPeriod = isDay ? adjustedMinutes : adjustedMinutes - 720;
+  const minutesInYamYai = minutesInPeriod % 90;
+  
+  const reksSlot = Math.floor(minutesInYamYai / 10) + 1; // 1-9
+  const REKS_NAMES = [
+    "ทาษา",
+    "คหปติ",
+    "โจโร",
+    "เสนาปติ",
+    "กาลทัณฑ์",
+    "กัลยา",
+    "มหายักษ์",
+    "ธนบดินทร์",
+    "นักพรต"
+  ];
+  const reksName = REKS_NAMES[reksSlot - 1] || "ทาษา";
+  
   return {
     row: row + 1,
     col: col + 1,
     houseName: PHOPEPHUM_HOUSES[row][col],
-    star: starToFind
+    star: starToFind,
+    subPeriod: time.subPeriod,
+    reksName,
+    reksIndex: reksSlot
   };
 }
 

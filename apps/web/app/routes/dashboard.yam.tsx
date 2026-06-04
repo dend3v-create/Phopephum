@@ -1635,15 +1635,32 @@ export default function YamPage() {
                                 <span className={isSelected ? "text-[#D9BC82]" : "text-[#D9CDB7]"}>
                                   {yamName}
                                 </span>
-                                {/* Ticks */}
-                                <div className="flex gap-0.5 text-[8px] mt-0.5 justify-center">
-                                  {ticks > 0 ? (
-                                    Array.from({ length: ticks }).map((_, starI) => (
-                                      <span key={starI} className="text-green-400">✓</span>
-                                    ))
-                                  ) : (
-                                    <span className="text-red-400 font-bold">⚠️</span>
-                                  )}
+                                {/* Ticks - Divided into 3 phases: Start, Middle, End */}
+                                <div className="flex gap-1 mt-1.5 w-full justify-center">
+                                  {["start", "middle", "end"].map((phaseKey, pIdx) => {
+                                    const isActive = ticks > pIdx;
+                                    const isBad = ticks === 0;
+                                    
+                                    return (
+                                      <div 
+                                        key={phaseKey}
+                                        className={`w-3.5 h-3.5 flex items-center justify-center rounded-[2px] border ${
+                                          isActive 
+                                            ? "border-green-500/30 bg-green-500/10" 
+                                            : isBad 
+                                              ? "border-red-500/20 bg-red-500/5" 
+                                              : "border-white/5 bg-white/5"
+                                        }`}
+                                        title={PHASE_LABEL[phaseKey]}
+                                      >
+                                        {isActive ? (
+                                          <span className="text-[8px] text-green-400 font-bold">✓</span>
+                                        ) : isBad ? (
+                                          <span className="text-[8px] text-red-500/40 font-bold">✕</span>
+                                        ) : null}
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             </td>
