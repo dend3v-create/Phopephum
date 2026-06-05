@@ -1,5 +1,6 @@
 // All prompts are versioned — version bump = new file
 export { buildLifeReportPrompt, PROMPT_VERSION } from "./v2/lifeReport.js";
+export { buildKarnchataChatPrompt } from "./v2/karnchataChat.js";
 
 // Knowledge Base (RAG) exports
 export {

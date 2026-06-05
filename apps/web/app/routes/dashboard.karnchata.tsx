@@ -2,8 +2,8 @@ import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData, useSubmit } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile, requireMinPlan } from "~/services/auth.server";
-import { calculateKarnchata } from "@phopephum/engine";
-import { r7_local, calcTaksaMaha } from "@phopephum/engine";
+import { calculateKarnchata, calculatePhopephum } from "@phopephum/engine";
+import { STAR_NAMES } from "@phopephum/types";
 import type { Env } from "~/env.server";
 import { Card } from "~/components/ui/Card";
 import { Input } from "~/components/ui/Input";
@@ -23,23 +23,14 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const initialResult = calculateKarnchata(now);
 
   // คำนวณทักษาผู้ถาม
-  let taksaMaha = null;
+  let phopephumResult = null;
   if (profile?.birth_date) {
     try {
-      const bDate = new Date(profile.birth_date);
-      const natal = r7_local(
-        bDate.getDate(),
-        bDate.getMonth() + 1,
-        bDate.getFullYear() + 543
-      );
-      const currentYearThai = now.getFullYear() + 543;
-      const birthYearThai = bDate.getFullYear() + 543;
-      taksaMaha = calcTaksaMaha(
-        natal.nineBase.bases[0][0], // sum of day
-        currentYearThai - birthYearThai + 1, // ageYang
-        birthYearThai,
-        currentYearThai
-      );
+      phopephumResult = await calculatePhopephum({
+        birthDate: profile.birth_date,
+        birthTime: profile.birth_time || "12:00",
+        birthPlace: profile.birth_place || "กรุงเทพมหานคร",
+      }, now);
     } catch (e) {
       // fallback
     }
@@ -55,7 +46,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   return json({
     profile,
     initialResult,
-    taksaMaha,
+    phopephumResult,
     thaiDateLabel,
     currentTime: now.toISOString(),
   });
@@ -63,7 +54,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  await requireAuth(request, env);
+  const user = await requireAuth(request, env);
 
   const formData = await request.formData();
   const timeMode = formData.get("timeMode") as "live" | "custom";
@@ -85,8 +76,23 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const result = calculateKarnchata(targetDate);
 
+  let phopephumResult = null;
+  const profile = await getProfile(user.id, request, env);
+  if (profile?.birth_date) {
+    try {
+      phopephumResult = await calculatePhopephum({
+        birthDate: profile.birth_date,
+        birthTime: profile.birth_time || "12:00",
+        birthPlace: profile.birth_place || "กรุงเทพมหานคร",
+      }, targetDate);
+    } catch (e) {
+      // fallback
+    }
+  }
+
   return json({
     result,
+    phopephumResult,
     timeMode,
   });
 }
@@ -113,12 +119,15 @@ const TAKSA_DIRECTIONS = [
 ];
 
 export default function KarnchataPage() {
-  const { profile, initialResult, taksaMaha, thaiDateLabel } = useLoaderData<typeof loader>();
+  const { profile, initialResult, phopephumResult: initialPhopephum, thaiDateLabel } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
   const navigation = useNavigation();
 
   const activeResult = actionData?.result || initialResult;
+  const activePhopephum = actionData?.phopephumResult || initialPhopephum;
+  
+  const [hoverNum, setHoverNum] = useState<number | null>(null);
   const [timeMode, setTimeMode] = useState<"live" | "custom">("live");
   const [selectedCategory, setSelectedCategory] = useState("work");
   const [time, setTime] = useState<Date>(new Date());
@@ -169,38 +178,71 @@ export default function KarnchataPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
-  const handleAutoSend = (q: string) => {
-    setUserInput(q);
+  const doChatFetch = async (q: string) => {
     setChatMessages(prev => [...prev, { sender: "user", text: q, time: "" }]);
-    setTimeout(() => {
-      let aiResponse = `ในทางกาลชะตาขณะนี้ ยามใหญ่ตกที่ ${activeResult.yamYaiName} ส่วนยามซอยตกที่ ${activeResult.yamSoyName} `;
-      if (selectedDirection) {
-        const dir = TAKSA_DIRECTIONS.find(d => d.id === selectedDirection);
-        aiResponse += `(คุณเลือกทิศ ${dir?.name}) `;
-      }
-      aiResponse += "จังหวะนี้มีพลังงานสอดคล้องกับเรื่องราวที่คุณถาม แนะนำให้ดำเนินการด้วยสติและรอบคอบครับ";
-      setChatMessages(prev => [...prev, { sender: "ai", text: aiResponse, time: "" }]);
-    }, 1500);
     setUserInput("");
+    
+    // Add temporary AI loading message
+    setChatMessages(prev => [...prev, { sender: "ai", text: "กำลังเชื่อมต่อกระแสญาณ...", time: "" }]);
+    
+    try {
+      const formData = new FormData();
+      formData.append("question", q);
+      formData.append("category", CATEGORIES.find(c => c.id === selectedCategory)?.label || "ทั่วไป");
+      formData.append("targetDate", time.toISOString());
+      
+      const res = await fetch("/api/karnchata-chat", {
+        method: "POST",
+        body: formData,
+      });
+      
+      if (!res.ok) throw new Error("API Error");
+      
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let aiText = "";
+      
+      if (reader) {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split("\n");
+          for (const line of lines) {
+             if (line.trim().startsWith("data: ")) {
+                const raw = line.slice(6).trim();
+                if (raw === "[DONE]") break;
+                try {
+                  const parsed = JSON.parse(raw);
+                  if (parsed.text) aiText += parsed.text;
+                } catch(e){}
+             }
+          }
+          // update last message
+          setChatMessages(prev => {
+            const newArr = [...prev];
+            newArr[newArr.length - 1] = { sender: "ai", text: aiText, time: "" };
+            return newArr;
+          });
+        }
+      }
+    } catch(e) {
+      setChatMessages(prev => {
+        const newArr = [...prev];
+        newArr[newArr.length - 1] = { sender: "ai", text: "ขออภัยครับ กระแสญาณขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้ง", time: "" };
+        return newArr;
+      });
+    }
+  };
+
+  const handleAutoSend = (q: string) => {
+    doChatFetch(q);
   };
 
   const handleSendChat = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim()) return;
-    
-    setChatMessages(prev => [...prev, { sender: "user", text: userInput, time: "" }]);
-    
-    setTimeout(() => {
-      let aiResponse = `ในทางกาลชะตาขณะนี้ ยามใหญ่ตกที่ ${activeResult.yamYaiName} ส่วนยามซอยตกที่ ${activeResult.yamSoyName} `;
-      if (selectedDirection) {
-        const dir = TAKSA_DIRECTIONS.find(d => d.id === selectedDirection);
-        aiResponse += `(คุณเลือกทิศ ${dir?.name}) `;
-      }
-      aiResponse += "จังหวะนี้มีพลังงานสอดคล้องกับเรื่องราวที่คุณถาม แนะนำให้ดำเนินการด้วยสติและรอบคอบครับ";
-      
-      setChatMessages(prev => [...prev, { sender: "ai", text: aiResponse, time: "" }]);
-    }, 1500);
-    setUserInput("");
+    doChatFetch(userInput);
   };
 
   const activeCategory = CATEGORIES.find(c => c.id === selectedCategory);
@@ -428,7 +470,11 @@ export default function KarnchataPage() {
               <div className="flex-1 flex justify-between">
                 {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
                   <div key={cIdx} className="flex flex-col items-center gap-2 w-14">
-                    <div className="w-10 h-10 rounded-full border border-[#8A8070]/50 bg-[#020617] flex items-center justify-center text-lg font-display font-bold text-[#F8F6F1]">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 ${
+                      hoverNum === star 
+                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]" 
+                        : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1]"
+                    }`}>
                       {star}
                     </div>
                     <span className="text-[9px] text-[#8A8070] font-medium">{getBhopName(rIdx, cIdx)}</span>
@@ -444,7 +490,11 @@ export default function KarnchataPage() {
              <div className="flex-1 flex justify-between pr-2">
                 {activeResult.chart[3].map((star: number, cIdx: number) => (
                   <div key={cIdx} className="flex flex-col items-center gap-2 w-14">
-                    <div className="w-10 h-10 rounded-full border border-sky-500/50 bg-[#020617] flex items-center justify-center text-lg font-display font-bold text-[#F8F6F1]">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 ${
+                      hoverNum === star 
+                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]" 
+                        : "bg-[#020617] border border-sky-500/50 text-[#F8F6F1]"
+                    }`}>
                       {star}
                     </div>
                     <span className="text-[9px] text-[#8A8070] font-medium text-center">
@@ -462,7 +512,11 @@ export default function KarnchataPage() {
               <div className="flex-1 flex justify-between">
                 {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
                   <div key={cIdx} className="flex flex-col items-center gap-2 w-14">
-                    <div className="w-10 h-10 rounded-full border border-[#8A8070]/50 bg-[#020617] flex items-center justify-center text-lg font-display font-bold text-[#F8F6F1]">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 ${
+                      hoverNum === star 
+                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]" 
+                        : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1]"
+                    }`}>
                       {star}
                     </div>
                     {rIdx === 7 && <span className="text-[9px] text-[#8A8070] font-medium">{"อาตมะ,ทาสา,สิทธิโชค,โภคทรัพย์,โจร,อุบาทว์".split(',')[cIdx]}</span>}
@@ -512,11 +566,11 @@ export default function KarnchataPage() {
               return (
                 <button
                   key={dir.id}
-                  onClick={() => setSelectedDirection(isActive ? null : dir.id)}
+                  onClick={() => setHoverNum(hoverNum === dir.id ? null : dir.id)}
                   className={`p-6 rounded-3xl border flex flex-col items-center text-center transition-all ${
-                    isActive 
-                      ? "bg-[#C6A96B]/10 border-[#C6A96B] shadow-[0_0_20px_rgba(198,169,107,0.15)]" 
-                      : "bg-[#020617] border-white/5 hover:border-white/10"
+                    hoverNum === dir.id 
+                      ? "bg-[#C6A96B]/10 border-[#C6A96B] shadow-[0_0_20px_rgba(198,169,107,0.15)] scale-[1.02]" 
+                      : "bg-[#020617] border-white/5 hover:border-white/10 hover:bg-white/5"
                   }`}
                 >
                   <p className="text-[10px] text-[#8A8070] font-bold mb-3">{dir.name}</p>
@@ -562,23 +616,35 @@ export default function KarnchataPage() {
                 <span className="text-pink-400 text-base">🎯</span> ทักษาจรประจำปีนี้
               </p>
               <div className="space-y-4">
-                {[
-                  { n: 1, name: "ดาว อาทิตย์ (1)", b: "มูละ", bg: "bg-amber-600/20 text-amber-500" },
-                  { n: 2, name: "ดาว จันทร์ (2)", b: "อุตสาหะ", bg: "bg-teal-500/20 text-teal-400" },
-                  { n: 3, name: "ดาว อังคาร (3)", b: "มนตรี", bg: "bg-blue-500/20 text-blue-400" },
-                  { n: 4, name: "ดาว พุธ (4)", b: "กาลกิณี", bg: "bg-rose-950/40 text-rose-400" },
-                  { n: 5, name: "ดาว พฤหัส (5)", b: "อายุ", bg: "bg-[#8A8070]/20 text-[#8A8070]" },
-                  { n: 6, name: "ดาว ศุกร์ (6)", b: "ศรี", bg: "bg-emerald-950/40 text-emerald-400" },
-                  { n: 7, name: "ดาว เสาร์ (7)", b: "บริวาร", bg: "bg-indigo-500/20 text-indigo-400" },
-                  { n: 8, name: "ดาว ราหู (8)", b: "เดช", bg: "bg-orange-500/20 text-orange-400" }
-                ].map(item => (
-                  <div key={item.n} className="flex justify-between items-center text-[11px]">
-                    <span className="text-[#F8F6F1] font-medium">{item.name}</span>
-                    <span className={`px-2.5 py-1 rounded text-[10px] font-bold tracking-wide ${item.bg}`}>
-                      {item.b}
-                    </span>
-                  </div>
-                ))}
+                {activePhopephum?.taksaTransit?.map ? (
+                  Object.entries(activePhopephum.taksaTransit.map).map(([starStr, bhop]) => {
+                    const n = Number(starStr);
+                    const name = STAR_NAMES[n as keyof typeof STAR_NAMES];
+                    let bg = "bg-[#8A8070]/20 text-[#8A8070]";
+                    if (bhop === "มูละ") bg = "bg-amber-600/20 text-amber-500";
+                    else if (bhop === "อุตสาหะ") bg = "bg-teal-500/20 text-teal-400";
+                    else if (bhop === "มนตรี") bg = "bg-blue-500/20 text-blue-400";
+                    else if (bhop === "กาลกิณี") bg = "bg-rose-950/40 text-rose-400";
+                    else if (bhop === "ศรี") bg = "bg-emerald-950/40 text-emerald-400";
+                    else if (bhop === "บริวาร") bg = "bg-indigo-500/20 text-indigo-400";
+                    else if (bhop === "เดช") bg = "bg-orange-500/20 text-orange-400";
+
+                    return (
+                      <button 
+                        key={n} 
+                        onClick={() => setHoverNum(hoverNum === n ? null : n)}
+                        className={`w-full flex justify-between items-center text-[11px] p-2 rounded-xl transition-all ${hoverNum === n ? 'bg-white/10 ring-1 ring-[#C6A96B]' : 'hover:bg-white/5'}`}
+                      >
+                        <span className="text-[#F8F6F1] font-medium">ดาว {name} ({n})</span>
+                        <span className={`px-2.5 py-1 rounded text-[10px] font-bold tracking-wide ${bg}`}>
+                          {bhop as string}
+                        </span>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <p className="text-[#8A8070] text-xs text-center py-4 border border-dashed border-white/10 rounded-xl">กรุณาระบุวันเดือนปีเกิดในหน้าโปรไฟล์เพื่อวิเคราะห์ทักษาจร</p>
+                )}
               </div>
            </div>
 
@@ -588,20 +654,24 @@ export default function KarnchataPage() {
                 <span className="text-pink-400 text-base">🧠</span> มหาภูติจร (สภาวะจิตใจ)
               </p>
               <div className="space-y-4">
-                {[
-                  { name: "โลกาวินาศ", star: "ดาว จันทร์ (2)" },
-                  { name: "อริ", star: "ดาว อังคาร (3)" },
-                  { name: "ขุมทรัพย์", star: "ดาว พุธ (4)" },
-                  { name: "มรณะ", star: "ดาว พฤหัส (5)" },
-                  { name: "อธิบดี", star: "ดาว ศุกร์ (6)" },
-                  { name: "ราชา", star: "ดาว เสาร์ (7)" },
-                  { name: "ธงชัย", star: "ดาว อาทิตย์ (1)" }
-                ].map(item => (
-                  <div key={item.name} className="flex justify-between items-center text-[11px] py-0.5">
-                    <span className="text-[#8A8070] font-medium">{item.name}</span>
-                    <span className="text-[#F8F6F1] font-bold">{item.star}</span>
-                  </div>
-                ))}
+                {activePhopephum?.mahaTransit?.map ? (
+                  Object.entries(activePhopephum.mahaTransit.map).map(([bhop, starStr]) => {
+                    const n = Number(starStr);
+                    const name = STAR_NAMES[n as keyof typeof STAR_NAMES];
+                    return (
+                      <button 
+                        key={bhop}
+                        onClick={() => setHoverNum(hoverNum === n ? null : n)} 
+                        className={`w-full flex justify-between items-center text-[11px] py-1.5 px-2 rounded-xl transition-all ${hoverNum === n ? 'bg-white/10 ring-1 ring-[#C6A96B]' : 'hover:bg-white/5'}`}
+                      >
+                        <span className="text-[#8A8070] font-medium">{bhop}</span>
+                        <span className="text-[#F8F6F1] font-bold">ดาว {name} ({n})</span>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <p className="text-[#8A8070] text-xs text-center py-4 border border-dashed border-white/10 rounded-xl">กรุณาระบุวันเดือนปีเกิดในหน้าโปรไฟล์เพื่อวิเคราะห์มหาภูติจร</p>
+                )}
               </div>
            </div>
         </div>
