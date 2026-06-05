@@ -46,6 +46,7 @@ body {
   background:
     linear-gradient(180deg, #020617 0%, #071427 45%, #0A2240 100%);
   min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .font-display   { font-family: var(--font-family-display); }
@@ -59,38 +60,46 @@ body {
 /* ── Glow utilities ── */
 .glow-gold {
   text-shadow:
-    0 0 30px rgba(232,196,106,0.55),
-    0 0 80px rgba(232,196,106,0.20);
+    0 0 20px rgba(232,196,106,0.4),
+    0 0 50px rgba(232,196,106,0.15);
+}
+
+@media (min-width: 640px) {
+  .glow-gold {
+    text-shadow:
+      0 0 30px rgba(232,196,106,0.55),
+      0 0 80px rgba(232,196,106,0.20);
+  }
 }
 
 .glow-mystic {
   text-shadow:
-    0 0 30px rgba(109,143,199,0.50),
-    0 0 60px rgba(109,143,199,0.15);
+    0 0 20px rgba(109,143,199,0.40),
+    0 0 40px rgba(109,143,199,0.10);
 }
 
 .glow-gold-box {
   box-shadow:
-    0 0 20px rgba(232,196,106,0.15),
-    0 0 60px rgba(232,196,106,0.08);
+    0 0 15px rgba(232,196,106,0.12),
+    0 0 40px rgba(232,196,106,0.06);
 }
 
 .glow-mystic-box {
   box-shadow:
-    0 0 20px rgba(109,143,199,0.15),
-    0 0 60px rgba(109,143,199,0.08);
+    0 0 15px rgba(109,143,199,0.12),
+    0 0 40px rgba(109,143,199,0.06);
 }
 
 /* ── Glass cards ── */
 .card-glass {
   background: rgba(10, 34, 64, 0.58);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(217, 188, 130, 0.18);
   border-radius: 1.25rem;
   box-shadow:
-    0 10px 60px rgba(0, 0, 0, 0.45),
-    0 0  40px rgba(232, 196, 106, 0.06);
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0  30px rgba(232, 196, 106, 0.04);
 }
 
 /* Premium variant — heavier blur + stronger inner glow */
@@ -101,8 +110,8 @@ body {
   border: 1px solid rgba(217, 188, 130, 0.22);
   border-radius: 1.25rem;
   box-shadow:
-    0 16px 80px rgba(0, 0, 0, 0.55),
-    0 0   60px rgba(232, 196, 106, 0.08),
+    0 12px 60px rgba(0, 0, 0, 0.5),
+    0 0   50px rgba(232, 196, 106, 0.07),
     inset 0 1px 0 rgba(217, 188, 130, 0.12);
 }
 
@@ -114,10 +123,9 @@ body {
   border: 1px solid rgba(232, 196, 106, 0.30);
   border-radius: 1.25rem;
   box-shadow:
-    0 12px 70px rgba(0, 0, 0, 0.50),
-    0 0   50px rgba(232, 196, 106, 0.10),
-    inset 0 1px 0 rgba(232, 196, 106, 0.15),
-    inset 0 -1px 0 rgba(232, 196, 106, 0.05);
+    0 12px 60px rgba(0, 0, 0, 0.45),
+    0 0   40px rgba(232, 196, 106, 0.08),
+    inset 0 1px 0 rgba(232, 196, 106, 0.15);
 }
 
 /* ── Liquid Gold Overlay ── */
@@ -184,11 +192,11 @@ body {
 
 /* ── Aura pulse (box-shadow pulse) ── */
 .aura-pulse-gold {
-  animation: auraPulseGold 3s ease-in-out infinite;
+  animation: auraPulseGold 4s ease-in-out infinite;
 }
 
 .aura-pulse-mystic {
-  animation: auraPulseMystic 4s ease-in-out infinite;
+  animation: auraPulseMystic 5s ease-in-out infinite;
 }
 
 /* ── Star field background ── */
@@ -211,7 +219,7 @@ body {
     radial-gradient(1px 1px at 60% 35%, rgba(248,246,241,0.35) 0%, transparent 100%),
     radial-gradient(1px 1px at 90% 80%, rgba(248,246,241,0.25) 0%, transparent 100%),
     radial-gradient(1.5px 1.5px at 5% 50%, rgba(232,196,106,0.40) 0%, transparent 100%);
-  animation: starTwinkle 5s ease-in-out infinite;
+  animation: starTwinkle 6s ease-in-out infinite;
 }
 .star-field::after {
   background-image:
@@ -221,12 +229,12 @@ body {
     radial-gradient(1px 1px at 50% 45%, rgba(248,246,241,0.25) 0%, transparent 100%),
     radial-gradient(1px 1px at 80% 30%, rgba(248,246,241,0.35) 0%, transparent 100%),
     radial-gradient(1.5px 1.5px at 95% 10%, rgba(232,196,106,0.45) 0%, transparent 100%);
-  animation: starTwinkle 7s ease-in-out infinite reverse;
+  animation: starTwinkle 8s ease-in-out infinite reverse;
 }
 
 /* ── Cosmic ring (rotating) ── */
 .cosmic-ring {
-  animation: cosmicRingSpin 12s linear infinite;
+  animation: cosmicRingSpin 16s linear infinite;
 }
 
 /* ── Shimmer sweep on hover ── */
@@ -258,24 +266,24 @@ body {
 /* ── Animations ── */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50%       { transform: translateY(-10px); }
+  50%       { transform: translateY(-8px); }
 }
 
 @keyframes twinkle {
-  0%, 100% { opacity: 0.12; transform: scale(1); }
-  50%       { opacity: 0.90; transform: scale(1.5); }
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%       { opacity: 0.85; transform: scale(1.3); }
 }
 
 @keyframes starTwinkle {
-  0%, 100% { opacity: 0.6; }
-  33%       { opacity: 1.0; }
-  66%       { opacity: 0.4; }
+  0%, 100% { opacity: 0.5; }
+  33%       { opacity: 0.9; }
+  66%       { opacity: 0.3; }
 }
 
 @keyframes cosmicDrift {
   0%   { transform: translate(0px, 0px)   rotate(0deg); }
-  33%  { transform: translate(6px, -8px)  rotate(1.5deg); }
-  66%  { transform: translate(-4px, 5px)  rotate(-1deg); }
+  33%  { transform: translate(4px, -6px)  rotate(1deg); }
+  66%  { transform: translate(-3px, 4px)  rotate(-0.5deg); }
   100% { transform: translate(0px, 0px)   rotate(0deg); }
 }
 
@@ -295,62 +303,62 @@ body {
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(18px); }
+  from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideInUp {
-  from { opacity: 0; transform: translateY(24px); }
+  from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes auraPulse {
-  0%, 100% { opacity: 0.12; }
-  50%       { opacity: 0.28; }
+  0%, 100% { opacity: 0.15; }
+  50%       { opacity: 0.25; }
 }
 
 @keyframes auraPulseGold {
   0%, 100% {
     box-shadow:
-      0 0 12px rgba(232,196,106,0.10),
-      0 0 40px rgba(232,196,106,0.04);
+      0 0 10px rgba(232,196,106,0.08),
+      0 0 30px rgba(232,196,106,0.03);
   }
   50% {
     box-shadow:
-      0 0 24px rgba(232,196,106,0.25),
-      0 0 70px rgba(232,196,106,0.12);
+      0 0 20px rgba(232,196,106,0.20),
+      0 0 50px rgba(232,196,106,0.10);
   }
 }
 
 @keyframes auraPulseMystic {
   0%, 100% {
     box-shadow:
-      0 0 12px rgba(109,143,199,0.10),
-      0 0 40px rgba(109,143,199,0.04);
+      0 0 10px rgba(109,143,199,0.08),
+      0 0 30px rgba(109,143,199,0.03);
   }
   50% {
     box-shadow:
-      0 0 24px rgba(109,143,199,0.25),
-      0 0 70px rgba(109,143,199,0.12);
+      0 0 20px rgba(109,143,199,0.20),
+      0 0 50px rgba(109,143,199,0.10);
   }
 }
 
 @keyframes numberCount {
-  from { opacity: 0; transform: scale(0.8) translateY(8px); }
+  from { opacity: 0; transform: scale(0.9) translateY(5px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 /* ── Staggered slide-in classes ── */
-.animate-slide-in-1 { animation: slideInUp 0.55s ease both 0.05s; }
-.animate-slide-in-2 { animation: slideInUp 0.55s ease both 0.15s; }
-.animate-slide-in-3 { animation: slideInUp 0.55s ease both 0.25s; }
-.animate-slide-in-4 { animation: slideInUp 0.55s ease both 0.35s; }
-.animate-slide-in-5 { animation: slideInUp 0.55s ease both 0.45s; }
+.animate-slide-in-1 { animation: slideInUp 0.5s ease both 0.05s; }
+.animate-slide-in-2 { animation: slideInUp 0.5s ease both 0.12s; }
+.animate-slide-in-3 { animation: slideInUp 0.5s ease both 0.20s; }
+.animate-slide-in-4 { animation: slideInUp 0.5s ease both 0.28s; }
+.animate-slide-in-5 { animation: slideInUp 0.5s ease both 0.35s; }
 
 .animate-float        { animation: float        6s ease-in-out infinite; }
-.animate-twinkle      { animation: twinkle      3s ease-in-out infinite; }
-.animate-cosmic-drift { animation: cosmicDrift 18s ease-in-out infinite; }
-.animate-aura-pulse   { animation: auraPulse    5s ease-in-out infinite; }
+.animate-twinkle      { animation: twinkle      4s ease-in-out infinite; }
+.animate-cosmic-drift { animation: cosmicDrift 20s ease-in-out infinite; }
+.animate-aura-pulse   { animation: auraPulse    6s ease-in-out infinite; }
 .animate-fade-up      { animation: fadeUp        0.6s ease both; }
 .animate-number-count { animation: numberCount  0.5s ease both 0.3s; }
 
@@ -366,7 +374,7 @@ body {
   background-size: 200% auto;
   animation: shimmer 4s linear infinite;
   color: #020617;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* ── Constellation dots (decorative) ── */
@@ -377,4 +385,27 @@ body {
     radial-gradient(1.5px 1.5px at 50% 80%, rgba(198,169,107,0.25) 0%, transparent 100%),
     radial-gradient(1px 1px at 80% 70%, rgba(248,246,241,0.15) 0%, transparent 100%),
     radial-gradient(1px 1px at 20% 90%, rgba(109,143,199,0.2) 0%, transparent 100%);
+}
+
+/* ── Mobile Optimization Utilities ── */
+@media (max-width: 640px) {
+  .card-glass, .card-glass-premium, .card-glass-gold {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  }
+  
+  .animate-float, .animate-twinkle, .animate-aura-pulse, .animate-cosmic-drift {
+    animation-duration: calc(var(--base-duration, 1s) * 1.5);
+  }
+
+  .font-display {
+    letter-spacing: 0.01em;
+  }
+}
+
+.safe-p-mobile {
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
 }

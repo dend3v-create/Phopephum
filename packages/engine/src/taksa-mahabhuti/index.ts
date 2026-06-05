@@ -24,7 +24,6 @@ export type {
 } from "./taksa-mahabhuti.types";
 
 export {
-  STAR_NAMES,
   DAY_TO_STAR,
   TAKSA_SEQUENCE,
   TAKSA_BHOP,

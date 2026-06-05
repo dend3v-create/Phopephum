@@ -26,18 +26,6 @@
  */
 export type StarNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 
-/** ชื่อดาวภาษาไทย (ครบ 8 ดวง) */
-export const STAR_NAMES: Record<StarNumber, string> = {
-  1: "อาทิตย์",
-  2: "จันทร์",
-  3: "อังคาร",
-  4: "พุธ",
-  5: "พฤหัส",
-  6: "ศุกร์",
-  7: "เสาร์",
-  8: "ราหู",
-} as const;
-
 /** วันเกิด (0=อาทิตย์ … 6=เสาร์) → เลขดาว */
 export const DAY_TO_STAR: Record<number, StarNumber> = {
   0: 1,

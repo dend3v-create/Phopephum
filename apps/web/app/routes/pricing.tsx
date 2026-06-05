@@ -110,7 +110,7 @@ const PLANS = [
 
 const COMPARE_ROWS = [
   { label: "ดูหน้า Dashboard",           free: "✅",          basic: "✅",          pro: "✅",              imperial: "✅" },
-  { label: "ยามอัฏฐกาลปัจจุบัน",        free: "Widget เท่านั้น", basic: "✅",        pro: "ล่วงหน้า 7 วัน",   imperial: "ไม่จำกัด" },
+  { label: "ยามอัฏฐกาลปัจจุบัน",        free: "Widget",     basic: "✅",        pro: "ล่วงหน้า 7 วัน",   imperial: "ไม่จำกัด" },
   { label: "ราหูค้นทรัพย์",             free: "—",           basic: "✅ วันนี้",   pro: "✅ ล่วงหน้า",      imperial: "✅ ไม่จำกัด" },
   { label: "ผัง 7 ตัว 9 ฐาน",           free: "—",           basic: "ตนเอง",       pro: "15 รายชื่อ",       imperial: "ไม่จำกัด" },
   { label: "ระบบจร (วัยจร/ปีจร)",       free: "—",           basic: "—",           pro: "✅",               imperial: "✅" },
@@ -129,21 +129,21 @@ export default function PricingPage() {
   const showUpgradeBanner = url?.searchParams.get("upgrade") === "1";
 
   return (
-    <main className="relative min-h-screen overflow-hidden" style={{ background: "#020617" }}>
+    <main className="relative min-h-screen overflow-x-hidden" style={{ background: "#020617" }}>
 
       {/* ── Cosmic atmosphere ── */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute w-[800px] h-[800px] -top-80 left-1/2 -translate-x-1/2 rounded-full"
+        <div className="absolute w-[300px] sm:w-[800px] h-[300px] sm:h-[800px] -top-20 sm:-top-80 left-1/2 -translate-x-1/2 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(75,111,174,0.13) 0%, transparent 65%)" }} />
-        <div className="absolute w-[600px] h-[600px] -bottom-40 -right-40 rounded-full"
+        <div className="absolute w-[250px] sm:w-[600px] h-[250px] sm:h-[600px] -bottom-20 sm:-bottom-40 -right-20 sm:-right-40 rounded-full"
           style={{ background: "radial-gradient(circle, rgba(198,169,107,0.08) 0%, transparent 65%)" }} />
       </div>
 
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-16 sm:py-24">
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-12 sm:py-24">
 
-        {/* ── Upgrade Banner (ถ้าถูก redirect มาเพราะ free plan) ── */}
+        {/* ── Upgrade Banner ── */}
         {showUpgradeBanner && (
-          <div className="mb-10 rounded-2xl border border-[#C6A96B]/30 px-5 py-4 text-center"
+          <div className="mb-10 rounded-2xl border border-[#C6A96B]/30 px-5 py-4 text-center animate-fade-up"
             style={{ background: "rgba(198,169,107,0.07)" }}>
             <p className="text-[#C6A96B] text-sm font-semibold">
               ✦ เนื้อหานี้สำหรับสมาชิกแบบชำระเงินเท่านั้น — เลือกแพ็กเกจด้านล่างเพื่อปลดล็อก
@@ -152,77 +152,82 @@ export default function PricingPage() {
         )}
 
         {/* ── Header ── */}
-        <div className="text-center mb-16">
-          <p className="text-[#C6A96B] text-xs tracking-[0.3em] uppercase mb-4 font-bold">
+        <div className="text-center mb-12 sm:mb-20">
+          <p className="text-[#C6A96B] text-[10px] sm:text-xs tracking-[0.3em] uppercase mb-4 font-bold opacity-80">
             INVESTMENT · ระดับแห่งสิทธิ์การเข้าถึง
           </p>
-          <h1 className="font-display text-4xl sm:text-5xl font-bold text-[#F8F6F1] mb-4 leading-tight">
+          <h1 className="font-display text-3xl sm:text-5xl font-bold text-[#F8F6F1] mb-5 leading-tight px-4">
             เลือกแผนที่เหมาะกับคุณ
           </h1>
-          <p className="text-[#94A3B8] text-base max-w-xl mx-auto leading-relaxed">
-            เริ่มจากสมาชิกฟรี หรืออัปเกรดทันทีเพื่อรับการพยากรณ์เชิงลึก<br />
-            ระดับจักรพรรดิ
+          <p className="text-[#94A3B8] text-sm sm:text-base max-w-xl mx-auto leading-relaxed px-6">
+            เริ่มจากสมาชิกฟรี หรืออัปเกรดทันทีเพื่อรับการพยากรณ์เชิงลึก<br className="hidden sm:block" />
+            ระดับจักรพรรดิ พร้อมรายงาน AI ไม่จำกัด
           </p>
         </div>
 
         {/* ── Pricing Cards — 4 tier ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-20">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-16 sm:mb-24">
           {PLANS.map((plan) => (
             <PricingCard key={plan.tier} plan={plan} isLoggedIn={isLoggedIn} />
           ))}
         </div>
 
         {/* ── Comparison Table ── */}
-        <div className="mb-16">
-          <div className="flex items-center gap-3 mb-6">
+        <div className="mb-16 sm:mb-24">
+          <div className="flex items-center gap-3 mb-8">
             <div className="h-px flex-1" style={{ background: "rgba(198,169,107,0.2)" }} />
-            <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase whitespace-nowrap">เปรียบเทียบฟีเจอร์ทั้งหมด</p>
+            <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase whitespace-nowrap font-bold">เปรียบเทียบฟีเจอร์ทั้งหมด</p>
             <div className="h-px flex-1" style={{ background: "rgba(198,169,107,0.2)" }} />
           </div>
 
-          <div className="rounded-2xl overflow-hidden border border-white/5"
-            style={{ backdropFilter: "blur(24px)", background: "rgba(10,34,64,0.4)" }}>
-            {/* Header row */}
-            <div className="grid grid-cols-5 text-[9px] font-bold uppercase tracking-widest border-b border-white/5 px-4 py-3">
-              <div className="text-[#94A3B8]">ฟีเจอร์</div>
-              <div className="text-center text-[#4A5568]">Free</div>
-              <div className="text-center text-[#94A3B8]">Basic</div>
-              <div className="text-center text-[#C6A96B]">Pro</div>
-              <div className="text-center text-[#9AB3D9]">Imperial</div>
-            </div>
-            {COMPARE_ROWS.map((row, i) => (
-              <div key={row.label}
-                className={`grid grid-cols-5 px-4 py-3 text-xs ${i % 2 === 0 ? "bg-white/[0.02]" : ""} border-b border-white/[0.04] last:border-0`}>
-                <div className="text-[#94A3B8]">{row.label}</div>
-                <div className="text-center text-[#4A5568]">{row.free}</div>
-                <div className="text-center text-[#F8F6F1]">{row.basic}</div>
-                <div className="text-center text-[#C6A96B] font-semibold">{row.pro}</div>
-                <div className="text-center text-[#9AB3D9]">{row.imperial}</div>
+          <div className="overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+            <div className="min-w-[600px] rounded-2xl overflow-hidden border border-white/5"
+              style={{ backdropFilter: "blur(24px)", background: "rgba(10,34,64,0.4)" }}>
+              {/* Header row */}
+              <div className="grid grid-cols-5 text-[10px] font-bold uppercase tracking-widest border-b border-white/5 px-5 py-4">
+                <div className="text-[#94A3B8]">ฟีเจอร์</div>
+                <div className="text-center text-[#4A5568]">Free</div>
+                <div className="text-center text-[#94A3B8]">Basic</div>
+                <div className="text-center text-[#C6A96B]">Pro</div>
+                <div className="text-center text-[#9AB3D9]">Imperial</div>
               </div>
-            ))}
+              {COMPARE_ROWS.map((row, i) => (
+                <div key={row.label}
+                  className={`grid grid-cols-5 px-5 py-4 text-xs ${i % 2 === 0 ? "bg-white/[0.02]" : ""} border-b border-white/[0.04] last:border-0 items-center`}>
+                  <div className="text-[#94A3B8] font-medium">{row.label}</div>
+                  <div className="text-center text-[#4A5568]">{row.free}</div>
+                  <div className="text-center text-[#F8F6F1]">{row.basic}</div>
+                  <div className="text-center text-[#C6A96B] font-semibold">{row.pro}</div>
+                  <div className="text-center text-[#9AB3D9] font-bold">{row.imperial}</div>
+                </div>
+              ))}
+            </div>
           </div>
+          <p className="text-center text-[10px] text-[#94A3B8]/50 mt-4 italic sm:hidden">
+            ( เลื่อนไปทางซ้ายเพื่อดูตารางเปรียบเทียบทั้งหมด )
+          </p>
         </div>
 
         {/* ── Trust signals ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-16">
           {[
             { icon: "🔒", title: "ปลอดภัย 100%", desc: "ข้อมูลวันเกิดของคุณเข้ารหัสและไม่ถูกแชร์" },
             { icon: "⚡", title: "ยกเลิกได้ทุกเมื่อ", desc: "ไม่มีสัญญาผูกมัด ยกเลิกก่อนรอบถัดไปได้เสมอ" },
             { icon: "✦", title: "ศาสตร์แท้ดั้งเดิม", desc: "สูตรคำนวณจากตำราโหราศาสตร์ไทยโบราณแท้" },
           ].map(({ icon, title, desc }) => (
-            <div key={title} className="text-center p-5 rounded-2xl border border-white/5"
+            <div key={title} className="text-center p-6 sm:p-8 rounded-2xl border border-white/5 transition-all hover:border-white/10"
               style={{ backdropFilter: "blur(12px)", background: "rgba(10,34,64,0.3)" }}>
-              <div className="text-2xl mb-2">{icon}</div>
-              <p className="text-[#F8F6F1] font-semibold text-sm mb-1">{title}</p>
-              <p className="text-[#94A3B8] text-xs leading-relaxed">{desc}</p>
+              <div className="text-3xl mb-4">{icon}</div>
+              <p className="text-[#F8F6F1] font-semibold text-base mb-2">{title}</p>
+              <p className="text-[#94A3B8] text-xs leading-relaxed opacity-80">{desc}</p>
             </div>
           ))}
         </div>
 
         {/* ── Back to home ── */}
         <div className="text-center">
-          <Link to={isLoggedIn ? "/dashboard" : "/"} className="text-[#94A3B8] text-sm hover:text-[#C6A96B] transition-colors">
-            ← {isLoggedIn ? "กลับหน้า Dashboard" : "กลับหน้าหลัก"}
+          <Link to={isLoggedIn ? "/dashboard" : "/"} className="inline-flex items-center gap-2 text-[#94A3B8] text-sm hover:text-[#C6A96B] transition-colors group">
+            <span className="group-hover:-translate-x-1 transition-transform">←</span> {isLoggedIn ? "กลับหน้า Dashboard" : "กลับหน้าหลัก"}
           </Link>
         </div>
       </div>
@@ -268,15 +273,15 @@ function PricingCard({
     : "rgba(255,255,255,0.10)";
 
   const bg = isPro
-    ? "rgba(198,169,107,0.06)"
+    ? "rgba(198,169,107,0.08)"
     : isImperial
-    ? "rgba(75,111,174,0.08)"
+    ? "rgba(75,111,174,0.10)"
     : "rgba(10,34,64,0.40)";
 
   const glow = isPro
-    ? "0 0 50px rgba(198,169,107,0.12)"
+    ? "0 0 50px rgba(198,169,107,0.15)"
     : isImperial
-    ? "0 0 50px rgba(75,111,174,0.10)"
+    ? "0 0 50px rgba(75,111,174,0.12)"
     : "none";
 
   const priceColor = isPro
@@ -302,13 +307,13 @@ function PricingCard({
 
   return (
     <div
-      className={`relative flex flex-col rounded-3xl p-6 transition-all duration-300 ${isPro ? "lg:-translate-y-3 lg:scale-[1.02]" : ""}`}
-      style={{ backdropFilter: "blur(24px)", background: bg, border: `1px solid ${borderColor}`, boxShadow: glow }}
+      className={`relative flex flex-col rounded-3xl p-6 sm:p-8 transition-all duration-300 ${isPro ? "lg:-translate-y-3 lg:scale-[1.02]" : "hover:border-white/20"}`}
+      style={{ backdropFilter: "blur(32px)", background: bg, border: `1px solid ${borderColor}`, boxShadow: glow }}
     >
       {/* Tag */}
       {plan.tag && (
-        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-          <span className="px-4 py-1 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase"
+        <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 z-20">
+          <span className="px-5 py-1.5 rounded-full text-[9px] font-bold tracking-[0.2em] uppercase shadow-lg shadow-[#C6A96B]/20 whitespace-nowrap"
             style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)", color: "#020617" }}>
             {plan.tag}
           </span>
@@ -316,32 +321,32 @@ function PricingCard({
       )}
 
       {/* Tier */}
-      <div className="mb-5">
-        <p className="font-display text-[9px] tracking-[0.25em] uppercase mb-0.5" style={{ color: priceColor }}>
+      <div className="mb-6">
+        <p className="font-display text-[10px] tracking-[0.25em] uppercase mb-1 font-bold" style={{ color: priceColor }}>
           {plan.tier}
         </p>
-        <p className="text-[#F8F6F1] text-sm font-bold leading-tight">{plan.name}</p>
-        <p className="text-[#94A3B8] text-[10px] mt-0.5">{plan.subtitle}</p>
+        <p className="text-[#F8F6F1] text-lg font-bold leading-tight">{plan.name}</p>
+        <p className="text-[#94A3B8] text-[11px] mt-1 opacity-70">{plan.subtitle}</p>
       </div>
 
       {/* Price */}
-      <div className="mb-5 flex items-end gap-1">
+      <div className="mb-8 flex items-end gap-1">
         {plan.price === "0" ? (
-          <span className="font-display text-3xl font-bold leading-none text-[#4A5568]">ฟรี</span>
+          <span className="font-display text-4xl font-bold leading-none text-[#4A5568]">ฟรี</span>
         ) : (
           <>
-            <span className="text-[#94A3B8] text-xs self-start mt-1">฿</span>
-            <span className="font-display text-4xl font-bold leading-none" style={{ color: priceColor }}>{plan.price}</span>
-            <span className="text-[#94A3B8] text-[10px] mb-1">/ {plan.unit}</span>
+            <span className="text-[#94A3B8] text-sm self-start mt-1 font-semibold">฿</span>
+            <span className="font-display text-5xl font-bold leading-none" style={{ color: priceColor }}>{plan.price}</span>
+            <span className="text-[#94A3B8] text-xs mb-1.5 ml-1 opacity-60">/ {plan.unit}</span>
           </>
         )}
       </div>
 
       {/* Features */}
-      <ul className="space-y-2.5 mb-6 flex-1">
+      <ul className="space-y-3.5 mb-8 flex-1">
         {plan.features.map((f) => (
-          <li key={f.text} className={`flex items-start gap-2.5 text-xs ${f.included ? "" : "opacity-40"}`}>
-            <span className="text-sm leading-4 shrink-0" style={{ color: f.included ? (isFree ? "#4A5568" : "#C6A96B") : "#374151" }}>
+          <li key={f.text} className={`flex items-start gap-3 text-xs sm:text-sm ${f.included ? "" : "opacity-40"}`}>
+            <span className="text-base leading-4 shrink-0 mt-0.5" style={{ color: f.included ? (isFree ? "#4A5568" : "#C6A96B") : "#374151" }}>
               {f.included ? f.icon : "✕"}
             </span>
             <span className={f.included ? "text-[#D9CDB7]" : "text-[#4A5568] line-through"}>{f.text}</span>
@@ -351,13 +356,13 @@ function PricingCard({
 
       {/* Note */}
       {plan.note && (
-        <p className="text-[#4A5568] text-[9px] mb-4 leading-relaxed">{plan.note}</p>
+        <p className="text-[#4A5568] text-[10px] mb-5 leading-relaxed italic">{plan.note}</p>
       )}
 
       {/* CTA */}
       <Link
         to={ctaHref}
-        className="block text-center py-3 px-4 rounded-xl text-xs font-bold transition-all duration-200 hover:opacity-90 active:scale-[0.98]"
+        className="block text-center py-4 px-6 rounded-2xl text-sm font-bold transition-all duration-300 hover:scale-[1.03] active:scale-[0.97] shadow-lg shadow-black/20"
         style={{ background: ctaBg, color: ctaColor, border: ctaBorder }}
       >
         {plan.ctaLabel}

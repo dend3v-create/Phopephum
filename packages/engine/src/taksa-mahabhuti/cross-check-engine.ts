@@ -21,7 +21,8 @@ import type {
   TaksaMahaInput,
   TaksaMahaResult,
 } from "./taksa-mahabhuti.types";
-import { STAR_NAMES, DAY_TO_STAR } from "./taksa-mahabhuti.types";
+import { STAR_NAMES } from "@phopephum/types";
+import { DAY_TO_STAR } from "./taksa-mahabhuti.types";
 import {
   calcTaksaNatal_V3,
   calcTaksaTransit_V3,

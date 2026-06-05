@@ -44,9 +44,9 @@ import {
   TAKSA_SEQUENCE,
   TAKSA_BHOP,
   ELEMENT_PAIRS,
-  STAR_NAMES,
   STAR_POWER,
 } from "./taksa-mahabhuti.types";
+import { STAR_NAMES } from "@phopephum/types";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants

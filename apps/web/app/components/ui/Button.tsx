@@ -12,13 +12,13 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex items-center justify-center gap-2 font-semibold rounded-full px-6 py-3 text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center gap-2 font-bold rounded-full px-8 py-3.5 text-base sm:text-sm transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 shadow-sm";
 
   const variants = {
     primary:
-      "bg-[#C9A96E] text-[#0A0806] hover:bg-[#E8D4A8] active:scale-[0.98]",
+      "bg-[#C9A96E] text-[#0A0806] hover:bg-[#E8D4A8] hover:shadow-lg hover:shadow-[#C9A96E]/20",
     outline:
-      "border border-[#C9A96E] text-[#C9A96E] hover:bg-[#C9A96E]/10 active:scale-[0.98]",
+      "border border-[#C9A96E] text-[#C9A96E] hover:bg-[#C9A96E]/10",
     ghost: "text-[#8A8070] hover:text-[#F3EFE8] hover:bg-[#15120F]",
   };
 
