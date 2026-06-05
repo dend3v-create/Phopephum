@@ -193,41 +193,52 @@ export default function KarnchataPage() {
   return (
     <div className="space-y-8 max-w-6xl mx-auto pb-20 animate-fade-up">
       {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#C6A96B]/20 pb-6">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
         <div>
-          <span className="text-[#C6A96B] text-[10px] tracking-[0.25em] uppercase font-bold block mb-2 flex items-center gap-2">
+          <span className="text-[#C6A96B] text-[10px] tracking-[0.25em] uppercase font-bold flex items-center gap-2 mb-2">
             <span className="text-amber-500">✦</span> คัมภีร์พยากรณ์ลับเฉพาะกาล
           </span>
-          <h1 className="font-display text-4xl font-bold text-[#F8F6F1] glow-gold flex items-baseline gap-4">
-            ทำนายกาลชะตา V2.0 <span className="text-[#C6A96B] text-sm font-normal tracking-[0.2em] uppercase">(Real-time Time Oracle)</span>
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] glow-gold flex flex-wrap items-baseline gap-2 md:gap-4">
+            ทำนายกาลชะตา V2.0 <span className="text-[#C6A96B] text-xs md:text-sm font-normal tracking-[0.2em] uppercase whitespace-nowrap">(Real-time Time Oracle)</span>
           </h1>
-          <p className="text-[#8A8070] text-sm mt-2">
+          <p className="text-[#8A8070] text-xs md:text-sm mt-2">
             วิเคราะห์รหัสชะตาชีวิตระดับวินาทีด้วย 7 ตัว 9 ฐาน ผสมผสานระบบ Q&A แชทอัจฉริยะแบบเรียลไทม์
           </p>
         </div>
-        <div className="flex bg-[#0A1628] rounded-xl p-1 border border-white/5">
+        <div className="text-left md:text-right border border-white/10 bg-[#0A1628] rounded-xl px-5 py-3 self-start md:self-center">
+          <p className="text-[10px] text-[#8A8070] uppercase font-bold tracking-wider mb-1">วันกาลชะตาวันนี้</p>
+          <p className="text-xs text-[#F8F6F1] font-bold">{thaiDateLabel}</p>
+        </div>
+      </header>
+
+      {/* Control Bar (Time Mode) */}
+      <div className="bg-[#0A1628] border border-white/5 rounded-2xl p-2 md:p-3 flex flex-col lg:flex-row lg:items-center gap-4">
+        <div className="flex flex-col sm:flex-row bg-[#020617] rounded-xl p-1 border border-white/5 shrink-0">
            <button
              type="button"
              onClick={() => setTimeMode("live")}
-             className={`px-6 py-2.5 text-xs font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#C6A96B] text-[#020617] shadow-lg shadow-[#C6A96B]/20" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
+             className={`px-4 md:px-6 py-2.5 text-xs font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#C6A96B] text-[#020617] shadow-lg shadow-[#C6A96B]/20" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
            >
              ⏱ เวลาเรียลไทม์ (Real-time)
            </button>
            <button
              type="button"
              onClick={() => setTimeMode("custom")}
-             className={`px-6 py-2.5 text-xs font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[#0F2942] text-[#F8F6F1] border border-white/10 shadow-lg" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
+             className={`px-4 md:px-6 py-2.5 text-xs font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[#C6A96B] text-[#020617] shadow-lg shadow-[#C6A96B]/20" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
            >
              📅 เลือกวัน/เวลาเอง (Custom Cast)
            </button>
         </div>
-        <div className="hidden lg:block text-right">
-          <div className="border border-white/10 bg-slate-950/40 rounded-xl px-5 py-2.5">
-            <p className="text-[10px] text-[#8A8070] uppercase font-bold tracking-wider mb-1">วันกาลชะตาวันนี้</p>
-            <p className="text-xs text-[#F8F6F1] font-bold">{thaiDateLabel}</p>
+        
+        {/* If Custom mode is selected, show inputs */}
+        <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 transition-opacity duration-300 ${timeMode === "custom" ? "opacity-100" : "opacity-50 pointer-events-none"}`}>
+          <span className="text-xs text-[#8A8070] font-bold px-2">เลือกวันเวลาสืบค้น:</span>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <input type="date" className="bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-xl px-4 py-2.5 outline-none focus:border-[#C6A96B] w-full sm:w-auto" defaultValue={new Date().toISOString().split('T')[0]} />
+            <input type="time" className="bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-xl px-4 py-2.5 outline-none focus:border-[#C6A96B]" defaultValue="12:00" />
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Top Section: Clock & Categories */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -279,7 +290,7 @@ export default function KarnchataPage() {
         </Card>
 
         {/* เลือกเรื่องที่ต้องการถามเจาะลึก */}
-        <Card className="border-[#C6A96B]/20 bg-gradient-to-b from-[#0A1628] to-[#040C18] p-8 flex flex-col">
+        <Card className="border-[#C6A96B]/20 bg-gradient-to-b from-[#0A1628] to-[#040C18] p-6 lg:p-8 flex flex-col">
           <h3 className="text-sm font-bold text-[#F8F6F1] mb-6 flex items-center gap-2">
             <span className="text-pink-400">🎯</span> เลือกเรื่องที่ต้องการถามเจาะลึก
           </h3>
@@ -291,12 +302,12 @@ export default function KarnchataPage() {
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`p-4 rounded-2xl border flex flex-col items-center justify-center gap-3 transition-all ${
                   selectedCategory === cat.id 
-                    ? "bg-[#112A46] border-sky-500/50 shadow-lg shadow-sky-500/10" 
-                    : "bg-[#0A1628] border-white/5 hover:border-white/10"
+                    ? "bg-[#0B1E36] border-sky-500/50 shadow-[0_0_15px_rgba(14,165,233,0.15)]" 
+                    : "bg-[#020617] border-white/5 hover:border-white/10"
                 }`}
               >
                 <span className="text-2xl">{cat.icon}</span>
-                <span className={`text-[11px] font-bold ${selectedCategory === cat.id ? "text-sky-300" : "text-[#8A8070]"}`}>
+                <span className={`text-[11px] font-bold ${selectedCategory === cat.id ? "text-sky-400" : "text-[#8A8070]"}`}>
                   {cat.label}
                 </span>
               </button>
@@ -309,8 +320,8 @@ export default function KarnchataPage() {
             </p>
             <div className="space-y-3">
               {activeCategory?.questions.map((q, i) => (
-                <div key={i} className="flex gap-3">
-                  <span className="text-[#8A8070] text-lg leading-none mt-0.5">✦</span>
+                <div key={i} className="flex gap-3 bg-[#020617] border border-white/5 p-4 rounded-xl hover:border-white/10 transition-colors cursor-pointer" onClick={() => setUserInput(q)}>
+                  <span className="text-[#C6A96B] text-lg leading-none mt-0.5">✦</span>
                   <p className="text-xs text-[#F8F6F1] opacity-90 leading-relaxed">{q}</p>
                 </div>
               ))}
@@ -515,31 +526,37 @@ export default function KarnchataPage() {
       </div>
 
       {/* Chat Section */}
-      <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-0 overflow-hidden relative shadow-2xl shadow-sky-900/10">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#C6A96B] via-[#F8F6F1] to-[#C6A96B] opacity-50" />
+      <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-0 overflow-hidden relative shadow-2xl shadow-sky-900/10 max-w-4xl mx-auto">
         
-        <div className="p-6 border-b border-white/5 flex items-center gap-4">
-           <div className="w-12 h-12 rounded-full bg-[#C6A96B]/20 flex items-center justify-center relative">
-             <span className="text-2xl">✨</span>
-             <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-[#0A1628]" />
-           </div>
+        {/* Header แชท */}
+        <div className="p-5 border-b border-white/5 flex items-center gap-4">
+           <div className="w-3 h-3 rounded-full bg-[#C6A96B] shrink-0 shadow-[0_0_8px_rgba(198,169,107,0.6)]" />
            <div>
-             <h3 className="text-lg font-bold text-[#F8F6F1]">แชทถามตอบกับ WISDOM GUIDANCE</h3>
-             <p className="text-xs text-[#C6A96B]">หมวดการสนทนาปัจจุบัน: <span className="font-bold text-white">{activeCategory?.label}</span></p>
+             <h3 className="text-base md:text-lg font-bold text-[#F8F6F1]">แชทถามตอบกับ WISDOM GUIDANCE</h3>
+             <p className="text-[10px] text-[#8A8070]">หมวดการสนทนาปัจจุบัน: <span className="font-bold text-[#C6A96B]">{activeCategory?.label}</span></p>
            </div>
-           <button onClick={() => setChatMessages([])} className="ml-auto px-4 py-2 text-xs border border-white/10 text-[#8A8070] hover:text-white rounded-lg">
+           <button onClick={() => setChatMessages([])} className="ml-auto px-4 py-1.5 text-[10px] md:text-xs border border-white/10 text-[#8A8070] hover:text-[#F8F6F1] hover:border-white/20 rounded-lg transition-colors">
              ล้างแชท
            </button>
         </div>
 
-        <div className="h-[400px] overflow-y-auto p-6 space-y-6">
+        {/* พื้นที่แชท */}
+        <div className="h-[400px] overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-[#0A1628] to-[#040C18]">
           {chatMessages.map((msg, i) => (
             <div key={i} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
-              {msg.sender === "ai" && <span className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-wider mb-1 flex items-center gap-1"><span className="text-[#F8F6F1]">✦</span> WISDOM GUIDANCE</span>}
-              <div className={`max-w-[75%] p-4 rounded-2xl text-sm leading-loose ${
+              
+              {/* ชื่อคนส่ง AI */}
+              {msg.sender === "ai" && (
+                <span className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                  <span className="text-[#F8F6F1]">✦</span> WISDOM GUIDANCE
+                </span>
+              )}
+
+              {/* กล่องข้อความ */}
+              <div className={`max-w-[85%] md:max-w-[75%] p-5 rounded-2xl text-[13px] md:text-sm leading-loose md:leading-loose ${
                 msg.sender === "user" 
-                  ? "bg-[#C6A96B] text-[#020617] font-bold rounded-tr-none" 
-                  : "bg-slate-900/80 text-[#F8F6F1] border border-white/5 rounded-tl-none"
+                  ? "bg-[#C6A96B] text-[#020617] font-bold rounded-tr-none shadow-lg shadow-[#C6A96B]/10" 
+                  : "bg-[#020617]/60 text-[#F8F6F1] border border-white/10 rounded-tl-none shadow-lg shadow-black/20"
               }`}>
                 {msg.text}
               </div>
@@ -548,16 +565,17 @@ export default function KarnchataPage() {
           <div ref={chatEndRef} />
         </div>
 
-        <div className="p-4 bg-[#040C18] border-t border-white/5">
-          <form onSubmit={handleSendChat} className="flex gap-3 max-w-4xl mx-auto">
+        {/* ช่องพิมพ์ข้อความ */}
+        <div className="p-5 bg-[#020617] border-t border-white/5">
+          <form onSubmit={handleSendChat} className="flex gap-3">
             <input 
               type="text" 
               value={userInput}
               onChange={e => setUserInput(e.target.value)}
               placeholder={`ถามคำถามกาลชะตาที่นี่... เช่น ${activeCategory?.questions[0].split('?')[0]}`}
-              className="flex-1 bg-[#0A1628] border border-white/10 rounded-xl px-5 py-3 text-sm text-[#F8F6F1] outline-none focus:border-[#C6A96B]/50 transition-colors"
+              className="flex-1 bg-[#0A1628] border border-white/5 rounded-2xl px-6 py-3.5 text-sm text-[#F8F6F1] outline-none focus:border-[#C6A96B]/50 transition-colors placeholder:text-[#8A8070]/50"
             />
-            <Button type="submit" disabled={!userInput.trim()} className="px-8 py-3 shrink-0 rounded-xl bg-[#C6A96B]/20 text-[#C6A96B] hover:bg-[#C6A96B] hover:text-[#020617]">
+            <Button type="submit" disabled={!userInput.trim()} className="px-6 md:px-8 py-3.5 shrink-0 rounded-2xl bg-[#8A8070] text-[#020617] font-bold hover:bg-[#C6A96B] transition-colors shadow-lg">
               ส่งคำถาม
             </Button>
           </form>
