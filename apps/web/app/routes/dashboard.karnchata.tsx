@@ -169,6 +169,21 @@ export default function KarnchataPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
+  const handleAutoSend = (q: string) => {
+    setUserInput(q);
+    setChatMessages(prev => [...prev, { sender: "user", text: q, time: "" }]);
+    setTimeout(() => {
+      let aiResponse = `ในทางกาลชะตาขณะนี้ ยามใหญ่ตกที่ ${activeResult.yamYaiName} ส่วนยามซอยตกที่ ${activeResult.yamSoyName} `;
+      if (selectedDirection) {
+        const dir = TAKSA_DIRECTIONS.find(d => d.id === selectedDirection);
+        aiResponse += `(คุณเลือกทิศ ${dir?.name}) `;
+      }
+      aiResponse += "จังหวะนี้มีพลังงานสอดคล้องกับเรื่องราวที่คุณถาม แนะนำให้ดำเนินการด้วยสติและรอบคอบครับ";
+      setChatMessages(prev => [...prev, { sender: "ai", text: aiResponse, time: "" }]);
+    }, 1500);
+    setUserInput("");
+  };
+
   const handleSendChat = (e: React.FormEvent) => {
     e.preventDefault();
     if (!userInput.trim()) return;
@@ -251,36 +266,36 @@ export default function KarnchataPage() {
              <span className="bg-white/5 border border-white/10 text-[#F8F6F1] font-bold text-[10px] px-4 py-1.5 rounded-full">กลางวัน</span>
           </div>
 
-          <div className="text-center my-8 space-y-4">
-            <p className="text-[80px] md:text-[96px] font-display font-black text-[#F8F6F1] leading-none tracking-tight drop-shadow-lg">
-              {formatTime(time).slice(0, 5)}
+          <div className="text-center my-8">
+            <p className="text-[80px] md:text-[96px] font-display font-black text-[#F8F6F1] leading-none tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse-slow">
+              {formatTime(time)}
             </p>
-            <p className="text-[11px] text-[#8A8070] tracking-wide">
-              วิเคราะห์จังหวะชีวิต ณ วันที่ {thaiDateLabel}
+            <p className="text-[11px] text-[#8A8070] tracking-wide mt-4 italic">
+              กาลชะตาหมุนเวียนรอบละ 3.45 นาที • ตรวจจับกำลังดาวเปลี่ยนตามวินาทีจริง
             </p>
             
             <div className="flex items-center justify-center gap-4 mt-6">
-              <div className="bg-[#020617] border border-white/5 rounded-2xl px-6 py-3">
-                <p className="text-[9px] text-[#8A8070] mb-0.5">ยามใหญ่ (ตนุ)</p>
+              <div className="bg-[#020617] border border-white/5 rounded-2xl px-6 py-3 min-w-[120px]">
+                <p className="text-[9px] text-[#8A8070] mb-1">ยามใหญ่ (ตนุ)</p>
                 <p className="text-sm font-bold text-[#F8F6F1]">{activeResult.yamYaiName}</p>
               </div>
-              <div className="bg-[#0B1E36] border border-sky-500/20 rounded-2xl px-6 py-3">
-                <p className="text-[9px] text-sky-400 mb-0.5">ยามซอย (อัตตะ)</p>
+              <div className="bg-[#0B1E36] border border-sky-500/20 rounded-2xl px-6 py-3 min-w-[120px]">
+                <p className="text-[9px] text-sky-400 mb-1">ยามซอย (อัตตะ)</p>
                 <p className="text-sm font-bold text-sky-300">{activeResult.yamSoyName}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#020617] border border-[#C6A96B]/30 rounded-2xl p-5 mt-auto relative">
+          <div className="bg-[#020617] border border-[#d97706]/40 rounded-2xl p-5 mt-auto relative shadow-[0_0_15px_rgba(217,119,6,0.1)]">
             <div className="flex justify-between items-start mb-2">
-              <p className="text-[10px] text-[#C6A96B] font-bold">ยามกาลชะตาในขณะนี้</p>
+              <p className="text-[10px] text-[#d97706] font-bold">ยามกาลชะตาในขณะนี้</p>
               <span className="bg-[#0A1628] border border-white/5 text-[#F8F6F1] text-[10px] px-3 py-1 rounded-full font-bold">
                 ยามที่ 1
               </span>
             </div>
-            <h3 className="font-display text-lg font-bold text-[#C6A96B] mb-2">{activeResult.yamYaiName} (เจรจา/สติปัญญา)</h3>
-            <p className="text-xs text-[#8A8070] leading-relaxed max-w-md">
-              ช่วงเวลาดีเลิศในการวางแผน ตกลงเซ็นเอกสารสัญญา ธุรกิจค้าขาย ค้นหาไอเดียสร้างสรรค์ใหม่ๆ มีสติปัญญาสูงส่ง
+            <h3 className="font-display text-lg font-bold text-[#d97706] mb-2">{activeResult.yamYaiName} (ครูบา/ปัญญา)</h3>
+            <p className="text-xs text-[#d97706]/80 leading-relaxed max-w-md">
+              ช่วงเวลาแห่งสติปัญญาและคุณธรรม เหมาะแก่การศึกษาธรรมะ เริ่มต้นเรียนรู้สิ่งใหม่ ผู้ใหญ่ให้ความเมตตาเอ็นดู
             </p>
           </div>
         </Card>
@@ -316,17 +331,68 @@ export default function KarnchataPage() {
             </p>
             <div className="space-y-3">
               {activeCategory?.questions.map((q, i) => (
-                <div key={i} className="flex gap-3 bg-transparent p-0 cursor-pointer group" onClick={() => setUserInput(q)}>
+                <div key={i} className="flex gap-3 bg-transparent p-0 cursor-pointer group" onClick={() => handleAutoSend(q)}>
                   <span className="text-[#C6A96B] text-sm leading-none mt-0.5 opacity-70 group-hover:opacity-100">✦</span>
                   <p className="text-[11px] text-[#F8F6F1] opacity-70 group-hover:opacity-100 leading-relaxed transition-opacity">{q}</p>
                 </div>
               ))}
             </div>
           </div>
+
+          <div className="my-2" />
+
+          {/* Chat Section Integrated */}
+          <div className="flex-1 flex flex-col bg-[#020617] border border-white/5 rounded-2xl overflow-hidden shadow-2xl relative min-h-[350px]">
+            <div className="p-5 flex items-center gap-4 bg-[#0A1628]/30 border-b border-white/5">
+               <div className="w-3 h-3 rounded-full bg-[#C6A96B] shrink-0 shadow-[0_0_8px_rgba(198,169,107,0.6)] animate-pulse" />
+               <div>
+                 <h3 className="text-xs font-bold text-[#F8F6F1] tracking-wider">แชทถามตอบกับ WISDOM GUIDANCE</h3>
+                 <p className="text-[9px] text-[#8A8070] mt-0.5">หมวดการสนทนาปัจจุบัน: <span className="font-bold text-[#C6A96B]">{activeCategory?.label}</span></p>
+               </div>
+               <button onClick={() => setChatMessages([])} className="ml-auto px-4 py-1.5 text-[10px] border border-white/10 text-[#8A8070] hover:text-[#F8F6F1] hover:border-white/20 rounded-lg transition-colors">
+                 ล้างแชท
+               </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-5 space-y-5 bg-transparent h-[280px]">
+              {chatMessages.map((msg, i) => (
+                <div key={i} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
+                  {msg.sender === "ai" && (
+                    <span className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <span className="text-[#F8F6F1]">✦</span> WISDOM GUIDANCE
+                    </span>
+                  )}
+                  <div className={`max-w-[85%] md:max-w-[80%] p-4 rounded-2xl text-[12px] leading-relaxed ${
+                    msg.sender === "user" 
+                      ? "bg-[#0A1628] text-[#F8F6F1] border border-white/10 font-bold rounded-tr-none shadow-lg" 
+                      : "bg-[#020617]/60 text-[#F8F6F1] border border-white/10 rounded-tl-none shadow-lg shadow-black/20"
+                  }`}>
+                    {msg.text}
+                  </div>
+                </div>
+              ))}
+              <div ref={chatEndRef} />
+            </div>
+
+            <div className="p-4 bg-[#020617] border-t border-white/5">
+              <form onSubmit={handleSendChat} className="flex gap-2">
+                <input 
+                  type="text" 
+                  value={userInput}
+                  onChange={e => setUserInput(e.target.value)}
+                  placeholder="กำลังประมวลผลดวงดาว..."
+                  className="flex-1 bg-[#0A1628] border border-white/5 rounded-xl px-5 py-3 text-xs text-[#F8F6F1] outline-none focus:border-[#C6A96B]/50 transition-colors placeholder:text-[#8A8070]/50"
+                />
+                <Button type="submit" disabled={!userInput.trim()} className="px-6 py-3 shrink-0 rounded-xl bg-[#8A8070] text-[#020617] font-bold hover:bg-[#C6A96B] transition-colors shadow-lg text-[11px]">
+                  ส่งคำถาม
+                </Button>
+              </form>
+            </div>
+          </div>
         </Card>
       </div>
 
-      {/* Scores Section */}
+      {/* Scores Section Moved Down */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
           { label: "การค้า/เจรจา", score: 70, color: "text-[#C6A96B]", bgLine: "bg-[#C6A96B]" },
@@ -541,62 +607,7 @@ export default function KarnchataPage() {
         </div>
       </Card>
 
-      {/* Chat Section */}
-      <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-0 overflow-hidden relative shadow-2xl max-w-4xl mx-auto">
-        
-        {/* Header แชท */}
-        <div className="p-6 border-b border-white/5 flex items-center gap-4">
-           <div className="w-3 h-3 rounded-full bg-[#C6A96B] shrink-0 shadow-[0_0_8px_rgba(198,169,107,0.6)]" />
-           <div>
-             <h3 className="text-sm md:text-base font-bold text-[#F8F6F1]">แชทถามตอบกับ WISDOM GUIDANCE</h3>
-             <p className="text-[10px] text-[#8A8070] mt-1">หมวดการสนทนาปัจจุบัน: <span className="font-bold text-[#C6A96B]">{activeCategory?.label}</span></p>
-           </div>
-           <button onClick={() => setChatMessages([])} className="ml-auto px-4 py-1.5 text-[10px] border border-white/10 text-[#8A8070] hover:text-[#F8F6F1] hover:border-white/20 rounded-lg transition-colors">
-             ล้างแชท
-           </button>
-        </div>
-
-        {/* พื้นที่แชท */}
-        <div className="h-[400px] overflow-y-auto p-6 space-y-6 bg-[#0A1628]">
-          {chatMessages.map((msg, i) => (
-            <div key={i} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
-              
-              {/* ชื่อคนส่ง AI */}
-              {msg.sender === "ai" && (
-                <span className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                  <span className="text-[#F8F6F1]">✦</span> WISDOM GUIDANCE
-                </span>
-              )}
-
-              {/* กล่องข้อความ */}
-              <div className={`max-w-[85%] md:max-w-[75%] p-5 rounded-2xl text-[12px] md:text-[13px] leading-relaxed md:leading-relaxed ${
-                msg.sender === "user" 
-                  ? "bg-[#C6A96B] text-[#020617] font-bold rounded-tr-none shadow-lg shadow-[#C6A96B]/10" 
-                  : "bg-[#020617]/60 text-[#F8F6F1] border border-white/10 rounded-tl-none shadow-lg shadow-black/20"
-              }`}>
-                {msg.text}
-              </div>
-            </div>
-          ))}
-          <div ref={chatEndRef} />
-        </div>
-
-        {/* ช่องพิมพ์ข้อความ */}
-        <div className="p-6 bg-[#020617]">
-          <form onSubmit={handleSendChat} className="flex gap-3">
-            <input 
-              type="text" 
-              value={userInput}
-              onChange={e => setUserInput(e.target.value)}
-              placeholder={`ถามคำถามกาลชะตาที่นี่... เช่น ${activeCategory?.questions[0].split('?')[0]}`}
-              className="flex-1 bg-[#0A1628] border border-white/5 rounded-2xl px-6 py-3.5 text-xs text-[#F8F6F1] outline-none focus:border-[#C6A96B]/50 transition-colors placeholder:text-[#8A8070]/50"
-            />
-            <Button type="submit" disabled={!userInput.trim()} className="px-6 md:px-8 py-3.5 shrink-0 rounded-2xl bg-[#8A8070] text-[#020617] font-bold hover:bg-[#C6A96B] transition-colors shadow-lg">
-              ส่งคำถาม
-            </Button>
-          </form>
-        </div>
-      </Card>
+      {/* Chat Section removed from bottom and integrated into Category card */}
     </div>
   );
 }
