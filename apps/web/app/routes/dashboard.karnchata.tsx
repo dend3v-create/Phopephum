@@ -198,45 +198,43 @@ export default function KarnchataPage() {
           <span className="text-[#C6A96B] text-[10px] tracking-[0.25em] uppercase font-bold flex items-center gap-2 mb-2">
             <span className="text-amber-500">✦</span> คัมภีร์พยากรณ์ลับเฉพาะกาล
           </span>
-          <h1 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] glow-gold flex flex-wrap items-baseline gap-2 md:gap-4">
-            ทำนายกาลชะตา V2.0 <span className="text-[#C6A96B] text-xs md:text-sm font-normal tracking-[0.2em] uppercase whitespace-nowrap">(Real-time Time Oracle)</span>
+          <h1 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] flex flex-wrap items-baseline gap-2 md:gap-4">
+            ทำนายกาลชะตา V2.0 <span className="text-[#C6A96B] text-[10px] md:text-xs font-normal tracking-[0.2em] uppercase whitespace-nowrap">(REAL-TIME TIME ORACLE)</span>
           </h1>
           <p className="text-[#8A8070] text-xs md:text-sm mt-2">
             วิเคราะห์รหัสชะตาชีวิตระดับวินาทีด้วย 7 ตัว 9 ฐาน ผสมผสานระบบ Q&A แชทอัจฉริยะแบบเรียลไทม์
           </p>
         </div>
-        <div className="text-left md:text-right border border-white/10 bg-[#0A1628] rounded-xl px-5 py-3 self-start md:self-center">
-          <p className="text-[10px] text-[#8A8070] uppercase font-bold tracking-wider mb-1">วันกาลชะตาวันนี้</p>
+        <div className="text-center md:text-right border border-white/5 bg-[#0A1628]/50 rounded-3xl px-6 py-3 self-start md:self-center">
+          <p className="text-[9px] text-[#8A8070] uppercase font-bold tracking-wider mb-0.5">วันกาลชะตาวันนี้</p>
           <p className="text-xs text-[#F8F6F1] font-bold">{thaiDateLabel}</p>
         </div>
       </header>
 
       {/* Control Bar (Time Mode) */}
-      <div className="bg-[#0A1628] border border-white/5 rounded-2xl p-2 md:p-3 flex flex-col lg:flex-row lg:items-center gap-4">
-        <div className="flex flex-col sm:flex-row bg-[#020617] rounded-xl p-1 border border-white/5 shrink-0">
+      <div className="bg-[#0A1628]/80 border border-white/5 rounded-full p-1.5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex bg-[#020617] rounded-full p-1 border border-white/5 shrink-0">
            <button
              type="button"
              onClick={() => setTimeMode("live")}
-             className={`px-4 md:px-6 py-2.5 text-xs font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#C6A96B] text-[#020617] shadow-lg shadow-[#C6A96B]/20" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
+             className={`px-5 py-2 text-xs font-bold rounded-full transition-all flex items-center gap-2 ${timeMode === "live" ? "bg-[#1E1730] text-[#F8F6F1] shadow-lg" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
            >
-             ⏱ เวลาเรียลไทม์ (Real-time)
+             <span className="text-sm">⏱</span> เวลาเรียลไทม์ (Real-time)
            </button>
            <button
              type="button"
              onClick={() => setTimeMode("custom")}
-             className={`px-4 md:px-6 py-2.5 text-xs font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[#C6A96B] text-[#020617] shadow-lg shadow-[#C6A96B]/20" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
+             className={`px-5 py-2 text-xs font-bold rounded-full transition-all flex items-center gap-2 ${timeMode === "custom" ? "bg-[#C6A96B] text-[#020617] shadow-lg" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
            >
-             📅 เลือกวัน/เวลาเอง (Custom Cast)
+             <span className="text-sm">📅</span> เลือกวัน/เวลาเอง (Custom Cast)
            </button>
         </div>
         
         {/* If Custom mode is selected, show inputs */}
-        <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 transition-opacity duration-300 ${timeMode === "custom" ? "opacity-100" : "opacity-50 pointer-events-none"}`}>
-          <span className="text-xs text-[#8A8070] font-bold px-2">เลือกวันเวลาสืบค้น:</span>
-          <div className="flex gap-2 w-full sm:w-auto">
-            <input type="date" className="bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-xl px-4 py-2.5 outline-none focus:border-[#C6A96B] w-full sm:w-auto" defaultValue={new Date().toISOString().split('T')[0]} />
-            <input type="time" className="bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-xl px-4 py-2.5 outline-none focus:border-[#C6A96B]" defaultValue="12:00" />
-          </div>
+        <div className={`flex items-center gap-3 pr-4 transition-opacity duration-300 ${timeMode === "custom" ? "opacity-100" : "opacity-50 pointer-events-none"}`}>
+          <span className="text-[10px] text-[#8A8070] font-bold">เลือกวันเวลาสืบค้น:</span>
+          <input type="date" className="bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-full px-4 py-1.5 outline-none focus:border-[#C6A96B]" defaultValue={new Date().toISOString().split('T')[0]} />
+          <input type="time" className="bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-full px-4 py-1.5 outline-none focus:border-[#C6A96B]" defaultValue="12:00" />
         </div>
       </div>
 
@@ -244,55 +242,53 @@ export default function KarnchataPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* กาลเวลาปัจจุบันแบบเรียลไทม์ */}
-        <Card className="border-[#C6A96B]/20 bg-gradient-to-b from-[#0A1628] to-[#040C18] p-8 flex flex-col justify-between relative overflow-hidden">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#C6A96B]/5 rounded-full blur-[100px] -z-10" />
-          
+        <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8 flex flex-col relative overflow-hidden">
           <div className="flex justify-between items-center mb-6">
-             <span className="text-xs font-bold text-[#8A8070] tracking-widest">กาลเวลาปัจจุบันแบบเรียลไทม์</span>
-             <span className="bg-white/5 border border-white/10 text-[#8A8070] text-[10px] px-3 py-1 rounded-full">กลางวัน</span>
+             <span className="text-[11px] font-bold text-[#C6A96B] tracking-wide flex items-center gap-2">
+               <span className="w-2 h-2 rounded-full bg-[#C6A96B] shadow-[0_0_8px_rgba(198,169,107,0.8)]" />
+               กาลเวลาที่กำหนด (เจาะจงฤกษ์)
+             </span>
+             <span className="bg-white/5 border border-white/10 text-[#F8F6F1] font-bold text-[10px] px-4 py-1.5 rounded-full">กลางวัน</span>
           </div>
 
-          <div className="text-center my-6 space-y-6">
-            <p className="text-[80px] md:text-[96px] font-display font-black text-[#F8F6F1] leading-none drop-shadow-2xl">
-              {formatTime(time)}
+          <div className="text-center my-8 space-y-4">
+            <p className="text-[80px] md:text-[96px] font-display font-black text-[#F8F6F1] leading-none tracking-tight drop-shadow-lg">
+              {formatTime(time).slice(0, 5)}
             </p>
-            <p className="text-xs text-[#8A8070] tracking-wider">
-              กาลชะตาหมุนเวียนรอบละ 3.45 นาที · ตรวจจับกำลังดาวเปลี่ยนตามวินาทีจริง
+            <p className="text-[11px] text-[#8A8070] tracking-wide">
+              วิเคราะห์จังหวะชีวิต ณ วันที่ {thaiDateLabel}
             </p>
             
-            <div className="flex items-center justify-center gap-4">
-              <div className="bg-[#0A1628] border border-[#C6A96B]/20 rounded-xl px-6 py-3">
-                <p className="text-[10px] text-[#8A8070] mb-1">ยามใหญ่ (ตนุ)</p>
+            <div className="flex items-center justify-center gap-4 mt-6">
+              <div className="bg-[#020617] border border-white/5 rounded-2xl px-6 py-3">
+                <p className="text-[9px] text-[#8A8070] mb-0.5">ยามใหญ่ (ตนุ)</p>
                 <p className="text-sm font-bold text-[#F8F6F1]">{activeResult.yamYaiName}</p>
               </div>
-              <div className="bg-[#0A1628] border border-sky-500/20 rounded-xl px-6 py-3">
-                <p className="text-[10px] text-sky-400 mb-1">ยามซอย (อัตตะ)</p>
+              <div className="bg-[#0B1E36] border border-sky-500/20 rounded-2xl px-6 py-3">
+                <p className="text-[9px] text-sky-400 mb-0.5">ยามซอย (อัตตะ)</p>
                 <p className="text-sm font-bold text-sky-300">{activeResult.yamSoyName}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-rose-950/20 border border-rose-500/20 rounded-2xl p-5 relative overflow-hidden mt-6">
-            <div className="absolute left-0 top-0 bottom-0 w-1 bg-rose-500" />
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-[10px] text-rose-300 mb-1">ยามกาลชะตาในขณะนี้</p>
-                <h3 className="font-display text-xl font-bold text-rose-400">ยาม{activeResult.yamYaiName.replace('ดาว','')} (อำนาจ/ผู้นำ)</h3>
-                <p className="text-xs text-rose-200/70 mt-2 leading-relaxed max-w-md">
-                  ช่วงเวลาแห่งอำนาจบารมี เหมาะสำหรับการเป็นผู้นำ ตัดสินใจเด็ดขาด เจรจากับผู้ใหญ่ หรือผู้มีอำนาจ ความแม่นยำสูง
-                </p>
-              </div>
-              <span className="bg-[#020617] border border-rose-500/30 text-rose-300 text-[10px] px-3 py-1 rounded-full whitespace-nowrap">
+          <div className="bg-[#020617] border border-[#C6A96B]/30 rounded-2xl p-5 mt-auto relative">
+            <div className="flex justify-between items-start mb-2">
+              <p className="text-[10px] text-[#C6A96B] font-bold">ยามกาลชะตาในขณะนี้</p>
+              <span className="bg-[#0A1628] border border-white/5 text-[#F8F6F1] text-[10px] px-3 py-1 rounded-full font-bold">
                 ยามที่ 1
               </span>
             </div>
+            <h3 className="font-display text-lg font-bold text-[#C6A96B] mb-2">{activeResult.yamYaiName} (เจรจา/สติปัญญา)</h3>
+            <p className="text-xs text-[#8A8070] leading-relaxed max-w-md">
+              ช่วงเวลาดีเลิศในการวางแผน ตกลงเซ็นเอกสารสัญญา ธุรกิจค้าขาย ค้นหาไอเดียสร้างสรรค์ใหม่ๆ มีสติปัญญาสูงส่ง
+            </p>
           </div>
         </Card>
 
         {/* เลือกเรื่องที่ต้องการถามเจาะลึก */}
-        <Card className="border-[#C6A96B]/20 bg-gradient-to-b from-[#0A1628] to-[#040C18] p-6 lg:p-8 flex flex-col">
-          <h3 className="text-sm font-bold text-[#F8F6F1] mb-6 flex items-center gap-2">
-            <span className="text-pink-400">🎯</span> เลือกเรื่องที่ต้องการถามเจาะลึก
+        <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 lg:p-8 flex flex-col">
+          <h3 className="text-[11px] font-bold text-[#F8F6F1] mb-6 flex items-center gap-2">
+            <span className="text-pink-400 text-lg">🎯</span> เลือกเรื่องที่ต้องการถามเจาะลึก
           </h3>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
@@ -300,29 +296,29 @@ export default function KarnchataPage() {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`p-4 rounded-2xl border flex flex-col items-center justify-center gap-3 transition-all ${
+                className={`p-4 rounded-2xl border flex flex-col items-center justify-center gap-2 transition-all ${
                   selectedCategory === cat.id 
                     ? "bg-[#0B1E36] border-sky-500/50 shadow-[0_0_15px_rgba(14,165,233,0.15)]" 
                     : "bg-[#020617] border-white/5 hover:border-white/10"
                 }`}
               >
-                <span className="text-2xl">{cat.icon}</span>
-                <span className={`text-[11px] font-bold ${selectedCategory === cat.id ? "text-sky-400" : "text-[#8A8070]"}`}>
+                <span className="text-2xl mb-1">{cat.icon}</span>
+                <span className={`text-[10px] font-bold ${selectedCategory === cat.id ? "text-sky-400" : "text-[#F8F6F1]"}`}>
                   {cat.label}
                 </span>
               </button>
             ))}
           </div>
 
-          <div className="bg-[#0A1628] border border-white/5 rounded-2xl p-5 flex-1">
-            <p className="text-xs font-bold text-[#C6A96B] mb-4 flex items-center gap-2">
+          <div className="bg-[#020617] border border-white/5 rounded-2xl p-5 flex-1">
+            <p className="text-[10px] font-bold text-[#C6A96B] mb-4 flex items-center gap-2">
               💡 คำถามแนะนำสำหรับหมวดนี้
             </p>
             <div className="space-y-3">
               {activeCategory?.questions.map((q, i) => (
-                <div key={i} className="flex gap-3 bg-[#020617] border border-white/5 p-4 rounded-xl hover:border-white/10 transition-colors cursor-pointer" onClick={() => setUserInput(q)}>
-                  <span className="text-[#C6A96B] text-lg leading-none mt-0.5">✦</span>
-                  <p className="text-xs text-[#F8F6F1] opacity-90 leading-relaxed">{q}</p>
+                <div key={i} className="flex gap-3 bg-transparent p-0 cursor-pointer group" onClick={() => setUserInput(q)}>
+                  <span className="text-[#C6A96B] text-sm leading-none mt-0.5 opacity-70 group-hover:opacity-100">✦</span>
+                  <p className="text-[11px] text-[#F8F6F1] opacity-70 group-hover:opacity-100 leading-relaxed transition-opacity">{q}</p>
                 </div>
               ))}
             </div>
@@ -333,43 +329,43 @@ export default function KarnchataPage() {
       {/* Scores Section */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "การค้า/เจรจา", score: 80, color: "text-[#C6A96B]", bgLine: "bg-[#C6A96B]" },
-          { label: "ความรัก/เมตตา", score: 60, color: "text-pink-400", bgLine: "bg-pink-400" },
-          { label: "โชคลาภ/ทรัพย์สิน", score: 70, color: "text-emerald-400", bgLine: "bg-emerald-400" },
-          { label: "ระดับการเตือนภัย", score: 40, color: "text-[#8A8070]", bgLine: "bg-[#8A8070]" },
+          { label: "การค้า/เจรจา", score: 70, color: "text-[#C6A96B]", bgLine: "bg-[#C6A96B]" },
+          { label: "ความรัก/เมตตา", score: 98, color: "text-pink-400", bgLine: "bg-pink-400" },
+          { label: "โชคลาภ/ทรัพย์สิน", score: 80, color: "text-emerald-400", bgLine: "bg-emerald-400" },
+          { label: "ระดับการเตือนภัย", score: 8, color: "text-[#8A8070]", bgLine: "bg-[#8A8070]" },
         ].map(item => (
-          <Card key={item.label} className="p-6 border-white/5 bg-[#0A1628] flex flex-col items-center justify-center gap-4 relative overflow-hidden">
-            <span className="text-[11px] text-[#8A8070] font-bold tracking-wider">{item.label}</span>
-            <span className={`text-4xl font-display font-black ${item.color}`}>{item.score}%</span>
+          <div key={item.label} className="p-5 border border-white/5 bg-[#0A1628] rounded-2xl flex flex-col items-center justify-center gap-3">
+            <span className="text-[10px] text-[#8A8070] font-bold">{item.label}</span>
+            <span className={`text-3xl font-display font-bold ${item.color}`}>{item.score}%</span>
             <div className={`w-12 h-1 rounded-full ${item.bgLine}`} />
-          </Card>
+          </div>
         ))}
       </div>
 
       {/* ผังดวงกาลชะตา 9 ฐาน */}
       <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8 overflow-x-auto relative">
-        <div className="flex items-start gap-4 mb-8">
-          <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center text-xl shrink-0">
+        <div className="flex items-start gap-4 mb-10">
+          <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-lg shrink-0">
             ☸️
           </div>
           <div>
-            <h3 className="text-base font-bold text-[#F8F6F1]">ผังดวงกาลชะตา 9 ฐาน</h3>
+            <h3 className="text-sm font-bold text-[#F8F6F1]">ผังดวงกาลชะตา 9 ฐาน</h3>
             <p className="text-[10px] text-[#8A8070] mt-1">อัปเดตชะตาตามจุดเวลาที่เลือก - แตะตัวเลขเพื่อดูความเชื่อมโยง</p>
           </div>
         </div>
 
-        <div className="min-w-[700px] flex flex-col gap-6 items-center">
+        <div className="min-w-[700px] flex flex-col gap-6 items-center pb-4">
           {/* Bases 1-3 */}
           {[0, 1, 2].map(rIdx => (
             <div key={rIdx} className="flex items-center w-full max-w-3xl">
-              <div className="w-24 text-xs font-bold text-[#F8F6F1]">ฐาน {rIdx + 1}</div>
+              <div className="w-20 text-[11px] font-bold text-[#F8F6F1]">ฐาน {rIdx + 1 === 1 ? '๑' : rIdx + 1 === 2 ? '๒' : '๓'}</div>
               <div className="flex-1 flex justify-between">
                 {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
-                  <div key={cIdx} className="flex flex-col items-center gap-2 w-16">
-                    <div className="w-12 h-12 rounded-full border-2 border-[#8A8070]/30 bg-[#020617] flex items-center justify-center text-xl font-display font-bold text-[#F8F6F1]">
+                  <div key={cIdx} className="flex flex-col items-center gap-2 w-14">
+                    <div className="w-10 h-10 rounded-full border border-[#8A8070]/50 bg-[#020617] flex items-center justify-center text-lg font-display font-bold text-[#F8F6F1]">
                       {star}
                     </div>
-                    <span className="text-[10px] text-[#8A8070] font-medium">{getBhopName(rIdx, cIdx)}</span>
+                    <span className="text-[9px] text-[#8A8070] font-medium">{getBhopName(rIdx, cIdx)}</span>
                   </div>
                 ))}
               </div>
@@ -377,15 +373,15 @@ export default function KarnchataPage() {
           ))}
 
           {/* Base 4 */}
-          <div className="flex items-center w-full max-w-3xl bg-sky-950/20 border border-sky-500/20 p-4 rounded-2xl relative">
-             <div className="w-20 text-xs font-bold text-sky-400">ฐาน ๔</div>
-             <div className="flex-1 flex justify-between">
+          <div className="flex items-center w-full max-w-3xl bg-[#0B1E36]/30 border border-sky-500/10 py-3 px-2 rounded-2xl my-2">
+             <div className="w-[72px] text-[11px] font-bold text-sky-400 pl-2">ฐาน ๔</div>
+             <div className="flex-1 flex justify-between pr-2">
                 {activeResult.chart[3].map((star: number, cIdx: number) => (
-                  <div key={cIdx} className="flex flex-col items-center gap-2 w-16">
-                    <div className="w-12 h-12 rounded-full border-2 border-[#C6A96B]/50 bg-[#C6A96B]/10 flex items-center justify-center text-xl font-display font-bold text-[#F8F6F1]">
+                  <div key={cIdx} className="flex flex-col items-center gap-2 w-14">
+                    <div className="w-10 h-10 rounded-full border border-sky-500/50 bg-[#020617] flex items-center justify-center text-lg font-display font-bold text-[#F8F6F1]">
                       {star}
                     </div>
-                    <span className="text-[9px] text-[#C6A96B] font-bold text-center leading-tight">
+                    <span className="text-[9px] text-[#8A8070] font-medium text-center">
                       {BASE4_NAMES[cIdx] || ""}
                     </span>
                   </div>
@@ -396,11 +392,11 @@ export default function KarnchataPage() {
           {/* Bases 5-9 */}
           {[4, 5, 6, 7, 8].map(rIdx => (
             <div key={rIdx} className="flex items-center w-full max-w-3xl">
-              <div className="w-24 text-xs font-bold text-[#F8F6F1]">ฐาน {rIdx + 1}</div>
+              <div className="w-20 text-[11px] font-bold text-[#F8F6F1]">ฐาน {rIdx + 1 === 5 ? '๕' : rIdx + 1 === 6 ? '๖' : rIdx + 1 === 7 ? '๗' : rIdx + 1 === 8 ? '๘' : '๙'}</div>
               <div className="flex-1 flex justify-between">
                 {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
-                  <div key={cIdx} className="flex flex-col items-center gap-2 w-16">
-                    <div className="w-10 h-10 rounded-full border border-white/10 bg-[#020617] flex items-center justify-center text-lg font-display font-bold text-[#F8F6F1]">
+                  <div key={cIdx} className="flex flex-col items-center gap-2 w-14">
+                    <div className="w-10 h-10 rounded-full border border-[#8A8070]/50 bg-[#020617] flex items-center justify-center text-lg font-display font-bold text-[#F8F6F1]">
                       {star}
                     </div>
                     {rIdx === 7 && <span className="text-[9px] text-[#8A8070] font-medium">{"อาตมะ,ทาสา,สิทธิโชค,โภคทรัพย์,โจร,อุบาทว์".split(',')[cIdx]}</span>}
@@ -416,20 +412,37 @@ export default function KarnchataPage() {
       {/* Grid ทิศทักษาจร 8 ทิศ */}
       <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8">
          <div className="flex items-start gap-4 mb-8 border-b border-white/5 pb-6">
-            <div className="w-10 h-10 rounded-xl bg-[#C6A96B]/20 flex items-center justify-center text-xl shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-[#C6A96B]/20 flex items-center justify-center text-lg shrink-0">
               🧭
             </div>
             <div>
-              <h3 className="text-base font-bold text-[#F8F6F1]">ผังทิศทักษาจรแปดทิศ (8-DIRECTIONAL TAKSA GRID)</h3>
+              <h3 className="text-sm font-bold text-[#F8F6F1]">ผังทิศทักษาจรแปดทิศ (8-DIRECTIONAL TAKSA GRID)</h3>
               <p className="text-[10px] text-[#8A8070] mt-1">แผนผังแปดทิศ แสดงความสัมพันธ์ของดาวและตำแหน่งทิศทางที่เป็นคุณ/เป็นภัยในนาทีนี้ แตะการ์ดทิศเพื่อเลือกดาว</p>
+            </div>
+            <div className="hidden md:block ml-auto border border-white/10 rounded-full px-4 py-1 text-[9px] font-bold text-[#8A8070] uppercase tracking-wider">
+              Karnchata Engine V2.0
             </div>
          </div>
 
          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
             {TAKSA_DIRECTIONS.map((dir) => {
               const isActive = selectedDirection === dir.id;
-              // Mocking properties for UI display as per screenshot
-              const isKala = dir.id === 6 || dir.id === 4; // Mocking N, S having kala/sri
+              
+              let kalaLabel = "";
+              let kalaBg = "";
+              let birthLabel = "";
+              let birthBg = "bg-[#0A1628] border-white/5 text-[#8A8070]";
+              let isCenter = dir.id === 9;
+
+              if (dir.id === 3) { kalaLabel = "อายุ"; kalaBg = "bg-[#0A1628] border-white/5 text-[#F8F6F1]"; birthLabel = "มนตรี"; }
+              else if (dir.id === 1) { kalaLabel = "กาลกิณี"; kalaBg = "bg-rose-950/20 border-rose-500/20 text-rose-400"; birthLabel = "มูละ"; }
+              else if (dir.id === 2) { kalaLabel = "บริวาร"; kalaBg = "bg-[#0A1628] border-white/5 text-[#F8F6F1]"; birthLabel = "อุตสาหะ"; }
+              else if (dir.id === 6) { kalaLabel = "มนตรี"; kalaBg = "bg-[#0A1628] border-white/5 text-[#F8F6F1]"; birthLabel = "ศรี"; birthBg = "bg-emerald-950/20 border-emerald-500/20 text-emerald-400"; }
+              else if (dir.id === 4) { kalaLabel = "เดช"; kalaBg = "bg-[#0A1628] border-white/5 text-[#F8F6F1]"; birthLabel = "กาลกิณี"; birthBg = "bg-rose-950/20 border-rose-500/20 text-rose-400"; }
+              else if (dir.id === 8) { kalaLabel = "อุตสาหะ"; kalaBg = "bg-[#0A1628] border-white/5 text-[#F8F6F1]"; birthLabel = "เดช"; }
+              else if (dir.id === 5) { kalaLabel = "มูละ"; kalaBg = "bg-[#0A1628] border-white/5 text-[#F8F6F1]"; birthLabel = "อายุ"; }
+              else if (dir.id === 7) { kalaLabel = "ศรี"; kalaBg = "bg-emerald-950/20 border-emerald-500/20 text-emerald-400"; birthLabel = "บริวาร"; }
+
               return (
                 <button
                   key={dir.id}
@@ -442,15 +455,23 @@ export default function KarnchataPage() {
                 >
                   <p className="text-[10px] text-[#8A8070] font-bold mb-3">{dir.name}</p>
                   <p className="text-sm font-bold text-[#F8F6F1] mb-2">ดาว {dir.star}</p>
-                  <p className="text-3xl font-display font-bold text-[#C6A96B] mb-6">({dir.id})</p>
+                  <p className="text-3xl font-display font-bold text-[#C6A96B] mb-6">({dir.id === 9 ? '๙' : dir.id})</p>
                   
-                  <div className="w-full space-y-2">
-                    <div className={`px-4 py-1.5 rounded-lg border text-[10px] font-bold ${dir.id === 6 ? "bg-rose-950/30 border-rose-500/30 text-rose-400" : dir.id === 4 ? "bg-emerald-950/30 border-emerald-500/30 text-emerald-400" : "bg-[#0A1628] border-white/10 text-[#8A8070]"}`}>
-                       กาล: {dir.id === 6 ? "กาลกิณี" : dir.id === 4 ? "ศรี" : "บริวาร"}
-                    </div>
-                    <div className={`px-4 py-1.5 rounded-lg border text-[10px] font-bold ${dir.id === 6 ? "bg-emerald-950/30 border-emerald-500/30 text-emerald-400" : dir.id === 4 ? "bg-rose-950/30 border-rose-500/30 text-rose-400" : "bg-[#0A1628] border-white/10 text-[#8A8070]"}`}>
-                       กำเนิด: {dir.id === 6 ? "ศรี" : dir.id === 4 ? "กาลกิณี" : "มูละ"}
-                    </div>
+                  <div className="w-full space-y-2 mt-auto">
+                    {isCenter ? (
+                      <div className="px-4 py-1.5 rounded-lg border bg-transparent border-[#C6A96B]/30 text-[#C6A96B] text-[10px] font-bold w-full">
+                        วิญญาณธาตุ
+                      </div>
+                    ) : (
+                      <>
+                        <div className={`px-4 py-1.5 rounded-lg border text-[10px] font-bold w-full ${kalaBg}`}>
+                           กาล: {kalaLabel}
+                        </div>
+                        <div className={`px-4 py-1.5 rounded-lg border text-[10px] font-bold w-full ${birthBg}`}>
+                           กำเนิด: {birthLabel}
+                        </div>
+                      </>
+                    )}
                   </div>
                 </button>
               )
@@ -458,90 +479,85 @@ export default function KarnchataPage() {
          </div>
       </Card>
 
-      {/* ตารางทักษาคู่ & มหาภูติ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center text-lg">📊</div>
-            <div>
-              <h3 className="text-sm font-bold text-[#F8F6F1]">ตารางทักษาคู่ (กำเนิด / จร)</h3>
-              <p className="text-[9px] text-[#8A8070]">สรุปสถานะดาวรายตัว เปรียบเทียบกำลังดาวจากดวงกำเนิดและสถานการณ์กาลชะตาจร</p>
-            </div>
+      {/* ทักษา & มหาภูติจรส่วนบุคคล */}
+      <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8 max-w-4xl mx-auto">
+        <div className="flex items-start gap-4 mb-8">
+          <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-lg shrink-0">👤</div>
+          <div>
+            <h3 className="text-sm font-bold text-[#F8F6F1]">ทักษา & มหาภูติจรส่วนบุคคล (ดวงผู้ถาม)</h3>
+            <p className="text-[10px] text-[#8A8070] mt-1">ดึงค่าจากวันเกิดในโปรไฟล์ของคุณ เพื่อใช้เปรียบเทียบหาจุดทับซ้อนและตรวจสอบความแม่นยำรายวัน</p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-             {[1,2,3,6,4,8,5,7].map(num => (
-               <div key={num} className="bg-[#020617] border border-white/5 rounded-2xl p-4 flex flex-col items-center relative">
-                 {num === 1 && <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-emerald-400" />}
-                 {num === 6 && <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-rose-400" />}
-                 <span className="text-2xl font-display font-bold text-[#C6A96B] mb-1">{num}</span>
-                 <span className="text-[10px] font-bold text-[#F8F6F1] mb-3">ดาว{TAKSA_DIRECTIONS.find(d => d.id === num)?.star}</span>
-                 <div className="w-full space-y-1">
-                   <div className={`text-[9px] text-center py-1 rounded border ${num === 4 ? "bg-emerald-950/50 border-emerald-500/30 text-emerald-400" : num === 6 ? "bg-rose-950/50 border-rose-500/30 text-rose-400" : "bg-white/5 border-white/5 text-[#8A8070]"}`}>
-                     {num === 4 ? "ศรีจร" : num === 6 ? "กาลกิณีจร" : "บริวารจร"}
-                   </div>
-                   <div className="text-[9px] text-center py-1 rounded border bg-white/5 border-white/5 text-[#8A8070]">
-                     {num === 6 ? "ศรี (กำเนิด)" : "มูละ (กำเนิด)"}
-                   </div>
-                 </div>
-               </div>
-             ))}
-          </div>
-        </Card>
+        </div>
 
-        <Card className="border-[#C6A96B]/20 bg-slate-900 p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-lg">👤</div>
-            <div>
-              <h3 className="text-sm font-bold text-[#F8F6F1]">ทักษา & มหาภูติจรส่วนบุคคล (ดวงผู้ถาม)</h3>
-              <p className="text-[9px] text-[#8A8070]">ดึงค่าจากวันเกิดในโปรไฟล์ของคุณ เพื่อใช้เปรียบเทียบหาจุดทับซ้อนและตรวจสอบความแม่นยำรายวัน</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-             <div className="bg-[#0A1628] rounded-xl p-4">
-                <p className="text-xs font-bold text-[#C6A96B] mb-3 flex items-center gap-2">🎯 ทักษาจรประจำปีนี้</p>
-                <div className="space-y-2">
-                  {[1,2,3,4,5,6,7,8].map(num => (
-                    <div key={num} className="flex justify-between items-center text-[10px]">
-                      <span className="text-[#F8F6F1]">ดาว{TAKSA_DIRECTIONS.find(d => d.id === num)?.star} ({num})</span>
-                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${num === 6 ? "bg-emerald-950 text-emerald-400" : num === 4 ? "bg-rose-950 text-rose-400" : "bg-white/10 text-[#8A8070]"}`}>
-                        {num === 6 ? "ศรี" : num === 4 ? "กาลกิณี" : "บริวาร"}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-             </div>
-             <div className="bg-[#0A1628] rounded-xl p-4">
-                <p className="text-xs font-bold text-pink-400 mb-3 flex items-center gap-2">🧠 มหาภูติจร (สภาวะจิตใจ)</p>
-                <div className="space-y-2">
-                  {["โลกาวินาศ", "อริ", "ขุมทรัพย์", "มรณะ", "อธิบดี", "ราชา", "ธงชัย"].map((bhop, i) => (
-                    <div key={bhop} className="flex justify-between items-center text-[10px]">
-                      <span className="text-[#8A8070]">{bhop}</span>
-                      <span className="text-[#F8F6F1]">ดาว{TAKSA_DIRECTIONS.find(d => d.id === (i+1))?.star} ({i+1})</span>
-                    </div>
-                  ))}
-                </div>
-             </div>
-          </div>
-        </Card>
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+           {/* ทักษาจร */}
+           <div className="bg-[#020617] rounded-2xl p-6 border border-white/5">
+              <p className="text-xs font-bold text-[#F8F6F1] mb-6 flex items-center gap-2">
+                <span className="text-pink-400 text-base">🎯</span> ทักษาจรประจำปีนี้
+              </p>
+              <div className="space-y-4">
+                {[
+                  { n: 1, name: "ดาว อาทิตย์ (1)", b: "มูละ", bg: "bg-amber-600/20 text-amber-500" },
+                  { n: 2, name: "ดาว จันทร์ (2)", b: "อุตสาหะ", bg: "bg-teal-500/20 text-teal-400" },
+                  { n: 3, name: "ดาว อังคาร (3)", b: "มนตรี", bg: "bg-blue-500/20 text-blue-400" },
+                  { n: 4, name: "ดาว พุธ (4)", b: "กาลกิณี", bg: "bg-rose-950/40 text-rose-400" },
+                  { n: 5, name: "ดาว พฤหัส (5)", b: "อายุ", bg: "bg-[#8A8070]/20 text-[#8A8070]" },
+                  { n: 6, name: "ดาว ศุกร์ (6)", b: "ศรี", bg: "bg-emerald-950/40 text-emerald-400" },
+                  { n: 7, name: "ดาว เสาร์ (7)", b: "บริวาร", bg: "bg-indigo-500/20 text-indigo-400" },
+                  { n: 8, name: "ดาว ราหู (8)", b: "เดช", bg: "bg-orange-500/20 text-orange-400" }
+                ].map(item => (
+                  <div key={item.n} className="flex justify-between items-center text-[11px]">
+                    <span className="text-[#F8F6F1] font-medium">{item.name}</span>
+                    <span className={`px-2.5 py-1 rounded text-[10px] font-bold tracking-wide ${item.bg}`}>
+                      {item.b}
+                    </span>
+                  </div>
+                ))}
+              </div>
+           </div>
+
+           {/* มหาภูติจร */}
+           <div className="bg-[#020617] rounded-2xl p-6 border border-white/5">
+              <p className="text-xs font-bold text-[#F8F6F1] mb-6 flex items-center gap-2">
+                <span className="text-pink-400 text-base">🧠</span> มหาภูติจร (สภาวะจิตใจ)
+              </p>
+              <div className="space-y-4">
+                {[
+                  { name: "โลกาวินาศ", star: "ดาว จันทร์ (2)" },
+                  { name: "อริ", star: "ดาว อังคาร (3)" },
+                  { name: "ขุมทรัพย์", star: "ดาว พุธ (4)" },
+                  { name: "มรณะ", star: "ดาว พฤหัส (5)" },
+                  { name: "อธิบดี", star: "ดาว ศุกร์ (6)" },
+                  { name: "ราชา", star: "ดาว เสาร์ (7)" },
+                  { name: "ธงชัย", star: "ดาว อาทิตย์ (1)" }
+                ].map(item => (
+                  <div key={item.name} className="flex justify-between items-center text-[11px] py-0.5">
+                    <span className="text-[#8A8070] font-medium">{item.name}</span>
+                    <span className="text-[#F8F6F1] font-bold">{item.star}</span>
+                  </div>
+                ))}
+              </div>
+           </div>
+        </div>
+      </Card>
 
       {/* Chat Section */}
-      <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-0 overflow-hidden relative shadow-2xl shadow-sky-900/10 max-w-4xl mx-auto">
+      <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-0 overflow-hidden relative shadow-2xl max-w-4xl mx-auto">
         
         {/* Header แชท */}
-        <div className="p-5 border-b border-white/5 flex items-center gap-4">
+        <div className="p-6 border-b border-white/5 flex items-center gap-4">
            <div className="w-3 h-3 rounded-full bg-[#C6A96B] shrink-0 shadow-[0_0_8px_rgba(198,169,107,0.6)]" />
            <div>
-             <h3 className="text-base md:text-lg font-bold text-[#F8F6F1]">แชทถามตอบกับ WISDOM GUIDANCE</h3>
-             <p className="text-[10px] text-[#8A8070]">หมวดการสนทนาปัจจุบัน: <span className="font-bold text-[#C6A96B]">{activeCategory?.label}</span></p>
+             <h3 className="text-sm md:text-base font-bold text-[#F8F6F1]">แชทถามตอบกับ WISDOM GUIDANCE</h3>
+             <p className="text-[10px] text-[#8A8070] mt-1">หมวดการสนทนาปัจจุบัน: <span className="font-bold text-[#C6A96B]">{activeCategory?.label}</span></p>
            </div>
-           <button onClick={() => setChatMessages([])} className="ml-auto px-4 py-1.5 text-[10px] md:text-xs border border-white/10 text-[#8A8070] hover:text-[#F8F6F1] hover:border-white/20 rounded-lg transition-colors">
+           <button onClick={() => setChatMessages([])} className="ml-auto px-4 py-1.5 text-[10px] border border-white/10 text-[#8A8070] hover:text-[#F8F6F1] hover:border-white/20 rounded-lg transition-colors">
              ล้างแชท
            </button>
         </div>
 
         {/* พื้นที่แชท */}
-        <div className="h-[400px] overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-[#0A1628] to-[#040C18]">
+        <div className="h-[400px] overflow-y-auto p-6 space-y-6 bg-[#0A1628]">
           {chatMessages.map((msg, i) => (
             <div key={i} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
               
@@ -553,7 +569,7 @@ export default function KarnchataPage() {
               )}
 
               {/* กล่องข้อความ */}
-              <div className={`max-w-[85%] md:max-w-[75%] p-5 rounded-2xl text-[13px] md:text-sm leading-loose md:leading-loose ${
+              <div className={`max-w-[85%] md:max-w-[75%] p-5 rounded-2xl text-[12px] md:text-[13px] leading-relaxed md:leading-relaxed ${
                 msg.sender === "user" 
                   ? "bg-[#C6A96B] text-[#020617] font-bold rounded-tr-none shadow-lg shadow-[#C6A96B]/10" 
                   : "bg-[#020617]/60 text-[#F8F6F1] border border-white/10 rounded-tl-none shadow-lg shadow-black/20"
@@ -566,14 +582,14 @@ export default function KarnchataPage() {
         </div>
 
         {/* ช่องพิมพ์ข้อความ */}
-        <div className="p-5 bg-[#020617] border-t border-white/5">
+        <div className="p-6 bg-[#020617]">
           <form onSubmit={handleSendChat} className="flex gap-3">
             <input 
               type="text" 
               value={userInput}
               onChange={e => setUserInput(e.target.value)}
               placeholder={`ถามคำถามกาลชะตาที่นี่... เช่น ${activeCategory?.questions[0].split('?')[0]}`}
-              className="flex-1 bg-[#0A1628] border border-white/5 rounded-2xl px-6 py-3.5 text-sm text-[#F8F6F1] outline-none focus:border-[#C6A96B]/50 transition-colors placeholder:text-[#8A8070]/50"
+              className="flex-1 bg-[#0A1628] border border-white/5 rounded-2xl px-6 py-3.5 text-xs text-[#F8F6F1] outline-none focus:border-[#C6A96B]/50 transition-colors placeholder:text-[#8A8070]/50"
             />
             <Button type="submit" disabled={!userInput.trim()} className="px-6 md:px-8 py-3.5 shrink-0 rounded-2xl bg-[#8A8070] text-[#020617] font-bold hover:bg-[#C6A96B] transition-colors shadow-lg">
               ส่งคำถาม
