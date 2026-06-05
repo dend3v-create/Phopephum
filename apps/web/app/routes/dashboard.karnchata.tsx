@@ -1,32 +1,62 @@
 import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData, useSubmit } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { requireAuth, getProfile, requireMinPlan, canAccess } from "~/services/auth.server";
-import { logEvent, EVENTS } from "~/services/analytics.server";
+import { requireAuth, getProfile, requireMinPlan } from "~/services/auth.server";
 import { calculateKarnchata } from "@phopephum/engine";
+import { r7_local, calcTaksaMaha } from "@phopephum/engine";
 import type { Env } from "~/env.server";
 import { Card } from "~/components/ui/Card";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export const meta: MetaFunction = () => [
-  { title: "ทำนายกาลชะตา (ยาม 3.45) — PhopePhum" },
-  { name: "description", content: "พยากรณ์เรื่องเฉพาะหน้า เหตุการณ์กะทันหัน ด้วยกาลชะตายามซอย 3.45 นาที" },
+  { title: "ทำนายกาลชะตา V2.0 — PhopePhum" },
+  { name: "description", content: "วิเคราะห์รหัสชะตาชีวิตระดับวินาทีด้วย 7 ตัว 9 ฐาน ผสมผสานระบบ Q&A แชทอัจฉริยะ" },
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  // Require at least basic plan
   const { user, profile } = await requireMinPlan("basic", request, env);
 
-  // Initialize with current time
   const now = new Date();
   const initialResult = calculateKarnchata(now);
+
+  // คำนวณทักษาผู้ถาม
+  let taksaMaha = null;
+  if (profile?.birth_date) {
+    try {
+      const bDate = new Date(profile.birth_date);
+      const natal = r7_local(
+        bDate.getDate(),
+        bDate.getMonth() + 1,
+        bDate.getFullYear() + 543
+      );
+      const currentYearThai = now.getFullYear() + 543;
+      const birthYearThai = bDate.getFullYear() + 543;
+      taksaMaha = calcTaksaMaha(
+        natal.nineBase.bases[0][0], // sum of day
+        currentYearThai - birthYearThai + 1, // ageYang
+        birthYearThai,
+        currentYearThai
+      );
+    } catch (e) {
+      // fallback
+    }
+  }
+
+  const thaiDateLabel = now.toLocaleDateString("th-TH", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 
   return json({
     profile,
     initialResult,
+    taksaMaha,
+    thaiDateLabel,
     currentTime: now.toISOString(),
   });
 }
@@ -49,7 +79,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const [th, tmin] = timeStr.split(":").map(Number);
     
     if (tDay && tMonth && tYear) {
-      targetDate = new Date(Date.UTC(tYearCE, tMonth - 1, tDay, th - 7, tmin, 0)); // BKK is UTC+7
+      targetDate = new Date(Date.UTC(tYearCE, tMonth - 1, tDay, th - 7, tmin, 0));
     }
   }
 
@@ -61,101 +91,59 @@ export async function action({ request, context }: ActionFunctionArgs) {
   });
 }
 
-function DateDropdowns({ prefix, defaultDay, defaultMonth, defaultYear, onChange }: { prefix: string, defaultDay: number, defaultMonth: number, defaultYear: number, onChange?: any }) {
-  return (
-    <div className="grid grid-cols-3 gap-1.5">
-      <select name={`${prefix}Day`} onChange={onChange} defaultValue={defaultDay} className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
-        {Array.from({ length: 31 }).map((_, i) => (
-          <option key={i + 1} value={i + 1} className="bg-[#020617]">{i + 1}</option>
-        ))}
-      </select>
-      <select name={`${prefix}Month`} onChange={onChange} defaultValue={defaultMonth} className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
-        {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-          <option key={i + 1} value={i + 1} className="bg-[#020617]">{m}</option>
-        ))}
-      </select>
-      <select name={`${prefix}Year`} onChange={onChange} defaultValue={defaultYear} className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
-        {Array.from({ length: 150 }).map((_, i) => {
-          const y = new Date().getFullYear() + 543 + 10 - i;
-          return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
-        })}
-      </select>
-    </div>
-  );
-}
+const CATEGORIES = [
+  { id: "work", icon: "💼", label: "การงาน & เจรจา", questions: ["การเจรจาตกลงทางธุรกิจในยามนี้จะประสบความสำเร็จหรือไม่?", "สภาพแวดล้อมหรือโอกาสความก้าวหน้าในยามนี้มีลักษณะอย่างไร?", "อยากเริ่มต้นโครงการงานใหม่ในนาทีนี้ควรทำทันทีหรือควรรอ?"] },
+  { id: "wealth", icon: "💎", label: "การเงิน & โชคลาภ", questions: ["จังหวะนี้เหมาะกับการเสี่ยงโชคหรือลงทุนหรือไม่?", "เงินที่รอคอยอยู่จะได้รับภายในระยะเวลาอันใกล้นี้ไหม?", "ควรระมัดระวังการใช้จ่ายหรือจะเสียทรัพย์ในยามนี้หรือไม่?"] },
+  { id: "love", icon: "💖", label: "ความรัก & เมตตา", questions: ["คนที่นึกถึงตอนนี้เขามีความรู้สึกอย่างไรกับเรา?", "การปรับความเข้าใจหรือสารภาพรักในเวลานี้จะราบรื่นไหม?", "ผู้ใหญ่หรือผู้บังคับบัญชาจะเมตตาเอ็นดูเราหรือไม่ในจังหวะนี้?"] },
+  { id: "health", icon: "💊", label: "สุขภาพ & เจ็บไข้", questions: ["อาการป่วยที่เป็นอยู่จะทุเลาลงหรือต้องระวังภาวะแทรกซ้อน?", "ควรไปพบแพทย์หรือเปลี่ยนวิธีการรักษาในเวลานี้หรือไม่?", "คนป่วยที่นึกถึงมีเกณฑ์ฟื้นตัวในทิศทางใด?"] },
+  { id: "travel", icon: "🧭", label: "การเดินทาง & ทิศมงคล", questions: ["การเดินทางไปทิศ...ในยามนี้จะปลอดภัยและราบรื่นไหม?", "ควรหลีกเลี่ยงการเดินทางไปยังทิศใดเพื่อป้องกันอุปสรรค?", "จะพบโชคลาภหรือคนช่วยเหลือระหว่างการเดินทางหรือไม่?"] },
+  { id: "obstacle", icon: "⚠️", label: "อุปสรรค & แก้เคล็ด", questions: ["ปัญหาที่กำลังเผชิญหน้าอยู่จะมีทางออกหรือมีคนช่วยไหม?", "มีสิ่งใดที่กำลังขัดขวางความสำเร็จและควรแก้เคล็ดอย่างไร?", "ของที่สูญหายจะได้คืนหรือไม่ หรือควรค้นหาในทิศใด?"] },
+];
 
 const TAKSA_DIRECTIONS = [
-  { id: 1, name: "ตะวันออกเฉียงเหนือ", col: 1, row: 1 },
-  { id: 2, name: "ตะวันออก",         col: 2, row: 1 },
-  { id: 3, name: "ตะวันออกเฉียงใต้",    col: 3, row: 1 },
-  { id: 6, name: "ทิศเหนือ",           col: 1, row: 2 },
-  { id: 9, name: "ศูนย์กลาง (เกตุ)",    col: 2, row: 2 },
-  { id: 4, name: "ทิศใต้",             col: 3, row: 2 },
-  { id: 8, name: "ตะวันตกเฉียงเหนือ",    col: 1, row: 3 },
-  { id: 5, name: "ตะวันตก",          col: 2, row: 3 },
-  { id: 7, name: "ตะวันตกเฉียงใต้",      col: 3, row: 3 },
+  { id: 3, name: "ตะวันออกเฉียงใต้", star: "อังคาร" },
+  { id: 1, name: "ตะวันออกเฉียงเหนือ", star: "อาทิตย์" },
+  { id: 2, name: "ตะวันออก", star: "จันทร์" },
+  { id: 6, name: "ทิศเหนือ", star: "ศุกร์" },
+  { id: 9, name: "ตรงกลาง", star: "เกตุ" },
+  { id: 4, name: "ทิศใต้", star: "พุธ" },
+  { id: 8, name: "ตะวันตกเฉียงเหนือ", star: "ราหู" },
+  { id: 5, name: "ทิศตะวันตก", star: "พฤหัส" },
+  { id: 7, name: "ตะวันตกเฉียงใต้", star: "เสาร์" },
 ];
 
 export default function KarnchataPage() {
-  const { profile, initialResult } = useLoaderData<typeof loader>();
+  const { profile, initialResult, taksaMaha, thaiDateLabel } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
   const navigation = useNavigation();
-  const isLoading = navigation.state === "submitting";
 
   const activeResult = actionData?.result || initialResult;
   const [timeMode, setTimeMode] = useState<"live" | "custom">("live");
-  
+  const [selectedCategory, setSelectedCategory] = useState("work");
+  const [time, setTime] = useState<Date>(new Date());
+  const [selectedDirection, setSelectedDirection] = useState<number | null>(null);
+
   // Live Timer
   useEffect(() => {
-    if (timeMode !== "live") return;
-    const interval = setInterval(() => {
-      const form = new FormData();
-      form.append("timeMode", "live");
-      submit(form, { method: "post", replace: true });
-    }, 60000); // Update every minute in live mode
-    return () => clearInterval(interval);
+    const timer = setInterval(() => {
+      setTime(new Date());
+      if (timeMode === "live") {
+        const form = new FormData();
+        form.append("timeMode", "live");
+        submit(form, { method: "post", replace: true });
+      }
+    }, 60000); // refresh engine every 60s
+    return () => clearInterval(timer);
   }, [timeMode, submit]);
 
-  // Handle custom time change
-  const handleCustomChange = () => {
-    if (timeMode === "custom") {
-      const form = document.getElementById("karnchata-form") as HTMLFormElement;
-      submit(form, { method: "post", replace: true });
-    }
-  };
+  useEffect(() => {
+    const tick = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(tick);
+  }, []);
 
-  const defaultDate = new Date();
-  const defaultTDay = defaultDate.getDate();
-  const defaultTMonth = defaultDate.getMonth() + 1;
-  const defaultTYear = defaultDate.getFullYear() + 543;
-  const defaultTime = `${String(defaultDate.getHours()).padStart(2, "0")}:${String(defaultDate.getMinutes()).padStart(2, "0")}`;
-
-  const [selectedDirection, setSelectedDirection] = useState<number | null>(null);
-  
-  // Chat
-  const [chatMessages, setChatMessages] = useState([
-    { sender: "ai", text: "ยินดีต้อนรับสู่กาลชะตาค่ะ พิมพ์คำถามเฉพาะหน้าได้เลย เช่น 'ของที่หายจะหาเจอไหม?' หรือ 'สมัครงานทิศเหนือดีหรือไม่?'", time: new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) }
-  ]);
-  const [userInput, setUserInput] = useState("");
-
-  const handleSendChat = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!userInput.trim()) return;
-    
-    setChatMessages(prev => [...prev, { sender: "user", text: userInput, time: new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) }]);
-    
-    setTimeout(() => {
-      let aiResponse = `จากดวงกาลชะตา ยามใหญ่ ${activeResult.yamYaiName} และ ยามซอย ${activeResult.yamSoyName} `;
-      if (selectedDirection) {
-        const dir = TAKSA_DIRECTIONS.find(d => d.id === selectedDirection);
-        aiResponse += `(เจาะจงทิศ ${dir?.name}) `;
-      }
-      aiResponse += "พบว่ามีพลังงานขับเคลื่อนตามหลักเลข 7 ตัว แนะนำให้ดำเนินการด้วยความรอบคอบค่ะ";
-      
-      setChatMessages(prev => [...prev, { sender: "ai", text: aiResponse, time: new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }) }]);
-    }, 1000);
-    setUserInput("");
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
   };
 
   const getBhopName = (rowIdx: number, colIdx: number) => {
@@ -168,198 +156,413 @@ export default function KarnchataPage() {
     return "";
   };
 
+  const BASE4_NAMES = ["มหาอุตจ์", "โสฬสมงคล", "พฤหัสบดีเล็ก", "อังคารใหญ่", "ราชาโชค", "จักรพรรดิ", "มหาสิทธิโชค"];
+
+  // Chat
+  const [chatMessages, setChatMessages] = useState([
+    { sender: "ai", text: "สวัสดีครับคุณผู้ใช้งาน ยินดีต้อนรับสู่พื้นที่แห่งปัญญาญาณและการเติบโตภายใน ผมคือ Wisdom Guidance พร้อมชี้แนะแนวทางและวิเคราะห์จังหวะชีวิตด้วยศาสตร์กาลชะตาเรียลไทม์ ณ ขณะนี้แล้วครับ ท่านอยากจะตรวจสอบเรื่องใดเป็นพิเศษหรือไม่ครับ?", time: "" }
+  ]);
+  const [userInput, setUserInput] = useState("");
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+  const handleSendChat = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userInput.trim()) return;
+    
+    setChatMessages(prev => [...prev, { sender: "user", text: userInput, time: "" }]);
+    
+    setTimeout(() => {
+      let aiResponse = `ในทางกาลชะตาขณะนี้ ยามใหญ่ตกที่ ${activeResult.yamYaiName} ส่วนยามซอยตกที่ ${activeResult.yamSoyName} `;
+      if (selectedDirection) {
+        const dir = TAKSA_DIRECTIONS.find(d => d.id === selectedDirection);
+        aiResponse += `(คุณเลือกทิศ ${dir?.name}) `;
+      }
+      aiResponse += "จังหวะนี้มีพลังงานสอดคล้องกับเรื่องราวที่คุณถาม แนะนำให้ดำเนินการด้วยสติและรอบคอบครับ";
+      
+      setChatMessages(prev => [...prev, { sender: "ai", text: aiResponse, time: "" }]);
+    }, 1500);
+    setUserInput("");
+  };
+
+  const activeCategory = CATEGORIES.find(c => c.id === selectedCategory);
+
   return (
-    <div className="space-y-8 max-w-5xl pb-20 animate-fade-up">
-      <header className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase font-bold">
-              ดวงเทวดาให้ · วิชาเข็มทิศชีวิต
-            </p>
-            <h1 className="font-display text-4xl font-extrabold text-[#F8F6F1] tracking-tight mt-1">
-              ทำนายกาลชะตา
-            </h1>
-            <p className="text-[#8A8070] text-xs font-medium mt-1 font-sans">
-              พยากรณ์เรื่องเฉพาะหน้า เหตุการณ์กะทันหัน ทุกๆ 3.45 นาที
-            </p>
+    <div className="space-y-8 max-w-6xl mx-auto pb-20 animate-fade-up">
+      {/* Header */}
+      <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#C6A96B]/20 pb-6">
+        <div>
+          <span className="text-[#C6A96B] text-[10px] tracking-[0.25em] uppercase font-bold block mb-2 flex items-center gap-2">
+            <span className="text-amber-500">✦</span> คัมภีร์พยากรณ์ลับเฉพาะกาล
+          </span>
+          <h1 className="font-display text-4xl font-bold text-[#F8F6F1] glow-gold flex items-baseline gap-4">
+            ทำนายกาลชะตา V2.0 <span className="text-[#C6A96B] text-sm font-normal tracking-[0.2em] uppercase">(Real-time Time Oracle)</span>
+          </h1>
+          <p className="text-[#8A8070] text-sm mt-2">
+            วิเคราะห์รหัสชะตาชีวิตระดับวินาทีด้วย 7 ตัว 9 ฐาน ผสมผสานระบบ Q&A แชทอัจฉริยะแบบเรียลไทม์
+          </p>
+        </div>
+        <div className="flex bg-[#0A1628] rounded-xl p-1 border border-white/5">
+           <button
+             type="button"
+             onClick={() => setTimeMode("live")}
+             className={`px-6 py-2.5 text-xs font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#C6A96B] text-[#020617] shadow-lg shadow-[#C6A96B]/20" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
+           >
+             ⏱ เวลาเรียลไทม์ (Real-time)
+           </button>
+           <button
+             type="button"
+             onClick={() => setTimeMode("custom")}
+             className={`px-6 py-2.5 text-xs font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[#0F2942] text-[#F8F6F1] border border-white/10 shadow-lg" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
+           >
+             📅 เลือกวัน/เวลาเอง (Custom Cast)
+           </button>
+        </div>
+        <div className="hidden lg:block text-right">
+          <div className="border border-white/10 bg-slate-950/40 rounded-xl px-5 py-2.5">
+            <p className="text-[10px] text-[#8A8070] uppercase font-bold tracking-wider mb-1">วันกาลชะตาวันนี้</p>
+            <p className="text-xs text-[#F8F6F1] font-bold">{thaiDateLabel}</p>
           </div>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* Top Section: Clock & Categories */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
-        {/* Left Column: Controls & Matrix */}
-        <div className="lg:col-span-7 space-y-6">
-          <Card className="border-[#C9A96E]/20 bg-slate-900/40 backdrop-blur-md p-6">
-            <Form method="post" id="karnchata-form" className="space-y-6">
-              
-              <div className="flex bg-slate-950/40 rounded-xl p-1 border border-white/5">
-                <button
-                  type="button"
-                  onClick={() => { setTimeMode("live"); setTimeout(() => document.getElementById("karnchata-form")?.dispatchEvent(new Event("submit", { cancelable: true, bubbles: true })), 100); }}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#C6A96B] text-[#020617] shadow-lg" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
-                >
-                  ⏱ เวลาปัจจุบัน (Real-time)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTimeMode("custom")}
-                  className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[#C6A96B] text-[#020617] shadow-lg" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}
-                >
-                  📅 กำหนดเวลาเอง
-                </button>
-                <input type="hidden" name="timeMode" value={timeMode} />
-              </div>
-
-              {timeMode === "custom" && (
-                <div className="grid grid-cols-2 gap-4 animate-in fade-in slide-in-from-top-2">
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-wider">วันที่จับยาม (พ.ศ.)</label>
-                    <DateDropdowns prefix="custom" defaultDay={defaultTDay} defaultMonth={defaultTMonth} defaultYear={defaultTYear} onChange={handleCustomChange} />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-[10px] text-[#94A3B8] font-bold uppercase tracking-wider">เวลาที่จับยาม</label>
-                    <input 
-                      type="time" 
-                      name="customTime" 
-                      defaultValue={defaultTime} 
-                      onChange={handleCustomChange}
-                      className="w-full bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-3 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none"
-                    />
-                  </div>
-                </div>
-              )}
-            </Form>
-
-            <div className="mt-6 p-4 rounded-xl bg-gradient-to-r from-[#C6A96B]/10 to-transparent border-l-4 border-[#C6A96B]">
-              <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <p className="text-[10px] text-[#8A8070] font-bold uppercase">ดาววัน (ฐานมรณะ)</p>
-                  <p className="text-xl font-display font-bold text-[#F8F6F1]">{activeResult.dayStarNumber}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-[#8A8070] font-bold uppercase">ยามใหญ่ (ฐานตนุ)</p>
-                  <p className="text-xl font-display font-bold text-[#F8F6F1]">{activeResult.yamYaiName} <span className="text-[#C6A96B] text-sm">({activeResult.yamYaiNumber})</span></p>
-                </div>
-                <div>
-                  <p className="text-[10px] text-[#8A8070] font-bold uppercase">ยามซอย (ฐานอัตตะ)</p>
-                  <p className="text-xl font-display font-bold text-[#F8F6F1]">{activeResult.yamSoyName} <span className="text-[#C6A96B] text-sm">({activeResult.yamSoyNumber})</span></p>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Matrix Chart */}
-          <Card className="border-[#C9A96E]/20 bg-slate-900/40 backdrop-blur-md p-6 overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-[#C6A96B]/5 rounded-full blur-3xl -z-10" />
-            <h3 className="text-sm font-bold text-[#C6A96B] uppercase tracking-wider mb-6 flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#C6A96B]" />
-              ผังดวงกาลชะตา
-            </h3>
-            <div className="overflow-x-auto pb-4">
-              <div className="min-w-[500px] grid grid-cols-7 gap-2">
-                {activeResult.chart.slice(0, 4).map((row: number[], rIdx: number) => (
-                  row.map((star: number, cIdx: number) => (
-                    <div key={`c-${rIdx}-${cIdx}`} className="relative p-2 rounded-xl bg-slate-950/40 border border-white/5 flex flex-col items-center justify-center text-center group hover:border-[#C6A96B]/30 transition-colors">
-                      {rIdx < 3 && <span className="text-[9px] text-[#8A8070] font-medium mb-1">{getBhopName(rIdx, cIdx)}</span>}
-                      {rIdx === 3 && <span className="text-[9px] text-[#C6A96B] font-bold mb-1">ฐาน ๔</span>}
-                      <span className="font-display text-xl font-bold text-[#F8F6F1]">{star}</span>
-                    </div>
-                  ))
-                ))}
-                
-                {/* ฐาน 5-9 */}
-                <div className="col-span-7 mt-4 border-t border-white/5 pt-4 grid grid-cols-7 gap-2">
-                  {activeResult.chart.slice(4).map((row: number[], rIdx: number) => (
-                    row.map((star: number, cIdx: number) => (
-                      <div key={`c2-${rIdx}-${cIdx}`} className="p-1.5 rounded-lg bg-slate-950/20 flex flex-col items-center">
-                        <span className="text-[8px] text-[#8A8070]">ฐาน {rIdx + 5}</span>
-                        <span className="font-display text-sm font-bold text-[#C6A96B]">{star}</span>
-                      </div>
-                    ))
-                  ))}
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Right Column: Taksa & Chat */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* กาลเวลาปัจจุบันแบบเรียลไทม์ */}
+        <Card className="border-[#C6A96B]/20 bg-gradient-to-b from-[#0A1628] to-[#040C18] p-8 flex flex-col justify-between relative overflow-hidden">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#C6A96B]/5 rounded-full blur-[100px] -z-10" />
           
-          {/* Taksa Grid */}
-          <Card className="border-[#C9A96E]/20 bg-slate-900/40 backdrop-blur-md p-6">
-            <div className="flex items-center justify-between mb-4">
-               <h3 className="text-sm font-bold text-[#C6A96B] uppercase tracking-wider flex items-center gap-2">
-                 <span className="w-2 h-2 rounded-full bg-[#C6A96B]" />
-                 ทักษาจร (ทิศทาง)
-               </h3>
+          <div className="flex justify-between items-center mb-6">
+             <span className="text-xs font-bold text-[#8A8070] tracking-widest">กาลเวลาปัจจุบันแบบเรียลไทม์</span>
+             <span className="bg-white/5 border border-white/10 text-[#8A8070] text-[10px] px-3 py-1 rounded-full">กลางวัน</span>
+          </div>
+
+          <div className="text-center my-6 space-y-6">
+            <p className="text-[80px] md:text-[96px] font-display font-black text-[#F8F6F1] leading-none drop-shadow-2xl">
+              {formatTime(time)}
+            </p>
+            <p className="text-xs text-[#8A8070] tracking-wider">
+              กาลชะตาหมุนเวียนรอบละ 3.45 นาที · ตรวจจับกำลังดาวเปลี่ยนตามวินาทีจริง
+            </p>
+            
+            <div className="flex items-center justify-center gap-4">
+              <div className="bg-[#0A1628] border border-[#C6A96B]/20 rounded-xl px-6 py-3">
+                <p className="text-[10px] text-[#8A8070] mb-1">ยามใหญ่ (ตนุ)</p>
+                <p className="text-sm font-bold text-[#F8F6F1]">{activeResult.yamYaiName}</p>
+              </div>
+              <div className="bg-[#0A1628] border border-sky-500/20 rounded-xl px-6 py-3">
+                <p className="text-[10px] text-sky-400 mb-1">ยามซอย (อัตตะ)</p>
+                <p className="text-sm font-bold text-sky-300">{activeResult.yamSoyName}</p>
+              </div>
             </div>
-            <div className="grid grid-cols-3 gap-2">
-              {TAKSA_DIRECTIONS.sort((a,b) => (a.row * 10 + a.col) - (b.row * 10 + b.col)).map((dir) => (
-                <button
-                  key={dir.id}
-                  type="button"
-                  onClick={() => setSelectedDirection(dir.id === selectedDirection ? null : dir.id)}
-                  className={`aspect-square flex flex-col items-center justify-center p-2 rounded-2xl border transition-all ${
-                    selectedDirection === dir.id 
-                      ? "bg-[#C6A96B] border-[#C6A96B] text-[#020617] shadow-lg shadow-[#C6A96B]/20"
-                      : "bg-slate-950/40 border-white/10 text-[#F8F6F1] hover:border-[#C6A96B]/40"
-                  }`}
-                >
-                  <span className="font-display text-2xl font-bold mb-1">{dir.id}</span>
-                  <span className={`text-[9px] text-center leading-tight ${selectedDirection === dir.id ? "text-[#020617] font-bold" : "text-[#8A8070]"}`}>
-                    {dir.name}
-                  </span>
-                </button>
+          </div>
+
+          <div className="bg-rose-950/20 border border-rose-500/20 rounded-2xl p-5 relative overflow-hidden mt-6">
+            <div className="absolute left-0 top-0 bottom-0 w-1 bg-rose-500" />
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-[10px] text-rose-300 mb-1">ยามกาลชะตาในขณะนี้</p>
+                <h3 className="font-display text-xl font-bold text-rose-400">ยาม{activeResult.yamYaiName.replace('ดาว','')} (อำนาจ/ผู้นำ)</h3>
+                <p className="text-xs text-rose-200/70 mt-2 leading-relaxed max-w-md">
+                  ช่วงเวลาแห่งอำนาจบารมี เหมาะสำหรับการเป็นผู้นำ ตัดสินใจเด็ดขาด เจรจากับผู้ใหญ่ หรือผู้มีอำนาจ ความแม่นยำสูง
+                </p>
+              </div>
+              <span className="bg-[#020617] border border-rose-500/30 text-rose-300 text-[10px] px-3 py-1 rounded-full whitespace-nowrap">
+                ยามที่ 1
+              </span>
+            </div>
+          </div>
+        </Card>
+
+        {/* เลือกเรื่องที่ต้องการถามเจาะลึก */}
+        <Card className="border-[#C6A96B]/20 bg-gradient-to-b from-[#0A1628] to-[#040C18] p-8 flex flex-col">
+          <h3 className="text-sm font-bold text-[#F8F6F1] mb-6 flex items-center gap-2">
+            <span className="text-pink-400">🎯</span> เลือกเรื่องที่ต้องการถามเจาะลึก
+          </h3>
+          
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className={`p-4 rounded-2xl border flex flex-col items-center justify-center gap-3 transition-all ${
+                  selectedCategory === cat.id 
+                    ? "bg-[#112A46] border-sky-500/50 shadow-lg shadow-sky-500/10" 
+                    : "bg-[#0A1628] border-white/5 hover:border-white/10"
+                }`}
+              >
+                <span className="text-2xl">{cat.icon}</span>
+                <span className={`text-[11px] font-bold ${selectedCategory === cat.id ? "text-sky-300" : "text-[#8A8070]"}`}>
+                  {cat.label}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <div className="bg-[#0A1628] border border-white/5 rounded-2xl p-5 flex-1">
+            <p className="text-xs font-bold text-[#C6A96B] mb-4 flex items-center gap-2">
+              💡 คำถามแนะนำสำหรับหมวดนี้
+            </p>
+            <div className="space-y-3">
+              {activeCategory?.questions.map((q, i) => (
+                <div key={i} className="flex gap-3">
+                  <span className="text-[#8A8070] text-lg leading-none mt-0.5">✦</span>
+                  <p className="text-xs text-[#F8F6F1] opacity-90 leading-relaxed">{q}</p>
+                </div>
               ))}
             </div>
-            <p className="text-[10px] text-[#8A8070] mt-4 text-center">
-              * เลือกทิศทางที่ต้องการเดินทาง หรือทำกิจกรรม เพื่อประกอบคำทำนาย
-            </p>
-          </Card>
+          </div>
+        </Card>
+      </div>
 
-          {/* Chat Interface */}
-          <Card className="border-[#C9A96E]/20 bg-slate-900/40 backdrop-blur-md p-0 overflow-hidden flex flex-col h-[400px]">
-             <div className="p-4 border-b border-[#C6A96B]/20 bg-gradient-to-r from-[#0A2240] to-[#020617]">
-               <h3 className="text-sm font-bold text-[#C6A96B] uppercase tracking-wider">
-                 💬 Wisdom Guidance
-               </h3>
+      {/* Scores Section */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: "การค้า/เจรจา", score: 80, color: "text-[#C6A96B]", bgLine: "bg-[#C6A96B]" },
+          { label: "ความรัก/เมตตา", score: 60, color: "text-pink-400", bgLine: "bg-pink-400" },
+          { label: "โชคลาภ/ทรัพย์สิน", score: 70, color: "text-emerald-400", bgLine: "bg-emerald-400" },
+          { label: "ระดับการเตือนภัย", score: 40, color: "text-[#8A8070]", bgLine: "bg-[#8A8070]" },
+        ].map(item => (
+          <Card key={item.label} className="p-6 border-white/5 bg-[#0A1628] flex flex-col items-center justify-center gap-4 relative overflow-hidden">
+            <span className="text-[11px] text-[#8A8070] font-bold tracking-wider">{item.label}</span>
+            <span className={`text-4xl font-display font-black ${item.color}`}>{item.score}%</span>
+            <div className={`w-12 h-1 rounded-full ${item.bgLine}`} />
+          </Card>
+        ))}
+      </div>
+
+      {/* ผังดวงกาลชะตา 9 ฐาน */}
+      <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8 overflow-x-auto relative">
+        <div className="flex items-start gap-4 mb-8">
+          <div className="w-10 h-10 rounded-xl bg-violet-500/20 flex items-center justify-center text-xl shrink-0">
+            ☸️
+          </div>
+          <div>
+            <h3 className="text-base font-bold text-[#F8F6F1]">ผังดวงกาลชะตา 9 ฐาน</h3>
+            <p className="text-[10px] text-[#8A8070] mt-1">อัปเดตชะตาตามจุดเวลาที่เลือก - แตะตัวเลขเพื่อดูความเชื่อมโยง</p>
+          </div>
+        </div>
+
+        <div className="min-w-[700px] flex flex-col gap-6 items-center">
+          {/* Bases 1-3 */}
+          {[0, 1, 2].map(rIdx => (
+            <div key={rIdx} className="flex items-center w-full max-w-3xl">
+              <div className="w-24 text-xs font-bold text-[#F8F6F1]">ฐาน {rIdx + 1}</div>
+              <div className="flex-1 flex justify-between">
+                {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
+                  <div key={cIdx} className="flex flex-col items-center gap-2 w-16">
+                    <div className="w-12 h-12 rounded-full border-2 border-[#8A8070]/30 bg-[#020617] flex items-center justify-center text-xl font-display font-bold text-[#F8F6F1]">
+                      {star}
+                    </div>
+                    <span className="text-[10px] text-[#8A8070] font-medium">{getBhopName(rIdx, cIdx)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Base 4 */}
+          <div className="flex items-center w-full max-w-3xl bg-sky-950/20 border border-sky-500/20 p-4 rounded-2xl relative">
+             <div className="w-20 text-xs font-bold text-sky-400">ฐาน ๔</div>
+             <div className="flex-1 flex justify-between">
+                {activeResult.chart[3].map((star: number, cIdx: number) => (
+                  <div key={cIdx} className="flex flex-col items-center gap-2 w-16">
+                    <div className="w-12 h-12 rounded-full border-2 border-[#C6A96B]/50 bg-[#C6A96B]/10 flex items-center justify-center text-xl font-display font-bold text-[#F8F6F1]">
+                      {star}
+                    </div>
+                    <span className="text-[9px] text-[#C6A96B] font-bold text-center leading-tight">
+                      {BASE4_NAMES[cIdx] || ""}
+                    </span>
+                  </div>
+                ))}
              </div>
-             <div className="flex-1 p-4 overflow-y-auto space-y-4">
-               {chatMessages.map((msg, i) => (
-                 <div key={i} className={`flex ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
-                   <div className={`max-w-[85%] p-3 rounded-2xl text-xs leading-relaxed ${
-                     msg.sender === "user" 
-                       ? "bg-gradient-to-br from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold shadow-md shadow-[#C6A96B]/10" 
-                       : "bg-slate-950/60 text-[#F8F6F1] border border-white/10 backdrop-blur-md"
-                   }`}>
-                     {msg.text}
-                     <div className={`text-[9px] mt-1 text-right ${msg.sender === "user" ? "text-[#020617]/60" : "text-[#8A8070]"}`}>
-                       {msg.time}
-                     </div>
+          </div>
+
+          {/* Bases 5-9 */}
+          {[4, 5, 6, 7, 8].map(rIdx => (
+            <div key={rIdx} className="flex items-center w-full max-w-3xl">
+              <div className="w-24 text-xs font-bold text-[#F8F6F1]">ฐาน {rIdx + 1}</div>
+              <div className="flex-1 flex justify-between">
+                {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
+                  <div key={cIdx} className="flex flex-col items-center gap-2 w-16">
+                    <div className="w-10 h-10 rounded-full border border-white/10 bg-[#020617] flex items-center justify-center text-lg font-display font-bold text-[#F8F6F1]">
+                      {star}
+                    </div>
+                    {rIdx === 7 && <span className="text-[9px] text-[#8A8070] font-medium">{"อาตมะ,ทาสา,สิทธิโชค,โภคทรัพย์,โจร,อุบาทว์".split(',')[cIdx]}</span>}
+                    {rIdx === 8 && <span className="text-[9px] text-[#8A8070] font-medium">{"อัตตะ,สักกะ,ญาติ,ธนัง,เคหัง,นาวัง".split(',')[cIdx]}</span>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* Grid ทิศทักษาจร 8 ทิศ */}
+      <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8">
+         <div className="flex items-start gap-4 mb-8 border-b border-white/5 pb-6">
+            <div className="w-10 h-10 rounded-xl bg-[#C6A96B]/20 flex items-center justify-center text-xl shrink-0">
+              🧭
+            </div>
+            <div>
+              <h3 className="text-base font-bold text-[#F8F6F1]">ผังทิศทักษาจรแปดทิศ (8-DIRECTIONAL TAKSA GRID)</h3>
+              <p className="text-[10px] text-[#8A8070] mt-1">แผนผังแปดทิศ แสดงความสัมพันธ์ของดาวและตำแหน่งทิศทางที่เป็นคุณ/เป็นภัยในนาทีนี้ แตะการ์ดทิศเพื่อเลือกดาว</p>
+            </div>
+         </div>
+
+         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+            {TAKSA_DIRECTIONS.map((dir) => {
+              const isActive = selectedDirection === dir.id;
+              // Mocking properties for UI display as per screenshot
+              const isKala = dir.id === 6 || dir.id === 4; // Mocking N, S having kala/sri
+              return (
+                <button
+                  key={dir.id}
+                  onClick={() => setSelectedDirection(isActive ? null : dir.id)}
+                  className={`p-6 rounded-3xl border flex flex-col items-center text-center transition-all ${
+                    isActive 
+                      ? "bg-[#C6A96B]/10 border-[#C6A96B] shadow-[0_0_20px_rgba(198,169,107,0.15)]" 
+                      : "bg-[#020617] border-white/5 hover:border-white/10"
+                  }`}
+                >
+                  <p className="text-[10px] text-[#8A8070] font-bold mb-3">{dir.name}</p>
+                  <p className="text-sm font-bold text-[#F8F6F1] mb-2">ดาว {dir.star}</p>
+                  <p className="text-3xl font-display font-bold text-[#C6A96B] mb-6">({dir.id})</p>
+                  
+                  <div className="w-full space-y-2">
+                    <div className={`px-4 py-1.5 rounded-lg border text-[10px] font-bold ${dir.id === 6 ? "bg-rose-950/30 border-rose-500/30 text-rose-400" : dir.id === 4 ? "bg-emerald-950/30 border-emerald-500/30 text-emerald-400" : "bg-[#0A1628] border-white/10 text-[#8A8070]"}`}>
+                       กาล: {dir.id === 6 ? "กาลกิณี" : dir.id === 4 ? "ศรี" : "บริวาร"}
+                    </div>
+                    <div className={`px-4 py-1.5 rounded-lg border text-[10px] font-bold ${dir.id === 6 ? "bg-emerald-950/30 border-emerald-500/30 text-emerald-400" : dir.id === 4 ? "bg-rose-950/30 border-rose-500/30 text-rose-400" : "bg-[#0A1628] border-white/10 text-[#8A8070]"}`}>
+                       กำเนิด: {dir.id === 6 ? "ศรี" : dir.id === 4 ? "กาลกิณี" : "มูละ"}
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+         </div>
+      </Card>
+
+      {/* ตารางทักษาคู่ & มหาภูติ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-8 h-8 rounded-lg bg-sky-500/20 flex items-center justify-center text-lg">📊</div>
+            <div>
+              <h3 className="text-sm font-bold text-[#F8F6F1]">ตารางทักษาคู่ (กำเนิด / จร)</h3>
+              <p className="text-[9px] text-[#8A8070]">สรุปสถานะดาวรายตัว เปรียบเทียบกำลังดาวจากดวงกำเนิดและสถานการณ์กาลชะตาจร</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+             {[1,2,3,6,4,8,5,7].map(num => (
+               <div key={num} className="bg-[#020617] border border-white/5 rounded-2xl p-4 flex flex-col items-center relative">
+                 {num === 1 && <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-emerald-400" />}
+                 {num === 6 && <span className="absolute top-3 right-3 w-2 h-2 rounded-full bg-rose-400" />}
+                 <span className="text-2xl font-display font-bold text-[#C6A96B] mb-1">{num}</span>
+                 <span className="text-[10px] font-bold text-[#F8F6F1] mb-3">ดาว{TAKSA_DIRECTIONS.find(d => d.id === num)?.star}</span>
+                 <div className="w-full space-y-1">
+                   <div className={`text-[9px] text-center py-1 rounded border ${num === 4 ? "bg-emerald-950/50 border-emerald-500/30 text-emerald-400" : num === 6 ? "bg-rose-950/50 border-rose-500/30 text-rose-400" : "bg-white/5 border-white/5 text-[#8A8070]"}`}>
+                     {num === 4 ? "ศรีจร" : num === 6 ? "กาลกิณีจร" : "บริวารจร"}
+                   </div>
+                   <div className="text-[9px] text-center py-1 rounded border bg-white/5 border-white/5 text-[#8A8070]">
+                     {num === 6 ? "ศรี (กำเนิด)" : "มูละ (กำเนิด)"}
                    </div>
                  </div>
-               ))}
-             </div>
-             <div className="p-3 bg-[#020617] border-t border-white/10">
-               <form onSubmit={handleSendChat} className="flex gap-2">
-                 <input 
-                   type="text" 
-                   value={userInput}
-                   onChange={e => setUserInput(e.target.value)}
-                   placeholder="เช่น วันนี้ไปสมัครงานทิศเหนือดีไหม?"
-                   className="flex-1 bg-slate-900 border border-[#C6A96B]/20 rounded-xl px-4 py-2.5 text-xs text-[#F8F6F1] outline-none focus:border-[#C6A96B]/60 transition-colors"
-                 />
-                 <Button type="submit" disabled={!userInput.trim()} className="px-4 py-2.5 shrink-0 rounded-xl">
-                   ส่ง
-                 </Button>
-               </form>
-             </div>
-          </Card>
+               </div>
+             ))}
+          </div>
+        </Card>
 
-        </div>
+        <Card className="border-[#C6A96B]/20 bg-slate-900 p-6">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center text-lg">👤</div>
+            <div>
+              <h3 className="text-sm font-bold text-[#F8F6F1]">ทักษา & มหาภูติจรส่วนบุคคล (ดวงผู้ถาม)</h3>
+              <p className="text-[9px] text-[#8A8070]">ดึงค่าจากวันเกิดในโปรไฟล์ของคุณ เพื่อใช้เปรียบเทียบหาจุดทับซ้อนและตรวจสอบความแม่นยำรายวัน</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+             <div className="bg-[#0A1628] rounded-xl p-4">
+                <p className="text-xs font-bold text-[#C6A96B] mb-3 flex items-center gap-2">🎯 ทักษาจรประจำปีนี้</p>
+                <div className="space-y-2">
+                  {[1,2,3,4,5,6,7,8].map(num => (
+                    <div key={num} className="flex justify-between items-center text-[10px]">
+                      <span className="text-[#F8F6F1]">ดาว{TAKSA_DIRECTIONS.find(d => d.id === num)?.star} ({num})</span>
+                      <span className={`px-2 py-0.5 rounded text-[9px] font-bold ${num === 6 ? "bg-emerald-950 text-emerald-400" : num === 4 ? "bg-rose-950 text-rose-400" : "bg-white/10 text-[#8A8070]"}`}>
+                        {num === 6 ? "ศรี" : num === 4 ? "กาลกิณี" : "บริวาร"}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+             </div>
+             <div className="bg-[#0A1628] rounded-xl p-4">
+                <p className="text-xs font-bold text-pink-400 mb-3 flex items-center gap-2">🧠 มหาภูติจร (สภาวะจิตใจ)</p>
+                <div className="space-y-2">
+                  {["โลกาวินาศ", "อริ", "ขุมทรัพย์", "มรณะ", "อธิบดี", "ราชา", "ธงชัย"].map((bhop, i) => (
+                    <div key={bhop} className="flex justify-between items-center text-[10px]">
+                      <span className="text-[#8A8070]">{bhop}</span>
+                      <span className="text-[#F8F6F1]">ดาว{TAKSA_DIRECTIONS.find(d => d.id === (i+1))?.star} ({i+1})</span>
+                    </div>
+                  ))}
+                </div>
+             </div>
+          </div>
+        </Card>
       </div>
+
+      {/* Chat Section */}
+      <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-0 overflow-hidden relative shadow-2xl shadow-sky-900/10">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#C6A96B] via-[#F8F6F1] to-[#C6A96B] opacity-50" />
+        
+        <div className="p-6 border-b border-white/5 flex items-center gap-4">
+           <div className="w-12 h-12 rounded-full bg-[#C6A96B]/20 flex items-center justify-center relative">
+             <span className="text-2xl">✨</span>
+             <span className="absolute top-0 right-0 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-[#0A1628]" />
+           </div>
+           <div>
+             <h3 className="text-lg font-bold text-[#F8F6F1]">แชทถามตอบกับ WISDOM GUIDANCE</h3>
+             <p className="text-xs text-[#C6A96B]">หมวดการสนทนาปัจจุบัน: <span className="font-bold text-white">{activeCategory?.label}</span></p>
+           </div>
+           <button onClick={() => setChatMessages([])} className="ml-auto px-4 py-2 text-xs border border-white/10 text-[#8A8070] hover:text-white rounded-lg">
+             ล้างแชท
+           </button>
+        </div>
+
+        <div className="h-[400px] overflow-y-auto p-6 space-y-6">
+          {chatMessages.map((msg, i) => (
+            <div key={i} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
+              {msg.sender === "ai" && <span className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-wider mb-1 flex items-center gap-1"><span className="text-[#F8F6F1]">✦</span> WISDOM GUIDANCE</span>}
+              <div className={`max-w-[75%] p-4 rounded-2xl text-sm leading-loose ${
+                msg.sender === "user" 
+                  ? "bg-[#C6A96B] text-[#020617] font-bold rounded-tr-none" 
+                  : "bg-slate-900/80 text-[#F8F6F1] border border-white/5 rounded-tl-none"
+              }`}>
+                {msg.text}
+              </div>
+            </div>
+          ))}
+          <div ref={chatEndRef} />
+        </div>
+
+        <div className="p-4 bg-[#040C18] border-t border-white/5">
+          <form onSubmit={handleSendChat} className="flex gap-3 max-w-4xl mx-auto">
+            <input 
+              type="text" 
+              value={userInput}
+              onChange={e => setUserInput(e.target.value)}
+              placeholder={`ถามคำถามกาลชะตาที่นี่... เช่น ${activeCategory?.questions[0].split('?')[0]}`}
+              className="flex-1 bg-[#0A1628] border border-white/10 rounded-xl px-5 py-3 text-sm text-[#F8F6F1] outline-none focus:border-[#C6A96B]/50 transition-colors"
+            />
+            <Button type="submit" disabled={!userInput.trim()} className="px-8 py-3 shrink-0 rounded-xl bg-[#C6A96B]/20 text-[#C6A96B] hover:bg-[#C6A96B] hover:text-[#020617]">
+              ส่งคำถาม
+            </Button>
+          </form>
+        </div>
+      </Card>
     </div>
   );
 }
