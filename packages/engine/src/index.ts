@@ -6,7 +6,7 @@ export * from "./yam/index.js";
 export * from "./core/index.js";
 export { horoscopeEngine } from "./engine/horoscopeEngine.js";
 export { calculatePhopephum } from "./engine/phopephum-v2.js";
-export { calculateNineBases } from "./engine/seven-numbers-v2.js";
+export { calculateNineBases, r7_local } from "./engine/seven-numbers-v2.js";
 export { calculateLagnaNakshatra } from "./calculators/calculateNakshatra.js";
 
 // Re-export specific calculators for the new architecture
