@@ -41,8 +41,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="cosmic-ocean-bg text-[#F8F6F1] font-sarabun antialiased">
-        {children}
+      <body className="cosmic-ocean-bg text-[#F8F6F1] font-sarabun antialiased overflow-x-hidden min-h-screen">
+        <div className="flex flex-col min-h-screen">
+          <main className="flex-1">
+            {children}
+          </main>
+        </div>
         <ScrollRestoration />
         <Scripts />
       </body>

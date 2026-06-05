@@ -281,50 +281,68 @@ function WisdomBirthGuidanceCard({ profile, activeResult, lunar }: { profile: an
   const lunarDay = match ? parseInt(match[0], 10) : 1;
   const brightness = isWaxing ? Math.round((lunarDay / 15) * 100) : Math.round(((15 - lunarDay) / 15) * 100);
 
+  const transitDateObj = activeResult?.transitDate ? new Date(activeResult.transitDate) : new Date();
+  const tDateThai = transitDateObj.getFullYear() + 543;
+  const tDay = transitDateObj.getDate();
+  const tMonth = transitDateObj.getMonth() + 1;
+  const transitDateText = `${tDay} ${monthNames[tMonth - 1]} ${tDateThai}`;
+
+  // Lunar Birth
+  const natalLunar = activeResult?.phopephumResult?.nineBase?.lunarDate || "—";
+  const currentAge = activeResult?.phopephumResult?.taksaTransit?.ageYang || 0;
+
   return (
     <Card className="border-[#C6A96B]/20 bg-gradient-to-br from-[#0A2240]/80 to-[#020617]/90 backdrop-blur-xl p-5 relative overflow-hidden shadow-2xl rounded-2xl">
       <div className="absolute top-0 right-0 w-32 h-32 bg-[#C6A96B]/10 rounded-full blur-3xl -z-10" />
       <div className="flex flex-col md:flex-row gap-6">
         <div className="flex-1 space-y-4">
           <div className="flex items-center gap-3 border-b border-[#C6A96B]/20 pb-3">
-            <div className="w-8 h-8 rounded-full bg-[#C6A96B]/20 border border-[#C6A96B]/40 flex items-center justify-center font-bold text-[#C6A96B]">
-              👤
-            </div>
+            <div className="text-[#C6A96B] text-xl">⚜️</div>
             <div>
-              <h3 className="font-display font-bold text-[#F8F6F1] text-base leading-none">
-                WISDOM BIRTH GUIDANCE
+              <h3 className="font-display font-bold text-[#C6A96B] text-xs tracking-[0.2em] uppercase">
+                WISDOM BIRTH GUIDANCE · ภูมิปัญญาพื้นดวงชะตา
               </h3>
-              <p className="text-[10px] text-[#8A8070] mt-1 uppercase tracking-widest">ข้อมูลพื้นดวงกำเนิด</p>
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <p className="text-[10px] text-[#8A8070] uppercase font-bold">ชื่อ-นามสกุล</p>
-              <p className="text-sm font-bold text-[#F8F6F1] truncate">{profile?.full_name ?? profile?.username ?? "ไม่ระบุ"}</p>
+          
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-xl font-bold text-[#F8F6F1]">ดวงชะตาของ คุณ {profile?.full_name ?? profile?.username ?? "ไม่ระบุ"}</h2>
+              <p className="text-xs text-[#8A8070] mt-1">ประจำวันที่ {transitDateText}</p>
             </div>
-            <div className="space-y-1">
-              <p className="text-[10px] text-[#8A8070] uppercase font-bold">วันเกิด (พ.ศ.)</p>
-              <p className="text-sm font-bold text-[#F8F6F1]">{birthDateText}</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] text-[#8A8070] uppercase font-bold">เวลาเกิด</p>
-              <p className="text-sm font-bold text-[#F8F6F1]">{activeResult?.phopephumResult?.input_data?.birthTime ?? profile?.birth_time ?? "—"} น.</p>
-            </div>
-            <div className="space-y-1">
-              <p className="text-[10px] text-[#8A8070] uppercase font-bold">สถานที่เกิด</p>
-              <p className="text-sm font-bold text-[#F8F6F1] truncate">{activeResult?.phopephumResult?.input_data?.birthPlace ?? profile?.birth_place ?? "—"}</p>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-[#C6A96B] border-b border-white/10 pb-1 inline-block">ข้อมูลการถือกำเนิด</p>
+                <div className="space-y-1 text-sm text-[#F8F6F1]">
+                  <p><span className="text-[#8A8070]">วันเกิด:</span> {birthDateText}</p>
+                  <p><span className="text-[#8A8070]">เวลาเกิด:</span> {activeResult?.phopephumResult?.input_data?.birthTime ?? profile?.birth_time ?? "—"} น.</p>
+                  <p><span className="text-[#8A8070]">จังหวัดเกิด:</span> {activeResult?.phopephumResult?.input_data?.birthPlace ?? profile?.birth_place ?? "—"}</p>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <p className="text-xs font-bold text-[#C6A96B] border-b border-white/10 pb-1 inline-block">ปฏิทินจันทรคติและสัจจะอายุ</p>
+                <div className="space-y-1 text-sm text-[#F8F6F1]">
+                  <p><span className="text-[#8A8070]">วันจันทรคติเกิด:</span> {natalLunar}</p>
+                  <p><span className="text-[#8A8070]">อายุย่างปีนี้:</span> <span className="font-bold text-[#C6A96B]">{currentAge} ปี</span></p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="w-full md:w-48 shrink-0">
-          <div className="p-4 rounded-2xl bg-[#0A2240]/45 border border-[#C6A96B]/20 h-full flex flex-col items-center justify-center text-center">
+        <div className="w-full md:w-64 shrink-0">
+          <div className="p-4 rounded-2xl bg-slate-900/60 border border-[#C6A96B]/20 h-full flex flex-col items-center justify-center text-center">
+            <p className="text-[10px] text-[#8A8070] uppercase font-bold mb-2 tracking-widest">จันทรคติจรปัจจุบัน</p>
             <div className="text-4xl mb-2">{isWaxing ? "🌕" : "🌑"}</div>
-            <p className="text-[#F8F6F1] font-bold text-xs">{moonPhaseText}</p>
-            <div className="mt-2 w-full bg-slate-950/40 rounded-full h-1.5 overflow-hidden border border-white/5">
-              <div className="bg-[#C6A96B] h-full transition-all duration-500" style={{ width: `${brightness}%` }} />
+            <p className="text-[#F8F6F1] font-bold text-sm">{moonPhaseText}</p>
+            <p className="text-xs text-[#8A8070] mt-1 italic leading-tight">
+              ({isWaxing ? "ช่วงเวลาแห่งการเติบโตและสะสมพลังงาน" : "จุดเริ่มต้น - ปลูกเมล็ดพันธุ์แห่งความตั้งใจใหม่"})
+            </p>
+            <div className="mt-3 w-full bg-slate-950/60 rounded-full h-1.5 overflow-hidden border border-white/5">
+              <div className="bg-[#C6A96B] h-full transition-all duration-500 shadow-[0_0_10px_#C6A96B]" style={{ width: `${brightness}%` }} />
             </div>
-            <p className="text-[9px] text-[#8A8070] mt-1 uppercase tracking-widest font-bold">ความสว่าง {brightness}%</p>
+            <p className="text-[10px] text-[#C6A96B] mt-1 font-bold">ความสว่าง {brightness}%</p>
           </div>
         </div>
       </div>
@@ -335,55 +353,92 @@ function WisdomBirthGuidanceCard({ profile, activeResult, lunar }: { profile: an
 function ComparisonCard({ activeResult }: { activeResult: any }) {
   const natal = activeResult?.phopephumResult?.lagna;
   const transit = activeResult?.phopephumResult?.lagnaTransit;
+  const nakshatra = activeResult?.lagnaNakshatra;
+  const yam = activeResult?.birthYamResult?.yam;
 
   if (!natal && !transit) return null;
 
   return (
-    <Card className="border-[#C6A96B]/20 bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl">
-      <h3 className="text-xs font-bold text-[#C6A96B] uppercase tracking-widest mb-4 flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-[#C6A96B]" />
-        เปรียบเทียบลัคนากำเนิด VS ลัคนาจร
-      </h3>
-      <div className="grid grid-cols-2 gap-6">
-        <div className="space-y-3">
+    <Card className="border-[#C6A96B]/20 bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl md:col-span-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 border-b border-white/5 pb-3">
+        <h3 className="text-xs font-bold text-[#C6A96B] uppercase tracking-widest flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse" />
+          วิเคราะห์จุดเจ้าชะตา: ลัคนากำเนิด VS ลัคนาจร
+        </h3>
+      </div>
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* ลัคนากำเนิด */}
+        <div className="space-y-3 p-4 rounded-xl bg-slate-950/40 border border-white/5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-[#C6A96B]/10 rounded-full blur-2xl -z-10" />
           <div className="flex items-center gap-2 border-b border-white/5 pb-2">
             <div className="w-6 h-6 rounded-full bg-[#C6A96B] text-[#020617] text-[10px] font-bold flex items-center justify-center">ล</div>
-            <span className="text-xs font-bold text-[#F8F6F1]">ลัคนากำเนิด</span>
+            <span className="text-xs font-bold text-[#F8F6F1]">ลัคนากำเนิด (Natal Lagna)</span>
           </div>
           <div className="space-y-2">
-            <div className="flex justify-between text-[11px]">
-              <span className="text-[#8A8070]">ตำแหน่ง</span>
-              <span className="text-[#F8F6F1] font-bold">{natal ? `ฐาน ${natal.row} ช่อง ${natal.col}` : "—"}</span>
+            <div className="flex justify-between text-[11px] items-center">
+              <span className="text-[#8A8070]">ตำแหน่งบนผังดวง</span>
+              <span className="text-[#F8F6F1] font-bold px-2 py-0.5 rounded bg-white/5">{natal ? `ฐาน ${natal.row} ช่อง ${natal.col}` : "—"}</span>
             </div>
-            <div className="flex justify-between text-[11px]">
+            <div className="flex justify-between text-[11px] items-center">
               <span className="text-[#8A8070]">ดาวครองลัคนา</span>
-              <span className="text-[#C6A96B] font-bold">{natal ? `ดาว ${natal.star}` : "—"}</span>
+              <span className="text-[#C6A96B] font-bold text-base">{natal ? `${natal.star}` : "—"}</span>
             </div>
-            <div className="flex justify-between text-[11px]">
+            <div className="flex justify-between text-[11px] items-center">
               <span className="text-[#8A8070]">ชื่อดาว</span>
               <span className="text-[#F8F6F1]">{natal ? STAR_NAMES[natal.star as StarNumber] : "—"}</span>
             </div>
           </div>
         </div>
 
-        <div className="space-y-3">
+        {/* ลัคนาจร */}
+        <div className="space-y-3 p-4 rounded-xl bg-slate-950/40 border border-white/5 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-red-500/10 rounded-full blur-2xl -z-10" />
           <div className="flex items-center gap-2 border-b border-white/5 pb-2">
-            <div className="w-6 h-6 rounded-full bg-[#4B6FAE] text-[#F8F6F1] text-[10px] font-bold flex items-center justify-center">✶</div>
-            <span className="text-xs font-bold text-[#F8F6F1]">ลัคนาจร</span>
+            <div className="w-6 h-6 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border border-red-400">ลอ</div>
+            <span className="text-xs font-bold text-[#F8F6F1]">ลัคนาจร (Transit Lagna)</span>
           </div>
           <div className="space-y-2">
-            <div className="flex justify-between text-[11px]">
-              <span className="text-[#8A8070]">ตำแหน่ง</span>
-              <span className="text-[#F8F6F1] font-bold">{transit ? `ฐาน ${transit.row} ช่อง ${transit.col}` : "—"}</span>
+            <div className="flex justify-between text-[11px] items-center">
+              <span className="text-[#8A8070]">ตำแหน่งปัจจุบัน</span>
+              <span className="text-[#F8F6F1] font-bold px-2 py-0.5 rounded bg-white/5">{transit ? `ฐาน ${transit.row} ช่อง ${transit.col}` : "—"}</span>
             </div>
-            <div className="flex justify-between text-[11px]">
-              <span className="text-[#8A8070]">ดาวครองลัคนา</span>
-              <span className="text-[#4B6FAE] font-bold">{transit ? `ดาว ${transit.star}` : "—"}</span>
+            <div className="flex justify-between text-[11px] items-center">
+              <span className="text-[#8A8070]">ดาวครองลัคนาจร</span>
+              <span className="text-red-400 font-bold text-base">{transit ? `${transit.star}` : "—"}</span>
             </div>
-            <div className="flex justify-between text-[11px]">
+            <div className="flex justify-between text-[11px] items-center">
               <span className="text-[#8A8070]">ชื่อดาว</span>
               <span className="text-[#F8F6F1]">{transit ? STAR_NAMES[transit.star as StarNumber] : "—"}</span>
             </div>
+          </div>
+        </div>
+
+        {/* ฤกษ์และยามกำเนิด */}
+        <div className="space-y-3 p-4 rounded-xl bg-gradient-to-br from-[#0A2240]/40 to-[#020617]/60 border border-sky-500/20 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-24 h-24 bg-sky-500/10 rounded-full blur-2xl -z-10" />
+          <div className="flex items-center gap-2 border-b border-white/5 pb-2">
+            <span className="text-base">⏳</span>
+            <span className="text-xs font-bold text-sky-400">ฤกษ์และยามกำเนิด</span>
+          </div>
+          <div className="space-y-3">
+            {nakshatra ? (
+              <div>
+                <p className="text-[10px] text-[#8A8070] mb-1">นักษัตรฤกษ์ที่เกาะ</p>
+                <p className="text-xs text-[#F8F6F1] font-bold leading-tight">{nakshatra}</p>
+              </div>
+            ) : null}
+            {yam ? (
+              <div>
+                <p className="text-[10px] text-[#8A8070] mb-1">ยามเวลาเกิด</p>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] bg-sky-500/20 text-sky-400 border border-sky-500/30 px-2 py-0.5 rounded font-bold">ยาม {yam.name}</span>
+                  <span className="text-[10px] text-[#8A8070]">({yam.type})</span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-[10px] text-[#8A8070] italic">ไม่พบข้อมูลเวลาเกิดที่ระบุแน่ชัด</p>
+            )}
           </div>
         </div>
       </div>
@@ -450,6 +505,107 @@ function DateDropdowns({ prefix, defaultDay, defaultMonth, defaultYear, onChange
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Legend & Base 4 Effect Panels
+// ─────────────────────────────────────────────────────────────────────────────
+
+function LegendPanel() {
+  return (
+    <div className="mt-6 p-4 rounded-2xl bg-slate-900/40 border border-white/5">
+      <h4 className="text-[10px] font-bold text-[#C6A96B] uppercase tracking-widest mb-3 flex items-center gap-2">
+        <span className="text-base">📋</span> คำอธิบายสัญลักษณ์ (Legend)
+      </h4>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#C6A96B] animate-pulse shadow-[0_0_5px_#C6A96B]"></span>
+          <span className="text-xs text-[#8A8070]">ดาววัยจร</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-[#4B6FAE] shadow-[0_0_5px_#4B6FAE]"></span>
+          <span className="text-xs text-[#8A8070]">ดาวปีจร</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_5px_#f59e0b]"></span>
+          <span className="text-xs text-[#8A8070]">ดาวเดือนจร</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]"></span>
+          <span className="text-xs text-[#8A8070]">ดาววันจร</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-bold bg-[#C6A96B] text-black px-1.5 py-0.5 rounded-full border border-black/20">ล</span>
+          <span className="text-xs text-[#8A8070]">ลัคนากำเนิด</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-bold bg-red-500 text-white px-1.5 py-0.5 rounded-full border border-red-400">ลอ</span>
+          <span className="text-xs text-[#8A8070]">ลัคนาจร</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500 text-white font-bold">ศรี</span>
+          <span className="text-xs text-[#8A8070]">ทักษาจร (มงคล/โชคลาภ)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500 text-white font-bold">กาลี</span>
+          <span className="text-xs text-[#8A8070]">ทักษาจร (อุปสรรค)</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Base4EffectPanel({ activeResult }: { activeResult: any }) {
+  const matrix = activeResult?.matrix;
+  
+  // หาตัวเลขที่ซ้ำในฐาน 1-3
+  let repeatedStars: number[] = [];
+  if (matrix) {
+    const counts = new Array(8).fill(0);
+    for (let r = 0; r < 3; r++) {
+      for (let c = 0; c < 7; c++) {
+        const val = matrix[r][c];
+        if (val >= 1 && val <= 7) counts[val]++;
+      }
+    }
+    repeatedStars = counts.map((v, i) => v > 1 ? i : 0).filter(v => v !== 0);
+  }
+
+  return (
+    <Card className="mt-6 border-[#C6A96B]/20 bg-gradient-to-br from-[#0A2240]/40 to-[#020617]/60 p-5 rounded-2xl">
+      <h3 className="text-xs font-bold text-[#C6A96B] uppercase tracking-widest mb-3 flex items-center gap-2 border-b border-white/5 pb-2">
+        <span className="text-base">⚡</span> วิเคราะห์ดาวย้ำ และกำลังส่งผลจากฐานที่ 4 (มหาจักร)
+      </h3>
+      <div className="space-y-4">
+        <p className="text-sm text-[#F8F6F1] leading-relaxed">
+          ระบบ <span className="font-bold text-[#C6A96B]">ดาวย้ำ</span> หรือดาวที่ปรากฏซ้ำในหลายภพเรือน บ่งชี้ถึงพลังงานที่ส่งผลรุนแรงและมีอิทธิพลต่อดวงชะตาเป็นพิเศษ 
+          โดยเฉพาะเมื่อได้รับการหนุนนำจาก <span className="font-bold text-[#4B6FAE]">ฐานที่ 4 (มหาจักร)</span> ซึ่งเป็นฐานแห่งกำลังและการขยายผล
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="p-4 rounded-xl bg-slate-900/50 border border-white/5">
+            <p className="text-[10px] text-[#8A8070] uppercase font-bold mb-3 tracking-widest">ดาวย้ำที่พบในพื้นดวงชะตา (ฐาน 1-3)</p>
+            {repeatedStars.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {repeatedStars.map(star => (
+                  <span key={star} className="px-3 py-1.5 rounded-lg bg-[#C6A96B]/10 border border-[#C6A96B]/30 text-xs text-[#C6A96B] font-bold">
+                    ดาว {star} ({STAR_NAMES[star as StarNumber] || "—"})
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-[#8A8070] italic">ไม่พบดาวย้ำในพื้นดวง</p>
+            )}
+          </div>
+          <div className="p-4 rounded-xl bg-slate-900/50 border border-white/5">
+            <p className="text-[10px] text-[#8A8070] uppercase font-bold mb-2 tracking-widest">ผลกระทบจากฐานที่ 4 (มหาจักร)</p>
+            <p className="text-xs text-[#F8F6F1] leading-relaxed">
+              ดาวที่ตั้งอยู่บนฐาน 4 มีกำลังเป็นมหาจักร ส่งผลให้เรื่องราวในภพนั้นๆ มีโอกาสประสบความสำเร็จอย่างยิ่งใหญ่ แต่ต้องแลกมาด้วยความเหน็ดเหนื่อยและการต่อสู้ฟันฝ่า
+            </p>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Page Component
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -500,15 +656,15 @@ export default function HoroscopePage() {
   const [userInput, setUserInput] = useState("");
 
   // ── ระบบ Filter เปิด/ปิด การแสดงผลสัญลักษณ์และภพเรือน ──
-  const [showNatalLagna, setShowNatalLagna] = useState(true);
-  const [showTransitLagna, setShowTransitLagna] = useState(true);
   const [showVayaJorn, setShowVayaJorn] = useState(true);
   const [showYearlyJorn, setShowYearlyJorn] = useState(true);
   const [showMonthlyJorn, setShowMonthlyJorn] = useState(false);
   const [showDailyJorn, setShowDailyJorn] = useState(false);
-  const [showAgeRange, setShowAgeRange] = useState(false);
-  const [showHouseNames, setShowHouseNames] = useState(false);
-  const [showTaksaMahaBadges, setShowTaksaMahaBadges] = useState(false);
+  const [showNatalLagna, setShowNatalLagna] = useState(true);
+  const [showTransitLagna, setShowTransitLagna] = useState(true);
+  const [showTaksaJorn, setShowTaksaJorn] = useState(false);
+  const [showMahaJorn, setShowMahaJorn] = useState(false);
+  const [showTaksaDirection, setShowTaksaDirection] = useState(false);
 
   // ดึงค่าระบบจรจาก activeResult เพื่อนำมาหาดาวเป้าหมาย
   const taksaTransit = activeResult?.taksaMaha?.taksaTransit || activeResult?.phopephumResult?.taksaTransit;
@@ -694,9 +850,9 @@ export default function HoroscopePage() {
       {/* ── Tab Navigation (3 แท็บ) ── */}
       <div className="flex gap-2">
         {[
-          { id: "chart",    label: "พื้นดวง",        icon: "🔮" },
-          { id: "analysis", label: "ภูมิปัญญาวิถี",  icon: "📜" },
-          { id: "calc",     label: "คำนวณชะตา",       icon: "📝" },
+          { id: "chart",    label: "1. พื้นดวง",        icon: "🔮" },
+          { id: "analysis", label: "2. ภูมิปัญญาวิถี",  icon: "📜" },
+          { id: "calc",     label: "3. คำนวณชะตา",       icon: "📝" },
         ].map((tab) => {
           const isSelected = activeTab === tab.id;
           return (
@@ -722,6 +878,52 @@ export default function HoroscopePage() {
         <div className="space-y-6 animate-in fade-in duration-300">
           <WisdomBirthGuidanceCard profile={profile} activeResult={activeResult} lunar={lunar} />
           
+          {/* ส่วนที่ 3: ตัวกรองมุมมองดวงชะตา (TRANSIT & OVERLAY FILTERS) */}
+          <Card className="border-[#C6A96B]/20 bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4 border-b border-white/5 pb-3">
+              <h3 className="text-xs font-bold text-[#C6A96B] uppercase tracking-widest flex items-center gap-2">
+                <span className="text-base">🎛️</span> ตัวกรองมุมมองดวงชะตา (TRANSIT & OVERLAY FILTERS)
+              </h3>
+              <p className="text-[10px] text-[#8A8070] italic">(เลือกเปิด/ปิดเพื่อแสดงสัญลักษณ์ทับซ้อนบนผังดวง)</p>
+            </div>
+            
+            <div className="flex flex-wrap gap-3 items-center">
+              <button onClick={() => setShowVayaJorn(!showVayaJorn)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showVayaJorn ? "bg-[#C6A96B]/10 border-[#C6A96B]/40 text-[#C6A96B]" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span className={`w-2 h-2 rounded-full ${showVayaJorn ? "bg-[#C6A96B] animate-pulse" : "bg-[#8A8070]"}`}></span> วัยจร
+              </button>
+              <button onClick={() => setShowYearlyJorn(!showYearlyJorn)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showYearlyJorn ? "bg-[#4B6FAE]/10 border-[#4B6FAE]/40 text-[#4B6FAE]" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span className={`w-2 h-2 rounded-full ${showYearlyJorn ? "bg-[#4B6FAE]" : "bg-[#8A8070]"}`}></span> ปีจร
+              </button>
+              <button onClick={() => setShowMonthlyJorn(!showMonthlyJorn)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showMonthlyJorn ? "bg-amber-500/10 border-amber-500/40 text-amber-500" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span className={`w-2 h-2 rounded-full ${showMonthlyJorn ? "bg-amber-500" : "bg-[#8A8070]"}`}></span> เดือนจร
+              </button>
+              <button onClick={() => setShowDailyJorn(!showDailyJorn)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showDailyJorn ? "bg-rose-500/10 border-rose-500/40 text-rose-500" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span className={`w-2 h-2 rounded-full ${showDailyJorn ? "bg-rose-500" : "bg-[#8A8070]"}`}></span> วันจร
+              </button>
+              
+              <div className="w-px h-6 bg-white/10 mx-1"></div>
+              
+              <button onClick={() => setShowNatalLagna(!showNatalLagna)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showNatalLagna ? "bg-white/5 border-white/20 text-[#F8F6F1]" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span className={`text-[10px] bg-[#C6A96B] text-black rounded-full w-4 h-4 flex items-center justify-center ${showNatalLagna ? "opacity-100" : "opacity-50 grayscale"}`}>ล</span> ลัคนาเกิด
+              </button>
+              <button onClick={() => setShowTransitLagna(!showTransitLagna)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showTransitLagna ? "bg-white/5 border-white/20 text-[#F8F6F1]" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span className={`text-[10px] bg-red-500 text-white rounded-full w-4 h-4 flex items-center justify-center ${showTransitLagna ? "opacity-100" : "opacity-50 grayscale"}`}>ลอ</span> ลัคนาจร
+              </button>
+              
+              <div className="w-px h-6 bg-white/10 mx-1"></div>
+              
+              <button onClick={() => setShowTaksaJorn(!showTaksaJorn)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showTaksaJorn ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span className="text-xs">✨</span> ทักษาจร
+              </button>
+              <button onClick={() => setShowMahaJorn(!showMahaJorn)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showMahaJorn ? "bg-violet-500/10 border-violet-500/40 text-violet-400" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span className="text-xs">🔮</span> มหาภูติจร
+              </button>
+              <button onClick={() => setShowTaksaDirection(!showTaksaDirection)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showTaksaDirection ? "bg-sky-500/10 border-sky-500/40 text-sky-400" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span className="text-xs">🧭</span> ทิศทักษา
+              </button>
+            </div>
+          </Card>
+
           <FateMatrixPanel
             matrix={activeResult?.matrix ?? placeholderMatrix}
             activeNum={hoverNum}
@@ -746,10 +948,12 @@ export default function HoroscopePage() {
             showYearlyJorn={showYearlyJorn}
             showMonthlyJorn={showMonthlyJorn}
             showDailyJorn={showDailyJorn}
-            showAgeRange={showAgeRange}
-            showHouseNames={showHouseNames}
-            showTaksaMahaBadges={showTaksaMahaBadges}
+            showTaksaJorn={showTaksaJorn}
+            showMahaJorn={showMahaJorn}
           />
+
+          <LegendPanel />
+          <Base4EffectPanel activeResult={activeResult} />
 
           <DynamicExplanationBox activeResult={activeResult} />
           
@@ -1025,39 +1229,49 @@ function CombinedTaksaCard({
   taksaMaha: any;
 }) {
   return (
-    <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
-      <div className="p-4 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-[#C9A96E]">ตารางทักษาคู่ (กำเนิด / จร)</p>
+    <Card className="p-0 overflow-hidden border-[#C6A96B]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md rounded-2xl">
+      <div className="p-4 border-b border-[#C6A96B]/20 bg-gradient-to-r from-[#C6A96B]/10 to-transparent">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">✨</span>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[#C6A96B]">ตารางทักษา (กำเนิด / จร)</h3>
+        </div>
       </div>
-      <div className="p-4 bg-slate-950/15">
-        <div className="grid grid-cols-3 gap-2 max-w-sm mx-auto">
+      <div className="p-5 bg-slate-950/20">
+        <div className="grid grid-cols-3 gap-3 max-w-[280px] mx-auto">
           {TAKSA_GRID_3X3.map((row, rIdx) =>
             row.map((star, cIdx) => {
               if (star === null) {
                 return (
                   <div
                     key={`center-taksa`}
-                    className="aspect-square flex flex-col items-center justify-center rounded-2xl border border-[#C9A96E]/20 bg-[#C9A96E]/10 p-2 text-center"
+                    className="aspect-square flex flex-col items-center justify-center rounded-2xl border border-[#C6A96B]/30 bg-[#C6A96B]/15 p-2 text-center shadow-[0_0_15px_rgba(198,169,107,0.1)] relative overflow-hidden"
                   >
-                    <span className="text-[#C9A96E] text-xs font-bold leading-none">อายุย่าง</span>
-                    <span className="text-[#F8F6F1] font-display text-2xl font-bold my-1">{taksaTransit.ageYang}</span>
-                    <span className="text-[#8A8070] text-xs leading-none">ปี</span>
+                    <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent"></div>
+                    <span className="text-[#C6A96B] text-[10px] font-bold leading-none uppercase tracking-widest relative z-10">อายุย่าง</span>
+                    <span className="text-[#F8F6F1] font-display text-3xl font-bold my-1 relative z-10 drop-shadow-md">{taksaTransit.ageYang}</span>
+                    <span className="text-[#8A8070] text-[10px] leading-none font-bold relative z-10">ปี</span>
                   </div>
                 );
               }
               const bhopNatal = taksaNatal?.map?.[star];
               const bhopTransit = taksaTransit?.map?.[star];
               
+              // กำหนดสีตามความหมายของทักษาจร
+              let transitColorClass = "text-[#C6A96B]";
+              if (bhopTransit === "กาลกิณี") transitColorClass = "text-rose-400";
+              else if (bhopTransit === "ศรี") transitColorClass = "text-emerald-400";
+              else if (bhopTransit === "มนตรี") transitColorClass = "text-sky-400";
+              
               return (
                 <div
                   key={`star-combined-${star}`}
-                  className="aspect-square flex flex-col items-center justify-between rounded-2xl border border-white/5 bg-slate-900/35 p-2 relative transition-all hover:border-[#C9A96E]/30"
+                  className="aspect-square flex flex-col items-center justify-between rounded-xl border border-white/10 bg-slate-900/50 p-2 relative transition-all hover:border-[#C6A96B]/40 hover:bg-slate-800/60 shadow-inner group"
                 >
-                  <span className="text-[10px] font-semibold text-[#8A8070]">{bhopNatal ?? "—"}</span>
-                  <div className="flex flex-col items-center">
-                    <span className="font-display text-2xl font-bold text-[#F8F6F1]">{star}</span>
+                  <span className="text-[9px] font-bold text-[#8A8070] uppercase group-hover:text-white/70 transition-colors">{bhopNatal ?? "—"}</span>
+                  <div className="flex flex-col items-center my-1">
+                    <span className="font-display text-2xl font-black text-[#F8F6F1] drop-shadow-sm">{star}</span>
                   </div>
-                  <span className={`text-[10px] font-bold ${bhopTransit === "กาลกิณี" ? "text-rose-400" : "text-[#C9A96E]"}`}>
+                  <span className={`text-[10px] font-bold bg-black/40 px-1.5 py-0.5 rounded w-full text-center truncate ${transitColorClass}`}>
                     {bhopTransit ? `${bhopTransit}จร` : "—"}
                   </span>
                 </div>
@@ -1090,12 +1304,15 @@ function CombinedMahaCard({
   taksaMaha?: any;
 }) {
   return (
-    <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
-      <div className="p-4 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-[#C9A96E]">มหาภูติกำเนิด / จร</p>
+    <Card className="p-0 overflow-hidden border-[#C6A96B]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md rounded-2xl">
+      <div className="p-4 border-b border-[#C6A96B]/20 bg-gradient-to-r from-violet-500/10 to-transparent">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🔮</span>
+          <h3 className="text-xs font-bold uppercase tracking-widest text-[#C6A96B]">มหาภูติ (กำเนิด / จร)</h3>
+        </div>
       </div>
-      <div className="p-4 bg-slate-950/15">
-        <div className="grid grid-cols-3 gap-2 max-w-sm mx-auto">
+      <div className="p-5 bg-slate-950/20">
+        <div className="grid grid-cols-3 gap-3 max-w-[280px] mx-auto">
           {MAHA_GRID_3X3.map((row, rIdx) =>
             row.map((bhop, cIdx) => {
               if (bhop === null) {
@@ -1107,11 +1324,11 @@ function CombinedMahaCard({
               return (
                 <div
                   key={`maha-combined-${bhop}`}
-                  className="aspect-square flex flex-col items-center justify-between rounded-2xl border border-white/5 bg-slate-900/35 p-2 transition-all hover:border-[#C9A96E]/30"
+                  className="aspect-square flex flex-col items-center justify-between rounded-xl border border-white/10 bg-slate-900/50 p-2 transition-all hover:border-violet-500/40 hover:bg-slate-800/60 shadow-inner group"
                 >
-                  <span className="text-[10px] font-bold text-[#8A8070]">{bhop}</span>
-                  <span className="font-display text-2xl font-bold text-[#F8F6F1]">{starNatal ?? "—"}</span>
-                  <span className="text-[10px] font-bold text-[#C9A96E]">{starTransit ?? "—"} จร</span>
+                  <span className="text-[9px] font-bold text-[#8A8070] uppercase group-hover:text-white/70 transition-colors">{bhop}</span>
+                  <span className="font-display text-2xl font-black text-[#F8F6F1] drop-shadow-sm my-1">{starNatal ?? "—"}</span>
+                  <span className="text-[10px] font-bold bg-black/40 px-1.5 py-0.5 rounded w-full text-center truncate text-violet-400">{starTransit ?? "—"} จร</span>
                 </div>
               );
             })
@@ -1207,9 +1424,8 @@ function FateMatrixPanel({
   showYearlyJorn = true,
   showMonthlyJorn = true,
   showDailyJorn = true,
-  showAgeRange = false,
-  showHouseNames = false,
-  showTaksaMahaBadges = false,
+  showTaksaJorn = false,
+  showMahaJorn = false,
 }: {
   matrix: number[][];
   activeNum: number | null;
@@ -1224,9 +1440,8 @@ function FateMatrixPanel({
   showYearlyJorn?: boolean;
   showMonthlyJorn?: boolean;
   showDailyJorn?: boolean;
-  showAgeRange?: boolean;
-  showHouseNames?: boolean;
-  showTaksaMahaBadges?: boolean;
+  showTaksaJorn?: boolean;
+  showMahaJorn?: boolean;
 }) {
   const getCellAgeRange = (row: number, col: number, mat: number[][]) => {
     let currentAgeStart = 1;
@@ -1287,12 +1502,31 @@ function FateMatrixPanel({
                             <span className="absolute -bottom-1 -left-2 text-[8px] font-bold bg-[#C6A96B] text-[#020617] border border-[#C6A96B]/60 px-1 rounded-full z-10">ล</span>
                           )}
                           {showTransitLagna && isLagnaTransit && (
-                            <span className="absolute -bottom-1 -right-2 text-[10px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 px-0.5 rounded-full z-10">✶</span>
+                            <span className="absolute -bottom-1 -right-2 text-[9px] font-bold bg-red-500 text-white border border-red-400 px-1 rounded-full z-10">ลอ</span>
                           )}
                           <div className="absolute -bottom-2 flex gap-0.5">
-                            {showVayaJorn && isVayaJorn && <span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B] animate-pulse" />}
-                            {showYearlyJorn && isYearlyJorn && <span className="w-1.5 h-1.5 rounded-full bg-[#4B6FAE]" />}
+                            {showVayaJorn && isVayaJorn && <span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B] animate-pulse shadow-[0_0_5px_#C6A96B]" />}
+                            {showYearlyJorn && isYearlyJorn && <span className="w-1.5 h-1.5 rounded-full bg-[#4B6FAE] shadow-[0_0_5px_#4B6FAE]" />}
+                            {showMonthlyJorn && isRow012 && phopephumResult?.monthlyJorn?.row === (rIdx + 1) && phopephumResult?.monthlyJorn?.col === (cIdx + 1) && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_5px_#f59e0b]" />}
+                            {showDailyJorn && isRow012 && phopephumResult?.dailyJorn?.row === (rIdx + 1) && phopephumResult?.dailyJorn?.col === (cIdx + 1) && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]" />}
                           </div>
+                          
+                          {/* Taksa & Maha Badges Overlay */}
+                          {isRow012 && showTaksaJorn && taksaMaha?.taksaTransit?.map?.[actualNum] && (
+                            <div className="absolute -top-2 -right-3 z-10">
+                              {taksaMaha.taksaTransit.map[actualNum] === "ศรี" && <span className="text-[8px] px-1 rounded bg-emerald-500 text-white font-bold shadow-md border border-emerald-400">ศรี</span>}
+                              {taksaMaha.taksaTransit.map[actualNum] === "กาลกิณี" && <span className="text-[8px] px-1 rounded bg-rose-500 text-white font-bold shadow-md border border-rose-400">กาลี</span>}
+                              {taksaMaha.taksaTransit.map[actualNum] === "เดช" && <span className="text-[8px] px-1 rounded bg-white text-black font-bold shadow-md border border-gray-300">เดช</span>}
+                              {taksaMaha.taksaTransit.map[actualNum] === "มนตรี" && <span className="text-[8px] px-1 rounded bg-sky-500 text-white font-bold shadow-md border border-sky-400">มนตรี</span>}
+                            </div>
+                          )}
+                          {isRow012 && showMahaJorn && taksaMaha?.mahaTransit?.map && (
+                            <div className="absolute -top-2 -left-3 z-10">
+                              {Object.entries(taksaMaha.mahaTransit.map).find(([k, v]) => v === actualNum)?.[0] === "โลกาวินาศ" && <span className="text-[8px] px-1 rounded bg-amber-500 text-black font-bold shadow-md border border-amber-400">วินาศ</span>}
+                              {Object.entries(taksaMaha.mahaTransit.map).find(([k, v]) => v === actualNum)?.[0] === "มรณะ" && <span className="text-[8px] px-1 rounded bg-slate-600 text-white font-bold shadow-md border border-slate-400">มรณะ</span>}
+                              {Object.entries(taksaMaha.mahaTransit.map).find(([k, v]) => v === actualNum)?.[0] === "อริ" && <span className="text-[8px] px-1 rounded bg-orange-600 text-white font-bold shadow-md border border-orange-400">อริ</span>}
+                            </div>
+                          )}
                         </button>
                       </td>
                     );

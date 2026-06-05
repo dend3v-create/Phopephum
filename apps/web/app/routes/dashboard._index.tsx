@@ -227,10 +227,10 @@ export default function DashboardIndex() {
               <IconSparklesLarge />
             </div>
             <div className="text-[10px] tracking-widest text-[#94A3B8] uppercase font-bold mb-2">รายงานทั้งหมด</div>
-            <div className="font-display text-5xl font-bold text-[#C6A96B] leading-none mb-2 glow-gold animate-number-count group-hover:scale-105 transition-transform origin-left">
+            <div className="font-display text-4xl sm:text-5xl font-bold text-[#C6A96B] leading-none mb-2 glow-gold animate-number-count group-hover:scale-105 transition-transform origin-left">
               {reportCount}
             </div>
-            <div className="text-xs text-[#94A3B8]/70">บทวิเคราะห์ชีวิตที่บันทึกไว้</div>
+            <div className="text-[10px] sm:text-xs text-[#94A3B8]/70">บทวิเคราะห์ชีวิตที่บันทึกไว้</div>
             {/* Bottom accent line */}
             <div className="absolute bottom-0 left-0 right-0 h-px"
               style={{ background: "linear-gradient(90deg, transparent, rgba(198,169,107,0.35), transparent)" }}

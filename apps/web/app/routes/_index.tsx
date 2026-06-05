@@ -1,5 +1,7 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
 import { Link } from "@remix-run/react";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
 
 export const meta: MetaFunction = () => [
   { title: "ภพภูมิ — PhopePhum | ระบบปฏิบัติการนำทางชีวิตด้วยยามมงคลอัฏฐกาลและเลข 7 ตัว 9 ฐาน" },
@@ -170,14 +172,16 @@ const SCHEMA_MARKUP = {
 };
 
 export default function Index() {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
   return (
     <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#020617" }}>
 
       {/* ── Stars background ── */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute w-[700px] h-[700px] -top-60 -left-60 rounded-full animate-aura-pulse"
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute w-[300px] sm:w-[700px] h-[300px] sm:h-[700px] -top-20 sm:-top-60 -left-20 sm:-left-60 rounded-full animate-aura-pulse opacity-50 sm:opacity-100"
           style={{ background: "radial-gradient(circle, rgba(75,111,174,0.14) 0%, transparent 65%)" }} />
-        <div className="absolute w-[500px] h-[500px] -bottom-32 -right-32 rounded-full animate-aura-pulse"
+        <div className="absolute w-[250px] sm:w-[500px] h-[250px] sm:h-[500px] -bottom-16 sm:-bottom-32 -right-16 sm:-right-32 rounded-full animate-aura-pulse opacity-40 sm:opacity-100"
           style={{ background: "radial-gradient(circle, rgba(109,143,199,0.10) 0%, transparent 65%)", animationDelay: "2.5s" }} />
         <div className="absolute inset-0"
           style={{ background: "radial-gradient(ellipse 50% 40% at 50% 20%, rgba(232,196,106,0.06) 0%, transparent 70%)" }} />
@@ -193,7 +197,7 @@ export default function Index() {
       </div>
 
       {/* ── Navbar ── */}
-      <nav className="relative z-50 flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
+      <nav className="relative z-50 flex items-center justify-between px-4 sm:px-6 py-4 max-w-6xl mx-auto backdrop-blur-md sm:backdrop-blur-none">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
           <div className="relative w-8 h-8 flex items-center justify-center transition-transform group-hover:rotate-90 duration-700">
@@ -208,143 +212,180 @@ export default function Index() {
           <span className="font-display text-[#F8F6F1] font-bold text-lg tracking-wide group-hover:text-[#C6A96B] transition-colors">PhopePhum</span>
         </Link>
 
+        {/* Mobile menu button */}
+        <button 
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="md:hidden p-2 text-[#C6A96B] hover:bg-[#C6A96B]/10 rounded-lg transition-colors"
+        >
+          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
         {/* Nav links (desktop) */}
         <div className="hidden md:flex items-center gap-6 text-sm text-[#94A3B8]">
           <Link to="/pricing" className="hover:text-[#C6A96B] transition-colors">แผนสมาชิก</Link>
           <a href="#features" className="hover:text-[#C6A96B] transition-colors">ฟีเจอร์</a>
           <a href="#how" className="hover:text-[#C6A96B] transition-colors">วิธีใช้</a>
+          <Link to="/login" className="px-5 py-2 rounded-full border border-[#C6A96B]/30 text-[#D9BC82] hover:bg-[#C6A96B]/10 transition-all ml-2 text-xs font-medium">เข้าสู่ระบบ</Link>
         </div>
       </nav>
 
+      {/* ── Mobile menu overlay ── */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-40 bg-[#020617]/95 backdrop-blur-xl md:hidden animate-fade-up">
+          <div className="flex flex-col items-center justify-center h-full gap-8 p-6 text-center">
+            <Link to="/pricing" onClick={() => setIsMenuOpen(false)} className="text-2xl font-display text-[#F8F6F1] hover:text-[#C6A96B]">แผนสมาชิก</Link>
+            <a href="#features" onClick={() => setIsMenuOpen(false)} className="text-2xl font-display text-[#F8F6F1] hover:text-[#C6A96B]">ฟีเจอร์</a>
+            <a href="#how" onClick={() => setIsMenuOpen(false)} className="text-2xl font-display text-[#F8F6F1] hover:text-[#C6A96B]">วิธีใช้</a>
+            <div className="w-full h-px bg-[#C6A96B]/20 max-w-[100px]" />
+            <Link to="/login" onClick={() => setIsMenuOpen(false)} className="text-xl font-medium text-[#D9BC82]">เข้าสู่ระบบ</Link>
+            <Link 
+              to="/register" 
+              onClick={() => setIsMenuOpen(false)} 
+              className="w-full max-w-xs py-4 rounded-full font-bold text-[#020617] text-lg shadow-xl shadow-[#C6A96B]/20"
+              style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}
+            >
+              เริ่มต้นใช้งาน ฟรี
+            </Link>
+          </div>
+        </div>
+      )}
+
       {/* ── Hero ── */}
-      <section className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-12 pb-24">
-        <div className="flex justify-center mb-8 animate-float">
-          <LogoSymbol />
+      <section className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-10 sm:pt-16 pb-20 sm:pb-32">
+        <div className="flex justify-center mb-6 sm:mb-10 animate-float">
+          <div className="scale-75 sm:scale-100 transition-transform">
+            <LogoSymbol />
+          </div>
         </div>
 
-        <p className="text-[#D9BC82] text-[9px] tracking-[0.4em] uppercase mb-4 animate-fade-up"
+        <p className="text-[#D9BC82] text-[8px] sm:text-[10px] tracking-[0.4em] uppercase mb-4 animate-fade-up opacity-80"
           style={{ animationDelay: "0.1s" }}>
           Living Wisdom Operating System
         </p>
 
-        <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-[#F8F6F1] glow-gold mb-4 animate-fade-up leading-tight"
+        <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-[#F8F6F1] glow-gold mb-4 animate-fade-up leading-[1.1] sm:leading-tight px-2"
           style={{ animationDelay: "0.2s" }}>
           PhopePhum
         </h1>
 
-        <p className="font-cormorant text-[#9AB3D9] text-2xl sm:text-3xl md:text-4xl italic mb-1 animate-fade-up"
-          style={{ animationDelay: "0.28s" }}>
-          เปิดประตูสู่อนาคตด้วย
-        </p>
-        <p className="font-display text-[#D9BC82] text-xl sm:text-2xl md:text-3xl font-semibold tracking-wide mb-6 animate-fade-up"
-          style={{ animationDelay: "0.32s" }}>
-          ศาสตร์ยามอัฏฐกาลชั้นสูง
-        </p>
+        <div className="mb-8 animate-fade-up" style={{ animationDelay: "0.28s" }}>
+          <p className="font-cormorant text-[#9AB3D9] text-xl sm:text-3xl md:text-4xl italic mb-1">
+            เปิดประตูสู่อนาคตด้วย
+          </p>
+          <p className="font-display text-[#D9BC82] text-lg sm:text-2xl md:text-3xl font-semibold tracking-wide">
+            ศาสตร์ยามอัฏฐกาลชั้นสูง
+          </p>
+        </div>
 
-        <p className="text-[#94A3B8] text-base md:text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto mb-10 animate-fade-up"
+        <p className="text-[#94A3B8] text-sm sm:text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto mb-10 sm:mb-12 animate-fade-up px-4"
           style={{ animationDelay: "0.38s" }}>
-          คำนวณยามมงคลและชะตาจรระดับนาทีด้วยสูตรโบราณดั้งเดิม<br />
+          คำนวณยามมงคลและชะตาจรระดับนาทีด้วยสูตรโบราณดั้งเดิม<br className="hidden sm:block" />
           พร้อมบทวิเคราะห์ดวงชะตาเชิงลึก ส่งรายงานวิเคราะห์ชีวิตสู่มือคุณ
         </p>
 
         {/* Hero CTAs */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up"
+        <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up px-6 sm:px-0"
           style={{ animationDelay: "0.44s" }}>
           <Link
             to="/register"
-            className="inline-flex items-center justify-center gap-2 px-10 py-4 rounded-full font-bold text-[#020617] shadow-lg shadow-[#C6A96B]/25 transition-all hover:scale-105 active:scale-95 text-base"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-10 py-4 rounded-full font-bold text-[#020617] shadow-lg shadow-[#C6A96B]/25 transition-all hover:scale-105 active:scale-95 text-base"
             style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}
           >
             เริ่มต้นใช้งาน ฟรี →
           </Link>
           <Link
             to="/login"
-            className="inline-flex items-center justify-center gap-2 px-10 py-4 rounded-full font-medium border border-[#C6A96B]/40 text-[#D9BC82] hover:bg-[#C6A96B]/10 hover:border-[#C6A96B]/70 transition-all text-base"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-10 py-4 rounded-full font-medium border border-[#C6A96B]/40 text-[#D9BC82] hover:bg-[#C6A96B]/10 hover:border-[#C6A96B]/70 transition-all text-base backdrop-blur-sm"
           >
             เข้าสู่ระบบ
           </Link>
         </div>
 
         {/* Trust line */}
-        <p className="text-[#94A3B8]/50 text-xs mt-5 animate-fade-up" style={{ animationDelay: "0.52s" }}>
+        <p className="text-[#94A3B8]/50 text-[10px] sm:text-xs mt-6 animate-fade-up" style={{ animationDelay: "0.52s" }}>
           ฟรีตลอดชีพ · ไม่ต้องใช้บัตรเครดิต · ยกเลิกได้ทุกเมื่อ
         </p>
 
         {/* Divider */}
-        <div className="flex items-center justify-center gap-3 mt-14 animate-fade-up" style={{ animationDelay: "0.56s" }}>
-          <div className="h-px w-24 bg-gradient-to-r from-transparent to-[#C6A96B]/30" />
+        <div className="flex items-center justify-center gap-3 mt-14 sm:mt-20 animate-fade-up" style={{ animationDelay: "0.56s" }}>
+          <div className="h-px w-16 sm:w-24 bg-gradient-to-r from-transparent to-[#C6A96B]/30" />
           <span className="text-[#C6A96B]/50 text-xs">✦</span>
-          <div className="h-px w-24 bg-gradient-to-l from-transparent to-[#C6A96B]/30" />
+          <div className="h-px w-16 sm:w-24 bg-gradient-to-l from-transparent to-[#C6A96B]/30" />
         </div>
       </section>
 
       {/* ── Features ── */}
-      <section id="features" className="relative z-10 max-w-6xl mx-auto px-4 py-20">
-        <div className="text-center mb-12">
+      <section id="features" className="relative z-10 max-w-6xl mx-auto px-4 py-16 sm:py-24">
+        <div className="text-center mb-10 sm:mb-16">
           <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">ฟีเจอร์หลัก</p>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] mb-3">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#F8F6F1] mb-3">
             ทุกศาสตร์ที่คุณต้องการ
           </h2>
-          <p className="text-[#94A3B8] text-base max-w-md mx-auto">
-            รวมทุกเครื่องมือโหราศาสตร์ไทยในที่เดียว ใช้งานได้ทันที
+          <p className="text-[#94A3B8] text-sm sm:text-base max-w-md mx-auto px-4">
+            รวมทุกเครื่องมือโหราศาสตร์ไทยในที่เดียว ใช้งานได้ทันทีบนมือถือทุกที่ทุกเวลา
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {FEATURES.map((f) => (
             <div key={f.title}
-              className="rounded-2xl border border-white/5 p-6 transition-all duration-300 hover:border-[#C6A96B]/20 group"
-              style={{ backdropFilter: "blur(20px)", background: "rgba(10,34,64,0.45)" }}>
-              <div className="text-[#C6A96B] text-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
+              className="rounded-2xl border border-white/5 p-6 sm:p-8 transition-all duration-300 hover:border-[#C6A96B]/20 group card-glass overflow-hidden"
+              style={{ background: "rgba(10,34,64,0.35)" }}>
+              <div className="text-[#C6A96B] text-3xl mb-5 group-hover:scale-110 transition-transform duration-300">
                 {f.icon}
               </div>
-              <h3 className="font-display text-[#F8F6F1] font-semibold text-lg mb-2">{f.title}</h3>
-              <p className="text-[#94A3B8] text-sm leading-relaxed">{f.desc}</p>
+              <h3 className="font-display text-[#F8F6F1] font-semibold text-lg sm:text-xl mb-3">{f.title}</h3>
+              <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed opacity-80">{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── How it works ── */}
-      <section id="how" className="relative z-10 max-w-4xl mx-auto px-4 py-20">
-        <div className="text-center mb-12">
+      <section id="how" className="relative z-10 max-w-5xl mx-auto px-4 py-16 sm:py-24">
+        <div className="text-center mb-12 sm:mb-20">
           <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">วิธีเริ่มต้น</p>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1]">
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#F8F6F1]">
             เริ่มใช้ใน 3 ขั้นตอน
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 sm:gap-12">
           {STEPS.map((step) => (
-            <div key={step.num} className="text-center">
-              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4 mx-auto"
-                style={{ background: "rgba(198,169,107,0.12)", border: "1px solid rgba(198,169,107,0.3)" }}>
-                <span className="font-display text-[#C6A96B] font-bold text-lg">{step.num}</span>
+            <div key={step.num} className="text-center group">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6 mx-auto transition-transform group-hover:scale-110 duration-300"
+                style={{ background: "rgba(198,169,107,0.12)", border: "1px solid rgba(198,169,107,0.3)", boxShadow: "0 0 20px rgba(198,169,107,0.05)" }}>
+                <span className="font-display text-[#C6A96B] font-bold text-xl">{step.num}</span>
               </div>
-              <h3 className="font-display text-[#F8F6F1] font-semibold text-lg mb-2">{step.title}</h3>
-              <p className="text-[#94A3B8] text-sm leading-relaxed">{step.desc}</p>
+              <h3 className="font-display text-[#F8F6F1] font-semibold text-xl mb-3">{step.title}</h3>
+              <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed opacity-70 px-6">{step.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="relative z-10 max-w-5xl mx-auto px-4 py-16">
-        <div className="text-center mb-10">
+      <section className="relative z-10 max-w-5xl mx-auto px-4 py-16 sm:py-24">
+        <div className="text-center mb-12">
           <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">เสียงจากผู้ใช้</p>
           <h2 className="font-display text-3xl font-bold text-[#F8F6F1]">ผู้ใช้พูดว่าอะไร</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
           {TESTIMONIALS.map((t) => (
             <div key={t.name}
-              className="rounded-2xl border border-white/5 p-6"
-              style={{ backdropFilter: "blur(20px)", background: "rgba(10,34,64,0.4)" }}>
-              <p className="text-[#C6A96B] text-lg mb-3">"</p>
-              <p className="text-[#D9CDB7] text-xs leading-relaxed mb-4">{t.text}</p>
-              <div className="border-t border-white/5 pt-3">
-                <p className="text-[#F8F6F1] text-xs font-semibold">{t.name}</p>
-                <p className="text-[#94A3B8] text-[10px]">{t.role}</p>
+              className="rounded-2xl border border-white/5 p-6 sm:p-8 card-glass"
+              style={{ background: "rgba(10,34,64,0.3)" }}>
+              <p className="text-[#C6A96B] text-2xl mb-4">"</p>
+              <p className="text-[#D9CDB7] text-sm leading-relaxed mb-6 italic opacity-90">{t.text}</p>
+              <div className="border-t border-white/10 pt-4 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#C6A96B]/10 flex items-center justify-center text-[#C6A96B] text-[10px] font-bold">
+                  {t.name.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-[#F8F6F1] text-xs font-semibold">{t.name}</p>
+                  <p className="text-[#94A3B8] text-[10px] tracking-wider uppercase">{t.role}</p>
+                </div>
               </div>
             </div>
           ))}
@@ -352,28 +393,31 @@ export default function Index() {
       </section>
 
       {/* ── Pricing teaser ── */}
-      <section className="relative z-10 max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="rounded-3xl border border-[#C6A96B]/20 p-10"
+      <section className="relative z-10 max-w-3xl mx-auto px-4 py-16 sm:py-32 text-center">
+        <div className="rounded-3xl border border-[#C6A96B]/20 p-8 sm:p-14 overflow-hidden relative"
           style={{ backdropFilter: "blur(24px)", background: "rgba(198,169,107,0.05)", boxShadow: "0 0 80px rgba(198,169,107,0.08)" }}>
-          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">แผนราคา</p>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] mb-3">
+          
+          <div className="absolute -top-24 -right-24 w-48 h-48 rounded-full blur-[100px] bg-[#C6A96B]/10 pointer-events-none" />
+          
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-4">แผนราคา</p>
+          <h2 className="font-display text-3xl sm:text-4xl font-bold text-[#F8F6F1] mb-4">
             เริ่มต้น ฿0 ตลอดชีพ
           </h2>
-          <p className="text-[#94A3B8] text-sm mb-6 max-w-md mx-auto">
-            ใช้ฟรีได้เลย ไม่มีวันหมดอายุ อัปเกรดเมื่อพร้อม
+          <p className="text-[#94A3B8] text-sm sm:text-base mb-10 max-w-md mx-auto opacity-80">
+            ใช้งานระบบปฏิบัติการนำทางชีวิตได้ฟรี ไม่มีวันหมดอายุ พร้อมสถิติแบบเรียลไทม์
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/register"
-              className="inline-flex items-center justify-center px-8 py-3.5 rounded-full font-bold text-[#020617] transition-all hover:scale-105 active:scale-95"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-10 py-4 rounded-full font-bold text-[#020617] transition-all hover:scale-105 active:scale-95 shadow-xl shadow-[#C6A96B]/20"
               style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}
             >
               เริ่มต้นใช้งาน ฟรี
             </Link>
             <Link
               to="/pricing"
-              className="inline-flex items-center justify-center px-8 py-3.5 rounded-full font-medium border border-white/15 text-[#94A3B8] hover:border-[#C6A96B]/40 hover:text-[#D9BC82] transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-10 py-4 rounded-full font-medium border border-white/10 text-[#94A3B8] hover:border-[#C6A96B]/40 hover:text-[#D9BC82] transition-all backdrop-blur-sm"
             >
               ดูแผนทั้งหมด →
             </Link>
@@ -382,19 +426,27 @@ export default function Index() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className="relative z-10 border-t border-white/5 mt-8 py-10 px-4">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <span className="text-[#C6A96B] text-sm">✦</span>
-            <span className="font-display text-[#F8F6F1] font-bold">PhopePhum</span>
-            <span className="text-[#94A3B8] text-xs ml-2">Living Wisdom OS</span>
+      <footer className="relative z-10 border-t border-white/5 mt-12 py-12 px-6">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-8">
+          <div className="flex flex-col items-center sm:items-start gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-[#C6A96B] text-sm">✦</span>
+              <span className="font-display text-[#F8F6F1] font-bold text-xl">PhopePhum</span>
+            </div>
+            <p className="text-[#94A3B8]/60 text-xs tracking-widest uppercase">Living Wisdom OS</p>
           </div>
-          <div className="flex items-center gap-6 text-xs text-[#94A3B8]">
+          
+          <div className="flex flex-wrap justify-center items-center gap-x-8 gap-y-4 text-xs text-[#94A3B8]">
             <Link to="/pricing" className="hover:text-[#C6A96B] transition-colors">แผนสมาชิก</Link>
             <Link to="/login" className="hover:text-[#C6A96B] transition-colors">เข้าสู่ระบบ</Link>
             <Link to="/register" className="hover:text-[#C6A96B] transition-colors">สมัครสมาชิก</Link>
+            <Link to="/terms" className="hover:text-[#C6A96B] transition-colors">เงื่อนไข</Link>
           </div>
-          <p className="text-[#94A3B8]/40 text-[10px]">© 2025 PhopePhum · ศาสตร์ไทยแท้ดั้งเดิม</p>
+          
+          <div className="text-center sm:text-right">
+            <p className="text-[#94A3B8]/40 text-[10px]">© 2025 PhopePhum · ศาสตร์ไทยแท้ดั้งเดิม</p>
+            <p className="text-[#C6A96B]/30 text-[9px] mt-1 tracking-tighter">Crafted with Astral Intent</p>
+          </div>
         </div>
       </footer>
 
