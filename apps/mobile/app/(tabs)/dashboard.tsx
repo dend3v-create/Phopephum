@@ -60,7 +60,7 @@ const BASE4_MEANINGS: Record<number, string> = {
 
 const RAHU_ADVICE: Record<string, string> = {
   "ทาษา": "ยามอุปสรรค พึงระวังความเหนื่อยยาก ห้ามเจรจาการเงินหรือเซ็นสัญญาสำคัญ",
-  "คหปติ": "ยามมงคล เหมาะสำหรับเริ่มต้นธุรกิจ ค้าขาย ซื้อขายสินทรัพย์ มีกำไรงดงาม",
+  "คหปติ": "ยามมมงคล เหมาะสำหรับเริ่มต้นธุรกิจ ค้าขาย ซื้อขายสินทรัพย์ มีกำไรงดงาม",
   "โจโร": "ยามอันตราย พึงระวังความขัดแย้ง การถูกเอารัดเอาเปรียบ หรือการสูญเสียเงินทอง",
   "เสนาปติ": "ยามแห่งชัยชนะ เหมาะสำหรับเจรจาการงาน เข้าพบผู้ใหญ่ หรือการแสดงภาวะผู้นำ",
   "กาลทัณฑ์": "ยามกาลกิณี หลีกเลี่ยงกิจกรรมเสี่ยงทุกชนิด มีเกณฑ์สูญเสียหรือเกิดความล่าช้า",
@@ -321,6 +321,28 @@ export default function DashboardScreen() {
                             const tBhop = isRow012 && horoscope.taksaTransit?.map?.[actualNum];
                             const mBhop = isRow012 && Object.entries(horoscope.mahaTransit?.map ?? {}).find(([_, v]) => v === actualNum)?.[0];
 
+                            // Indicator Styles (Match Web Refinement)
+                            const getTaksaStyle = (bhop: string) => {
+                              switch (bhop) {
+                                case "ศรี": return { label: "ศรี", bg: "bg-emerald-950/90", border: "border-emerald-400/50", text: "text-[#00FF00]" };
+                                case "เดช": return { label: "เดช", bg: "bg-white/20", border: "border-white/50", text: "text-white" };
+                                case "กาลกิณี": return { label: "กาลี", bg: "bg-rose-950/90", border: "border-rose-400/50", text: "text-[#FF0000]" };
+                                case "มนตรี": return { label: "มนตรี", bg: "bg-sky-950/90", border: "border-sky-400/50", text: "text-sky-400" };
+                                default: return { label: bhop, bg: "bg-slate-800/90", border: "border-slate-600/50", text: "text-slate-300" };
+                              }
+                            };
+
+                            const getMahaStyle = (bhop: string) => {
+                              switch (bhop) {
+                                case "โลกาวินาศ": return { label: "วินาศ", bg: "bg-amber-950/90", border: "border-[#FFD700]/50", text: "text-[#FFD700]" };
+                                case "ธงชัย": return { label: "ธงชัย", bg: "bg-yellow-950/90", border: "border-[#FFFF00]/50", text: "text-[#FFFF00]" };
+                                default: return { label: bhop, bg: "bg-violet-950/90", border: "border-violet-400/50", text: "text-violet-300" };
+                              }
+                            };
+
+                            const tStyle = tBhop ? getTaksaStyle(tBhop) : null;
+                            const mStyle = mBhop ? getMahaStyle(mBhop) : null;
+
                             return (
                               <TouchableOpacity
                                 key={cIdx}
@@ -348,38 +370,38 @@ export default function DashboardScreen() {
 
                                 {/* Lagna Overlays */}
                                 {showNatalLagna && isLagnaNatal && (
-                                  <View className="absolute -bottom-1.5 -left-1 bg-gold-500 w-4 h-4 rounded-full items-center justify-center border border-cosmic-950 z-10">
+                                  <View className="absolute -bottom-1.5 -left-1 bg-gold-500 w-4 h-4 rounded-full items-center justify-center border border-cosmic-950 z-10 shadow-sm">
                                     <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#020617' }}>ล</Text>
                                   </View>
                                 )}
                                 {showTransitLagna && isLagnaTransit && (
-                                  <View className="absolute -bottom-1.5 -right-1 bg-rose-500 w-4 h-4 rounded-full items-center justify-center border border-cosmic-950 z-10">
-                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#fff' }}>ลจร</Text>
+                                  <View className="absolute -bottom-1.5 -right-1 bg-rose-500 w-4 h-4 rounded-full items-center justify-center border border-cosmic-950 z-10 shadow-sm">
+                                    <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#fff' }}>ลอ</Text>
                                   </View>
                                 )}
 
-                                {/* Taksa & Maha Indicators */}
-                                {showTaksaJorn && tBhop && (
-                                  <View className="absolute -top-1 -right-2 bg-emerald-500/90 rounded px-1 border border-emerald-400 z-10">
-                                    <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#fff' }}>
-                                      {tBhop === 'ศรี' ? 'ศรี' : tBhop === 'กาลกิณี' ? 'กาลี' : tBhop}
+                                {/* Taksa & Maha Indicators - Refined Positioning */}
+                                {showTaksaJorn && tStyle && (
+                                  <View className={`absolute -top-1 -right-2 ${tStyle.bg} rounded-md px-1 py-0.5 border ${tStyle.border} z-20 shadow-lg`}>
+                                    <Text className={`text-[7px] font-bold font-thai ${tStyle.text}`}>
+                                      {tStyle.label}
                                     </Text>
                                   </View>
                                 )}
-                                {showMahaJorn && mBhop && (
-                                  <View className="absolute -top-1 -left-2 bg-violet-600/90 rounded px-1 border border-violet-400 z-10">
-                                    <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#fff' }}>
-                                      {mBhop === 'โลกาวินาศ' ? 'วินาศ' : mBhop}
+                                {showMahaJorn && mStyle && (
+                                  <View className={`absolute -top-1 -left-2 ${mStyle.bg} rounded-md px-1 py-0.5 border ${mStyle.border} z-20 shadow-lg`}>
+                                    <Text className={`text-[7px] font-bold font-thai ${mStyle.text}`}>
+                                      {mStyle.label}
                                     </Text>
                                   </View>
                                 )}
 
                                 {/* Dot Indicators for transits */}
                                 <View className="absolute -bottom-3 flex-row gap-0.5">
-                                  {showVayaJorn && isVayaJorn && <View className="w-1.5 h-1.5 rounded-full bg-gold-500" />}
-                                  {showYearlyJorn && isYearlyJorn && <View className="w-1.5 h-1.5 rounded-full bg-mystic-400" />}
-                                  {showMonthlyJorn && isMonthlyJorn && <View className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
-                                  {showDailyJorn && isDailyJorn && <View className="w-1.5 h-1.5 rounded-full bg-rose-500" />}
+                                  {showVayaJorn && isVayaJorn && <View className="w-1.5 h-1.5 rounded-full bg-gold-500 shadow-[0_0_3px_#C6A96B]" />}
+                                  {showYearlyJorn && isYearlyJorn && <View className="w-1.5 h-1.5 rounded-full bg-mystic-400 shadow-[0_0_3px_#4B6FAE]" />}
+                                  {showMonthlyJorn && isMonthlyJorn && <View className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_3px_#f59e0b]" />}
+                                  {showDailyJorn && isDailyJorn && <View className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_3px_#f43f5e]" />}
                                 </View>
                               </TouchableOpacity>
                             );
@@ -389,6 +411,8 @@ export default function DashboardScreen() {
                     </View>
                   </ScrollView>
                 </CosmicCard>
+
+                <DetailedGuidanceSection />
 
                 {/* Selected Cell details */}
                 {selectedCell && (
@@ -693,5 +717,62 @@ function InfoRow({ icon, label, value }: { icon: any; label: string; value: stri
       </View>
       <Text className="text-text-primary text-xs font-semibold max-w-[55%] text-right font-thai" numberOfLines={1}>{value}</Text>
     </View>
+  );
+}
+
+function GuidanceItem({ label, desc, color }: { label: string, desc: string, color?: string }) {
+  return (
+    <View className="mb-4">
+      <Text className={`text-[12px] font-bold font-thai ${color || 'text-gold-400'}`}>{label}:</Text>
+      <Text className="text-text-muted text-[10px] font-thai leading-4 mt-0.5">{desc}</Text>
+    </View>
+  );
+}
+
+function DetailedGuidanceSection() {
+  return (
+    <CosmicCard hasGlow={false} className="border-gold-500/10 p-5 mt-4">
+      <View className="border-b border-gold-500/20 pb-3 mb-5">
+        <Text className="text-gold-500 text-[12px] font-bold font-thai">📖 คำอธิบายสัญลักษณ์และเกณฑ์จร</Text>
+      </View>
+
+      <View className="gap-6">
+        <View>
+          <Text className="text-text-primary text-[11px] font-bold font-thai mb-3">✨ ปัจจัยภายนอก (ทักษาจรปีนี้):</Text>
+          <View className="flex-row flex-wrap">
+            <View style={{ width: '50%' }}><GuidanceItem label="บริวาร" desc="ลูกน้อง คนรัก ครอบครัว" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="อายุ" desc="สุขภาพ พลังชีวิต" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="เดช" desc="อำนาจ ชัยชนะ (ขาว)" color="#FFFFFF" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="ศรี" desc="สิริมงคล โชคลาภ (เขียว)" color="#00FF00" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="มูละ" desc="ฐานะ ทรัพย์สิน บ้าน" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="อุตสาหะ" desc="ความเพียร งานหนัก" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="มนตรี" desc="ผู้ใหญ่เมตตา อุปถัมภ์" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="กาลกิณี" desc="อุปสรรค ระวัง (แดง)" color="#FF0000" /></View>
+          </View>
+        </View>
+
+        <View>
+          <Text className="text-text-primary text-[11px] font-bold font-thai mb-3">🧠 ปัจจัยภายใน (มหาภูติจรปีนี้):</Text>
+          <View className="flex-row flex-wrap">
+            <View style={{ width: '50%' }}><GuidanceItem label="อธิบดี" desc="จิตใจเข้มแข็ง คุมงานใหญ่" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="ราชา" desc="รุ่งโรจน์ สง่างาม" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="ธงชัย" desc="ชัยชนะ ความสำเร็จ" color="#FFFF00" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="ขุมทรัพย์" desc="คลังปัญญา จังหวะทำเงิน" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="มรณะ" desc="จบเพื่อเริ่มสิ่งใหม่" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="อริ" desc="อดทนต่อแรงกดดัน" /></View>
+            <View style={{ width: '50%' }}><GuidanceItem label="วินาศ" desc="ความแปรปรวนภายใน" color="#FFD700" /></View>
+          </View>
+        </View>
+
+        <View className="pt-4 border-t border-white/5">
+           <Text className="text-text-primary text-[11px] font-bold font-thai mb-3">◈ สัญลักษณ์และดาวย้ำ:</Text>
+           <Text className="text-text-muted text-[10px] font-thai leading-5">
+             <Text className="text-gold-500 font-bold">1) ดาวย้ำ:</Text> บ่งบอกว่าเรื่องในภพจรนั้นถูกย้ำด้วยพลังของดาวใด{"\n"}
+             <Text className="text-gold-500 font-bold">2) วิธีดู:</Text> ตกฐานวัน-ย้ำฐาน 5 | ตกฐานเดือน-ย้ำฐาน 6 | ตกฐานปี-ย้ำฐาน 7{"\n"}
+             <Text className="text-gold-500 font-bold">3) ฐาน 4:</Text> ส่งกำลังมหาจักรครอบคลุมทั้งคอลัมน์
+           </Text>
+        </View>
+      </View>
+    </CosmicCard>
   );
 }

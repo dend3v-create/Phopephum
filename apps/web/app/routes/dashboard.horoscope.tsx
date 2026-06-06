@@ -953,6 +953,8 @@ export default function HoroscopePage() {
             showMahaJorn={showMahaJorn}
           />
 
+          <DetailedGuidancePanel />
+
           <LegendPanel />
           <Base4EffectPanel activeResult={activeResult} />
 
