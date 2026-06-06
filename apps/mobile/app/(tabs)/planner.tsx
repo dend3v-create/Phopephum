@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  View, Text, ScrollView, TouchableOpacity,
   SafeAreaView, ActivityIndicator, RefreshControl,
   TextInput, Alert, KeyboardAvoidingView, Platform,
 } from 'react-native';
@@ -118,75 +118,75 @@ export default function PlannerScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#C9A96E" style={{ marginTop: 80 }} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#020617' }} className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#C6A96B" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#020617' }} className="flex-1">
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView
-          contentContainerStyle={styles.scrollContent}
+          contentContainerStyle={{ padding: 20, paddingBottom: 48 }}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C9A96E" />
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C6A96B" />
           }
           keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <View style={styles.headerRow}>
+          <View className="flex-row justify-between items-start mb-7">
             <View>
-              <Text style={styles.headerTitle}>วางแผนชีวิต</Text>
-              <Text style={styles.headerDate}>{formatThaiDate(today)}</Text>
+              <Text className="text-[#F8F6F1] text-[22px] font-bold font-thai">วางแผนชีวิต</Text>
+              <Text className="text-[#8A8070] text-xs mt-0.5 font-thai">{formatThaiDate(today)}</Text>
             </View>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>{plan ? '✓ มีแผนแล้ว' : '+ ใหม่'}</Text>
+            <View className="bg-[#C6A96B]/15 border border-[#C6A96B]/30 px-3 py-1 rounded-full">
+              <Text className="text-[#C6A96B] text-[11px] font-bold font-thai">{plan ? '✓ มีแผนแล้ว' : '+ ใหม่'}</Text>
             </View>
           </View>
 
           {/* Energy Level */}
-          <Text style={styles.fieldLabel}>พลังงานวันนี้</Text>
-          <View style={styles.energyRow}>
+          <Text className="text-[#8A8070] text-[11px] uppercase tracking-widest mb-2 mt-5 font-thai">พลังงานวันนี้</Text>
+          <View className="flex-row gap-2.5 mb-1.5">
             {[1, 2, 3, 4, 5].map((level) => (
               <TouchableOpacity
                 key={level}
-                style={[styles.energyButton, energyLevel === level && styles.energyButtonActive]}
+                className={`flex-1 h-11 rounded-xl bg-[#0a2240]/55 border items-center justify-center ${energyLevel === level ? 'bg-[#C6A96B]/15 border-[#C6A96B]' : 'border-[#C6A96B]/10'}`}
                 onPress={() => setEnergyLevel(level)}
               >
-                <Text style={[styles.energyNum, energyLevel === level && styles.energyNumActive]}>
+                <Text className={`text-base font-bold font-thai ${energyLevel === level ? 'text-[#C6A96B]' : 'text-[#8A8070]'}`}>
                   {level}
                 </Text>
               </TouchableOpacity>
             ))}
           </View>
-          <Text style={styles.energyLabel}>{ENERGY_LABELS[energyLevel]}</Text>
+          <Text className="text-[#C6A96B] text-xs text-center mt-1 font-thai">{ENERGY_LABELS[energyLevel]}</Text>
 
           {/* Intention */}
-          <Text style={styles.fieldLabel}>☽ เจตนาวันนี้</Text>
+          <Text className="text-[#8A8070] text-[11px] uppercase tracking-widest mb-2 mt-5 font-thai">☽ เจตนาวันนี้</Text>
           <TextInput
-            style={styles.textInput}
+            className="bg-[#0a2240]/45 border border-[#C6A96B]/15 rounded-2xl p-4 text-[#F8F6F1] text-sm min-h-[80px] font-thai"
             value={intention}
             onChangeText={setIntention}
             placeholder="วันนี้ฉันตั้งใจจะ..."
-            placeholderTextColor="#4A3F32"
+            placeholderTextColor="#8A8070"
             multiline
             numberOfLines={3}
             textAlignVertical="top"
           />
 
           {/* Priorities */}
-          <Text style={styles.fieldLabel}>✦ สิ่งสำคัญ 3 อย่าง</Text>
+          <Text className="text-[#8A8070] text-[11px] uppercase tracking-widest mb-2 mt-5 font-thai">✦ สิ่งสำคัญ 3 อย่าง</Text>
           {[0, 1, 2].map((i) => (
-            <View key={i} style={styles.priorityRow}>
-              <View style={styles.priorityNumber}>
-                <Text style={styles.priorityNumText}>{i + 1}</Text>
+            <View key={i} className="flex-row items-center gap-2.5 mb-2">
+              <View className="w-8 h-8 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/30 items-center justify-center shrink-0">
+                <Text className="text-[#C6A96B] text-[13px] font-bold font-thai">{i + 1}</Text>
               </View>
               <TextInput
-                style={styles.priorityInput}
+                className="flex-1 bg-[#0a2240]/45 border border-[#C6A96B]/15 rounded-xl px-3.5 py-3 text-[#F8F6F1] text-sm font-thai"
                 value={priorities[i]}
                 onChangeText={(text) => {
                   const next = [...priorities];
@@ -194,26 +194,26 @@ export default function PlannerScreen() {
                   setPriorities(next);
                 }}
                 placeholder={`สิ่งสำคัญที่ ${i + 1}`}
-                placeholderTextColor="#4A3F32"
+                placeholderTextColor="#8A8070"
               />
             </View>
           ))}
 
           {/* Reflection */}
-          <Text style={styles.fieldLabel}>◈ ทบทวนตนเอง</Text>
+          <Text className="text-[#8A8070] text-[11px] uppercase tracking-widest mb-2 mt-5 font-thai">◈ ทบทวนตนเอง</Text>
           <TextInput
-            style={[styles.textInput, { minHeight: 100 }]}
+            className="bg-[#0a2240]/45 border border-[#C6A96B]/15 rounded-2xl p-4 text-[#F8F6F1] text-sm min-h-[100px] font-thai"
             value={reflection}
             onChangeText={setReflection}
             placeholder="วันนี้ฉันได้เรียนรู้อะไร..."
-            placeholderTextColor="#4A3F32"
+            placeholderTextColor="#8A8070"
             multiline
             textAlignVertical="top"
           />
 
           {/* Save Button */}
           <TouchableOpacity
-            style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+            className={`mt-8 bg-[#C6A96B] rounded-full flex-row items-center justify-center gap-2 py-4 ${saving ? 'opacity-60' : ''}`}
             onPress={handleSave}
             disabled={saving}
             activeOpacity={0.8}
@@ -223,7 +223,7 @@ export default function PlannerScreen() {
             ) : (
               <>
                 <Ionicons name="checkmark-circle" size={20} color="#020617" />
-                <Text style={styles.saveButtonText}>บันทึกแผนวันนี้</Text>
+                <Text className="text-[#020617] text-base font-bold font-thai">บันทึกแผนวันนี้</Text>
               </>
             )}
           </TouchableOpacity>
@@ -234,105 +234,4 @@ export default function PlannerScreen() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0806' },
-  scrollContent: { padding: 20, paddingBottom: 48 },
-
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 28,
-  },
-  headerTitle: { color: '#F8F6F1', fontSize: 22, fontWeight: 'bold' },
-  headerDate: { color: '#8A8070', fontSize: 12, marginTop: 2 },
-  statusBadge: {
-    backgroundColor: 'rgba(201,169,110,0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(201,169,110,0.3)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 20,
-  },
-  statusText: { color: '#C9A96E', fontSize: 11, fontWeight: 'bold' },
-
-  fieldLabel: {
-    color: '#8A8070',
-    fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 8,
-    marginTop: 20,
-  },
-
-  energyRow: { flexDirection: 'row', gap: 10, marginBottom: 6 },
-  energyButton: {
-    flex: 1,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#15120F',
-    borderWidth: 1,
-    borderColor: '#2A2018',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  energyButtonActive: {
-    backgroundColor: 'rgba(201,169,110,0.15)',
-    borderColor: '#C9A96E',
-  },
-  energyNum: { color: '#8A8070', fontSize: 16, fontWeight: 'bold' },
-  energyNumActive: { color: '#C9A96E' },
-  energyLabel: { color: '#C9A96E', fontSize: 12, textAlign: 'center', marginTop: 4 },
-
-  textInput: {
-    backgroundColor: '#15120F',
-    borderWidth: 1,
-    borderColor: '#2A2018',
-    borderRadius: 16,
-    padding: 16,
-    color: '#F8F6F1',
-    fontSize: 14,
-    lineHeight: 22,
-    minHeight: 80,
-  },
-
-  priorityRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
-  priorityNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(201,169,110,0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(201,169,110,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
-  },
-  priorityNumText: { color: '#C9A96E', fontSize: 13, fontWeight: 'bold' },
-  priorityInput: {
-    flex: 1,
-    backgroundColor: '#15120F',
-    borderWidth: 1,
-    borderColor: '#2A2018',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: '#F8F6F1',
-    fontSize: 14,
-  },
-
-  saveButton: {
-    marginTop: 32,
-    backgroundColor: '#C9A96E',
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 16,
-  },
-  saveButtonDisabled: { opacity: 0.6 },
-  saveButtonText: { color: '#020617', fontSize: 16, fontWeight: 'bold' },
-});

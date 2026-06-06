@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  View, Text, ScrollView, TouchableOpacity,
   SafeAreaView, ActivityIndicator, RefreshControl, Alert,
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { usePreventScreenCapture } from '../../hooks/useScreenCapture';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,6 +31,7 @@ const REPORT_TYPES: { key: string; label: string; icon: string; desc: string }[]
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function ReportScreen() {
+  usePreventScreenCapture();
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -105,38 +108,45 @@ export default function ReportScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#C9A96E" style={{ marginTop: 80 }} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: '#020617' }} className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#C9A96E" />
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#020617' }} className="flex-1">
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={{ padding: 20, paddingBottom: 40 }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C9A96E" />
         }
       >
         {/* Section: Generate */}
-        <Text style={styles.sectionTitle}>✦ สร้างรายงาน AI</Text>
-        <View style={styles.generateGrid}>
+        <Text className="text-text text-[15px] font-bold mb-3 font-thai">✦ สร้างรายงาน AI</Text>
+        <View className="flex-row flex-wrap justify-between gap-y-3 mb-7">
           {REPORT_TYPES.map((rt) => (
             <TouchableOpacity
               key={rt.key}
-              style={styles.generateCard}
+              className="w-[48%] rounded-2xl border border-[#C6A96B]/30 overflow-hidden shadow-lg shadow-black/50"
               onPress={() => handleGenerate(rt.key)}
               disabled={!!generating}
               activeOpacity={0.7}
             >
-              {generating === rt.key ? (
-                <ActivityIndicator size="small" color="#C9A96E" />
-              ) : (
-                <Text style={styles.generateIcon}>{rt.icon}</Text>
-              )}
-              <Text style={styles.generateLabel}>{rt.label}</Text>
-              <Text style={styles.generateDesc} numberOfLines={2}>{rt.desc}</Text>
+              <LinearGradient
+                colors={['rgba(10,34,64,0.8)', 'rgba(2,6,23,0.95)']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="p-4 items-start gap-1.5 h-full"
+              >
+                {generating === rt.key ? (
+                  <ActivityIndicator size="small" color="#C6A96B" />
+                ) : (
+                  <Text className="text-[24px] text-[#C6A96B] mb-1">{rt.icon}</Text>
+                )}
+                <Text className="text-[#F8F6F1] text-[13px] font-bold font-thai">{rt.label}</Text>
+                <Text className="text-[#8A8070] text-[11px] leading-4 font-thai" numberOfLines={2}>{rt.desc}</Text>
+              </LinearGradient>
             </TouchableOpacity>
           ))}
         </View>
@@ -144,39 +154,47 @@ export default function ReportScreen() {
         {/* Section: History */}
         {reports.length > 0 && (
           <>
-            <Text style={[styles.sectionTitle, { marginTop: 8 }]}>◈ ประวัติรายงาน</Text>
-            <View style={styles.historyList}>
+            <Text className="text-text text-[15px] font-bold mb-3 mt-2 font-thai">◈ ประวัติรายงาน</Text>
+            <View className="gap-2.5">
               {reports.map((report) => {
                 const rt = REPORT_TYPES.find((r) => r.key === report.report_type);
                 const isExpanded = expandedId === report.id;
                 return (
                   <TouchableOpacity
                     key={report.id}
-                    style={styles.reportCard}
+                    className="rounded-2xl border border-[#C6A96B]/20 overflow-hidden shadow-md shadow-black/40"
                     onPress={() => setExpandedId(isExpanded ? null : report.id)}
                     activeOpacity={0.8}
                   >
-                    <View style={styles.reportCardHeader}>
-                      <View style={styles.reportCardLeft}>
-                        <Text style={styles.reportCardIcon}>{rt?.icon ?? '◈'}</Text>
-                        <View>
-                          <Text style={styles.reportCardLabel}>{rt?.label ?? report.report_type}</Text>
-                          <Text style={styles.reportCardDate}>
-                            {new Date(report.created_at).toLocaleDateString('th-TH', {
-                              day: 'numeric', month: 'long', year: 'numeric',
-                            })}
-                          </Text>
+                    <LinearGradient
+                      colors={isExpanded ? ['rgba(10,34,64,0.9)', 'rgba(2,6,23,1)'] : ['rgba(2,6,23,0.7)', 'rgba(2,6,23,0.9)']}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 0, y: 1 }}
+                    >
+                      <View className="flex-row justify-between items-center p-4">
+                        <View className="flex-row items-center gap-3">
+                          <Text className="text-[20px] text-[#C6A96B] w-7 text-center">{rt?.icon ?? '◈'}</Text>
+                          <View>
+                            <Text className="text-[#F8F6F1] text-[14px] font-bold mb-0.5 font-thai">{rt?.label ?? report.report_type}</Text>
+                            <Text className="text-[#8A8070] text-[11px] font-thai">
+                              {new Date(report.created_at).toLocaleDateString('th-TH', {
+                                day: 'numeric', month: 'long', year: 'numeric',
+                              })}
+                            </Text>
+                          </View>
                         </View>
+                        <Ionicons
+                          name={isExpanded ? 'chevron-up' : 'chevron-down'}
+                          size={18}
+                          color="#C6A96B"
+                        />
                       </View>
-                      <Ionicons
-                        name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                        size={18}
-                        color="#8A8070"
-                      />
-                    </View>
-                    {isExpanded && report.content && (
-                      <Text style={styles.reportContent}>{report.content}</Text>
-                    )}
+                      {isExpanded && report.content && (
+                        <View className="px-4 pb-4 border-t border-[#C6A96B]/10 pt-3 mt-1">
+                          <Text className="text-[#F8F6F1] text-[13px] leading-[24px] font-thai">{report.content}</Text>
+                        </View>
+                      )}
+                    </LinearGradient>
                   </TouchableOpacity>
                 );
               })}
@@ -185,9 +203,9 @@ export default function ReportScreen() {
         )}
 
         {reports.length === 0 && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>◐</Text>
-            <Text style={styles.emptyText}>ยังไม่มีรายงาน{'\n'}กดสร้างรายงานด้านบน</Text>
+          <View className="items-center py-12">
+            <Text className="text-[40px] text-[#2A2018] mb-3">◐</Text>
+            <Text className="text-muted text-[13px] text-center leading-[22px] font-thai">ยังไม่มีรายงาน{'\n'}กดสร้างรายงานด้านบน</Text>
           </View>
         )}
       </ScrollView>
@@ -195,65 +213,3 @@ export default function ReportScreen() {
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0806' },
-  scrollContent: { padding: 20, paddingBottom: 40 },
-  sectionTitle: {
-    color: '#F8F6F1',
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  generateGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 28,
-  },
-  generateCard: {
-    width: '47%',
-    backgroundColor: '#15120F',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#2A2018',
-    padding: 16,
-    alignItems: 'flex-start',
-    gap: 6,
-  },
-  generateIcon: { fontSize: 22, color: '#C9A96E' },
-  generateLabel: { color: '#F8F6F1', fontSize: 13, fontWeight: 'bold' },
-  generateDesc: { color: '#8A8070', fontSize: 11, lineHeight: 16 },
-  historyList: { gap: 10 },
-  reportCard: {
-    backgroundColor: '#15120F',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#2A2018',
-    overflow: 'hidden',
-  },
-  reportCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-  },
-  reportCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  reportCardIcon: { fontSize: 20, color: '#C9A96E', width: 28 },
-  reportCardLabel: { color: '#F8F6F1', fontSize: 13, fontWeight: '600', marginBottom: 2 },
-  reportCardDate: { color: '#8A8070', fontSize: 11 },
-  reportContent: {
-    color: '#D9CDB7',
-    fontSize: 13,
-    lineHeight: 22,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
-  },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 48,
-  },
-  emptyIcon: { fontSize: 40, color: '#2A2018', marginBottom: 12 },
-  emptyText: { color: '#8A8070', fontSize: 13, textAlign: 'center', lineHeight: 22 },
-});

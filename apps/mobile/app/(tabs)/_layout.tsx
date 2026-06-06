@@ -1,18 +1,43 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { StyleSheet, View } from "react-native";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: "#15120F",
-          borderTopColor: "#2A2018",
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          right: 0,
+          elevation: 0,
+          backgroundColor: "rgba(2, 6, 23, 0.75)", // Cosmic Blue with transparency
+          borderTopColor: "rgba(198, 169, 107, 0.2)", // Gold with transparency
+          height: 60,
+          paddingBottom: 8,
         },
-        tabBarActiveTintColor: "#C9A96E",
-        tabBarInactiveTintColor: "#8A8070",
-        headerStyle: { backgroundColor: "#0A0806" },
-        headerTintColor: "#C9A96E",
+        tabBarBackground: () => (
+          <BlurView intensity={30} tint="dark" style={StyleSheet.absoluteFill} />
+        ),
+        tabBarActiveTintColor: "#C6A96B", // Gold
+        tabBarInactiveTintColor: "#4B6FAE", // Mystic
+        tabBarLabelStyle: {
+          fontFamily: "IBMPlexSansThai_500Medium",
+          fontSize: 10,
+        },
+        headerStyle: { 
+          backgroundColor: "rgba(2, 6, 23, 0.8)", 
+        },
+        headerBackground: () => (
+          <BlurView intensity={20} tint="dark" style={StyleSheet.absoluteFill} />
+        ),
+        headerTintColor: "#C6A96B",
+        headerTitleStyle: {
+          fontFamily: "Cinzel_700Bold",
+          fontSize: 20,
+        },
       }}
     >
       <Tabs.Screen

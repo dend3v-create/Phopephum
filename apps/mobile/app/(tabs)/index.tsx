@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -25,36 +25,37 @@ export default function HomeScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#020617' }} className="flex-1">
+      <ScrollView contentContainerStyle={{ padding: 24 }}>
         {/* Welcome Header */}
-        <View style={styles.header}>
+        <View className="flex-row justify-between items-center mb-8">
           <View>
-            <Text style={styles.welcomeText}>สวัสดี,</Text>
-            <Text style={styles.nameText}>{profile?.display_name || 'ผู้ใช้งาน'}</Text>
+            <Text className="text-[#8A8070] text-sm font-thai">สวัสดี,</Text>
+            <Text className="text-[#F8F6F1] text-2xl font-bold font-thai">{profile?.display_name || 'ผู้ใช้งาน'}</Text>
           </View>
-          <View style={styles.badgeContainer}>
-             <Text style={styles.roleText}>
+          <View className="bg-[#C6A96B]/15 px-3 py-1.5 rounded-full border border-[#C6A96B]/30">
+             <Text className="text-[#C6A96B] text-[10px] font-bold uppercase font-thai">
                {profile?.role === 'admin' ? '⌘ Admin' : 'Member'}
              </Text>
           </View>
         </View>
 
         {/* Plan Card */}
-        <View style={styles.planCard}>
-           <Text style={styles.planLabel}>แพ็กเกจปัจจุบัน</Text>
-           <Text style={styles.planValue}>{profile?.plan?.toUpperCase() || 'FREE'}</Text>
-           <View style={styles.divider} />
-           <Text style={styles.statusText}>สถานะ: {profile?.membership_status || 'Active'}</Text>
+        <View className="bg-[#0a2240]/60 border border-[#C6A96B]/30 rounded-[20px] p-6 mb-8 relative overflow-hidden">
+           <View className="absolute top-0 right-0 w-32 h-32 bg-[#C6A96B]/5 rounded-full blur-3xl -z-10" />
+           <Text className="text-[#8A8070] text-xs uppercase tracking-widest font-thai font-semibold">แพ็กเกจปัจจุบัน</Text>
+           <Text className="text-[#C6A96B] text-3xl font-bold my-2 font-cinzel">{profile?.plan?.toUpperCase() || 'FREE'}</Text>
+           <View className="h-[1px] bg-[#C6A96B]/15 my-3" />
+           <Text className="text-success text-xs font-thai font-medium">● สถานะ: {profile?.membership_status || 'Active'}</Text>
         </View>
 
         {/* Quick Actions */}
-        <Text style={styles.sectionTitle}>เมนูแนะนำ</Text>
-        <View style={styles.grid}>
+        <Text className="text-[#F8F6F1] text-lg font-bold mb-4 font-thai">เมนูแนะนำ</Text>
+        <View className="flex-row flex-wrap justify-between gap-y-4">
           <ActionCard 
             icon="planet" 
             title="ดวงชะตา" 
-            color="#38BDF8" 
+            color="#C6A96B" 
             onPress={() => router.push('/(tabs)/dashboard')} 
           />
           <ActionCard 
@@ -72,7 +73,7 @@ export default function HomeScreen() {
           <ActionCard 
             icon="help-circle" 
             title="วิธีการใช้งาน" 
-            color="#C9A96E" 
+            color="#4B6FAE" 
             onPress={() => router.push('/how-to-use')} 
           />
           <ActionCard 
@@ -90,112 +91,16 @@ export default function HomeScreen() {
 
 function ActionCard({ icon, title, color, onPress }: { icon: any, title: string, color: string, onPress: () => void }) {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
-      <View style={[styles.iconBox, { backgroundColor: color + '20' }]}>
+    <TouchableOpacity 
+      className="bg-[#0a2240]/55 w-[48%] p-5 rounded-2xl border border-[#C6A96B]/15 items-center shadow-lg shadow-black/45" 
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <View className="w-12 h-12 rounded-xl justify-center items-center mb-3" style={{ backgroundColor: color + '18' }}>
         <Ionicons name={icon} size={24} color={color} />
       </View>
-      <Text style={styles.cardTitle}>{title}</Text>
+      <Text className="text-[#F8F6F1] text-sm font-semibold font-thai">{title}</Text>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0A0806',
-  },
-  scrollContent: {
-    padding: 24,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 32,
-  },
-  welcomeText: {
-    color: '#8A8070',
-    fontSize: 14,
-  },
-  nameText: {
-    color: '#F8F6F1',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
-  badgeContainer: {
-    backgroundColor: 'rgba(56,189,248,0.15)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(56,189,248,0.3)',
-  },
-  roleText: {
-    color: '#38BDF8',
-    fontSize: 10,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  planCard: {
-    backgroundColor: '#15120F',
-    borderWidth: 1,
-    borderColor: '#D9BC8230',
-    borderRadius: 20,
-    padding: 24,
-    marginBottom: 32,
-  },
-  planLabel: {
-    color: '#8A8070',
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  planValue: {
-    color: '#D9BC82',
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginVertical: 8,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#2A2018',
-    marginVertical: 12,
-  },
-  statusText: {
-    color: '#34D399',
-    fontSize: 12,
-  },
-  sectionTitle: {
-    color: '#F8F6F1',
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 16,
-  },
-  card: {
-    backgroundColor: '#15120F',
-    width: '47%',
-    padding: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#2A2018',
-    alignItems: 'center',
-  },
-  iconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  cardTitle: {
-    color: '#F8F6F1',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-});

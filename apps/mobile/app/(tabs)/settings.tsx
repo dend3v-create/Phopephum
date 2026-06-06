@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Alert, SafeAreaView, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, Alert, SafeAreaView, ScrollView } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -36,54 +36,54 @@ export default function SettingsScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#020617' }} className="flex-1">
+      <ScrollView contentContainerStyle={{ padding: 24 }}>
         
         {/* Profile Section */}
-        <View style={styles.profileSection}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarText}>
+        <View className="items-center mb-10">
+          <View className="w-20 h-20 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B] justify-center items-center mb-4">
+            <Text className="text-[#C6A96B] text-[32px] font-bold font-thai">
               {(profile?.display_name || 'U').charAt(0).toUpperCase()}
             </Text>
           </View>
-          <Text style={styles.nameText}>{profile?.display_name || 'ผู้ใช้งาน'}</Text>
-          <Text style={styles.emailText}>{profile?.email}</Text>
+          <Text className="text-[#F8F6F1] text-[22px] font-bold font-thai">{profile?.display_name || 'ผู้ใช้งาน'}</Text>
+          <Text className="text-[#8A8070] text-sm mt-1 font-thai">{profile?.email}</Text>
         </View>
 
         {/* Main Menu Actions */}
-        <Text style={styles.groupTitle}>เมนูหลัก</Text>
-        <View style={styles.menuGroup}>
-          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/how-to-use')}>
-            <View style={styles.menuLeft}>
-              <Ionicons name="help-circle-outline" size={22} color="#C9A96E" />
-              <Text style={styles.menuText}>วิธีการใช้งาน</Text>
+        <Text className="text-[#8A8070] text-xs uppercase tracking-widest mb-3 ml-1 font-thai">เมนูหลัก</Text>
+        <View className="bg-[#0a2240]/60 rounded-[20px] border border-[#C6A96B]/15 overflow-hidden mb-6">
+          <TouchableOpacity className="flex-row justify-between items-center p-4 border-b border-[#C6A96B]/10" onPress={() => router.push('/how-to-use')}>
+            <View className="flex-row items-center gap-3">
+              <Ionicons name="help-circle-outline" size={22} color="#C6A96B" />
+              <Text className="text-[#F8F6F1] text-[15px] font-medium font-thai">วิธีการใช้งาน</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#8A8070" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/edit-profile')}>
-            <View style={styles.menuLeft}>
-              <Ionicons name="person-circle-outline" size={22} color="#C9A96E" />
-              <Text style={styles.menuText}>ตั้งค่าโปรไฟล์</Text>
+          <TouchableOpacity className="flex-row justify-between items-center p-4" onPress={() => router.push('/edit-profile')}>
+            <View className="flex-row items-center gap-3">
+              <Ionicons name="person-circle-outline" size={22} color="#C6A96B" />
+              <Text className="text-[#F8F6F1] text-[15px] font-medium font-thai">ตั้งค่าโปรไฟล์</Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color="#8A8070" />
           </TouchableOpacity>
         </View>
 
         {/* Info Section */}
-        <Text style={styles.groupTitle}>ข้อมูลพื้นฐาน</Text>
-        <View style={styles.menuGroup}>
+        <Text className="text-[#8A8070] text-xs uppercase tracking-widest mb-3 ml-1 font-thai">ข้อมูลพื้นฐาน</Text>
+        <View className="bg-[#0a2240]/60 rounded-[20px] border border-[#C6A96B]/15 overflow-hidden mb-6">
            <InfoRow label="วันเกิด" value={profile?.birth_date || '-'} icon="calendar-outline" />
            <InfoRow label="เวลาเกิด" value={profile?.birth_time || '-'} icon="time-outline" />
            <InfoRow label="สถานที่เกิด" value={profile?.birth_place || '-'} icon="location-outline" />
-           <InfoRow label="เพศ" value={profile?.gender || '-'} icon="person-outline" />
+           <InfoRow label="เพศ" value={profile?.gender || '-'} icon="person-outline" isLast={true} />
         </View>
 
         {/* Action Buttons */}
-        <View style={styles.actionGroup}>
-          <TouchableOpacity style={[styles.logoutButton]} onPress={handleSignOut}>
+        <View className="mt-2">
+          <TouchableOpacity className="flex-row items-center justify-center p-4 bg-danger/5 rounded-2xl border border-danger/20 gap-3" onPress={handleSignOut}>
             <Ionicons name="log-out-outline" size={22} color="#F87171" />
-            <Text style={styles.logoutText}>ออกจากระบบ</Text>
+            <Text className="text-danger text-base font-bold font-thai">ออกจากระบบ</Text>
           </TouchableOpacity>
         </View>
 
@@ -92,129 +92,15 @@ export default function SettingsScreen() {
   );
 }
 
-function InfoRow({ label, value, icon }: { label: string, value: string, icon: any }) {
+function InfoRow({ label, value, icon, isLast }: { label: string, value: string, icon: any, isLast?: boolean }) {
   return (
-    <View style={styles.infoRow}>
-      <View style={styles.infoLeft}>
+    <View className={`flex-row justify-between items-center p-4 ${isLast ? '' : 'border-b border-[#C6A96B]/10'}`}>
+      <View className="flex-row items-center gap-3">
         <Ionicons name={icon} size={20} color="#8A8070" />
-        <Text style={styles.infoLabel}>{label}</Text>
+        <Text className="text-[#8A8070] text-sm font-thai">{label}</Text>
       </View>
-      <Text style={styles.infoValue}>{value}</Text>
+      <Text className="text-[#F8F6F1] text-sm font-medium font-thai">{value}</Text>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#0A0806',
-  },
-  scrollContent: {
-    padding: 24,
-  },
-  profileSection: {
-    alignItems: 'center',
-    marginBottom: 40,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: 'rgba(201,169,110,0.15)',
-    borderWidth: 1,
-    borderColor: '#C9A96E',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
-  },
-  avatarText: {
-    color: '#C9A96E',
-    fontSize: 32,
-    fontWeight: 'bold',
-  },
-  nameText: {
-    color: '#F8F6F1',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  emailText: {
-    color: '#8A8070',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  groupTitle: {
-    color: '#8A8070',
-    fontSize: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 12,
-    marginLeft: 4,
-  },
-  menuGroup: {
-    backgroundColor: '#15120F',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: '#2A2018',
-    overflow: 'hidden',
-    marginBottom: 24,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2A2018',
-  },
-  menuLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  menuText: {
-    color: '#F8F6F1',
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2A2018',
-  },
-  infoLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  infoLabel: {
-    color: '#8A8070',
-    fontSize: 14,
-  },
-  infoValue: {
-    color: '#F8F6F1',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  actionGroup: {
-    marginTop: 8,
-  },
-  logoutButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 18,
-    backgroundColor: 'rgba(248,113,113,0.05)',
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(248,113,113,0.2)',
-    gap: 12,
-    justifyContent: 'center',
-  },
-  logoutText: {
-    color: '#F87171',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});

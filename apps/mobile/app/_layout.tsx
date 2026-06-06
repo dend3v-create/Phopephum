@@ -11,6 +11,7 @@
  * - Global Copy Protection (ทุก screen)
  */
 
+import "../global.css";
 import { Stack, useRouter, useSegments } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
@@ -19,9 +20,27 @@ import { Session } from "@supabase/supabase-js";
 import { View, ActivityIndicator, Text, Animated, StyleSheet, Platform } from "react-native";
 import { useRef } from "react";
 import { usePreventScreenCapture, useIsScreenCaptured } from "../hooks/useScreenCapture";
+import { DarkTheme, ThemeProvider } from "@react-navigation/native";
+
+const PhopephumTheme = {
+  ...DarkTheme,
+  colors: {
+    ...DarkTheme.colors,
+    primary: '#C6A96B',
+    background: '#020617',
+    card: '#071427',
+    text: '#F8F6F1',
+    border: 'rgba(198, 169, 107, 0.2)',
+  },
+};
+import { useFonts, Cinzel_400Regular, Cinzel_700Bold } from "@expo-google-fonts/cinzel";
+import { CormorantGaramond_400Regular, CormorantGaramond_600SemiBold, CormorantGaramond_700Bold } from "@expo-google-fonts/cormorant-garamond";
+import { IBMPlexSansThai_400Regular, IBMPlexSansThai_500Medium, IBMPlexSansThai_600SemiBold, IBMPlexSansThai_700Bold } from "@expo-google-fonts/ibm-plex-sans-thai";
+import * as SplashScreen from 'expo-splash-screen';
+
+// SplashScreen.preventAutoHideAsync();
 
 // ========== GlobalCaptureWarning ==========
-// แสดง overlay เตือน บน iOS เมื่อตรวจพบ screenshot
 function GlobalCaptureWarning() {
   const isCaptured = useIsScreenCaptured();
   const opacity = useRef(new Animated.Value(0)).current;
@@ -39,17 +58,18 @@ function GlobalCaptureWarning() {
 
   return (
     <Animated.View
-      style={[styles.captureOverlay, { opacity }]}
+      className="absolute inset-0 bg-background/95 justify-center items-center z-[99999]"
+      style={{ opacity }}
       pointerEvents={isCaptured ? "auto" : "none"}
     >
-      <View style={styles.captureCard}>
-        <Text style={styles.captureIcon}>🛡️</Text>
-        <Text style={styles.captureTitle}>เนื้อหาได้รับการป้องกัน</Text>
-        <Text style={styles.captureText}>
+      <View className="items-center px-8 py-10 border border-primary rounded-2xl bg-[#0A2240]/85 max-w-[320px] gap-3">
+        <Text className="text-5xl mb-1">🛡️</Text>
+        <Text className="text-xl font-bold text-primary text-center tracking-wide">เนื้อหาได้รับการป้องกัน</Text>
+        <Text className="text-sm text-text text-center leading-relaxed">
           ไม่สามารถบันทึกหน้าจอหรือแคปภาพได้
         </Text>
-        <View style={styles.captureDivider} />
-        <Text style={styles.captureNote}>
+        <View className="w-12 h-[1px] bg-primary/40" />
+        <Text className="text-xs text-text/60 text-center leading-5">
           เนื้อหานี้เป็นทรัพย์สินเฉพาะของสมาชิก{"\n"}
           ห้ามเผยแพร่หรือแชร์โดยไม่ได้รับอนุญาต
         </Text>
@@ -60,9 +80,22 @@ function GlobalCaptureWarning() {
 
 // ========== RootLayout ==========
 export default function RootLayout() {
+  // ── Fonts ──
+  const [fontsLoaded] = useFonts({
+    Cinzel_400Regular,
+    Cinzel_700Bold,
+    CormorantGaramond_400Regular,
+    CormorantGaramond_600SemiBold,
+    CormorantGaramond_700Bold,
+    IBMPlexSansThai_400Regular,
+    IBMPlexSansThai_500Medium,
+    IBMPlexSansThai_600SemiBold,
+    IBMPlexSansThai_700Bold,
+  });
+
   // ── Global Screen Capture Protection ──
   // เปิดทันที ก่อนทุกอย่าง — Android: FLAG_SECURE | iOS: listener
-  usePreventScreenCapture();
+  // usePreventScreenCapture();
 
   // ── Auth State ──
   const [session, setSession] = useState<Session | null>(null);
@@ -84,20 +117,29 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (!initialized) return;
+    if (!initialized || !fontsLoaded) return;
 
     const inAuthGroup = segments[0] === "(tabs)";
 
-    if (!session && inAuthGroup) {
-      // ถ้าไม่ได้ login แต่อยู่ในหน้า tabs ให้ไปหน้า login
-      router.replace("/login");
-    } else if (session && segments[0] === "login") {
-      // ถ้า login แล้วแต่อยู่หน้า login ให้ไปหน้าหลัก
-      router.replace("/(tabs)");
-    }
-  }, [session, segments, initialized]);
+    // เลื่อนการนำทางไปทำงานใน Event Loop ถัดไป เพื่อให้ Stack/Navigator เมาท์เสร็จสมบูรณ์ก่อน
+    const timer = setTimeout(() => {
+      if (!session && inAuthGroup) {
+        router.replace("/login");
+      } else if (session && segments[0] === "login") {
+        router.replace("/(tabs)");
+      }
+    }, 0);
 
-  if (!initialized) {
+    return () => clearTimeout(timer);
+  }, [session, segments, initialized, fontsLoaded]);
+
+  useEffect(() => {
+    if (initialized && fontsLoaded) {
+      SplashScreen.hideAsync();
+    }
+  }, [initialized, fontsLoaded]);
+
+  if (!initialized || !fontsLoaded) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0A0806' }}>
         <ActivityIndicator size="large" color="#C9A96E" />
@@ -106,7 +148,7 @@ export default function RootLayout() {
   }
 
   return (
-    <>
+    <ThemeProvider value={PhopephumTheme}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="login" options={{ title: "เข้าสู่ระบบ" }} />
         <Stack.Screen name="(tabs)" options={{ title: "Main" }} />
@@ -116,58 +158,11 @@ export default function RootLayout() {
       <StatusBar style="light" />
 
       {/* Global iOS capture warning overlay */}
-      <GlobalCaptureWarning />
-    </>
+      {/* <GlobalCaptureWarning /> */}
+    </ThemeProvider>
   );
 }
 
 // ========== Styles ==========
-const styles = StyleSheet.create({
-  captureOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(2, 6, 23, 0.96)",
-    justifyContent: "center",
-    alignItems: "center",
-    zIndex: 99999,
-  },
-  captureCard: {
-    alignItems: "center",
-    paddingHorizontal: 32,
-    paddingVertical: 40,
-    borderWidth: 1,
-    borderColor: "#C6A96B",
-    borderRadius: 20,
-    backgroundColor: "rgba(10, 34, 64, 0.85)",
-    maxWidth: 320,
-    gap: 12,
-  },
-  captureIcon: {
-    fontSize: 48,
-    marginBottom: 4,
-  },
-  captureTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#C6A96B",
-    textAlign: "center",
-    letterSpacing: 0.5,
-  },
-  captureText: {
-    fontSize: 14,
-    color: "#F8F6F1",
-    textAlign: "center",
-    lineHeight: 22,
-  },
-  captureDivider: {
-    width: 48,
-    height: 1,
-    backgroundColor: "#C6A96B",
-    opacity: 0.4,
-  },
-  captureNote: {
-    fontSize: 12,
-    color: "rgba(248,246,241,0.6)",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-});
+// removed since we are using NativeWind
+

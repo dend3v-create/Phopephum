@@ -126,6 +126,10 @@ export interface JornResult {
   yumStar?: number;
   yumBase?: number;   // 1-based base index
   ageRange?: string;  // For Vaya Jorn
+  base4Power?: number;
+  base4Meaning?: string;
+  base4Taksa?: TaksaBhop;
+  base4Direction?: string;
 }
 
 export interface LagnaPhopephumResult {
@@ -136,6 +140,10 @@ export interface LagnaPhopephumResult {
   subPeriod?: 'early' | 'middle' | 'end';
   reksName?: string;
   reksIndex?: number;
+  base4Power?: number;
+  base4Meaning?: string;
+  base4Taksa?: TaksaBhop;
+  base4Direction?: string;
 }
 
 // ─── Integrated Results (สหวิชาพยากรณ์) ──────────────────────────────────────────

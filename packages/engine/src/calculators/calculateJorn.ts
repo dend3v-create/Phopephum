@@ -4,7 +4,8 @@
  * ครอบคลุม วัยจร, ปีจร, เดือนจร, วันจร
  */
 
-import { FateMatrix } from '../types/fateMatrix.js';
+import { FateMatrix, BASE4_MEANINGS, POWER_TO_STAR, STAR_DIRECTIONS } from '../types/fateMatrix.js';
+import { TaksaMap, TaksaBhop, StarNumber } from '@phopephum/types';
 
 export interface JornResult {
   row: number;        // 1-based row
@@ -14,6 +15,10 @@ export interface JornResult {
   yumStar?: number;
   yumBase?: number;   // 1-based base index
   ageRange?: string;  // For Vaya Jorn
+  base4Power?: number;
+  base4Meaning?: string;
+  base4Taksa?: TaksaBhop;
+  base4Direction?: string;
 }
 
 export const PHOPEPHUM_HOUSES: string[][] = [
@@ -22,12 +27,29 @@ export const PHOPEPHUM_HOUSES: string[][] = [
   ['มรณะ', 'สุภะ', 'กัมมะ', 'ลาภะ', 'พยายะ', 'ทาสา', 'ทาสี'],
 ];
 
+function getBase4Info(matrix: FateMatrix, col: number, taksaMap?: TaksaMap) {
+  const power = matrix[3] ? matrix[3][col] : undefined;
+  if (power === undefined) return {};
+
+  const meaning = BASE4_MEANINGS[power];
+  const star = POWER_TO_STAR[power];
+  const taksa = (star && taksaMap) ? taksaMap[star] : undefined;
+  const direction = star ? STAR_DIRECTIONS[star] : undefined;
+
+  return {
+    base4Power: power,
+    base4Meaning: meaning,
+    base4Taksa: taksa,
+    base4Direction: direction,
+  };
+}
+
 /**
  * คำนวณวัยจร (Life Age Period)
  * นับจากบนลงล่างทีละคอลัมน์ (Row 1 -> 2 -> 3)
  * แต่ละช่องกินระยะเวลาเท่ากับตัวเลขดาวในช่องนั้น
  */
-export function calculateVayaJorn(matrix: FateMatrix, age: number): JornResult {
+export function calculateVayaJorn(matrix: FateMatrix, age: number, taksaMap?: TaksaMap): JornResult {
   let currentAgeStart = 1;
   
   for (let col = 0; col < 7; col++) {
@@ -41,7 +63,8 @@ export function calculateVayaJorn(matrix: FateMatrix, age: number): JornResult {
           col: col + 1,
           houseName: PHOPEPHUM_HOUSES[row][col],
           star: star,
-          ageRange: `${currentAgeStart}-${currentAgeEnd}`
+          ageRange: `${currentAgeStart}-${currentAgeEnd}`,
+          ...getBase4Info(matrix, col, taksaMap)
         };
       }
       
@@ -54,7 +77,8 @@ export function calculateVayaJorn(matrix: FateMatrix, age: number): JornResult {
     col: 7,
     houseName: PHOPEPHUM_HOUSES[2][6],
     star: matrix[2][6],
-    ageRange: "84+"
+    ageRange: "84+",
+    ...getBase4Info(matrix, 6, taksaMap)
   };
 }
 
@@ -62,7 +86,7 @@ export function calculateVayaJorn(matrix: FateMatrix, age: number): JornResult {
  * คำนวณปีจร (Yearly Forecast)
  * นับไล่แนวนอนทีละช่อง 1-7 (Row 1), 8-14 (Row 2), 15-21 (Row 3)
  */
-export function calculateYearlyJorn(matrix: FateMatrix, age: number): JornResult {
+export function calculateYearlyJorn(matrix: FateMatrix, age: number, taksaMap?: TaksaMap): JornResult {
   const position = (age - 1) % 21;
   const row = Math.floor(position / 7);
   const col = position % 7;
@@ -77,7 +101,8 @@ export function calculateYearlyJorn(matrix: FateMatrix, age: number): JornResult
     houseName: PHOPEPHUM_HOUSES[row][col],
     star: star,
     yumBase: yumBase,
-    yumStar: yumStar
+    yumStar: yumStar,
+    ...getBase4Info(matrix, col, taksaMap)
   };
 }
 
@@ -85,7 +110,7 @@ export function calculateYearlyJorn(matrix: FateMatrix, age: number): JornResult
  * คำนวณเดือนจร (Monthly Forecast)
  * เริ่มที่ภพพันธุ (Row 2, Col 4) = เดือน 1
  */
-export function calculateMonthlyJorn(matrix: FateMatrix, lunarMonth: number): JornResult {
+export function calculateMonthlyJorn(matrix: FateMatrix, lunarMonth: number, taksaMap?: TaksaMap): JornResult {
   const startCol = 3; // Index 3 is Col 4 (พันธุ)
   const col = (startCol + (lunarMonth - 1)) % 7;
   const row = 1; // ฐานเดือน (Base 2)
@@ -100,7 +125,8 @@ export function calculateMonthlyJorn(matrix: FateMatrix, lunarMonth: number): Jo
     houseName: PHOPEPHUM_HOUSES[row][col],
     star: star,
     yumBase: yumBase,
-    yumStar: yumStar
+    yumStar: yumStar,
+    ...getBase4Info(matrix, col, taksaMap)
   };
 }
 
@@ -108,7 +134,7 @@ export function calculateMonthlyJorn(matrix: FateMatrix, lunarMonth: number): Jo
  * คำนวณวันจร (Daily Forecast)
  * เริ่มที่ภพอัตตะ (Row 1, Col 1) = วันเสาร์
  */
-export function calculateDailyJorn(matrix: FateMatrix, dayOfWeek: number): JornResult {
+export function calculateDailyJorn(matrix: FateMatrix, dayOfWeek: number, taksaMap?: TaksaMap): JornResult {
   const dayMap: Record<number, number> = { 7: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6 };
   const col = dayMap[dayOfWeek] ?? 0;
   const row = 0; // ฐานวัน (Base 1)
@@ -123,6 +149,7 @@ export function calculateDailyJorn(matrix: FateMatrix, dayOfWeek: number): JornR
     houseName: PHOPEPHUM_HOUSES[row][col],
     star: star,
     yumBase: yumBase,
-    yumStar: yumStar
+    yumStar: yumStar,
+    ...getBase4Info(matrix, col, taksaMap)
   };
 }

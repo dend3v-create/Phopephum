@@ -109,20 +109,20 @@ function AccordionItem({ question, answer }: { question: string, answer: string 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0806',
+    backgroundColor: '#020617',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#2A2018',
+    borderBottomColor: 'rgba(198, 169, 107, 0.15)',
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
-    color: '#C9A96E',
+    color: '#C6A96B',
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 8,
@@ -133,11 +133,11 @@ const styles = StyleSheet.create({
   introBox: {
     alignItems: 'center',
     marginBottom: 32,
-    backgroundColor: '#15120F',
+    backgroundColor: 'rgba(10, 34, 64, 0.58)',
     padding: 24,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#2A2018',
+    borderColor: 'rgba(198, 169, 107, 0.18)',
   },
   introTitle: {
     color: '#F8F6F1',
@@ -156,17 +156,17 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   sectionCategory: {
-    color: '#C9A96E',
+    color: '#C6A96B',
     fontSize: 16,
     fontWeight: 'bold',
     marginBottom: 12,
     marginLeft: 4,
   },
   accordionContainer: {
-    backgroundColor: '#15120F',
+    backgroundColor: 'rgba(10, 34, 64, 0.45)',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: '#2A2018',
+    borderColor: 'rgba(198, 169, 107, 0.15)',
     marginBottom: 12,
     overflow: 'hidden',
   },
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 0,
     borderTopWidth: 1,
-    borderTopColor: 'rgba(42, 32, 24, 0.5)',
+    borderTopColor: 'rgba(198, 169, 107, 0.1)',
   },
   answerText: {
     color: '#8A8070',

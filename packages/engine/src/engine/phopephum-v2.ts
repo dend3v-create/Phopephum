@@ -43,15 +43,16 @@ export async function calculatePhopephum(input: HoroscopeInput, checkDate: Date 
   // ── 5. Calculate Jorn (Progressed) & Lagna ────────────────────────────────
   const ageYang = taksaMaha.taksaTransit.ageYang;
   const matrix = nineBase.bases;
+  const taksaMap = taksaMaha.taksaTransit.map;
 
-  const vayaJorn = calculateVayaJorn(matrix, ageYang);
-  const yearlyJorn = calculateYearlyJorn(matrix, ageYang);
-  const monthlyJorn = calculateMonthlyJorn(matrix, transitThai.lunarMonth);
-  const dailyJorn = calculateDailyJorn(matrix, transitThai.dayNum);
+  const vayaJorn = calculateVayaJorn(matrix, ageYang, taksaMap);
+  const yearlyJorn = calculateYearlyJorn(matrix, ageYang, taksaMap);
+  const monthlyJorn = calculateMonthlyJorn(matrix, transitThai.lunarMonth, taksaMap);
+  const dailyJorn = calculateDailyJorn(matrix, transitThai.dayNum, taksaMap);
   
   const birthDateTime = new Date(`${input.birthDate}T${input.birthTime || '12:00'}:00`);
-  const lagna = calculateLagnaPhopephum(matrix, birthDateTime);
-  const lagnaTransit = calculateLagnaPhopephum(matrix, checkDate);
+  const lagna = calculateLagnaPhopephum(matrix, birthDateTime, taksaMap);
+  const lagnaTransit = calculateLagnaPhopephum(matrix, checkDate, taksaMap);
 
   // ── 6. Calculate Horary (กาลชะตา) ──────────────────────────────────────────
   const horaryMatrix = calculateHorary(checkDate);

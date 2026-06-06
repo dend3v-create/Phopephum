@@ -4,8 +4,9 @@
  * ครอบคลุม ยามอัฏกาล (90 นาที), ยามซอย (3.45 นาที), ลัคนาเกิด, กาลชะตา
  */
 
-import { FateMatrix } from '../types/fateMatrix.js';
+import { FateMatrix, BASE4_MEANINGS, POWER_TO_STAR, STAR_DIRECTIONS } from '../types/fateMatrix.js';
 import { PHOPEPHUM_HOUSES } from './calculateJorn.js';
+import { TaksaMap, TaksaBhop } from '@phopephum/types';
 
 // ลำดับยามอัฏกาล (Chaldean Order) ตามตำรา PhopePhum
 // อาทิตย์ (1), ศุกร์ (6), พุธ (4), จันทร์ (2), เสาร์ (7), พฤหัส (5), อังคาร (3)
@@ -73,7 +74,7 @@ export function calculateTimeEngine(date: Date): TimeEngineResult {
 /**
  * คำนวณลัคนาเกิด (Birth Ascendant)
  */
-export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { 
+export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date, taksaMap?: TaksaMap): { 
   row: number;
   col: number;
   houseName: string;
@@ -81,6 +82,10 @@ export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): {
   subPeriod: 'early' | 'middle' | 'end';
   reksName: string;
   reksIndex: number;
+  base4Power?: number;
+  base4Meaning?: string;
+  base4Taksa?: TaksaBhop;
+  base4Direction?: string;
 } {
   const time = calculateTimeEngine(date);
   const starToFind = time.yamYai;
@@ -117,15 +122,26 @@ export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): {
     "นักพรต"
   ];
   const reksName = REKS_NAMES[reksSlot - 1] || "ทาษา";
+
+  // Base 4 Info
+  const base4Power = col !== -1 && matrix[3] ? matrix[3][col] : undefined;
+  const base4Meaning = base4Power !== undefined ? BASE4_MEANINGS[base4Power] : undefined;
+  const base4Star = base4Power !== undefined ? POWER_TO_STAR[base4Power] : undefined;
+  const base4Taksa = (base4Star && taksaMap) ? taksaMap[base4Star] : undefined;
+  const base4Direction = base4Star ? STAR_DIRECTIONS[base4Star] : undefined;
   
   return {
     row: row + 1,
     col: col + 1,
-    houseName: PHOPEPHUM_HOUSES[row][col],
+    houseName: col !== -1 ? PHOPEPHUM_HOUSES[row][col] : "ไม่พบ",
     star: starToFind,
     subPeriod: time.subPeriod,
     reksName,
-    reksIndex: reksSlot
+    reksIndex: reksSlot,
+    base4Power,
+    base4Meaning,
+    base4Taksa,
+    base4Direction
   };
 }
 

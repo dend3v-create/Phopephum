@@ -84,20 +84,20 @@ export default function EditProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0A0806',
+    backgroundColor: '#020617',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: '#2A2018',
+    borderBottomColor: 'rgba(198, 169, 107, 0.15)',
   },
   backButton: {
     padding: 8,
   },
   headerTitle: {
-    color: '#C9A96E',
+    color: '#C6A96B',
     fontSize: 18,
     fontWeight: 'bold',
     marginLeft: 8,
@@ -114,23 +114,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    backgroundColor: '#15120F',
+    backgroundColor: 'rgba(10, 34, 64, 0.58)',
     borderWidth: 1,
-    borderColor: '#2A2018',
+    borderColor: 'rgba(198, 169, 107, 0.18)',
     borderRadius: 12,
     padding: 16,
     color: '#F8F6F1',
     fontSize: 16,
   },
   saveButton: {
-    backgroundColor: '#C9A96E',
+    backgroundColor: '#C6A96B',
     padding: 18,
     borderRadius: 16,
     alignItems: 'center',
     marginTop: 12,
   },
   saveButtonText: {
-    color: '#0A0806',
+    color: '#020617',
     fontSize: 16,
     fontWeight: 'bold',
   },
