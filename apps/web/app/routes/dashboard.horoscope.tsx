@@ -1468,8 +1468,9 @@ function FateMatrixPanel({
             <tbody>
               {matrix.map((row, rIdx) => (
                 <tr key={rIdx} className={rIdx === 3 ? "bg-[#4B6FAE]/15 border-y border-[#4B6FAE]/45" : "hover:bg-white/5"}>
-                  <td className="py-2 pr-4 text-left whitespace-nowrap min-w-[100px]">
-                    <p className="text-xs font-bold text-[#F8F6F1]">{ROW_META[rIdx].label}</p>
+                  <td className="py-4 pr-6 text-left whitespace-nowrap min-w-[120px] border-r border-white/5">
+                    <p className="text-xs font-black text-[#F8F6F1] leading-tight">{ROW_META[rIdx].label}</p>
+                    <p className="text-[10px] text-[#8A8070] font-bold uppercase tracking-tighter mt-1">{ROW_META[rIdx].sub}</p>
                   </td>
                   {row.map((num, cIdx) => {
                     const getStarFromBase4 = (n: number): number => {
@@ -1477,6 +1478,8 @@ function FateMatrixPanel({
                       return mapping[n] || (n % 7 || 7);
                     };
                     const isBase4 = rIdx === 3;
+                    const phopName = ROW_META[rIdx].phopNames ? ROW_META[rIdx].phopNames[cIdx] : (isBase4 ? BASE4_MEANINGS[num] : null);
+                    
                     const actualNum = isBase4 ? getStarFromBase4(num) : (num % 7 || 7);
                     const isHighlighted = (activeNum !== null && (isBase4 ? matrix[2]?.[cIdx] === activeNum : (actualNum === activeNum && [0,1,2,7,8].includes(rIdx)))) || (isFiltering && highlightedStars.has(isBase4 ? matrix[2]?.[cIdx] : actualNum));
                     const isDimmed = isFiltering && !highlightedStars.has(isBase4 ? matrix[2]?.[cIdx] : actualNum);
@@ -1493,28 +1496,33 @@ function FateMatrixPanel({
                     const isYearlyJorn = isRow012 && phopephumResult?.yearlyJorn?.row === (rIdx + 1) && phopephumResult?.yearlyJorn?.col === (cIdx + 1);
 
                     return (
-                      <td key={cIdx} className="p-1">
-                        <button onClick={(e) => { e.stopPropagation(); onNumClick(isBase4 ? matrix[2]?.[cIdx] : actualNum); }} type="button" className={`flex flex-col items-center gap-1 focus:outline-none relative ${isDimmed ? "opacity-30" : ""}`}>
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-sans text-lg border transition-all ${isHighlighted ? "scale-110 z-10 border-[#C9A96E]" : ""} ${c.bg} ${c.text} ${c.border}`}>
+                      <td key={cIdx} className="p-2 min-w-[70px]">
+                        <button onClick={(e) => { e.stopPropagation(); onNumClick(isBase4 ? matrix[2]?.[cIdx] : actualNum); }} type="button" className={`flex flex-col items-center gap-1.5 focus:outline-none relative w-full ${isDimmed ? "opacity-30" : ""}`}>
+                          {phopName && (
+                            <span className={`text-[9px] font-black uppercase text-center w-full leading-tight h-6 flex items-center justify-center transition-colors ${isHighlighted ? "text-[#D9BC82]" : "text-[#8A8070]"}`}>
+                              {phopName}
+                            </span>
+                          )}
+                          <div className={`w-11 h-11 rounded-full flex items-center justify-center font-sans text-xl border transition-all ${isHighlighted ? "scale-110 z-10 border-[#C9A96E]" : ""} ${c.bg} ${c.text} ${c.border}`}>
                             {num}
                           </div>
                           
                           {showNatalLagna && isLagnaNatal && (
-                            <span className="absolute -bottom-1 -left-2 text-[8px] font-bold bg-[#C6A96B] text-[#020617] border border-[#C6A96B]/60 px-1 rounded-full z-10">ล</span>
+                            <span className="absolute -bottom-1 -left-1 text-[8px] font-bold bg-[#C6A96B] text-[#020617] border border-[#C6A96B]/60 px-1 rounded-full z-10 shadow-sm">ล</span>
                           )}
                           {showTransitLagna && isLagnaTransit && (
-                            <span className="absolute -bottom-1 -right-2 text-[9px] font-bold bg-red-500 text-white border border-red-400 px-1 rounded-full z-10">ลอ</span>
+                            <span className="absolute -bottom-1 -right-1 text-[9px] font-bold bg-red-500 text-white border border-red-400 px-1 rounded-full z-10 shadow-sm">ลอ</span>
                           )}
-                          <div className="absolute -bottom-2 flex gap-0.5">
-                            {showVayaJorn && isVayaJorn && <span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B] animate-pulse shadow-[0_0_5px_#C6A96B]" />}
-                            {showYearlyJorn && isYearlyJorn && <span className="w-1.5 h-1.5 rounded-full bg-[#4B6FAE] shadow-[0_0_5px_#4B6FAE]" />}
-                            {showMonthlyJorn && isRow012 && phopephumResult?.monthlyJorn?.row === (rIdx + 1) && phopephumResult?.monthlyJorn?.col === (cIdx + 1) && <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_5px_#f59e0b]" />}
-                            {showDailyJorn && isRow012 && phopephumResult?.dailyJorn?.row === (rIdx + 1) && phopephumResult?.dailyJorn?.col === (cIdx + 1) && <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]" />}
+                          <div className="absolute -bottom-3 flex gap-0.5">
+                            {showVayaJorn && isVayaJorn && <span className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse shadow-[0_0_5px_#C6A96B]" />}
+                            {showYearlyJorn && isYearlyJorn && <span className="w-2 h-2 rounded-full bg-[#4B6FAE] shadow-[0_0_5px_#4B6FAE]" />}
+                            {showMonthlyJorn && isRow012 && phopephumResult?.monthlyJorn?.row === (rIdx + 1) && phopephumResult?.monthlyJorn?.col === (cIdx + 1) && <span className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_5px_#f59e0b]" />}
+                            {showDailyJorn && isRow012 && phopephumResult?.dailyJorn?.row === (rIdx + 1) && phopephumResult?.dailyJorn?.col === (cIdx + 1) && <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]" />}
                           </div>
                           
                           {/* Taksa & Maha Badges Overlay */}
                           {isRow012 && showTaksaJorn && taksaMaha?.taksaTransit?.map?.[actualNum] && (
-                            <div className="absolute -top-2 -right-3 z-10">
+                            <div className="absolute -top-1 -right-4 z-10">
                               {taksaMaha.taksaTransit.map[actualNum] === "ศรี" && <span className="text-[8px] px-1 rounded bg-emerald-500 text-white font-bold shadow-md border border-emerald-400">ศรี</span>}
                               {taksaMaha.taksaTransit.map[actualNum] === "กาลกิณี" && <span className="text-[8px] px-1 rounded bg-rose-500 text-white font-bold shadow-md border border-rose-400">กาลี</span>}
                               {taksaMaha.taksaTransit.map[actualNum] === "เดช" && <span className="text-[8px] px-1 rounded bg-white text-black font-bold shadow-md border border-gray-300">เดช</span>}
@@ -1522,7 +1530,7 @@ function FateMatrixPanel({
                             </div>
                           )}
                           {isRow012 && showMahaJorn && taksaMaha?.mahaTransit?.map && (
-                            <div className="absolute -top-2 -left-3 z-10">
+                            <div className="absolute -top-1 -left-4 z-10">
                               {Object.entries(taksaMaha.mahaTransit.map).find(([k, v]) => v === actualNum)?.[0] === "โลกาวินาศ" && <span className="text-[8px] px-1 rounded bg-amber-500 text-black font-bold shadow-md border border-amber-400">วินาศ</span>}
                               {Object.entries(taksaMaha.mahaTransit.map).find(([k, v]) => v === actualNum)?.[0] === "มรณะ" && <span className="text-[8px] px-1 rounded bg-slate-600 text-white font-bold shadow-md border border-slate-400">มรณะ</span>}
                               {Object.entries(taksaMaha.mahaTransit.map).find(([k, v]) => v === actualNum)?.[0] === "อริ" && <span className="text-[8px] px-1 rounded bg-orange-600 text-white font-bold shadow-md border border-orange-400">อริ</span>}

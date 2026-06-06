@@ -43,16 +43,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     year: "numeric",
   });
 
-  // ดึง natalChart (ผังดวงเลข 7 ตัวกำเนิด) จาก phopephumResult
-  const natalChart: number[][] | null = phopephumResult?.nineBase?.bases ?? null;
-  const natalSevenBase: number[] | null = phopephumResult?.nineBase?.bases?.[0] ?? null;
-
   return json({
     profile,
     initialResult,
     phopephumResult,
-    natalChart,
-    natalSevenBase,
     thaiDateLabel,
     currentTime: now.toISOString(),
   });
@@ -124,16 +118,41 @@ const TAKSA_DIRECTIONS = [
   { id: 7, name: "ตะวันตกเฉียงใต้", star: "เสาร์" },
 ];
 
-// ชื่อฐาน 1-3 สำหรับ natal chart
+// ชื่อภพฐาน 1-3 สำหรับผังกาลชะตา
 const BHOP_NATAL_NAMES = [
-  ["อัตตะ", "หินะ", "ธะนัง", "ปิตา", "มาตา", "โภคา", "มัชฌิมา"],
-  ["ตนุ", "กดุมภะ", "สหัสชะ", "พันธุ", "ปุตตะ", "อริ", "ปัตนิ"],
+  ["อัตตะ", "หินะ", "ธนัง", "ปิตา", "มาตา", "โภคา", "มัชฌิมา"],
+  ["ตนุ", "กฎุมภะ", "สหัชชะ", "พันธุ", "ปุตตะ", "อริ", "ปัตนิ"],
   ["มรณะ", "ศุภะ", "กัมมะ", "ลาภะ", "พยายะ", "ทาสา", "ทาสี"]
 ];
-const BASE4_NATAL_NAMES = ["มหาอุตจ์", "โสฬสมงคล", "พฤหัสบดีเล็ก", "อังคารใหญ่", "ราชาโชค", "จักรพรรดิ", "มหาสิทธิโชค"];
+
+// ชื่อกำลังเทวดา ฐาน 4 (ค่า 3–21 → ชื่อกำลังพระเคราะห์)
+const BASE4_POWER_NAMES: Record<number, string> = {
+  3: "กำลังดาวอังคารเล็ก",
+  4: "กำลังดาวพุธเล็ก",
+  5: "กำลังดาวพฤหัสบดีเล็ก",
+  6: "กำลังพระอาทิตย์",
+  7: "กำลังดาวเสาร์เล็ก",
+  8: "กำลังพระอังคาร",
+  9: "กำลังพระเกตุ",
+  10: "กำลังพระเสาร์",
+  11: "ราชาโชค",
+  12: "กำลังพระราหู",
+  13: "มหาอุจ",
+  14: "จักรพรรดิ",
+  15: "กำลังพระจันทร์",
+  16: "โสฬสมงคล",
+  17: "กำลังพระพุธ",
+  18: "มหาจักรพรรดิ์",
+  19: "กำลังพระพฤหัสบดี",
+  20: "กำลังดาวเสาร์ใหญ่",
+  21: "กำลังพระศุกร์",
+};
+
+const BHOP_8_NAMES = ["อาตมะ", "ทาสา", "สิทธิโชค", "โภคทรัพย์", "โจร", "อุบาทว์", "อุปถัมภ์"];
+const BHOP_9_NAMES = ["อัตตะ", "สักกะ", "ญาติ", "ธนัง", "เคหัง", "นาวัง", "ภริยัง"];
 
 export default function KarnchataPage() {
-  const { profile, initialResult, phopephumResult: initialPhopephum, natalChart, natalSevenBase, thaiDateLabel } = useLoaderData<typeof loader>();
+  const { profile, initialResult, phopephumResult: initialPhopephum, thaiDateLabel } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
   const navigation = useNavigation();
@@ -170,16 +189,9 @@ export default function KarnchataPage() {
   };
 
   const getBhopName = (rowIdx: number, colIdx: number) => {
-    const ROW_NAMES = [
-      ["อัตตะ", "หินะ", "ธะนัง", "ปิตา", "มาตา", "โภคา", "มัชฌิมา"],
-      ["ตนุ", "กดุมภะ", "สหัสชะ", "พันธุ", "ปุตตะ", "อริ", "ปัตนิ"],
-      ["มรณะ", "ศุภะ", "กัมมะ", "ลาภะ", "พยายะ", "ทาสา", "ทาสี"]
-    ];
-    if (rowIdx < 3) return ROW_NAMES[rowIdx][colIdx];
+    if (rowIdx < 3) return BHOP_NATAL_NAMES[rowIdx][colIdx];
     return "";
   };
-
-  const BASE4_NAMES = ["มหาอุตจ์", "โสฬสมงคล", "พฤหัสบดีเล็ก", "อังคารใหญ่", "ราชาโชค", "จักรพรรดิ", "มหาสิทธิโชค"];
 
   // Chat
   const [chatMessages, setChatMessages] = useState([
@@ -498,21 +510,24 @@ export default function KarnchataPage() {
             </div>
           ))}
 
-          {/* Base 4 */}
+          {/* Base 4 — กำลังเทวดา (ค่า 3-21) */}
           <div className="flex items-center w-full max-w-3xl bg-[#0B1E36]/30 border border-sky-500/10 py-3 px-2 rounded-2xl my-2">
-             <div className="w-[72px] text-[11px] font-bold text-sky-400 pl-2">ฐาน ๔</div>
+             <div className="w-[72px] text-[11px] font-bold text-sky-400 pl-2">
+               <div>ฐาน ๔</div>
+               <div className="text-[8px] text-sky-400/60 leading-tight mt-0.5">กำลังเทวดา</div>
+             </div>
              <div className="flex-1 flex justify-between pr-2">
                 {activeResult.chart[3].map((star: number, cIdx: number) => (
                   <div key={cIdx} className="flex flex-col items-center gap-2 w-14">
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 ${
-                      hoverNum === star 
-                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]" 
+                      hoverNum === star
+                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]"
                         : "bg-[#020617] border border-sky-500/50 text-[#F8F6F1]"
                     }`}>
                       {star}
                     </div>
-                    <span className="text-[9px] text-[#8A8070] font-medium text-center">
-                      {BASE4_NAMES[cIdx] || ""}
+                    <span className="text-[8px] text-sky-400/80 font-medium text-center leading-tight">
+                      {BASE4_POWER_NAMES[star] || ""}
                     </span>
                   </div>
                 ))}
@@ -543,134 +558,6 @@ export default function KarnchataPage() {
         </div>
       </Card>
 
-      {/* ===== ผังดวงเลข 7 ตัว (ชะตากำเนิด) ===== */}
-      {natalChart && natalChart.length >= 9 ? (
-        <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8 overflow-x-auto relative">
-          <div className="flex items-start gap-4 mb-8">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-lg shrink-0">⚜️</div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3 flex-wrap">
-                <h3 className="text-sm font-bold text-[#F8F6F1]">ผังดวงเลข 7 ตัว 9 ฐาน (ชะตากำเนิด)</h3>
-                <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-[9px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">Natal Chart</span>
-                {profile?.birth_date && (
-                  <span className="text-[#8A8070] text-[10px]">
-                    วันเกิด: {new Date(profile.birth_date).toLocaleDateString("th-TH", { day:"numeric", month:"long", year:"numeric" })}{profile.birth_time ? ` เวลา ${profile.birth_time} น.` : ""}
-                  </span>
-                )}
-              </div>
-              <p className="text-[10px] text-[#8A8070] mt-1">เลข 7 ตัวที่ได้จากวันเดือนปีเกิด ใช้เปรียบเทียบกับผังกาลชะตาเพื่อหาจุดทับซ้อน</p>
-            </div>
-          </div>
-
-          {/* หมายเหตุ: เลขที่ทับซ้อนกับผังกาลชะตาขณะนี้ */}
-          {natalSevenBase && natalSevenBase.length > 0 && (
-            <div className="mb-6 flex items-center gap-3 flex-wrap">
-              <span className="text-[10px] text-[#8A8070] font-bold">เลข 7 ตัวกำเนิด (ฐาน ๑):</span>
-              {natalSevenBase.map((n, i) => {
-                const matchesKarnchata = activeResult?.chart?.flat().includes(n);
-                return (
-                  <span
-                    key={i}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-display font-bold border ${
-                      matchesKarnchata
-                        ? "bg-[#C6A96B] text-[#020617] border-[#C6A96B] shadow-[0_0_8px_rgba(198,169,107,0.5)]"
-                        : "bg-[#020617] border-[#8A8070]/50 text-[#F8F6F1]"
-                    }`}
-                    title={matchesKarnchata ? "ทับซ้อนกับกาลชะตา" : ""}
-                  >
-                    {n}
-                  </span>
-                );
-              })}
-              <span className="text-[9px] text-amber-500/70 ml-2">✦ สีทองคือเลขที่ทับซ้อนกับกาลชะตาขณะนี้</span>
-            </div>
-          )}
-
-          <div className="min-w-[700px] flex flex-col gap-5 items-center pb-4">
-            {/* Natal Bases 1-3 */}
-            {[0, 1, 2].map(rIdx => (
-              <div key={rIdx} className="flex items-center w-full max-w-3xl">
-                <div className="w-20 text-[11px] font-bold text-[#C6A96B]">ฐาน {rIdx === 0 ? '๑' : rIdx === 1 ? '๒' : '๓'}</div>
-                <div className="flex-1 flex justify-between">
-                  {natalChart[rIdx].map((star: number, cIdx: number) => {
-                    const isInKarnchata = hoverNum === star;
-                    const matchesLive = activeResult?.chart?.flat().includes(star);
-                    return (
-                      <div key={cIdx} className="flex flex-col items-center gap-1.5 w-14">
-                        <button
-                          onClick={() => setHoverNum(hoverNum === star ? null : star)}
-                          className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-display font-bold transition-all duration-300 ${
-                            isInKarnchata
-                              ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]"
-                              : matchesLive
-                              ? "bg-amber-900/40 border border-amber-500/50 text-amber-300"
-                              : "bg-[#0A2240]/80 border border-[#C6A96B]/30 text-[#F8F6F1]"
-                          }`}
-                        >
-                          {star}
-                        </button>
-                        <span className="text-[9px] text-[#8A8070] font-medium">{BHOP_NATAL_NAMES[rIdx]?.[cIdx] ?? ""}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-
-            {/* Natal Base 4 */}
-            <div className="flex items-center w-full max-w-3xl bg-amber-950/20 border border-amber-500/10 py-3 px-2 rounded-2xl my-1">
-              <div className="w-[72px] text-[11px] font-bold text-amber-500 pl-2">ฐาน ๔</div>
-              <div className="flex-1 flex justify-between pr-2">
-                {natalChart[3].map((star: number, cIdx: number) => (
-                  <div key={cIdx} className="flex flex-col items-center gap-1.5 w-14">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-display font-bold bg-[#0A2240]/80 border border-amber-500/30 text-amber-300">
-                      {star}
-                    </div>
-                    <span className="text-[9px] text-[#8A8070] font-medium text-center">{BASE4_NATAL_NAMES[cIdx] ?? ""}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Natal Bases 5-9 */}
-            {[4, 5, 6, 7, 8].map(rIdx => (
-              <div key={rIdx} className="flex items-center w-full max-w-3xl">
-                <div className="w-20 text-[11px] font-bold text-[#C6A96B]">ฐาน {rIdx === 4 ? '๕' : rIdx === 5 ? '๖' : rIdx === 6 ? '๗' : rIdx === 7 ? '๘' : '๙'}</div>
-                <div className="flex-1 flex justify-between">
-                  {natalChart[rIdx].map((star: number, cIdx: number) => {
-                    const isInKarnchata = hoverNum === star;
-                    const matchesLive = activeResult?.chart?.flat().includes(star);
-                    return (
-                      <div key={cIdx} className="flex flex-col items-center gap-1.5 w-14">
-                        <button
-                          onClick={() => setHoverNum(hoverNum === star ? null : star)}
-                          className={`w-10 h-10 rounded-full flex items-center justify-center text-base font-display font-bold transition-all duration-300 ${
-                            isInKarnchata
-                              ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]"
-                              : matchesLive
-                              ? "bg-amber-900/40 border border-amber-500/50 text-amber-300"
-                              : "bg-[#0A2240]/80 border border-[#C6A96B]/30 text-[#F8F6F1]"
-                          }`}
-                        >
-                          {star}
-                        </button>
-                        {rIdx === 7 && <span className="text-[9px] text-[#8A8070] font-medium">{"อาตมะ,ทาสา,สิทธิโชค,โภคทรัพย์,โจร,อุบาทว์".split(",")[cIdx]}</span>}
-                        {rIdx === 8 && <span className="text-[9px] text-[#8A8070] font-medium">{"อัตตะ,สักกะ,ญาติ,ธนัง,เคหัง,นาวัง".split(",")[cIdx]}</span>}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      ) : (
-        <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8 text-center">
-          <div className="text-4xl mb-4">⚜️</div>
-          <h3 className="text-sm font-bold text-[#F8F6F1] mb-2">ผังดวงเลข 7 ตัวกำเนิด</h3>
-          <p className="text-[11px] text-[#8A8070]">กรุณาระบุวันเดือนปีเกิดใน <a href="/dashboard/settings" className="text-[#C6A96B] underline">โปรไฟล์ของคุณ</a> เพื่อดูผังดวงชะตากำเนิดส่วนบุคคล</p>
-        </Card>
-      )}
 
       {/* Grid ทิศทักษาจร 8 ทิศ */}
       <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8">

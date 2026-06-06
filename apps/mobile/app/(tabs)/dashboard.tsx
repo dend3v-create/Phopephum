@@ -51,6 +51,25 @@ const ROW_META = [
   { label: "ฐาน ๙", sub: "ภริยัง",           phopNames: ["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"] },
 ];
 
+const ROW_META = [
+  { label: "ฐาน ๑", sub: "วันเกิด",           phopNames: ["อัตตะ","หินะ","ธนัง","ปิตา","มาตา","โภคา","มัชฌิมา"] },
+  { label: "ฐาน ๒", sub: "เดือนเกิด",         phopNames: ["ตนุ","กฎุมภะ","สหัชชะ","พันธุ","ปุตตะ","อริ","ปัตนิ"] },
+  { label: "ฐาน ๓", sub: "ปีเกิด",            phopNames: ["มรณะ","ศุภะ","กัมมะ","ลาภะ","พยายะ","ทาสา","ทาสี"] },
+  { label: "ฐาน ๔", sub: "ฐานบวก (มหาจักร)", phopNames: null },
+  { label: "ฐาน ๕", sub: "ฐานเศษ (มหาภูติ)", phopNames: null },
+  { label: "ฐาน ๖", sub: "กำลังพระเคราะห์",  phopNames: null },
+  { label: "ฐาน ๗", sub: "กำลังพระเคราะห์",  phopNames: null },
+  { label: "ฐาน ๘", sub: "อาตมะ",            phopNames: ["อาตมะ","ทาสา","สิทธิโชค","โภคทรัพย์","โจร","อุบาทว์","อุปถัมภ์"] },
+  { label: "ฐาน ๙", sub: "ภริยัง",           phopNames: ["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"] },
+];
+
+const BASE4_MEANINGS: Record<number, string> = {
+  3: 'อังคารเล็ก', 4: 'พุธเล็ก', 5: 'พฤหัสเล็ก', 6: 'พระอาทิตย์', 7: 'เสาร์เล็ก',
+  8: 'อังคารใหญ่', 9: 'พระเกตุ', 10: 'พระเสาร์', 11: 'ราชาโชค', 12: 'พระราหู',
+  13: 'มหาอุจ', 14: 'จักรพรรดิ', 15: 'พระจันทร์', 16: 'โสฬสมงคล',
+  17: 'พุธใหญ่', 18: 'มหาจักรพรรดิ์', 19: 'พระพฤหัส', 20: 'เสาร์ใหญ่', 21: 'พระศุกร์',
+};
+
 const RAHU_ADVICE: Record<string, string> = {
   "ทาษา": "ยามอุปสรรค พึงระวังความเหนื่อยยาก ห้ามเจรจาการเงินหรือเซ็นสัญญาสำคัญ",
   "คหปติ": "ยามมงคล เหมาะสำหรับเริ่มต้นธุรกิจ ค้าขาย ซื้อขายสินทรัพย์ มีกำไรงดงาม",
@@ -283,7 +302,7 @@ export default function DashboardScreen() {
                   <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                     <View className="gap-3">
                       {horoscope.nineBase.bases.map((row: number[], rIdx: number) => (
-                        <View key={rIdx} className={`flex-row items-center py-2 px-2 rounded-xl ${rIdx === 3 ? 'bg-gold-500/5 border-y border-gold-500/20' : ''}`}>
+                        <View key={rIdx} className={`flex-row items-center py-4 px-2 rounded-xl ${rIdx === 3 ? 'bg-gold-500/5 border-y border-gold-500/20' : ''}`}>
                           <View style={{ width: 85 }}>
                             <Text className="text-text-primary text-[11px] font-bold font-thai">{ROW_META[rIdx].label}</Text>
                             <Text className="text-text-muted text-[9px] font-thai uppercase tracking-tighter">{ROW_META[rIdx].sub}</Text>
@@ -295,6 +314,7 @@ export default function DashboardScreen() {
                               return mapping[n] || (n % 7 || 7);
                             };
                             const actualNum = isBase4 ? getStarFromBase4(num) : (num % 7 || 7);
+                            const phopName = ROW_META[rIdx].phopNames ? ROW_META[rIdx].phopNames[cIdx] : (isBase4 ? BASE4_MEANINGS[num] : null);
 
                             // Highlights
                             const isSelected = selectedCell?.row === rIdx && selectedCell?.col === cIdx;
@@ -316,43 +336,50 @@ export default function DashboardScreen() {
                             return (
                               <TouchableOpacity
                                 key={cIdx}
-                                className={`w-11 h-11 rounded-full mx-1 items-center justify-center border-2 relative shadow-md ${
-                                  isSelected || isHighlighted
-                                    ? 'bg-gold-500 border-text-primary'
-                                    : 'bg-cosmic-950/60 border-gold-500/20'
-                                }`}
+                                className={`mx-1 items-center justify-center relative ${isBase4 ? 'min-w-[60px]' : ''}`}
                                 activeOpacity={0.7}
                                 onPress={() => {
                                   setSelectedCell({ row: rIdx, col: cIdx, val: num });
                                   setHoverNum(actualNum === hoverNum ? null : actualNum);
                                 }}
                               >
-                                <Text className={`text-[17px] font-black ${isSelected || isHighlighted ? 'text-cosmic-950' : 'text-text-primary'}`}>
-                                  {num}
-                                </Text>
+                                {phopName && (
+                                  <Text className={`text-[7px] font-bold uppercase text-center mb-1 ${isHighlighted ? 'text-gold-500' : 'text-text-muted'}`} numberOfLines={1}>
+                                    {phopName}
+                                  </Text>
+                                )}
+                                <View className={`w-11 h-11 rounded-full items-center justify-center border-2 shadow-md ${
+                                  isSelected || isHighlighted
+                                    ? 'bg-gold-500 border-text-primary'
+                                    : 'bg-cosmic-950/60 border-gold-500/20'
+                                }`}>
+                                  <Text className={`text-[17px] font-black ${isSelected || isHighlighted ? 'text-cosmic-950' : 'text-text-primary'}`}>
+                                    {num}
+                                  </Text>
+                                </View>
 
                                 {/* Lagna Overlays */}
                                 {showNatalLagna && isLagnaNatal && (
-                                  <View className="absolute -bottom-1.5 -left-1 bg-gold-500 w-4 h-4 rounded-full items-center justify-center border border-cosmic-950">
+                                  <View className="absolute -bottom-1.5 -left-1 bg-gold-500 w-4 h-4 rounded-full items-center justify-center border border-cosmic-950 z-10">
                                     <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#020617' }}>ล</Text>
                                   </View>
                                 )}
                                 {showTransitLagna && isLagnaTransit && (
-                                  <View className="absolute -bottom-1.5 -right-1 bg-rose-500 w-4 h-4 rounded-full items-center justify-center border border-cosmic-950">
+                                  <View className="absolute -bottom-1.5 -right-1 bg-rose-500 w-4 h-4 rounded-full items-center justify-center border border-cosmic-950 z-10">
                                     <Text style={{ fontSize: 8, fontWeight: 'bold', color: '#fff' }}>ลจร</Text>
                                   </View>
                                 )}
 
                                 {/* Taksa & Maha Indicators */}
                                 {showTaksaJorn && tBhop && (
-                                  <View className="absolute -top-2.5 -right-2 bg-emerald-500/90 rounded px-1 border border-emerald-400">
+                                  <View className="absolute -top-1 -right-2 bg-emerald-500/90 rounded px-1 border border-emerald-400 z-10">
                                     <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#fff' }}>
                                       {tBhop === 'ศรี' ? 'ศรี' : tBhop === 'กาลกิณี' ? 'กาลี' : tBhop}
                                     </Text>
                                   </View>
                                 )}
                                 {showMahaJorn && mBhop && (
-                                  <View className="absolute -top-2.5 -left-2 bg-violet-600/90 rounded px-1 border border-violet-400">
+                                  <View className="absolute -top-1 -left-2 bg-violet-600/90 rounded px-1 border border-violet-400 z-10">
                                     <Text style={{ fontSize: 7, fontWeight: 'bold', color: '#fff' }}>
                                       {mBhop === 'โลกาวินาศ' ? 'วินาศ' : mBhop}
                                     </Text>

@@ -55,6 +55,15 @@ const TAKSA_DIRECTIONS = [
 ];
 
 const BASE4_NAMES = ["มหาอุตจ์", "โสฬสมงคล", "พฤหัสบดีเล็ก", "อังคารใหญ่", "ราชาโชค", "จักรพรรดิ", "มหาสิทธิโชค"];
+const BHOP_8_NAMES = ["อาตมะ", "ทาสา", "สิทธิโชค", "โภคทรัพย์", "โจร", "อุบาทว์", "อุปถัมภ์"];
+const BHOP_9_NAMES = ["อัตตะ", "สักกะ", "ญาติ", "ธนัง", "เคหัง", "นาวัง", "ภริยัง"];
+
+// ชื่อฐาน 1-3
+const BHOP_NATAL_NAMES = [
+  ["อัตตะ", "หินะ", "ธนัง", "ปิตา", "มาตา", "โภคา", "มัชฌิมา"],
+  ["ตนุ", "กฎุมภะ", "สหัชชะ", "พันธุ", "ปุตตะ", "อริ", "ปัตนิ"],
+  ["มรณะ", "ศุภะ", "กัมมะ", "ลาภะ", "พยายะ", "ทาสา", "ทาสี"]
+];
 
 const ROW_META = [
   { label: "ฐาน ๑", sub: "วันเกิด" },
@@ -157,12 +166,9 @@ export default function KarnchataScreen() {
   };
 
   const getBhopName = (rowIdx: number, colIdx: number) => {
-    const ROW_NAMES = [
-      ["อัตตะ", "หินะ", "ธะนัง", "ปิตา", "มาตา", "โภคา", "มัชฌิมา"],
-      ["ตนุ", "กดุมภะ", "สหัสชะ", "พันธุ", "ปุตตะ", "อริ", "ปัตนิ"],
-      ["มรณะ", "ศุภะ", "กัมมะ", "ลาภะ", "พยายะ", "ทาสา", "ทาสี"]
-    ];
-    if (rowIdx < 3) return ROW_NAMES[rowIdx][colIdx];
+    if (rowIdx < 3) return BHOP_NATAL_NAMES[rowIdx][colIdx];
+    if (rowIdx === 7) return BHOP_8_NAMES[colIdx];
+    if (rowIdx === 8) return BHOP_9_NAMES[colIdx];
     return "";
   };
 
@@ -347,14 +353,14 @@ export default function KarnchataScreen() {
                       {row.map((star: number, cIdx: number) => {
                         const isSelected = selectedCell?.row === rIdx && selectedCell?.col === cIdx;
                         const isHighlighted = hoverNum !== null && star === hoverNum;
+                        const phopName = isBase4 ? BASE4_NAMES[cIdx] : getBhopName(rIdx, cIdx);
 
                         return (
                           <TouchableOpacity
                             key={cIdx}
                             style={[
-                              styles.cellCircle,
-                              isBase4 && styles.cellCircleBase4,
-                              (isSelected || isHighlighted) && styles.cellCircleActive
+                              styles.cellCircleContainer,
+                              isBase4 && { minWidth: 60 }
                             ]}
                             activeOpacity={0.7}
                             onPress={() => {
@@ -362,13 +368,27 @@ export default function KarnchataScreen() {
                               setHoverNum(hoverNum === star ? null : star);
                             }}
                           >
-                            <Text style={[
-                              styles.cellCircleText,
-                              isBase4 && { color: THEME.mystic },
-                              (isSelected || isHighlighted) && { color: THEME.bg, fontWeight: 'bold' }
+                            {phopName ? (
+                              <Text style={[
+                                styles.phopNameText,
+                                isHighlighted && { color: THEME.gold }
+                              ]} numberOfLines={1}>
+                                {phopName}
+                              </Text>
+                            ) : null}
+                            <View style={[
+                              styles.cellCircle,
+                              isBase4 && styles.cellCircleBase4,
+                              (isSelected || isHighlighted) && styles.cellCircleActive
                             ]}>
-                              {star}
-                            </Text>
+                              <Text style={[
+                                styles.cellCircleText,
+                                isBase4 && { color: THEME.mystic },
+                                (isSelected || isHighlighted) && { color: THEME.bg, fontWeight: 'bold' }
+                              ]}>
+                                {star}
+                              </Text>
+                            </View>
                           </TouchableOpacity>
                         );
                       })}
@@ -528,6 +548,452 @@ export default function KarnchataScreen() {
     </SafeAreaView>
   );
 }
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
+const styles = StyleSheet.create({
+  dateHeader: {
+    alignItems: 'center',
+    marginBottom: 16
+  },
+  dateTitle: {
+    color: THEME.text,
+    fontSize: 18,
+    fontWeight: 'bold',
+    fontFamily: 'IBMPlexSansThai_700Bold'
+  },
+  dateSub: {
+    color: THEME.textMuted,
+    fontSize: 11,
+    marginTop: 4,
+    fontFamily: 'IBMPlexSansThai_400Regular'
+  },
+  modeToggleRow: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(10, 34, 64, 0.4)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 30,
+    padding: 3,
+    marginBottom: 16
+  },
+  toggleBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    alignItems: 'center',
+    borderRadius: 26
+  },
+  toggleBtnActive: {
+    backgroundColor: 'rgba(198, 169, 107, 0.15)',
+    borderWidth: 1,
+    borderColor: THEME.gold
+  },
+  toggleText: {
+    color: THEME.textMuted,
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontFamily: 'IBMPlexSansThai_700Bold'
+  },
+  toggleTextActive: {
+    color: THEME.gold
+  },
+  customInputRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 16
+  },
+  inputLabel: {
+    color: THEME.textMuted,
+    fontSize: 10,
+    marginBottom: 6,
+    marginLeft: 4,
+    fontFamily: 'IBMPlexSansThai_600SemiBold'
+  },
+  textInput: {
+    backgroundColor: THEME.inputBg,
+    borderWidth: 1,
+    borderColor: THEME.border,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    color: THEME.text,
+    fontSize: 12,
+    fontFamily: 'IBMPlexSansThai_400Regular'
+  },
+  timeCard: {
+    backgroundColor: THEME.cardBg,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: THEME.border,
+    padding: 24,
+    marginBottom: 20,
+    overflow: 'hidden'
+  },
+  timeLabelText: {
+    color: THEME.textMuted,
+    fontSize: 11,
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    fontFamily: 'IBMPlexSansThai_700Bold'
+  },
+  clockText: {
+    color: THEME.text,
+    fontSize: 48,
+    fontFamily: 'Cinzel_700Bold',
+    marginVertical: 12
+  },
+  yamLabelRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 4
+  },
+  yamBadge: {
+    backgroundColor: 'rgba(2, 6, 23, 0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    alignItems: 'center',
+    minWidth: 100
+  },
+  yamBadgeLabel: {
+    color: THEME.textMuted,
+    fontSize: 8,
+    fontFamily: 'IBMPlexSansThai_500Medium'
+  },
+  yamBadgeVal: {
+    color: THEME.text,
+    fontSize: 12,
+    fontWeight: 'bold',
+    fontFamily: 'IBMPlexSansThai_700Bold',
+    marginTop: 2
+  },
+  scoreGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 24
+  },
+  scoreItemCard: {
+    backgroundColor: THEME.cardBg,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 16,
+    width: '48%',
+    padding: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6
+  },
+  scoreItemLabel: {
+    color: THEME.textMuted,
+    fontSize: 10,
+    fontFamily: 'IBMPlexSansThai_600SemiBold'
+  },
+  scoreItemVal: {
+    fontSize: 20,
+    fontFamily: 'Cinzel_700Bold'
+  },
+  scoreLine: {
+    width: 24,
+    height: 2,
+    borderRadius: 1
+  },
+  sectionTitle: {
+    color: THEME.text,
+    fontSize: 14,
+    fontFamily: 'IBMPlexSansThai_700Bold',
+    marginBottom: 12,
+    marginTop: 4
+  },
+  matrixCard: {
+    backgroundColor: THEME.cardBg,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: THEME.border,
+    padding: 16,
+    marginBottom: 16
+  },
+  matrixContainer: {
+    gap: 12,
+    paddingBottom: 4
+  },
+  matrixRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
+  rowLabelBlock: {
+    width: 60,
+    marginRight: 12
+  },
+  rowLabelText: {
+    color: THEME.text,
+    fontSize: 11,
+    fontWeight: 'bold',
+    fontFamily: 'IBMPlexSansThai_700Bold'
+  },
+  rowLabelSub: {
+    color: THEME.textMuted,
+    fontSize: 8,
+    fontFamily: 'IBMPlexSansThai_400Regular'
+  },
+  cellCircleContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginHorizontal: 3
+  },
+  phopNameText: {
+    fontSize: 7,
+    fontWeight: 'bold',
+    color: THEME.textMuted,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+    textAlign: 'center',
+    width: '100%'
+  },
+  cellCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(2, 6, 23, 0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(198, 169, 107, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  cellCircleBase4: {
+    borderColor: 'rgba(75, 110, 174, 0.4)',
+  },
+  cellCircleActive: {
+    backgroundColor: THEME.gold,
+    borderColor: THEME.text
+  },
+  cellCircleText: {
+    color: THEME.text,
+    fontSize: 14,
+    fontFamily: 'Cinzel_700Bold'
+  },
+  cellDetailCard: {
+    backgroundColor: 'rgba(198, 169, 107, 0.08)',
+    borderWidth: 1,
+    borderColor: THEME.border,
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 24
+  },
+  cellDetailHeader: {
+    color: THEME.gold,
+    fontSize: 11,
+    fontWeight: 'bold',
+    fontFamily: 'IBMPlexSansThai_700Bold',
+    marginBottom: 4
+  },
+  cellDetailText: {
+    color: THEME.text,
+    fontSize: 12,
+    fontFamily: 'IBMPlexSansThai_400Regular',
+    marginTop: 2
+  },
+  taksaGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    gap: 8,
+    marginBottom: 24
+  },
+  directionCard: {
+    backgroundColor: 'rgba(2, 6, 23, 0.4)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 18,
+    width: '31%',
+    padding: 10,
+    alignItems: 'center'
+  },
+  directionCardActive: {
+    borderColor: THEME.gold,
+    backgroundColor: 'rgba(198, 169, 107, 0.08)'
+  },
+  dirNameText: {
+    color: THEME.textMuted,
+    fontSize: 8,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    fontFamily: 'IBMPlexSansThai_600SemiBold',
+    marginBottom: 6
+  },
+  dirStarText: {
+    color: THEME.text,
+    fontSize: 10,
+    fontFamily: 'IBMPlexSansThai_400Regular',
+    marginBottom: 2
+  },
+  dirNumText: {
+    color: THEME.gold,
+    fontSize: 15,
+    fontFamily: 'Cinzel_700Bold',
+    marginVertical: 4
+  },
+  dirBadgeRow: {
+    width: '100%',
+    gap: 4,
+    marginTop: 4
+  },
+  dirBadge: {
+    borderWidth: 1,
+    borderRadius: 6,
+    paddingVertical: 2,
+    alignItems: 'center'
+  },
+  dirBadgeText: {
+    fontSize: 7,
+    fontWeight: 'bold',
+    fontFamily: 'IBMPlexSansThai_700Bold'
+  },
+  categoryScroll: {
+    flexDirection: 'row',
+    marginBottom: 12
+  },
+  catBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 14,
+    backgroundColor: 'rgba(2, 6, 23, 0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    marginRight: 6
+  },
+  catBadgeActive: {
+    backgroundColor: 'rgba(75, 110, 174, 0.2)',
+    borderColor: THEME.mystic
+  },
+  catBadgeText: {
+    color: THEME.text,
+    fontSize: 11,
+    fontWeight: 'bold',
+    fontFamily: 'IBMPlexSansThai_700Bold'
+  },
+  suggestionsBox: {
+    backgroundColor: 'rgba(2, 6, 23, 0.4)',
+    borderRadius: 16,
+    padding: 14,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)'
+  },
+  suggestTitle: {
+    color: THEME.gold,
+    fontSize: 11,
+    fontWeight: 'bold',
+    fontFamily: 'IBMPlexSansThai_700Bold',
+    marginBottom: 8
+  },
+  suggestItem: {
+    paddingVertical: 6
+  },
+  suggestText: {
+    color: THEME.text,
+    fontSize: 11,
+    lineHeight: 16,
+    fontFamily: 'IBMPlexSansThai_400Regular'
+  },
+  chatContainer: {
+    backgroundColor: THEME.cardBg,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: THEME.border,
+    overflow: 'hidden'
+  },
+  chatHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(10, 34, 64, 0.3)',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.05)'
+  },
+  greenDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#10B981'
+  },
+  chatHeaderTitle: {
+    color: THEME.text,
+    fontSize: 11,
+    fontWeight: 'bold',
+    fontFamily: 'IBMPlexSansThai_700Bold'
+  },
+  chatList: {
+    padding: 16,
+    gap: 16,
+    minHeight: 200
+  },
+  chatMsg: {
+    maxWidth: '85%',
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1
+  },
+  chatMsgUser: {
+    alignSelf: 'flex-end',
+    backgroundColor: 'rgba(10, 34, 64, 0.8)',
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderTopRightRadius: 2
+  },
+  chatMsgAi: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(2, 6, 23, 0.6)',
+    borderColor: 'rgba(198, 169, 107, 0.1)',
+    borderTopLeftRadius: 2
+  },
+  chatMsgLabel: {
+    color: THEME.gold,
+    fontSize: 9,
+    fontWeight: 'bold',
+    fontFamily: 'IBMPlexSansThai_700Bold',
+    marginBottom: 4
+  },
+  chatMsgText: {
+    color: THEME.text,
+    fontSize: 11,
+    lineHeight: 16,
+    fontFamily: 'IBMPlexSansThai_400Regular'
+  },
+  chatInputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    backgroundColor: 'rgba(2, 6, 23, 0.5)',
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.05)'
+  },
+  chatTextInput: {
+    flex: 1,
+    backgroundColor: 'rgba(10, 34, 64, 0.8)',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    color: THEME.text,
+    fontSize: 12,
+    fontFamily: 'IBMPlexSansThai_400Regular'
+  },
+  chatSendBtn: {
+    backgroundColor: THEME.gold,
+    width: 38,
+    height: 38,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  chatSendBtnDisabled: {
+    backgroundColor: THEME.textMuted,
+    opacity: 0.5
+  }
+});
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
