@@ -1142,15 +1142,15 @@ export function getTaksaTransitIndicator(star: number, taksaMaha?: any) {
   const bhop = taksaMaha.taksaTransit.map[star];
   switch (bhop) {
     case "ศรี":
-      return { label: "ศรี", fullName: "ศรีจร (โชคลาภ/โอกาสดี)", color: "text-emerald-400 bg-emerald-950/80 border-emerald-500/30" };
+      return { label: "ศรี", fullName: "ศรีจร (โชคลาภ/โอกาสดี)", color: "text-[#00FF00] bg-emerald-950/80 border-[#00FF00]/50" };
     case "มนตรี":
       return { label: "มนตรี", fullName: "มนตรีจร (ผู้อุปถัมภ์/สนับสนุน)", color: "text-sky-400 bg-sky-950/80 border-sky-500/30" };
     case "เดช":
-      return { label: "เดช", fullName: "เดชจร (เกียรติยศ/อำนาจบารมี)", color: "text-[#F8F6F1] bg-white/20 border-white/40" };
+      return { label: "เดช", fullName: "เดชจร (เกียรติยศ/อำนาจบารมี)", color: "text-[#FFFFFF] bg-white/20 border-[#FFFFFF]/50 shadow-[0_0_10px_rgba(255,255,255,0.3)]" };
     case "กาลกิณี":
-      return { label: "กาลี", fullName: "กาลกิณีจร (อุปสรรค/ข้อควรระวัง)", color: "text-red-400 bg-red-950/80 border-red-500/30" };
+      return { label: "กาลี", fullName: "กาลกิณีจร (อุปสรรค/ข้อควรระวัง)", color: "text-[#FF0000] bg-rose-950/80 border-[#FF0000]/50" };
     default:
-      return null;
+      return { label: bhop, fullName: `${bhop}จร`, color: "text-slate-300 bg-slate-800/80 border-slate-700/50" };
   }
 }
 
@@ -1165,11 +1165,15 @@ export function getMahaTransitIndicator(star: number, taksaMaha?: any) {
     }
   }
   
+  if (!bhop) return null;
+
   switch (bhop) {
     case "โลกาวินาศ":
-      return { label: "วินาศ", fullName: "โลกาวินาศจร (ความแปรปรวน/ความเครียดภายใน)", color: "text-amber-400 bg-amber-950/80 border-amber-500/30" };
+      return { label: "วินาศ", fullName: "โลกาวินาศจร (ความแปรปรวน/ความเครียดภายใน)", color: "text-[#FFD700] bg-amber-950/80 border-[#FFD700]/50" };
+    case "ธงชัย":
+      return { label: "ธงชัย", fullName: "ธงชัยจร (ชัยชนะ/ความสำเร็จ)", color: "text-[#FFFF00] bg-yellow-950/80 border-[#FFFF00]/50" };
     default:
-      return null;
+      return { label: bhop, fullName: `${bhop}จร`, color: "text-violet-300 bg-violet-950/80 border-violet-500/30" };
   }
 }
 
@@ -1411,6 +1415,109 @@ const BASE4_MEANINGS: Record<number, string> = {
   17: 'พุธใหญ่', 18: 'มหาจักรพรรดิ์', 19: 'พระพฤหัส', 20: 'เสาร์ใหญ่', 21: 'พระศุกร์',
 };
 
+function GuidanceItem({ label, desc, color }: { label: string, desc: string, color?: string }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <span className={`text-[13px] font-bold font-thai ${color || "text-[#C6A96B]"}`}>{label}:</span>
+      <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai">{desc}</p>
+    </div>
+  );
+}
+
+function DetailedGuidancePanel() {
+  return (
+    <Card className="mt-8 border-[#C6A96B]/30 bg-[#0A1628]/60 p-6 rounded-3xl space-y-8 backdrop-blur-xl">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* ปัจจัยภายนอก (ทักษาจรปีนี้) */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 border-b border-[#C6A96B]/20 pb-3">
+             <span className="text-xl">✨</span>
+             <h3 className="font-bold text-[#F8F6F1] text-base font-thai">ปัจจัยภายนอก (ทักษาจรปีนี้):</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <GuidanceItem label="บริวาร" desc="ลูกน้อง คนรัก ครอบครัว หรือโครงการร่วมมือกันใหม่ๆ" />
+            <GuidanceItem label="อายุ" desc="สุขภาพร่างกาย พลังชีวิต และความมั่นคงในการดูแลตนเอง" />
+            <GuidanceItem label="เดช" desc="อำนาจบารมี เกียรติยศ ชัยชนะ และสิทธิ์ขาดการตัดสินใจ (ขาวสว่าง)" color="text-[#FFFFFF]" />
+            <GuidanceItem label="ศรี" desc="สิริมงคลสูงสุด โชคลาภ ความรักราบรื่น ทรัพย์สินเงินทอง (เขียวสว่าง)" color="text-[#00FF00]" />
+            <GuidanceItem label="มูละ" desc="ฐานรากชีวิตที่มั่นคง มรดก การออม ทรัพย์สินชิ้นใหญ่ บ้าน/ที่ดิน" />
+            <GuidanceItem label="อุตสาหะ" desc="ความเพียรพยายาม งานหนัก โครงการที่ต้องฝ่าฟันลุล่วง" />
+            <GuidanceItem label="มนตรี" desc="ผู้ใหญ่เมตตาเอ็นดู ผู้อุปถัมภ์ช่วยเหลือ คอยเกื้อหนุนแนะนำ" />
+            <GuidanceItem label="กาลกิณี" desc="สิ่งที่ควรระวัง อุปสรรคขัดข้อง ความขัดแย้ง หรือสุขภาพ (แดงสว่าง)" color="text-[#FF0000]" />
+          </div>
+        </div>
+
+        {/* ปัจจัยภายใน (มหาภูติจรปีนี้) */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 border-b border-[#C6A96B]/20 pb-3">
+             <span className="text-xl">🧠</span>
+             <h3 className="font-bold text-[#F8F6F1] text-base font-thai">ปัจจัยภายใน (มหาภูติจรปีนี้):</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <GuidanceItem label="อธิบดี" desc="สภาวะจิตใจเข้มแข็ง ความคิดกล้าหาญพร้อมปกครองหรือคุมงานใหญ่" />
+            <GuidanceItem label="ราชา" desc="สภาวะภายในรุ่งโรจน์ สง่างาม ได้รับความเอ็นดูเคารพรัก" />
+            <GuidanceItem label="ธงชัย" desc="แรงขับเคลื่อนภายในสู่ชัยชนะ ความสำเร็จ และสัจจะชัยชนะของจิตใจ" color="text-[#FFFF00]" />
+            <GuidanceItem label="ขุมทรัพย์" desc="ความสมบูรณ์ของความรู้สึกภายใน คลังปัญญา หรือจังหวะชีวิตทำเงิน" />
+            <GuidanceItem label="มรณะ" desc="ความคิดที่อยากปรับปรุง เปลี่ยนแปลง ยุติบางสิ่งเพื่อก้าวข้ามสู่บทเรียนใหม่" />
+            <GuidanceItem label="อริ" desc="จิตใจต้องอดทนต่อแรงกดดัน การแก้ปัญหาเรื่องขัดข้องรายวัน" />
+            <GuidanceItem label="โลกาวินาศ" desc="ความแปรปรวนพลิกผันของสภาวะจิตใจ เรื่องหลังบ้านแปรปรวน (ส้มเหลืองสว่าง)" color="text-[#FFD700]" />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-6 border-t border-white/5">
+        {/* สัญลักษณ์ผังดวง */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+             <h3 className="font-bold text-[#F8F6F1] text-sm font-thai uppercase tracking-wider">สัญลักษณ์ผังดวง:</h3>
+          </div>
+          <div className="flex gap-8">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#C6A96B] text-black text-[10px] font-bold flex items-center justify-center border border-black/20 shadow-sm">ล</div>
+              <span className="text-xs text-[#8A8070] font-thai">ลัคนากำเนิด</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center border border-red-400 shadow-sm">ลอ</div>
+              <span className="text-xs text-[#8A8070] font-thai">ลัคนาจร</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ดาวน้ำ และกำลังส่งผลจากฐานที่ 4 */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 border-b border-white/10 pb-3">
+             <h3 className="font-bold text-[#F8F6F1] text-sm font-thai uppercase tracking-wider">ดาวน้ำ และกำลังส่งผลจากฐานที่ 4 (กำลังเทวดา):</h3>
+          </div>
+          <div className="space-y-3">
+            <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai">
+              <span className="text-[#C6A96B] font-bold">1) ดาวย้ำคืออะไร:</span> หลังจากรู้แล้วว่าปีจรตกภพไหน ขั้นต่อมาคือดู <span className="text-[#F8F6F1] font-bold">ดาวย้ำ</span> เพราะดาวย้ำจะช่วยบอกว่าเรื่องที่ปีจรไปตกนั้น จะถูกย้ำด้วยพลังของดาวอะไร หรือมีดาวอะไรเข้ามาจับคู่ให้ความหมายหนักขึ้น ชัดขึ้น หรือเฉพาะเจาะจงมากขึ้น
+            </p>
+            <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai">
+              <span className="text-[#C6A96B] font-bold">2) พูดง่ายๆ คือ:</span> ปีจรบอกว่าปีนี้ตกภพอะไร ดาวย้ำบอกว่าภพนั้นถูกย้ำด้วยดาวอะไร
+            </p>
+            <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai">
+              <span className="text-[#C6A96B] font-bold">3) การออกคำทำนาย:</span> เวลาออกคำทำนาย เราไม่ได้ดูแค่ภพที่ปีจรตก แต่ต้องลากแนวดิ่งลงไปดูดาวย้ำในฐานที่ 5, 6, 7 ร่วมด้วยเสมอ
+            </p>
+            <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai">
+              <span className="text-[#C6A96B] font-bold">4) วิธีดูดาวย้ำ:</span>
+            </p>
+            <ul className="list-disc list-inside space-y-1 ml-2 text-[11px] text-[#8A8070] font-thai">
+              <li>ตกฐานวัน (อัตตะ ถึง มัชฌิมา): ดูดาวย้ำที่ ฐานที่ 5 ในแถวคอลัมน์เดียวกัน</li>
+              <li>ตกฐานเดือน (ตนุ ถึง ปัตนิ): ดูดาวย้ำที่ ฐานที่ 6 ในแถวคอลัมน์เดียวกัน</li>
+              <li>ตกฐานปี (มรณะ ถึง ทาสี): ดูดาวย้ำที่ ฐานที่ 7 ในแถวคอลัมน์เดียวกัน</li>
+            </ul>
+            <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai bg-white/5 p-3 rounded-xl border border-white/10">
+              <span className="text-[#C6A96B] font-bold">5) กำลังการส่งผลจากฐานที่ 4 (กำลังเทวดา):</span> ไม่ว่าปีจรจะตกที่ฐานใดก็ตาม (ฐานวัน 1, ฐานเดือน 2, หรือ ฐานปี 3) ให้เราดูที่ <span className="text-[#F8F6F1] font-bold">** คอลัมน์เดียวกันในฐานที่ 4 **</span> เป็นหลัก เพื่อดูอิทธิพลร่วมของกำลังเทวดานั้น ซึ่งจะแผ่กำลังส่งผลรวมไปถึงดาวย้ำทั้งหมดด้วยเช่นกัน
+            </p>
+            <p className="text-[12px] text-emerald-400 font-bold font-thai text-center py-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              📍 สรุปจำง่ายๆ: ตกฐานวัน - ย้ำฐาน 5 | ตกฐานเดือน - ย้ำฐาน 6 | ตกฐานปี - ย้ำฐาน 7 (ลากตรงลงมาผ่านกำลังเทวดาฐาน 4)
+            </p>
+          </div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 function FateMatrixPanel({ 
   matrix, 
   activeNum, 
@@ -1444,24 +1551,11 @@ function FateMatrixPanel({
   showTaksaJorn?: boolean;
   showMahaJorn?: boolean;
 }) {
-  const getCellAgeRange = (row: number, col: number, mat: number[][]) => {
-    let currentAgeStart = 1;
-    for (let c = 0; c < 7; c++) {
-      for (let r = 0; r < 3; r++) {
-        const star = mat[r]?.[c] ? mat[r][c] : 7;
-        const currentAgeEnd = currentAgeStart + star - 1;
-        if (r === row && c === col) return `${currentAgeStart}-${currentAgeEnd}`;
-        currentAgeStart = currentAgeEnd + 1;
-      }
-    }
-    return "";
-  };
-
   return (
     <div onClick={() => onNumClick(null)} className="w-full">
-      <Card className="p-0 overflow-hidden border-[#D9BC82]/20 shadow-2xl">
+      <Card className="p-0 overflow-hidden border-[#D9BC82]/20 shadow-2xl bg-[#020617]/40 backdrop-blur-2xl">
         <div onClick={(e) => e.stopPropagation()} className="bg-[#D9BC82]/10 p-4 border-b border-[#D9BC82]/20 flex justify-between items-center">
-          <p className="text-[#D9BC82] text-sm font-bold uppercase tracking-widest">ผังดวงเลข 7 ตัว 9 ฐาน (35 ภพเรือนสมบูรณ์)</p>
+          <p className="text-[#D9BC82] text-sm font-bold uppercase tracking-widest font-thai">ผังดวงเลข 7 ตัว 9 ฐาน (35 ภพเรือนสมบูรณ์)</p>
         </div>
         <div className="overflow-x-auto p-6 bg-slate-900/30">
           <table className="w-full border-collapse">
@@ -1469,8 +1563,8 @@ function FateMatrixPanel({
               {matrix.map((row, rIdx) => (
                 <tr key={rIdx} className={rIdx === 3 ? "bg-[#4B6FAE]/15 border-y border-[#4B6FAE]/45" : "hover:bg-white/5"}>
                   <td className="py-4 pr-6 text-left whitespace-nowrap min-w-[120px] border-r border-white/5">
-                    <p className="text-xs font-black text-[#F8F6F1] leading-tight">{ROW_META[rIdx].label}</p>
-                    <p className="text-[10px] text-[#8A8070] font-bold uppercase tracking-tighter mt-1">{ROW_META[rIdx].sub}</p>
+                    <p className="text-xs font-black text-[#F8F6F1] leading-tight font-thai">{ROW_META[rIdx].label}</p>
+                    <p className="text-[10px] text-[#8A8070] font-bold uppercase tracking-tighter mt-1 font-thai">{ROW_META[rIdx].sub}</p>
                   </td>
                   {row.map((num, cIdx) => {
                     const getStarFromBase4 = (n: number): number => {
@@ -1495,11 +1589,14 @@ function FateMatrixPanel({
                     const isVayaJorn = isRow012 && phopephumResult?.vayaJorn?.row === (rIdx + 1) && phopephumResult?.vayaJorn?.col === (cIdx + 1);
                     const isYearlyJorn = isRow012 && phopephumResult?.yearlyJorn?.row === (rIdx + 1) && phopephumResult?.yearlyJorn?.col === (cIdx + 1);
 
+                    const taksaIndicator = isRow012 ? getTaksaTransitIndicator(actualNum, taksaMaha) : null;
+                    const mahaIndicator = isRow012 ? getMahaTransitIndicator(actualNum, taksaMaha) : null;
+
                     return (
-                      <td key={cIdx} className="p-2 min-w-[70px]">
+                      <td key={cIdx} className="p-2 min-w-[80px]">
                         <button onClick={(e) => { e.stopPropagation(); onNumClick(isBase4 ? matrix[2]?.[cIdx] : actualNum); }} type="button" className={`flex flex-col items-center gap-1.5 focus:outline-none relative w-full ${isDimmed ? "opacity-30" : ""}`}>
                           {phopName && (
-                            <span className={`text-[9px] font-black uppercase text-center w-full leading-tight h-6 flex items-center justify-center transition-colors ${isHighlighted ? "text-[#D9BC82]" : "text-[#8A8070]"}`}>
+                            <span className={`text-[9px] font-black uppercase text-center w-full leading-tight h-6 flex items-center justify-center transition-colors font-thai ${isHighlighted ? "text-[#D9BC82]" : "text-[#8A8070]"}`}>
                               {phopName}
                             </span>
                           )}
@@ -1508,10 +1605,10 @@ function FateMatrixPanel({
                           </div>
                           
                           {showNatalLagna && isLagnaNatal && (
-                            <span className="absolute -bottom-1 -left-1 text-[8px] font-bold bg-[#C6A96B] text-[#020617] border border-[#C6A96B]/60 px-1 rounded-full z-10 shadow-sm">ล</span>
+                            <span className="absolute -bottom-1 -left-1 text-[8px] font-bold bg-[#C6A96B] text-[#020617] border border-[#C6A96B]/60 px-1 rounded-full z-10 shadow-sm font-thai">ล</span>
                           )}
                           {showTransitLagna && isLagnaTransit && (
-                            <span className="absolute -bottom-1 -right-1 text-[9px] font-bold bg-red-500 text-white border border-red-400 px-1 rounded-full z-10 shadow-sm">ลอ</span>
+                            <span className="absolute -bottom-1 -right-1 text-[9px] font-bold bg-red-500 text-white border border-red-400 px-1 rounded-full z-10 shadow-sm font-thai">ลอ</span>
                           )}
                           <div className="absolute -bottom-3 flex gap-0.5">
                             {showVayaJorn && isVayaJorn && <span className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse shadow-[0_0_5px_#C6A96B]" />}
@@ -1520,21 +1617,24 @@ function FateMatrixPanel({
                             {showDailyJorn && isRow012 && phopephumResult?.dailyJorn?.row === (rIdx + 1) && phopephumResult?.dailyJorn?.col === (cIdx + 1) && <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]" />}
                           </div>
                           
-                          {/* Taksa & Maha Badges Overlay */}
-                          {isRow012 && showTaksaJorn && taksaMaha?.taksaTransit?.map?.[actualNum] && (
-                            <div className="absolute -top-1 -right-4 z-10">
-                              {taksaMaha.taksaTransit.map[actualNum] === "ศรี" && <span className="text-[8px] px-1 rounded bg-emerald-500 text-white font-bold shadow-md border border-emerald-400">ศรี</span>}
-                              {taksaMaha.taksaTransit.map[actualNum] === "กาลกิณี" && <span className="text-[8px] px-1 rounded bg-rose-500 text-white font-bold shadow-md border border-rose-400">กาลี</span>}
-                              {taksaMaha.taksaTransit.map[actualNum] === "เดช" && <span className="text-[8px] px-1 rounded bg-white text-black font-bold shadow-md border border-gray-300">เดช</span>}
-                              {taksaMaha.taksaTransit.map[actualNum] === "มนตรี" && <span className="text-[8px] px-1 rounded bg-sky-500 text-white font-bold shadow-md border border-sky-400">มนตรี</span>}
-                            </div>
-                          )}
-                          {isRow012 && showMahaJorn && taksaMaha?.mahaTransit?.map && (
-                            <div className="absolute -top-1 -left-4 z-10">
-                              {Object.entries(taksaMaha.mahaTransit.map).find(([k, v]) => v === actualNum)?.[0] === "โลกาวินาศ" && <span className="text-[8px] px-1 rounded bg-amber-500 text-black font-bold shadow-md border border-amber-400">วินาศ</span>}
-                              {Object.entries(taksaMaha.mahaTransit.map).find(([k, v]) => v === actualNum)?.[0] === "มรณะ" && <span className="text-[8px] px-1 rounded bg-slate-600 text-white font-bold shadow-md border border-slate-400">มรณะ</span>}
-                              {Object.entries(taksaMaha.mahaTransit.map).find(([k, v]) => v === actualNum)?.[0] === "อริ" && <span className="text-[8px] px-1 rounded bg-orange-600 text-white font-bold shadow-md border border-orange-400">อริ</span>}
-                            </div>
+                          {/* Taksa & Maha Badges Overlay - Refined Positioning & Set Separation */}
+                          {isRow012 && (
+                            <>
+                              {showTaksaJorn && taksaIndicator && (
+                                <div className="absolute -top-1 -right-4 z-20">
+                                   <span className={`text-[8px] px-1.5 py-0.5 rounded-md font-bold shadow-lg border font-thai ${taksaIndicator.color}`}>
+                                     {taksaIndicator.label}
+                                   </span>
+                                </div>
+                              )}
+                              {showMahaJorn && mahaIndicator && (
+                                <div className="absolute -top-1 -left-4 z-20">
+                                   <span className={`text-[8px] px-1.5 py-0.5 rounded-md font-bold shadow-lg border font-thai ${mahaIndicator.color}`}>
+                                     {mahaIndicator.label}
+                                   </span>
+                                </div>
+                              )}
+                            </>
                           )}
                         </button>
                       </td>
