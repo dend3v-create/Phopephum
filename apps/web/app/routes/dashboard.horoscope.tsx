@@ -288,7 +288,7 @@ function WisdomBirthGuidanceCard({ profile, activeResult, lunar }: { profile: an
   const transitDateText = `${tDay} ${monthNames[tMonth - 1]} ${tDateThai}`;
 
   // Lunar Birth
-  const natalLunar = activeResult?.phopephumResult?.nineBase?.lunarDate || "—";
+  const natalLunar = activeResult?.phopephumResult?.nineBase?.lunarDate?.thaiDateText || activeResult?.lunar?.thaiDateText || "—";
   const currentAge = activeResult?.phopephumResult?.taksaTransit?.ageYang || 0;
 
   return (
@@ -425,7 +425,8 @@ function ComparisonCard({ activeResult }: { activeResult: any }) {
             {nakshatra ? (
               <div>
                 <p className="text-[10px] text-[#8A8070] mb-1">นักษัตรฤกษ์ที่เกาะ</p>
-                <p className="text-xs text-[#F8F6F1] font-bold leading-tight">{nakshatra}</p>
+                <p className="text-xs text-[#F8F6F1] font-bold leading-tight">{nakshatra.name} ({nakshatra.category})</p>
+                <p className="text-[9px] text-[#8A8070] mt-1">{nakshatra.meaning}</p>
               </div>
             ) : null}
             {yam ? (

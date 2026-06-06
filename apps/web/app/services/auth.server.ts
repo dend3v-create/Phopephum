@@ -7,6 +7,16 @@ import { getUserPlan, canAccess, type Plan } from "./permissions.server";
 export { canAccess, type Plan };
 
 export async function getUser(request: Request, env: Env) {
+  const authHeader = request.headers.get("Authorization");
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.substring(7);
+    const client = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
+    const {
+      data: { user },
+    } = await client.auth.getUser(token);
+    return user;
+  }
+
   const { supabase } = createSupabaseClient(request, env);
   const {
     data: { user },
