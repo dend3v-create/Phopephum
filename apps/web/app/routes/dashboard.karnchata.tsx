@@ -495,16 +495,21 @@ export default function KarnchataPage() {
               <div className="w-20 text-[11px] font-bold text-[#F8F6F1]">ฐาน {rIdx + 1 === 1 ? '๑' : rIdx + 1 === 2 ? '๒' : '๓'}</div>
               <div className="flex-1 flex justify-between">
                 {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
-                  <div key={cIdx} className="flex flex-col items-center gap-2 w-14">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 ${
-                      hoverNum === star 
-                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]" 
-                        : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1]"
+                  <button
+                    key={cIdx}
+                    type="button"
+                    onClick={() => setHoverNum(hoverNum === star ? null : star)}
+                    className="flex flex-col items-center gap-2 w-14 focus:outline-none"
+                  >
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
+                      hoverNum === star
+                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]"
+                        : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
                     }`}>
                       {star}
                     </div>
                     <span className="text-[9px] text-[#8A8070] font-medium">{getBhopName(rIdx, cIdx)}</span>
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
@@ -517,20 +522,28 @@ export default function KarnchataPage() {
                <div className="text-[8px] text-sky-400/60 leading-tight mt-0.5">กำลังเทวดา</div>
              </div>
              <div className="flex-1 flex justify-between pr-2">
-                {activeResult.chart[3].map((star: number, cIdx: number) => (
-                  <div key={cIdx} className="flex flex-col items-center gap-2 w-14">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 ${
-                      hoverNum === star
-                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]"
-                        : "bg-[#020617] border border-sky-500/50 text-[#F8F6F1]"
-                    }`}>
-                      {star}
-                    </div>
-                    <span className="text-[8px] text-sky-400/80 font-medium text-center leading-tight">
-                      {BASE4_POWER_NAMES[star] || ""}
-                    </span>
-                  </div>
-                ))}
+                {activeResult.chart[3].map((star: number, cIdx: number) => {
+                  const base4Star = star % 7 || 7;
+                  return (
+                    <button
+                      key={cIdx}
+                      type="button"
+                      onClick={() => setHoverNum(hoverNum === base4Star ? null : base4Star)}
+                      className="flex flex-col items-center gap-2 w-14 focus:outline-none"
+                    >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
+                        hoverNum === base4Star
+                          ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]"
+                          : "bg-[#020617] border border-sky-500/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
+                      }`}>
+                        {star}
+                      </div>
+                      <span className="text-[8px] text-sky-400/80 font-medium text-center leading-tight">
+                        {BASE4_POWER_NAMES[star] || ""}
+                      </span>
+                    </button>
+                  );
+                })}
              </div>
           </div>
 
@@ -540,17 +553,22 @@ export default function KarnchataPage() {
               <div className="w-20 text-[11px] font-bold text-[#F8F6F1]">ฐาน {rIdx + 1 === 5 ? '๕' : rIdx + 1 === 6 ? '๖' : rIdx + 1 === 7 ? '๗' : rIdx + 1 === 8 ? '๘' : '๙'}</div>
               <div className="flex-1 flex justify-between">
                 {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
-                  <div key={cIdx} className="flex flex-col items-center gap-2 w-14">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 ${
-                      hoverNum === star 
-                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]" 
-                        : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1]"
+                  <button
+                    key={cIdx}
+                    type="button"
+                    onClick={() => setHoverNum(hoverNum === star ? null : star)}
+                    className="flex flex-col items-center gap-2 w-14 focus:outline-none"
+                  >
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
+                      hoverNum === star
+                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]"
+                        : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
                     }`}>
                       {star}
                     </div>
                     {rIdx === 7 && <span className="text-[9px] text-[#8A8070] font-medium">{"อาตมะ,ทาสา,สิทธิโชค,โภคทรัพย์,โจร,อุบาทว์".split(',')[cIdx]}</span>}
                     {rIdx === 8 && <span className="text-[9px] text-[#8A8070] font-medium">{"อัตตะ,สักกะ,ญาติ,ธนัง,เคหัง,นาวัง".split(',')[cIdx]}</span>}
-                  </div>
+                  </button>
                 ))}
               </div>
             </div>
