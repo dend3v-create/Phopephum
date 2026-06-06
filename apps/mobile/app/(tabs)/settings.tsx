@@ -61,6 +61,16 @@ export default function SettingsScreen() {
             <Ionicons name="chevron-forward" size={20} color="#8A8070" />
           </TouchableOpacity>
 
+          {profile?.role === 'admin' && (
+            <TouchableOpacity className="flex-row justify-between items-center p-4 border-b border-[#C6A96B]/10" onPress={() => router.push('/admin')}>
+              <View className="flex-row items-center gap-3">
+                <Ionicons name="shield-checkmark-outline" size={22} color="#C6A96B" />
+                <Text className="text-[#F8F6F1] text-[15px] font-medium font-thai">ระบบจัดการแอดมิน (Admin Panel)</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#8A8070" />
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity className="flex-row justify-between items-center p-4" onPress={() => router.push('/edit-profile')}>
             <View className="flex-row items-center gap-3">
               <Ionicons name="person-circle-outline" size={22} color="#C6A96B" />

@@ -154,6 +154,11 @@ export default function RootLayout() {
         <Stack.Screen name="(tabs)" options={{ title: "Main" }} />
         <Stack.Screen name="how-to-use" options={{ title: "วิธีการใช้งาน", presentation: 'modal' }} />
         <Stack.Screen name="edit-profile" options={{ title: "ตั้งค่าโปรไฟล์" }} />
+        <Stack.Screen name="dashboard/yam" options={{ headerShown: true, title: "ยามอัฏฐกาล" }} />
+        <Stack.Screen name="dashboard/karnchata" options={{ headerShown: true, title: "ทำนายกาลชะตา" }} />
+        <Stack.Screen name="admin/index" options={{ headerShown: true, title: "ระบบจัดการแอดมิน" }} />
+        <Stack.Screen name="admin/users" options={{ headerShown: true, title: "จัดการสมาชิก" }} />
+        <Stack.Screen name="admin/approvals" options={{ headerShown: true, title: "อนุมัติคำขอ" }} />
       </Stack>
       <StatusBar style="light" />
 

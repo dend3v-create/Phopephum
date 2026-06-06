@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { supabase } from '../lib/supabase';
 import { useRouter } from 'expo-router';
+import { CosmicLayout, CosmicCard } from '../components';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -25,107 +27,75 @@ export default function LoginScreen() {
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.header}>
-          <Text style={styles.title}>PHOPEPHUM</Text>
-          <Text style={styles.subtitle}>Living Wisdom OS</Text>
+    <CosmicLayout scrollable={false}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+      >
+        <View className="flex-1 justify-center px-8">
+          <View className="items-center mb-12">
+            <Text className="text-text-primary text-4xl font-bold font-cinzel tracking-[6px]">PHOPEPHUM</Text>
+            <View className="h-[1px] w-24 bg-gold-500/40 my-3" />
+            <Text className="text-gold-500 text-xs font-thai tracking-[3px] uppercase">Living Wisdom AI OS</Text>
+          </View>
+
+          <CosmicCard hasGlow className="p-6">
+            <View className="gap-y-5">
+              <View>
+                <Text className="text-text-muted text-[10px] uppercase font-bold tracking-widest mb-2 ml-1">อีเมล</Text>
+                <TextInput
+                  className="bg-cosmic-950/50 border border-gold-500/20 rounded-xl px-4 py-4 text-text-primary font-thai"
+                  onChangeText={(text) => setEmail(text)}
+                  value={email}
+                  placeholder="name@example.com"
+                  placeholderTextColor="#94A3B8"
+                  autoCapitalize={'none'}
+                />
+              </View>
+
+              <View>
+                <Text className="text-text-muted text-[10px] uppercase font-bold tracking-widest mb-2 ml-1">รหัสผ่าน</Text>
+                <TextInput
+                  className="bg-cosmic-950/50 border border-gold-500/20 rounded-xl px-4 py-4 text-text-primary font-thai"
+                  onChangeText={(text) => setPassword(text)}
+                  value={password}
+                  secureTextEntry={true}
+                  placeholder="••••••••"
+                  placeholderTextColor="#94A3B8"
+                  autoCapitalize={'none'}
+                />
+              </View>
+
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => signInWithEmail()}
+                disabled={loading}
+                className="mt-4 overflow-hidden rounded-xl"
+              >
+                <LinearGradient
+                  colors={['#C6A96B', '#D9BC82']}
+                  className="py-4 items-center"
+                >
+                  <Text className="text-cosmic-950 font-bold font-thai text-base">
+                    {loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+
+              <TouchableOpacity className="items-center mt-2">
+                 <Text className="text-text-muted text-xs font-thai">ลืมรหัสผ่าน? ติดต่อแอดมิน</Text>
+              </TouchableOpacity>
+            </View>
+          </CosmicCard>
+
+          <View className="items-center mt-12">
+             <Text className="text-text-muted/60 text-[10px] font-thai text-center leading-relaxed">
+               ลิขสิทธิ์เฉพาะสมาชิก Phopephum เท่านั้น{"\n"}
+               การเข้าใช้งานถือว่ายอมรับเงื่อนไขและนโยบายความเป็นส่วนตัว
+             </Text>
+          </View>
         </View>
-
-        <View style={styles.form}>
-          <Text style={styles.label}>อีเมล</Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={(text) => setEmail(text)}
-            value={email}
-            placeholder="name@example.com"
-            placeholderTextColor="#8A8070"
-            autoCapitalize={'none'}
-          />
-
-          <Text style={styles.label}>รหัสผ่าน</Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={(text) => setPassword(text)}
-            value={password}
-            secureTextEntry={true}
-            placeholder="••••••••"
-            placeholderTextColor="#8A8070"
-            autoCapitalize={'none'}
-          />
-
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => signInWithEmail()}
-            disabled={loading}
-          >
-            <Text style={styles.buttonText}>{loading ? 'กำลังเข้าสู่ระบบ...' : 'เข้าสู่ระบบ'}</Text>
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </CosmicLayout>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#020617',
-  },
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    padding: 24,
-  },
-  header: {
-    alignItems: 'center',
-    marginBottom: 48,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#F8F6F1',
-    letterSpacing: 4,
-  },
-  subtitle: {
-    fontSize: 12,
-    color: '#C6A96B',
-    marginTop: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-  },
-  form: {
-    gap: 16,
-  },
-  label: {
-    color: '#8A8070',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    marginLeft: 4,
-  },
-  input: {
-    backgroundColor: 'rgba(10, 34, 64, 0.58)',
-    borderWidth: 1,
-    borderColor: 'rgba(198, 169, 107, 0.18)',
-    borderRadius: 12,
-    padding: 16,
-    color: '#F8F6F1',
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: '#C6A96B',
-    borderRadius: 12,
-    padding: 18,
-    alignItems: 'center',
-    marginTop: 12,
-  },
-  buttonText: {
-    color: '#020617',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});
