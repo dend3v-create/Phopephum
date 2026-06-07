@@ -189,10 +189,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const taksaResult = calculateWisdomTaksa(phopephumResult.nineBase.bases[0][0], phopephumResult.taksaTransit.ageYang);
 
     // ── 3. Save to History (New calculations table) ──
+    const ownerName = String(formData.get("customerName") ?? "").trim() || user.email || "ไม่ระบุ";
+    
     await supabase.from("calculations").insert({
       user_id: user.id,
       calc_type: "phopephum_v2",
       input_data: { 
+        name: ownerName,
         birthDate: parsed.data.birthDate, 
         birthTime: parsed.data.birthTime,
         checkDate: checkDate.toISOString() 
@@ -307,7 +310,7 @@ function WisdomBirthGuidanceCard({ profile, activeResult, lunar }: { profile: an
           
           <div className="space-y-4">
             <div>
-              <h2 className="text-xl font-bold text-[#F8F6F1]">ดวงชะตาของ คุณ {profile?.full_name ?? profile?.username ?? "ไม่ระบุ"}</h2>
+              <h2 className="text-xl font-bold text-[#F8F6F1]">ดวงชะตาของ คุณ {profile?.display_name ?? profile?.full_name ?? profile?.username ?? "ไม่ระบุ"}</h2>
               <p className="text-xs text-[#8A8070] mt-1">ประจำวันที่ {transitDateText}</p>
             </div>
 
@@ -922,6 +925,61 @@ export default function HoroscopePage() {
               <button onClick={() => setShowTaksaDirection(!showTaksaDirection)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showTaksaDirection ? "bg-sky-500/10 border-sky-500/40 text-sky-400" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
                 <span className="text-xs">🧭</span> ทิศทักษา
               </button>
+              
+              {isFiltering && (
+                <button onClick={handleResetFilter} className="px-3 py-1.5 rounded-full border border-rose-500/40 bg-rose-500/10 text-rose-400 text-xs font-bold hover:bg-rose-500/20 transition-all">
+                  ✕ ล้างตัวกรอง
+                </button>
+              )}
+            </div>
+
+            {/* Sub-filters for Taksa and Mahabhuti categories */}
+            <div className="mt-4 pt-4 border-t border-white/5 space-y-4">
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-[10px] font-bold text-[#8A8070] uppercase tracking-widest mr-2">กรองทักษา:</span>
+                {["บริวาร", "อายุ", "เดช", "ศรี", "มูละ", "อุตสาหะ", "มนตรี", "กาลกิณี"].map((cat) => {
+                  const isSel = filterType === "taksa" && filterValue === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        handleFilterClick("taksa", cat);
+                        if (!showTaksaJorn) setShowTaksaJorn(true);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
+                        isSel 
+                          ? "bg-emerald-500 border-emerald-400 text-white shadow-[0_0_10px_rgba(16,185,129,0.4)]" 
+                          : "bg-slate-900/60 border-white/10 text-[#8A8070] hover:border-emerald-500/30 hover:text-emerald-400"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <div className="flex flex-wrap gap-2 items-center">
+                <span className="text-[10px] font-bold text-[#8A8070] uppercase tracking-widest mr-2">กรองมหาภูติ:</span>
+                {["อธิบดี", "ราชา", "ธงชัย", "ขุมทรัพย์", "มรณะ", "อริ", "โลกาวินาศ"].map((cat) => {
+                  const isSel = filterType === "maha" && filterValue === cat;
+                  return (
+                    <button
+                      key={cat}
+                      onClick={() => {
+                        handleFilterClick("maha", cat);
+                        if (!showMahaJorn) setShowMahaJorn(true);
+                      }}
+                      className={`px-2.5 py-1 rounded-lg text-[10px] font-bold transition-all border ${
+                        isSel 
+                          ? "bg-violet-600 border-violet-400 text-white shadow-[0_0_10px_rgba(139,92,246,0.4)]" 
+                          : "bg-slate-900/60 border-white/10 text-[#8A8070] hover:border-violet-500/30 hover:text-violet-400"
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </Card>
 
@@ -1144,15 +1202,23 @@ export function getTaksaTransitIndicator(star: number, taksaMaha?: any) {
   const bhop = taksaMaha.taksaTransit.map[star];
   switch (bhop) {
     case "ศรี":
-      return { label: "ศรี", fullName: "ศรีจร (โชคลาภ/โอกาสดี)", color: "text-[#00FF00] bg-emerald-950/80 border-[#00FF00]/50" };
+      return { label: "ศรี", fullName: "ศรีจร", color: "text-[#00FF00] bg-emerald-950/90 border-emerald-500/50 shadow-[0_0_8px_rgba(0,255,0,0.4)]" };
     case "มนตรี":
-      return { label: "มนตรี", fullName: "มนตรีจร (ผู้อุปถัมภ์/สนับสนุน)", color: "text-sky-400 bg-sky-950/80 border-sky-500/30" };
+      return { label: "มนตรี", fullName: "มนตรีจร", color: "text-sky-300 bg-sky-950/90 border-sky-500/50 shadow-[0_0_8px_rgba(125,211,252,0.4)]" };
     case "เดช":
-      return { label: "เดช", fullName: "เดชจร (เกียรติยศ/อำนาจบารมี)", color: "text-[#FFFFFF] bg-white/20 border-[#FFFFFF]/50 shadow-[0_0_10px_rgba(255,255,255,0.3)]" };
+      return { label: "เดช", fullName: "เดชจร", color: "text-slate-100 bg-slate-800/90 border-white/40 shadow-[0_0_8px_rgba(255,255,255,0.4)]" };
     case "กาลกิณี":
-      return { label: "กาลี", fullName: "กาลกิณีจร (อุปสรรค/ข้อควรระวัง)", color: "text-[#FF0000] bg-rose-950/80 border-[#FF0000]/50" };
+      return { label: "กาลี", fullName: "กาลกิณีจร", color: "text-rose-400 bg-rose-950/90 border-rose-500/50 shadow-[0_0_8px_rgba(251,113,133,0.4)]" };
+    case "บริวาร":
+      return { label: "บริวาร", fullName: "บริวารจร", color: "text-amber-300 bg-amber-950/90 border-amber-500/50" };
+    case "อายุ":
+      return { label: "อายุ", fullName: "อายุจร", color: "text-blue-300 bg-blue-950/90 border-blue-500/50" };
+    case "มูละ":
+      return { label: "มูละ", fullName: "มูละจร", color: "text-orange-300 bg-orange-950/90 border-orange-500/50" };
+    case "อุตสาหะ":
+      return { label: "อุตสาหะ", fullName: "อุตสาหะจร", color: "text-purple-300 bg-purple-950/90 border-purple-500/50" };
     default:
-      return { label: bhop, fullName: `${bhop}จร`, color: "text-slate-300 bg-slate-800/80 border-slate-700/50" };
+      return { label: bhop, fullName: `${bhop}จร`, color: "text-slate-300 bg-slate-800/90 border-slate-700/50" };
   }
 }
 
@@ -1171,11 +1237,21 @@ export function getMahaTransitIndicator(star: number, taksaMaha?: any) {
 
   switch (bhop) {
     case "โลกาวินาศ":
-      return { label: "วินาศ", fullName: "โลกาวินาศจร (ความแปรปรวน/ความเครียดภายใน)", color: "text-[#FFD700] bg-amber-950/80 border-[#FFD700]/50" };
+      return { label: "วินาศ", fullName: "โลกาวินาศจร", color: "text-amber-400 bg-slate-900/95 border-amber-600/60 shadow-[0_0_8px_rgba(251,191,36,0.3)]" };
     case "ธงชัย":
-      return { label: "ธงชัย", fullName: "ธงชัยจร (ชัยชนะ/ความสำเร็จ)", color: "text-[#FFFF00] bg-yellow-950/80 border-[#FFFF00]/50" };
+      return { label: "ธงชัย", fullName: "ธงชัยจร", color: "text-yellow-300 bg-slate-900/95 border-yellow-500/60 shadow-[0_0_8px_rgba(253,224,71,0.3)]" };
+    case "อธิบดี":
+      return { label: "อธิบดี", fullName: "อธิบดีจร", color: "text-red-300 bg-slate-900/95 border-red-500/60 shadow-[0_0_8px_rgba(252,165,165,0.3)]" };
+    case "ราชา":
+      return { label: "ราชา", fullName: "ราชาจร", color: "text-pink-300 bg-slate-900/95 border-pink-500/60 shadow-[0_0_8px_rgba(249,168,212,0.3)]" };
+    case "ขุมทรัพย์":
+      return { label: "ทรัพย์", fullName: "ขุมทรัพย์จร", color: "text-emerald-300 bg-slate-900/95 border-emerald-500/60 shadow-[0_0_8px_rgba(110,231,183,0.3)]" };
+    case "มรณะ":
+      return { label: "มรณะ", fullName: "มรณะจร", color: "text-gray-400 bg-slate-900/95 border-gray-600/60" };
+    case "อริ":
+      return { label: "อริ", fullName: "อริจร", color: "text-orange-400 bg-slate-900/95 border-orange-600/60" };
     default:
-      return { label: bhop, fullName: `${bhop}จร`, color: "text-violet-300 bg-violet-950/80 border-violet-500/30" };
+      return { label: bhop, fullName: `${bhop}จร`, color: "text-violet-300 bg-slate-900/95 border-violet-500/60" };
   }
 }
 
@@ -1580,7 +1656,7 @@ function FateMatrixPanel({
                     const isHighlighted = (activeNum !== null && (isBase4 ? matrix[2]?.[cIdx] === activeNum : (actualNum === activeNum && [0,1,2,7,8].includes(rIdx)))) || (isFiltering && highlightedStars.has(isBase4 ? matrix[2]?.[cIdx] : actualNum));
                     const isDimmed = isFiltering && !highlightedStars.has(isBase4 ? matrix[2]?.[cIdx] : actualNum);
                     const c = numColor(num, isHighlighted);
-                    const isRow012 = [0, 1, 2].includes(rIdx);
+                    const isRow012 = [0, 1, 2, 7, 8].includes(rIdx);
                     
                     const lagnaNatal = phopephumResult?.lagna;
                     const isLagnaNatal = isRow012 && lagnaNatal?.row === (rIdx + 1) && lagnaNatal?.col === (cIdx + 1);
@@ -1623,14 +1699,14 @@ function FateMatrixPanel({
                           {isRow012 && (
                             <>
                               {showTaksaJorn && taksaIndicator && (
-                                <div className="absolute -top-1 -right-4 z-20">
+                                <div className="absolute -top-1 -right-2 z-20">
                                    <span className={`text-[8px] px-1.5 py-0.5 rounded-md font-bold shadow-lg border font-thai ${taksaIndicator.color}`}>
                                      {taksaIndicator.label}
                                    </span>
                                 </div>
                               )}
                               {showMahaJorn && mahaIndicator && (
-                                <div className="absolute -top-1 -left-4 z-20">
+                                <div className="absolute -top-1 -left-2 z-20">
                                    <span className={`text-[8px] px-1.5 py-0.5 rounded-md font-bold shadow-lg border font-thai ${mahaIndicator.color}`}>
                                      {mahaIndicator.label}
                                    </span>
