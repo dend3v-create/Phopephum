@@ -551,8 +551,35 @@ export default function KarnchataPage() {
              </div>
           </div>
 
-          {/* Star Tracing Method Guide */}
-          <div className="w-full max-w-3xl bg-[#020617] border border-[#C6A96B]/20 rounded-2xl p-5 my-1">
+          {/* Bases 5-9 */}
+          {[4, 5, 6, 7, 8].map(rIdx => (
+            <div key={rIdx} className="flex items-center w-full max-w-3xl">
+              <div className="w-20 text-[11px] font-bold text-[#F8F6F1]">ฐาน {rIdx + 1 === 5 ? '๕' : rIdx + 1 === 6 ? '๖' : rIdx + 1 === 7 ? '๗' : rIdx + 1 === 8 ? '๘' : '๙'}</div>
+              <div className="flex-1 flex justify-between">
+                {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
+                  <button
+                    key={cIdx}
+                    type="button"
+                    onClick={() => setHoverNum(hoverNum === star ? null : star)}
+                    className="flex flex-col items-center gap-2 w-14 focus:outline-none"
+                  >
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
+                      hoverNum === star
+                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]"
+                        : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
+                    }`}>
+                      {star}
+                    </div>
+                    {rIdx === 7 && <span className="text-[9px] text-[#8A8070] font-medium">{["อาตมะ","ทาสา","สิทธิโชค","โภคทรัพย์","โจร","อุบาทว์","อุปถัมภ์"][cIdx]}</span>}
+                    {rIdx === 8 && <span className="text-[9px] text-[#8A8070] font-medium">{["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"][cIdx]}</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+
+          {/* Star Tracing Method Guide — ท้ายผังเลข 7 ตัว */}
+          <div className="w-full max-w-3xl bg-[#020617] border border-[#C6A96B]/20 rounded-2xl p-5 mt-2">
             <div className="flex items-center gap-2 mb-4">
               <span className="text-[#C6A96B] text-base">✦</span>
               <p className="text-[11px] font-bold text-[#C6A96B] tracking-wide">วิธีอ่านรหัสชีวิต 3 Steps — Star Tracing Method</p>
@@ -590,33 +617,6 @@ export default function KarnchataPage() {
               </div>
             )}
           </div>
-
-          {/* Bases 5-9 */}
-          {[4, 5, 6, 7, 8].map(rIdx => (
-            <div key={rIdx} className="flex items-center w-full max-w-3xl">
-              <div className="w-20 text-[11px] font-bold text-[#F8F6F1]">ฐาน {rIdx + 1 === 5 ? '๕' : rIdx + 1 === 6 ? '๖' : rIdx + 1 === 7 ? '๗' : rIdx + 1 === 8 ? '๘' : '๙'}</div>
-              <div className="flex-1 flex justify-between">
-                {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
-                  <button
-                    key={cIdx}
-                    type="button"
-                    onClick={() => setHoverNum(hoverNum === star ? null : star)}
-                    className="flex flex-col items-center gap-2 w-14 focus:outline-none"
-                  >
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
-                      hoverNum === star
-                        ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]"
-                        : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
-                    }`}>
-                      {star}
-                    </div>
-                    {rIdx === 7 && <span className="text-[9px] text-[#8A8070] font-medium">{["อาตมะ","ทาสา","สิทธิโชค","โภคทรัพย์","โจร","อุบาทว์","อุปถัมภ์"][cIdx]}</span>}
-                    {rIdx === 8 && <span className="text-[9px] text-[#8A8070] font-medium">{["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"][cIdx]}</span>}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
         </div>
       </Card>
 
