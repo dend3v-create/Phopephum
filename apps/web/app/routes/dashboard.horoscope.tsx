@@ -489,6 +489,8 @@ export default function HoroscopePage() {
   const [activeTab, setActiveTab] = useState<"calc" | "chart" | "analysis">("chart");
   const [activeResult, setActiveResult] = useState<any>(actionData || initialResult);
   const [showVayaRanges, setShowVayaRanges] = useState(false);
+  const [showNatalLagna, setShowNatalLagna] = useState(true);
+  const [showTransitLagna, setShowTransitLagna] = useState(true);
 
   useEffect(() => { if (actionData && !actionData.error) setActiveResult(actionData); }, [actionData]);
   useEffect(() => { if (!activeResult) setActiveTab("calc"); }, [activeResult]);
@@ -521,11 +523,20 @@ export default function HoroscopePage() {
               <div className="flex flex-wrap gap-4 items-center">
                  <h3 className="text-[10px] font-black text-[#C6A96B] uppercase tracking-widest mr-4">Transit Filters:</h3>
                  <button onClick={() => setShowVayaRanges(!showVayaRanges)} className={`px-5 py-2 rounded-full border text-[11px] font-black transition-all ${showVayaRanges ? "bg-amber-500 text-white border-white/20 shadow-lg" : "bg-slate-950/40 text-[#8A8070] border-white/5"}`}>📊 ช่วงอายุวัยจร</button>
+                 <button onClick={() => setShowNatalLagna(!showNatalLagna)} className={`px-5 py-2 rounded-full border text-[11px] font-black transition-all ${showNatalLagna ? "bg-[#C6A96B] text-[#020617] border-white/20" : "bg-slate-950/40 text-[#8A8070] border-white/5"}`}>ลัคนาเกิด</button>
+                 <button onClick={() => setShowTransitLagna(!showTransitLagna)} className={`px-5 py-2 rounded-full border text-[11px] font-black transition-all ${showTransitLagna ? "bg-sky-500 text-white border-white/20" : "bg-slate-950/40 text-[#8A8070] border-white/5"}`}>ลัคนาจร</button>
                  <button className="px-5 py-2 rounded-full bg-slate-950/40 text-[#8A8070] border border-white/5 text-[11px] font-black cursor-not-allowed opacity-50">⏳ กาลชะตา (3.45น.)</button>
               </div>
            </Card>
 
-           <FateMatrixPanel matrix={activeResult.matrix} onNumClick={() => {}} phopephumResult={activeResult.phopephumResult} showVayaRanges={showVayaRanges} />
+           <FateMatrixPanel 
+             matrix={activeResult.matrix} 
+             onNumClick={() => {}} 
+             phopephumResult={activeResult.phopephumResult} 
+             showVayaRanges={showVayaRanges} 
+             showNatalLagna={showNatalLagna}
+             showTransitLagna={showTransitLagna}
+           />
            
            <DetailedGuidancePanel />
            
