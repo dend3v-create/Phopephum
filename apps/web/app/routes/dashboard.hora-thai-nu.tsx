@@ -3,222 +3,212 @@ import { useLoaderData, useRevalidator } from "@remix-run/react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useEffect, useState } from "react";
 import { requireMinPlan } from "~/services/auth.server";
-import {
-  calculateHoraThaiNu,
-  HORA_THAI_NU_PLANETS,
-} from "@phopephum/engine";
+import { calculateHoraNu, HORA_NU_PLANETS } from "@phopephum/engine";
+import { HoraNuChart } from "~/components/hora-thai-nu/HoraNuChart";
 import { Card } from "~/components/ui/Card";
 import type { Env } from "~/env.server";
 
 export const meta: MetaFunction = () => [
-  { title: "โหรทายหนู — ศาสตร์ยามพยากรณ์แม่นยำ — PhopePhum" },
-  { name: "description", content: "โหรทายหนู วิชาพยากรณ์กาลชะตาโบราณของไทย คำนวณยามอัฐกาล 90 นาที และยามย่อย 7.5 นาที หาดาวเจ้ายาม ผังภพ 12 หลัง เพื่อตอบปัญหาเฉพาะหน้าได้โดยไม่ต้องรู้วันเกิด" },
+  { title: "โหรทายหนู — ผังยามพยากรณ์แม่นยำ — PhopePhum" },
+  { name: "description", content: "ผังโหรทายหนู วงล้อ 12 ราศี 8 ทิศ ดาวประจำยาม คำนวณยามอัฐกาล 90 นาที ยามย่อย 7.5 นาที ยามซอย 3 นาที 45 วินาที พยากรณ์เฉพาะหน้าโดยไม่ต้องรู้วันเกิด" },
   { property: "og:type", content: "website" },
-  { property: "og:title", content: "โหรทายหนู — ศาสตร์ยามพยากรณ์แม่นยำ — PhopePhum" },
-  { property: "og:description", content: "คำนวณยามอัฐกาลและยามย่อย 7.5 นาที ด้วยวิชาโหรทายหนู ศาสตร์โบราณแห่งกรุงศรีอยุธยา" },
+  { property: "og:title", content: "โหรทายหนู — ผังยามพยากรณ์แม่นยำ — PhopePhum" },
+  { property: "og:description", content: "วงล้อทำนายยามแบบ 12 ราศี + 8 ทิศ + ดาวประจำยาม ศาสตร์โบราณแห่งกรุงศรีอยุธยา" },
   { property: "og:image", content: "https://phopephum.com/favicon.svg" },
   { name: "twitter:card", content: "summary_large_image" },
-  { name: "keywords", content: "โหรทายหนู, ยามอัฐกาล, ยามพยากรณ์, ดาวเจ้ายาม, ผังภพ, โหราศาสตร์ไทย, ตามดาวเจ้าเรือน, PhopePhum" },
+  { name: "keywords", content: "โหรทายหนู, ผังยาม, วงล้อทำนาย, ยามอัฐกาล, ดาวเจ้ายาม, 12 ราศี, 8 ทิศ, โหราศาสตร์ไทย, PhopePhum" },
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   await requireMinPlan("basic", request, env);
-
   const now = new Date();
-  const result = calculateHoraThaiNu(now);
-
-  return json({ result, serverTime: now.toISOString() });
+  const data = calculateHoraNu(now);
+  return json({ data, serverTime: now.toISOString() });
 }
 
-// ─── Planet color map ────────────────────────────────────────────────────────
-const PLANET_BG: Record<number, string> = {
-  1: "rgba(239,68,68,0.15)",
-  2: "rgba(251,191,36,0.15)",
-  3: "rgba(249,115,22,0.15)",
-  4: "rgba(16,185,129,0.15)",
-  5: "rgba(245,158,11,0.15)",
-  6: "rgba(236,72,153,0.15)",
-  7: "rgba(139,92,246,0.15)",
+// ─── Planet color helpers ─────────────────────────────────────────────────────
+const P_BG:     Record<number, string> = {
+  1:"rgba(239,68,68,0.12)",   2:"rgba(251,191,36,0.12)", 3:"rgba(249,115,22,0.12)",
+  4:"rgba(16,185,129,0.12)",  5:"rgba(245,158,11,0.12)", 6:"rgba(236,72,153,0.12)",
+  7:"rgba(139,92,246,0.12)",
 };
-const PLANET_BORDER: Record<number, string> = {
-  1: "rgba(239,68,68,0.35)",
-  2: "rgba(251,191,36,0.35)",
-  3: "rgba(249,115,22,0.35)",
-  4: "rgba(16,185,129,0.35)",
-  5: "rgba(245,158,11,0.35)",
-  6: "rgba(236,72,153,0.35)",
-  7: "rgba(139,92,246,0.35)",
+const P_BORDER: Record<number, string> = {
+  1:"rgba(239,68,68,0.35)",   2:"rgba(251,191,36,0.35)", 3:"rgba(249,115,22,0.35)",
+  4:"rgba(16,185,129,0.35)",  5:"rgba(245,158,11,0.35)", 6:"rgba(236,72,153,0.35)",
+  7:"rgba(139,92,246,0.35)",
 };
 
-// ─── Countdown hook ──────────────────────────────────────────────────────────
-function useCountdown(seconds: number) {
-  const [remaining, setRemaining] = useState(seconds);
+// ─── Countdown hook ───────────────────────────────────────────────────────────
+function useCountdown(initSeconds: number) {
+  const [rem, setRem] = useState(initSeconds);
   useEffect(() => {
-    setRemaining(seconds);
-    const id = setInterval(() => setRemaining((s) => Math.max(0, s - 1)), 1000);
+    setRem(initSeconds);
+    const id = setInterval(() => setRem((s) => Math.max(0, s - 1)), 1000);
     return () => clearInterval(id);
-  }, [seconds]);
-  const m = Math.floor(remaining / 60);
-  const s = remaining % 60;
+  }, [initSeconds]);
+  const m = Math.floor(rem / 60);
+  const s = rem % 60;
   return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
 }
 
-function formatMinutes(min: number): string {
-  const m = Math.floor(min);
-  const s = Math.round((min - m) * 60);
-  if (s === 0) return `${m} นาที`;
-  return `${m} นาที ${s} วินาที`;
-}
-
-// ─── Main Component ──────────────────────────────────────────────────────────
-export default function HoraThaiNuDashboard() {
-  const { result, serverTime } = useLoaderData<typeof loader>();
+// ─── Main Page ────────────────────────────────────────────────────────────────
+export default function HoraThaiNuPage() {
+  const { data, serverTime } = useLoaderData<typeof loader>();
   const { revalidate } = useRevalidator();
 
-  // Auto-refresh every 30 seconds
+  // Auto-refresh every 30 s
   useEffect(() => {
     const id = setInterval(revalidate, 30_000);
     return () => clearInterval(id);
   }, [revalidate]);
 
-  const mainCountdown = useCountdown(Math.round(result.minutesRemainingInMainPeriod * 60));
-  const subCountdown = useCountdown(Math.round(result.minutesRemainingInSubPeriod * 60));
+  const mainCD  = useCountdown(data.secondsRemainingMain);
+  const subCD   = useCountdown(data.secondsRemainingSub);
+  const microCD = useCountdown(data.secondsRemainingMicro);
 
-  const planet = HORA_THAI_NU_PLANETS[result.currentMainPlanet]!;
+  const pInfo = HORA_NU_PLANETS[data.currentPlanet]!;
 
   return (
     <div className="space-y-8">
-      {/* ── Hero ── */}
-      <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs tracking-widest uppercase"
-          style={{ background: "rgba(198,169,107,0.1)", border: "1px solid rgba(198,169,107,0.25)", color: "#C6A96B" }}>
-          <IconMouse /> โหรทายหนู
+
+      {/* ── Hero + Wheel ── */}
+      <div className="flex flex-col items-center gap-6">
+
+        {/* Title badge */}
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full text-xs tracking-widest uppercase"
+          style={{ background:"rgba(198,169,107,0.1)", border:"1px solid rgba(198,169,107,0.25)", color:"#C6A96B" }}>
+          <IconMouse /> โหรทายหนู — ผังวงล้อ 12 ราศี
         </div>
-        <h1 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] glow-gold leading-tight">
-          ศาสตร์ยามพยากรณ์<br className="md:hidden" />แม่นยำยิ่งกว่าตาเห็น
-        </h1>
-        <p className="text-[#94A3B8] max-w-xl mx-auto text-sm leading-relaxed">
-          วิชาโบราณแห่งกรุงศรีอยุธยา คำนวณยามอัฐกาล ตอบปัญหาเฉพาะหน้าได้โดยไม่ต้องรู้วันเกิด
-        </p>
+
+        {/* ════ ผังโหรทายหนู ════ */}
+        <div className="w-full max-w-md">
+          <HoraNuChart data={data} size={460} />
+        </div>
+
+        {/* Prediction card (sits directly under the wheel) */}
+        <div className="w-full max-w-md rounded-2xl p-4 text-center space-y-1"
+          style={{
+            background: P_BG[data.currentPlanet],
+            border: `1px solid ${P_BORDER[data.currentPlanet]}`,
+            boxShadow: `0 0 24px ${pInfo.color}12`,
+          }}>
+          <p className="text-xs tracking-widest uppercase" style={{ color: pInfo.color }}>
+            {pInfo.symbol} ดาว{data.currentPlanetName} · {data.currentStatusSymbol} {data.currentStatusLabel}
+          </p>
+          <p className="text-sm text-[#F8F6F1] leading-relaxed">{data.prediction}</p>
+        </div>
       </div>
 
-      {/* ── Current Yam Status ── */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {/* Main Period Card */}
-        <Card>
-          <div className="p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-[#94A3B8] tracking-widest uppercase">ยามใหญ่ปัจจุบัน (90 นาที)</p>
-              <span className="text-xs px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(198,169,107,0.12)", color: "#C6A96B" }}>
-                {result.phase === "day" ? "☀ กลางวัน" : "☾ กลางคืน"}
-              </span>
-            </div>
+      {/* ── Yam Status Row ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl flex flex-col items-center justify-center font-bold text-xl shrink-0"
-                style={{ background: PLANET_BG[result.currentMainPlanet], border: `1px solid ${PLANET_BORDER[result.currentMainPlanet]}`, color: planet.color }}>
-                <span className="text-2xl">{planet.symbol}</span>
+        {/* Main yam */}
+        <Card>
+          <div className="p-4 space-y-3">
+            <p className="text-xs text-[#94A3B8] tracking-widest uppercase">ยามใหญ่ (90 นาที)</p>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl shrink-0"
+                style={{ background: P_BG[data.currentPlanet], border: `1px solid ${P_BORDER[data.currentPlanet]}`, color: pInfo.color }}>
+                {pInfo.symbol}
               </div>
               <div>
-                <p className="text-2xl font-display font-bold text-[#F8F6F1]">
-                  ยามที่ {result.currentMainPeriod}
-                </p>
-                <p className="text-base font-semibold" style={{ color: planet.color }}>
-                  ดาว{result.currentMainPlanetName}
-                </p>
-                <p className="text-xs text-[#94A3B8]">
-                  {result.mainPeriodStartTime} — {result.mainPeriodEndTime} น.
-                </p>
+                <p className="text-xl font-display font-bold text-[#F8F6F1]">ยามที่ {data.yamNumber}</p>
+                <p className="text-sm" style={{ color: pInfo.color }}>ดาว{data.currentPlanetName}</p>
+                <p className="text-xs text-[#94A3B8]">{data.mainPeriodStart}–{data.mainPeriodEnd}</p>
               </div>
             </div>
-
-            <div className="rounded-xl p-3 text-center"
-              style={{ background: "rgba(198,169,107,0.06)", border: "1px solid rgba(198,169,107,0.15)" }}>
-              <p className="text-xs text-[#94A3B8] mb-1">เหลือเวลาในยามใหญ่</p>
-              <p className="font-mono text-2xl font-bold text-[#C6A96B]">{mainCountdown}</p>
+            <div className="rounded-xl p-2 text-center"
+              style={{ background:"rgba(198,169,107,0.06)", border:"1px solid rgba(198,169,107,0.15)" }}>
+              <p className="text-xs text-[#94A3B8] mb-0.5">เหลือ</p>
+              <p className="font-mono text-xl font-bold text-[#C6A96B]">{mainCD}</p>
             </div>
           </div>
         </Card>
 
-        {/* Sub Period Card */}
+        {/* Sub-yam */}
         <Card>
-          <div className="p-5 space-y-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs text-[#94A3B8] tracking-widest uppercase">ยามย่อยปัจจุบัน (7.5 นาที)</p>
-              <span className="text-xs px-2 py-0.5 rounded-full"
-                style={{ background: "rgba(75,111,174,0.15)", color: "#7BA4E8" }}>
-                ละเอียดระดับนาที
-              </span>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl flex flex-col items-center justify-center font-bold shrink-0"
-                style={{ background: "rgba(75,111,174,0.12)", border: "1px solid rgba(75,111,174,0.3)", color: "#7BA4E8" }}>
-                <span className="text-xs text-[#94A3B8]">ย่อย</span>
-                <span className="text-2xl font-display">{result.currentSubPeriod}</span>
-                <span className="text-xs text-[#94A3B8]">/12</span>
+          <div className="p-4 space-y-3">
+            <p className="text-xs text-[#94A3B8] tracking-widest uppercase">ยามย่อย (7.5 นาที)</p>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-display font-bold text-lg shrink-0"
+                style={{ background:"rgba(75,111,174,0.12)", border:"1px solid rgba(75,111,174,0.3)", color:"#7BA4E8" }}>
+                {data.subYamNumber}
               </div>
               <div>
-                <p className="text-2xl font-display font-bold text-[#F8F6F1]">
-                  ยามย่อยที่ {result.currentSubPeriod}
-                </p>
-                <p className="text-xs text-[#94A3B8]">
-                  {result.subPeriodStartTime} — {result.subPeriodEndTime} น.
-                </p>
-                <p className="text-xs text-[#94A3B8] mt-0.5">
-                  {result.dayName} · ประธานวัน: ดาว{result.dayRulerName}
-                </p>
+                <p className="text-xl font-display font-bold text-[#F8F6F1]">ย่อยที่ {data.subYamNumber}</p>
+                <p className="text-xs text-[#94A3B8]">{data.subPeriodStart}</p>
+                <p className="text-xs text-[#94A3B8]">–{data.subPeriodEnd}</p>
               </div>
             </div>
+            <div className="rounded-xl p-2 text-center"
+              style={{ background:"rgba(75,111,174,0.08)", border:"1px solid rgba(75,111,174,0.2)" }}>
+              <p className="text-xs text-[#94A3B8] mb-0.5">เหลือ</p>
+              <p className="font-mono text-xl font-bold text-[#7BA4E8]">{subCD}</p>
+            </div>
+          </div>
+        </Card>
 
-            <div className="rounded-xl p-3 text-center"
-              style={{ background: "rgba(75,111,174,0.08)", border: "1px solid rgba(75,111,174,0.2)" }}>
-              <p className="text-xs text-[#94A3B8] mb-1">เหลือเวลาในยามย่อย</p>
-              <p className="font-mono text-2xl font-bold text-[#7BA4E8]">{subCountdown}</p>
+        {/* Micro-yam */}
+        <Card>
+          <div className="p-4 space-y-3">
+            <p className="text-xs text-[#94A3B8] tracking-widest uppercase">ยามซอย (3 น. 45 ว.)</p>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center font-display font-bold text-lg shrink-0"
+                style={{ background:"rgba(139,92,246,0.12)", border:"1px solid rgba(139,92,246,0.3)", color:"#A78BFA" }}>
+                {data.microYamNumber}
+              </div>
+              <div>
+                <p className="text-xl font-display font-bold text-[#F8F6F1]">ซอยที่ {data.microYamNumber}</p>
+                <p className="text-xs text-[#94A3B8]">{data.dayName}</p>
+                <p className="text-xs text-[#94A3B8]">ทิศ: {data.currentDirectionThai}</p>
+              </div>
+            </div>
+            <div className="rounded-xl p-2 text-center"
+              style={{ background:"rgba(139,92,246,0.08)", border:"1px solid rgba(139,92,246,0.2)" }}>
+              <p className="text-xs text-[#94A3B8] mb-0.5">เหลือ</p>
+              <p className="font-mono text-xl font-bold text-[#A78BFA]">{microCD}</p>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* ── Full Day Schedule ── */}
+      {/* ── Yam Schedule ── */}
       <Card>
         <div className="p-5">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display text-lg font-bold text-[#F8F6F1]">
-              ตารางยามอัฐกาล — {result.phase === "day" ? "ภาคกลางวัน" : "ภาคกลางคืน"}
+              ตารางยามอัฐกาล — {data.phase === "day" ? "☀ กลางวัน" : "☾ กลางคืน"}
             </h2>
-            <span className="text-xs text-[#94A3B8]">8 ยาม × 90 นาที</span>
+            <span className="text-xs text-[#94A3B8]">{data.dayName}</span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-            {result.allMainPeriods.map((p) => {
-              const pInfo = HORA_THAI_NU_PLANETS[p.planet]!;
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {data.yamSchedule.map((yam) => {
+              const pi = HORA_NU_PLANETS[yam.planet]!;
               return (
-                <div key={p.periodNum}
+                <div key={yam.periodNum}
                   className="rounded-xl p-3 transition-all"
                   style={{
-                    background: p.isCurrent ? PLANET_BG[p.planet] : "rgba(255,255,255,0.03)",
-                    border: `1px solid ${p.isCurrent ? PLANET_BORDER[p.planet] : "rgba(255,255,255,0.07)"}`,
-                    boxShadow: p.isCurrent ? `0 0 20px ${pInfo.color}18` : "none",
+                    background: yam.isCurrent ? P_BG[yam.planet] : "rgba(255,255,255,0.03)",
+                    border: `1px solid ${yam.isCurrent ? P_BORDER[yam.planet] : "rgba(255,255,255,0.07)"}`,
+                    boxShadow: yam.isCurrent ? `0 0 16px ${pi.color}18` : "none",
                   }}>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-[#94A3B8]">ยามที่ {p.periodNum}</span>
-                    {p.isCurrent && (
-                      <span className="text-xs px-1.5 py-0.5 rounded-full font-bold"
-                        style={{ background: pInfo.color + "22", color: pInfo.color }}>
-                        ▶ ปัจจุบัน
-                      </span>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs text-[#64748B]">ยาม {yam.periodNum}</span>
+                    {yam.isCurrent && (
+                      <span className="text-[10px] px-1 py-0.5 rounded-full font-bold"
+                        style={{ background: `${pi.color}20`, color: pi.color }}>▶</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl" style={{ color: pInfo.color }}>{pInfo.symbol}</span>
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <span className="text-lg" style={{ color: pi.color }}>{pi.symbol}</span>
                     <div>
-                      <p className="text-sm font-semibold text-[#F8F6F1]">ดาว{pInfo.name}</p>
-                      <p className="text-xs text-[#94A3B8]">{p.startTime}–{p.endTime}</p>
+                      <p className="text-xs font-semibold text-[#F8F6F1]">{pi.name}</p>
+                      <p className="text-[10px] text-[#64748B] font-mono">{yam.startTime}–{yam.endTime}</p>
                     </div>
                   </div>
+                  <p className="text-[10px] text-[#64748B]">ทิศ: {yam.direction}</p>
                 </div>
               );
             })}
@@ -226,76 +216,60 @@ export default function HoraThaiNuDashboard() {
         </div>
       </Card>
 
-      {/* ── Sub Periods ── */}
-      <Card>
-        <div className="p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="font-display text-lg font-bold text-[#F8F6F1]">
-              ยามย่อย — ยามใหญ่ที่ {result.currentMainPeriod}
-            </h2>
-            <span className="text-xs text-[#94A3B8]">12 ย่อย × 7.5 นาที</span>
-          </div>
-
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-            {result.subPeriods.map((sp) => (
-              <div key={sp.subNum}
-                className="rounded-lg p-2 text-center transition-all"
-                style={{
-                  background: sp.isCurrent ? "rgba(198,169,107,0.15)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${sp.isCurrent ? "rgba(198,169,107,0.4)" : "rgba(255,255,255,0.07)"}`,
-                }}>
-                <p className="text-xs text-[#94A3B8]">ย่อย {sp.subNum}</p>
-                <p className={`text-xs font-mono mt-0.5 ${sp.isCurrent ? "text-[#C6A96B] font-bold" : "text-[#64748B]"}`}>
-                  {sp.startTime}
-                </p>
-                {sp.isCurrent && (
-                  <p className="text-[10px] text-[#C6A96B] mt-0.5">▶ ขณะนี้</p>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
-
-      {/* ── 12 Houses Chart ── */}
+      {/* ── House Chart ── */}
       <Card>
         <div className="p-5">
           <div className="mb-4">
             <h2 className="font-display text-lg font-bold text-[#F8F6F1]">ผังภพ 12 หลัง</h2>
-            <p className="text-xs text-[#94A3B8] mt-1">
-              ราศีพฤษภเป็นภพลัคนาที่ 1 เสมอ — ใช้ "ตามดาวเจ้าเรือน" เพื่อพยากรณ์
-            </p>
+            <p className="text-xs text-[#94A3B8] mt-0.5">ราศีพฤษภ = ภพลัคนาที่ 1 เสมอ · ดาวทอง = ดาวประจำยามปัจจุบัน</p>
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-            {result.houses.map((house) => {
-              const lordColor = HORA_THAI_NU_PLANETS[house.lordPlanet]?.color ?? "#C6A96B";
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+            {data.houseChart.map((house) => {
+              const lordColor = HORA_NU_PLANETS[house.lordPlanet]?.color ?? "#94A3B8";
+              const isActive  = house.isCurrentYam;
+              const isSecond  = house.isSecondaryKaset;
               return (
                 <div key={house.houseNum}
-                  className="rounded-xl p-3 space-y-1.5"
+                  className="rounded-xl p-2.5 space-y-1"
                   style={{
-                    background: "rgba(255,255,255,0.03)",
-                    border: "1px solid rgba(255,255,255,0.07)",
+                    background: isActive ? P_BG[data.currentPlanet] : isSecond ? "rgba(198,169,107,0.05)" : "rgba(255,255,255,0.02)",
+                    border: `1px solid ${isActive ? P_BORDER[data.currentPlanet] : isSecond ? "rgba(198,169,107,0.2)" : "rgba(255,255,255,0.06)"}`,
                   }}>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-[#64748B]">ภพที่ {house.houseNum}</span>
-                    <span className="text-xs font-bold" style={{ color: lordColor }}>
-                      {house.lordPlanetSymbol}
+                    <span className="text-[10px] text-[#64748B]">ภพ {house.houseNum}</span>
+                    <span className="text-xs" style={{ color: house.lordStatusColor }}>
+                      {house.lordStatusSymbol}
                     </span>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-[#C6A96B]">{house.houseName}</p>
-                    <p className="text-xs text-[#94A3B8]">ราศี{house.zodiacName}</p>
-                  </div>
-                  <div className="pt-1 border-t" style={{ borderColor: "rgba(255,255,255,0.06)" }}>
-                    <p className="text-[10px] text-[#64748B]">{house.houseQuestion}</p>
-                    <p className="text-[10px]" style={{ color: lordColor + "cc" }}>
-                      เจ้าเรือน: ดาว{house.lordPlanetName}
-                    </p>
-                  </div>
+                  <p className="text-xs font-bold" style={{ color: isActive ? data.currentPlanetColor : "#C6A96B" }}>
+                    {house.houseName}
+                  </p>
+                  <p className="text-[10px] text-[#94A3B8]">{house.zodiacName}</p>
+                  <p className="text-[10px]" style={{ color: isActive ? data.currentPlanetColor : lordColor + "cc" }}>
+                    {house.lordSymbol} {house.lordName}
+                  </p>
                 </div>
               );
             })}
+          </div>
+        </div>
+      </Card>
+
+      {/* ── Status Legend ── */}
+      <Card>
+        <div className="p-5">
+          <h2 className="font-display text-base font-bold text-[#F8F6F1] mb-3">สัญลักษณ์สถานะดาว</h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
+            {STATUS_LEGEND.map((s) => (
+              <div key={s.symbol} className="flex items-center gap-2 rounded-xl px-3 py-2"
+                style={{ background:"rgba(255,255,255,0.03)", border:"1px solid rgba(255,255,255,0.06)" }}>
+                <span className="text-lg shrink-0" style={{ color: s.color }}>{s.symbol}</span>
+                <div>
+                  <p className="text-xs font-semibold text-[#F8F6F1]">{s.label}</p>
+                  <p className="text-[10px] text-[#64748B]">{s.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </Card>
@@ -303,27 +277,18 @@ export default function HoraThaiNuDashboard() {
       {/* ── Lord Tracking Guide ── */}
       <Card>
         <div className="p-5 space-y-4">
-          <h2 className="font-display text-lg font-bold text-[#F8F6F1]">วิธีการตามดาวเจ้าเรือน</h2>
-          <p className="text-sm text-[#94A3B8] leading-relaxed">
-            หัวใจสำคัญของวิชาโหรทายหนู คือการ <span className="text-[#C6A96B]">สะกดรอยตามดาว</span> จากคำถามไปสู่บทสรุปฟันธง
-          </p>
-
-          <div className="space-y-3">
-            {[
-              { step: "1", title: "แปลคำถาม → ภพ", desc: "ของหาย = กฎุมภะ (ภพ 2) · ลูกหลาน = ปุตตะ (ภพ 5) · โรค = อริ (ภพ 6) · คู่ครอง = ปัตนิ (ภพ 7)" },
-              { step: "2", title: "หาราศีของภพ", desc: "ดูในผังภพด้านบนว่าภพนั้นตกอยู่ในราศีใด (เช่น ภพ 2 = ราศีเมถุน)" },
-              { step: "3", title: "ดาวเจ้าเรือนคือใคร", desc: "ดาวที่ปกครองราศีนั้น (เช่น ราศีเมถุน → เจ้าเรือน = พุธ)" },
-              { step: "4", title: "สะกดรอยดาว", desc: "ดาวเจ้าเรือนโคจรไปอยู่ที่ภพใดในผังยาม? ภพนั้นคือคำตอบ" },
-            ].map((item) => (
-              <div key={item.step} className="flex gap-3 rounded-xl p-3"
-                style={{ background: "rgba(198,169,107,0.05)", border: "1px solid rgba(198,169,107,0.12)" }}>
-                <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold font-display"
-                  style={{ background: "rgba(198,169,107,0.2)", color: "#C6A96B" }}>
-                  {item.step}
+          <h2 className="font-display text-lg font-bold text-[#F8F6F1]">วิธีตามดาวเจ้าเรือน</h2>
+          <div className="space-y-2">
+            {LORD_STEPS.map((step) => (
+              <div key={step.n} className="flex gap-3 rounded-xl p-3"
+                style={{ background:"rgba(198,169,107,0.05)", border:"1px solid rgba(198,169,107,0.12)" }}>
+                <div className="w-6 h-6 rounded-full shrink-0 flex items-center justify-center text-xs font-bold font-display"
+                  style={{ background:"rgba(198,169,107,0.2)", color:"#C6A96B" }}>
+                  {step.n}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-[#F8F6F1]">{item.title}</p>
-                  <p className="text-xs text-[#94A3B8] mt-0.5 leading-relaxed">{item.desc}</p>
+                  <p className="text-sm font-semibold text-[#F8F6F1]">{step.title}</p>
+                  <p className="text-xs text-[#94A3B8] leading-relaxed">{step.desc}</p>
                 </div>
               </div>
             ))}
@@ -331,30 +296,9 @@ export default function HoraThaiNuDashboard() {
         </div>
       </Card>
 
-      {/* ── Use Cases ── */}
-      <Card>
-        <div className="p-5 space-y-4">
-          <h2 className="font-display text-lg font-bold text-[#F8F6F1]">7 กรณีที่วิชานี้ช่วยได้</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {USE_CASES.map((uc) => (
-              <div key={uc.no} className="flex gap-3 rounded-xl p-3"
-                style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                <span className="text-xl shrink-0">{uc.icon}</span>
-                <div>
-                  <p className="text-sm font-semibold text-[#F8F6F1]">{uc.title}</p>
-                  <p className="text-xs text-[#94A3B8] mt-0.5 leading-relaxed">{uc.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </Card>
-
-      {/* ── Footer Note ── */}
+      {/* ── Footer ── */}
       <div className="text-center space-y-1 pb-4">
-        <p className="text-xs text-[#475569]">
-          อ้างอิง: ตำราโหรทายหนู อ.ประทีป อัครา (พ.ศ. 2528) · อัปเดตอัตโนมัติทุก 30 วินาที
-        </p>
+        <p className="text-xs text-[#475569]">อ้างอิง: ตำราโหรทายหนู อ.ประทีป อัครา (พ.ศ. 2528) · อัปเดตทุก 30 วินาที</p>
         <p className="text-xs text-[#475569]">
           เวลาเซิร์ฟเวอร์: {new Date(serverTime).toLocaleString("th-TH", { timeZone: "Asia/Bangkok" })}
         </p>
@@ -363,53 +307,25 @@ export default function HoraThaiNuDashboard() {
   );
 }
 
-// ─── Use Cases Data ───────────────────────────────────────────────────────────
-const USE_CASES = [
-  {
-    no: 1,
-    icon: "🔍",
-    title: "ตามหาของหายและคนหาย",
-    desc: "ระบุทิศทางและตำแหน่งของสิ่งของหรือบุคคลที่หายไป",
-  },
-  {
-    no: 2,
-    icon: "🏥",
-    title: "วิกฤตสุขภาพ",
-    desc: "ประเมินความรุนแรง ชี้โรคเฉพาะ เตรียมตัวรับมือได้ทันท่วงที",
-  },
-  {
-    no: 3,
-    icon: "💼",
-    title: "การตัดสินใจสำคัญ",
-    desc: "ควรเปลี่ยนงาน? คู่ครองมีคนอื่น? ตอบแบบฟันธงได้",
-  },
-  {
-    no: 4,
-    icon: "🌟",
-    title: "สอบลัคนาและปรับเวลาเกิด",
-    desc: "ช่วยผู้ที่ไม่ทราบเวลาเกิดหาลัคนาดวงชะตาที่แม่นยำ",
-  },
-  {
-    no: 5,
-    icon: "💭",
-    title: "ทำนายฝันและลางสังหรณ์",
-    desc: "ถอดรหัสความหมายจากเวลาที่ฝันหรือสัมผัสได้",
-  },
-  {
-    no: 6,
-    icon: "🔮",
-    title: "รู้วาระซ่อนเร้น",
-    desc: "โหรชำนาญสามารถทำนายใจผู้คนได้ก่อนที่จะเอ่ยปาก",
-  },
-  {
-    no: 7,
-    icon: "📅",
-    title: "ช่วยหาฤกษ์ยาม",
-    desc: "ประกอบกับระบบฤกษ์อื่นเพื่อหาเวลามงคลที่เหมาะสมที่สุด",
-  },
+// ─── Static data ──────────────────────────────────────────────────────────────
+const STATUS_LEGEND = [
+  { symbol: "△", color: "#C6A96B", label: "เกษตร",    desc: "บ้านดาว — พลังสูงสุด" },
+  { symbol: "○", color: "#F59E0B", label: "มหาอุจจ์",  desc: "ยกชั้น — อัพสุดแกร่ง" },
+  { symbol: "⬡", color: "#10B981", label: "ราชาโชค",  desc: "โชควาสนาพิเศษ" },
+  { symbol: "□", color: "#8B5CF6", label: "มหาจักร",  desc: "พลังงานจักรวาล" },
+  { symbol: "·", color: "#64748B", label: "กลาง",      desc: "สมดุล ปกติ" },
+  { symbol: "⋮", color: "#94A3B8", label: "ประ",       desc: "อ่อนแอ อุปสรรค" },
+  { symbol: "✳", color: "#EF4444", label: "นิจ",       desc: "ตกต่ำ — ระวัง" },
 ];
 
-// ─── Icons ───────────────────────────────────────────────────────────────────
+const LORD_STEPS = [
+  { n:"1", title:"แปลคำถาม → ภพ",       desc:"ของหาย=กฎุมภะ · ลูกหลาน=ปุตตะ · โรค=อริ · คู่ครอง=ปัตนิ" },
+  { n:"2", title:"หาราศีของภพ",          desc:"ดูในผังภพว่าภพนั้นตกอยู่ในราศีใด" },
+  { n:"3", title:"ดาวเจ้าเรือนคือใคร",  desc:"ดูจากผังภพ 12 หลังว่าดาวอะไรปกครองราศีนั้น" },
+  { n:"4", title:"สะกดรอยดาว",          desc:"ดาวเจ้าเรือนไปอยู่ภพใดในผังยาม? ภพนั้นคือคำตอบ" },
+];
+
+// ─── Icon ─────────────────────────────────────────────────────────────────────
 function IconMouse() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-4 h-4">

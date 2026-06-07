@@ -21,6 +21,7 @@ export {
   calculateRahu as calculateRahuLivingWisdom 
 } from "./engine/time-engines.js";
 export { STAR_NAMES } from "@phopephum/types";
-export * from "./wisdomEngine.js"; 
+export * from "./wisdomEngine.js";
 export * from "./taksa-mahabhuti/index.js";
 export * from "./types/horoscope.js";
+export * from "./hora-thai-nu/index.js";
