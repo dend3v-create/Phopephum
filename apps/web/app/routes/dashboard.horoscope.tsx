@@ -7,6 +7,7 @@ import { logEvent, EVENTS } from "~/services/analytics.server";
 import {
   calculateImperial,
   calcTaksaMaha,
+  buddhToCS,
   STAR_NAMES,
 } from "@phopephum/engine";
 import type {
@@ -15,12 +16,62 @@ import type {
   MahaBhop,
   TaksaBhop,
 } from "@phopephum/engine";
-import { HoroscopeInputSchema } from "@phopephum/validators";
+import { BuddhistDatePartsSchema, HoroscopeInputSchema } from "@phopephum/validators";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
 import type { Env } from "~/env.server";
 import { useState, useEffect, useCallback } from "react";
+import type { ReactNode } from "react";
+import {
+  buddhistPartsToISODate,
+  currentBuddhistParts,
+  isoDateToBuddhistParts,
+} from "~/lib/buddhist-year";
+
+type HoroscopeActionResult = {
+  phopephumResult?: any;
+  matrix?: number[][];
+  taksaMaha?: any;
+  birthDate?: string;
+  transitDate?: string;
+  transitTime?: string;
+  error?: string | null;
+};
+
+type CustomerOption = {
+  id: string;
+  name: string;
+  birth_date: string;
+  birth_time?: string | null;
+  birth_place?: string | null;
+};
+
+const THAI_MONTHS = [
+  "มกราคม",
+  "กุมภาพันธ์",
+  "มีนาคม",
+  "เมษายน",
+  "พฤษภาคม",
+  "มิถุนายน",
+  "กรกฎาคม",
+  "สิงหาคม",
+  "กันยายน",
+  "ตุลาคม",
+  "พฤศจิกายน",
+  "ธันวาคม",
+];
+
+function parseBuddhistDateParts(formData: FormData, prefix: "birth" | "transit") {
+  const parsed = BuddhistDatePartsSchema.safeParse({
+    day: Number(formData.get(`${prefix}Day`) ?? "0"),
+    month: Number(formData.get(`${prefix}Month`) ?? "0"),
+    yearBE: Number(formData.get(`${prefix}Year`) ?? "0"),
+  });
+
+  if (!parsed.success) return null;
+  return buddhistPartsToISODate(parsed.data);
+}
 
 // ─── Meta & Loader ──────────────────────────────────────────────────────────
 
@@ -36,12 +87,17 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const { createSupabaseClient } = await import("~/services/supabase.server");
   const { supabase } = createSupabaseClient(request, env);
   
-  const { data: history } = await supabase
+  const historyResult = await supabase
     .from("calculations")
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(3);
+
+  if (historyResult.error) {
+    console.warn("[horoscope] calculations history unavailable:", historyResult.error.message);
+  }
+  const history = historyResult.error ? [] : historyResult.data;
 
   const { data: customers } = await supabase
     .from("customers")
@@ -58,10 +114,18 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
         birthPlace: profile.birth_place || "กรุงเทพมหานคร",
       }, new Date());
 
+      const birthYearThai = Number(profile.birth_date.slice(0, 4)) + 543;
+      const checkDate = new Date();
+
       initialResult = {
         phopephumResult: imperialResult,
         matrix: imperialResult.matrix,
-        taksaMaha: calcTaksaMaha(bYearThai, imperialResult.ageYang),
+        taksaMaha: calcTaksaMaha({
+          birthDate: new Date(`${profile.birth_date}T12:00:00+07:00`),
+          checkDate,
+          csNatal: buddhToCS(birthYearThai),
+          csTransit: buddhToCS(checkDate.getFullYear() + 543),
+        }),
         birthDate: profile.birth_date,
         transitDate: new Date().toISOString().split("T")[0],
         transitTime: "12:00",
@@ -86,10 +150,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   try {
     const formData = await request.formData();
-    const bDay = Number(formData.get("birthDay") ?? "0");
-    const bMonth = Number(formData.get("birthMonth") ?? "0");
-    const bYear = Number(formData.get("birthYear") ?? "0");
-    const birthDateStr = `${bYear - 543}-${String(bMonth).padStart(2, "0")}-${String(bDay).padStart(2, "0")}`;
+    const birthDateStr = parseBuddhistDateParts(formData, "birth");
+
+    if (!birthDateStr) {
+      return json({ error: "กรุณาตรวจสอบวันเดือนปีเกิด", result: null }, { status: 400 });
+    }
 
     const raw = {
       birthDate: birthDateStr,
@@ -100,10 +165,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const parsed = HoroscopeInputSchema.safeParse(raw);
     if (!parsed.success) return json({ error: "ข้อมูลไม่ถูกต้อง", result: null }, { status: 400 });
 
-    const tDay = Number(formData.get("transitDay") ?? "0");
-    const tMonth = Number(formData.get("transitMonth") ?? "0");
-    const tYear = Number(formData.get("transitYear") ?? "0");
-    const transitDate = `${tYear - 543}-${String(tMonth).padStart(2, "0")}-${String(tDay).padStart(2, "0")}`;
+    const todayParts = currentBuddhistParts();
+    const hasTransitParts =
+      formData.has("transitDay") && formData.has("transitMonth") && formData.has("transitYear");
+    const transitDate = hasTransitParts
+      ? parseBuddhistDateParts(formData, "transit") ?? buddhistPartsToISODate(todayParts)
+      : buddhistPartsToISODate(todayParts);
+
+    if (!transitDate) {
+      return json({ error: "กรุณาตรวจสอบวันจร", result: null }, { status: 400 });
+    }
+
+    const tYear = Number(formData.get("transitYear") ?? todayParts.yearBE);
     const transitTime = String(formData.get("transitTime") ?? "") || "12:00";
     
     const [ty, tm, td] = transitDate.split("-").map(Number);
@@ -111,7 +184,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const checkDate = new Date(ty, tm - 1, td, th, tmin, 0);
 
     const imperialResult = await calculateImperial(parsed.data, checkDate);
-    const taksaMaha = calcTaksaMaha(tYear, imperialResult.ageYang);
+    const birthYearThai = Number(parsed.data.birthDate.slice(0, 4)) + 543;
+    const taksaMaha = calcTaksaMaha({
+      birthDate: new Date(`${parsed.data.birthDate}T12:00:00+07:00`),
+      checkDate,
+      csNatal: buddhToCS(birthYearThai),
+      csTransit: buddhToCS(tYear),
+    });
 
     const ownerName = String(formData.get("customerName") ?? "").trim() || user.email || "ไม่ระบุ";
     await supabase.from("calculations").insert({
@@ -119,6 +198,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
       calc_type: "imperial_v4",
       input_data: { name: ownerName, birthDate: parsed.data.birthDate, birthTime: parsed.data.birthTime, checkDate: checkDate.toISOString() },
       result_data: imperialResult,
+    }).then(({ error }) => {
+      if (error) console.warn("[horoscope] calculation history insert skipped:", error.message);
     });
 
     return json({
@@ -481,7 +562,385 @@ function FateMatrixPanel({
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
+type TabId = "chart" | "analysis" | "calc";
+
+function TabButton({
+  id,
+  label,
+  activeTab,
+  disabled,
+  onTabChange,
+}: {
+  id: TabId;
+  label: string;
+  activeTab: TabId;
+  disabled?: boolean;
+  onTabChange: (tab: TabId) => void;
+}) {
+  const isActive = activeTab === id;
+  return (
+    <button
+      type="button"
+      disabled={disabled}
+      aria-pressed={isActive}
+      onClick={() => onTabChange(id)}
+      className={`min-h-11 rounded-2xl border px-4 py-2 text-xs font-black transition-all focus:outline-none focus:ring-2 focus:ring-[#C6A96B]/60 disabled:cursor-not-allowed disabled:opacity-40 ${
+        isActive
+          ? "bg-[#C6A96B] text-[#020617] border-white/20 shadow-xl"
+          : "bg-slate-900/40 text-[#D9CDB7] border-white/10 hover:text-white hover:border-[#C6A96B]/40"
+      }`}
+    >
+      {label}
+    </button>
+  );
+}
+
+function HoroscopeHeader({
+  activeTab,
+  onTabChange,
+  hasResult,
+}: {
+  activeTab: TabId;
+  onTabChange: (tab: TabId) => void;
+  hasResult: boolean;
+}) {
+  return (
+    <header className="space-y-5">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-5">
+        <div>
+          <p className="text-[#C6A96B] text-[10px] sm:text-[11px] font-black tracking-[0.3em] uppercase opacity-80 mb-2">
+            PhopePhum Imperial Engine
+          </p>
+          <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black text-[#F8F6F1] leading-tight">
+            ผังดวงจักรพรรดิ
+          </h1>
+        </div>
+        <div className="hidden sm:flex flex-wrap gap-2" role="tablist" aria-label="Horoscope dashboard views">
+          <TabButton id="chart" label="พื้นดวง" activeTab={activeTab} onTabChange={onTabChange} disabled={!hasResult} />
+          <TabButton id="analysis" label="วิเคราะห์" activeTab={activeTab} onTabChange={onTabChange} disabled={!hasResult} />
+          <TabButton id="calc" label="คำนวณ" activeTab={activeTab} onTabChange={onTabChange} />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function HoroscopeSkeleton() {
+  return (
+    <div className="space-y-4" aria-label="กำลังคำนวณดวงชะตา">
+      <div className="h-28 rounded-2xl bg-white/5 animate-pulse" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="h-32 rounded-2xl bg-white/5 animate-pulse" />
+        <div className="h-32 rounded-2xl bg-white/5 animate-pulse md:col-span-2" />
+      </div>
+      <div className="h-72 rounded-2xl bg-white/5 animate-pulse" />
+    </div>
+  );
+}
+
+function HoroscopeEmptyState({
+  hasProfileBirthData,
+  hasCustomers,
+  onOpenCalculator,
+}: {
+  hasProfileBirthData: boolean;
+  hasCustomers: boolean;
+  onOpenCalculator: () => void;
+}) {
+  return (
+    <Card className="border-[#C6A96B]/20 bg-[#020617]/70 p-6 sm:p-8 rounded-2xl shadow-2xl">
+      <div className="max-w-2xl space-y-5">
+        <p className="text-[10px] font-black uppercase tracking-[0.25em] text-[#C6A96B]">Ready for calculation</p>
+        <h2 className="font-display text-2xl sm:text-3xl font-black text-[#F8F6F1]">เลือกโปรไฟล์หรือกรอกข้อมูลเกิดให้ครบ</h2>
+        <p className="text-sm leading-relaxed text-[#D9CDB7]">
+          {hasProfileBirthData
+            ? "มีข้อมูลเกิดในโปรไฟล์แล้ว แต่ยังไม่มีผลคำนวณพร้อมแสดงผล กรุณาคำนวณอีกครั้งเพื่อสร้างผังดวงล่าสุด"
+            : hasCustomers
+              ? "เลือกข้อมูลลูกค้าจากฐานข้อมูล หรือกรอกวันเดือนปีเกิด เวลาเกิด และจังหวัดเกิดเพื่อเริ่มผูกดวง"
+              : "ยังไม่มีข้อมูลเกิดที่พร้อมใช้งาน กรอกข้อมูลเจ้าชะตาก่อนเพื่อสร้างพื้นดวงและลัคนาจร"}
+        </p>
+        <Button type="button" onClick={onOpenCalculator} className="rounded-2xl">ไปหน้าคำนวณ</Button>
+      </div>
+    </Card>
+  );
+}
+
+function SelectField({ name, label, value, onChange, children }: { name: string; label: string; value: number | string; onChange: (value: number) => void; children: ReactNode; }) {
+  return (
+    <div className="space-y-2">
+      <label htmlFor={name} className="text-[10px] font-black text-[#8A8070] uppercase tracking-widest">{label}</label>
+      <select
+        id={name}
+        name={name}
+        value={value}
+        onChange={(event) => onChange(Number(event.currentTarget.value))}
+        className="w-full min-h-12 bg-slate-950 border border-white/10 rounded-xl p-3 text-white text-sm outline-none focus:border-[#C6A96B] focus:ring-2 focus:ring-[#C6A96B]/20"
+      >
+        {children}
+      </select>
+    </div>
+  );
+}
+
+function ProfileSelector({ customers, onSelectCustomer }: { customers: CustomerOption[]; onSelectCustomer: (customerId: string) => void; }) {
+  return (
+    <div className="border-b border-white/10 pb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <h2 className="text-base sm:text-lg font-black text-[#C6A96B] font-thai uppercase tracking-widest">ตั้งค่าคำนวณชะตา</h2>
+      {customers.length > 0 && (
+        <div className="w-full sm:w-72">
+          <label htmlFor="profileSelector" className="sr-only">เลือกโปรไฟล์เจ้าชะตา</label>
+          <select
+            id="profileSelector"
+            className="w-full min-h-11 bg-slate-950 border border-white/10 text-[#C6A96B] text-xs rounded-xl px-3 py-2 outline-none focus:border-[#C6A96B] focus:ring-2 focus:ring-[#C6A96B]/20"
+            onChange={(event) => onSelectCustomer(event.currentTarget.value)}
+          >
+            <option value="">เลือกจากฐานข้อมูลลูกค้า...</option>
+            {customers.map((customer) => <option key={customer.id} value={customer.id}>{customer.name}</option>)}
+          </select>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function BirthDataForm(props: {
+  birthDay: number; birthMonth: number; birthYear: number; birthTime: string; birthPlace: string; customerName: string;
+  onBirthDayChange: (value: number) => void; onBirthMonthChange: (value: number) => void; onBirthYearChange: (value: number) => void;
+  onBirthTimeChange: (value: string) => void; onBirthPlaceChange: (value: string) => void; onCustomerNameChange: (value: string) => void;
+}) {
+  const maxYear = currentBuddhistParts().yearBE + 6;
+  return (
+    <section className="space-y-5" aria-labelledby="birth-data-title">
+      <h3 id="birth-data-title" className="text-[11px] font-black text-[#C6A96B] uppercase tracking-widest">ข้อมูลเกิด</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <SelectField name="birthDay" label="วันเกิด" value={props.birthDay} onChange={props.onBirthDayChange}>
+          {Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}
+        </SelectField>
+        <SelectField name="birthMonth" label="เดือนเกิด" value={props.birthMonth} onChange={props.onBirthMonthChange}>
+          {THAI_MONTHS.map((month, index) => <option key={month} value={index + 1}>{month}</option>)}
+        </SelectField>
+        <SelectField name="birthYear" label="ปีเกิด (พ.ศ.)" value={props.birthYear} onChange={props.onBirthYearChange}>
+          {Array.from({ length: 120 }, (_, i) => {
+            const year = maxYear - i;
+            return <option key={year} value={year}>{year}</option>;
+          })}
+        </SelectField>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <Input name="birthTime" type="time" label="เวลาเกิด" value={props.birthTime} onChange={(event) => props.onBirthTimeChange(event.currentTarget.value)} />
+        <Input name="birthPlace" label="จังหวัดเกิด" value={props.birthPlace} onChange={(event) => props.onBirthPlaceChange(event.currentTarget.value)} placeholder="เช่น กรุงเทพมหานคร" />
+      </div>
+      <Input name="customerName" label="ชื่อเจ้าชะตา" value={props.customerName} onChange={(event) => props.onCustomerNameChange(event.currentTarget.value)} placeholder="ระบุชื่อเพื่อบันทึกประวัติ" />
+    </section>
+  );
+}
+
+function TransitDateForm(props: {
+  transitDay: number; transitMonth: number; transitYear: number; transitTime: string;
+  onTransitDayChange: (value: number) => void; onTransitMonthChange: (value: number) => void; onTransitYearChange: (value: number) => void; onTransitTimeChange: (value: string) => void;
+}) {
+  const currentYear = currentBuddhistParts().yearBE;
+  return (
+    <section className="space-y-5 rounded-2xl border border-white/10 bg-white/[0.03] p-4 sm:p-5" aria-labelledby="transit-date-title">
+      <h3 id="transit-date-title" className="text-[11px] font-black text-[#C6A96B] uppercase tracking-widest">วันจรที่ต้องการตรวจ</h3>
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <SelectField name="transitDay" label="วัน" value={props.transitDay} onChange={props.onTransitDayChange}>{Array.from({ length: 31 }, (_, i) => <option key={i + 1} value={i + 1}>{i + 1}</option>)}</SelectField>
+        <SelectField name="transitMonth" label="เดือน" value={props.transitMonth} onChange={props.onTransitMonthChange}>{THAI_MONTHS.map((month, index) => <option key={month} value={index + 1}>{month}</option>)}</SelectField>
+        <SelectField name="transitYear" label="ปี (พ.ศ.)" value={props.transitYear} onChange={props.onTransitYearChange}>{Array.from({ length: 12 }, (_, i) => { const year = currentYear - 5 + i; return <option key={year} value={year}>{year}</option>; })}</SelectField>
+        <Input name="transitTime" type="time" label="เวลา" value={props.transitTime} onChange={(event) => props.onTransitTimeChange(event.currentTarget.value)} />
+      </div>
+    </section>
+  );
+}
+
+function TogglePill({ active, onClick, label, activeClass }: { active: boolean; onClick: () => void; label: string; activeClass: string; }) {
+  return (
+    <button type="button" aria-pressed={active} onClick={onClick} className={`min-h-10 rounded-full border px-4 py-2 text-[11px] font-black transition-all focus:outline-none focus:ring-2 focus:ring-[#C6A96B]/50 ${active ? `${activeClass} border-white/20 shadow-lg` : "bg-slate-950/40 text-[#D9CDB7] border-white/10"}`}>
+      {label}
+    </button>
+  );
+}
+
+function TransitControls(props: {
+  showVayaRanges: boolean; showNatalLagna: boolean; showTransitLagna: boolean;
+  onToggleVayaRanges: () => void; onToggleNatalLagna: () => void; onToggleTransitLagna: () => void;
+}) {
+  return (
+    <Card className="border-[#C6A96B]/20 bg-slate-900/40 p-4 sm:p-5 rounded-2xl">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:items-center">
+        <h3 className="text-[10px] font-black text-[#C6A96B] uppercase tracking-widest sm:mr-2">Transit Filters</h3>
+        <TogglePill active={props.showVayaRanges} onClick={props.onToggleVayaRanges} label="ช่วงอายุวัยจร" activeClass="bg-amber-500 text-white" />
+        <TogglePill active={props.showNatalLagna} onClick={props.onToggleNatalLagna} label="ลัคนาเกิด" activeClass="bg-[#C6A96B] text-[#020617]" />
+        <TogglePill active={props.showTransitLagna} onClick={props.onToggleTransitLagna} label="ลัคนาจร" activeClass="bg-sky-500 text-white" />
+      </div>
+    </Card>
+  );
+}
+
+function MobileStickyActions({ activeTab, hasResult, isLoading, onTabChange }: { activeTab: TabId; hasResult: boolean; isLoading: boolean; onTabChange: (tab: TabId) => void; }) {
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-30 border-t border-[#C6A96B]/20 bg-[#020617]/95 px-3 py-3 backdrop-blur-xl sm:hidden">
+      <div className="grid grid-cols-3 gap-2">
+        <TabButton id="chart" label="พื้นดวง" activeTab={activeTab} onTabChange={onTabChange} disabled={!hasResult} />
+        <TabButton id="analysis" label="วิเคราะห์" activeTab={activeTab} onTabChange={onTabChange} disabled={!hasResult} />
+        {activeTab === "calc" ? (
+          <button type="submit" form="horoscope-form" disabled={isLoading} className="min-h-11 rounded-2xl bg-[#C6A96B] px-3 py-2 text-xs font-black text-[#020617] disabled:opacity-50">คำนวณ</button>
+        ) : (
+          <TabButton id="calc" label="คำนวณ" activeTab={activeTab} onTabChange={onTabChange} />
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function HoroscopePage() {
+  const { profile, customers, initialResult } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>() as HoroscopeActionResult | undefined;
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "submitting";
+  const initialBirthParts = isoDateToBuddhistParts(profile?.birth_date) ?? { day: 15, month: 6, yearBE: 2530 };
+  const initialTransitParts = currentBuddhistParts();
+
+  const [activeTab, setActiveTab] = useState<"chart" | "analysis" | "calc">("chart");
+  const [activeResult, setActiveResult] = useState<HoroscopeActionResult | null>(initialResult);
+  const [birthDay, setBirthDay] = useState(initialBirthParts.day);
+  const [birthMonth, setBirthMonth] = useState(initialBirthParts.month);
+  const [birthYear, setBirthYear] = useState(initialBirthParts.yearBE);
+  const [birthTime, setBirthTime] = useState(profile?.birth_time?.substring(0, 5) || "12:00");
+  const [birthPlace, setBirthPlace] = useState(profile?.birth_place || "");
+  const [customerName, setCustomerName] = useState(profile?.display_name || profile?.full_name || "");
+  const [transitDay, setTransitDay] = useState(initialTransitParts.day);
+  const [transitMonth, setTransitMonth] = useState(initialTransitParts.month);
+  const [transitYear, setTransitYear] = useState(initialTransitParts.yearBE);
+  const [transitTime, setTransitTime] = useState("12:00");
+  const [showVayaRanges, setShowVayaRanges] = useState(false);
+  const [showNatalLagna, setShowNatalLagna] = useState(true);
+  const [showTransitLagna, setShowTransitLagna] = useState(true);
+
+  useEffect(() => {
+    if (actionData && !actionData.error) {
+      setActiveResult(actionData);
+      setActiveTab("chart");
+    }
+  }, [actionData]);
+
+  const customerOptions = customers as CustomerOption[];
+  const handleCustomerSelect = (customerId: string) => {
+    const selected = customerOptions.find((customer) => customer.id === customerId);
+    if (!selected) return;
+    const parts = isoDateToBuddhistParts(selected.birth_date);
+    if (parts) {
+      setBirthDay(parts.day);
+      setBirthMonth(parts.month);
+      setBirthYear(parts.yearBE);
+    }
+    setBirthTime(selected.birth_time?.substring(0, 5) || "12:00");
+    setBirthPlace(selected.birth_place || "");
+    setCustomerName(selected.name);
+  };
+
+  return (
+    <div className="space-y-6 sm:space-y-10 max-w-6xl pb-36 animate-fade-in">
+      <HoroscopeHeader activeTab={activeTab} onTabChange={setActiveTab} hasResult={Boolean(activeResult)} />
+
+      {isLoading && <HoroscopeSkeleton />}
+
+      {!isLoading && activeTab !== "calc" && !activeResult && (
+        <HoroscopeEmptyState
+          hasProfileBirthData={Boolean(profile?.birth_date)}
+          hasCustomers={customerOptions.length > 0}
+          onOpenCalculator={() => setActiveTab("calc")}
+        />
+      )}
+
+      {!isLoading && activeTab === "chart" && activeResult && activeResult.matrix && (
+        <div className="space-y-6 sm:space-y-10 animate-in fade-in duration-700">
+          <WisdomBirthGuidanceCard profile={profile} activeResult={activeResult} lunar={activeResult.phopephumResult?.lunar} />
+          <SummaryParagraph activeResult={activeResult} />
+          <TransitControls
+            showVayaRanges={showVayaRanges}
+            showNatalLagna={showNatalLagna}
+            showTransitLagna={showTransitLagna}
+            onToggleVayaRanges={() => setShowVayaRanges((value) => !value)}
+            onToggleNatalLagna={() => setShowNatalLagna((value) => !value)}
+            onToggleTransitLagna={() => setShowTransitLagna((value) => !value)}
+          />
+          <FateMatrixPanel
+            matrix={activeResult.matrix}
+            onNumClick={() => {}}
+            phopephumResult={activeResult.phopephumResult}
+            showVayaRanges={showVayaRanges}
+            showNatalLagna={showNatalLagna}
+            showTransitLagna={showTransitLagna}
+          />
+        </div>
+      )}
+
+      {!isLoading && activeTab === "analysis" && activeResult && (
+        <div className="space-y-6 sm:space-y-10 animate-in fade-in duration-700">
+          <details className="group" open>
+            <summary className="cursor-pointer list-none rounded-2xl border border-[#C6A96B]/20 bg-slate-900/50 px-5 py-4 text-sm font-black text-[#C6A96B] focus:outline-none focus:ring-2 focus:ring-[#C6A96B]/50">
+              บทวิเคราะห์เชิงลึก
+            </summary>
+            <DetailedGuidancePanel />
+          </details>
+          <NatalInfoPanel activeResult={activeResult} />
+          <ComparisonCard activeResult={activeResult} />
+        </div>
+      )}
+
+      {activeTab === "calc" && (
+        <div className="max-w-3xl mx-auto animate-in zoom-in duration-500">
+          <Card className="border-[#C6A96B]/30 bg-slate-900/60 p-5 sm:p-8 lg:p-10 rounded-2xl sm:rounded-[2rem] shadow-2xl">
+            <Form id="horoscope-form" method="post" className="space-y-8">
+              <ProfileSelector customers={customerOptions} onSelectCustomer={handleCustomerSelect} />
+
+              {actionData?.error && (
+                <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold text-center" role="alert">
+                  {actionData.error}
+                </div>
+              )}
+
+              <BirthDataForm
+                birthDay={birthDay}
+                birthMonth={birthMonth}
+                birthYear={birthYear}
+                birthTime={birthTime}
+                birthPlace={birthPlace}
+                customerName={customerName}
+                onBirthDayChange={setBirthDay}
+                onBirthMonthChange={setBirthMonth}
+                onBirthYearChange={setBirthYear}
+                onBirthTimeChange={setBirthTime}
+                onBirthPlaceChange={setBirthPlace}
+                onCustomerNameChange={setCustomerName}
+              />
+
+              <TransitDateForm
+                transitDay={transitDay}
+                transitMonth={transitMonth}
+                transitYear={transitYear}
+                transitTime={transitTime}
+                onTransitDayChange={setTransitDay}
+                onTransitMonthChange={setTransitMonth}
+                onTransitYearChange={setTransitYear}
+                onTransitTimeChange={setTransitTime}
+              />
+
+              <Button type="submit" loading={isLoading} className="w-full min-h-14 sm:h-16 rounded-2xl text-sm sm:text-lg font-black tracking-[0.08em] sm:tracking-[0.2em]">
+                ผูกดวงชะตาจักรพรรดิ
+              </Button>
+            </Form>
+          </Card>
+        </div>
+      )}
+
+      <MobileStickyActions activeTab={activeTab} hasResult={Boolean(activeResult)} isLoading={isLoading} onTabChange={setActiveTab} />
+    </div>
+  );
+}
+
+function LegacyHoroscopePage() {
   const { profile, history, customers, initialResult } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();

@@ -6,6 +6,12 @@ export const HoroscopeInputSchema = z.object({
   birthPlace: z.string().optional(),
 });
 
+export const BuddhistDatePartsSchema = z.object({
+  day: z.number().int().min(1).max(31),
+  month: z.number().int().min(1).max(12),
+  yearBE: z.number().int().min(2400).max(2700),
+});
+
 export const AIReportRequestSchema = z.object({
   reportType: z.enum([
     "life_overview",
@@ -30,5 +36,6 @@ export const LoginSchema = z.object({
 });
 
 export type HoroscopeInputData = z.infer<typeof HoroscopeInputSchema>;
+export type BuddhistDatePartsData = z.infer<typeof BuddhistDatePartsSchema>;
 export type RegisterData = z.infer<typeof RegisterSchema>;
 export type LoginData = z.infer<typeof LoginSchema>;

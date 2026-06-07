@@ -40,7 +40,7 @@ const BASE4_MEANINGS: Record<number, string> = {
 
 // ─── Core Logic ───────────────────────────────────────────────────────────────
 
-function buddhToCS(yearBE: number) { return yearBE - 1181; }
+export function buddhToCS(yearBE: number) { return yearBE - 1181; }
 function r7(n: number) { return n % 7 || 7; }
 function getBKKDate(date: Date): Date { return new Date(date.getTime() + (date.getTimezoneOffset() + 420) * 60000); }
 function safeMod(n: number, m: number) { return ((n % m) + m) % m; }
