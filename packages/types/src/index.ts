@@ -192,6 +192,7 @@ export interface PhopephumResult {
   dailyJorn?: JornResult;
   lagna?: LagnaPhopephumResult;
   lagnaTransit?: LagnaPhopephumResult;
+  lagnaMoment?: LagnaPhopephumResult;
   horary?: NineBaseResult;
   timestamp: string;
 }

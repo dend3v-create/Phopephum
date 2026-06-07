@@ -146,8 +146,50 @@ export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date, taksaMap
 }
 
 /**
- * คำนวณผังกาลชะตา (Horary)
+ * คำนวณลัคนาจร (Transit Ascendant)
+ * นับจากลัคนาเดิมไปตามแนวนอนทีละช่อง ตามจำนวนอายุย่าง
  */
+export function calculateLagnaTransitPhopephum(
+  matrix: FateMatrix,
+  lagnaNatal: { row: number; col: number },
+  ageYang: number,
+  taksaMap?: TaksaMap
+): {
+  row: number;
+  col: number;
+  houseName: string;
+  star: number;
+  base4Power?: number;
+  base4Meaning?: string;
+  base4Taksa?: TaksaBhop;
+  base4Direction?: string;
+} {
+  // ลำดับช่อง 0-20 (Row 1: 0-6, Row 2: 7-13, Row 3: 14-20)
+  const startIdx = (lagnaNatal.row - 1) * 7 + (lagnaNatal.col - 1);
+  const targetIdx = (startIdx + (ageYang - 1)) % 21;
+  
+  const row = Math.floor(targetIdx / 7);
+  const col = targetIdx % 7;
+  const star = matrix[row][col];
+  
+  // Base 4 Info
+  const base4Power = col !== -1 && matrix[3] ? matrix[3][col] : undefined;
+  const base4Meaning = base4Power !== undefined ? BASE4_MEANINGS[base4Power] : undefined;
+  const base4Star = base4Power !== undefined ? POWER_TO_STAR[base4Power] : undefined;
+  const base4Taksa = (base4Star && taksaMap) ? taksaMap[base4Star] : undefined;
+  const base4Direction = base4Star ? STAR_DIRECTIONS[base4Star] : undefined;
+
+  return {
+    row: row + 1,
+    col: col + 1,
+    houseName: PHOPEPHUM_HOUSES[row][col],
+    star,
+    base4Power,
+    base4Meaning,
+    base4Taksa,
+    base4Direction
+  };
+}
 export function calculateHorary(date: Date): FateMatrix {
   const time = calculateTimeEngine(date);
   

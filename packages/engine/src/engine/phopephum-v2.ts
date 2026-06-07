@@ -3,7 +3,7 @@ import { calculateAtthakarn as calculateAtthakarnLivingWisdom, calculateRahu as 
 import { calcTaksaMaha, buddhToCS } from "../taksa-mahabhuti/index.js";
 import { getThaiBaseNumbers } from "../core/lunarCalendar.js";
 import { calculateVayaJorn, calculateYearlyJorn, calculateMonthlyJorn, calculateDailyJorn } from "../calculators/calculateJorn.js";
-import { calculateLagnaPhopephum, calculateHorary } from "../calculators/calculatePhopephumTime.js";
+import { calculateLagnaPhopephum, calculateLagnaTransitPhopephum, calculateHorary } from "../calculators/calculatePhopephumTime.js";
 import type { PhopephumResult, HoroscopeInput } from "@phopephum/types";
 
 /**
@@ -52,7 +52,8 @@ export async function calculatePhopephum(input: HoroscopeInput, checkDate: Date 
   
   const birthDateTime = new Date(`${input.birthDate}T${input.birthTime || '12:00'}:00`);
   const lagna = calculateLagnaPhopephum(matrix, birthDateTime, taksaMap);
-  const lagnaTransit = calculateLagnaPhopephum(matrix, checkDate, taksaMap);
+  const lagnaTransit = calculateLagnaTransitPhopephum(matrix, lagna, ageYang, taksaMap);
+  const lagnaMoment = calculateLagnaPhopephum(matrix, checkDate, taksaMap);
 
   // ── 6. Calculate Horary (กาลชะตา) ──────────────────────────────────────────
   const horaryMatrix = calculateHorary(checkDate);
@@ -79,6 +80,7 @@ export async function calculatePhopephum(input: HoroscopeInput, checkDate: Date 
     dailyJorn,
     lagna,
     lagnaTransit,
+    lagnaMoment,
     horary,
     timestamp: checkDate.toISOString(),
   };
