@@ -15,3 +15,4 @@ export * from "./calculateJorn.js";
 export * from "./calculatePhopephumTime.js";
 export * from "./calculateNakshatra.js";
 export * from "./karnchataCalculator.js";
+export * from "./calculateHoraThaiNu.js";

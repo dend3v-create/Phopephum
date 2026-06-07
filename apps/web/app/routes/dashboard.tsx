@@ -97,11 +97,16 @@ export default function DashboardLayout() {
             label={<span>ยามราหูค้นทรัพย์ {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
           />
           
-          <NavLink to="/dashboard/karnchata" 
-            icon={<IconHourglass />}   
-            label={<span>ทำนายกาลชะตา {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
+          <NavLink to="/dashboard/karnchata"
+            icon={<IconHourglass />}
+            label={<span>ทำนายกาลชะตา {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>}
           />
-          
+
+          <NavLink to="/dashboard/hora-thai-nu"
+            icon={<IconHoraThai />}
+            label={<span>โหรทายหนู {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>}
+          />
+
           <NavLink to="/dashboard/planner"   
             icon={<IconCalendar />} 
             label={<span>วางแผนชีวิต {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
@@ -350,6 +355,18 @@ function IconHourglass() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#C6A96B]">
       <path d="M5 2h14M5 22h14M19 2v4a7 7 0 0 1-7 7 7 7 0 0 1-7-7V2M5 22v-4a7 7 0 0 1 7-7 7 7 0 0 1 7 7v4" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M12 2v4M12 18v4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IconHoraThai() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#C6A96B]">
+      <ellipse cx="12" cy="12" rx="5" ry="8" />
+      <path d="M12 4v4" strokeLinecap="round" />
+      <circle cx="12" cy="10" r="1.5" fill="currentColor" stroke="none" />
+      <path d="M7 12h-3M17 12h3" strokeLinecap="round" />
+      <path d="M8.5 7.5L6 5.5M15.5 7.5L18 5.5" strokeLinecap="round" />
     </svg>
   );
 }
