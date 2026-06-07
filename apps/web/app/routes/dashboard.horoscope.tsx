@@ -675,6 +675,7 @@ export default function HoroscopePage() {
 
   // ── ระบบ Filter เปิด/ปิด การแสดงผลสัญลักษณ์และภพเรือน ──
   const [showVayaJorn, setShowVayaJorn] = useState(true);
+  const [showVayaRanges, setShowVayaRanges] = useState(false);
   const [showYearlyJorn, setShowYearlyJorn] = useState(true);
   const [showMonthlyJorn, setShowMonthlyJorn] = useState(false);
   const [showDailyJorn, setShowDailyJorn] = useState(false);
@@ -683,6 +684,35 @@ export default function HoroscopePage() {
   const [showTaksaJorn, setShowTaksaJorn] = useState(false);
   const [showMahaJorn, setShowMahaJorn] = useState(false);
   const [showTaksaDirection, setShowTaksaDirection] = useState(false);
+  const [showHorary, setShowHorary] = useState(false);
+
+  // ── ระบบ กาลชะตา เรียลไทม์ (อัปเดตทุก 3.45 นาที) ──
+  const [horaryResult, setHoraryResult] = useState<any>(null);
+  
+  const updateHorary = useCallback(async () => {
+    if (!showHorary) return;
+    try {
+      // ใช้ API เดิมแต่ส่ง calc_type เป็น horary หรือคำนวณผ่าน engine โดยตรง
+      // สำหรับความเรียบง่าย เราจะคำนวณผ่าน action หรือ loader หรือสร้าง API endpoint ใหม่
+      // ในที่นี้เราจะจำลองการดึงข้อมูลกาลชะตาปัจจุบัน
+      const now = new Date();
+      // หมายเหตุ: ในที่นี้เราอาจจะต้องเพิ่ม API route สำหรับดึงค่ากาลชะตาสด
+      const res = await fetch(`/api/hora?type=horary&t=${now.getTime()}`).then(r => r.json()) as { success: boolean; data: unknown };
+      if (res.success) {
+        setHoraryResult(res.data);
+      }
+    } catch (e) {
+      console.error("Horary update error:", e);
+    }
+  }, [showHorary]);
+
+  useEffect(() => {
+    if (showHorary) {
+      updateHorary();
+      const timer = setInterval(updateHorary, 225000); // 3.45 minutes = 225 seconds
+      return () => clearInterval(timer);
+    }
+  }, [showHorary, updateHorary]);
 
   // ดึงค่าระบบจรจาก activeResult เพื่อนำมาหาดาวเป้าหมาย
   const taksaTransit = activeResult?.taksaMaha?.taksaTransit || activeResult?.phopephumResult?.taksaTransit;
@@ -909,6 +939,9 @@ export default function HoroscopePage() {
               <button onClick={() => setShowVayaJorn(!showVayaJorn)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showVayaJorn ? "bg-[#C6A96B]/10 border-[#C6A96B]/40 text-[#C6A96B]" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
                 <span className={`w-2 h-2 rounded-full ${showVayaJorn ? "bg-[#C6A96B] animate-pulse" : "bg-[#8A8070]"}`}></span> วัยจร
               </button>
+              <button onClick={() => setShowVayaRanges(!showVayaRanges)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showVayaRanges ? "bg-amber-500/10 border-amber-500/40 text-amber-400" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span>📊</span> ช่วงอายุวัยจร
+              </button>
               <button onClick={() => setShowYearlyJorn(!showYearlyJorn)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showYearlyJorn ? "bg-[#4B6FAE]/10 border-[#4B6FAE]/40 text-[#4B6FAE]" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
                 <span className={`w-2 h-2 rounded-full ${showYearlyJorn ? "bg-[#4B6FAE]" : "bg-[#8A8070]"}`}></span> ปีจร
               </button>
@@ -938,6 +971,9 @@ export default function HoroscopePage() {
               </button>
               <button onClick={() => setShowTaksaDirection(!showTaksaDirection)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showTaksaDirection ? "bg-sky-500/10 border-sky-500/40 text-sky-400" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
                 <span className="text-xs">🧭</span> ทิศทักษา
+              </button>
+              <button onClick={() => setShowHorary(!showHorary)} className={`px-3 py-1.5 rounded-full border text-xs font-bold transition-all flex items-center gap-2 ${showHorary ? "bg-pink-500/10 border-pink-500/40 text-pink-400" : "bg-transparent border-white/10 text-[#8A8070] hover:border-white/30"}`}>
+                <span className="text-xs">⏰</span> กาลชะตา (3.45น.)
               </button>
               
               {isFiltering && (
@@ -1023,9 +1059,80 @@ export default function HoroscopePage() {
             showDailyJorn={showDailyJorn}
             showTaksaJorn={showTaksaJorn}
             showMahaJorn={showMahaJorn}
+            showVayaRanges={showVayaRanges}
           />
 
-          <DetailedGuidancePanel />
+          {/* ── ส่วนที่ 4: กาลชะตา (Horary) และเดือนจร (Monthly) ── */}
+          {showHorary && (
+            <div className="space-y-6 animate-in zoom-in duration-500">
+              <div className="flex items-center gap-3">
+                <div className="h-px flex-1 bg-pink-500/20" />
+                <p className="text-pink-400 text-[10px] tracking-[0.25em] uppercase font-bold flex items-center gap-2">
+                   ⏰ ผังกาลชะตาเรียลไทม์ (เปลี่ยนทุก 3.45 นาที)
+                </p>
+                <div className="h-px flex-1 bg-pink-500/20" />
+              </div>
+              
+              <div className="grid grid-cols-1 gap-6">
+                 {horaryResult ? (
+                   <FateMatrixPanel
+                      matrix={horaryResult.nineBase.bases}
+                      activeNum={null}
+                      onNumClick={() => {}}
+                      taksaMaha={horaryResult}
+                      phopephumResult={horaryResult}
+                      showVayaJorn={false}
+                      showYearlyJorn={false}
+                      showMonthlyJorn={false}
+                      showDailyJorn={false}
+                   />
+                 ) : (
+                   <Card className="p-12 text-center border-dashed border-pink-500/20 bg-pink-500/5">
+                      <p className="text-pink-400/60 text-xs animate-pulse">กำลังประมวลผลกาลชะตาสดจากฟากฟ้า... 🌌</p>
+                   </Card>
+                 )}
+              </div>
+            </div>
+          )}
+
+          {/* ── ส่วนที่ 5: วิเคราะห์เดือนจรตามปฏิทินจันทรคติ ── */}
+          <Card className="border-[#C6A96B]/20 bg-slate-900/40 backdrop-blur-md p-5 rounded-2xl">
+            <h3 className="text-xs font-bold text-[#C6A96B] uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-white/5 pb-2">
+              <span className="text-base">📅</span> ตารางเดือนจรจันทรคติปีนี้ (Lunar Monthly Jorn)
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-[11px] text-[#8A8070]">
+                <thead>
+                  <tr className="border-b border-white/5">
+                    <th className="py-2 text-left">เดือนจันทรคติ</th>
+                    <th className="py-2 text-left">ภพจร</th>
+                    <th className="py-2 text-left">ดาวครอง</th>
+                    <th className="py-2 text-left">สถานะ</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[1,2,3,4,5,6,7,8,9,10,11,12].map((m) => {
+                    const monthMap: Record<number, string> = { 1: "พันธุ", 2: "ปุตตะ", 3: "อริ", 4: "ปัตนิ", 5: "ตนุ", 6: "กฎุมภะ", 7: "สหัชชะ", 8: "พันธุ", 9: "ปุตตะ", 10: "อริ", 11: "ปัตนิ", 12: "ตนุ" };
+                    const currentLunarMonth = activeResult?.phopephumResult?.nineBase?.lunarDate?.thaiMonth || 1;
+                    const isCurrent = currentLunarMonth === m;
+                    return (
+                      <tr key={m} className={`border-b border-white/5 ${isCurrent ? "bg-[#C6A96B]/10 text-[#F8F6F1]" : ""}`}>
+                        <td className="py-3 font-bold">เดือน {m}</td>
+                        <td className="py-3 font-bold">{monthMap[m]}</td>
+                        <td className="py-3">ดาว {activeResult?.matrix?.[1]?.[(m-1)%7] ?? "—"}</td>
+                        <td className="py-3">
+                          {isCurrent ? <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">ปัจจุบัน</span> : "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p className="mt-4 text-[10px] text-[#8A8070] italic">
+              * หมายเหตุ: เดือนจันทรคติไทยเริ่มนับเดือน 1 ประมาณเดือนธันวาคมของปีปฏิทินสากล จังหวะดวงจะให้ผลแรงที่สุดในช่วง "วันอัฏฐมี" (๘ ค่ำ) และ "วันอุโบสถ" (๑๕ ค่ำ) ของแต่ละเดือน
+            </p>
+          </Card>
 
           <LegendPanel />
           <Base4EffectPanel activeResult={activeResult} />
@@ -1137,8 +1244,31 @@ export default function HoroscopePage() {
             }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <div className="border-b border-[#C9A96E]/20 pb-2">
+                  <div className="border-b border-[#C9A96E]/20 pb-2 flex justify-between items-center">
                     <h3 className="text-sm font-bold text-[#C9A96E] uppercase tracking-wider">ข้อมูลวันกำเนิด (Birth Info)</h3>
+                    {customers.length > 0 && (
+                      <select 
+                        className="bg-slate-900 border border-[#C9A96E]/30 text-[#C9A96E] text-[10px] rounded px-2 py-1 outline-none"
+                        onChange={(e) => {
+                          const c = customers.find(c => c.id === e.target.value);
+                          if (c) {
+                            const [by, bm, bd] = c.birth_date.split("-").map(Number);
+                            const bYearThai = by + 543;
+                            (document.querySelector('select[name="birthDay"]') as any).value = bd;
+                            (document.querySelector('select[name="birthMonth"]') as any).value = bm;
+                            (document.querySelector('select[name="birthYear"]') as any).value = bYearThai;
+                            (document.querySelector('input[name="birthTime"]') as any).value = c.birth_time?.substring(0,5) || "";
+                            (document.querySelector('input[name="birthPlace"]') as any).value = c.birth_place || "";
+                            (document.querySelector('input[name="customerName"]') as any).value = c.name;
+                          }
+                        }}
+                      >
+                        <option value="">เลือกจากฐานข้อมูลลูกค้า...</option>
+                        {customers.map(c => (
+                          <option key={c.id} value={c.id}>{c.name}</option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                   <div className="space-y-4">
                     <div className="flex flex-col gap-1.5">
@@ -1489,15 +1619,15 @@ function numColor(n: number, isActive: boolean = false) {
 }
 
 const ROW_META = [
-  { label: "ฐาน ๑", sub: "วันเกิด",           phopNames: ["อัตตะ","หินะ","ธนัง","ปิตา","มาตา","โภคา","มัชฌิมา"] },
-  { label: "ฐาน ๒", sub: "เดือนเกิด",         phopNames: ["ตนุ","กฎุมภะ","สหัชชะ","พันธุ","ปุตตะ","อริ","ปัตนิ"] },
-  { label: "ฐาน ๓", sub: "ปีเกิด",            phopNames: ["มรณะ","ศุภะ","กัมมะ","ลาภะ","พยายะ","ทาสา","ทาสี"] },
-  { label: "ฐาน ๔", sub: "ฐานบวก (มหาจักร)", phopNames: null },
-  { label: "ฐาน ๕", sub: "ฐานเศษ (มหาภูติ)", phopNames: null },
-  { label: "ฐาน ๖", sub: "กำลังพระเคราะห์",  phopNames: null },
-  { label: "ฐาน ๗", sub: "กำลังพระเคราะห์",  phopNames: null },
-  { label: "ฐาน ๘", sub: "อาตมะ",            phopNames: ["อาตมะ","ทาสา","สิทธิโชค","โภคทรัพย์","โจร","อุบาทว์","อุปถัมภ์"] },
-  { label: "ฐาน ๙", sub: "ภริยัง",           phopNames: ["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"] },
+  { label: "ฐาน ๑", sub: "",           phopNames: ["อัตตะ","หินะ","ธนัง","ปิตา","มาตา","โภคา","มัชฌิมา"] },
+  { label: "ฐาน ๒", sub: "",         phopNames: ["ตนุ","กฎุมภะ","สหัชชะ","พันธุ","ปุตตะ","อริ","ปัตนิ"] },
+  { label: "ฐาน ๓", sub: "",            phopNames: ["มรณะ","ศุภะ","กัมมะ","ลาภะ","พยายะ","ทาสา","ทาสี"] },
+  { label: "ฐาน ๔", sub: "", phopNames: null },
+  { label: "ฐาน ๕", sub: "", phopNames: null },
+  { label: "ฐาน ๖", sub: "",  phopNames: null },
+  { label: "ฐาน ๗", sub: "",  phopNames: null },
+  { label: "ฐาน ๘", sub: "",            phopNames: ["อาตมะ","ทาสา","สิทธิโชค","โภคทรัพย์","โจร","อุบาทว์","อุปถัมภ์"] },
+  { label: "ฐาน ๙", sub: "",           phopNames: ["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"] },
 ];
 
 const BASE4_MEANINGS: Record<number, string> = {
@@ -1620,6 +1750,7 @@ function FateMatrixPanel({
   showDailyJorn = true,
   showTaksaJorn = false,
   showMahaJorn = false,
+  showVayaRanges = false,
 }: {
   matrix: number[][];
   activeNum: number | null;
@@ -1636,6 +1767,7 @@ function FateMatrixPanel({
   showDailyJorn?: boolean;
   showTaksaJorn?: boolean;
   showMahaJorn?: boolean;
+  showVayaRanges?: boolean;
 }) {
   return (
     <div onClick={() => onNumClick(null)} className="w-full">
@@ -1663,20 +1795,26 @@ function FateMatrixPanel({
                     const actualNum = isBase4 ? getStarFromBase4(num) : (num % 7 || 7);
                     const isHighlighted = (activeNum !== null && (isBase4 ? matrix[2]?.[cIdx] === activeNum : (actualNum === activeNum && [0,1,2,7,8].includes(rIdx)))) || (isFiltering && highlightedStars.has(isBase4 ? matrix[2]?.[cIdx] : actualNum));
                     const isDimmed = isFiltering && !highlightedStars.has(isBase4 ? matrix[2]?.[cIdx] : actualNum);
-                    const c = numColor(num, isHighlighted);
-                    const isRow012 = [0, 1, 2, 7, 8].includes(rIdx);
-                    
+
+                    const isRow012   = [0, 1, 2].includes(rIdx);
+                    const isRow01278 = [0, 1, 2, 7, 8].includes(rIdx);
+
                     const lagnaNatal = phopephumResult?.lagna;
                     const isLagnaNatal = isRow012 && lagnaNatal?.row === (rIdx + 1) && lagnaNatal?.col === (cIdx + 1);
-                    
+
                     const lagnaTransit = phopephumResult?.lagnaTransit;
                     const isLagnaTransit = isRow012 && lagnaTransit?.row === (rIdx + 1) && lagnaTransit?.col === (cIdx + 1);
-                    
+
                     const isVayaJorn = isRow012 && phopephumResult?.vayaJorn?.row === (rIdx + 1) && phopephumResult?.vayaJorn?.col === (cIdx + 1);
                     const isYearlyJorn = isRow012 && phopephumResult?.yearlyJorn?.row === (rIdx + 1) && phopephumResult?.yearlyJorn?.col === (cIdx + 1);
                     const isMonthlyJorn = isRow012 && phopephumResult?.monthlyJorn?.row === (rIdx + 1) && phopephumResult?.monthlyJorn?.col === (cIdx + 1);
                     const isDailyJorn = isRow012 && phopephumResult?.dailyJorn?.row === (rIdx + 1) && phopephumResult?.dailyJorn?.col === (cIdx + 1);
                     const isLagnaMoment = isRow012 && phopephumResult?.lagnaMoment?.row === (rIdx + 1) && phopephumResult?.lagnaMoment?.col === (cIdx + 1);
+
+                    const isColHighlighted = (isVayaJorn || isYearlyJorn || isMonthlyJorn || isDailyJorn || isLagnaNatal || isLagnaTransit || isLagnaMoment);
+                    const isBase4ColumnActive = rIdx === 3 && isColHighlighted;
+
+                    const c = numColor(num, isHighlighted);
 
                     // ยามย้ำ (Yum Star) - ลากแนวดิ่งลงมาหาฐาน 5, 6, 7
                     const isYumYearly = (rIdx === 6) && phopephumResult?.yearlyJorn?.col === (cIdx + 1) && phopephumResult?.yearlyJorn?.row !== null;
@@ -1689,11 +1827,19 @@ function FateMatrixPanel({
                     return (
                       <td key={cIdx} className="p-2 min-w-[80px]">
                         <button onClick={(e) => { e.stopPropagation(); onNumClick(isBase4 ? matrix[2]?.[cIdx] : actualNum); }} type="button" className={`flex flex-col items-center gap-1.5 focus:outline-none relative w-full ${isDimmed ? "opacity-30" : ""}`}>
-                          {phopName && (
-                            <span className={`text-[9px] font-black uppercase text-center w-full leading-tight h-6 flex items-center justify-center transition-colors font-thai ${isHighlighted ? "text-[#D9BC82]" : "text-[#8A8070]"}`}>
-                              {phopName}
-                            </span>
-                          )}
+                          <div className="flex flex-col items-center justify-center h-6 w-full relative">
+                            {phopName && !showVayaRanges && (
+                              <span className={`text-[9px] font-black uppercase text-center w-full leading-tight transition-colors font-thai ${isHighlighted ? "text-[#D9BC82]" : "text-[#8A8070]"}`}>
+                                {phopName}
+                              </span>
+                            )}
+                            {isRow01278 && showVayaRanges && rIdx < 3 && phopephumResult?.vayaJornRanges && (
+                              <span className="text-[8px] font-bold text-amber-400 bg-slate-950/80 px-1 rounded border border-amber-500/20">
+                                {phopephumResult.vayaJornRanges.find((r: any) => r.row === (rIdx + 1) && r.col === (cIdx + 1))?.start}-
+                                {phopephumResult.vayaJornRanges.find((r: any) => r.row === (rIdx + 1) && r.col === (cIdx + 1))?.end} ปี
+                              </span>
+                            )}
+                          </div>
                           <div className={`w-11 h-11 rounded-full flex items-center justify-center font-sans text-xl border transition-all ${isHighlighted ? "scale-110 z-10 border-[#C9A96E]" : ""} ${isBase4 && (isVayaJorn || isYearlyJorn || isLagnaNatal || isLagnaTransit) ? "ring-2 ring-offset-2 ring-[#C9A96E] ring-offset-[#020617]" : ""} ${c.bg} ${c.text} ${c.border}`}>
                             {num}
                           </div>
