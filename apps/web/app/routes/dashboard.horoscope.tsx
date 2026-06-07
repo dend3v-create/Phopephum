@@ -61,7 +61,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       initialResult = {
         phopephumResult: imperialResult,
         matrix: imperialResult.matrix,
-        lunar: imperialResult.lunar,
+        taksaMaha: calcTaksaMaha(bYearThai, imperialResult.ageYang),
         birthDate: profile.birth_date,
         transitDate: new Date().toISOString().split("T")[0],
         transitTime: "12:00",
@@ -492,7 +492,13 @@ export default function HoroscopePage() {
   const [showNatalLagna, setShowNatalLagna] = useState(true);
   const [showTransitLagna, setShowTransitLagna] = useState(true);
 
-  useEffect(() => { if (actionData && !actionData.error) setActiveResult(actionData); }, [actionData]);
+  useEffect(() => { 
+    if (actionData && !actionData.error) {
+      setActiveResult(actionData);
+      setActiveTab("chart");
+    }
+  }, [actionData]);
+
   useEffect(() => { if (!activeResult) setActiveTab("calc"); }, [activeResult]);
 
   return (
@@ -551,18 +557,59 @@ export default function HoroscopePage() {
       {activeTab === "calc" && (
         <div className="max-w-3xl mx-auto animate-in zoom-in duration-500">
            <Card className="border-[#C6A96B]/30 bg-slate-900/60 p-10 rounded-[3rem] shadow-2xl">
-              <Form method="post" onSubmit={() => setTimeout(() => setActiveTab("chart"), 1000)} className="space-y-10">
+              <Form method="post" className="space-y-10">
                  <div className="space-y-8">
-                    <div className="border-b border-white/10 pb-4 flex justify-between items-end">
+                    <div className="border-b border-white/10 pb-4 flex justify-between items-center">
                        <h3 className="text-lg font-black text-[#C6A96B] font-thai uppercase tracking-widest">ตั้งค่าคำนวณชะตา</h3>
+                       {customers?.length > 0 && (
+                         <select 
+                           className="bg-slate-900 border border-white/10 text-[#C6A96B] text-[10px] rounded px-2 py-1 outline-none"
+                           onChange={(e) => {
+                             const c = customers.find(c => c.id === e.target.value);
+                             if (c) {
+                               const [by, bm, bd] = c.birth_date.split("-").map(Number);
+                               (document.querySelector('select[name="birthDay"]') as any).value = bd;
+                               (document.querySelector('select[name="birthMonth"]') as any).value = bm;
+                               (document.querySelector('select[name="birthYear"]') as any).value = by + 543;
+                               (document.querySelector('input[name="birthTime"]') as any).value = c.birth_time?.substring(0,5) || "12:00";
+                               (document.querySelector('input[name="customerName"]') as any).value = c.name;
+                             }
+                           }}
+                         >
+                           <option value="">เลือกจากฐานข้อมูลลูกค้า...</option>
+                           {customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                         </select>
+                       )}
                     </div>
+
+                    {actionData?.error && (
+                      <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-bold text-center animate-shake">
+                        ⚠️ {actionData.error}
+                      </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                       <div className="space-y-2"><label className="text-[10px] font-black text-[#8A8070] uppercase tracking-widest">วันเกิด</label><select name="birthDay" className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white text-sm outline-none">{Array.from({length:31},(_,i)=><option key={i+1} value={i+1}>{i+1}</option>)}</select></div>
-                       <div className="space-y-2"><label className="text-[10px] font-black text-[#8A8070] uppercase tracking-widest">เดือนเกิด</label><select name="birthMonth" className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white text-sm outline-none">{["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"].map((m,i)=><option key={i+1} value={i+1}>{m}</option>)}</select></div>
-                       <div className="space-y-2"><label className="text-[10px] font-black text-[#8A8070] uppercase tracking-widest">ปีเกิด (พ.ศ.)</label><select name="birthYear" className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white text-sm outline-none">{Array.from({length:100},(_,i)=><option key={2575-i} value={2575-i}>{2575-i}</option>)}</select></div>
+                       <div className="space-y-2">
+                         <label className="text-[10px] font-black text-[#8A8070] uppercase tracking-widest">วันเกิด</label>
+                         <select name="birthDay" className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white text-sm outline-none">
+                           {Array.from({length:31},(_,i)=><option key={i+1} value={i+1}>{i+1}</option>)}
+                         </select>
+                       </div>
+                       <div className="space-y-2">
+                         <label className="text-[10px] font-black text-[#8A8070] uppercase tracking-widest">เดือนเกิด</label>
+                         <select name="birthMonth" className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white text-sm outline-none">
+                           {["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน","กรกฎาคม","สิงหาคม","กันยายน","ตุลาคม","พฤศจิกายน","ธันวาคม"].map((m,i)=><option key={i+1} value={i+1}>{m}</option>)}
+                         </select>
+                       </div>
+                       <div className="space-y-2">
+                         <label className="text-[10px] font-black text-[#8A8070] uppercase tracking-widest">ปีเกิด (พ.ศ.)</label>
+                         <select name="birthYear" defaultValue={2530} className="w-full bg-slate-950 border border-white/10 rounded-xl p-3 text-white text-sm outline-none">
+                           {Array.from({length:100},(_,i)=><option key={2575-i} value={2575-i}>{2575-i}</option>)}
+                         </select>
+                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                       <Input name="birthTime" type="time" label="เวลาเกิด" />
+                       <Input name="birthTime" type="time" label="เวลาเกิด" defaultValue="12:00" />
                        <Input name="customerName" label="ชื่อเจ้าชะตา" placeholder="ระบุชื่อเพื่อบันทึก..." />
                     </div>
                  </div>
