@@ -1,7 +1,7 @@
 import { json } from "@remix-run/cloudflare";
 import { useLoaderData, useRevalidator } from "@remix-run/react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { requireMinPlan } from "~/services/auth.server";
 import { calculateHoraNu, HORA_NU_PLANETS } from "@phopephum/engine";
 import { HoraNuChart } from "~/components/hora-thai-nu/HoraNuChart";
@@ -298,6 +298,13 @@ export default function HoraThaiNuPage() {
         </div>
       </Card>
 
+      {/* ── Prediction Chat ── */}
+      <HoraNuChat
+        currentPlanet={data.currentPlanet}
+        currentPlanetName={data.currentPlanetName}
+        yamNumber={data.yamNumber}
+      />
+
       {/* ── Footer ── */}
       <div className="text-center space-y-1 pb-4">
         <p className="text-xs text-[#475569]">อ้างอิง: ตำราโหรทายหนู อ.ประทีป อัครา (พ.ศ. 2528) · อัปเดตทุก 30 วินาที</p>
@@ -327,7 +334,279 @@ const LORD_STEPS = [
   { n:"4", title:"สะกดรอยดาว",          desc:"ดาวเจ้าเรือนไปอยู่ภพใดในผังยาม? ภพนั้นคือคำตอบ" },
 ];
 
+// ─── Chat categories & guides ────────────────────────────────────────────────
+const CHAT_CATEGORIES = [
+  { id: "ทั่วไป",          emoji: "✨", label: "ทั่วไป" },
+  { id: "การเงิน/ธุรกิจ", emoji: "💰", label: "การเงิน" },
+  { id: "ความรัก",         emoji: "❤️", label: "ความรัก" },
+  { id: "การงาน/การเรียน", emoji: "💼", label: "การงาน" },
+  { id: "สุขภาพ",          emoji: "🌿", label: "สุขภาพ" },
+  { id: "ของหาย/เดินทาง", emoji: "🔍", label: "ของหาย" },
+];
+
+const QUESTION_GUIDES: Record<string, string[]> = {
+  "ทั่วไป": [
+    "วันนี้พลังงานดีไหม ควรทำอะไรเพื่อเสริมโชค?",
+    "ช่วงนี้ควรตัดสินใจเรื่องใหญ่ไหม?",
+    "มีเรื่องต้องระวังอะไรบ้างในช่วงนี้?",
+  ],
+  "การเงิน/ธุรกิจ": [
+    "วันนี้เหมาะกับการลงทุนหรือทำธุรกิจไหม?",
+    "โชคลาภจะเข้ามาทางไหน?",
+    "ควรตัดสินใจเรื่องเงินตอนนี้ได้เลยไหม?",
+    "ธุรกิจที่กำลังจะเริ่มมีโอกาสสำเร็จไหม?",
+  ],
+  "ความรัก": [
+    "ความสัมพันธ์ตอนนี้เป็นยังไงบ้าง?",
+    "คนที่ชอบอยู่รู้สึกยังไงกับเรา?",
+    "เหมาะกับการเริ่มต้นความสัมพันธ์ใหม่ไหม?",
+    "ควรบอกรักตอนนี้เลยไหม?",
+  ],
+  "การงาน/การเรียน": [
+    "การสัมภาษณ์งานวันนี้จะผ่านไหม?",
+    "ควรขอเลื่อนตำแหน่งหรือขึ้นเงินเดือนตอนนี้ไหม?",
+    "การสอบหรืองานที่ต้องส่งจะสำเร็จไหม?",
+    "ควรเปลี่ยนงานหรือเปล่า?",
+  ],
+  "สุขภาพ": [
+    "สุขภาพโดยรวมช่วงนี้เป็นยังไง?",
+    "ควรไปพบแพทย์หรือตรวจสุขภาพตอนนี้ไหม?",
+    "อาการที่เป็นอยู่จะดีขึ้นเมื่อไหร่?",
+  ],
+  "ของหาย/เดินทาง": [
+    "ของที่หายจะได้คืนไหม อยู่แถวไหน?",
+    "การเดินทางวันนี้ปลอดภัยไหม?",
+    "ควรออกเดินทางตอนนี้หรือรอก่อน?",
+    "เดินทางทิศไหนดีที่สุดวันนี้?",
+  ],
+};
+
+type ChatMsg = { role: "user" | "ai"; text: string };
+
+function HoraNuChat({
+  currentPlanet,
+  currentPlanetName,
+  yamNumber,
+}: {
+  currentPlanet: number;
+  currentPlanetName: string;
+  yamNumber: number;
+}) {
+  const [category, setCategory] = useState("ทั่วไป");
+  const [input, setInput]       = useState("");
+  const [messages, setMessages] = useState<ChatMsg[]>([]);
+  const [streaming, setStreaming] = useState(false);
+  const [error, setError]       = useState<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  const submit = useCallback(
+    async (q: string) => {
+      const question = q.trim();
+      if (!question || streaming) return;
+
+      setInput("");
+      setError(null);
+      setMessages((prev) => [...prev, { role: "user" as const, text: question }]);
+      setStreaming(true);
+      setMessages((prev) => [...prev, { role: "ai" as const, text: "" }]);
+
+      try {
+        const fd = new FormData();
+        fd.append("question", question);
+        fd.append("category", category);
+
+        const res = await fetch("/api/hora-thai-nu-chat", { method: "POST", body: fd });
+
+        if (!res.ok || !res.body) {
+          const errBody = await res.json().catch(() => ({ error: "เกิดข้อผิดพลาด" })) as { error?: string };
+          throw new Error(errBody.error ?? "เกิดข้อผิดพลาด");
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = "";
+        let aiText = "";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buf += decoder.decode(value, { stream: true });
+          const lines = buf.split("\n");
+          buf = lines.pop() ?? "";
+          for (const line of lines) {
+            if (!line.startsWith("data: ")) continue;
+            const raw = line.slice(6).trim();
+            if (raw === "[DONE]") break;
+            try {
+              const chunk = JSON.parse(raw) as { text?: string };
+              if (chunk.text) {
+                aiText += chunk.text;
+                setMessages((prev) => {
+                  const next = [...prev];
+                  next[next.length - 1] = { role: "ai" as const, text: aiText };
+                  return next;
+                });
+              }
+            } catch { /* skip */ }
+          }
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "เกิดข้อผิดพลาด");
+        setMessages((prev) => {
+          const last = prev[prev.length - 1];
+          return last?.role === "ai" && !last.text ? prev.slice(0, -1) : prev;
+        });
+      } finally {
+        setStreaming(false);
+      }
+    },
+    [category, streaming]
+  );
+
+  const guides = QUESTION_GUIDES[category] ?? QUESTION_GUIDES["ทั่วไป"]!;
+
+  return (
+    <Card>
+      <div className="p-5 space-y-4">
+
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0"
+            style={{ background: P_BG[currentPlanet], border: `1px solid ${P_BORDER[currentPlanet]}` }}>
+            <IconChat />
+          </div>
+          <div>
+            <h2 className="font-display text-lg font-bold text-[#F8F6F1]">ถามโหรทายหนู</h2>
+            <p className="text-xs text-[#64748B]">
+              ยามที่ {yamNumber} · ดาว{currentPlanetName} เป็นเจ้ายาม · ตอบโดยอ้างอิงผังยามปัจจุบัน
+            </p>
+          </div>
+        </div>
+
+        {/* Category pills */}
+        <div className="flex flex-wrap gap-2">
+          {CHAT_CATEGORIES.map((cat) => (
+            <button key={cat.id} onClick={() => setCategory(cat.id)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all"
+              style={{
+                background: category === cat.id ? "rgba(198,169,107,0.18)" : "rgba(255,255,255,0.04)",
+                border: `1px solid ${category === cat.id ? "rgba(198,169,107,0.45)" : "rgba(255,255,255,0.08)"}`,
+                color: category === cat.id ? "#C6A96B" : "#94A3B8",
+              }}>
+              <span>{cat.emoji}</span><span>{cat.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Quick guide chips */}
+        <div className="space-y-1.5">
+          <p className="text-[10px] text-[#475569] tracking-widest uppercase">คำถามแนะนำ</p>
+          <div className="flex flex-wrap gap-2">
+            {guides.map((g) => (
+              <button key={g} onClick={() => submit(g)} disabled={streaming}
+                className="text-xs px-3 py-1.5 rounded-xl text-left transition-all disabled:opacity-40"
+                style={{ background:"rgba(75,111,174,0.08)", border:"1px solid rgba(75,111,174,0.2)", color:"#7BA4E8" }}>
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Chat history */}
+        {messages.length > 0 && (
+          <div className="rounded-2xl p-3 space-y-3 max-h-96 overflow-y-auto"
+            style={{ background:"rgba(2,6,23,0.6)", border:"1px solid rgba(255,255,255,0.06)" }}>
+            {messages.map((msg, i) => (
+              <div key={i} className={`flex gap-2.5 ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                {msg.role === "ai" && (
+                  <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-sm mt-0.5"
+                    style={{ background:"rgba(198,169,107,0.15)", color:"#C6A96B" }}>☽</div>
+                )}
+                <div className="max-w-[85%] rounded-2xl px-3.5 py-2.5 text-sm leading-relaxed"
+                  style={msg.role === "user" ? {
+                    background:"rgba(75,111,174,0.15)", border:"1px solid rgba(75,111,174,0.25)", color:"#E2E8F0",
+                  } : {
+                    background:"rgba(198,169,107,0.07)", border:"1px solid rgba(198,169,107,0.15)", color:"#F8F6F1",
+                  }}>
+                  {msg.role === "ai" && !msg.text && streaming ? (
+                    <span className="inline-flex gap-1 items-center" style={{ color:"#C6A96B" }}>
+                      <span className="animate-pulse">●</span>
+                      <span className="animate-pulse" style={{ animationDelay:"75ms" }}>●</span>
+                      <span className="animate-pulse" style={{ animationDelay:"150ms" }}>●</span>
+                    </span>
+                  ) : (
+                    <span style={{ whiteSpace:"pre-wrap" }}>{msg.text}</span>
+                  )}
+                </div>
+                {msg.role === "user" && (
+                  <div className="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs mt-0.5"
+                    style={{ background:"rgba(75,111,174,0.2)", color:"#7BA4E8" }}>☉</div>
+                )}
+              </div>
+            ))}
+            <div ref={bottomRef} />
+          </div>
+        )}
+
+        {/* Error */}
+        {error && (
+          <div className="rounded-xl px-3 py-2 text-xs text-red-400"
+            style={{ background:"rgba(239,68,68,0.08)", border:"1px solid rgba(239,68,68,0.2)" }}>
+            {error}
+          </div>
+        )}
+
+        {/* Input row */}
+        <div className="flex gap-2 items-end">
+          <textarea
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); submit(input); } }}
+            rows={2}
+            placeholder="พิมพ์คำถามของคุณ… (Enter ส่ง, Shift+Enter ขึ้นบรรทัดใหม่)"
+            disabled={streaming}
+            className="flex-1 resize-none rounded-xl px-3.5 py-2.5 text-sm outline-none transition-all disabled:opacity-50"
+            style={{ background:"rgba(255,255,255,0.04)", border:"1px solid rgba(198,169,107,0.2)", color:"#F8F6F1", caretColor:"#C6A96B" }}
+          />
+          <button onClick={() => submit(input)} disabled={streaming || !input.trim()}
+            className="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-all disabled:opacity-30"
+            style={{
+              background: streaming || !input.trim() ? "rgba(198,169,107,0.1)" : "rgba(198,169,107,0.2)",
+              border:"1px solid rgba(198,169,107,0.3)", color:"#C6A96B",
+            }}>
+            {streaming ? (
+              <svg viewBox="0 0 24 24" className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" strokeLinecap="round"/>
+              </svg>
+            ) : (
+              <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2}>
+                <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            )}
+          </button>
+        </div>
+
+        <p className="text-[10px] text-[#334155] text-center">
+          การพยากรณ์อ้างอิงจากยามโหรทายหนู ณ เวลาที่ถาม · ผลลัพธ์เป็นเพียงแนวทาง ไม่ใช่การตัดสินใจแทน
+        </p>
+      </div>
+    </Card>
+  );
+}
+
 // ─── Icon ─────────────────────────────────────────────────────────────────────
+function IconChat() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="#C6A96B" strokeWidth={1.8} className="w-4 h-4">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
 function IconMouse() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-4 h-4">
