@@ -2,7 +2,7 @@ import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData, useSubmit } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile, requireMinPlan } from "~/services/auth.server";
-import { calculateKarnchata, calculatePhopephum } from "@phopephum/engine";
+import { calculateKarnchata, calculatePhopephum, gregorianToThaiLunarV3 } from "@phopephum/engine";
 import { STAR_NAMES } from "@phopephum/types";
 import type { Env } from "~/env.server";
 import { Card } from "~/components/ui/Card";
@@ -43,11 +43,18 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     year: "numeric",
   });
 
+  let lunarInfo: { moonPhaseText: string; isWaxing: boolean; lunarDay: number; thaiMonthName: string } | null = null;
+  try {
+    const lunar = gregorianToThaiLunarV3(now);
+    lunarInfo = { moonPhaseText: lunar.moonPhaseText, isWaxing: lunar.isWaxing, lunarDay: lunar.lunarDay, thaiMonthName: lunar.thaiMonthName };
+  } catch (e) { /* fallback */ }
+
   return json({
     profile,
     initialResult,
     phopephumResult,
     thaiDateLabel,
+    lunarInfo,
     currentTime: now.toISOString(),
   });
 }
@@ -90,9 +97,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
   }
 
+  let lunarInfo: { moonPhaseText: string; isWaxing: boolean; lunarDay: number; thaiMonthName: string } | null = null;
+  try {
+    const lunar = gregorianToThaiLunarV3(targetDate);
+    lunarInfo = { moonPhaseText: lunar.moonPhaseText, isWaxing: lunar.isWaxing, lunarDay: lunar.lunarDay, thaiMonthName: lunar.thaiMonthName };
+  } catch (e) { /* fallback */ }
+
   return json({
     result,
     phopephumResult,
+    lunarInfo,
     timeMode,
   });
 }
@@ -152,13 +166,14 @@ const BHOP_8_NAMES = ["อาตมะ", "ทาสา", "สิทธิโช�
 const BHOP_9_NAMES = ["อัตตะ", "สักกะ", "ญาติ", "ธนัง", "เคหัง", "นาวัง", "ภริยัง"];
 
 export default function KarnchataPage() {
-  const { profile, initialResult, phopephumResult: initialPhopephum, thaiDateLabel } = useLoaderData<typeof loader>();
+  const { profile, initialResult, phopephumResult: initialPhopephum, thaiDateLabel, lunarInfo: initialLunar } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
   const navigation = useNavigation();
 
   const activeResult = actionData?.result || initialResult;
   const activePhopephum = actionData?.phopephumResult || initialPhopephum;
+  const activeLunar = actionData?.lunarInfo ?? initialLunar;
 
   const [hoverNum, setHoverNum] = useState<number | null>(null);
   const [timeMode, setTimeMode] = useState<"live" | "custom">("live");
@@ -172,6 +187,13 @@ export default function KarnchataPage() {
   const periodLabel = isDaytime ? "กลางวัน" : "กลางคืน";
   const yamSeq = Math.floor(((bkkHour - 6 + 24) % 24) / 1.5) % 8 + 1;
 
+  // ── ลัคนายาม 3.75 นาที ──
+  const secInCycle = (time.getUTCMinutes() % 30 * 60 + time.getUTCSeconds()) % Math.round(3.75 * 60);
+  const cycleSec = Math.round(3.75 * 60); // 225s
+  const soySlot = Math.floor((time.getUTCMinutes() % 30) / 3.75) + 1; // 1-8
+  const lagnamPos = secInCycle < cycleSec / 3 ? "ยามต้น" : secInCycle < (cycleSec * 2) / 3 ? "ยามกลาง" : "ยามปลาย";
+
+  // ── คำพยากรณ์ยาม (โคลงสี่สุภาพ style) ──
   // ── Star quality scores (based on Thai Taksa kala quality per planet) ──
   const STAR_SCORES: Record<number, {trade:number; love:number; wealth:number; danger:number}> = {
     1: {trade:35, love:40, wealth:35, danger:75}, // อาทิตย์ — กาลกิณี
@@ -202,6 +224,18 @@ export default function KarnchataPage() {
     7: {subtitle:"ความมั่นคง/อดทน", desc:"ช่วงเวลาแห่งความมั่นคง เหมาะสำหรับงานระยะยาว วางรากฐาน ปฏิบัติงานที่ต้องการความอดทนและความละเอียดรอบคอบ"},
   };
   const yamDesc = YAM_DESC[yaiN] ?? YAM_DESC[1];
+
+  // ── คำพยากรณ์โบราณ ──
+  const YAM_OMEN: Record<number, string> = {
+    1: "อาทิตย์อวสาน ยาตราทำการ มิตีหนักหนา ได้เมื่อช่างทอง จำลองพระสิทธา แค้นเคืองหนักหนา มยุรากลืนแหวน",
+    2: "จันทร์สาดแสงฉาย เมตตาอภัย สมบัติงามดี มีมิตรสหาย กายใจสบาย พ้นภัยพิบัติ ประกาศเกียรติยศ",
+    3: "อังคารเดินทาง ระวางอันตราย อย่าไปทิศตะวันออก โลหกิจเจริญ เผ็ดร้อนเกริ่นกราย ชนะศัตรูได้",
+    4: "พุธทรงปรีชา วาจาว่องไว พ่อค้าโชคดี มีกำไรงาม เจรจาสำเร็จ เลิศทางสติปัญญา ค้าขายวันนี้",
+    5: "พฤหัสบดีโชค ปลดโศกทุกข์พ้น ทรัพย์สมบัติล้น ผลบุญส่งเสริม เพิ่มพูนความเจริญ เกริ่นชื่อเสียงดี",
+    6: "ศุกร์งามพริ้งเพรา เสน่ห์เพริดแพร้ว รักหวานชื่นชม สมหวังทุกสิ่ง ยิ่งเมตตาดี มีสุขสมบูรณ์",
+    7: "เสาร์หนักขวาง ระวางสิ่งร้าย อย่างระวังภัย ใจอดทนดี มีความมั่นคง คงชนะอุปสรรค พรากจากเสนียด",
+  };
+  const yamOmen = YAM_OMEN[yaiN] ?? "";
 
   // Live Timer
   useEffect(() => {
@@ -515,6 +549,102 @@ export default function KarnchataPage() {
           </div>
         ))}
       </div>
+
+      {/* ═══ การ์ดบทวิเคราะห์ยามกาลชะตา ═══ */}
+      <Card className="border-[#C6A96B]/30 bg-[#0A1628] p-6 md:p-8 relative overflow-hidden">
+        {/* Decorative background glow */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#C6A96B]/5 via-transparent to-[#4B6FAE]/5 pointer-events-none" />
+
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-8 h-8 rounded-lg bg-[#C6A96B]/20 flex items-center justify-center text-lg shrink-0">📋</div>
+          <div>
+            <h3 className="text-sm font-bold text-[#C6A96B]">บทวิเคราะห์ยามกาลชะตา</h3>
+            <p className="text-xs text-[#8A8070] mt-0.5">สรุปรายงานส่วนบุคคล — กดปุ่มถ่ายภาพหน้าจอเพื่อแชร์</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* ── ซ้าย: ข้อมูลวัน/เวลา ── */}
+          <div className="space-y-4">
+            {/* วัน/เดือน/ปี + จันทรคติ */}
+            <div className="bg-[#020617] border border-[#C6A96B]/20 rounded-2xl p-5">
+              <p className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-widest mb-3">พยากรณ์</p>
+              <p className="font-display text-base font-bold text-[#F8F6F1] leading-relaxed">
+                {time.toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" })}
+              </p>
+              <p className="text-sm text-[#8A8070] mt-1">
+                ตรงกับวัน{time.toLocaleDateString("th-TH", { weekday: "long" }).replace("วัน", "")}
+                {activeLunar ? (
+                  <span className={`ml-1.5 font-bold ${activeLunar.isWaxing ? "text-[#C6A96B]" : "text-sky-400"}`}>
+                    {activeLunar.moonPhaseText}
+                  </span>
+                ) : null}
+              </p>
+              <div className="flex items-center gap-3 mt-4 pt-4 border-t border-white/5">
+                <div>
+                  <p className="text-[10px] text-[#8A8070]">เวลา</p>
+                  <p className="text-lg font-display font-bold text-[#F8F6F1]">{time.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", hour12: false })} น.</p>
+                </div>
+                <div className="w-px h-8 bg-white/10" />
+                <div>
+                  <p className="text-[10px] text-[#8A8070]">ลัคนายาม (3.75 นาที)</p>
+                  <p className="text-sm font-bold text-[#F8F6F1]">{soySlot} <span className="text-[#C6A96B]">{lagnamPos}</span></p>
+                </div>
+              </div>
+            </div>
+
+            {/* ยามใหญ่ + ยามซอย */}
+            <div className="bg-[#020617] border border-white/5 rounded-2xl p-5">
+              <p className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-widest mb-3">ยาม</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-[#0A1628] rounded-xl p-3">
+                  <p className="text-[10px] text-[#8A8070] mb-1">ยามใหญ่ (ตนุ)</p>
+                  <p className="text-sm font-bold text-[#F8F6F1]">{yaiN} {activeResult.yamYaiName}</p>
+                </div>
+                <div className="bg-[#0B1E36] rounded-xl p-3 border border-sky-500/20">
+                  <p className="text-[10px] text-sky-400 mb-1">ยามซอย (อัตตะ)</p>
+                  <p className="text-sm font-bold text-sky-300">{soyN} {activeResult.yamSoyName}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── ขวา: คำพยากรณ์ + ทักษา ── */}
+          <div className="space-y-4">
+            {/* คำพยากรณ์โบราณ */}
+            <div className="bg-[#020617] border border-[#d97706]/20 rounded-2xl p-5">
+              <p className="text-[10px] text-[#d97706] font-bold uppercase tracking-widest mb-3">คำพยากรณ์ยามนี้</p>
+              <p className="text-sm text-[#F8F6F1] leading-relaxed font-medium italic">"{yamOmen}"</p>
+              <div className="mt-3 pt-3 border-t border-white/5">
+                <p className="text-xs text-[#8A8070] leading-relaxed">{yamDesc.desc}</p>
+              </div>
+            </div>
+
+            {/* ทักษาจร ยามนี้ */}
+            <div className="bg-[#020617] border border-white/5 rounded-2xl p-5">
+              <p className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-widest mb-3">ทักษาจร (ยามใหญ่ {activeResult.yamYaiName})</p>
+              <div className="grid grid-cols-4 gap-2">
+                {[
+                  {q:"ศรี", color:"bg-emerald-500/20 text-emerald-400 border-emerald-500/30"},
+                  {q:"มนตรี", color:"bg-blue-500/20 text-blue-400 border-blue-500/30"},
+                  {q:"มูละ", color:"bg-amber-500/20 text-amber-400 border-amber-500/30"},
+                  {q:"อุตสาหะ", color:"bg-teal-500/20 text-teal-400 border-teal-500/30"},
+                  {q:"เดช", color:"bg-orange-500/20 text-orange-400 border-orange-500/30"},
+                  {q:"บริวาร", color:"bg-indigo-500/20 text-indigo-300 border-indigo-500/30"},
+                  {q:"อายุ", color:"bg-white/5 text-[#8A8070] border-white/10"},
+                  {q:"กาลกิณี", color:"bg-rose-950/40 text-rose-400 border-rose-500/30"},
+                ].map(item => (
+                  <div key={item.q} className={`rounded-xl px-2 py-2 border text-center ${item.color}`}>
+                    <p className="text-[10px] font-bold leading-tight">{item.q}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="text-[10px] text-[#8A8070] mt-3">ดาวศรี = โชคดีสูงสุด • กาลกิณี = ระวังอุปสรรค</p>
+            </div>
+          </div>
+        </div>
+      </Card>
 
       {/* ผังดวงกาลชะตา 9 ฐาน */}
       <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8 overflow-x-auto relative">
