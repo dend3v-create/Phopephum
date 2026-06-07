@@ -515,7 +515,9 @@ export default function KarnchataPage() {
             </div>
           ))}
 
-          {/* Base 4 — กำลังเทวดา (ค่า 3-21) */}
+          {/* Base 4 — กำลังเทวดา
+              highlight: column ที่ฐาน 3 (index 2) มีดาวตรงกับ hoverNum
+              click: set hoverNum เป็นดาวของฐาน 3 ที่ column เดียวกัน */}
           <div className="flex items-center w-full max-w-3xl bg-[#0B1E36]/30 border border-sky-500/10 py-3 px-2 rounded-2xl my-2">
              <div className="w-[72px] text-[11px] font-bold text-sky-400 pl-2">
                <div>ฐาน ๔</div>
@@ -523,28 +525,70 @@ export default function KarnchataPage() {
              </div>
              <div className="flex-1 flex justify-between pr-2">
                 {activeResult.chart[3].map((star: number, cIdx: number) => {
-                  const base4Star = star % 7 || 7;
+                  // ดาวของฐาน 3 ที่ column เดียวกัน (Base 3 = index 2)
+                  const base3Star: number = activeResult.chart[2]?.[cIdx] ?? 0;
+                  const isBase4Lit = hoverNum !== null && base3Star === hoverNum;
                   return (
                     <button
                       key={cIdx}
                       type="button"
-                      onClick={() => setHoverNum(hoverNum === base4Star ? null : base4Star)}
+                      onClick={() => setHoverNum(hoverNum === base3Star ? null : base3Star)}
                       className="flex flex-col items-center gap-2 w-14 focus:outline-none"
                     >
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
-                        hoverNum === base4Star
-                          ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]"
+                        isBase4Lit
+                          ? "bg-[#4B6FAE] text-[#F8F6F1] scale-110 shadow-[0_0_15px_rgba(75,111,174,0.7)] border border-[#4B6FAE]"
                           : "bg-[#020617] border border-sky-500/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
                       }`}>
                         {star}
                       </div>
-                      <span className="text-[8px] text-sky-400/80 font-medium text-center leading-tight">
+                      <span className={`text-[8px] font-medium text-center leading-tight ${isBase4Lit ? "text-sky-300" : "text-sky-400/80"}`}>
                         {BASE4_POWER_NAMES[star] || ""}
                       </span>
                     </button>
                   );
                 })}
              </div>
+          </div>
+
+          {/* Star Tracing Method Guide */}
+          <div className="w-full max-w-3xl bg-[#020617] border border-[#C6A96B]/20 rounded-2xl p-5 my-1">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-[#C6A96B] text-base">✦</span>
+              <p className="text-[11px] font-bold text-[#C6A96B] tracking-wide">วิธีอ่านรหัสชีวิต 3 Steps — Star Tracing Method</p>
+            </div>
+            <p className="text-[10px] text-rose-400/90 font-bold mb-3 flex items-center gap-1.5">
+              <span>⚑</span> กฎเหล็ก: ห้ามอ่านแนวดิ่ง (Column) เสมอไป — ใช้ "เลขดาว" เป็นตัวเชื่อมโยง ฐาน 1 → 2 → 3
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="bg-[#0A1628] rounded-xl p-4 border border-white/5">
+                <p className="text-[10px] font-bold text-[#C6A96B] mb-2 flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded-full bg-[#C6A96B]/20 flex items-center justify-center text-[9px] font-black text-[#C6A96B] shrink-0">1</span>
+                  ตั้งโจทย์ (Inquiry)
+                </p>
+                <p className="text-[10px] text-[#8A8070] leading-relaxed">เลือกภพเรือนใน <span className="text-[#F8F6F1] font-bold">ฐานที่ 1</span> ที่ต้องการทราบ แล้วดูว่าคือ <span className="text-[#C6A96B] font-bold">เลขดาวอะไร</span> — กดที่ตัวเลขนั้นเพื่อเริ่มติดตาม</p>
+              </div>
+              <div className="bg-[#0A1628] rounded-xl p-4 border border-white/5">
+                <p className="text-[10px] font-bold text-sky-400 mb-2 flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded-full bg-sky-500/20 flex items-center justify-center text-[9px] font-black text-sky-400 shrink-0">2</span>
+                  ตามรอยดาว (Tracing)
+                </p>
+                <p className="text-[10px] text-[#8A8070] leading-relaxed">จากฐาน 1 → นำเลขดาวนั้น ไปหาตำแหน่งใน <span className="text-[#F8F6F1]">ฐาน 2</span> ว่าสถิตในภพอะไร แล้วตามต่อสู่ <span className="text-[#F8F6F1]">ฐาน 3</span> ว่าตกในภพใด <span className="text-[9px] text-sky-400">(ย้าย Column ได้)</span></p>
+              </div>
+              <div className="bg-[#0B1E36] rounded-xl p-4 border border-sky-500/20">
+                <p className="text-[10px] font-bold text-[#4B6FAE] mb-2 flex items-center gap-1.5">
+                  <span className="w-5 h-5 rounded-full bg-[#4B6FAE]/30 flex items-center justify-center text-[9px] font-black text-[#4B6FAE] shrink-0">3</span>
+                  สรุปด้วยกำลังเทวดา (Base 4)
+                </p>
+                <p className="text-[10px] text-[#8A8070] leading-relaxed">ดูดาวในฐาน 3 <span className="text-[#F8F6F1]">ตกที่ Column ไหน</span> → อ่านค่า <span className="text-sky-300 font-bold">ฐาน 4</span> ใน Column เดียวกันนั้น เพื่อตัดสินคุณภาพของเรื่องราว</p>
+              </div>
+            </div>
+            {hoverNum !== null && (
+              <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2">
+                <span className="text-[#C6A96B] text-xs">✦</span>
+                <p className="text-[10px] text-[#F8F6F1]">กำลังตามรอยดาว <span className="font-bold text-[#C6A96B]">{hoverNum}</span> — ดูตำแหน่งที่ไฮไลต์ใน ฐาน 2 และ 3 แล้วอ่านกำลังเทวดาใน <span className="text-sky-300">ฐาน 4 (สีน้ำเงิน)</span></p>
+              </div>
+            )}
           </div>
 
           {/* Bases 5-9 */}
@@ -566,8 +610,8 @@ export default function KarnchataPage() {
                     }`}>
                       {star}
                     </div>
-                    {rIdx === 7 && <span className="text-[9px] text-[#8A8070] font-medium">{"อาตมะ,ทาสา,สิทธิโชค,โภคทรัพย์,โจร,อุบาทว์".split(',')[cIdx]}</span>}
-                    {rIdx === 8 && <span className="text-[9px] text-[#8A8070] font-medium">{"อัตตะ,สักกะ,ญาติ,ธนัง,เคหัง,นาวัง".split(',')[cIdx]}</span>}
+                    {rIdx === 7 && <span className="text-[9px] text-[#8A8070] font-medium">{["อาตมะ","ทาสา","สิทธิโชค","โภคทรัพย์","โจร","อุบาทว์","อุปถัมภ์"][cIdx]}</span>}
+                    {rIdx === 8 && <span className="text-[9px] text-[#8A8070] font-medium">{["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"][cIdx]}</span>}
                   </button>
                 ))}
               </div>
