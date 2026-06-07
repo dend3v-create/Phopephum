@@ -159,12 +159,49 @@ export default function KarnchataPage() {
 
   const activeResult = actionData?.result || initialResult;
   const activePhopephum = actionData?.phopephumResult || initialPhopephum;
-  
+
   const [hoverNum, setHoverNum] = useState<number | null>(null);
   const [timeMode, setTimeMode] = useState<"live" | "custom">("live");
   const [selectedCategory, setSelectedCategory] = useState("work");
   const [time, setTime] = useState<Date>(new Date());
   const [selectedDirection, setSelectedDirection] = useState<number | null>(null);
+
+  // ── Derived display values ──
+  const bkkHour = (time.getUTCHours() + 7) % 24;
+  const isDaytime = bkkHour >= 6 && bkkHour < 18;
+  const periodLabel = isDaytime ? "กลางวัน" : "กลางคืน";
+  const yamSeq = Math.floor(((bkkHour - 6 + 24) % 24) / 1.5) % 8 + 1;
+
+  // ── Star quality scores (based on Thai Taksa kala quality per planet) ──
+  const STAR_SCORES: Record<number, {trade:number; love:number; wealth:number; danger:number}> = {
+    1: {trade:35, love:40, wealth:35, danger:75}, // อาทิตย์ — กาลกิณี
+    2: {trade:55, love:70, wealth:50, danger:20}, // จันทร์  — บริวาร
+    3: {trade:60, love:45, wealth:55, danger:35}, // อังคาร  — อายุ
+    4: {trade:80, love:55, wealth:65, danger:15}, // พุธ     — เดช
+    5: {trade:70, love:65, wealth:80, danger:10}, // พฤหัส  — มูละ
+    6: {trade:60, love:90, wealth:70, danger:10}, // ศุกร์   — มนตรี
+    7: {trade:75, love:60, wealth:90, danger:15}, // เสาร์   — ศรี
+  };
+  const yaiN = activeResult.yamYaiNumber || activeResult.dayStarNumber || 1;
+  const soyN = activeResult.yamSoyNumber || activeResult.dayStarNumber || 1;
+  const yaiQ = STAR_SCORES[yaiN] ?? STAR_SCORES[1];
+  const soyQ = STAR_SCORES[soyN] ?? STAR_SCORES[1];
+  const tradeScore  = Math.round(yaiQ.trade  * 0.6 + soyQ.trade  * 0.4);
+  const loveScore   = Math.round(yaiQ.love   * 0.4 + soyQ.love   * 0.6);
+  const wealthScore = Math.round(yaiQ.wealth * 0.5 + soyQ.wealth * 0.5);
+  const dangerScore = Math.max(yaiQ.danger, soyQ.danger);
+
+  // ── Yam descriptions per planet ──
+  const YAM_DESC: Record<number, {subtitle:string; desc:string}> = {
+    1: {subtitle:"อำนาจ/ผู้นำ", desc:"ช่วงเวลาแห่งอำนาจบารมี เหมาะสำหรับการเป็นผู้นำ ตัดสินใจเด็ดขาด เจรจากับผู้ใหญ่หรือผู้มีอำนาจ ความแม่นยำสูง"},
+    2: {subtitle:"ความรู้สึก/ครอบครัว", desc:"ช่วงเวลาแห่งความรู้สึก เหมาะสำหรับการดูแลครอบครัว สร้างความสัมพันธ์ เจรจาด้วยความอ่อนโยน"},
+    3: {subtitle:"พลังงาน/ความกล้า", desc:"ช่วงเวลาแห่งพลังงาน เหมาะสำหรับงานที่ต้องใช้กำลังและความกล้าหาญ ระวังอารมณ์ร้อนและการทะเลาะวิวาท"},
+    4: {subtitle:"สติปัญญา/การสื่อสาร", desc:"ช่วงเวลาแห่งสติปัญญา เหมาะสำหรับการเรียนรู้ เจรจาต่อรอง วิเคราะห์ข้อมูล และงานด้านการสื่อสาร"},
+    5: {subtitle:"ปัญญา/โชคลาภ", desc:"ช่วงเวลาแห่งปัญญาและโชคลาภ เหมาะสำหรับการขอพร ขยายกิจการ ลงทุน และสร้างความมั่งคั่งระยะยาว"},
+    6: {subtitle:"ความรัก/ศิลปะ", desc:"ช่วงเวลาแห่งความรักและศิลปะ เหมาะสำหรับการสารภาพรัก สร้างมิตรภาพ กิจกรรมสร้างสรรค์และความงาม"},
+    7: {subtitle:"ความมั่นคง/อดทน", desc:"ช่วงเวลาแห่งความมั่นคง เหมาะสำหรับงานระยะยาว วางรากฐาน ปฏิบัติงานที่ต้องการความอดทนและความละเอียดรอบคอบ"},
+  };
+  const yamDesc = YAM_DESC[yaiN] ?? YAM_DESC[1];
 
   // Live Timer
   useEffect(() => {
@@ -327,66 +364,68 @@ export default function KarnchataPage() {
         {/* กาลเวลาปัจจุบันแบบเรียลไทม์ */}
         <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-8 flex flex-col relative overflow-hidden">
           <div className="flex justify-between items-center mb-6">
-             <span className="text-[11px] font-bold text-[#C6A96B] tracking-wide flex items-center gap-2">
+             <span className="text-xs font-bold text-[#C6A96B] tracking-wide flex items-center gap-2">
                <span className="w-2 h-2 rounded-full bg-[#C6A96B] shadow-[0_0_8px_rgba(198,169,107,0.8)]" />
                กาลเวลาที่กำหนด (เจาะจงฤกษ์)
              </span>
-             <span className="bg-white/5 border border-white/10 text-[#F8F6F1] font-bold text-[10px] px-4 py-1.5 rounded-full">กลางวัน</span>
+             <span className={`border font-bold text-xs px-4 py-1.5 rounded-full ${isDaytime ? "bg-amber-500/10 border-amber-500/30 text-amber-400" : "bg-indigo-500/10 border-indigo-500/30 text-indigo-300"}`}>
+               {isDaytime ? "☀️ กลางวัน" : "🌙 กลางคืน"}
+             </span>
           </div>
 
-          <div className="text-center my-8">
-            <p className="text-[80px] md:text-[96px] font-display font-black text-[#F8F6F1] leading-none tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse-slow">
+          <div className="text-center my-6">
+            <p className="text-[72px] md:text-[88px] font-display font-black text-[#F8F6F1] leading-none tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse-slow">
               {formatTime(time)}
             </p>
-            <p className="text-[11px] text-[#8A8070] tracking-wide mt-4 italic">
+            <p className="text-xs text-[#8A8070] tracking-wide mt-4 italic">
               กาลชะตาหมุนเวียนรอบละ 3.45 นาที • ตรวจจับกำลังดาวเปลี่ยนตามวินาทีจริง
             </p>
-            
+
             <div className="flex items-center justify-center gap-4 mt-6">
-              <div className="bg-[#020617] border border-white/5 rounded-2xl px-6 py-3 min-w-[120px]">
-                <p className="text-[9px] text-[#8A8070] mb-1">ยามใหญ่ (ตนุ)</p>
-                <p className="text-sm font-bold text-[#F8F6F1]">{activeResult.yamYaiName}</p>
+              <div className="bg-[#020617] border border-white/5 rounded-2xl px-6 py-4 min-w-[120px]">
+                <p className="text-[11px] text-[#8A8070] mb-1.5 font-medium">ยามใหญ่ (ตนุ)</p>
+                <p className="text-base font-bold text-[#F8F6F1]">{activeResult.yamYaiName}</p>
               </div>
-              <div className="bg-[#0B1E36] border border-sky-500/20 rounded-2xl px-6 py-3 min-w-[120px]">
-                <p className="text-[9px] text-sky-400 mb-1">ยามซอย (อัตตะ)</p>
-                <p className="text-sm font-bold text-sky-300">{activeResult.yamSoyName}</p>
+              <div className="bg-[#0B1E36] border border-sky-500/20 rounded-2xl px-6 py-4 min-w-[120px]">
+                <p className="text-[11px] text-sky-400 mb-1.5 font-medium">ยามซอย (อัตตะ)</p>
+                <p className="text-base font-bold text-sky-300">{activeResult.yamSoyName}</p>
               </div>
             </div>
           </div>
 
           <div className="bg-[#020617] border border-[#d97706]/40 rounded-2xl p-5 mt-auto relative shadow-[0_0_15px_rgba(217,119,6,0.1)]">
             <div className="flex justify-between items-start mb-2">
-              <p className="text-[10px] text-[#d97706] font-bold">ยามกาลชะตาในขณะนี้</p>
-              <span className="bg-[#0A1628] border border-white/5 text-[#F8F6F1] text-[10px] px-3 py-1 rounded-full font-bold">
-                ยามที่ 1
+              <p className="text-xs text-[#d97706] font-bold">ยามกาลชะตาในขณะนี้</p>
+              <span className="bg-[#0A1628] border border-white/5 text-[#F8F6F1] text-xs px-3 py-1 rounded-full font-bold">
+                ยามที่ {yamSeq}
               </span>
             </div>
-            <h3 className="font-display text-lg font-bold text-[#d97706] mb-2">{activeResult.yamYaiName} (ครูบา/ปัญญา)</h3>
-            <p className="text-xs text-[#d97706]/80 leading-relaxed max-w-md">
-              ช่วงเวลาแห่งสติปัญญาและคุณธรรม เหมาะแก่การศึกษาธรรมะ เริ่มต้นเรียนรู้สิ่งใหม่ ผู้ใหญ่ให้ความเมตตาเอ็นดู
+            <h3 className="font-display text-lg font-bold text-[#d97706] mb-2">{activeResult.yamYaiName} <span className="text-sm font-normal">({yamDesc.subtitle})</span></h3>
+            <p className="text-sm text-[#d97706]/80 leading-relaxed max-w-md">
+              {yamDesc.desc}
             </p>
           </div>
         </Card>
 
         {/* เลือกเรื่องที่ต้องการถามเจาะลึก */}
         <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 lg:p-8 flex flex-col">
-          <h3 className="text-[11px] font-bold text-[#F8F6F1] mb-6 flex items-center gap-2">
+          <h3 className="text-sm font-bold text-[#F8F6F1] mb-6 flex items-center gap-2">
             <span className="text-pink-400 text-lg">🎯</span> เลือกเรื่องที่ต้องการถามเจาะลึก
           </h3>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
             {CATEGORIES.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
                 className={`p-4 rounded-2xl border flex flex-col items-center justify-center gap-2 transition-all ${
-                  selectedCategory === cat.id 
-                    ? "bg-[#0B1E36] border-sky-500/50 shadow-[0_0_15px_rgba(14,165,233,0.15)]" 
+                  selectedCategory === cat.id
+                    ? "bg-[#0B1E36] border-sky-500/50 shadow-[0_0_15px_rgba(14,165,233,0.15)]"
                     : "bg-[#020617] border-white/5 hover:border-white/10"
                 }`}
               >
                 <span className="text-2xl mb-1">{cat.icon}</span>
-                <span className={`text-[10px] font-bold ${selectedCategory === cat.id ? "text-sky-400" : "text-[#F8F6F1]"}`}>
+                <span className={`text-xs font-bold text-center leading-tight ${selectedCategory === cat.id ? "text-sky-400" : "text-[#F8F6F1]"}`}>
                   {cat.label}
                 </span>
               </button>
@@ -394,14 +433,14 @@ export default function KarnchataPage() {
           </div>
 
           <div className="bg-[#020617] border border-white/5 rounded-2xl p-5 flex-1">
-            <p className="text-[10px] font-bold text-[#C6A96B] mb-4 flex items-center gap-2">
+            <p className="text-xs font-bold text-[#C6A96B] mb-4 flex items-center gap-2">
               💡 คำถามแนะนำสำหรับหมวดนี้
             </p>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {activeCategory?.questions.map((q, i) => (
                 <div key={i} className="flex gap-3 bg-transparent p-0 cursor-pointer group" onClick={() => handleAutoSend(q)}>
-                  <span className="text-[#C6A96B] text-sm leading-none mt-0.5 opacity-70 group-hover:opacity-100">✦</span>
-                  <p className="text-[11px] text-[#F8F6F1] opacity-70 group-hover:opacity-100 leading-relaxed transition-opacity">{q}</p>
+                  <span className="text-[#C6A96B] text-base leading-none mt-0.5 opacity-70 group-hover:opacity-100 shrink-0">✦</span>
+                  <p className="text-sm text-[#F8F6F1] opacity-70 group-hover:opacity-100 leading-relaxed transition-opacity">{q}</p>
                 </div>
               ))}
             </div>
@@ -414,10 +453,10 @@ export default function KarnchataPage() {
             <div className="p-5 flex items-center gap-4 bg-[#0A1628]/30 border-b border-white/5">
                <div className="w-3 h-3 rounded-full bg-[#C6A96B] shrink-0 shadow-[0_0_8px_rgba(198,169,107,0.6)] animate-pulse" />
                <div>
-                 <h3 className="text-xs font-bold text-[#F8F6F1] tracking-wider">แชทถามตอบกับ WISDOM GUIDANCE</h3>
-                 <p className="text-[9px] text-[#8A8070] mt-0.5">หมวดการสนทนาปัจจุบัน: <span className="font-bold text-[#C6A96B]">{activeCategory?.label}</span></p>
+                 <h3 className="text-sm font-bold text-[#F8F6F1] tracking-wider">WISDOM GUIDANCE</h3>
+                 <p className="text-xs text-[#8A8070] mt-0.5">หมวด: <span className="font-bold text-[#C6A96B]">{activeCategory?.label}</span></p>
                </div>
-               <button onClick={() => setChatMessages([])} className="ml-auto px-4 py-1.5 text-[10px] border border-white/10 text-[#8A8070] hover:text-[#F8F6F1] hover:border-white/20 rounded-lg transition-colors">
+               <button onClick={() => setChatMessages([])} className="ml-auto px-4 py-1.5 text-xs border border-white/10 text-[#8A8070] hover:text-[#F8F6F1] hover:border-white/20 rounded-lg transition-colors">
                  ล้างแชท
                </button>
             </div>
@@ -426,13 +465,13 @@ export default function KarnchataPage() {
               {chatMessages.map((msg, i) => (
                 <div key={i} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
                   {msg.sender === "ai" && (
-                    <span className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <span className="text-xs text-[#C6A96B] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <span className="text-[#F8F6F1]">✦</span> WISDOM GUIDANCE
                     </span>
                   )}
-                  <div className={`max-w-[85%] md:max-w-[80%] p-4 rounded-2xl text-[12px] leading-relaxed ${
-                    msg.sender === "user" 
-                      ? "bg-[#0A1628] text-[#F8F6F1] border border-white/10 font-bold rounded-tr-none shadow-lg" 
+                  <div className={`max-w-[85%] md:max-w-[80%] p-4 rounded-2xl text-sm leading-relaxed ${
+                    msg.sender === "user"
+                      ? "bg-[#0A1628] text-[#F8F6F1] border border-white/10 font-bold rounded-tr-none shadow-lg"
                       : "bg-[#020617]/60 text-[#F8F6F1] border border-white/10 rounded-tl-none shadow-lg shadow-black/20"
                   }`}>
                     {msg.text}
@@ -444,15 +483,15 @@ export default function KarnchataPage() {
 
             <div className="p-4 bg-[#020617] border-t border-white/5">
               <form onSubmit={handleSendChat} className="flex gap-2">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   value={userInput}
                   onChange={e => setUserInput(e.target.value)}
-                  placeholder="กำลังประมวลผลดวงดาว..."
-                  className="flex-1 bg-[#0A1628] border border-white/5 rounded-xl px-5 py-3 text-xs text-[#F8F6F1] outline-none focus:border-[#C6A96B]/50 transition-colors placeholder:text-[#8A8070]/50"
+                  placeholder="พิมพ์คำถามของท่าน..."
+                  className="flex-1 bg-[#0A1628] border border-white/5 rounded-xl px-5 py-3 text-sm text-[#F8F6F1] outline-none focus:border-[#C6A96B]/50 transition-colors placeholder:text-[#8A8070]/50"
                 />
-                <Button type="submit" disabled={!userInput.trim()} className="px-6 py-3 shrink-0 rounded-xl bg-[#8A8070] text-[#020617] font-bold hover:bg-[#C6A96B] transition-colors shadow-lg text-[11px]">
-                  ส่งคำถาม
+                <Button type="submit" disabled={!userInput.trim()} className="px-6 py-3 shrink-0 rounded-xl bg-[#8A8070] text-[#020617] font-bold hover:bg-[#C6A96B] transition-colors shadow-lg text-xs">
+                  ส่ง
                 </Button>
               </form>
             </div>
@@ -460,18 +499,19 @@ export default function KarnchataPage() {
         </Card>
       </div>
 
-      {/* Scores Section Moved Down */}
+      {/* Scores Section — computed from yamYai + yamSoy */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: "การค้า/เจรจา", score: 70, color: "text-[#C6A96B]", bgLine: "bg-[#C6A96B]" },
-          { label: "ความรัก/เมตตา", score: 98, color: "text-pink-400", bgLine: "bg-pink-400" },
-          { label: "โชคลาภ/ทรัพย์สิน", score: 80, color: "text-emerald-400", bgLine: "bg-emerald-400" },
-          { label: "ระดับการเตือนภัย", score: 8, color: "text-[#8A8070]", bgLine: "bg-[#8A8070]" },
+          { label: "การค้า/เจรจา",    score: tradeScore,  color: "text-[#C6A96B]",   bgLine: "bg-[#C6A96B]",   icon: "💼" },
+          { label: "ความรัก/เมตตา",   score: loveScore,   color: "text-pink-400",    bgLine: "bg-pink-400",    icon: "💖" },
+          { label: "โชคลาภ/ทรัพย์",   score: wealthScore, color: "text-emerald-400", bgLine: "bg-emerald-400", icon: "💎" },
+          { label: "ระดับการเตือนภัย", score: dangerScore, color: dangerScore >= 50 ? "text-rose-400" : dangerScore >= 30 ? "text-amber-400" : "text-[#8A8070]", bgLine: dangerScore >= 50 ? "bg-rose-400" : dangerScore >= 30 ? "bg-amber-400" : "bg-[#8A8070]", icon: "⚠️" },
         ].map(item => (
           <div key={item.label} className="p-5 border border-white/5 bg-[#0A1628] rounded-2xl flex flex-col items-center justify-center gap-3">
-            <span className="text-[10px] text-[#8A8070] font-bold">{item.label}</span>
-            <span className={`text-3xl font-display font-bold ${item.color}`}>{item.score}%</span>
-            <div className={`w-12 h-1 rounded-full ${item.bgLine}`} />
+            <span className="text-lg">{item.icon}</span>
+            <span className="text-xs text-[#8A8070] font-bold text-center leading-snug">{item.label}</span>
+            <span className={`text-4xl font-display font-bold ${item.color}`}>{item.score}%</span>
+            <div className={`w-16 h-1.5 rounded-full ${item.bgLine} opacity-70`} />
           </div>
         ))}
       </div>
