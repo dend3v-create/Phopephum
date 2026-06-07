@@ -22,9 +22,11 @@ export const meta: MetaFunction = () => [
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   await requireMinPlan("basic", request, env);
-  const now = new Date();
-  const data = calculateHoraNu(now);
-  return json({ data, serverTime: now.toISOString() });
+  // Cloudflare Workers run in UTC — shift to Asia/Bangkok (UTC+7)
+  const nowUTC = new Date();
+  const nowBangkok = new Date(nowUTC.getTime() + 7 * 60 * 60 * 1000);
+  const data = calculateHoraNu(nowBangkok);
+  return json({ data, serverTime: nowUTC.toISOString() });
 }
 
 // ─── Planet color helpers ─────────────────────────────────────────────────────
