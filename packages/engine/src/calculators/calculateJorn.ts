@@ -135,8 +135,9 @@ export function calculateMonthlyJorn(matrix: FateMatrix, lunarMonth: number, tak
  * เริ่มที่ภพอัตตะ (Row 1, Col 1) = วันเสาร์
  */
 export function calculateDailyJorn(matrix: FateMatrix, dayOfWeek: number, taksaMap?: TaksaMap): JornResult {
-  const dayMap: Record<number, number> = { 7: 0, 1: 1, 2: 2, 3: 3, 4: 4, 5: 5, 6: 6 };
-  const col = dayMap[dayOfWeek] ?? 0;
+  // dayOfWeek: 0=Sun, 1=Mon, ..., 6=Sat
+  // Manual: Sat=Atta(0), Sun=Hina(1), Mon=Thanang(2), ...
+  const col = (dayOfWeek + 1) % 7;
   const row = 0; // ฐานวัน (Base 1)
   
   const star = matrix[row][col];

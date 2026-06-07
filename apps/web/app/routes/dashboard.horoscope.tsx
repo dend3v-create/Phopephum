@@ -544,6 +544,20 @@ function LegendPanel() {
           <span className="text-xs text-[#8A8070]">ลัคนาจร</span>
         </div>
         <div className="flex items-center gap-2">
+          <span className="text-[9px] font-bold bg-sky-500 text-white px-1.5 py-0.5 rounded-full border border-sky-400">ลจ</span>
+          <span className="text-xs text-[#8A8070]">ลัคนาจรปัจจุบัน</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-[8px] font-bold text-amber-400">✨ ย้ำ</span>
+          <span className="text-xs text-[#8A8070]">ดาวย้ำ (พลังงานทวีคูณ)</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-4 h-4 rounded-full ring-1 ring-[#C6A96B] flex items-center justify-center">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B]"></span>
+          </span>
+          <span className="text-xs text-[#8A8070]">ฐาน 4 (กำลังเทวดา)</span>
+        </div>
+        <div className="flex items-center gap-2">
           <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500 text-white font-bold">ศรี</span>
           <span className="text-xs text-[#8A8070]">ทักษาจร (มงคล/โชคลาภ)</span>
         </div>
@@ -1560,34 +1574,28 @@ function DetailedGuidancePanel() {
           </div>
         </div>
 
-        {/* ดาวน้ำ และกำลังส่งผลจากฐานที่ 4 */}
+        {/* ดาวย้ำ และกำลังส่งผลจากฐานที่ 4 */}
         <div className="space-y-4">
           <div className="flex items-center gap-3 border-b border-white/10 pb-3">
-             <h3 className="font-bold text-[#F8F6F1] text-sm font-thai uppercase tracking-wider">ดาวน้ำ และกำลังส่งผลจากฐานที่ 4 (กำลังเทวดา):</h3>
+             <h3 className="font-bold text-[#F8F6F1] text-sm font-thai uppercase tracking-wider">ดาวย้ำ และกำลังส่งผลจากฐานที่ 4 (กำลังเทวดา):</h3>
           </div>
           <div className="space-y-3">
             <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai">
-              <span className="text-[#C6A96B] font-bold">1) ดาวย้ำคืออะไร:</span> หลังจากรู้แล้วว่าปีจรตกภพไหน ขั้นต่อมาคือดู <span className="text-[#F8F6F1] font-bold">ดาวย้ำ</span> เพราะดาวย้ำจะช่วยบอกว่าเรื่องที่ปีจรไปตกนั้น จะถูกย้ำด้วยพลังของดาวอะไร หรือมีดาวอะไรเข้ามาจับคู่ให้ความหมายหนักขึ้น ชัดขึ้น หรือเฉพาะเจาะจงมากขึ้น
+              <span className="text-[#C6A96B] font-bold">1) ดาวย้ำ (Yum Star):</span> บ่งบอกถึงพลังงานที่ถูกเน้นย้ำเป็นพิเศษตามกาลเวลา (วัน/เดือน/ปี) โดยจะปรากฏในฐานที่ 5, 6, 7 ในคอลัมน์ที่ตรงกับจุดจรนั้นๆ
             </p>
             <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai">
-              <span className="text-[#C6A96B] font-bold">2) พูดง่ายๆ คือ:</span> ปีจรบอกว่าปีนี้ตกภพอะไร ดาวย้ำบอกว่าภพนั้นถูกย้ำด้วยดาวอะไร
-            </p>
-            <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai">
-              <span className="text-[#C6A96B] font-bold">3) การออกคำทำนาย:</span> เวลาออกคำทำนาย เราไม่ได้ดูแค่ภพที่ปีจรตก แต่ต้องลากแนวดิ่งลงไปดูดาวย้ำในฐานที่ 5, 6, 7 ร่วมด้วยเสมอ
-            </p>
-            <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai">
-              <span className="text-[#C6A96B] font-bold">4) วิธีดูดาวย้ำ:</span>
+              <span className="text-[#C6A96B] font-bold">2) สูตรการดู:</span>
             </p>
             <ul className="list-disc list-inside space-y-1 ml-2 text-[11px] text-[#8A8070] font-thai">
-              <li>ตกฐานวัน (อัตตะ ถึง มัชฌิมา): ดูดาวย้ำที่ ฐานที่ 5 ในแถวคอลัมน์เดียวกัน</li>
-              <li>ตกฐานเดือน (ตนุ ถึง ปัตนิ): ดูดาวย้ำที่ ฐานที่ 6 ในแถวคอลัมน์เดียวกัน</li>
-              <li>ตกฐานปี (มรณะ ถึง ทาสี): ดูดาวย้ำที่ ฐานที่ 7 ในแถวคอลัมน์เดียวกัน</li>
+              <li>ตกฐานวัน (แถว 1): ย้ำที่ <span className="text-amber-400 font-bold">ฐาน 5</span> (ฐานเศษ/มหาภูติ)</li>
+              <li>ตกฐานเดือน (แถว 2): ย้ำที่ <span className="text-amber-400 font-bold">ฐาน 6</span> (กำลังพระเคราะห์)</li>
+              <li>ตกฐานปี (แถว 3): ย้ำที่ <span className="text-amber-400 font-bold">ฐาน 7</span> (กำลังพระเคราะห์)</li>
             </ul>
             <p className="text-[11px] text-[#8A8070] leading-relaxed font-thai bg-white/5 p-3 rounded-xl border border-white/10">
-              <span className="text-[#C6A96B] font-bold">5) กำลังการส่งผลจากฐานที่ 4 (กำลังเทวดา):</span> ไม่ว่าปีจรจะตกที่ฐานใดก็ตาม (ฐานวัน 1, ฐานเดือน 2, หรือ ฐานปี 3) ให้เราดูที่ <span className="text-[#F8F6F1] font-bold">** คอลัมน์เดียวกันในฐานที่ 4 **</span> เป็นหลัก เพื่อดูอิทธิพลร่วมของกำลังเทวดานั้น ซึ่งจะแผ่กำลังส่งผลรวมไปถึงดาวย้ำทั้งหมดด้วยเช่นกัน
+              <span className="text-[#C6A96B] font-bold">3) กำลังส่งผลจากฐานที่ 4:</span> ฐานนี้ทำหน้าที่เป็น <span className="text-[#F8F6F1] font-bold">"แบตเตอรี่สำรอง"</span> ที่แผ่พลังงานไปยังดาวทุกดวงในคอลัมน์เดียวกัน หากจุดจร (วัย/ปี/ลัคนา) ตกในคอลัมน์ที่มีกำลังเทวดาสูง (มหาจักร) เรื่องราวนั้นจะขยายผลรุนแรงและชัดเจนยิ่งขึ้น
             </p>
-            <p className="text-[12px] text-emerald-400 font-bold font-thai text-center py-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-              📍 สรุปจำง่ายๆ: ตกฐานวัน - ย้ำฐาน 5 | ตกฐานเดือน - ย้ำฐาน 6 | ตกฐานปี - ย้ำฐาน 7 (ลากตรงลงมาผ่านกำลังเทวดาฐาน 4)
+            <p className="text-[12px] text-sky-400 font-bold font-thai text-center py-2 bg-sky-500/10 rounded-lg border border-sky-500/20">
+              📍 สัญลักษณ์ ลจ: คือลัคนาจร ณ ปัจจุบันนาที (กาลชะตา) เพื่อดูจังหวะตัดสินใจในเสี้ยวเวลา
             </p>
           </div>
         </div>
@@ -1666,6 +1674,14 @@ function FateMatrixPanel({
                     
                     const isVayaJorn = isRow012 && phopephumResult?.vayaJorn?.row === (rIdx + 1) && phopephumResult?.vayaJorn?.col === (cIdx + 1);
                     const isYearlyJorn = isRow012 && phopephumResult?.yearlyJorn?.row === (rIdx + 1) && phopephumResult?.yearlyJorn?.col === (cIdx + 1);
+                    const isMonthlyJorn = isRow012 && phopephumResult?.monthlyJorn?.row === (rIdx + 1) && phopephumResult?.monthlyJorn?.col === (cIdx + 1);
+                    const isDailyJorn = isRow012 && phopephumResult?.dailyJorn?.row === (rIdx + 1) && phopephumResult?.dailyJorn?.col === (cIdx + 1);
+                    const isLagnaMoment = isRow012 && phopephumResult?.lagnaMoment?.row === (rIdx + 1) && phopephumResult?.lagnaMoment?.col === (cIdx + 1);
+
+                    // ยามย้ำ (Yum Star) - ลากแนวดิ่งลงมาหาฐาน 5, 6, 7
+                    const isYumYearly = (rIdx === 6) && phopephumResult?.yearlyJorn?.col === (cIdx + 1) && phopephumResult?.yearlyJorn?.row !== null;
+                    const isYumMonthly = (rIdx === 5) && phopephumResult?.monthlyJorn?.col === (cIdx + 1);
+                    const isYumDaily = (rIdx === 4) && phopephumResult?.dailyJorn?.col === (cIdx + 1);
 
                     const taksaIndicator = isRow012 ? getTaksaTransitIndicator(actualNum, taksaMaha) : null;
                     const mahaIndicator = isRow012 ? getMahaTransitIndicator(actualNum, taksaMaha) : null;
@@ -1678,7 +1694,7 @@ function FateMatrixPanel({
                               {phopName}
                             </span>
                           )}
-                          <div className={`w-11 h-11 rounded-full flex items-center justify-center font-sans text-xl border transition-all ${isHighlighted ? "scale-110 z-10 border-[#C9A96E]" : ""} ${c.bg} ${c.text} ${c.border}`}>
+                          <div className={`w-11 h-11 rounded-full flex items-center justify-center font-sans text-xl border transition-all ${isHighlighted ? "scale-110 z-10 border-[#C9A96E]" : ""} ${isBase4 && (isVayaJorn || isYearlyJorn || isLagnaNatal || isLagnaTransit) ? "ring-2 ring-offset-2 ring-[#C9A96E] ring-offset-[#020617]" : ""} ${c.bg} ${c.text} ${c.border}`}>
                             {num}
                           </div>
                           
@@ -1688,11 +1704,22 @@ function FateMatrixPanel({
                           {showTransitLagna && isLagnaTransit && (
                             <span className="absolute -bottom-1 -right-1 text-[9px] font-bold bg-red-500 text-white border border-red-400 px-1 rounded-full z-10 shadow-sm font-thai">ลอ</span>
                           )}
+                          {isLagnaMoment && (
+                            <span className="absolute -top-1 -right-1 text-[8px] font-bold bg-sky-500 text-white border border-sky-400 px-1 rounded-full z-10 shadow-sm font-thai">ลจ</span>
+                          )}
+
+                          {/* ดาวย้ำ (Yum Star) Indicators */}
+                          {(isYumYearly || isYumMonthly || isYumDaily) && (
+                            <span className="absolute -top-3 flex items-center gap-0.5">
+                              <span className="text-[8px] font-bold text-amber-400 animate-pulse">✨ ย้ำ</span>
+                            </span>
+                          )}
+
                           <div className="absolute -bottom-3 flex gap-0.5">
                             {showVayaJorn && isVayaJorn && <span className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse shadow-[0_0_5px_#C6A96B]" />}
                             {showYearlyJorn && isYearlyJorn && <span className="w-2 h-2 rounded-full bg-[#4B6FAE] shadow-[0_0_5px_#4B6FAE]" />}
-                            {showMonthlyJorn && isRow012 && phopephumResult?.monthlyJorn?.row === (rIdx + 1) && phopephumResult?.monthlyJorn?.col === (cIdx + 1) && <span className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_5px_#f59e0b]" />}
-                            {showDailyJorn && isRow012 && phopephumResult?.dailyJorn?.row === (rIdx + 1) && phopephumResult?.dailyJorn?.col === (cIdx + 1) && <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]" />}
+                            {showMonthlyJorn && isMonthlyJorn && <span className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_5px_#f59e0b]" />}
+                            {showDailyJorn && isDailyJorn && <span className="w-2 h-2 rounded-full bg-rose-500 shadow-[0_0_5px_#f43f5e]" />}
                           </div>
                           
                           {/* Taksa & Maha Badges Overlay - Refined Positioning & Set Separation */}

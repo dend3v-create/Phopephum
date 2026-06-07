@@ -318,8 +318,9 @@ export default function DashboardScreen() {
                             const isDailyJorn = isRow012 && horoscope.dailyJorn?.row === (rIdx + 1) && horoscope.dailyJorn?.col === (cIdx + 1);
 
                             // Indicators
-                            const tBhop = isRow012 && horoscope.taksaTransit?.map?.[actualNum];
-                            const mBhop = isRow012 && Object.entries(horoscope.mahaTransit?.map ?? {}).find(([_, v]) => v === actualNum)?.[0];
+                            const isRow01278 = [0, 1, 2, 7, 8].includes(rIdx);
+                            const tBhop = isRow01278 && horoscope.taksaTransit?.map?.[actualNum];
+                            const mBhop = isRow01278 && Object.entries(horoscope.mahaTransit?.map ?? {}).find(([_, v]) => v === actualNum)?.[0];
 
                             // Indicator Styles (Match Web Refinement)
                             const getTaksaStyle = (bhop: string) => {
