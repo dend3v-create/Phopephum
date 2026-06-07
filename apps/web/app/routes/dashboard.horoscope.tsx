@@ -1085,6 +1085,7 @@ export default function HoroscopePage() {
                       showYearlyJorn={false}
                       showMonthlyJorn={false}
                       showDailyJorn={false}
+                      showVayaRanges={false}
                    />
                  ) : (
                    <Card className="p-12 text-center border-dashed border-pink-500/20 bg-pink-500/5">

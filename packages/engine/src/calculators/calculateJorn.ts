@@ -45,6 +45,30 @@ function getBase4Info(matrix: FateMatrix, col: number, taksaMap?: TaksaMap) {
 }
 
 /**
+ * คำนวณช่วงอายุวัยจรทั้งหมด (All Vaya Jorn Ranges)
+ * ใช้สำหรับแสดงผลทั้งกระดานทีละช่อง
+ */
+export function calculateVayaJornRanges(matrix: FateMatrix): { row: number; col: number; start: number; end: number }[] {
+  const ranges: { row: number; col: number; start: number; end: number }[] = [];
+  let currentAge = 1;
+
+  for (let col = 0; col < 7; col++) {
+    for (let row = 0; row < 3; row++) {
+      const duration = matrix[row][col];
+      ranges.push({
+        row: row + 1,
+        col: col + 1,
+        start: currentAge,
+        end: currentAge + duration - 1
+      });
+      currentAge += duration;
+    }
+  }
+
+  return ranges;
+}
+
+/**
  * คำนวณวัยจร (Life Age Period)
  * นับจากบนลงล่างทีละคอลัมน์ (Row 1 -> 2 -> 3)
  * แต่ละช่องกินระยะเวลาเท่ากับตัวเลขดาวในช่องนั้น

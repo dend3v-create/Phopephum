@@ -187,6 +187,7 @@ export interface PhopephumResult {
   atthakarn: SystematicAtthakarnResult;
   rahu: SystematicRahuResult;
   vayaJorn?: JornResult;
+  vayaJornRanges?: { row: number; col: number; start: number; end: number }[];
   yearlyJorn?: JornResult;
   monthlyJorn?: JornResult;
   dailyJorn?: JornResult;

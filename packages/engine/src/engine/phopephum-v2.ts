@@ -2,7 +2,7 @@ import { calculateNineBases } from "./seven-numbers-v2.js";
 import { calculateAtthakarn as calculateAtthakarnLivingWisdom, calculateRahu as calculateRahuLivingWisdom } from "./time-engines.js";
 import { calcTaksaMaha, buddhToCS } from "../taksa-mahabhuti/index.js";
 import { getThaiBaseNumbers } from "../core/lunarCalendar.js";
-import { calculateVayaJorn, calculateYearlyJorn, calculateMonthlyJorn, calculateDailyJorn } from "../calculators/calculateJorn.js";
+import { calculateVayaJorn, calculateVayaJornRanges, calculateYearlyJorn, calculateMonthlyJorn, calculateDailyJorn } from "../calculators/calculateJorn.js";
 import { calculateLagnaPhopephum, calculateLagnaTransitPhopephum, calculateHorary } from "../calculators/calculatePhopephumTime.js";
 import type { PhopephumResult, HoroscopeInput } from "@phopephum/types";
 
@@ -46,6 +46,7 @@ export async function calculatePhopephum(input: HoroscopeInput, checkDate: Date 
   const taksaMap = taksaMaha.taksaTransit.map;
 
   const vayaJorn = calculateVayaJorn(matrix, ageYang, taksaMap);
+  const vayaJornRanges = calculateVayaJornRanges(matrix);
   const yearlyJorn = calculateYearlyJorn(matrix, ageYang, taksaMap);
   const monthlyJorn = calculateMonthlyJorn(matrix, transitThai.lunarMonth, taksaMap);
   const dailyJorn = calculateDailyJorn(matrix, transitThai.dayNum, taksaMap);

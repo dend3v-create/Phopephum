@@ -20,10 +20,14 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const checkDateStr = url.searchParams.get("checkDate");
   const checkDate = checkDateStr ? new Date(checkDateStr) : new Date();
 
+  const type = url.searchParams.get("type");
+  const isHorary = type === "horary";
+
   // 3. Calculate (Systematic v2.0)
   const result = await calculatePhopephum({
-    birthDate: profile?.birth_date ?? checkDate.toISOString().split('T')[0],
-    birthTime: profile?.birth_time ?? undefined,
+    birthDate: isHorary ? checkDate.toISOString().split('T')[0] : (profile?.birth_date ?? checkDate.toISOString().split('T')[0]),
+    birthTime: isHorary ? `${String(checkDate.getHours()).padStart(2, '0')}:${String(checkDate.getMinutes()).padStart(2, '0')}` : (profile?.birth_time ?? undefined),
+    birthPlace: profile?.birth_place ?? "กรุงเทพมหานคร",
   }, checkDate);
 
   return json({

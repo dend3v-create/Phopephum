@@ -237,6 +237,18 @@ export default function KarnchataPage() {
   };
   const yamOmen = YAM_OMEN[yaiN] ?? "";
 
+  // ── ทักษาจรยาม: rotate from yamYaiNumber (same algorithm as calcTaksaNatal_V3) ──
+  // SEQ_STARS_8 = [6,1,2,3,4,7,5,8], TAKSA_BHOP = [บริวาร,อายุ,เดช,ศรี,มูละ,อุตสาหะ,มนตรี,กาลกิณี]
+  const _SEQ = [6, 1, 2, 3, 4, 7, 5, 8] as const;
+  const _BHOP = ["บริวาร", "อายุ", "เดช", "ศรี", "มูละ", "อุตสาหะ", "มนตรี", "กาลกิณี"] as const;
+  const _si = _SEQ.indexOf(yaiN as typeof _SEQ[number]);
+  const taksaYamMap: Record<string, number> = {};
+  if (_si !== -1) {
+    for (let i = 0; i < 8; i++) {
+      taksaYamMap[_BHOP[i]] = _SEQ[(_si + i) % 8];
+    }
+  }
+
   // Live Timer
   useEffect(() => {
     const timer = setInterval(() => {
@@ -625,22 +637,34 @@ export default function KarnchataPage() {
             <div className="bg-[#020617] border border-white/5 rounded-2xl p-5">
               <p className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-widest mb-3">ทักษาจร (ยามใหญ่ {activeResult.yamYaiName})</p>
               <div className="grid grid-cols-4 gap-2">
-                {[
-                  {q:"ศรี", color:"bg-emerald-500/20 text-emerald-400 border-emerald-500/30"},
-                  {q:"มนตรี", color:"bg-blue-500/20 text-blue-400 border-blue-500/30"},
-                  {q:"มูละ", color:"bg-amber-500/20 text-amber-400 border-amber-500/30"},
+                {([
+                  {q:"ศรี",      color:"bg-emerald-500/20 text-emerald-400 border-emerald-500/30"},
+                  {q:"มนตรี",    color:"bg-blue-500/20 text-blue-400 border-blue-500/30"},
+                  {q:"มูละ",     color:"bg-amber-500/20 text-amber-400 border-amber-500/30"},
                   {q:"อุตสาหะ", color:"bg-teal-500/20 text-teal-400 border-teal-500/30"},
-                  {q:"เดช", color:"bg-orange-500/20 text-orange-400 border-orange-500/30"},
-                  {q:"บริวาร", color:"bg-indigo-500/20 text-indigo-300 border-indigo-500/30"},
-                  {q:"อายุ", color:"bg-white/5 text-[#8A8070] border-white/10"},
+                  {q:"เดช",      color:"bg-orange-500/20 text-orange-400 border-orange-500/30"},
+                  {q:"บริวาร",   color:"bg-indigo-500/20 text-indigo-300 border-indigo-500/30"},
+                  {q:"อายุ",     color:"bg-white/5 text-[#8A8070] border-white/10"},
                   {q:"กาลกิณี", color:"bg-rose-950/40 text-rose-400 border-rose-500/30"},
-                ].map(item => (
-                  <div key={item.q} className={`rounded-xl px-2 py-2 border text-center ${item.color}`}>
-                    <p className="text-[10px] font-bold leading-tight">{item.q}</p>
-                  </div>
-                ))}
+                ] as const).map(item => {
+                  const starNum = taksaYamMap[item.q];
+                  const starName = STAR_NAMES[starNum as keyof typeof STAR_NAMES] ?? "";
+                  return (
+                    <div key={item.q} className={`rounded-xl px-2 py-2.5 border text-center flex flex-col items-center gap-0.5 ${item.color}`}>
+                      <p className="text-[9px] font-bold leading-tight opacity-80">{item.q}</p>
+                      {starNum ? (
+                        <>
+                          <p className="text-lg font-display font-black leading-none">{starNum}</p>
+                          <p className="text-[8px] leading-tight opacity-70">{starName}</p>
+                        </>
+                      ) : (
+                        <p className="text-xs opacity-40">—</p>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
-              <p className="text-[10px] text-[#8A8070] mt-3">ดาวศรี = โชคดีสูงสุด • กาลกิณี = ระวังอุปสรรค</p>
+              <p className="text-[10px] text-[#8A8070] mt-3">ศรี = โชคดีสูงสุด • กาลกิณี = ระวังอุปสรรค • ดาว {yaiN} ({activeResult.yamYaiName}) = บริวาร</p>
             </div>
           </div>
         </div>
