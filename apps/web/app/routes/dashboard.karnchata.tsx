@@ -399,8 +399,8 @@ export default function KarnchataPage() {
         {timeMode === "custom" && (
           <div className="flex flex-wrap items-center gap-2 px-2 pb-1">
             <span className="text-xs text-[#8A8070] font-bold shrink-0">เลือกวันเวลา:</span>
-            <input type="date" className="flex-1 min-w-[130px] bg-[#020617] border border-white/10 text-[#F8F6F1] text-sm rounded-xl px-3 py-2 outline-none focus:border-[#C6A96B]" defaultValue={new Date().toISOString().split('T')[0]} />
-            <input type="time" className="w-[110px] bg-[#020617] border border-white/10 text-[#F8F6F1] text-sm rounded-xl px-3 py-2 outline-none focus:border-[#C6A96B]" defaultValue="12:00" />
+            <input type="date" autoComplete="off" className="flex-1 min-w-[130px] bg-[#020617] border border-white/10 text-[#F8F6F1] text-sm rounded-xl px-3 py-2 outline-none focus:border-[#C6A96B]" defaultValue={new Date().toISOString().split('T')[0]} />
+            <input type="time" autoComplete="off" className="w-[110px] bg-[#020617] border border-white/10 text-[#F8F6F1] text-sm rounded-xl px-3 py-2 outline-none focus:border-[#C6A96B]" defaultValue="12:00" />
           </div>
         )}
       </div>
@@ -551,6 +551,7 @@ export default function KarnchataPage() {
           <form onSubmit={handleSendChat} className="flex gap-2">
             <input
               type="text"
+              autoComplete="off"
               value={userInput}
               onChange={e => setUserInput(e.target.value)}
               placeholder="พิมพ์คำถามของท่าน..."
