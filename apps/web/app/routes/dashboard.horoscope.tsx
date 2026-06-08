@@ -834,7 +834,7 @@ export default function HoroscopePage() {
               >
                 <span className="flex items-center gap-1.5">
                   <span className="text-[10px] font-bold text-[#C9A96E] bg-white/5 px-1 py-[0.5px] rounded border border-white/10 leading-none">ท/ม</span>
-                  <span>ทักษา (กำเนิด/จร)</span>
+                  <span>ทักษาจร</span>
                 </span>
                 <span className={`w-2 h-2 rounded-full transition-all ${showTaksaMahaBadges ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
               </button>
