@@ -105,31 +105,50 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
+  // ── Auto-compute: ดูดวงให้ลูกค้าที่เลือกมาจากหน้า Profiles ──
+  const customerId = new URL(request.url).searchParams.get("customer");
+
   let initialResult = null;
-  if (profile?.birth_date) {
+  const checkDate = new Date();
+
+  const computeResult = async (birthDate: string, birthTime: string | null, birthPlace: string | null) => {
+    const imperialResult = await calculateImperial({
+      birthDate,
+      birthTime: birthTime || "12:00",
+      birthPlace: birthPlace || "กรุงเทพมหานคร",
+    }, checkDate);
+    const birthYearThai = Number(birthDate.slice(0, 4)) + 543;
+    return {
+      phopephumResult: imperialResult,
+      matrix: imperialResult.matrix,
+      taksaMaha: calcTaksaMaha({
+        birthDate: new Date(`${birthDate}T12:00:00+07:00`),
+        checkDate,
+        csNatal: buddhToCS(birthYearThai),
+        csTransit: buddhToCS(checkDate.getFullYear() + 543),
+      }),
+      birthDate,
+      transitDate: checkDate.toISOString().split("T")[0],
+      transitTime: "12:00",
+    };
+  };
+
+  if (customerId) {
+    // โหลดจากตาราง customers
     try {
-      const imperialResult = await calculateImperial({
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time || "12:00",
-        birthPlace: profile.birth_place || "กรุงเทพมหานคร",
-      }, new Date());
-
-      const birthYearThai = Number(profile.birth_date.slice(0, 4)) + 543;
-      const checkDate = new Date();
-
-      initialResult = {
-        phopephumResult: imperialResult,
-        matrix: imperialResult.matrix,
-        taksaMaha: calcTaksaMaha({
-          birthDate: new Date(`${profile.birth_date}T12:00:00+07:00`),
-          checkDate,
-          csNatal: buddhToCS(birthYearThai),
-          csTransit: buddhToCS(checkDate.getFullYear() + 543),
-        }),
-        birthDate: profile.birth_date,
-        transitDate: new Date().toISOString().split("T")[0],
-        transitTime: "12:00",
-      };
+      const { data: customer } = await supabase
+        .from("customers")
+        .select("*")
+        .eq("id", customerId)
+        .eq("user_id", user.id)
+        .single();
+      if (customer?.birth_date) {
+        initialResult = await computeResult(customer.birth_date, customer.birth_time, customer.birth_place);
+      }
+    } catch (e) { console.error("[horoscope] customer load error:", e); }
+  } else if (profile?.birth_date) {
+    try {
+      initialResult = await computeResult(profile.birth_date, profile.birth_time, profile.birth_place);
     } catch (e) { console.error(e); }
   }
 

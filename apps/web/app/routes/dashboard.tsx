@@ -117,11 +117,16 @@ export default function DashboardLayout() {
             label={<span>ปฏิทิน 100 ปี</span>} 
           />
 
-          <NavLink to="/dashboard/how-to-use" 
-            icon={<IconHelp />} 
-            label="วิธีการใช้งาน" 
+          <NavLink to="/dashboard/profiles"
+            icon={<IconPeople />}
+            label="โปรไฟล์บุคคล"
           />
-          
+
+          <NavLink to="/dashboard/how-to-use"
+            icon={<IconHelp />}
+            label="วิธีการใช้งาน"
+          />
+
           <NavLink to="/dashboard/settings"  icon={<IconSettings />} label="ตั้งค่าโปรไฟล์" />
           
           {(profile?.role === 'admin' || profile?.role === 'operator') && (
@@ -239,6 +244,17 @@ export default function DashboardLayout() {
 }
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
+
+function IconPeople() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <circle cx="9" cy="7" r="3" />
+      <path d="M3 21v-2a5 5 0 0 1 5-5h2" strokeLinecap="round" />
+      <circle cx="17" cy="9" r="2.5" />
+      <path d="M13 21v-1.5a3.5 3.5 0 0 1 3.5-3.5h1A3.5 3.5 0 0 1 21 19.5V21" strokeLinecap="round" />
+    </svg>
+  );
+}
 
 function IconYam() {
   return (
