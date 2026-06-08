@@ -1,5 +1,5 @@
 import { json, redirect } from "@remix-run/cloudflare";
-import { Outlet, Form, useLoaderData, Link } from "@remix-run/react";
+import { Outlet, Form, useLoaderData, Link, useLocation } from "@remix-run/react";
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
@@ -15,7 +15,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   try {
     const profile = await getProfile(user.id, request, env);
 
-    // Gate: ถ้า membership ยังรอการอนุมัติ → redirect ไปหน้า pending
     if (profile?.membership_status === "pending" && profile?.role === "user") {
       throw redirect("/pending-approval");
     }
@@ -23,17 +22,28 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     await logEvent(request, env, EVENTS.DAILY_VISIT, { source: "web" });
     return json({ user, profile });
   } catch (err) {
-    if (err instanceof Response) throw err; // re-throw redirects
+    if (err instanceof Response) throw err;
     console.error("Dashboard Layout Loader Error:", err);
     return json({ user, profile: null });
   }
 }
 
+// ── Route → tab mapping for mobile bottom bar ────────────────────────────────
+const MAIN_TABS = [
+  { to: "/dashboard",         label: "วันนี้",        icon: <IcoToday /> },
+  { to: "/dashboard/horoscope", label: "เส้นทางชีวิต", icon: <IcoJourney /> },
+  { to: "/dashboard/reports/new", label: "Wisdom AI",  icon: <IcoAI /> },
+  { to: "/dashboard/planner", label: "บันทึก",        icon: <IcoJournal /> },
+  { to: "/dashboard/settings", label: "โปรไฟล์",      icon: <IcoProfile /> },
+] as const;
+
 export default function DashboardLayout() {
   const { user, profile } = useLoaderData<typeof loader>();
-  const displayName =
-    profile?.display_name ?? profile?.email ?? "ผู้ใช้งาน";
+  const location = useLocation();
+  const displayName = profile?.display_name ?? profile?.email ?? "ผู้ใช้งาน";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const isPro = profile?.role === "admin" || profile?.role === "operator" || profile?.plan === "imperial";
 
   return (
     <div className="min-h-screen flex">
@@ -45,14 +55,14 @@ export default function DashboardLayout() {
         />
       )}
 
-      {/* Sidebar */}
+      {/* ── Desktop Sidebar ─────────────────────────────────────────────────── */}
       <aside
         className={`flex flex-col w-64 p-5 fixed h-full border-r z-40 transition-transform duration-300 ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
         style={{
-          background: "rgba(2,6,23,0.95)",
+          background: "rgba(2,6,23,0.97)",
           backdropFilter: "blur(20px)",
           borderColor: "rgba(217,188,130,0.12)",
         }}
@@ -63,14 +73,14 @@ export default function DashboardLayout() {
             <div className="absolute inset-0 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/5" />
             <span className="text-[#C6A96B] text-xs font-bold z-10 font-display">P</span>
             <div className="absolute inset-0 opacity-20">
-               <svg viewBox="0 0 40 40" fill="none">
-                 <circle cx="20" cy="20" r="18" stroke="#C6A96B" strokeWidth="0.5" strokeDasharray="2 2" />
-               </svg>
+              <svg viewBox="0 0 40 40" fill="none">
+                <circle cx="20" cy="20" r="18" stroke="#C6A96B" strokeWidth="0.5" strokeDasharray="2 2" />
+              </svg>
             </div>
           </div>
           <div>
-            <p className="text-[#D9BC82] text-[11px] tracking-[0.2em] uppercase mb-0.5 opacity-70">
-              Living Wisdom OS
+            <p className="text-[#D9BC82] text-[10px] tracking-[0.2em] uppercase mb-0.5 opacity-60">
+              Wisdom Guidance OS
             </p>
             <h2 className="font-display text-xl font-bold text-[#F8F6F1] glow-gold leading-none">
               PhopePhum
@@ -78,70 +88,69 @@ export default function DashboardLayout() {
           </div>
         </div>
 
-        {/* Nav */}
+        {/* ── Primary Nav (5 items) ── */}
         <nav className="flex flex-col gap-0.5 flex-1">
-          <NavLink to="/dashboard"           icon={<IconHome />}     label="ภาพรวม" />
-          
-          <NavLink to="/dashboard/horoscope" 
-            icon={<IconPlanet />}   
-            label={<span>ตรวจดวงชะตา {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
-          />
-          
-          <NavLink to="/dashboard/yam"       
-            icon={<IconYam />}      
-            label={<span>ฤกษ์งามยามดี {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
-          />
-          
-          <NavLink to="/dashboard/rahu"      
-            icon={<IconRahu />}     
-            label={<span>ยามราหูค้นทรัพย์ {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
-          />
-          
-          <NavLink to="/dashboard/karnchata" 
-            icon={<IconHourglass />}   
-            label={<span>ทำนายกาลชะตา {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
-          />
-          
-          <NavLink to="/dashboard/horanu" 
-            icon={<IconHoraNu />}   
-            label={<span>โหรทายหนู {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
-          />
-          
-          <NavLink to="/dashboard/planner"   
-            icon={<IconCalendar />} 
-            label={<span>วางแผนชีวิต {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
+
+          {/* Section: Main */}
+          <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#4A5568] px-3 mb-2">เมนูหลัก</p>
+
+          <NavLink to="/dashboard" icon={<IcoToday />} label="วันนี้" exact />
+
+          <NavLink
+            to="/dashboard/horoscope"
+            icon={<IcoJourney />}
+            label="เส้นทางชีวิต"
           />
 
-          <NavLink to="/dashboard/calendar"   
-            icon={<IconListCalendar />} 
-            label={<span>ปฏิทิน 100 ปี</span>} 
+          <NavLink
+            to="/dashboard/reports/new"
+            icon={<IcoAI />}
+            label="Wisdom AI"
           />
 
-          <NavLink to="/dashboard/how-to-use" 
-            icon={<IconHelp />} 
-            label="วิธีการใช้งาน" 
+          <NavLink
+            to="/dashboard/planner"
+            icon={<IcoJournal />}
+            label="บันทึก"
           />
-          
-          <NavLink to="/dashboard/settings"  icon={<IconSettings />} label="ตั้งค่าโปรไฟล์" />
-          
-          {(profile?.role === 'admin' || profile?.role === 'operator') && (
-            <div className="mt-4 pt-4 border-t" style={{ borderColor: "rgba(217,188,130,0.12)" }}>
-              <NavLink to="/operator" icon={<IconOperator />} label="ระบบ Operator" />
+
+          <NavLink
+            to="/dashboard/settings"
+            icon={<IcoProfile />}
+            label="โปรไฟล์"
+          />
+
+          {/* ── Pro Astrologer Tools (hidden from general users) ── */}
+          {isPro && (
+            <div className="mt-6 pt-4 border-t" style={{ borderColor: "rgba(217,188,130,0.08)" }}>
+              <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#C6A96B]/50 px-3 mb-2">
+                ✦ Pro Astrologer Tools
+              </p>
+              <NavLink to="/dashboard/yam"        icon={<IcoYam />}       label="Wisdom Timing Engine" />
+              <NavLink to="/dashboard/karnchata"  icon={<IcoHourglass />} label="Time Oracle Engine" />
+              <NavLink to="/dashboard/horanu"     icon={<IcoHoraNu />}    label="Hora Nu Chart" />
+              <NavLink to="/dashboard/rahu"       icon={<IcoRahu />}      label="Rahu Transit" />
+              <NavLink to="/dashboard/calendar"   icon={<IcoList />}      label="100-Year Calendar" />
             </div>
           )}
 
-          {profile?.role === 'admin' && (
+          {/* ── Admin / Operator ── */}
+          {(profile?.role === "admin" || profile?.role === "operator") && (
             <div className="mt-2">
-              <NavLink to="/admin/approvals" icon={<IconApprove />} label="อนุมัติคำขอ" />
+              <NavLink to="/operator" icon={<IcoOperator />} label="ระบบ Operator" />
+            </div>
+          )}
+          {profile?.role === "admin" && (
+            <div className="mt-1">
+              <NavLink to="/admin/approvals" icon={<IcoApprove />} label="อนุมัติคำขอ" />
             </div>
           )}
         </nav>
 
-        {/* User + Admin CTA */}
+        {/* ── Footer ── */}
         <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: "rgba(217,188,130,0.12)" }}>
-
-          {/* Upgrade CTA — แสดงเมื่อยังไม่เป็น Imperial */}
-          {profile?.plan !== 'imperial' && profile?.role !== 'admin' && (
+          {/* Upgrade CTA */}
+          {profile?.plan !== "imperial" && profile?.role !== "admin" && (
             <Link
               to="/dashboard/upgrade"
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
@@ -151,25 +160,24 @@ export default function DashboardLayout() {
                 boxShadow: "0 4px 12px rgba(198,169,107,0.15)",
               }}
             >
-              <IconSparkles />
+              <IcoSparkles />
               อัปเกรดสมาชิก
             </Link>
           )}
 
-          {/* Admin CTA — เห็นเฉพาะ admin */}
-          {profile?.role === 'admin' && (
+          {/* Admin CTA */}
+          {profile?.role === "admin" && (
             <a
               href="/admin"
-              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold tracking-wide transition-all"
               style={{
                 background: "linear-gradient(135deg, #1e3a5f, #2d5490)",
                 border: "1px solid rgba(56,189,248,0.35)",
                 color: "#38BDF8",
-                boxShadow: "0 0 16px rgba(56,189,248,0.12)",
               }}
             >
-              <IconAdmin />
-              จัดการระบบ (Admin)
+              <IcoAdmin />
+              Admin Dashboard
             </a>
           )}
 
@@ -183,10 +191,25 @@ export default function DashboardLayout() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-[#F8F6F1] truncate font-medium">{displayName}</p>
-              <p className="text-[13px] text-[#94A3B8]/60 truncate">{user.email}</p>
-              <p className="text-[13px] truncate capitalize font-semibold"
-                style={{ color: profile?.role === 'admin' ? "#38BDF8" : profile?.plan === 'imperial' ? "#C6A96B" : "#94A3B8" }}>
-                {profile?.role === 'admin' ? '⌘ Administrator' : profile?.plan === 'imperial' ? '✦ Imperial' : profile?.plan === 'pro' ? '◈ Pro' : 'Basic'}
+              <p className="text-[12px] text-[#94A3B8]/60 truncate">{user.email}</p>
+              <p
+                className="text-[12px] truncate capitalize font-semibold"
+                style={{
+                  color:
+                    profile?.role === "admin"
+                      ? "#38BDF8"
+                      : profile?.plan === "imperial"
+                      ? "#C6A96B"
+                      : "#94A3B8",
+                }}
+              >
+                {profile?.role === "admin"
+                  ? "⌘ Administrator"
+                  : profile?.plan === "imperial"
+                  ? "✦ Imperial"
+                  : profile?.plan === "pro"
+                  ? "◈ Pro"
+                  : "Basic"}
               </p>
             </div>
           </div>
@@ -194,9 +217,7 @@ export default function DashboardLayout() {
           <Form method="post" action="/logout">
             <button
               type="submit"
-              className="w-full text-left text-xs text-[#94A3B8] hover:text-[#F8F6F1] px-2 py-1.5 rounded-lg transition-colors"
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(75,111,174,0.12)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+              className="w-full text-left text-xs text-[#94A3B8] hover:text-[#F8F6F1] px-2 py-1.5 rounded-lg transition-colors hover:bg-white/5"
             >
               ออกจากระบบ
             </button>
@@ -204,31 +225,52 @@ export default function DashboardLayout() {
         </div>
       </aside>
 
-      {/* Mobile top bar */}
+      {/* ── Mobile Top Bar ─────────────────────────────────────────────────── */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 border-b"
+        className="md:hidden fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3 border-b"
         style={{
-          background: "rgba(2,6,23,0.95)",
+          background: "rgba(2,6,23,0.97)",
           backdropFilter: "blur(16px)",
           borderColor: "rgba(217,188,130,0.12)",
         }}
       >
-        <h2 className="font-display text-xl font-bold text-[#F8F6F1]">
-          PhopePhum
-        </h2>
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-1.5 rounded-lg hover:bg-white/5 active:scale-95 transition-all text-[#C9A96E]"
-          aria-label="เมนู"
-        >
-          <MobileMenu />
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="font-display text-lg font-bold text-[#F8F6F1]">PhopePhum</span>
+          <span className="text-[10px] text-[#C6A96B]/60 font-medium tracking-wider uppercase hidden xs:block">Wisdom OS</span>
+        </div>
+
+        {/* Hamburger (for Pro tools on mobile) */}
+        {isPro ? (
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-1.5 rounded-lg hover:bg-white/5 active:scale-95 transition-all text-[#C9A96E]"
+            aria-label="Pro Tools"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-6 h-6">
+              <path d="M4 6h16M4 12h10M4 18h16" strokeLinecap="round" />
+            </svg>
+          </button>
+        ) : (
+          <Link
+            to="/dashboard/upgrade"
+            className="text-[11px] font-bold text-[#C6A96B] border border-[#C6A96B]/30 px-2.5 py-1 rounded-full hover:bg-[#C6A96B]/10 transition-colors"
+          >
+            ✦ Upgrade
+          </Link>
+        )}
       </div>
 
-      {/* Main content */}
-      <main className="flex-1 md:ml-64 pt-16 md:pt-0 min-h-screen">
+      {/* ── Mobile Bottom Tab Bar ──────────────────────────────────────────── */}
+      <MobileBottomBar currentPath={location.pathname} />
+
+      {/* ── Main Content ───────────────────────────────────────────────────── */}
+      <main className="flex-1 md:ml-64 pt-14 md:pt-0 pb-20 md:pb-0 min-h-screen">
         <ProtectedContent
-          userLabel={profile?.display_name ? `${profile.display_name} · ${user.email}` : user.email}
+          userLabel={
+            profile?.display_name
+              ? `${profile.display_name} · ${user.email}`
+              : user.email
+          }
           className="max-w-5xl mx-auto px-4 py-8"
         >
           <Outlet />
@@ -238,9 +280,113 @@ export default function DashboardLayout() {
   );
 }
 
+// ─── Mobile Bottom Tab Bar ────────────────────────────────────────────────────
+
+function MobileBottomBar({ currentPath }: { currentPath: string }) {
+  const tabs = [
+    { to: "/dashboard",              label: "วันนี้",        icon: <IcoToday />,   exact: true },
+    { to: "/dashboard/horoscope",    label: "เส้นทางชีวิต", icon: <IcoJourney />, exact: false },
+    { to: "/dashboard/reports/new",  label: "AI",            icon: <IcoAI />,      exact: false },
+    { to: "/dashboard/planner",      label: "บันทึก",        icon: <IcoJournal />, exact: false },
+    { to: "/dashboard/settings",     label: "โปรไฟล์",      icon: <IcoProfile />, exact: false },
+  ];
+
+  return (
+    <nav
+      className="md:hidden fixed bottom-0 left-0 right-0 z-20 flex items-stretch border-t"
+      style={{
+        background: "rgba(2,6,23,0.97)",
+        backdropFilter: "blur(20px)",
+        borderColor: "rgba(217,188,130,0.12)",
+      }}
+    >
+      {tabs.map((tab) => {
+        const isActive = tab.exact
+          ? currentPath === tab.to
+          : currentPath.startsWith(tab.to);
+
+        return (
+          <Link
+            key={tab.to}
+            to={tab.to}
+            className={`flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 transition-all ${
+              isActive
+                ? "text-[#C6A96B]"
+                : "text-[#4A5568] hover:text-[#8A8070]"
+            }`}
+          >
+            <span className={`transition-transform ${isActive ? "scale-110" : ""}`}>
+              {tab.icon}
+            </span>
+            <span className={`text-[10px] font-medium leading-none tracking-wide ${
+              isActive ? "text-[#C6A96B]" : "text-[#4A5568]"
+            }`}>
+              {tab.label}
+            </span>
+            {isActive && (
+              <span
+                className="absolute bottom-0 w-8 h-0.5 rounded-full"
+                style={{ background: "#C6A96B" }}
+              />
+            )}
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
-function IconYam() {
+function IcoToday() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IcoJourney() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <path d="M12 22V12" strokeLinecap="round" />
+      <path d="M12 12C12 12 7 9 7 5a5 5 0 0 1 10 0c0 4-5 7-5 7z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 22h14" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IcoAI() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <path d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 17l.5 1.5L7 19l-1.5.5L5 21l-.5-1.5L3 19l1.5-.5L5 17z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IcoJournal() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9 7h7M9 11h5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IcoProfile() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function IcoYam() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
       <circle cx="12" cy="12" r="9" />
@@ -250,99 +396,35 @@ function IconYam() {
   );
 }
 
-function IconHome() {
+function IcoHourglass() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
-      <path d="M3 12L12 3l9 9" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M9 21V12h6v9" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M5 10v11h14V10" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M5 2h14M5 22h14M19 2v4a7 7 0 0 1-7 7 7 7 0 0 1-7-7V2M5 22v-4a7 7 0 0 1 7-7 7 7 0 0 1 7 7v4" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function IconPlanet() {
+function IcoHoraNu() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
-      <circle cx="12" cy="12" r="4" />
-      <ellipse cx="12" cy="12" rx="10" ry="4" transform="rotate(-20 12 12)" />
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="2" fill="currentColor" />
     </svg>
   );
 }
 
-function IconSparkles() {
+function IcoRahu() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
-      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M19 15l.75 2.25L22 18l-2.25.75L19 21l-.75-2.25L16 18l2.25-.75L19 15z" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconCalendar() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
-      <rect x="3" y="4" width="18" height="18" rx="2" />
-      <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconSettings() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function MobileMenu() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-6 h-6 text-[#C9A96E]">
-      <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function IconApprove() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
-      <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
-    </svg>
-  );
-}
-
-function IconAdmin() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#38BDF8]">
-      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconOperator() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#10B981]">
-      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="9" cy="7" r="4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M23 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconRahu() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#C6A96B]">
       <circle cx="12" cy="12" r="10" />
-      <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12c0-2.21.72-4.25 1.94-5.91" />
-      <path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" />
+      <path d="M12 2a10 10 0 0 1 10 10c0 5.523-4.477 10-10 10S2 17.523 2 12" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="3" />
     </svg>
   );
 }
 
-function IconListCalendar() {
+function IcoList() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
       <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" strokeLinecap="round" strokeLinejoin="round" />
@@ -350,31 +432,37 @@ function IconListCalendar() {
   );
 }
 
-function IconHourglass() {
+function IcoSparkles() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#C6A96B]">
-      <path d="M5 2h14M5 22h14M19 2v4a7 7 0 0 1-7 7 7 7 0 0 1-7-7V2M5 22v-4a7 7 0 0 1 7-7 7 7 0 0 1 7 7v4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 2v4M12 18v4" strokeLinecap="round" />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-4 h-4">
+      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function IconHelp() {
+function IcoAdmin() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#C9A96E]">
-      <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.91894 12.4272 7.03871C13.1255 7.15849 13.7588 7.52152 14.2151 8.06353C14.6713 8.60553 14.9211 9.29152 14.92 10C14.92 12 11.92 13 11.92 13" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M12 17H12.01" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} />
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-4 h-4">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
-function IconHoraNu() {
+function IcoOperator() {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#C6A96B]">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IcoApprove() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
       <circle cx="12" cy="12" r="9" />
-      <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" strokeLinecap="round" />
-      <circle cx="12" cy="12" r="2" fill="currentColor" />
     </svg>
   );
 }

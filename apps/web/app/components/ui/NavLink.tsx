@@ -4,13 +4,14 @@ interface NavLinkProps {
   to: string;
   icon: React.ReactNode;
   label: React.ReactNode;
+  exact?: boolean;
 }
 
-export function NavLink({ to, icon, label }: NavLinkProps) {
+export function NavLink({ to, icon, label, exact }: NavLinkProps) {
   return (
     <RemixNavLink
       to={to}
-      end
+      end={exact !== false}
       className={({ isActive }) =>
         `relative flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200
         ${
