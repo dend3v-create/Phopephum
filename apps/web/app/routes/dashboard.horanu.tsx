@@ -8,6 +8,8 @@ import { Card } from "~/components/ui/Card";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { useState, useEffect, useMemo } from "react";
+import { HoraNuChart } from "~/components/horanu/HoraNuChart";
+import type { PlanetPlacement, SubPeriodInfo } from "~/components/horanu/HoraNuChart";
 
 export const meta: MetaFunction = () => [
   { title: "โหรทายหนู — PhopePhum" },
@@ -252,38 +254,115 @@ export default function HoraNuPage() {
           </Card>
         </div>
 
-        {/* Right Column: Zodiac Chart & Houses */}
+        {/* Right Column: SVG Wheel Chart + Houses */}
         <div className="lg:col-span-7 space-y-6">
-           <Card className="p-6 border-[#C6A96B]/20 bg-[#020617]/60">
-              <div className="flex items-center justify-between mb-8">
-                 <h3 className="text-sm font-bold text-[#F8F6F1] uppercase tracking-wider">ผังเรือนชะตากาลเวลา</h3>
-                 <div className="flex gap-4">
-                    <div className="flex items-center gap-2">
-                       <div className="w-2 h-2 rounded-full bg-[#C6A96B]" />
-                       <span className="text-[10px] text-[#94A3B8]">ยามปัจจุบัน</span>
-                    </div>
+
+           {/* ── HoraNu SVG Chart ── */}
+           <Card className="p-4 sm:p-6 border-[#C6A96B]/20 bg-[#020617]/60">
+              <div className="flex items-center justify-between mb-4">
+                 <div>
+                    <h3 className="text-sm font-bold text-[#F8F6F1] uppercase tracking-wider">ผังโหรทายหนู</h3>
+                    <p className="text-[10px] text-[#94A3B8] mt-0.5">วงล้อชะตากาลเวลา — 12 ราศี × 8 ทิศ</p>
+                 </div>
+                 <div className="flex items-center gap-2 text-[10px] text-[#94A3B8]">
+                    <div className="w-2 h-2 rounded-full bg-[#C6A96B]" />
+                    <span>ยามปัจจุบัน</span>
                  </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {/* SVG Wheel */}
+              <div className="flex justify-center">
+                 {(() => {
+                   // Build planet placements from lord planets of each house
+                   // (Prototype: lord planet placed in their primary house)
+                   const chartPlacements: PlanetPlacement[] = result.houseChart
+                     .filter(h => h.isCurrentYam || h.isSecondaryKaset)
+                     .map(h => ({
+                       planet: h.lordPlanet,
+                       house: h.houseNum,
+                       dignity: h.lordStatus === 'KASET' ? 'kaset'
+                         : h.lordStatus === 'MAHA_UCH' ? 'mahauch'
+                         : h.lordStatus === 'NEECH' ? 'nich'
+                         : h.lordStatus === 'PRA' ? 'pra'
+                         : 'neutral',
+                     } as PlanetPlacement));
+
+                   // Add all lord planets to their houses for full chart
+                   const allPlacements: PlanetPlacement[] = result.houseChart.map(h => ({
+                     planet: h.lordPlanet,
+                     house: h.houseNum,
+                     dignity: h.lordStatus === 'KASET' ? 'kaset'
+                       : h.lordStatus === 'MAHA_UCH' ? 'mahauch'
+                       : h.lordStatus === 'NEECH' ? 'nich'
+                       : h.lordStatus === 'PRA' ? 'pra'
+                       : 'neutral',
+                   } as PlanetPlacement));
+
+                   const subPeriodsData: SubPeriodInfo[] = result.yamSchedule.map((yam, i) => ({
+                     num: i + 1,
+                     startTime: yam.startTime,
+                     isCurrent: yam.isCurrent,
+                   }));
+
+                   return (
+                     <HoraNuChart
+                       weekday={result.dayName}
+                       yama={result.yamNumber}
+                       period={result.phase}
+                       yamStartTime={result.mainPeriodStart}
+                       yamEndTime={result.mainPeriodEnd}
+                       currentPlanet={result.currentPlanet}
+                       currentPlanetName={result.currentPlanetName}
+                       currentDirection={result.currentDirection}
+                       currentDirectionAngle={result.currentDirectionAngle}
+                       placements={allPlacements}
+                       subPeriods={subPeriodsData}
+                       currentSubPeriod={result.subYamNumber}
+                       size={340}
+                       className="max-w-full"
+                     />
+                   );
+                 })()}
+              </div>
+
+              {/* Status badges */}
+              <div className="mt-4 flex flex-wrap gap-2 justify-center">
+                 <div className="px-3 py-1.5 rounded-lg bg-[#C6A96B]/10 border border-[#C6A96B]/25 text-xs font-bold text-[#C6A96B]">
+                    {result.currentStatusSymbol} {result.currentStatusLabel}
+                 </div>
+                 <div className="px-3 py-1.5 rounded-lg bg-[#4B6FAE]/10 border border-[#4B6FAE]/25 text-xs font-bold text-[#4B6FAE]">
+                    ทิศ{result.currentDirection}
+                 </div>
+                 <div className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-[#94A3B8]">
+                    ราศี{result.currentZodiacName}
+                 </div>
+              </div>
+           </Card>
+
+           {/* ── Zodiac House Grid ── */}
+           <Card className="p-4 sm:p-6 border-[#C6A96B]/10 bg-[#0F172A]/40">
+              <h3 className="text-xs font-bold text-[#C6A96B] uppercase tracking-wider mb-4">เรือนชะตา 12 ราศี</h3>
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                  {result.houseChart.map((house) => (
-                   <div 
+                   <div
                     key={house.zodiacIndex}
-                    className={`p-4 rounded-xl border transition-all ${
-                      house.isCurrentYam 
-                      ? 'bg-[#C6A96B]/10 border-[#C6A96B]/40 shadow-lg shadow-[#C6A96B]/5' 
-                      : 'bg-white/5 border-white/5'
+                    className={`p-3 rounded-xl border transition-all ${
+                      house.isCurrentYam
+                      ? 'bg-[#C6A96B]/10 border-[#C6A96B]/40 shadow shadow-[#C6A96B]/10'
+                      : house.isSecondaryKaset
+                      ? 'bg-[#4B6FAE]/10 border-[#4B6FAE]/30'
+                      : 'bg-white/3 border-white/5'
                     }`}
                    >
-                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-[10px] font-bold text-[#94A3B8] uppercase">{house.zodiacName}</span>
-                        <span className="text-xs font-bold text-[#C6A96B]">{house.houseName}</span>
+                     <div className="flex items-center justify-between mb-1.5">
+                        <span className="text-[9px] font-bold text-[#94A3B8]">{house.zodiacName}</span>
+                        <span className="text-[9px] font-bold text-[#C6A96B]">{house.houseName}</span>
                      </div>
-                     <div className="flex items-center gap-2">
-                        <span className="text-2xl font-display font-bold text-[#F8F6F1]">{house.lordSymbol}</span>
-                        <div className="min-w-0">
-                           <p className="text-[10px] text-[#94A3B8] truncate">{house.lordName}</p>
-                           <p className={`text-[8px] font-bold truncate`} style={{ color: house.lordStatusColor }}>
+                     <div className="flex items-center gap-1.5">
+                        <span className="text-lg font-display font-bold" style={{color: house.lordColor}}>{house.lordSymbol}</span>
+                        <div className="min-w-0 flex-1">
+                           <p className="text-[9px] text-[#94A3B8] truncate">{house.lordName}</p>
+                           <p className="text-[8px] font-bold" style={{ color: house.lordStatusColor }}>
                               {house.lordStatusSymbol}
                            </p>
                         </div>
@@ -291,33 +370,13 @@ export default function HoraNuPage() {
                    </div>
                  ))}
               </div>
-
-              <div className="mt-8 pt-6 border-t border-white/5">
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div className="space-y-3">
-                       <h4 className="text-[10px] font-bold text-[#C6A96B] uppercase tracking-widest">ความหมายภพเด่น</h4>
-                       <p className="text-xs text-[#F8F6F1] font-bold">ภพ{result.currentZodiacName} ({result.currentStatusLabel})</p>
-                       <p className="text-xs text-[#94A3B8] leading-relaxed">
-                          ภพนี้แสดงถึงสภาวะการณ์ที่กำลังเกิดขึ้น ดาวเจ้าการคือดาว {result.currentPlanetName} 
-                          ซึ่งมีคุณภาพเป็น {result.currentStatusLabel} บ่งบอกถึงความมั่นคงและความสำเร็จในกาลชะตานี้
-                       </p>
-                    </div>
-                    <div className="space-y-3 text-right">
-                       <h4 className="text-[10px] font-bold text-[#C6A96B] uppercase tracking-widest">ข้อมูลทางดาราศาสตร์</h4>
-                       <p className="text-xs text-[#F8F6F1] font-bold">{thaiDateLabel}</p>
-                       <p className="text-xs text-[#94A3B8]">เวลาคำนวณ: {localTime.toLocaleTimeString('th-TH')}</p>
-                    </div>
-                 </div>
-              </div>
            </Card>
 
-           {/* Tips / Wisdom */}
+           {/* Tips */}
            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <Card className="p-4 border-white/5 bg-white/5">
                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400">
-                       <IconSparkle />
-                    </div>
+                    <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400"><IconSparkle /></div>
                     <h5 className="text-xs font-bold text-[#F8F6F1]">เคล็ดลับมงคล</h5>
                  </div>
                  <p className="text-xs text-[#94A3B8] leading-relaxed">
@@ -326,13 +385,11 @@ export default function HoraNuPage() {
               </Card>
               <Card className="p-4 border-white/5 bg-white/5">
                  <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
-                       <IconCompass />
-                    </div>
+                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400"><IconCompass /></div>
                     <h5 className="text-xs font-bold text-[#F8F6F1]">ทิศให้ลาภ</h5>
                  </div>
                  <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    ในยามนี้ทิศ {result.currentDirection} เป็นทิศแห่งโชคลาภ เหมาะแก่การหันหน้าไปทางทิศนี้เพื่อรับพลังงานบวก
+                    ในยามนี้ทิศ {result.currentDirection} เป็นทิศแห่งโชคลาภ เหมาะแก่การหันหน้าไปทางทิศนี้
                  </p>
               </Card>
            </div>
