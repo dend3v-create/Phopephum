@@ -310,7 +310,7 @@ export default function HoroscopePage() {
   const [showMonthlyJorn, setShowMonthlyJorn] = useState(false);
   const [showDailyJorn, setShowDailyJorn] = useState(false);
   const [showAgeRange, setShowAgeRange] = useState(false);
-  const [showHouseNames, setShowHouseNames] = useState(false);
+  const [showHouseNames, setShowHouseNames] = useState(true);
   const [showTaksaMahaBadges, setShowTaksaMahaBadges] = useState(false);
 
   // ดึงค่าระบบจรจาก activeResult เพื่อนำมาหาดาวเป้าหมาย
@@ -1137,6 +1137,20 @@ export default function HoroscopePage() {
                   <span>ช่วงอายุ (วัยจร)</span>
                 </span>
                 <span className={`w-2 h-2 rounded-full transition-all ${showAgeRange ? "bg-rose-500 shadow-[0_0_8px_#f43f5e]" : "bg-white/10"}`} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowHouseNames(!showHouseNames)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showHouseNames ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#C6A96B]/60" />
+                  <span>ชื่อภพเรือน (35 ภพ)</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showHouseNames ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
               </button>
             </div>
           </Card>
@@ -1995,7 +2009,7 @@ function FateMatrixPanel({
   showMonthlyJorn = true,
   showDailyJorn = true,
   showAgeRange = false,
-  showHouseNames = false,
+  showHouseNames = true,
   showTaksaMahaBadges = false,
 }: {
   matrix: number[][];
@@ -2175,13 +2189,13 @@ function FateMatrixPanel({
                               </span>
                             )}
 
-                            {/* ลัคนาจร (ดาวหกแฉก ✶) - Bottom Right */}
+                            {/* ลัคนาจร (ลจ) - Bottom Right */}
                             {showTransitLagna && isLagnaTransit && (
                               <span 
-                                title="ลัคนาจร"
-                                className="absolute -bottom-1 -right-2.5 text-[10px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 px-1 py-[0.5px] rounded-full leading-none shadow-md transition-all group-hover/cell:scale-105 select-none animate-pulse z-10"
+                                title={`ลัคนาจร (อายุย่าง ${currentAge} ปี)`}
+                                className="absolute -bottom-1 -right-2.5 text-[8px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 px-1 py-[0.5px] rounded-full leading-none shadow-md transition-all group-hover/cell:scale-105 select-none animate-pulse z-10"
                               >
-                                ✶
+                                ลจ
                               </span>
                             )}
 
