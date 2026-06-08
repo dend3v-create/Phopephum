@@ -243,44 +243,43 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-4xl pb-16">
+    <div className="space-y-6 max-w-2xl pb-16">
       <div>
-        <h1 className="font-display text-3xl font-bold text-[#F8F6F1] mb-1">
-          การตั้งค่า <span className="text-[#C6A96B] font-normal text-base block sm:inline sm:ml-2">Settings & Dashboard</span>
-        </h1>
-        <p className="text-[#8A8070] text-sm">
-          ปรับแต่งข้อมูลดวงชะตากำเนิด ตรวจสอบสิทธิ์สมาชิก และแผงควบคุมรายได้ Affiliate
+        <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-1 font-bold">โปรไฟล์</p>
+        <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">การตั้งค่า</h1>
+        <p className="text-[#94A3B8] text-sm mt-1">
+          ปรับแต่งข้อมูลส่วนตัว และจัดการรายได้แนะนำเพื่อน
         </p>
       </div>
 
-      {/* เมนูแท็บสไตล์ Astral Imperial */}
-      <div className="flex border-b border-[#C6A96B]/15 overflow-x-auto gap-2">
+      {/* เมนูแท็บ */}
+      <div className="flex border-b border-[#C6A96B]/15 overflow-x-auto gap-1">
         <button
           onClick={() => setActiveTab("personal")}
-          className={`py-3 px-5 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
+          className={`py-2.5 px-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
             activeTab === "personal"
               ? "border-[#C6A96B] text-[#C6A96B] bg-white/5"
               : "border-transparent text-[#8A8070] hover:text-[#F8F6F1]"
           }`}
         >
-          ข้อมูลโปรไฟล์ & การเกิด
+          ข้อมูลโปรไฟล์
         </button>
         <button
           onClick={() => setActiveTab("affiliate")}
-          className={`py-3 px-5 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
+          className={`py-2.5 px-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
             activeTab === "affiliate"
               ? "border-[#C6A96B] text-[#C6A96B] bg-white/5"
               : "border-transparent text-[#8A8070] hover:text-[#F8F6F1]"
           }`}
         >
-          พันธมิตร & รายได้ (Affiliate)
+          พันธมิตร & รายได้
         </button>
       </div>
 
       {/* 1. แท็บข้อมูลส่วนตัวและการเกิด */}
       {activeTab === "personal" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-300">
-          <div className="lg:col-span-2 space-y-6">
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <div className="space-y-6">
             <Card className="border-[#C6A96B]/10 p-6 bg-slate-950/40">
               <h2 className="text-[#C6A96B] font-display text-lg font-bold mb-4 flex items-center gap-2">
                 <span>✦</span> ข้อมูลดวงชะตากำเนิด
@@ -394,18 +393,19 @@ export default function SettingsPage() {
             </Card>
           </div>
 
-          <div className="space-y-6">
-            <Card className="border-[#C6A96B]/20 p-6 bg-gradient-to-b from-[#0A1628] to-[#020617]">
-              <h3 className="font-display font-bold text-[#F8F6F1] text-base mb-2">ระดับสมาชิกปัจจุบัน</h3>
-              <div className="p-4 rounded-2xl bg-white/5 border border-[#C6A96B]/20 text-center mb-4">
-                 <p className="text-[13px] text-[#C6A96B] font-bold uppercase tracking-widest mb-1">Current Plan</p>
-                 <p className="text-2xl font-black text-[#F8F6F1] uppercase">{profile?.plan || 'FREE'}</p>
+          <Card className="border-[#C6A96B]/20 p-5 bg-gradient-to-b from-[#0A1628] to-[#020617]">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[13px] text-[#94A3B8] mb-1">ระดับสมาชิกปัจจุบัน</p>
+                <p className="text-2xl font-black font-display text-[#F8F6F1] uppercase">{profile?.plan || 'FREE'}</p>
               </div>
-              <p className="text-[#8A8070] text-xs leading-relaxed">
-                สมาชิกระดับสูงจะได้รับเปอร์เซ็นต์ค่าแนะนำเพื่อนที่มากขึ้น (สูงสุด 10%) คุณสามารถอัปเกรดเพื่อรับรายได้ที่สูงขึ้นได้เสมอครับ
-              </p>
-            </Card>
-          </div>
+              <a href="/dashboard/upgrade"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-[#020617] whitespace-nowrap"
+                style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}>
+                อัปเกรด →
+              </a>
+            </div>
+          </Card>
         </div>
       )}
 
@@ -484,7 +484,7 @@ export default function SettingsPage() {
           )}
 
           {/* Wallet & Stats Dashboard */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-4">
             <Card className="relative overflow-hidden border-[#C6A96B]/30 p-6 bg-gradient-to-br from-[#0B1528] to-[#020617] shadow-xl">
               <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">💰</div>
               <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-1">ยอดเงินคงเหลือในกระเป๋า</p>
@@ -526,8 +526,8 @@ export default function SettingsPage() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="space-y-4">
+            <div className="space-y-4">
               {/* Transaction History Table */}
               <Card className="border-white/5 p-0 overflow-hidden bg-slate-900/40">
                 <div className="px-6 py-4 border-b border-white/5 bg-white/5">
@@ -564,35 +564,33 @@ export default function SettingsPage() {
               </Card>
             </div>
 
-            <div className="space-y-6">
-              {/* Withdrawal Status */}
-              <Card className="border-white/5 p-0 overflow-hidden bg-slate-900/40">
-                <div className="px-5 py-4 border-b border-white/5 bg-white/5">
-                  <h3 className="text-[#F8F6F1] font-display text-sm font-bold">สถานะการถอนเงิน</h3>
-                </div>
-                <div className="p-4 space-y-3 max-h-[400px] overflow-y-auto">
-                  {wallet.withdrawals.length > 0 ? (
-                    wallet.withdrawals.map((w: any) => (
-                      <div key={w.id} className="p-3 rounded-xl bg-black/20 border border-white/5 text-xs flex justify-between items-center">
-                        <div className="space-y-1">
-                          <p className="text-[#F8F6F1] font-bold">ถอน ฿{w.amount.toLocaleString()}</p>
-                          <p className="text-[12px] text-[#8A8070]">{new Date(w.created_at).toLocaleDateString("th-TH")}</p>
-                        </div>
-                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${
-                          w.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                          w.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
-                          'bg-yellow-500/20 text-yellow-400'
-                        }`}>
-                          {w.status === 'completed' ? 'สำเร็จ' : w.status === 'rejected' ? 'ปฏิเสธ' : 'รอดำเนินการ'}
-                        </span>
+            {/* Withdrawal Status */}
+            <Card className="border-white/5 p-0 overflow-hidden bg-slate-900/40">
+              <div className="px-5 py-4 border-b border-white/5 bg-white/5">
+                <h3 className="text-[#F8F6F1] font-display text-sm font-bold">สถานะการถอนเงิน</h3>
+              </div>
+              <div className="p-4 space-y-3">
+                {wallet.withdrawals.length > 0 ? (
+                  wallet.withdrawals.map((w: any) => (
+                    <div key={w.id} className="p-3 rounded-xl bg-black/20 border border-white/5 text-xs flex justify-between items-center">
+                      <div className="space-y-1">
+                        <p className="text-[#F8F6F1] font-bold">ถอน ฿{w.amount.toLocaleString()}</p>
+                        <p className="text-[12px] text-[#8A8070]">{new Date(w.created_at).toLocaleDateString("th-TH")}</p>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-center py-6 text-[#8A8070] italic">ไม่มีคำขอถอนเงิน</p>
-                  )}
-                </div>
-              </Card>
-            </div>
+                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${
+                        w.status === 'completed' ? 'bg-green-500/20 text-green-400' :
+                        w.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
+                        'bg-yellow-500/20 text-yellow-400'
+                      }`}>
+                        {w.status === 'completed' ? 'สำเร็จ' : w.status === 'rejected' ? 'ปฏิเสธ' : 'รอดำเนินการ'}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-center py-6 text-[#8A8070] italic">ไม่มีคำขอถอนเงิน</p>
+                )}
+              </div>
+            </Card>
           </div>
         </div>
       )}

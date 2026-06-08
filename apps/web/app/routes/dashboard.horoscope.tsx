@@ -512,25 +512,23 @@ export default function HoroscopePage() {
   const placeholderMatrix = Array(9).fill(0).map(() => Array(7).fill(0));
 
   return (
-    <div className="space-y-6 max-w-5xl pb-20 animate-fade-up">
+    <div className="space-y-6 max-w-2xl pb-20 animate-fade-up">
 
       {/* ── เมนูหลัก (Page Header) ── */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-2">
-        <div>
-          <p className="text-[#C6A96B] text-xs tracking-[0.3em] uppercase font-bold">
-            ดวงดีมีชัย · ตรวจดวงชะตา
-          </p>
-          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#F8F6F1] tracking-tight mt-1">
-            ผังดวงจักรพรรดิ
-          </h1>
-          <p className="text-[#8A8070] text-sm font-medium mt-1 font-sans">
-            {formattedTransitDate}
-          </p>
-        </div>
+      <div>
+        <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-1 font-bold">
+          ดวงดีมีชัย · ตรวจดวงชะตา
+        </p>
+        <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">
+          เส้นทางชีวิต
+        </h1>
+        <p className="text-[#94A3B8] text-sm mt-1">
+          {formattedTransitDate}
+        </p>
       </div>
 
       {/* ── Sub-menu Card Navigation — บนสุด ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5">
+      <div className="grid grid-cols-2 gap-2">
         {[
           { id: "chart", label: "ผังดวงจักรพรรดิ", icon: "☸️", desc: "เลข 7 ตัว 9 ฐาน" },
           { id: "taksa", label: "ทักษา / มหาภูติ", icon: "🧭", desc: "ผังพลังงานวิถีจร" },
@@ -549,20 +547,20 @@ export default function HoroscopePage() {
                 }
                 setActiveTab(tab.id as any);
               }}
-              className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-2xl border transition-all duration-300 min-h-[60px] sm:min-h-[70px] text-left hover:scale-[1.01] active:scale-[0.99] ${
+              className={`flex items-center gap-2 p-3 rounded-2xl border transition-all duration-300 min-h-[56px] text-left hover:scale-[1.01] active:scale-[0.99] ${
                 isSelected
                   ? "bg-[#C6A96B] border-[#F8F6F1]/10 text-[#020617] shadow-[0_4px_20px_rgba(198,169,107,0.25)]"
                   : "bg-[#0A2240]/45 border-white/5 text-[#8A8070] hover:text-[#F8F6F1] hover:border-[#C6A96B]/25"
               }`}
             >
-              <span className={`text-2xl shrink-0 ${isSelected ? "text-[#020617]" : "text-[#C6A96B]"}`}>
+              <span className={`text-xl shrink-0 ${isSelected ? "text-[#020617]" : "text-[#C6A96B]"}`}>
                 {tab.icon}
               </span>
               <div className="flex flex-col min-w-0">
-                <span className={`text-sm font-extrabold tracking-wide leading-tight ${isSelected ? "text-[#020617]" : "text-[#F8F6F1]"}`}>
+                <span className={`text-sm font-bold leading-tight ${isSelected ? "text-[#020617]" : "text-[#F8F6F1]"}`}>
                   {tab.label}
                 </span>
-                <span className={`text-[14px] mt-0.5 leading-tight ${isSelected ? "text-[#020617]/70" : "text-[#8A8070]"}`}>
+                <span className={`text-[13px] mt-0.5 leading-tight ${isSelected ? "text-[#020617]/70" : "text-[#8A8070]"}`}>
                   {tab.desc}
                 </span>
               </div>
