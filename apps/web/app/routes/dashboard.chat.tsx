@@ -47,6 +47,7 @@ export default function WisdomChatPage() {
   const [input, setInput] = useState("");
   const [activeCat, setActiveCat] = useState<Category>(CATEGORIES[0]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [showQuestions, setShowQuestions] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -54,9 +55,13 @@ export default function WisdomChatPage() {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Close questions panel when category changes
+  useEffect(() => { setShowQuestions(false); }, [activeCat]);
+
   const sendMessage = useCallback(async (text: string) => {
     if (!text.trim() || isStreaming) return;
 
+    setShowQuestions(false);
     const userMsg: Message = { id: crypto.randomUUID(), role: "user", text: text.trim(), ts: new Date() };
     const wisdomId = crypto.randomUUID();
     const wisdomMsg: Message = { id: wisdomId, role: "wisdom", text: "", ts: new Date(), streaming: true };
@@ -117,23 +122,21 @@ export default function WisdomChatPage() {
 
   return (
     /*
-     * -mx-4 -mt-6 -mb-6 ล้างค่า px-4 py-6 ของ ProtectedContent
-     * ความสูง = 100dvh − topbar(48px) − bottombar(64px)
-     * md: ไม่มี topbar/bottombar → ความสูง 100dvh − py-6 (48px) ที่ถูก reset แล้ว
+     * -mx-4 -mt-6 -mb-6 cancels ProtectedContent px-4 py-6
+     * overflow-x-hidden prevents horizontal bleed
+     * height = 100dvh − topbar(48px) − bottombar(64px)
      */
     <div
-      className="-mx-4 -mt-6 -mb-6 flex flex-col overflow-hidden"
-      style={{ height: "calc(100dvh - 48px - 64px)" }}
+      className="-mx-4 -mt-6 -mb-6 flex flex-col"
+      style={{
+        height: "calc(100dvh - 48px - 64px)",
+        overflow: "hidden",
+        maxWidth: "100vw",
+      }}
     >
-      <style>{`
-        @media (min-width: 768px) {
-          .chat-wrap { height: calc(100dvh - 48px) !important; }
-        }
-      `}</style>
-
-      {/* ── Category tabs ─────────────────────────────────────── */}
+      {/* ── Category tabs: 2-row × 3-col grid ───────────────────── */}
       <div
-        className="flex gap-1.5 px-3 py-2 overflow-x-auto shrink-0 border-b scrollbar-none"
+        className="grid grid-cols-3 gap-1.5 px-3 py-2 shrink-0 border-b"
         style={{ borderColor: "rgba(217,188,130,0.10)" }}
       >
         {CATEGORIES.map(cat => {
@@ -142,52 +145,54 @@ export default function WisdomChatPage() {
             <button
               key={cat.id}
               onClick={() => setActiveCat(cat)}
-              className="shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-full font-medium transition-all"
+              className="flex items-center justify-center gap-1 py-1.5 rounded-xl font-medium transition-all"
               style={active
                 ? { background: "linear-gradient(135deg,#C6A96B,#D9BC82)", color: "#020617", fontSize: "13px" }
                 : { background: "rgba(10,34,64,0.5)", border: "1px solid rgba(255,255,255,0.08)", color: "#94A3B8", fontSize: "13px" }
               }
             >
-              <span style={{ fontSize: "14px" }}>{cat.emoji}</span>
+              <span style={{ fontSize: "13px" }}>{cat.emoji}</span>
               <span>{cat.label}</span>
             </button>
           );
         })}
       </div>
 
-      {/* ── Messages ─────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3 scrollbar-none">
+      {/* ── Messages ─────────────────────────────────────────────── */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-3 space-y-3 scrollbar-none">
         {messages.map(msg => <MessageBubble key={msg.id} msg={msg} />)}
         <div ref={bottomRef} />
       </div>
 
-      {/* ── Quick questions ───────────────────────────────────── */}
+      {/* ── Quick questions slide-up panel ───────────────────────── */}
       <div
-        className="px-3 py-2 flex gap-2 overflow-x-auto scrollbar-none shrink-0 border-t"
-        style={{ borderColor: "rgba(217,188,130,0.07)" }}
+        className="shrink-0 overflow-hidden transition-all duration-200"
+        style={{
+          maxHeight: showQuestions ? "160px" : "0px",
+          borderTop: showQuestions ? "1px solid rgba(217,188,130,0.10)" : "none",
+        }}
       >
-        {activeCat.questions.map(q => (
-          <button
-            key={q}
-            onClick={() => sendMessage(q)}
-            disabled={isStreaming}
-            className="shrink-0 text-left px-3 py-1.5 rounded-full border transition-all disabled:opacity-40 whitespace-nowrap"
-            style={{
-              background: "rgba(10,34,64,0.4)",
-              border: "1px solid rgba(255,255,255,0.08)",
-              color: "#94A3B8",
-              fontSize: "13px",
-              maxWidth: "180px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}
-          >
-            {q}
-          </button>
-        ))}
+        <div className="px-3 py-2 space-y-1.5">
+          {activeCat.questions.map(q => (
+            <button
+              key={q}
+              onClick={() => sendMessage(q)}
+              disabled={isStreaming}
+              className="w-full text-left px-3 py-2 rounded-xl border transition-all disabled:opacity-40"
+              style={{
+                background: "rgba(10,34,64,0.4)",
+                border: "1px solid rgba(255,255,255,0.08)",
+                color: "#D9CDB7",
+                fontSize: "13px",
+              }}
+            >
+              {q}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* ── Input bar ────────────────────────────────────────── */}
+      {/* ── Input bar ────────────────────────────────────────────── */}
       <div
         className="px-3 pb-3 pt-2 shrink-0"
         style={{ borderTop: "1px solid rgba(217,188,130,0.10)" }}
@@ -200,6 +205,26 @@ export default function WisdomChatPage() {
             backdropFilter: "blur(12px)",
           }}
         >
+          {/* Quick questions toggle */}
+          <button
+            onClick={() => setShowQuestions(v => !v)}
+            disabled={isStreaming}
+            className="shrink-0 w-8 h-8 rounded-lg flex items-center justify-center transition-all disabled:opacity-30"
+            style={{
+              background: showQuestions
+                ? "linear-gradient(135deg,#C6A96B,#D9BC82)"
+                : "rgba(255,255,255,0.06)",
+              border: showQuestions ? "none" : "1px solid rgba(255,255,255,0.10)",
+            }}
+            aria-label="คำถามแนะนำ"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke={showQuestions ? "#020617" : "#C6A96B"} strokeWidth={2} className="w-4 h-4">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" strokeLinecap="round" />
+              <circle cx="12" cy="17" r="0.5" fill={showQuestions ? "#020617" : "#C6A96B"} stroke="none" />
+            </svg>
+          </button>
+
           <textarea
             ref={inputRef}
             value={input}
@@ -246,7 +271,7 @@ function MessageBubble({ msg }: { msg: Message }) {
         <div
           className="rounded-2xl rounded-tr-sm px-4 py-2.5 leading-relaxed"
           style={{
-            maxWidth: "82%",
+            maxWidth: "80%",
             background: "rgba(198,169,107,0.18)",
             border: "1px solid rgba(198,169,107,0.25)",
             color: "#F8F6F1",
@@ -272,7 +297,7 @@ function MessageBubble({ msg }: { msg: Message }) {
       <div
         className="rounded-2xl rounded-tl-sm px-4 py-2.5 leading-relaxed"
         style={{
-          maxWidth: "85%",
+          maxWidth: "83%",
           background: "rgba(10,34,64,0.65)",
           border: "1px solid rgba(255,255,255,0.06)",
           color: "#D9CDB7",
