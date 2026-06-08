@@ -91,7 +91,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   if (formType === "personal") {
     const displayName = String(formData.get("displayName") ?? "");
-    const birthDate = String(formData.get("birthDate") ?? "");
+    const birthDay = Number(formData.get("birthDay"));
+    const birthMonth = Number(formData.get("birthMonth"));
+    const birthYearBE = Number(formData.get("birthYear"));
     const birthTime = String(formData.get("birthTime") ?? "");
     const birthPlace = String(formData.get("birthPlace") ?? "");
     const gender = String(formData.get("gender") ?? "");
@@ -100,11 +102,17 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return json({ error: "กรุณากรอกชื่อแสดงผล" }, { status: 400 });
     }
 
+    let birthDateISO = null;
+    if (birthDay && birthMonth && birthYearBE) {
+      const { buddhistPartsToISODate } = await import("~/lib/buddhist-year");
+      birthDateISO = buddhistPartsToISODate({ day: birthDay, month: birthMonth, yearBE: birthYearBE });
+    }
+
     const { error } = await supabase
       .from("profiles")
       .update({
         display_name: displayName,
-        birth_date: birthDate || null,
+        birth_date: birthDateISO || null,
         birth_time: birthTime || null,
         birth_place: birthPlace || null,
         gender: gender || null,
