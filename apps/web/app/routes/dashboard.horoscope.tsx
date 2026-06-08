@@ -303,8 +303,8 @@ export default function HoroscopePage() {
   const [userInput, setUserInput] = useState("");
 
   // ── ระบบ Filter เปิด/ปิด การแสดงผลสัญลักษณ์และภพเรือน ──
-  const [showNatalLagna, setShowNatalLagna] = useState(false);
-  const [showTransitLagna, setShowTransitLagna] = useState(false);
+  const [showNatalLagna, setShowNatalLagna] = useState(true);
+  const [showTransitLagna, setShowTransitLagna] = useState(true);
   const [showVayaJorn, setShowVayaJorn] = useState(false);
   const [showYearlyJorn, setShowYearlyJorn] = useState(false);
   const [showMonthlyJorn, setShowMonthlyJorn] = useState(false);
@@ -872,6 +872,32 @@ export default function HoroscopePage() {
               </h3>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 text-[11px]">
+              <button
+                type="button"
+                onClick={() => setShowNatalLagna(!showNatalLagna)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showNatalLagna ? "bg-[#C6A96B]/10 border-[#C6A96B]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="text-[8px] font-bold bg-[#C6A96B] text-[#020617] px-1.5 py-[0.5px] rounded-full border border-[#C6A96B]/60 leading-none">ล</span>
+                  <span>ลัคนาเกิด</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showNatalLagna ? "bg-[#C6A96B] shadow-[0_0_8px_#C6A96B]" : "bg-white/10"}`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowTransitLagna(!showTransitLagna)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showTransitLagna ? "bg-[#4B6FAE]/10 border-[#4B6FAE]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="text-[8px] font-bold bg-[#4B6FAE] text-[#F8F6F1] px-1 py-[0.5px] rounded-full border border-[#4B6FAE]/60 leading-none animate-pulse">ลจ</span>
+                  <span>ลัคนาจร</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showTransitLagna ? "bg-[#4B6FAE] shadow-[0_0_8px_#4B6FAE]" : "bg-white/10"}`} />
+              </button>
               <button
                 type="button"
                 onClick={() => setShowTaksaMahaBadges(!showTaksaMahaBadges)}
@@ -1817,8 +1843,8 @@ function FateMatrixPanel({
   phopephumResult,
   highlightedStars = new Set<number>(),
   isFiltering = false,
-  showNatalLagna = false,
-  showTransitLagna = false,
+  showNatalLagna = true,
+  showTransitLagna = true,
   showVayaJorn = true,
   showYearlyJorn = true,
   showMonthlyJorn = true,
