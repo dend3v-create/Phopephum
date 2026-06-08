@@ -1177,6 +1177,155 @@ export default function KarnchataPage() {
         </div>
       </Card>
 
+      {/* ── กาลชะตารายชั่วโมง ── */}
+      {(() => {
+        const hChart = (activeResult.hourlyChart ?? []) as number[][];
+        const yamNum = activeResult.yamYaiNumber;
+        const yamName = activeResult.yamYaiName;
+        const dayNum = activeResult.dayStarNumber;
+        const monthNum = (activeResult.lunarMonth ?? 1) as number;
+        const monthName = (activeResult.lunarMonthName ?? "") as string;
+        return (
+          <Card className="border-[#4B6FAE]/30 bg-[#0A1628] p-6 sm:p-8 relative">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-5">
+              <span className="text-2xl shrink-0">⏰</span>
+              <div className="flex-1">
+                <h3 className="text-base font-bold text-[#F8F6F1]">กาลชะตารายชั่วโมง</h3>
+                <p className="text-xs text-[#8A8070] mt-0.5">
+                  อัตตะ = ยาม <span className="text-[#C6A96B] font-bold">{yamNum} ({yamName})</span>
+                  &nbsp;•&nbsp; ตนุ = วัน <span className="text-[#C6A96B] font-bold">{dayNum} ({STAR_NAMES[dayNum as keyof typeof STAR_NAMES]})</span>
+                  &nbsp;•&nbsp; มรณะ = เดือน <span className="text-[#C6A96B] font-bold">{monthNum} ({monthName})</span>
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-[#C6A96B]/50 mb-4 md:hidden text-center">← เลื่อนซ้าย-ขวาเพื่อดูผังเต็ม →</p>
+
+            <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+              <div className="min-w-[320px] sm:min-w-[540px] flex flex-col gap-3 sm:gap-4 items-center pb-4">
+
+                {/* ── ฐาน 1–3 ── */}
+                {[0, 1, 2].map(rIdx => (
+                  <div key={rIdx} className="flex items-start w-full max-w-3xl">
+                    <div className="w-9 sm:w-16 shrink-0 pt-2.5">
+                      <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]">ฐาน {['๑','๒','๓'][rIdx]}</p>
+                      <p className="text-[8px] text-[#8A8070]/60 hidden sm:block">{['อัตตะ(ยาม)','ตนุ(วัน)','มรณะ(เดือน)'][rIdx]}</p>
+                    </div>
+                    <div className="flex-1 flex justify-between">
+                      {(hChart[rIdx] ?? []).map((star: number, cIdx: number) => (
+                        <div key={cIdx} className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14">
+                          <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold bg-[#020617] border border-[#4B6FAE]/45 text-[#F8F6F1]">
+                            {star}
+                          </div>
+                          <span className="text-[8px] sm:text-[11px] font-medium text-center leading-tight text-[#8A8070]">
+                            {BHOP_NATAL_NAMES[rIdx][cIdx]}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Divider — กำลังเทวดา */}
+                <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
+                  <div className="flex-1 h-px bg-sky-500/20" />
+                  <span className="text-[10px] text-sky-400/60 font-bold tracking-wider uppercase px-1">กำลังเทวดา</span>
+                  <div className="flex-1 h-px bg-sky-500/20" />
+                </div>
+
+                {/* ── ฐาน 4 ── */}
+                <div className="flex items-start w-full max-w-3xl bg-[#0B1E36]/40 border border-sky-500/12 py-3 px-1 sm:px-2 rounded-2xl">
+                  <div className="w-9 sm:w-16 shrink-0 pt-1.5 pl-0.5">
+                    <p className="text-[10px] sm:text-xs font-bold text-sky-400">ฐาน ๔</p>
+                    <p className="text-[9px] text-sky-400/45 hidden sm:block">เทวดา</p>
+                  </div>
+                  <div className="flex-1 flex justify-between pr-1 sm:pr-2">
+                    {(hChart[3] ?? []).map((star: number, cIdx: number) => (
+                      <div key={cIdx} className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14">
+                        <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold bg-[#020617] border border-sky-500/40 text-[#F8F6F1]">
+                          {star}
+                        </div>
+                        <span className="text-[8px] sm:text-[11px] font-medium text-center leading-tight text-sky-400/75">
+                          {BASE4_POWER_NAMES[star] || ""}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Divider — ฐานสมทบ */}
+                <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
+                  <div className="flex-1 h-px bg-white/5" />
+                  <span className="text-[10px] text-[#8A8070]/40 font-bold tracking-wider uppercase px-1">ฐานสมทบ ๕–๗</span>
+                  <div className="flex-1 h-px bg-white/5" />
+                </div>
+
+                {/* ── ฐาน 5–7 ── */}
+                {[4, 5, 6].map(rIdx => (
+                  <div key={rIdx} className="flex items-center w-full max-w-3xl">
+                    <div className="w-9 sm:w-16 shrink-0">
+                      <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]/50">ฐาน {['๕','๖','๗'][rIdx - 4]}</p>
+                    </div>
+                    <div className="flex-1 flex justify-between">
+                      {(hChart[rIdx] ?? []).map((star: number, cIdx: number) => (
+                        <div key={cIdx} className="flex flex-col items-center w-9 sm:w-14">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-display font-bold bg-[#020617] border border-white/12 text-[#F8F6F1]/60">
+                            {star}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Divider — ภพชาตาลึก */}
+                <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
+                  <div className="flex-1 h-px bg-[#4B6FAE]/12" />
+                  <span className="text-[10px] text-[#4B6FAE]/45 font-bold tracking-wider uppercase px-1">ภพชาตาลึก ๘–๙</span>
+                  <div className="flex-1 h-px bg-[#4B6FAE]/12" />
+                </div>
+
+                {/* ── ฐาน 8–9 ── */}
+                {[7, 8].map(rIdx => (
+                  <div key={rIdx} className="flex items-start w-full max-w-3xl">
+                    <div className="w-9 sm:w-16 shrink-0 pt-2.5">
+                      <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]">ฐาน {['๘','๙'][rIdx - 7]}</p>
+                    </div>
+                    <div className="flex-1 flex justify-between">
+                      {(hChart[rIdx] ?? []).map((star: number, cIdx: number) => {
+                        const bhopName = rIdx === 7 ? BHOP_8_NAMES[cIdx] : BHOP_9_NAMES[cIdx];
+                        return (
+                          <div key={cIdx} className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14">
+                            <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold bg-[#020617] border border-[#4B6FAE]/35 text-[#F8F6F1]">
+                              {star}
+                            </div>
+                            <span className="text-[8px] sm:text-[11px] font-medium text-center leading-tight text-[#8A8070]">
+                              {bhopName}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+
+              </div>
+            </div>
+
+            {/* Legend */}
+            <div className="mt-4 pt-4 border-t border-white/5 bg-[#020617] border border-[#4B6FAE]/18 rounded-2xl p-4">
+              <p className="text-xs font-bold text-[#4B6FAE] mb-2 flex items-center gap-2">⏰ หลักการอ่านกาลชะตารายชั่วโมง</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-[#8A8070] leading-relaxed">
+                <div><span className="text-[#C6A96B] font-bold">ฐาน ๑ (อัตตะ)</span> — ตั้งจากเลขดาวยามใหญ่ขณะนั้น</div>
+                <div><span className="text-[#C6A96B] font-bold">ฐาน ๒ (ตนุ)</span> — ตั้งจากเลขดาวประจำวัน</div>
+                <div><span className="text-[#C6A96B] font-bold">ฐาน ๓ (มรณะ)</span> — ตั้งจากเลขเดือนทางจันทรคติ</div>
+              </div>
+            </div>
+          </Card>
+        );
+      })()}
+
       {/* ── ผังทิศทักษาจรแปดทิศ ── */}
       <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8">
         <div className="flex items-start gap-3 mb-6 border-b border-white/5 pb-5">

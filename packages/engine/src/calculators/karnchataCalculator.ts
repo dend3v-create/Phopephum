@@ -5,6 +5,7 @@ import { yamDayTable } from "../yam/constants/yamDayTable.js";
 import { yamNightTable } from "../yam/constants/yamNightTable.js";
 import { DAY_INDEX_MAP } from "../yam/constants/dayMap.js";
 import { getBKKDay, getBKKHour, getMinutes, isDayTime, getSunTimes } from "../yam/core/timeUtils.js";
+import { gregorianToThaiLunarV3 } from "../core/thaiLunar.js";
 
 const YAM_TO_PLANET: Record<string, number> = {
   "สุริชะ": 1, "ระวิ": 1,
@@ -23,7 +24,10 @@ export interface KarnchataResult {
   yamSoyName: string;
   yamSoyNumber: number;
   dayStarNumber: number;
+  lunarMonth: number;
+  lunarMonthName: string;
   chart: number[][]; // 9 rows of 7 numbers
+  hourlyChart: number[][]; // กาลชะตารายชั่วโมง: ยาม × วัน × เดือน
 }
 
 /**
@@ -72,6 +76,20 @@ export function calculateKarnchata(date: Date): KarnchataResult {
 
   const chart = calculateNineBase(b1, b2, b3);
 
+  // 5. กาลชะตารายชั่วโมง (Hourly Horary)
+  // อัตตะ = เลขยามใหญ่ (yamYai planet number)
+  // ตนุ   = เลขดาวประจำวัน
+  // มรณะ  = เลขเดือนจันทรคติ
+  const lunar = gregorianToThaiLunarV3(adjustedDate);
+  const lunarMonth = lunar.thaiMonth === 88 ? 8 : lunar.thaiMonth; // intercalary → treat as 8
+  const lunarMonthName = lunar.thaiMonthName;
+
+  const h1 = Array.from({ length: 7 }, (_, i) => r7_local(yamYaiNumber + i));
+  const h2 = Array.from({ length: 7 }, (_, i) => r7_local(dayStarNumber + i));
+  const h3 = Array.from({ length: 7 }, (_, i) => r7_local(lunarMonth + i));
+
+  const hourlyChart = calculateNineBase(h1, h2, h3);
+
   return {
     date,
     yamYaiName,
@@ -79,6 +97,9 @@ export function calculateKarnchata(date: Date): KarnchataResult {
     yamSoyName,
     yamSoyNumber,
     dayStarNumber,
+    lunarMonth,
+    lunarMonthName,
     chart,
+    hourlyChart,
   };
 }
