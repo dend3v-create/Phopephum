@@ -397,10 +397,10 @@ export default function KarnchataPage() {
           </button>
         </div>
         {timeMode === "custom" && (
-          <div className="flex flex-wrap items-center gap-2 px-2 pb-1">
-            <span className="text-xs text-[#8A8070] font-bold shrink-0">เลือกวันเวลา:</span>
-            <input type="date" autoComplete="off" className="flex-1 min-w-[130px] bg-[#020617] border border-white/10 text-[#F8F6F1] text-sm rounded-xl px-3 py-2 outline-none focus:border-[#C6A96B]" defaultValue={new Date().toISOString().split('T')[0]} />
-            <input type="time" autoComplete="off" className="w-[110px] bg-[#020617] border border-white/10 text-[#F8F6F1] text-sm rounded-xl px-3 py-2 outline-none focus:border-[#C6A96B]" defaultValue="12:00" />
+          <div className="grid grid-cols-2 sm:flex sm:flex-wrap sm:items-center gap-2 px-2 pb-1">
+            <span className="hidden sm:block text-xs text-[#8A8070] font-bold shrink-0">เลือกวันเวลา:</span>
+            <input type="date" autoComplete="off" className="col-span-2 sm:col-auto sm:flex-1 bg-[#020617] border border-white/10 text-[#F8F6F1] text-sm rounded-xl px-3 py-2 outline-none focus:border-[#C6A96B] w-full" defaultValue={new Date().toISOString().split('T')[0]} />
+            <input type="time" autoComplete="off" className="bg-[#020617] border border-white/10 text-[#F8F6F1] text-sm rounded-xl px-3 py-2 outline-none focus:border-[#C6A96B] w-full sm:w-[110px]" defaultValue="12:00" />
           </div>
         )}
       </div>
@@ -482,19 +482,19 @@ export default function KarnchataPage() {
         <h3 className="text-base font-bold text-[#F8F6F1] mb-5 flex items-center gap-2">
           🎯 เลือกเรื่องที่ต้องการถาม
         </h3>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-6">
+        <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2 mb-6">
           {CATEGORIES.map(cat => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
-              className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all ${
+              className={`p-2 sm:p-3 rounded-xl border flex flex-col items-center justify-center gap-1 sm:gap-1.5 transition-all ${
                 selectedCategory === cat.id
                   ? "bg-[#0B1E36] border-sky-500/50 shadow-[0_0_12px_rgba(14,165,233,0.12)]"
                   : "bg-[#020617] border-white/5 hover:border-white/15"
               }`}
             >
-              <span className="text-xl">{cat.icon}</span>
-              <span className={`text-xs font-bold text-center leading-tight ${selectedCategory === cat.id ? "text-sky-400" : "text-[#8A8070]"}`}>
+              <span className="text-lg sm:text-xl">{cat.icon}</span>
+              <span className={`text-[10px] sm:text-xs font-bold text-center leading-tight ${selectedCategory === cat.id ? "text-sky-400" : "text-[#8A8070]"}`}>
                 {cat.label.split(" ")[0]}
               </span>
             </button>
@@ -527,7 +527,7 @@ export default function KarnchataPage() {
           </button>
         </div>
 
-        <div className="overflow-y-auto p-4 sm:p-5 space-y-4" style={{height: '320px'}}>
+        <div className="overflow-y-auto p-4 sm:p-5 space-y-4 h-60 sm:h-80">
           {chatMessages.map((msg, i) => (
             <div key={i} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
               {msg.sender === "ai" && (
@@ -632,7 +632,7 @@ export default function KarnchataPage() {
 
               <div className="bg-[#020617] border border-white/5 rounded-2xl p-5">
                 <p className="text-xs text-[#C6A96B] font-bold uppercase tracking-widest mb-3">ทักษาจร — ยามใหญ่ {activeResult.yamYaiName}</p>
-                <div className="grid grid-cols-4 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {([
                     {q:"ศรี",      color:"bg-emerald-500/20 text-emerald-400 border-emerald-500/30"},
                     {q:"มนตรี",    color:"bg-blue-500/20 text-blue-400 border-blue-500/30"},
@@ -646,7 +646,7 @@ export default function KarnchataPage() {
                     const starNum = taksaYamMap[item.q];
                     const starName = STAR_NAMES[starNum as keyof typeof STAR_NAMES] ?? "";
                     return (
-                      <div key={item.q} className={`rounded-xl px-1.5 py-2 border text-center flex flex-col items-center gap-0.5 ${item.color}`}>
+                      <div key={item.q} className={`rounded-xl px-2 py-2.5 border text-center flex flex-col items-center gap-0.5 ${item.color}`}>
                         <p className="text-xs font-bold leading-tight opacity-80">{item.q}</p>
                         {starNum ? (
                           <>
@@ -678,39 +678,39 @@ export default function KarnchataPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto -mx-6 sm:mx-0 px-6 sm:px-0">
-          <div className="min-w-[580px] flex flex-col gap-5 items-center pb-4">
+        <div className="overflow-x-auto -mx-4 sm:-mx-6 sm:mx-0 px-4 sm:px-6 sm:px-0">
+          <div className="min-w-[320px] sm:min-w-[540px] flex flex-col gap-3 sm:gap-5 items-center pb-4">
             {[0, 1, 2].map(rIdx => (
               <div key={rIdx} className="flex items-center w-full max-w-3xl">
-                <div className="w-16 text-xs font-bold text-[#F8F6F1]">ฐาน {rIdx + 1 === 1 ? '๑' : rIdx + 1 === 2 ? '๒' : '๓'}</div>
+                <div className="w-9 sm:w-16 text-[10px] sm:text-xs font-bold text-[#F8F6F1] shrink-0">ฐาน {rIdx + 1 === 1 ? '๑' : rIdx + 1 === 2 ? '๒' : '๓'}</div>
                 <div className="flex-1 flex justify-between">
                   {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
-                    <button key={cIdx} type="button" onClick={() => setHoverNum(hoverNum === star ? null : star)} className="flex flex-col items-center gap-1.5 w-14 focus:outline-none">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
+                    <button key={cIdx} type="button" onClick={() => setHoverNum(hoverNum === star ? null : star)} className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none">
+                      <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
                         hoverNum === star ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]" : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
                       }`}>{star}</div>
-                      <span className="text-xs text-[#8A8070] font-medium text-center leading-tight">{getBhopName(rIdx, cIdx)}</span>
+                      <span className="text-[8px] sm:text-xs text-[#8A8070] font-medium text-center leading-tight">{getBhopName(rIdx, cIdx)}</span>
                     </button>
                   ))}
                 </div>
               </div>
             ))}
 
-            <div className="flex items-center w-full max-w-3xl bg-[#0B1E36]/30 border border-sky-500/10 py-3 px-2 rounded-2xl my-1">
-              <div className="w-16 text-xs font-bold text-sky-400 pl-1">
+            <div className="flex items-center w-full max-w-3xl bg-[#0B1E36]/30 border border-sky-500/10 py-2 sm:py-3 px-1 sm:px-2 rounded-2xl my-1">
+              <div className="w-9 sm:w-16 text-[10px] sm:text-xs font-bold text-sky-400 pl-0.5 sm:pl-1 shrink-0">
                 <div>ฐาน ๔</div>
-                <div className="text-xs text-sky-400/60 leading-tight">เทวดา</div>
+                <div className="text-[9px] sm:text-xs text-sky-400/60 leading-tight hidden sm:block">เทวดา</div>
               </div>
-              <div className="flex-1 flex justify-between pr-2">
+              <div className="flex-1 flex justify-between pr-1 sm:pr-2">
                 {activeResult.chart[3].map((star: number, cIdx: number) => {
                   const base3Star: number = activeResult.chart[2]?.[cIdx] ?? 0;
                   const isBase4Lit = hoverNum !== null && base3Star === hoverNum;
                   return (
-                    <button key={cIdx} type="button" onClick={() => setHoverNum(hoverNum === base3Star ? null : base3Star)} className="flex flex-col items-center gap-1.5 w-14 focus:outline-none">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
+                    <button key={cIdx} type="button" onClick={() => setHoverNum(hoverNum === base3Star ? null : base3Star)} className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none">
+                      <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
                         isBase4Lit ? "bg-[#4B6FAE] text-[#F8F6F1] scale-110 shadow-[0_0_15px_rgba(75,111,174,0.7)] border border-[#4B6FAE]" : "bg-[#020617] border border-sky-500/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
                       }`}>{star}</div>
-                      <span className={`text-xs font-medium text-center leading-tight ${isBase4Lit ? "text-sky-300" : "text-sky-400/80"}`}>{BASE4_POWER_NAMES[star] || ""}</span>
+                      <span className={`text-[8px] sm:text-xs font-medium text-center leading-tight ${isBase4Lit ? "text-sky-300" : "text-sky-400/80"}`}>{BASE4_POWER_NAMES[star] || ""}</span>
                     </button>
                   );
                 })}
@@ -719,15 +719,15 @@ export default function KarnchataPage() {
 
             {[4, 5, 6, 7, 8].map(rIdx => (
               <div key={rIdx} className="flex items-center w-full max-w-3xl">
-                <div className="w-16 text-xs font-bold text-[#F8F6F1]">ฐาน {rIdx + 1 === 5 ? '๕' : rIdx + 1 === 6 ? '๖' : rIdx + 1 === 7 ? '๗' : rIdx + 1 === 8 ? '๘' : '๙'}</div>
+                <div className="w-9 sm:w-16 text-[10px] sm:text-xs font-bold text-[#F8F6F1] shrink-0">ฐาน {rIdx + 1 === 5 ? '๕' : rIdx + 1 === 6 ? '๖' : rIdx + 1 === 7 ? '๗' : rIdx + 1 === 8 ? '๘' : '๙'}</div>
                 <div className="flex-1 flex justify-between">
                   {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
-                    <button key={cIdx} type="button" onClick={() => setHoverNum(hoverNum === star ? null : star)} className="flex flex-col items-center gap-1.5 w-14 focus:outline-none">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
+                    <button key={cIdx} type="button" onClick={() => setHoverNum(hoverNum === star ? null : star)} className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none">
+                      <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
                         hoverNum === star ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]" : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
                       }`}>{star}</div>
-                      {rIdx === 7 && <span className="text-xs text-[#8A8070] font-medium text-center leading-tight">{["อาตมะ","ทาสา","สิทธิ","โภคทรัพย์","โจร","อุบาทว์","อุปถัมภ์"][cIdx]}</span>}
-                      {rIdx === 8 && <span className="text-xs text-[#8A8070] font-medium text-center leading-tight">{["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"][cIdx]}</span>}
+                      {rIdx === 7 && <span className="text-[8px] sm:text-xs text-[#8A8070] font-medium text-center leading-tight">{["อาตมะ","ทาสา","สิทธิ","โภคทรัพย์","โจร","อุบาทว์","อุปถัมภ์"][cIdx]}</span>}
+                      {rIdx === 8 && <span className="text-[8px] sm:text-xs text-[#8A8070] font-medium text-center leading-tight">{["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"][cIdx]}</span>}
                     </button>
                   ))}
                 </div>
@@ -773,7 +773,7 @@ export default function KarnchataPage() {
             <p className="text-xs text-[#8A8070] mt-1">ทิศทางที่เป็นคุณ/เป็นภัยในนาทีนี้ • แตะการ์ดเพื่อเลือก</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 gap-3 max-w-xl mx-auto">
+        <div className="grid grid-cols-3 gap-1.5 sm:gap-3 max-w-xl mx-auto">
           {TAKSA_DIRECTIONS.map((dir) => {
             let kalaLabel = "", kalaBg = "", birthLabel = "", birthBg = "bg-[#0A1628] border-white/5 text-[#8A8070]";
             const isCenter = dir.id === 9;
@@ -787,18 +787,18 @@ export default function KarnchataPage() {
             else if (dir.id === 7) { kalaLabel = "ศรี"; kalaBg = "bg-emerald-950/20 border-emerald-500/20 text-emerald-400"; birthLabel = "บริวาร"; }
             return (
               <button key={dir.id} onClick={() => setHoverNum(hoverNum === dir.id ? null : dir.id)}
-                className={`p-3 sm:p-4 rounded-2xl border flex flex-col items-center text-center transition-all ${hoverNum === dir.id ? "bg-[#C6A96B]/10 border-[#C6A96B] shadow-[0_0_20px_rgba(198,169,107,0.15)] scale-[1.02]" : "bg-[#020617] border-white/5 hover:border-white/10"}`}
+                className={`p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl border flex flex-col items-center text-center transition-all ${hoverNum === dir.id ? "bg-[#C6A96B]/10 border-[#C6A96B] shadow-[0_0_20px_rgba(198,169,107,0.15)] scale-[1.02]" : "bg-[#020617] border-white/5 hover:border-white/10"}`}
               >
-                <p className="text-xs text-[#8A8070] font-bold mb-1 leading-tight">{dir.name}</p>
-                <p className="text-xs font-bold text-[#F8F6F1] mb-1">ดาว {dir.star}</p>
-                <p className="text-2xl font-display font-bold text-[#C6A96B] mb-2">({dir.id === 9 ? '๙' : dir.id})</p>
-                <div className="w-full space-y-1 mt-auto">
+                <p className="text-[10px] sm:text-xs text-[#8A8070] font-bold mb-0.5 sm:mb-1 leading-tight">{dir.name}</p>
+                <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1] mb-0.5 sm:mb-1">ดาว {dir.star}</p>
+                <p className="text-xl sm:text-2xl font-display font-bold text-[#C6A96B] mb-1 sm:mb-2">({dir.id === 9 ? '๙' : dir.id})</p>
+                <div className="w-full space-y-0.5 sm:space-y-1 mt-auto">
                   {isCenter ? (
-                    <div className="px-2 py-1 rounded-lg border border-[#C6A96B]/30 text-[#C6A96B] text-xs font-bold w-full">วิญญาณธาตุ</div>
+                    <div className="px-1 sm:px-2 py-0.5 sm:py-1 rounded-lg border border-[#C6A96B]/30 text-[#C6A96B] text-[9px] sm:text-xs font-bold w-full">วิญญาณธาตุ</div>
                   ) : (
                     <>
-                      <div className={`px-2 py-1 rounded-lg border text-xs font-bold w-full ${kalaBg}`}>กาล: {kalaLabel}</div>
-                      <div className={`px-2 py-1 rounded-lg border text-xs font-bold w-full ${birthBg}`}>กำเนิด: {birthLabel}</div>
+                      <div className={`px-1 sm:px-2 py-0.5 sm:py-1 rounded-lg border text-[9px] sm:text-xs font-bold w-full ${kalaBg}`}>กาล: {kalaLabel}</div>
+                      <div className={`px-1 sm:px-2 py-0.5 sm:py-1 rounded-lg border text-[9px] sm:text-xs font-bold w-full ${birthBg}`}>เกิด: {birthLabel}</div>
                     </>
                   )}
                 </div>

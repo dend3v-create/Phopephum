@@ -4,9 +4,8 @@
  * Strictly follows the Imperial Manual provided by the Master.
  */
 
-import { 
-  FateMatrix, 
-  NineBaseResult, 
+import {
+  NineBaseResult,
   HoroscopeInput, 
   PhopephumResult, 
   JornResult,
@@ -45,30 +44,19 @@ function r7(n: number) { return n % 7 || 7; }
 function getBKKDate(date: Date): Date { return new Date(date.getTime() + (date.getTimezoneOffset() + 420) * 60000); }
 function safeMod(n: number, m: number) { return ((n % m) + m) % m; }
 
-export function calculateNineBases(input: HoroscopeInput): NineBaseResult {
-  const [y, m, d] = input.birthDate.split("-").map(Number);
-  if (isNaN(y) || isNaN(m) || isNaN(d)) return { bases: Array.from({length:9},()=>[1,1,1,1,1,1,1]), lunarDate: { thaiDateText: "ข้อมูลไม่ถูกต้อง", thaiMonth:1, zodiacName:"—", thaiYear:2500 } };
-  
-  const yearBE = y + 543;
-  const bDay = new Date(input.birthDate).getDay(); // 0=Sun
-  const dayNum = bDay === 0 ? 1 : bDay + 1; // 1=Sun...7=Sat
-  const monthNum = input.thaiMonthOverride || (new Date(input.birthDate).getMonth() + 1);
-  const zodiacNum = 5; // Dragon simplified
+import { getThaiBaseNumbers } from "../core/lunarCalendar.js";
+import { calculateSevenBase, calculateNineBase } from "../calculators/index.js";
 
-  const b1 = Array.from({ length: 7 }, (_, i) => r7(dayNum + i));
-  const b2 = Array.from({ length: 7 }, (_, i) => r7(monthNum + i));
-  const b3 = Array.from({ length: 7 }, (_, i) => r7(zodiacNum + i));
-  const b4 = b1.map((v, i) => v + b2[i] + b3[i]);
+export function calculateNineBases(input: HoroscopeInput): NineBaseResult {
+  const { birthDate, birthTime } = input;
+  const thai = getThaiBaseNumbers(birthDate, birthTime);
   
-  const b5 = b4.map(v => r7(v));
-  const b6 = b5.map((v, i) => r7(v + b1[i]));
-  const b7 = b6.map((v, i) => r7(v + b2[i]));
-  const b8 = Array.from({ length: 7 }, (_, i) => r7(b5[0] - i * 2 + 14));
-  const b9 = Array.from({ length: 7 }, (_, i) => r7(b5[0] + i * 2));
+  const [b1, b2, b3] = calculateSevenBase(thai.dayNum, thai.monthNum, thai.yearNum);
+  const bases = calculateNineBase(b1!, b2!, b3!);
   
   return {
-    bases: [b1, b2, b3, b4, b5, b6, b7, b8, b9],
-    lunarDate: { thaiDateText: "ปฏิทินระบบพื้นฐาน", thaiMonth: monthNum, zodiacName: "มะโรง", thaiYear: yearBE }
+    bases,
+    lunarDate: thai
   };
 }
 
@@ -116,20 +104,44 @@ function getAgeYang(birthDate: Date, checkDate: Date): number {
 export async function calculateImperial(input: HoroscopeInput, checkDate: Date = new Date()): Promise<any> {
   const matrixResult = calculateNineBases(input);
   const matrix = matrixResult.bases;
+  
   const bDate = new Date(`${input.birthDate}T${input.birthTime || '12:00'}:00+07:00`);
+  if (isNaN(bDate.getTime())) {
+    throw new Error("วันที่เกิดไม่ถูกต้อง");
+  }
+
   const ageYang = getAgeYang(bDate, checkDate);
   const natal = calculateLagnaNatal(matrix, bDate);
   
+  // ลัคนาจร (Count Horizontally from Natal)
   const natalIdx = (natal.row - 1) * 7 + (natal.col - 1);
   const transitIdx = safeMod(natalIdx + (ageYang - 1), 21);
   const tRow = Math.floor(transitIdx / 7);
   const tCol = transitIdx % 7;
-  const transit = { row: tRow + 1, col: tCol + 1, houseName: PHOPEPHUM_HOUSES[tRow][tCol], star: matrix[tRow][tCol] };
+  
+  const safeTRow = isNaN(tRow) ? 0 : Math.max(0, Math.min(2, tRow));
+  const safeTCol = isNaN(tCol) ? 0 : Math.max(0, Math.min(6, tCol));
+  
+  const transit = { 
+    row: safeTRow + 1, 
+    col: safeTCol + 1, 
+    houseName: PHOPEPHUM_HOUSES[safeTRow][safeTCol], 
+    star: matrix[safeTRow][safeTCol] 
+  };
 
   const yearlyIdx = safeMod(ageYang - 1, 21);
   const yRow = Math.floor(yearlyIdx / 7);
   const yCol = yearlyIdx % 7;
-  const yearly = { row: yRow + 1, col: yCol + 1, houseName: PHOPEPHUM_HOUSES[yRow][yCol], star: matrix[yRow][yCol] };
+  
+  const safeYRow = isNaN(yRow) ? 0 : Math.max(0, Math.min(2, yRow));
+  const safeYCol = isNaN(yCol) ? 0 : Math.max(0, Math.min(6, yCol));
+
+  const yearly = { 
+    row: safeYRow + 1, 
+    col: safeYCol + 1, 
+    houseName: PHOPEPHUM_HOUSES[safeYRow][safeYCol], 
+    star: matrix[safeYRow][safeYCol] 
+  };
 
   const bkkCheck = getBKKDate(checkDate);
   let d = bkkCheck.getDay();
