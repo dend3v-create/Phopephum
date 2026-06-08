@@ -669,80 +669,258 @@ export default function KarnchataPage() {
 
       {/* ── ผังดวงกาลชะตา 9 ฐาน ── */}
       <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8 relative">
-        <div className="flex items-start gap-3 mb-6">
+        {/* Header */}
+        <div className="flex items-center gap-3 mb-5">
           <span className="text-2xl shrink-0">☸️</span>
-          <div>
+          <div className="flex-1">
             <h3 className="text-base font-bold text-[#F8F6F1]">ผังดวงกาลชะตา 9 ฐาน</h3>
-            <p className="text-xs text-[#8A8070] mt-1">แตะตัวเลขเพื่อดูความเชื่อมโยง</p>
-            <p className="text-xs text-[#C6A96B]/60 mt-0.5 md:hidden">← เลื่อนซ้าย-ขวาเพื่อดูผังเต็ม →</p>
+            <p className="text-xs text-[#8A8070] mt-0.5">แตะตัวเลขเพื่อดูความเชื่อมโยง</p>
           </div>
+          {hoverNum !== null && (
+            <button
+              type="button"
+              onClick={() => setHoverNum(null)}
+              className="shrink-0 text-xs text-[#8A8070] hover:text-[#F8F6F1] border border-white/10 hover:border-white/25 px-3 py-1.5 rounded-lg transition-colors"
+            >
+              ✕ ล้าง
+            </button>
+          )}
         </div>
 
-        <div className="overflow-x-auto -mx-4 sm:-mx-6 sm:mx-0 px-4 sm:px-6 sm:px-0">
-          <div className="min-w-[320px] sm:min-w-[540px] flex flex-col gap-3 sm:gap-5 items-center pb-4">
+        {/* ── Connection Detail Panel ── */}
+        {hoverNum !== null && (() => {
+          const thaiNums = ['๑','๒','๓','๔','๕','๖','๗','๘','๙'];
+          const chart = activeResult.chart as number[][];
+          const occurrences = chart.map((row, rIdx) => {
+            if (rIdx === 3) return null; // Base 4 holds raw sums (3–21), not 1–7
+            const colIdx = row.indexOf(hoverNum);
+            if (colIdx === -1) return null;
+            let bhopName = '';
+            if (rIdx < 3) bhopName = BHOP_NATAL_NAMES[rIdx][colIdx];
+            else if (rIdx === 7) bhopName = BHOP_8_NAMES[colIdx];
+            else if (rIdx === 8) bhopName = BHOP_9_NAMES[colIdx];
+            // If star is in Base 3 → show the Base 4 power in same column
+            const b4Power = rIdx === 2 ? (BASE4_POWER_NAMES[chart[3][colIdx]] || null) : null;
+            return { rIdx, colIdx, bhopName, b4Power };
+          }).filter(Boolean) as Array<{ rIdx: number; colIdx: number; bhopName: string; b4Power: string | null }>;
+
+          return (
+            <div className="mb-6 bg-gradient-to-br from-[#020617] to-[#09152b] border border-[#C6A96B]/35 rounded-2xl p-5 shadow-[0_0_24px_rgba(198,169,107,0.08)] animate-in fade-in duration-300">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-11 h-11 rounded-full bg-[#C6A96B] text-[#020617] flex items-center justify-center text-xl font-display font-black shadow-[0_0_18px_rgba(198,169,107,0.45)] shrink-0">
+                  {hoverNum}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-[#C6A96B]">ดาว {STAR_NAMES[hoverNum as keyof typeof STAR_NAMES]}</p>
+                  <p className="text-xs text-[#8A8070]">ปรากฏใน {occurrences.length} ฐาน — เชื่อมโยงดังนี้</p>
+                </div>
+              </div>
+              {occurrences.length === 0 ? (
+                <p className="text-xs text-[#8A8070] text-center py-2">ไม่พบดาวนี้ในฐาน 1–3, 5–9</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  {occurrences.map(occ => {
+                    const isNamedBase = occ.rIdx < 3 || occ.rIdx === 7 || occ.rIdx === 8;
+                    return (
+                      <div
+                        key={occ.rIdx}
+                        className={`rounded-xl p-3 border flex flex-col gap-1 ${isNamedBase ? 'bg-[#0A1628] border-[#C6A96B]/20' : 'bg-[#020617] border-white/5'}`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className={`text-[10px] font-black shrink-0 ${occ.rIdx < 3 ? 'text-[#C6A96B]' : occ.rIdx < 7 ? 'text-[#8A8070]' : 'text-[#C6A96B]'}`}>
+                            ฐาน{thaiNums[occ.rIdx]}
+                          </span>
+                          <span className="text-xs text-[#F8F6F1] font-bold leading-tight truncate">
+                            {occ.bhopName || `ช่อง ${occ.colIdx + 1}`}
+                          </span>
+                        </div>
+                        {occ.b4Power && (
+                          <div className="flex items-center gap-1.5 pt-1 border-t border-sky-500/15">
+                            <span className="text-[9px] text-sky-400/70">เทวดา:</span>
+                            <span className="text-[10px] text-sky-300 font-bold">{occ.b4Power}</span>
+                          </div>
+                        )}
+                        {!occ.bhopName && (
+                          <span className="text-[10px] text-[#8A8070]">ฐานสมทบ</span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })()}
+
+        <p className="text-xs text-[#C6A96B]/50 mb-4 md:hidden text-center">← เลื่อนซ้าย-ขวาเพื่อดูผังเต็ม →</p>
+
+        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+          <div className="min-w-[320px] sm:min-w-[540px] flex flex-col gap-3 sm:gap-4 items-center pb-4">
+
+            {/* ── ฐาน 1–3 ── */}
             {[0, 1, 2].map(rIdx => (
-              <div key={rIdx} className="flex items-center w-full max-w-3xl">
-                <div className="w-9 sm:w-16 text-[10px] sm:text-xs font-bold text-[#F8F6F1] shrink-0">ฐาน {rIdx + 1 === 1 ? '๑' : rIdx + 1 === 2 ? '๒' : '๓'}</div>
+              <div key={rIdx} className="flex items-start w-full max-w-3xl">
+                <div className="w-9 sm:w-16 shrink-0 pt-2.5">
+                  <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]">ฐาน {['๑','๒','๓'][rIdx]}</p>
+                </div>
                 <div className="flex-1 flex justify-between">
-                  {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
-                    <button key={cIdx} type="button" onClick={() => setHoverNum(hoverNum === star ? null : star)} className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none">
-                      <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
-                        hoverNum === star ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]" : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
-                      }`}>{star}</div>
-                      <span className="text-[8px] sm:text-xs text-[#8A8070] font-medium text-center leading-tight">{getBhopName(rIdx, cIdx)}</span>
-                    </button>
-                  ))}
+                  {(activeResult.chart[rIdx] as number[]).map((star, cIdx) => {
+                    const isSelected = hoverNum === star;
+                    const isDimmed = hoverNum !== null && !isSelected;
+                    return (
+                      <button
+                        key={cIdx}
+                        type="button"
+                        onClick={() => setHoverNum(isSelected ? null : star)}
+                        className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none"
+                      >
+                        <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-200 ${
+                          isSelected
+                            ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_16px_rgba(198,169,107,0.65)] ring-2 ring-[#C6A96B]/30"
+                            : isDimmed
+                              ? "bg-[#020617] border border-white/8 text-[#F8F6F1]/25 hover:border-[#C6A96B]/30 hover:text-[#F8F6F1]/60"
+                              : "bg-[#020617] border border-[#8A8070]/45 text-[#F8F6F1] hover:border-[#C6A96B]/55 hover:scale-105"
+                        }`}>{star}</div>
+                        <span className={`text-[8px] sm:text-[11px] font-medium text-center leading-tight transition-opacity ${isDimmed ? 'text-[#8A8070]/30' : 'text-[#8A8070]'}`}>
+                          {BHOP_NATAL_NAMES[rIdx][cIdx]}
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ))}
 
-            <div className="flex items-center w-full max-w-3xl bg-[#0B1E36]/30 border border-sky-500/10 py-2 sm:py-3 px-1 sm:px-2 rounded-2xl my-1">
-              <div className="w-9 sm:w-16 text-[10px] sm:text-xs font-bold text-sky-400 pl-0.5 sm:pl-1 shrink-0">
-                <div>ฐาน ๔</div>
-                <div className="text-[9px] sm:text-xs text-sky-400/60 leading-tight hidden sm:block">เทวดา</div>
+            {/* Divider — กำลังเทวดา */}
+            <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
+              <div className="flex-1 h-px bg-sky-500/20" />
+              <span className="text-[10px] text-sky-400/60 font-bold tracking-wider uppercase px-1">กำลังเทวดา</span>
+              <div className="flex-1 h-px bg-sky-500/20" />
+            </div>
+
+            {/* ── ฐาน 4 ── */}
+            <div className="flex items-start w-full max-w-3xl bg-[#0B1E36]/40 border border-sky-500/12 py-3 px-1 sm:px-2 rounded-2xl">
+              <div className="w-9 sm:w-16 shrink-0 pt-1.5 pl-0.5">
+                <p className="text-[10px] sm:text-xs font-bold text-sky-400">ฐาน ๔</p>
+                <p className="text-[9px] text-sky-400/45 hidden sm:block">เทวดา</p>
               </div>
               <div className="flex-1 flex justify-between pr-1 sm:pr-2">
-                {activeResult.chart[3].map((star: number, cIdx: number) => {
-                  const base3Star: number = activeResult.chart[2]?.[cIdx] ?? 0;
-                  const isBase4Lit = hoverNum !== null && base3Star === hoverNum;
+                {(activeResult.chart[3] as number[]).map((star, cIdx) => {
+                  const base3Star = (activeResult.chart[2] as number[])[cIdx] ?? 0;
+                  const isLit = hoverNum !== null && base3Star === hoverNum;
+                  const isDimmedB4 = hoverNum !== null && !isLit;
                   return (
-                    <button key={cIdx} type="button" onClick={() => setHoverNum(hoverNum === base3Star ? null : base3Star)} className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none">
-                      <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
-                        isBase4Lit ? "bg-[#4B6FAE] text-[#F8F6F1] scale-110 shadow-[0_0_15px_rgba(75,111,174,0.7)] border border-[#4B6FAE]" : "bg-[#020617] border border-sky-500/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
+                    <button
+                      key={cIdx}
+                      type="button"
+                      onClick={() => setHoverNum(isLit ? null : base3Star)}
+                      className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none"
+                    >
+                      <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-200 ${
+                        isLit
+                          ? "bg-[#4B6FAE] text-[#F8F6F1] scale-110 shadow-[0_0_16px_rgba(75,111,174,0.75)] ring-2 ring-[#4B6FAE]/30"
+                          : isDimmedB4
+                            ? "bg-[#020617] border border-sky-500/15 text-[#F8F6F1]/25"
+                            : "bg-[#020617] border border-sky-500/40 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
                       }`}>{star}</div>
-                      <span className={`text-[8px] sm:text-xs font-medium text-center leading-tight ${isBase4Lit ? "text-sky-300" : "text-sky-400/80"}`}>{BASE4_POWER_NAMES[star] || ""}</span>
+                      <span className={`text-[8px] sm:text-[11px] font-medium text-center leading-tight transition-opacity ${isLit ? "text-sky-300" : isDimmedB4 ? "text-sky-400/25" : "text-sky-400/75"}`}>
+                        {BASE4_POWER_NAMES[star] || ""}
+                      </span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {[4, 5, 6, 7, 8].map(rIdx => (
+            {/* Divider — ฐานสมทบ */}
+            <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
+              <div className="flex-1 h-px bg-white/5" />
+              <span className="text-[10px] text-[#8A8070]/40 font-bold tracking-wider uppercase px-1">ฐานสมทบ ๕–๗</span>
+              <div className="flex-1 h-px bg-white/5" />
+            </div>
+
+            {/* ── ฐาน 5–7 (smaller circles, less prominent) ── */}
+            {[4, 5, 6].map(rIdx => (
               <div key={rIdx} className="flex items-center w-full max-w-3xl">
-                <div className="w-9 sm:w-16 text-[10px] sm:text-xs font-bold text-[#F8F6F1] shrink-0">ฐาน {rIdx + 1 === 5 ? '๕' : rIdx + 1 === 6 ? '๖' : rIdx + 1 === 7 ? '๗' : rIdx + 1 === 8 ? '๘' : '๙'}</div>
+                <div className="w-9 sm:w-16 shrink-0">
+                  <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]/50">ฐาน {['๕','๖','๗'][rIdx - 4]}</p>
+                </div>
                 <div className="flex-1 flex justify-between">
-                  {activeResult.chart[rIdx].map((star: number, cIdx: number) => (
-                    <button key={cIdx} type="button" onClick={() => setHoverNum(hoverNum === star ? null : star)} className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none">
-                      <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-300 cursor-pointer ${
-                        hoverNum === star ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_15px_rgba(198,169,107,0.6)] border border-[#C6A96B]" : "bg-[#020617] border border-[#8A8070]/50 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
-                      }`}>{star}</div>
-                      {rIdx === 7 && <span className="text-[8px] sm:text-xs text-[#8A8070] font-medium text-center leading-tight">{["อาตมะ","ทาสา","สิทธิ","โภคทรัพย์","โจร","อุบาทว์","อุปถัมภ์"][cIdx]}</span>}
-                      {rIdx === 8 && <span className="text-[8px] sm:text-xs text-[#8A8070] font-medium text-center leading-tight">{["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"][cIdx]}</span>}
-                    </button>
-                  ))}
+                  {(activeResult.chart[rIdx] as number[]).map((star, cIdx) => {
+                    const isSelected = hoverNum === star;
+                    const isDimmed = hoverNum !== null && !isSelected;
+                    return (
+                      <button
+                        key={cIdx}
+                        type="button"
+                        onClick={() => setHoverNum(isSelected ? null : star)}
+                        className="flex flex-col items-center w-9 sm:w-14 focus:outline-none"
+                      >
+                        <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-display font-bold transition-all duration-200 ${
+                          isSelected
+                            ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_12px_rgba(198,169,107,0.5)]"
+                            : isDimmed
+                              ? "bg-[#020617] border border-white/5 text-[#F8F6F1]/20"
+                              : "bg-[#020617] border border-white/12 text-[#F8F6F1]/60 hover:border-[#C6A96B]/40 hover:scale-105"
+                        }`}>{star}</div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             ))}
 
-            {/* วิธีอ่าน */}
-            <div className="w-full max-w-3xl bg-[#020617] border border-[#C6A96B]/20 rounded-2xl p-5 mt-2">
+            {/* Divider — ภพชาตาลึก */}
+            <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
+              <div className="flex-1 h-px bg-[#C6A96B]/12" />
+              <span className="text-[10px] text-[#C6A96B]/45 font-bold tracking-wider uppercase px-1">ภพชาตาลึก ๘–๙</span>
+              <div className="flex-1 h-px bg-[#C6A96B]/12" />
+            </div>
+
+            {/* ── ฐาน 8–9 ── */}
+            {[7, 8].map(rIdx => (
+              <div key={rIdx} className="flex items-start w-full max-w-3xl">
+                <div className="w-9 sm:w-16 shrink-0 pt-2.5">
+                  <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]">ฐาน {['๘','๙'][rIdx - 7]}</p>
+                </div>
+                <div className="flex-1 flex justify-between">
+                  {(activeResult.chart[rIdx] as number[]).map((star, cIdx) => {
+                    const isSelected = hoverNum === star;
+                    const isDimmed = hoverNum !== null && !isSelected;
+                    const bhopName = rIdx === 7 ? BHOP_8_NAMES[cIdx] : BHOP_9_NAMES[cIdx];
+                    return (
+                      <button
+                        key={cIdx}
+                        type="button"
+                        onClick={() => setHoverNum(isSelected ? null : star)}
+                        className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none"
+                      >
+                        <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-200 ${
+                          isSelected
+                            ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_16px_rgba(198,169,107,0.65)] ring-2 ring-[#C6A96B]/30"
+                            : isDimmed
+                              ? "bg-[#020617] border border-white/8 text-[#F8F6F1]/25 hover:border-[#C6A96B]/30"
+                              : "bg-[#020617] border border-[#8A8070]/45 text-[#F8F6F1] hover:border-[#C6A96B]/55 hover:scale-105"
+                        }`}>{star}</div>
+                        <span className={`text-[8px] sm:text-[11px] font-medium text-center leading-tight transition-opacity ${isDimmed ? 'text-[#8A8070]/25' : 'text-[#8A8070]'}`}>
+                          {bhopName}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {/* ── วิธีอ่าน ── */}
+            <div className="w-full max-w-3xl bg-[#020617] border border-[#C6A96B]/18 rounded-2xl p-5 mt-3">
               <p className="text-xs font-bold text-[#C6A96B] mb-3 flex items-center gap-2">✦ วิธีอ่านรหัสชีวิต 3 Steps — Star Tracing</p>
-              <p className="text-xs text-rose-400/80 font-bold mb-4">⚑ ห้ามอ่านแนวดิ่ง — ใช้ "เลขดาว" เชื่อมโยง ฐาน 1 → 2 → 3</p>
+              <p className="text-xs text-rose-400/75 font-bold mb-4">⚑ ห้ามอ่านแนวดิ่ง — ใช้ "เลขดาว" เชื่อมโยง ฐาน 1 → 2 → 3</p>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
-                  {step:"1", title:"ตั้งโจทย์", color:"text-[#C6A96B]", bg:"bg-[#C6A96B]/20", desc:"เลือกภพเรือนในฐาน 1 ที่ต้องการทราบ แล้วดูว่าคือเลขดาวอะไร — กดเพื่อเริ่มติดตาม"},
-                  {step:"2", title:"ตามรอยดาว", color:"text-sky-400", bg:"bg-sky-500/20", desc:"นำเลขดาวนั้นไปหาตำแหน่งในฐาน 2 แล้วตามต่อสู่ฐาน 3 ว่าตกในภพใด (ย้าย Column ได้)"},
-                  {step:"3", title:"กำลังเทวดา", color:"text-[#4B6FAE]", bg:"bg-[#4B6FAE]/30", desc:"ดูดาวในฐาน 3 ตกที่ Column ไหน → อ่านฐาน 4 ใน Column เดียวกัน เพื่อตัดสินคุณภาพ"},
+                  { step:"1", title:"ตั้งโจทย์", color:"text-[#C6A96B]", bg:"bg-[#C6A96B]/20", desc:"เลือกภพเรือนในฐาน 1 ที่ต้องการทราบ แล้วดูว่าคือเลขดาวอะไร — แตะเพื่อเริ่มติดตาม" },
+                  { step:"2", title:"ตามรอยดาว", color:"text-sky-400", bg:"bg-sky-500/20", desc:"แผงด้านบนจะแสดงทุกฐานที่ดาวนั้นปรากฏ พร้อมชื่อภพ — เชื่อมโยงฐาน 1 → 2 → 3 ได้ทันที" },
+                  { step:"3", title:"กำลังเทวดา", color:"text-[#4B6FAE]", bg:"bg-[#4B6FAE]/30", desc:"ดูดาวในฐาน 3 ตกช่องใด → อ่านฐาน 4 ช่องเดียวกัน (แสดงในแผง) เพื่อตัดสินคุณภาพดวง" },
                 ].map(s => (
                   <div key={s.step} className="bg-[#0A1628] rounded-xl p-4 border border-white/5">
                     <p className={`text-xs font-bold ${s.color} mb-2 flex items-center gap-1.5`}>
@@ -753,12 +931,6 @@ export default function KarnchataPage() {
                   </div>
                 ))}
               </div>
-              {hoverNum !== null && (
-                <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-2">
-                  <span className="text-[#C6A96B] text-xs">✦</span>
-                  <p className="text-xs text-[#F8F6F1]">ตามรอยดาว <span className="font-bold text-[#C6A96B]">{hoverNum}</span> — ดูตำแหน่งที่ไฮไลต์ใน ฐาน 2, 3 และอ่านกำลังเทวดา <span className="text-sky-300">ฐาน 4</span></p>
-                </div>
-              )}
             </div>
           </div>
         </div>
