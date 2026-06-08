@@ -196,6 +196,7 @@ export default function KarnchataPage() {
   const [selectedCategory, setSelectedCategory] = useState("work");
   const [time, setTime] = useState<Date>(new Date());
   const [selectedDirection, setSelectedDirection] = useState<number | null>(null);
+  const [selectedYamKey, setSelectedYamKey] = useState<string | null>(null);
 
   // ── Derived display values ──
   const bkkHour = (time.getUTCHours() + 7) % 24;
@@ -618,55 +619,63 @@ export default function KarnchataPage() {
               const lvl = advice?.level ?? 1;
               const isBad = yam.quality === 'กาลกิณี';
               const isGreat = lvl >= 3;
+              const yamKey = `day-${yam.yamNum}`;
+              const isExpanded = selectedYamKey === yamKey;
+              const yamDescItem = YAM_DESC[yam.star] ?? YAM_DESC[1];
               return (
-                <div
-                  key={yam.yamNum}
-                  className={`flex items-center gap-2 sm:gap-3 px-3 py-2.5 rounded-xl border transition-all ${
-                    yam.isCurrentYam
-                      ? 'bg-[#C6A96B]/10 border-[#C6A96B]/45 shadow-[0_0_12px_rgba(198,169,107,0.10)] ring-1 ring-[#C6A96B]/20'
-                      : isBad
-                        ? 'bg-rose-950/12 border-rose-500/12'
-                        : isGreat
-                          ? 'bg-emerald-950/8 border-emerald-500/8'
-                          : 'bg-[#020617] border-white/5'
-                  }`}
-                >
-                  {/* เวลา */}
-                  <span className="text-[10px] text-[#8A8070] font-mono shrink-0 w-[82px] sm:w-[92px] tabular-nums">
-                    {yam.timeStr}
-                  </span>
-
-                  {/* ดาว */}
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-display font-bold shrink-0 ${
-                      yam.isCurrentYam ? 'bg-[#C6A96B] text-[#020617] shadow-[0_0_8px_rgba(198,169,107,0.5)]' : 'bg-[#0A1628] border border-white/10 text-[#F8F6F1]'
-                    }`}>
-                      {yam.star}
+                <div key={yam.yamNum} className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedYamKey(isExpanded ? null : yamKey)}
+                    className={`w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 rounded-xl border transition-all text-left ${
+                      isExpanded
+                        ? 'rounded-b-none border-b-0'
+                        : ''
+                    } ${
+                      yam.isCurrentYam
+                        ? 'bg-[#C6A96B]/10 border-[#C6A96B]/45 shadow-[0_0_12px_rgba(198,169,107,0.10)] ring-1 ring-[#C6A96B]/20'
+                        : isBad
+                          ? 'bg-rose-950/12 border-rose-500/12'
+                          : isGreat
+                            ? 'bg-emerald-950/8 border-emerald-500/8'
+                            : 'bg-[#020617] border-white/5'
+                    }`}
+                  >
+                    <span className="text-[10px] text-[#8A8070] font-mono shrink-0 w-[82px] sm:w-[92px] tabular-nums">{yam.timeStr}</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-display font-bold shrink-0 ${
+                        yam.isCurrentYam ? 'bg-[#C6A96B] text-[#020617] shadow-[0_0_8px_rgba(198,169,107,0.5)]' : 'bg-[#0A1628] border border-white/10 text-[#F8F6F1]'
+                      }`}>{yam.star}</div>
+                      <span className={`text-xs font-bold shrink-0 ${yam.isCurrentYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>
+                        {STAR_NAMES[yam.star as keyof typeof STAR_NAMES]}
+                      </span>
                     </div>
-                    <span className={`text-xs font-bold shrink-0 hidden sm:block ${yam.isCurrentYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>
-                      {STAR_NAMES[yam.star as keyof typeof STAR_NAMES]}
+                    <span className={`text-xs font-bold shrink-0 w-14 sm:w-16 ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]'}`}>
+                      {yam.quality || '—'}
                     </span>
-                  </div>
-
-                  {/* ทักษา */}
-                  <span className={`text-xs font-bold shrink-0 w-16 ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]'}`}>
-                    {yam.quality || '—'}
-                  </span>
-
-                  {/* ฐาน ๑ ภพ */}
-                  <span className="text-[10px] text-[#8A8070]/70 shrink-0 w-14 hidden md:block">
-                    {yam.b1Bhop || '—'}
-                  </span>
-
-                  {/* คำแนะนำ */}
-                  <span className="text-[10px] text-[#D9CDB7]/70 flex-1 leading-snug hidden lg:block">
-                    {advice ? `${advice.emoji} ${advice.th}` : ''}
-                  </span>
-
-                  {/* สัญลักษณ์ */}
-                  <span className={`text-sm shrink-0 ml-auto ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]/40'}`}>
-                    {isBad ? '⚠' : isGreat ? '✦' : '·'}
-                  </span>
+                    <span className="text-[10px] text-[#D9CDB7]/70 flex-1 leading-snug hidden lg:block">
+                      {advice ? `${advice.emoji} ${advice.th}` : ''}
+                    </span>
+                    <span className={`text-sm shrink-0 ml-auto ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]/40'}`}>
+                      {isExpanded ? '▲' : (isBad ? '⚠' : isGreat ? '✦' : '▾')}
+                    </span>
+                  </button>
+                  {isExpanded && (
+                    <div className={`px-4 py-3 rounded-b-xl border border-t-0 text-xs space-y-2 ${
+                      yam.isCurrentYam ? 'bg-[#C6A96B]/5 border-[#C6A96B]/45' : isBad ? 'bg-rose-950/12 border-rose-500/12' : isGreat ? 'bg-emerald-950/8 border-emerald-500/8' : 'bg-[#020617] border-white/5'
+                    }`}>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[#8A8070]">ภพ:</span>
+                        <span className="text-[#F8F6F1] font-bold">{yam.b1Bhop || '—'}</span>
+                        <span className="text-[#8A8070] ml-2">ดาว:</span>
+                        <span className="text-[#C6A96B] font-bold">{yam.star} {STAR_NAMES[yam.star as keyof typeof STAR_NAMES]}</span>
+                      </div>
+                      {advice && (
+                        <p className="text-[#D9CDB7] leading-relaxed">{advice.emoji} <span className="font-bold text-[#C6A96B]">{yam.quality}</span> — {advice.th}</p>
+                      )}
+                      <p className="text-[#8A8070] leading-relaxed">{yamDescItem.desc}</p>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -684,42 +693,61 @@ export default function KarnchataPage() {
               const lvl = advice?.level ?? 1;
               const isBad = yam.quality === 'กาลกิณี';
               const isGreat = lvl >= 3;
+              const yamKey = `night-${yam.yamNum}`;
+              const isExpanded = selectedYamKey === yamKey;
+              const yamDescItem = YAM_DESC[yam.star] ?? YAM_DESC[1];
               return (
-                <div
-                  key={yam.yamNum}
-                  className={`flex items-center gap-2 sm:gap-3 px-3 py-2.5 rounded-xl border transition-all ${
-                    yam.isCurrentYam
-                      ? 'bg-[#C6A96B]/10 border-[#C6A96B]/45 shadow-[0_0_12px_rgba(198,169,107,0.10)] ring-1 ring-[#C6A96B]/20'
-                      : isBad
-                        ? 'bg-rose-950/12 border-rose-500/12'
-                        : isGreat
-                          ? 'bg-emerald-950/8 border-emerald-500/8'
-                          : 'bg-[#020617] border-white/5'
-                  }`}
-                >
-                  <span className="text-[10px] text-[#8A8070] font-mono shrink-0 w-[82px] sm:w-[92px] tabular-nums">
-                    {yam.timeStr}
-                  </span>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-display font-bold shrink-0 ${
-                      yam.isCurrentYam ? 'bg-[#C6A96B] text-[#020617] shadow-[0_0_8px_rgba(198,169,107,0.5)]' : 'bg-[#0A1628] border border-white/10 text-[#F8F6F1]'
-                    }`}>
-                      {yam.star}
+                <div key={yam.yamNum} className="flex flex-col">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedYamKey(isExpanded ? null : yamKey)}
+                    className={`w-full flex items-center gap-2 sm:gap-3 px-3 py-2.5 rounded-xl border transition-all text-left ${
+                      isExpanded ? 'rounded-b-none border-b-0' : ''
+                    } ${
+                      yam.isCurrentYam
+                        ? 'bg-[#C6A96B]/10 border-[#C6A96B]/45 shadow-[0_0_12px_rgba(198,169,107,0.10)] ring-1 ring-[#C6A96B]/20'
+                        : isBad
+                          ? 'bg-rose-950/12 border-rose-500/12'
+                          : isGreat
+                            ? 'bg-emerald-950/8 border-emerald-500/8'
+                            : 'bg-[#020617] border-white/5'
+                    }`}
+                  >
+                    <span className="text-[10px] text-[#8A8070] font-mono shrink-0 w-[82px] sm:w-[92px] tabular-nums">{yam.timeStr}</span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-display font-bold shrink-0 ${
+                        yam.isCurrentYam ? 'bg-[#C6A96B] text-[#020617] shadow-[0_0_8px_rgba(198,169,107,0.5)]' : 'bg-[#0A1628] border border-white/10 text-[#F8F6F1]'
+                      }`}>{yam.star}</div>
+                      <span className={`text-xs font-bold shrink-0 ${yam.isCurrentYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>
+                        {STAR_NAMES[yam.star as keyof typeof STAR_NAMES]}
+                      </span>
                     </div>
-                    <span className={`text-xs font-bold shrink-0 hidden sm:block ${yam.isCurrentYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>
-                      {STAR_NAMES[yam.star as keyof typeof STAR_NAMES]}
+                    <span className={`text-xs font-bold shrink-0 w-14 sm:w-16 ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]'}`}>
+                      {yam.quality || '—'}
                     </span>
-                  </div>
-                  <span className={`text-xs font-bold shrink-0 w-16 ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]'}`}>
-                    {yam.quality || '—'}
-                  </span>
-                  <span className="text-[10px] text-[#8A8070]/70 shrink-0 w-14 hidden md:block">{yam.b1Bhop || '—'}</span>
-                  <span className="text-[10px] text-[#D9CDB7]/70 flex-1 leading-snug hidden lg:block">
-                    {advice ? `${advice.emoji} ${advice.th}` : ''}
-                  </span>
-                  <span className={`text-sm shrink-0 ml-auto ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]/40'}`}>
-                    {isBad ? '⚠' : isGreat ? '✦' : '·'}
-                  </span>
+                    <span className="text-[10px] text-[#D9CDB7]/70 flex-1 leading-snug hidden lg:block">
+                      {advice ? `${advice.emoji} ${advice.th}` : ''}
+                    </span>
+                    <span className={`text-sm shrink-0 ml-auto ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]/40'}`}>
+                      {isExpanded ? '▲' : (isBad ? '⚠' : isGreat ? '✦' : '▾')}
+                    </span>
+                  </button>
+                  {isExpanded && (
+                    <div className={`px-4 py-3 rounded-b-xl border border-t-0 text-xs space-y-2 ${
+                      yam.isCurrentYam ? 'bg-[#C6A96B]/5 border-[#C6A96B]/45' : isBad ? 'bg-rose-950/12 border-rose-500/12' : isGreat ? 'bg-emerald-950/8 border-emerald-500/8' : 'bg-[#020617] border-white/5'
+                    }`}>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-[#8A8070]">ภพ:</span>
+                        <span className="text-[#F8F6F1] font-bold">{yam.b1Bhop || '—'}</span>
+                        <span className="text-[#8A8070] ml-2">ดาว:</span>
+                        <span className="text-[#C6A96B] font-bold">{yam.star} {STAR_NAMES[yam.star as keyof typeof STAR_NAMES]}</span>
+                      </div>
+                      {advice && (
+                        <p className="text-[#D9CDB7] leading-relaxed">{advice.emoji} <span className="font-bold text-[#C6A96B]">{yam.quality}</span> — {advice.th}</p>
+                      )}
+                      <p className="text-[#8A8070] leading-relaxed">{yamDescItem.desc}</p>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -729,9 +757,10 @@ export default function KarnchataPage() {
         {/* Legend */}
         <div className="flex flex-wrap gap-3 mt-5 pt-4 border-t border-white/5 text-[10px]">
           <span className="flex items-center gap-1 text-emerald-400"><span className="font-bold">✦</span> เดช/ศรี/มูละ/มนตรี = ดีมาก</span>
-          <span className="flex items-center gap-1 text-[#8A8070]"><span>·</span> บริวาร/อายุ/อุตสาหะ = ปกติ</span>
+          <span className="flex items-center gap-1 text-[#8A8070]"><span>▾</span> บริวาร/อายุ/อุตสาหะ = ปกติ</span>
           <span className="flex items-center gap-1 text-rose-400"><span>⚠</span> กาลกิณี = ระวัง</span>
           <span className="flex items-center gap-1 text-[#C6A96B]"><span>▲</span> ยามปัจจุบัน</span>
+          <span className="flex items-center gap-1 text-[#8A8070]">แตะแถวเพื่อดูรายละเอียด</span>
         </div>
       </Card>
 
