@@ -1328,14 +1328,22 @@ export function getTaksaTransitIndicator(star: number, taksaMaha?: any) {
   if (!taksaMaha?.taksaTransit?.map) return null;
   const bhop = taksaMaha.taksaTransit.map[star];
   switch (bhop) {
-    case "ศรี":
-      return { label: "ศรี", fullName: "ศรีจร (โชคลาภ/โอกาสดี)", color: "text-emerald-400 bg-emerald-950/80 border-emerald-500/30" };
-    case "มนตรี":
-      return { label: "มนตรี", fullName: "มนตรีจร (ผู้อุปถัมภ์/สนับสนุน)", color: "text-sky-400 bg-sky-950/80 border-sky-500/30" };
+    case "บริวาร":
+      return { label: "บริวาร", fullName: "บริวารจร (บริวาร/ผู้ติดตาม/สังคม)", color: "text-slate-300 bg-slate-800/80 border-slate-500/30" };
+    case "อายุ":
+      return { label: "อายุ", fullName: "อายุจร (สุขภาพ/อายุ/ความมั่นคง)", color: "text-teal-300 bg-teal-950/80 border-teal-500/30" };
     case "เดช":
       return { label: "เดช", fullName: "เดชจร (เกียรติยศ/อำนาจบารมี)", color: "text-[#F8F6F1] bg-white/20 border-white/40" };
+    case "ศรี":
+      return { label: "ศรี", fullName: "ศรีจร (โชคลาภ/โอกาสดี/ทรัพย์สิน)", color: "text-emerald-400 bg-emerald-950/80 border-emerald-500/30" };
+    case "มูละ":
+      return { label: "มูละ", fullName: "มูละจร (รากฐาน/ที่อยู่/ครอบครัว)", color: "text-orange-300 bg-orange-950/80 border-orange-500/30" };
+    case "อุตสาหะ":
+      return { label: "อุตสาหะ", fullName: "อุตสาหะจร (ความขยัน/แรงบันดาลใจ/การงาน)", color: "text-yellow-300 bg-yellow-950/80 border-yellow-500/30" };
+    case "มนตรี":
+      return { label: "มนตรี", fullName: "มนตรีจร (ผู้อุปถัมภ์/สนับสนุน/เมตตา)", color: "text-sky-400 bg-sky-950/80 border-sky-500/30" };
     case "กาลกิณี":
-      return { label: "กาลี", fullName: "กาลกิณีจร (อุปสรรค/ข้อควรระวัง)", color: "text-red-400 bg-red-950/80 border-red-500/30" };
+      return { label: "กาลี", fullName: "กาลกิณีจร (อุปสรรค/ข้อควรระวัง/อัปมงคล)", color: "text-red-400 bg-red-950/80 border-red-500/30" };
     default:
       return null;
   }
@@ -1351,10 +1359,22 @@ export function getMahaTransitIndicator(star: number, taksaMaha?: any) {
       break;
     }
   }
-  
+
   switch (bhop) {
+    case "ราชา":
+      return { label: "ราชา", fullName: "ราชาจร (ความเป็นใหญ่/บารมีสูงสุด/ผู้นำ)", color: "text-[#C6A96B] bg-[#C6A96B]/10 border-[#C6A96B]/40" };
+    case "อธิบดี":
+      return { label: "อธิบดี", fullName: "อธิบดีจร (การควบคุม/ผู้บัญชาการ/บริหาร)", color: "text-violet-300 bg-violet-950/80 border-violet-500/30" };
+    case "ธงชัย":
+      return { label: "ธงชัย", fullName: "ธงชัยจร (ชัยชนะ/ความสำเร็จ/เกียรติยศ)", color: "text-lime-300 bg-lime-950/80 border-lime-500/30" };
+    case "ขุมทรัพย์":
+      return { label: "ขุมทรัพย์", fullName: "ขุมทรัพย์จร (ทรัพย์สมบัติ/โชคลาภ/รายได้)", color: "text-emerald-300 bg-emerald-950/80 border-emerald-500/30" };
+    case "มรณะ":
+      return { label: "มรณะ", fullName: "มรณะจร (การสูญเสีย/อันตราย/การเปลี่ยนแปลงครั้งใหญ่)", color: "text-rose-400 bg-rose-950/80 border-rose-500/30" };
     case "โลกาวินาศ":
-      return { label: "วินาศ", fullName: "โลกาวินาศจร (ความแปรปรวน/ความเครียดภายใน)", color: "text-amber-400 bg-amber-950/80 border-amber-500/30" };
+      return { label: "วินาศ", fullName: "โลกาวินาศจร (ความแปรปรวน/ความเครียดภายใน/วิกฤต)", color: "text-amber-400 bg-amber-950/80 border-amber-500/30" };
+    case "อริ":
+      return { label: "อริ", fullName: "อริจร (ศัตรู/การต่อสู้/ความขัดแย้ง)", color: "text-red-300 bg-red-950/60 border-red-400/30" };
     default:
       return null;
   }
@@ -2150,145 +2170,179 @@ function FateMatrixPanel({
             </div>
           )}
           {/* วัยจร */}
-          {showVayaJorn && phopephumResult?.vayaJorn && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
-              <span className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse shrink-0" />
-              <span className="text-[#C6A96B] font-semibold shrink-0">วัยจร</span>
-              <span className="text-[#8A8070]">อายุย่าง</span>
-              <span className="text-[#F8F6F1] font-bold">{phopephumResult.taksaTransit?.ageYang ?? "—"} ปี</span>
-              <span className="text-[#8A8070]">ช่วง</span>
-              <span className="text-[#F8F6F1] font-bold">{phopephumResult.vayaJorn.ageRange ?? "—"}</span>
-              <span className="text-[#8A8070]">→</span>
-              <span className="text-[#C6A96B] font-bold">ฐาน {phopephumResult.vayaJorn.row}</span>
-              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.vayaJorn.houseName}</span>
-              {phopephumResult.vayaJorn.yumStar && (
-                <>
-                  <span className="text-[#8A8070]">ดาวยํ้าฐาน {phopephumResult.vayaJorn.yumBase ?? "—"}</span>
-                  <span className="text-amber-300 font-bold">
-                    {STAR_NAMES[phopephumResult.vayaJorn.yumStar as 1|2|3|4|5|6|7] ?? phopephumResult.vayaJorn.yumStar}
-                  </span>
-                </>
-              )}
-            </div>
-          )}
+          {showVayaJorn && phopephumResult?.vayaJorn && (() => {
+            const j = phopephumResult.vayaJorn;
+            const b4val = matrix[3]?.[j.col - 1];
+            const b4name = BASE4_MEANINGS[b4val] ?? "—";
+            return (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
+                <span className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse shrink-0" />
+                <span className="text-[#C6A96B] font-semibold shrink-0">วัยจร</span>
+                <span className="text-[#8A8070]">อายุย่าง</span>
+                <span className="text-[#F8F6F1] font-bold">{phopephumResult.taksaTransit?.ageYang ?? "—"} ปี</span>
+                <span className="text-[#8A8070]">ช่วง</span>
+                <span className="text-[#F8F6F1] font-bold">{j.ageRange ?? "—"}</span>
+                <span className="text-[#8A8070]">→</span>
+                <span className="text-[#C6A96B] font-bold">ฐาน {j.row}</span>
+                <span className="text-[#F8F6F1] font-semibold">ภพ{j.houseName}</span>
+                {j.yumStar && (
+                  <>
+                    <span className="text-[#8A8070]">ดาวยํ้าฐาน {j.yumBase ?? "—"}</span>
+                    <span className="text-amber-300 font-bold">{STAR_NAMES[j.yumStar as 1|2|3|4|5|6|7] ?? j.yumStar}({j.yumStar})</span>
+                  </>
+                )}
+                <span className="text-[#8A8070]">กำลัง</span>
+                <span className="text-[#C6A96B] font-bold">{b4name}({b4val})</span>
+              </div>
+            );
+          })()}
           {/* ปีจร */}
-          {showYearlyJorn && phopephumResult?.yearlyJorn && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
-              <span className="w-2 h-2 rounded-full bg-[#4B6FAE] shrink-0" />
-              <span className="text-[#4B6FAE] font-semibold shrink-0">ปีจร</span>
-              <span className="text-[#8A8070]">อายุย่าง</span>
-              <span className="text-[#F8F6F1] font-bold">{phopephumResult.taksaTransit?.ageYang ?? "—"} ปี</span>
-              <span className="text-[#8A8070]">→</span>
-              <span className="text-[#4B6FAE] font-bold">ฐาน {phopephumResult.yearlyJorn.row}</span>
-              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.yearlyJorn.houseName}</span>
-              {phopephumResult.yearlyJorn.yumStar && (
-                <>
-                  <span className="text-[#8A8070]">ดาวยํ้าฐาน {phopephumResult.yearlyJorn.yumBase ?? "—"}</span>
-                  <span className="text-sky-300 font-bold">
-                    {STAR_NAMES[phopephumResult.yearlyJorn.yumStar as 1|2|3|4|5|6|7] ?? phopephumResult.yearlyJorn.yumStar}
-                  </span>
-                </>
-              )}
-            </div>
-          )}
+          {showYearlyJorn && phopephumResult?.yearlyJorn && (() => {
+            const j = phopephumResult.yearlyJorn;
+            const b4val = matrix[3]?.[j.col - 1];
+            const b4name = BASE4_MEANINGS[b4val] ?? "—";
+            return (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
+                <span className="w-2 h-2 rounded-full bg-[#4B6FAE] shrink-0" />
+                <span className="text-[#4B6FAE] font-semibold shrink-0">ปีจร</span>
+                <span className="text-[#8A8070]">อายุย่าง</span>
+                <span className="text-[#F8F6F1] font-bold">{phopephumResult.taksaTransit?.ageYang ?? "—"} ปี</span>
+                <span className="text-[#8A8070]">→</span>
+                <span className="text-[#4B6FAE] font-bold">ฐาน {j.row}</span>
+                <span className="text-[#F8F6F1] font-semibold">ภพ{j.houseName}</span>
+                {j.yumStar && (
+                  <>
+                    <span className="text-[#8A8070]">ดาวยํ้าฐาน {j.yumBase ?? "—"}</span>
+                    <span className="text-sky-300 font-bold">{STAR_NAMES[j.yumStar as 1|2|3|4|5|6|7] ?? j.yumStar}({j.yumStar})</span>
+                  </>
+                )}
+                <span className="text-[#8A8070]">กำลัง</span>
+                <span className="text-[#4B6FAE] font-bold">{b4name}({b4val})</span>
+              </div>
+            );
+          })()}
           {/* ลัคนาจร */}
-          {showTransitLagna && phopephumResult?.lagnaTransit && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
-              <span className="px-1 py-[1px] rounded-full text-[8px] font-bold bg-[#4B6FAE] text-[#F8F6F1] leading-none select-none shrink-0">ลจ</span>
-              <span className="text-[#4B6FAE] font-semibold shrink-0">ลัคนาจร</span>
-              <span className="text-[#8A8070]">อายุย่าง</span>
-              <span className="text-[#F8F6F1] font-bold">{phopephumResult.taksaTransit?.ageYang ?? "—"} ปี</span>
-              <span className="text-[#8A8070]">นับจาก</span>
-              <span className="text-[#C6A96B]">ฐาน {phopephumResult.lagna.row} {phopephumResult.lagna.houseName}</span>
-              <span className="text-[#8A8070]">→</span>
-              <span className="text-[#4B6FAE] font-bold">ฐาน {phopephumResult.lagnaTransit.row}</span>
-              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.lagnaTransit.houseName}</span>
-              {phopephumResult.lagnaTransit.yumStar && (
-                <>
-                  <span className="text-[#8A8070]">ดาวยํ้าฐาน {phopephumResult.lagnaTransit.yumBase ?? "—"}</span>
-                  <span className="text-violet-300 font-bold">
-                    {STAR_NAMES[phopephumResult.lagnaTransit.yumStar as 1|2|3|4|5|6|7] ?? phopephumResult.lagnaTransit.yumStar}
-                  </span>
-                </>
-              )}
-            </div>
-          )}
+          {showTransitLagna && phopephumResult?.lagnaTransit && (() => {
+            const j = phopephumResult.lagnaTransit;
+            const b4val = matrix[3]?.[j.col - 1];
+            const b4name = BASE4_MEANINGS[b4val] ?? "—";
+            return (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
+                <span className="px-1 py-[1px] rounded-full text-[8px] font-bold bg-[#4B6FAE] text-[#F8F6F1] leading-none select-none shrink-0">ลจ</span>
+                <span className="text-[#4B6FAE] font-semibold shrink-0">ลัคนาจร</span>
+                <span className="text-[#8A8070]">อายุย่าง</span>
+                <span className="text-[#F8F6F1] font-bold">{phopephumResult.taksaTransit?.ageYang ?? "—"} ปี</span>
+                <span className="text-[#8A8070]">นับจาก</span>
+                <span className="text-[#C6A96B]">ฐาน {phopephumResult.lagna.row} {phopephumResult.lagna.houseName}</span>
+                <span className="text-[#8A8070]">→</span>
+                <span className="text-[#4B6FAE] font-bold">ฐาน {j.row}</span>
+                <span className="text-[#F8F6F1] font-semibold">ภพ{j.houseName}</span>
+                {j.yumStar && (
+                  <>
+                    <span className="text-[#8A8070]">ดาวยํ้าฐาน {j.yumBase ?? "—"}</span>
+                    <span className="text-violet-300 font-bold">{STAR_NAMES[j.yumStar as 1|2|3|4|5|6|7] ?? j.yumStar}({j.yumStar})</span>
+                  </>
+                )}
+                <span className="text-[#8A8070]">กำลัง</span>
+                <span className="text-violet-300 font-bold">{b4name}({b4val})</span>
+              </div>
+            );
+          })()}
           {/* เดือนจร */}
-          {showMonthlyJorn && phopephumResult?.monthlyJorn && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
-              <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" />
-              <span className="text-pink-400 font-semibold shrink-0">เดือนจร</span>
-              <span className="text-[#8A8070]">เดือน</span>
-              <span className="text-[#F8F6F1] font-bold">
-                {phopephumResult.horary?.lunarDate?.lunarMonthName ?? phopephumResult.horary?.lunarDate?.lunarMonth ?? "—"}
-              </span>
-              <span className="text-[#8A8070]">→</span>
-              <span className="text-pink-400 font-bold">ฐาน {phopephumResult.monthlyJorn.row}</span>
-              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.monthlyJorn.houseName}</span>
-              {phopephumResult.monthlyJorn.yumStar && (
-                <>
-                  <span className="text-[#8A8070]">ดาวยํ้าฐาน {phopephumResult.monthlyJorn.yumBase ?? 6}</span>
-                  <span className="text-pink-300 font-bold">
-                    {STAR_NAMES[phopephumResult.monthlyJorn.yumStar as 1|2|3|4|5|6|7] ?? phopephumResult.monthlyJorn.yumStar}
-                  </span>
-                </>
-              )}
-            </div>
-          )}
+          {showMonthlyJorn && phopephumResult?.monthlyJorn && (() => {
+            const j = phopephumResult.monthlyJorn;
+            const b4val = matrix[3]?.[j.col - 1];
+            const b4name = BASE4_MEANINGS[b4val] ?? "—";
+            return (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
+                <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" />
+                <span className="text-pink-400 font-semibold shrink-0">เดือนจร</span>
+                <span className="text-[#8A8070]">เดือน</span>
+                <span className="text-[#F8F6F1] font-bold">
+                  {phopephumResult.horary?.lunarDate?.lunarMonthName ?? phopephumResult.horary?.lunarDate?.lunarMonth ?? "—"}
+                </span>
+                <span className="text-[#8A8070]">→</span>
+                <span className="text-pink-400 font-bold">ฐาน {j.row}</span>
+                <span className="text-[#F8F6F1] font-semibold">ภพ{j.houseName}</span>
+                {j.yumStar && (
+                  <>
+                    <span className="text-[#8A8070]">ดาวยํ้าฐาน {j.yumBase ?? 6}</span>
+                    <span className="text-pink-300 font-bold">{STAR_NAMES[j.yumStar as 1|2|3|4|5|6|7] ?? j.yumStar}({j.yumStar})</span>
+                  </>
+                )}
+                <span className="text-[#8A8070]">กำลัง</span>
+                <span className="text-pink-300 font-bold">{b4name}({b4val})</span>
+              </div>
+            );
+          })()}
           {/* วันจร */}
-          {showDailyJorn && phopephumResult?.dailyJorn && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
-              <span className="text-emerald-400 font-semibold shrink-0">วันจร</span>
-              <span className="text-[#8A8070]">วัน</span>
-              <span className="text-[#F8F6F1] font-bold">
-                {phopephumResult.horary?.lunarDate?.dayName ?? "—"}
-              </span>
-              <span className="text-[#8A8070]">→</span>
-              <span className="text-emerald-400 font-bold">ฐาน {phopephumResult.dailyJorn.row}</span>
-              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.dailyJorn.houseName}</span>
-              {phopephumResult.dailyJorn.yumStar && (
-                <>
-                  <span className="text-[#8A8070]">ดาวยํ้าฐาน {phopephumResult.dailyJorn.yumBase ?? 5}</span>
-                  <span className="text-emerald-300 font-bold">
-                    {STAR_NAMES[phopephumResult.dailyJorn.yumStar as 1|2|3|4|5|6|7] ?? phopephumResult.dailyJorn.yumStar}
-                  </span>
-                </>
-              )}
-            </div>
-          )}
+          {showDailyJorn && phopephumResult?.dailyJorn && (() => {
+            const j = phopephumResult.dailyJorn;
+            const b4val = matrix[3]?.[j.col - 1];
+            const b4name = BASE4_MEANINGS[b4val] ?? "—";
+            return (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                <span className="text-emerald-400 font-semibold shrink-0">วันจร</span>
+                <span className="text-[#8A8070]">วัน</span>
+                <span className="text-[#F8F6F1] font-bold">
+                  {phopephumResult.horary?.lunarDate?.dayName ?? "—"}
+                </span>
+                <span className="text-[#8A8070]">→</span>
+                <span className="text-emerald-400 font-bold">ฐาน {j.row}</span>
+                <span className="text-[#F8F6F1] font-semibold">ภพ{j.houseName}</span>
+                {j.yumStar && (
+                  <>
+                    <span className="text-[#8A8070]">ดาวยํ้าฐาน {j.yumBase ?? 5}</span>
+                    <span className="text-emerald-300 font-bold">{STAR_NAMES[j.yumStar as 1|2|3|4|5|6|7] ?? j.yumStar}({j.yumStar})</span>
+                  </>
+                )}
+                <span className="text-[#8A8070]">กำลัง</span>
+                <span className="text-emerald-300 font-bold">{b4name}({b4val})</span>
+              </div>
+            );
+          })()}
         </div>
       )}
 
       {/* Legend Block */}
       {taksaMaha && (
         <div className="bg-[#0f172a]/50 p-4 border-t border-[#D9BC82]/10 text-[10px] space-y-2 text-[#8A8070]">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[9px]">ปัจจัยภายนอก (ทักษาจร):</span>
-            <div className="flex items-center gap-1.5">
-              <span className="px-1 py-[0.5px] rounded border text-[7px] font-bold text-emerald-400 bg-emerald-950/80 border-emerald-500/30">ศรี</span>
-              <span>ศรีจร (โอกาส/โชคลาภ)</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="px-1 py-[0.5px] rounded border text-[7px] font-bold text-sky-400 bg-sky-950/80 border-sky-500/30">มนตรี</span>
-              <span>มนตรีจร (ผู้อุปถัมภ์/สนับสนุน)</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="px-1 py-[0.5px] rounded border text-[7px] font-bold text-[#F8F6F1] bg-white/20 border-white/40">เดช</span>
-              <span>เดชจร (เกียรติยศ/อำนาจ)</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="px-1 py-[0.5px] rounded border text-[7px] font-bold text-red-400 bg-red-950/80 border-red-500/30">กาลี</span>
-              <span>กาลกิณีจร (อุปสรรค/ควรระวัง)</span>
-            </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[9px] w-full">ปัจจัยภายนอก (ทักษาจร — 8 ภพ):</span>
+            {[
+              { label: "บริวาร", desc: "บริวาร/สังคม/ผู้ติดตาม",            cls: "text-slate-300 bg-slate-800/80 border-slate-500/30" },
+              { label: "อายุ",   desc: "สุขภาพ/อายุ/ความมั่นคง",             cls: "text-teal-300 bg-teal-950/80 border-teal-500/30" },
+              { label: "เดช",    desc: "เกียรติยศ/อำนาจบารมี",               cls: "text-[#F8F6F1] bg-white/20 border-white/40" },
+              { label: "ศรี",    desc: "โชคลาภ/โอกาสดี/ทรัพย์สิน",          cls: "text-emerald-400 bg-emerald-950/80 border-emerald-500/30" },
+              { label: "มูละ",   desc: "รากฐาน/ที่อยู่/ครอบครัว",            cls: "text-orange-300 bg-orange-950/80 border-orange-500/30" },
+              { label: "อุตสาหะ",desc: "ความขยัน/แรงบันดาลใจ/การงาน",       cls: "text-yellow-300 bg-yellow-950/80 border-yellow-500/30" },
+              { label: "มนตรี",  desc: "ผู้อุปถัมภ์/สนับสนุน/เมตตา",        cls: "text-sky-400 bg-sky-950/80 border-sky-500/30" },
+              { label: "กาลี",   desc: "กาลกิณี — อุปสรรค/อัปมงคล/ระวัง",  cls: "text-red-400 bg-red-950/80 border-red-500/30" },
+            ].map(({ label, desc, cls }) => (
+              <div key={label} className="flex items-center gap-1">
+                <span className={`px-1 py-[0.5px] rounded border text-[7px] font-bold leading-none ${cls}`}>{label}</span>
+                <span className="text-[9px]">{desc}</span>
+              </div>
+            ))}
           </div>
-          
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-white/5">
-            <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[9px]">ปัจจัยภายใน (มหาภูติจร):</span>
-            <div className="flex items-center gap-1.5">
-              <span className="px-1 py-[0.5px] rounded border text-[7px] font-bold text-amber-400 bg-amber-950/80 border-amber-500/30">วินาศ</span>
-              <span>โลกาวินาศจร (ความแปรปรวน/ความเครียด)</span>
-            </div>
+
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1 border-t border-white/5">
+            <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[9px] w-full">ปัจจัยภายใน (มหาภูติจร — 7 ตำแหน่ง):</span>
+            {[
+              { label: "ราชา",    desc: "ความเป็นใหญ่/บารมีสูงสุด/ผู้นำ",             cls: "text-[#C6A96B] bg-[#C6A96B]/10 border-[#C6A96B]/40" },
+              { label: "อธิบดี",  desc: "การควบคุม/ผู้บัญชาการ/บริหาร",              cls: "text-violet-300 bg-violet-950/80 border-violet-500/30" },
+              { label: "ธงชัย",   desc: "ชัยชนะ/ความสำเร็จ/เกียรติยศ",               cls: "text-lime-300 bg-lime-950/80 border-lime-500/30" },
+              { label: "ขุมทรัพย์",desc: "ทรัพย์สมบัติ/โชคลาภ/รายได้",              cls: "text-emerald-300 bg-emerald-950/80 border-emerald-500/30" },
+              { label: "มรณะ",    desc: "การสูญเสีย/อันตราย/เปลี่ยนแปลงครั้งใหญ่", cls: "text-rose-400 bg-rose-950/80 border-rose-500/30" },
+              { label: "วินาศ",   desc: "โลกาวินาศ — ความแปรปรวน/วิกฤต",            cls: "text-amber-400 bg-amber-950/80 border-amber-500/30" },
+              { label: "อริ",     desc: "ศัตรู/การต่อสู้/ความขัดแย้ง",               cls: "text-red-300 bg-red-950/60 border-red-400/30" },
+            ].map(({ label, desc, cls }) => (
+              <div key={label} className="flex items-center gap-1">
+                <span className={`px-1 py-[0.5px] rounded border text-[7px] font-bold leading-none ${cls}`}>{label}</span>
+                <span className="text-[9px]">{desc}</span>
+              </div>
+            ))}
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-white/5">
