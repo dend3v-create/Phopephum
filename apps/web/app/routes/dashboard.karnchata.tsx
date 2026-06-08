@@ -8,7 +8,7 @@ import type { Env } from "~/env.server";
 import { Card } from "~/components/ui/Card";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 
 export const meta: MetaFunction = () => [
   { title: "ทำนายกาลชะตา V2.0 — PhopePhum" },
@@ -356,6 +356,26 @@ export default function KarnchataPage() {
 
   const activeCategory = CATEGORIES.find(c => c.id === selectedCategory);
 
+  // ── Connection items: computed whenever hoverNum or chart changes ──
+  const THAI_NUMS = ['๑','๒','๓','๔','๕','๖','๗','๘','๙'] as const;
+  const connectionItems = useMemo(() => {
+    if (hoverNum === null) return [];
+    const chart = activeResult.chart as number[][];
+    const items: Array<{ rIdx: number; colIdx: number; bhopName: string; b4Power: string | null; baseThai: string }> = [];
+    chart.forEach((row, rIdx) => {
+      if (rIdx === 3) return; // base 4 holds raw sums 3–21, not 1–7
+      const colIdx = row.indexOf(hoverNum);
+      if (colIdx === -1) return;
+      let bhopName = '';
+      if (rIdx < 3) bhopName = BHOP_NATAL_NAMES[rIdx]?.[colIdx] ?? '';
+      else if (rIdx === 7) bhopName = BHOP_8_NAMES[colIdx] ?? '';
+      else if (rIdx === 8) bhopName = BHOP_9_NAMES[colIdx] ?? '';
+      const b4Power = rIdx === 2 ? (BASE4_POWER_NAMES[(chart[3]?.[colIdx] ?? 0)] ?? null) : null;
+      items.push({ rIdx, colIdx, bhopName, b4Power, baseThai: THAI_NUMS[rIdx] ?? '' });
+    });
+    return items;
+  }, [hoverNum, activeResult]);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
 
@@ -688,69 +708,52 @@ export default function KarnchataPage() {
         </div>
 
         {/* ── Connection Detail Panel ── */}
-        {hoverNum !== null && (() => {
-          const thaiNums = ['๑','๒','๓','๔','๕','๖','๗','๘','๙'];
-          const chart = activeResult.chart as number[][];
-          const occurrences = chart.map((row, rIdx) => {
-            if (rIdx === 3) return null; // Base 4 holds raw sums (3–21), not 1–7
-            const colIdx = row.indexOf(hoverNum);
-            if (colIdx === -1) return null;
-            let bhopName = '';
-            if (rIdx < 3) bhopName = BHOP_NATAL_NAMES[rIdx][colIdx];
-            else if (rIdx === 7) bhopName = BHOP_8_NAMES[colIdx];
-            else if (rIdx === 8) bhopName = BHOP_9_NAMES[colIdx];
-            // If star is in Base 3 → show the Base 4 power in same column
-            const b4Power = rIdx === 2 ? (BASE4_POWER_NAMES[chart[3][colIdx]] || null) : null;
-            return { rIdx, colIdx, bhopName, b4Power };
-          }).filter(Boolean) as Array<{ rIdx: number; colIdx: number; bhopName: string; b4Power: string | null }>;
-
-          return (
-            <div className="mb-6 bg-gradient-to-br from-[#020617] to-[#09152b] border border-[#C6A96B]/35 rounded-2xl p-5 shadow-[0_0_24px_rgba(198,169,107,0.08)] animate-in fade-in duration-300">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-11 h-11 rounded-full bg-[#C6A96B] text-[#020617] flex items-center justify-center text-xl font-display font-black shadow-[0_0_18px_rgba(198,169,107,0.45)] shrink-0">
-                  {hoverNum}
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-[#C6A96B]">ดาว {STAR_NAMES[hoverNum as keyof typeof STAR_NAMES]}</p>
-                  <p className="text-xs text-[#8A8070]">ปรากฏใน {occurrences.length} ฐาน — เชื่อมโยงดังนี้</p>
-                </div>
+        {hoverNum !== null && (
+          <div className="mb-6 bg-gradient-to-br from-[#020617] to-[#09152b] border border-[#C6A96B]/35 rounded-2xl p-5 shadow-[0_0_24px_rgba(198,169,107,0.08)] animate-in fade-in duration-300">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-11 h-11 rounded-full bg-[#C6A96B] text-[#020617] flex items-center justify-center text-xl font-display font-black shadow-[0_0_18px_rgba(198,169,107,0.45)] shrink-0">
+                {hoverNum}
               </div>
-              {occurrences.length === 0 ? (
-                <p className="text-xs text-[#8A8070] text-center py-2">ไม่พบดาวนี้ในฐาน 1–3, 5–9</p>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {occurrences.map(occ => {
-                    const isNamedBase = occ.rIdx < 3 || occ.rIdx === 7 || occ.rIdx === 8;
-                    return (
-                      <div
-                        key={occ.rIdx}
-                        className={`rounded-xl p-3 border flex flex-col gap-1 ${isNamedBase ? 'bg-[#0A1628] border-[#C6A96B]/20' : 'bg-[#020617] border-white/5'}`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <span className={`text-[10px] font-black shrink-0 ${occ.rIdx < 3 ? 'text-[#C6A96B]' : occ.rIdx < 7 ? 'text-[#8A8070]' : 'text-[#C6A96B]'}`}>
-                            ฐาน{thaiNums[occ.rIdx]}
-                          </span>
-                          <span className="text-xs text-[#F8F6F1] font-bold leading-tight truncate">
-                            {occ.bhopName || `ช่อง ${occ.colIdx + 1}`}
-                          </span>
-                        </div>
-                        {occ.b4Power && (
-                          <div className="flex items-center gap-1.5 pt-1 border-t border-sky-500/15">
-                            <span className="text-[9px] text-sky-400/70">เทวดา:</span>
-                            <span className="text-[10px] text-sky-300 font-bold">{occ.b4Power}</span>
-                          </div>
-                        )}
-                        {!occ.bhopName && (
-                          <span className="text-[10px] text-[#8A8070]">ฐานสมทบ</span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
+              <div>
+                <p className="text-sm font-bold text-[#C6A96B]">ดาว {STAR_NAMES[hoverNum as keyof typeof STAR_NAMES]}</p>
+                <p className="text-xs text-[#8A8070]">ปรากฏใน {connectionItems.length} ฐาน — เชื่อมโยงดังนี้</p>
+              </div>
             </div>
-          );
-        })()}
+            {connectionItems.length === 0 ? (
+              <p className="text-xs text-[#8A8070] text-center py-2">ไม่พบดาวนี้ในฐาน 1–3, 5–9</p>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {connectionItems.map(occ => {
+                  const isNamedBase = occ.rIdx < 3 || occ.rIdx === 7 || occ.rIdx === 8;
+                  return (
+                    <div
+                      key={occ.rIdx}
+                      className={`rounded-xl p-3 border flex flex-col gap-1 ${isNamedBase ? 'bg-[#0A1628] border-[#C6A96B]/20' : 'bg-[#020617] border-white/5'}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-black shrink-0 ${occ.rIdx < 3 ? 'text-[#C6A96B]' : occ.rIdx < 7 ? 'text-[#8A8070]' : 'text-[#C6A96B]'}`}>
+                          ฐาน{occ.baseThai}
+                        </span>
+                        <span className="text-xs text-[#F8F6F1] font-bold leading-tight truncate">
+                          {occ.bhopName || `ช่อง ${occ.colIdx + 1}`}
+                        </span>
+                      </div>
+                      {occ.b4Power && (
+                        <div className="flex items-center gap-1.5 pt-1 border-t border-sky-500/15">
+                          <span className="text-[9px] text-sky-400/70">เทวดา:</span>
+                          <span className="text-[10px] text-sky-300 font-bold">{occ.b4Power}</span>
+                        </div>
+                      )}
+                      {!occ.bhopName && (
+                        <span className="text-[10px] text-[#8A8070]">ฐานสมทบ</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         <p className="text-xs text-[#C6A96B]/50 mb-4 md:hidden text-center">← เลื่อนซ้าย-ขวาเพื่อดูผังเต็ม →</p>
 
