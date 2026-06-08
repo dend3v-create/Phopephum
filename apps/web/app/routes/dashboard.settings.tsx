@@ -91,7 +91,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   if (formType === "personal") {
     const displayName = String(formData.get("displayName") ?? "");
-    const birthDate = String(formData.get("birthDate") ?? "");
+    const birthDay = parseInt(String(formData.get("birthDay") ?? "0"), 10);
+    const birthMonth = parseInt(String(formData.get("birthMonth") ?? "0"), 10);
+    const birthYearBE = parseInt(String(formData.get("birthYear") ?? "0"), 10);
     const birthTime = String(formData.get("birthTime") ?? "");
     const birthPlace = String(formData.get("birthPlace") ?? "");
     const gender = String(formData.get("gender") ?? "");
@@ -100,11 +102,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return json({ error: "กรุณากรอกชื่อแสดงผล" }, { status: 400 });
     }
 
+    // แปลง พ.ศ. → ค.ศ. (ลบ 543) แล้วสร้าง ISO date string สำหรับฐานข้อมูล
+    let birthDate: string | null = null;
+    if (birthDay > 0 && birthMonth > 0 && birthYearBE >= 2400) {
+      const birthYearCE = birthYearBE - 543;
+      birthDate = `${birthYearCE}-${String(birthMonth).padStart(2, "0")}-${String(birthDay).padStart(2, "0")}`;
+    }
+
     const { error } = await supabase
       .from("profiles")
       .update({
         display_name: displayName,
-        birth_date: birthDate || null,
+        birth_date: birthDate,
         birth_time: birthTime || null,
         birth_place: birthPlace || null,
         gender: gender || null,
@@ -198,6 +207,17 @@ export default function SettingsPage() {
   // จัดการแท็บ
   const [activeTab, setActiveTab] = useState("personal");
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+
+  // แปลงวันเกิดจากฐานข้อมูล (ค.ศ.) → พ.ศ. สำหรับแสดงในฟอร์ม
+  const birthDateBE = (() => {
+    if (!profile?.birth_date) return { day: "", month: "", year: "" };
+    const d = new Date(profile.birth_date + "T12:00:00");
+    return {
+      day: d.getDate(),
+      month: d.getMonth() + 1,
+      year: d.getFullYear() + 543,
+    };
+  })();
 
   // รหัสแนะนำเฉพาะตัว
   const affiliateCode = profile?.referral_code || "";
@@ -293,14 +313,65 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Input
-                    name="birthDate"
-                    type="date"
-                    label="วันเกิดคริสต์ศักราช (ค.ศ.)"
-                    defaultValue={profile?.birth_date ?? ""}
-                  />
+                {/* วัน / เดือน / ปี พ.ศ. */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="flex flex-col">
+                    <label className="text-[#8A8070] text-[11px] uppercase tracking-widest block mb-2 font-bold">
+                      วันเกิด
+                    </label>
+                    <input
+                      name="birthDay"
+                      type="number"
+                      min={1}
+                      max={31}
+                      defaultValue={birthDateBE.day}
+                      placeholder="วัน"
+                      className="w-full bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
+                    />
+                  </div>
 
+                  <div className="flex flex-col">
+                    <label className="text-[#8A8070] text-[11px] uppercase tracking-widest block mb-2 font-bold">
+                      เดือนเกิด
+                    </label>
+                    <select
+                      name="birthMonth"
+                      defaultValue={birthDateBE.month}
+                      className="w-full bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
+                    >
+                      <option value="">เดือน...</option>
+                      <option value="1">มกราคม</option>
+                      <option value="2">กุมภาพันธ์</option>
+                      <option value="3">มีนาคม</option>
+                      <option value="4">เมษายน</option>
+                      <option value="5">พฤษภาคม</option>
+                      <option value="6">มิถุนายน</option>
+                      <option value="7">กรกฎาคม</option>
+                      <option value="8">สิงหาคม</option>
+                      <option value="9">กันยายน</option>
+                      <option value="10">ตุลาคม</option>
+                      <option value="11">พฤศจิกายน</option>
+                      <option value="12">ธันวาคม</option>
+                    </select>
+                  </div>
+
+                  <div className="flex flex-col">
+                    <label className="text-[#8A8070] text-[11px] uppercase tracking-widest block mb-2 font-bold">
+                      ปีเกิด (พ.ศ.)
+                    </label>
+                    <input
+                      name="birthYear"
+                      type="number"
+                      min={2400}
+                      max={2600}
+                      defaultValue={birthDateBE.year}
+                      placeholder="เช่น 2525"
+                      className="w-full bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     name="birthTime"
                     type="time"

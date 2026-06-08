@@ -675,9 +675,9 @@ export default function HoroscopePage() {
                       onChange={(e) => {
                         const cust = customers.find((c: any) => c.id === e.target.value);
                         if (cust) {
-                          const dSel = document.querySelector('select[name="birthDay"]') as HTMLSelectElement;
-                          const mSel = document.querySelector('select[name="birthMonth"]') as HTMLSelectElement;
-                          const ySel = document.querySelector('select[name="birthYear"]') as HTMLSelectElement;
+                          const dSel = document.querySelector('select[name="birthDay"]') as unknown as HTMLSelectElement | null;
+                          const mSel = document.querySelector('select[name="birthMonth"]') as unknown as HTMLSelectElement | null;
+                          const ySel = document.querySelector('select[name="birthYear"]') as unknown as HTMLSelectElement | null;
                           const timeInput = document.querySelector('input[name="birthTime"]') as HTMLInputElement;
                           const placeInput = document.querySelector('input[name="birthPlace"]') as HTMLInputElement;
                           
