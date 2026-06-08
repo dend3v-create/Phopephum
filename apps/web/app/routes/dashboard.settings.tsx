@@ -230,6 +230,13 @@ export default function SettingsPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const initialBirthYear = profile?.birth_date ? Number(profile.birth_date.slice(0, 4)) + 543 : 2525;
+  const initialBirthMonth = profile?.birth_date ? Number(profile.birth_date.slice(5, 7)) : 1;
+  const initialBirthDay = profile?.birth_date ? Number(profile.birth_date.slice(8, 10)) : 1;
+  const [birthYear, setBirthYear] = useState(initialBirthYear);
+  const [birthMonth, setBirthMonth] = useState(initialBirthMonth);
+  const [birthDay, setBirthDay] = useState(initialBirthDay);
+
   return (
     <div className="space-y-6 max-w-4xl pb-16">
       <div>
