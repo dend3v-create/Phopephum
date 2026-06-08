@@ -147,23 +147,56 @@ export async function calculateImperial(input: HoroscopeInput, checkDate: Date =
   let d = bkkCheck.getDay();
   if (bkkCheck.getHours() < 6) d = (d + 6) % 7;
   const dayStar = [1, 2, 3, 4, 5, 6, 7][d];
-  const dCol = dayStar % 7;
+  const dCol = (dayStar! - 1) % 7;
   const daily = { row: 1, col: dCol + 1, houseName: PHOPEPHUM_HOUSES[0][dCol], star: matrix[0][dCol] };
+
+  // ── เดือนจร (Monthly Jorn) — ตามเลขเดือนจันทรคติ mod 7 ──
+  const checkDateStr = checkDate.toISOString().split('T')[0]!;
+  const checkTimeStr = bkkCheck.getHours().toString().padStart(2, '0') + ':' + bkkCheck.getMinutes().toString().padStart(2, '0');
+  const transitThai = getThaiBaseNumbers(checkDateStr, checkTimeStr);
+  const mCol = safeMod(transitThai.lunarMonth - 1, 7);
+  const monthly = {
+    row: 2,
+    col: mCol + 1,
+    houseName: PHOPEPHUM_HOUSES[1][mCol],
+    star: matrix[1][mCol],
+    lunarMonth: transitThai.lunarMonth,
+  };
+
+  // ── วัยจร (Vaya Jorn) — ตำแหน่งปัจจุบันในช่วงอายุ ──
+  const allVayaRanges = calculateVayaJornRanges(matrix);
+  const currentVaya = allVayaRanges.find(r => ageYang >= r.start && ageYang <= r.end) ?? allVayaRanges[0]!;
+  const vRow = Math.max(0, Math.min(2, currentVaya.row - 1));
+  const vCol = Math.max(0, Math.min(6, currentVaya.col - 1));
+  const vaya = {
+    row: currentVaya.row,
+    col: currentVaya.col,
+    houseName: PHOPEPHUM_HOUSES[vRow][vCol],
+    star: matrix[vRow][vCol],
+    ageStart: currentVaya.start,
+    ageEnd: currentVaya.end,
+  };
 
   const time = calculateTimeEngine(bDate);
   const reksName = REKS_NAMES[time.reksIndex] || "—";
-  const yearlyB4 = matrix[3][yearly.col - 1] || 0;
-  const yumStar = matrix[6][yearly.col - 1] || 0;
+  const yearlyB4 = matrix[3]?.[yearly.col - 1] ?? 0;
+  const monthlyB4 = matrix[3]?.[monthly.col - 1] ?? 0;
+  const dailyB4 = matrix[3]?.[daily.col - 1] ?? 0;
+  const vayaB4 = matrix[3]?.[vaya.col - 1] ?? 0;
+  const yumStar = matrix[6]?.[yearly.col - 1] ?? 0;
 
-  return { 
-    matrix, 
-    lunar: matrixResult.lunarDate, 
-    natal: { ...natal, reksName, reksSlot: time.reksIndex + 1, yamName: `ยามที่ ${time.yamNumber}`, isDay: time.isDay }, 
-    transit, 
-    vayaRanges: calculateVayaJornRanges(matrix), 
+  return {
+    matrix,
+    lunar: matrixResult.lunarDate,
+    transitLunar: transitThai,
+    natal: { ...natal, reksName, reksSlot: time.reksIndex + 1, yamName: `ยามที่ ${time.yamNumber}`, isDay: time.isDay },
+    transit,
+    vayaRanges: allVayaRanges,
+    vaya: { ...vaya, b4Power: vayaB4, b4Meaning: BASE4_MEANINGS[vayaB4] || "—" },
     yearly: { ...yearly, b4Power: yearlyB4, b4Meaning: BASE4_MEANINGS[yearlyB4] || "—", yumStar },
-    daily, 
-    ageYang, 
-    input_data: input 
+    monthly: { ...monthly, b4Power: monthlyB4, b4Meaning: BASE4_MEANINGS[monthlyB4] || "—" },
+    daily: { ...daily, b4Power: dailyB4, b4Meaning: BASE4_MEANINGS[dailyB4] || "—" },
+    ageYang,
+    input_data: input
   };
 }
