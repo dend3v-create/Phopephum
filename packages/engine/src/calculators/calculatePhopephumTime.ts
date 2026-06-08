@@ -77,22 +77,23 @@ export const REKS_NAMES = [
 
 /**
  * คำนวณลัคนาเกิด (Birth Ascendant)
+ *
+ * Algorithm:
+ * 1. หายามใหญ่ 90 นาที → ได้ดาวประจำยาม (yamYai)
+ * 2. หาช่วงยาม 30 นาที → ยามต้น=ฐาน1(row0), ยามกลาง=ฐาน2(row1), ยามปลาย=ฐาน3(row2)
+ * 3. หาฤกษ์ 10 นาที (9 ฤกษ์ใน 1 ยาม) → ได้ดาวประจำฤกษ์
+ * 4. ดาวประจำฤกษ์ → column ในแถวนั้น
  */
 export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: number, col: number, houseName: string, star: number, reksName: string, reksIndex: number } {
   const time = calculateTimeEngine(date);
-  const starToFind = time.yamYai;
-  
+
   // ช่วงยาม 30 นาที บอกฐาน (row)
   // ยามต้น (early) -> ฐาน 1 (Row 0)
   // ยามกลาง (middle) -> ฐาน 2 (Row 1)
   // ยามปลาย (end) -> ฐาน 3 (Row 2)
   const row = time.subPeriod === 'early' ? 0 : (time.subPeriod === 'middle' ? 1 : 2);
-  
-  // หาว่าดาวประจำยามใหญ่อยู่ใน column ไหนของแถวนั้น
-  const col = matrix[row].indexOf(starToFind);
-  const safeCol = col === -1 ? 0 : col;
-  
-  // คำนวณฤกษ์ 10 นาที (0-8)
+
+  // คำนวณฤกษ์ 10 นาที (0-8) และหาดาวประจำฤกษ์
   const totalMin = date.getHours() * 60 + date.getMinutes();
   let adjusted = (totalMin - 360 + 1440) % 1440;
   const isDay = adjusted < 720;
@@ -100,12 +101,20 @@ export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: 
   const minInYam = periodMin % 90;
   const reksIndex = Math.floor(minInYam / 10);
   const reksName = REKS_NAMES[reksIndex] || "—";
-  
+
+  // ดาวประจำฤกษ์ = เริ่มจาก yamYai แล้วเดิน Chaldean reksIndex ก้าว
+  const yamYaiIdx = YAM_ORDER.indexOf(time.yamYai);
+  const reksStar = YAM_ORDER[(yamYaiIdx + reksIndex) % 7];
+
+  // column = ตำแหน่งที่ดาวประจำฤกษ์ปรากฏในแถวนั้น
+  const col = matrix[row].indexOf(reksStar);
+  const safeCol = col === -1 ? 0 : col;
+
   return {
     row: row + 1,
     col: safeCol + 1,
     houseName: PHOPEPHUM_HOUSES[row][safeCol],
-    star: starToFind,
+    star: reksStar,
     reksName,
     reksIndex
   };
