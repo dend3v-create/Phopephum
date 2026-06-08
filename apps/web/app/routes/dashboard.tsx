@@ -102,6 +102,11 @@ export default function DashboardLayout() {
             label={<span>ทำนายกาลชะตา {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
           />
           
+          <NavLink to="/dashboard/horanu" 
+            icon={<IconHoraNu />}   
+            label={<span>โหรทายหนู {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
+          />
+          
           <NavLink to="/dashboard/planner"   
             icon={<IconCalendar />} 
             label={<span>วางแผนชีวิต {profile?.plan === 'free' || profile?.plan === 'basic' ? '🔒' : ''}</span>} 
@@ -360,6 +365,16 @@ function IconHelp() {
       <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M9.09 9C9.3251 8.33167 9.78915 7.76811 10.4 7.40913C11.0108 7.05016 11.7289 6.91894 12.4272 7.03871C13.1255 7.15849 13.7588 7.52152 14.2151 8.06353C14.6713 8.60553 14.9211 9.29152 14.92 10C14.92 12 11.92 13 11.92 13" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M12 17H12.01" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} />
+    </svg>
+  );
+}
+
+function IconHoraNu() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5 text-[#C6A96B]">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" strokeLinecap="round" />
+      <circle cx="12" cy="12" r="2" fill="currentColor" />
     </svg>
   );
 }

@@ -67,6 +67,9 @@ export const FEATURE_PLANS = {
   // ─ Planner ────────────────────────────────────────────────────────────────
   planner: "basic" as Plan,  // วางแผนชีวิต TQM
 
+  // ─ Hora Nu (โหรทายหนู) ────────────────────────────────────────────────
+  horanu: "basic" as Plan,  // โหรทายหนู
+
   // ─ AI Reports ─────────────────────────────────────────────────────────────
   ai_report: "basic" as Plan,  // สร้าง AI Life Report
 
