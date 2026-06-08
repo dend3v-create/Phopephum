@@ -30,11 +30,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 // ── Route → tab mapping for mobile bottom bar ────────────────────────────────
 const MAIN_TABS = [
-  { to: "/dashboard",         label: "วันนี้",        icon: <IcoToday /> },
-  { to: "/dashboard/horoscope", label: "เส้นทางชีวิต", icon: <IcoJourney /> },
-  { to: "/dashboard/reports/new", label: "Wisdom AI",  icon: <IcoAI /> },
-  { to: "/dashboard/planner", label: "บันทึก",        icon: <IcoJournal /> },
-  { to: "/dashboard/settings", label: "โปรไฟล์",      icon: <IcoProfile /> },
+  { to: "/dashboard",       label: "วันนี้",      icon: <IcoToday /> },
+  { to: "/dashboard/chat",  label: "Wisdom AI",   icon: <IcoAI /> },
+  { to: "/dashboard/planner", label: "บันทึก",   icon: <IcoJournal /> },
+  { to: "/dashboard/settings", label: "โปรไฟล์", icon: <IcoProfile /> },
 ] as const;
 
 export default function DashboardLayout() {
@@ -97,13 +96,7 @@ export default function DashboardLayout() {
           <NavLink to="/dashboard" icon={<IcoToday />} label="วันนี้" exact />
 
           <NavLink
-            to="/dashboard/horoscope"
-            icon={<IcoJourney />}
-            label="เส้นทางชีวิต"
-          />
-
-          <NavLink
-            to="/dashboard/reports/new"
+            to="/dashboard/chat"
             icon={<IcoAI />}
             label="Wisdom AI"
           />
@@ -119,6 +112,15 @@ export default function DashboardLayout() {
             icon={<IcoProfile />}
             label="โปรไฟล์"
           />
+
+          {/* เส้นทางชีวิต — accessible but not primary nav */}
+          <div className="mt-1">
+            <NavLink
+              to="/dashboard/horoscope"
+              icon={<IcoJourney />}
+              label="เส้นทางชีวิต"
+            />
+          </div>
 
           {/* ── Pro Astrologer Tools (hidden from general users) ── */}
           {isPro && (
@@ -284,11 +286,10 @@ export default function DashboardLayout() {
 
 function MobileBottomBar({ currentPath }: { currentPath: string }) {
   const tabs = [
-    { to: "/dashboard",              label: "วันนี้",        icon: <IcoToday />,   exact: true },
-    { to: "/dashboard/horoscope",    label: "เส้นทางชีวิต", icon: <IcoJourney />, exact: false },
-    { to: "/dashboard/reports/new",  label: "AI",            icon: <IcoAI />,      exact: false },
-    { to: "/dashboard/planner",      label: "บันทึก",        icon: <IcoJournal />, exact: false },
-    { to: "/dashboard/settings",     label: "โปรไฟล์",      icon: <IcoProfile />, exact: false },
+    { to: "/dashboard",           label: "วันนี้",    icon: <IcoToday />,   exact: true  },
+    { to: "/dashboard/chat",      label: "Wisdom AI", icon: <IcoAI />,      exact: false },
+    { to: "/dashboard/planner",   label: "บันทึก",   icon: <IcoJournal />, exact: false },
+    { to: "/dashboard/settings",  label: "โปรไฟล์",  icon: <IcoProfile />, exact: false },
   ];
 
   return (
