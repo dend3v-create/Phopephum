@@ -1071,34 +1071,6 @@ export default function HoroscopePage() {
               </button>
               <button
                 type="button"
-                onClick={() => setShowNatalLagna(!showNatalLagna)}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showNatalLagna ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-[#C6A96B] text-[#020617] text-[8px] font-bold flex items-center justify-center">ล</span>
-                  <span>ลัคนากำเนิด</span>
-                </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showNatalLagna ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowTransitLagna(!showTransitLagna)}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showTransitLagna ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-[#4B6FAE] text-[#F8F6F1] text-[9px] font-bold flex items-center justify-center">✶</span>
-                  <span>ลัคนาจร</span>
-                </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showTransitLagna ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
-              </button>
-
-              <button
-                type="button"
                 onClick={() => setShowVayaJorn(!showVayaJorn)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
                   showVayaJorn ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
@@ -2002,8 +1974,8 @@ function FateMatrixPanel({
   phopephumResult,
   highlightedStars = new Set<number>(),
   isFiltering = false,
-  showNatalLagna = true,
-  showTransitLagna = true,
+  showNatalLagna = false,
+  showTransitLagna = false,
   showVayaJorn = true,
   showYearlyJorn = true,
   showMonthlyJorn = true,
@@ -2191,8 +2163,8 @@ function FateMatrixPanel({
 
                             {/* ลัคนาจร (ลจ) - Bottom Right */}
                             {showTransitLagna && isLagnaTransit && (
-                              <span 
-                                title={`ลัคนาจร (อายุย่าง ${currentAge} ปี)`}
+                              <span
+                                title={`ลัคนาจร (อายุย่าง ${phopephumResult?.taksaTransit?.ageYang ?? 0} ปี)`}
                                 className="absolute -bottom-1 -right-2.5 text-[8px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 px-1 py-[0.5px] rounded-full leading-none shadow-md transition-all group-hover/cell:scale-105 select-none animate-pulse z-10"
                               >
                                 ลจ
@@ -2301,8 +2273,8 @@ function FateMatrixPanel({
             )}
             {showTransitLagna && (
               <div className="flex items-center gap-1.5">
-                <span className="px-1 py-[0.5px] rounded-full text-[9px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 leading-none select-none">✶</span>
-                <span>ลัคนาจร (ดาวหกแฉก)</span>
+                <span className="px-1 py-[0.5px] rounded-full text-[9px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 leading-none select-none">ลจ</span>
+                <span>ลัคนาจร</span>
               </div>
             )}
             {showVayaJorn && (
