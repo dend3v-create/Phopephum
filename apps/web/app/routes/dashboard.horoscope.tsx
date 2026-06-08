@@ -510,71 +510,9 @@ export default function HoroscopePage() {
   const placeholderMatrix = Array(9).fill(0).map(() => Array(7).fill(0));
 
   return (
-    <div className="space-y-8 max-w-5xl pb-20 animate-fade-up">
-      <header className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase font-bold">
-              ดวงดีมีชัย · ตรวจดวงชะตา
-            </p>
-            <h1 className="font-display text-4xl font-extrabold text-[#F8F6F1] tracking-tight mt-1">
-              ผังดวงจักรพรรดิ
-            </h1>
-            <p className="text-[#8A8070] text-xs font-medium mt-1 font-sans">
-              {formattedTransitDate}
-            </p>
-          </div>
-          
-          <div className="text-left md:text-right shrink-0">
-            <span className="text-[#8A8070] text-[9px] uppercase tracking-widest font-bold block">อายุย่างปีจร</span>
-            <span className="text-[#F8F6F1] font-display text-3xl font-extrabold text-[#C6A96B] drop-shadow-[0_0_10px_rgba(198,169,107,0.3)]">
-              {currentAge ? `${currentAge} ปี` : "—"}
-            </span>
-          </div>
-        </div>
+    <div className="space-y-6 max-w-5xl pb-20 animate-fade-up">
 
-        {/* ── Moon Phase Widget (สไตล์เดียวกับ ฤกษ์งามยามดี) ── */}
-        {lunar ? (
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-[#0A2240]/45 border border-[#C6A96B]/20 backdrop-blur-xl shadow-lg relative overflow-hidden transition-all duration-300 hover:border-[#C6A96B]/40 animate-fade-in">
-            <div className="absolute inset-0 bg-gradient-to-r from-[#4B6FAE]/5 to-transparent pointer-events-none" />
-            <div className="flex items-center gap-3.5 z-10">
-              <div className="w-12 h-12 rounded-full bg-slate-950/40 flex items-center justify-center text-2xl border border-[#C6A96B]/15 shadow-[0_0_15px_rgba(198,169,107,0.25)] select-none">
-                {isWaxing ? "🌕" : "🌑"}
-              </div>
-              <div className="flex flex-col gap-0.5">
-                <span className="text-[#F8F6F1] font-extrabold text-sm leading-tight flex items-center gap-2">
-                  <span>{moonPhaseText}</span>
-                  <span className="text-[#C6A96B] text-[10px] font-normal border border-[#C6A96B]/25 px-1.5 py-[0.5px] rounded-md bg-[#C6A96B]/5">
-                    เดือน {lunar.lunarMonthName || lunar.lunarMonth} ปี {lunar.zodiacName || ''}
-                  </span>
-                </span>
-                <span className="text-[#8A8070] text-[11px] font-medium leading-normal italic">
-                  {lunarDescText}
-                </span>
-              </div>
-            </div>
-            <div className="text-right flex flex-col justify-center z-10 pl-4 border-l border-white/5">
-              <span className="text-[#F8F6F1] font-display font-extrabold text-lg leading-tight">
-                {brightnessText}
-              </span>
-              <span className="text-[#8A8070] text-[8px] uppercase tracking-widest font-bold mt-0.5">ความสว่าง</span>
-            </div>
-          </div>
-        ) : (
-          <div className="flex items-center justify-between p-4 rounded-2xl bg-[#0A2240]/25 border border-white/5 backdrop-blur-xl animate-pulse">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full bg-slate-950/20" />
-              <div className="flex flex-col gap-2">
-                <div className="h-4 w-32 bg-white/5 rounded" />
-                <div className="h-3 w-48 bg-white/5 rounded" />
-              </div>
-            </div>
-            <div className="h-8 w-12 bg-white/5 rounded" />
-          </div>
-        )}
-      </header>
-
-      {/* ── Sub-menu Card Navigation (สไตล์เดียวกับ ฤกษ์งามยามดี) ── */}
+      {/* ── Sub-menu Card Navigation — บนสุด ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
         {[
           { id: "chart", label: "ผังดวงจักรพรรดิ", icon: "☸️", desc: "เลข 7 ตัว 9 ฐาน" },
@@ -824,22 +762,27 @@ export default function HoroscopePage() {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-px bg-gradient-to-r from-transparent via-[#C6A96B]/40 to-transparent" />
 
               <div className="relative z-10 space-y-3">
-                {/* แถวบน: จันทรคติจร (วันนี้) + วันที่จร */}
-                <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-[#C6A96B]/15">
-                  {activeResult.phopephumResult?.transitLunar?.moonPhase && (
-                    <span className="text-[9px] font-bold bg-[#C6A96B]/10 border border-[#C6A96B]/25 text-[#C6A96B] px-2.5 py-1 rounded-full">
-                      {activeResult.phopephumResult.transitLunar.moonPhase}
-                      {activeResult.phopephumResult.transitLunar.lunarMonthName
-                        ? ` เดือน${activeResult.phopephumResult.transitLunar.lunarMonthName}`
-                        : activeResult.phopephumResult.transitLunar.lunarMonth
-                        ? ` เดือน${activeResult.phopephumResult.transitLunar.lunarMonth}`
-                        : ""}
-                      {activeResult.phopephumResult.transitLunar.zodiacName
-                        ? ` ปี${activeResult.phopephumResult.transitLunar.zodiacName}`
-                        : ""}
-                    </span>
-                  )}
-                  <span className="text-[10px] text-[#8A8070]">{formattedTransitDate}</span>
+                {/* แถวบน: Moon Phase + วันที่จร */}
+                <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#C6A96B]/15">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-950/40 flex items-center justify-center text-xl border border-[#C6A96B]/20 shadow-[0_0_12px_rgba(198,169,107,0.2)] select-none shrink-0">
+                      {isWaxing ? "🌕" : "🌑"}
+                    </div>
+                    <div className="flex flex-col gap-0.5">
+                      <span className="text-[#F8F6F1] font-extrabold text-sm leading-tight flex flex-wrap items-center gap-1.5">
+                        <span>{moonPhaseText}</span>
+                        <span className="text-[#C6A96B] text-[9px] font-normal border border-[#C6A96B]/25 px-1.5 py-[0.5px] rounded-md bg-[#C6A96B]/5">
+                          เดือน {lunar?.lunarMonthName || lunar?.lunarMonth} ปี {lunar?.zodiacName || ''}
+                        </span>
+                      </span>
+                      <span className="text-[#8A8070] text-[10px] italic leading-tight">{lunarDescText}</span>
+                    </div>
+                  </div>
+                  <div className="text-right shrink-0 pl-3 border-l border-white/10">
+                    <span className="text-[#C6A96B] font-display font-extrabold text-lg leading-tight block">{brightnessText}</span>
+                    <span className="text-[#8A8070] text-[8px] uppercase tracking-widest font-bold">ความสว่าง</span>
+                    <span className="text-[9px] text-[#8A8070] block mt-0.5">{formattedTransitDate}</span>
+                  </div>
                 </div>
 
                 {/* แถวกลาง: ชื่อเจ้าชะตา + ข้อมูลเกิด */}
