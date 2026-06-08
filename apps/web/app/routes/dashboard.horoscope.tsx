@@ -520,7 +520,7 @@ export default function HoroscopePage() {
           <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase font-bold">
             ดวงดีมีชัย · ตรวจดวงชะตา
           </p>
-          <h1 className="font-display text-4xl font-extrabold text-[#F8F6F1] tracking-tight mt-1">
+          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#F8F6F1] tracking-tight mt-1">
             ผังดวงจักรพรรดิ
           </h1>
           <p className="text-[#8A8070] text-xs font-medium mt-1 font-sans">
@@ -530,7 +530,7 @@ export default function HoroscopePage() {
       </div>
 
       {/* ── Sub-menu Card Navigation — บนสุด ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-2.5">
         {[
           { id: "chart", label: "ผังดวงจักรพรรดิ", icon: "☸️", desc: "เลข 7 ตัว 9 ฐาน" },
           { id: "taksa", label: "ทักษา / มหาภูติ", icon: "🧭", desc: "ผังพลังงานวิถีจร" },
@@ -549,7 +549,7 @@ export default function HoroscopePage() {
                 }
                 setActiveTab(tab.id as any);
               }}
-              className={`flex items-center gap-3 p-3 rounded-2xl border transition-all duration-300 min-h-[70px] text-left hover:scale-[1.01] active:scale-[0.99] ${
+              className={`flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-2xl border transition-all duration-300 min-h-[60px] sm:min-h-[70px] text-left hover:scale-[1.01] active:scale-[0.99] ${
                 isSelected
                   ? "bg-[#C6A96B] border-[#F8F6F1]/10 text-[#020617] shadow-[0_4px_20px_rgba(198,169,107,0.25)]"
                   : "bg-[#0A2240]/45 border-white/5 text-[#8A8070] hover:text-[#F8F6F1] hover:border-[#C6A96B]/25"
@@ -873,7 +873,7 @@ export default function HoroscopePage() {
                 ตัวเลือกการแสดงผลสัญลักษณ์ผังดวง (Chart Display Config)
               </h3>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 text-[11px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 text-[10px] sm:text-[11px]">
               <button
                 type="button"
                 onClick={() => setShowNatalLagna(!showNatalLagna)}
@@ -1169,7 +1169,7 @@ export default function HoroscopePage() {
             </div>
 
             {/* หมวดหมู่แนะนำเป็น Premium Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
               {[
                 {
                   value: "general_prediction",
@@ -1959,8 +1959,8 @@ function FateMatrixPanel({
                       : "hover:bg-white/5"
                   }`}
                 >
-                  <td className="py-2 pr-6 text-left whitespace-nowrap min-w-[120px]">
-                    <p className={`text-sm font-bold ${isBase4 ? "text-[#8AA7DF]" : "text-[#F8F6F1]"}`}>{ROW_META[rIdx].label}</p>
+                  <td className="py-2 pr-2 sm:pr-6 text-left whitespace-nowrap min-w-[60px] sm:min-w-[120px]">
+                    <p className={`text-[11px] sm:text-sm font-bold ${isBase4 ? "text-[#8AA7DF]" : "text-[#F8F6F1]"}`}>{ROW_META[rIdx].label}</p>
                   </td>
                   {row.map((num, cIdx) => {
                     const isBase4 = rIdx === 3;
@@ -2031,17 +2031,17 @@ function FateMatrixPanel({
                       phopephumResult.dailyJorn.col === (cIdx + 1);
 
                     return (
-                      <td key={cIdx} className="p-2 min-w-[64px]">
+                      <td key={cIdx} className="p-1 sm:p-2 min-w-[44px] sm:min-w-[64px]">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onNumClick(isBase4 ? matrix[2]?.[cIdx] : actualNum);
                           }}
                           type="button"
-                          className="flex flex-col items-center gap-1.5 w-full focus:outline-none relative group/cell"
+                          className="flex flex-col items-center gap-1 sm:gap-1.5 w-full focus:outline-none relative group/cell"
                         >
                           <div className="relative">
-                            <div className={`w-12 h-12 rounded-full flex items-center justify-center font-sans text-[22px] border transition-all duration-300 transform 
+                            <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-sans text-[17px] sm:text-[22px] border transition-all duration-300 transform
                               ${isHighlighted ? "scale-125 z-10 shadow-[0_0_15px_rgba(201,169,110,0.6)] border-[#C9A96E]" : ""} 
                               ${isDimmed ? "opacity-25 scale-90 border-white/5 saturate-50" : ""} 
                               ${isGlowFiltered ? "animate-pulse ring-2 ring-[#C9A96E] ring-offset-2 ring-offset-slate-950" : ""}
@@ -2125,7 +2125,7 @@ function FateMatrixPanel({
                           
                           <div className="flex flex-col items-center mt-1">
                             {showHouseNames && houseName && (
-                              <span className={`text-[12px] font-bold leading-none mb-0.5 transition-colors ${
+                              <span className={`text-[9px] sm:text-[12px] font-bold leading-none mb-0.5 transition-colors ${
                                 isHighlighted 
                                   ? "text-[#C9A96E] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" 
                                   : "text-[#B4A790] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]"
@@ -2152,7 +2152,7 @@ function FateMatrixPanel({
 
       {/* ── ลัคนาเกิด / ลัคนาจร Detail Panel ── */}
       {phopephumResult?.lagna && (
-        <div className="bg-[#020617]/60 border-t border-[#C6A96B]/15 px-5 py-3 space-y-2 text-[11px]">
+        <div className="bg-[#020617]/60 border-t border-[#C6A96B]/15 px-3 sm:px-5 py-3 space-y-2 text-[10px] sm:text-[11px]">
           {/* ลัคนาเกิด */}
           {showNatalLagna && (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
