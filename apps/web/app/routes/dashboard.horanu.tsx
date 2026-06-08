@@ -134,7 +134,7 @@ export default function HoraNuPage() {
           <Form method="post" className="flex flex-wrap items-end gap-4">
             <input type="hidden" name="timeMode" value="custom" />
             <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-wider text-[#94A3B8] font-bold">วันที่</label>
+              <label className="text-[13px] uppercase tracking-wider text-[#94A3B8] font-bold">วันที่</label>
               <Input 
                 type="number" 
                 name="customDay" 
@@ -143,7 +143,7 @@ export default function HoraNuPage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-wider text-[#94A3B8] font-bold">เดือน</label>
+              <label className="text-[13px] uppercase tracking-wider text-[#94A3B8] font-bold">เดือน</label>
               <Input 
                 type="number" 
                 name="customMonth" 
@@ -152,7 +152,7 @@ export default function HoraNuPage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-wider text-[#94A3B8] font-bold">ปี (พ.ศ.)</label>
+              <label className="text-[13px] uppercase tracking-wider text-[#94A3B8] font-bold">ปี (พ.ศ.)</label>
               <Input 
                 type="number" 
                 name="customYear" 
@@ -161,7 +161,7 @@ export default function HoraNuPage() {
               />
             </div>
             <div className="space-y-2">
-              <label className="text-[10px] uppercase tracking-wider text-[#94A3B8] font-bold">เวลา</label>
+              <label className="text-[13px] uppercase tracking-wider text-[#94A3B8] font-bold">เวลา</label>
               <Input 
                 type="time" 
                 name="customTime" 
@@ -204,12 +204,12 @@ export default function HoraNuPage() {
 
               <div className="py-6 border-y border-[#C6A96B]/10 flex justify-around items-center">
                  <div className="text-center">
-                   <p className="text-[10px] text-[#94A3B8] uppercase font-bold mb-1">ยามที่</p>
+                   <p className="text-[13px] text-[#94A3B8] uppercase font-bold mb-1">ยามที่</p>
                    <p className="text-2xl font-bold text-[#F8F6F1]">{result.yamNumber}</p>
                  </div>
                  <div className="h-8 w-px bg-[#C6A96B]/20" />
                  <div className="text-center">
-                   <p className="text-[10px] text-[#94A3B8] uppercase font-bold mb-1">ทิศมงคล</p>
+                   <p className="text-[13px] text-[#94A3B8] uppercase font-bold mb-1">ทิศมงคล</p>
                    <p className="text-2xl font-bold text-[#F8F6F1]">{result.currentDirection}</p>
                  </div>
               </div>
@@ -240,12 +240,12 @@ export default function HoraNuPage() {
                        <p className={`text-sm font-bold ${yam.isCurrent ? 'text-[#F8F6F1]' : 'text-[#94A3B8]'}`}>
                           {yam.startTime} - {yam.endTime}
                        </p>
-                       <p className="text-[10px] text-[#94A3B8]">ดาว {yam.planetName} · ทิศ {yam.direction}</p>
+                       <p className="text-[13px] text-[#94A3B8]">ดาว {yam.planetName} · ทิศ {yam.direction}</p>
                     </div>
                     {yam.isCurrent && (
                        <div className="flex items-center gap-1.5">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B] animate-pulse" />
-                          <span className="text-[10px] font-bold text-[#C6A96B]">ขณะนี้</span>
+                          <span className="text-[13px] font-bold text-[#C6A96B]">ขณะนี้</span>
                        </div>
                     )}
                   </div>
@@ -262,9 +262,9 @@ export default function HoraNuPage() {
               <div className="flex items-center justify-between mb-4">
                  <div>
                     <h3 className="text-sm font-bold text-[#F8F6F1] uppercase tracking-wider">ผังโหรทายหนู</h3>
-                    <p className="text-[10px] text-[#94A3B8] mt-0.5">วงล้อชะตากาลเวลา — 12 ราศี × 8 ทิศ</p>
+                    <p className="text-[13px] text-[#94A3B8] mt-0.5">วงล้อชะตากาลเวลา — 12 ราศี × 8 ทิศ</p>
                  </div>
-                 <div className="flex items-center gap-2 text-[10px] text-[#94A3B8]">
+                 <div className="flex items-center gap-2 text-[13px] text-[#94A3B8]">
                     <div className="w-2 h-2 rounded-full bg-[#C6A96B]" />
                     <span>ยามปัจจุบัน</span>
                  </div>
@@ -355,14 +355,14 @@ export default function HoraNuPage() {
                     }`}
                    >
                      <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[9px] font-bold text-[#94A3B8]">{house.zodiacName}</span>
-                        <span className="text-[9px] font-bold text-[#C6A96B]">{house.houseName}</span>
+                        <span className="text-[12px] font-bold text-[#94A3B8]">{house.zodiacName}</span>
+                        <span className="text-[12px] font-bold text-[#C6A96B]">{house.houseName}</span>
                      </div>
                      <div className="flex items-center gap-1.5">
                         <span className="text-lg font-display font-bold" style={{color: house.lordColor}}>{house.lordSymbol}</span>
                         <div className="min-w-0 flex-1">
-                           <p className="text-[9px] text-[#94A3B8] truncate">{house.lordName}</p>
-                           <p className="text-[8px] font-bold" style={{ color: house.lordStatusColor }}>
+                           <p className="text-[12px] text-[#94A3B8] truncate">{house.lordName}</p>
+                           <p className="text-[11px] font-bold" style={{ color: house.lordStatusColor }}>
                               {house.lordStatusSymbol}
                            </p>
                         </div>

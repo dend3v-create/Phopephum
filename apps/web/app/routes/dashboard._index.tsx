@@ -168,7 +168,7 @@ export default function DashboardIndex() {
                 <span className="text-gold-shimmer">{displayName}</span>
               </h1>
             </div>
-            <p className="text-[11px] text-[#94A3B8]/60 mt-1 tracking-wide">
+            <p className="text-[14px] text-[#94A3B8]/60 mt-1 tracking-wide">
               Astral Imperial Living Wisdom OS · พร้อมให้บริการ
             </p>
           </div>
@@ -226,7 +226,7 @@ export default function DashboardIndex() {
             <div className="absolute right-4 top-4 text-[#C6A96B]/8 opacity-20 group-hover:opacity-45 transition-opacity duration-400">
               <IconSparklesLarge />
             </div>
-            <div className="text-[10px] tracking-widest text-[#94A3B8] uppercase font-bold mb-2">รายงานทั้งหมด</div>
+            <div className="text-[13px] tracking-widest text-[#94A3B8] uppercase font-bold mb-2">รายงานทั้งหมด</div>
             <div className="font-display text-5xl font-bold text-[#C6A96B] leading-none mb-2 glow-gold animate-number-count group-hover:scale-105 transition-transform origin-left">
               {reportCount}
             </div>
@@ -248,7 +248,7 @@ export default function DashboardIndex() {
           <div className="absolute right-4 top-4 text-[#F2D49B]/8 opacity-25 group-hover:opacity-50 transition-opacity">
             <IconCrown />
           </div>
-          <div className="text-[10px] tracking-widest text-[#94A3B8] uppercase font-bold mb-2">แพ็กเกจสมาชิก</div>
+          <div className="text-[13px] tracking-widest text-[#94A3B8] uppercase font-bold mb-2">แพ็กเกจสมาชิก</div>
           <div className="font-display text-3xl font-bold leading-none tracking-widest uppercase glow-gold animate-number-count"
             style={{ color: "#F2D49B" }}
           >
@@ -264,7 +264,7 @@ export default function DashboardIndex() {
               )}
             </div>
             {profile?.membership_expires_at && (
-              <p className="text-[10px] text-[#94A3B8]/60">
+              <p className="text-[13px] text-[#94A3B8]/60">
                 หมดอายุ: {new Date(profile.membership_expires_at).toLocaleDateString("th-TH", {
                   year: "numeric",
                   month: "short",
@@ -288,7 +288,7 @@ export default function DashboardIndex() {
           <div className="absolute right-3 top-3 text-[#4DB8A0]/8 opacity-20 animate-float">
             <IconMoonPhase />
           </div>
-          <div className="text-[10px] tracking-widest text-[#94A3B8] uppercase font-bold mb-2">ดิถีจันทรคติวันนี้</div>
+          <div className="text-[13px] tracking-widest text-[#94A3B8] uppercase font-bold mb-2">ดิถีจันทรคติวันนี้</div>
           <div className="font-medium text-xl text-[#F8F6F1] leading-tight font-display animate-number-count truncate">
             {moon.moonPhase}
           </div>
@@ -361,22 +361,22 @@ export default function DashboardIndex() {
               </div>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] tracking-widest text-[#94A3B8] uppercase font-bold mb-1">ยามอัฏฐกาลขณะนี้</p>
+              <p className="text-[13px] tracking-widest text-[#94A3B8] uppercase font-bold mb-1">ยามอัฏฐกาลขณะนี้</p>
               <p className="font-display text-xl font-bold text-[#C6A96B] leading-snug glow-gold">
                 ยาม{yam.yamName} {yam.symbol}
               </p>
-              <p className="text-[11px] text-[#94A3B8] mt-0.5">
+              <p className="text-[14px] text-[#94A3B8] mt-0.5">
                 ยามที่ {yam.yamNumber} &nbsp;·&nbsp; {yam.period === "day" ? "กลางวัน" : "กลางคืน"}
               </p>
             </div>
             <div className="flex flex-col items-end gap-2 shrink-0">
-              <span className="text-[10px] font-bold text-[#4DB8A0] bg-[#4DB8A0]/10 border border-[#4DB8A0]/25 px-3 py-1.5 rounded-full">
+              <span className="text-[13px] font-bold text-[#4DB8A0] bg-[#4DB8A0]/10 border border-[#4DB8A0]/25 px-3 py-1.5 rounded-full">
                 ฤกษ์ดี
               </span>
               <Link
                 to="/dashboard/yam"
                 id="yam-live-link"
-                className="text-[10px] text-[#C6A96B] bg-[#C6A96B]/10 border border-[#C6A96B]/25 px-3 py-1.5 rounded-full hover:bg-[#C6A96B]/20 transition-colors font-medium whitespace-nowrap"
+                className="text-[13px] text-[#C6A96B] bg-[#C6A96B]/10 border border-[#C6A96B]/25 px-3 py-1.5 rounded-full hover:bg-[#C6A96B]/20 transition-colors font-medium whitespace-nowrap"
               >
                 ดูสด →
               </Link>
@@ -417,14 +417,14 @@ export default function DashboardIndex() {
               </div>
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] tracking-widest text-[#94A3B8] uppercase font-bold mb-1">จันทรคติวันนี้</p>
+              <p className="text-[13px] tracking-widest text-[#94A3B8] uppercase font-bold mb-1">จันทรคติวันนี้</p>
               <p className="font-display text-base font-semibold text-[#9AB3D9] leading-snug glow-mystic">
                 {moon.isWanPhra ? "เพ็ญเดือน — วันพระพลังสูง" : moon.moonPhase}
               </p>
-              <p className="text-[11px] text-[#94A3B8] mt-0.5 line-clamp-1">{moon.guidance}</p>
+              <p className="text-[14px] text-[#94A3B8] mt-0.5 line-clamp-1">{moon.guidance}</p>
             </div>
             <span
-              className={`shrink-0 text-[10px] font-bold px-3 py-1.5 rounded-full border ${
+              className={`shrink-0 text-[13px] font-bold px-3 py-1.5 rounded-full border ${
                 moon.isWanPhra
                   ? "text-[#9AB3D9] bg-[#8B7FD4]/10 border-[#8B7FD4]/25"
                   : "text-[#94A3B8] bg-[#94A3B8]/8 border-[#94A3B8]/20"
@@ -450,7 +450,7 @@ export default function DashboardIndex() {
             </span>
             เริ่มต้นวิเคราะห์ชะตาชีวิต
           </h2>
-          <Link to="/dashboard/reports" id="see-all-reports-link" className="text-[11px] text-[#8B6F45] hover:text-[#C6A96B] flex items-center gap-1 transition-colors">
+          <Link to="/dashboard/reports" id="see-all-reports-link" className="text-[14px] text-[#8B6F45] hover:text-[#C6A96B] flex items-center gap-1 transition-colors">
             ดูทั้งหมด <IconArrowUpRight className="w-3 h-3" />
           </Link>
         </div>
@@ -470,7 +470,7 @@ export default function DashboardIndex() {
               />
 
               <div>
-                <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-[#C6A96B] bg-[#C6A96B]/12 border border-[#C6A96B]/20 px-2.5 py-1 rounded-md tracking-wider uppercase mb-3 font-display">
+                <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#C6A96B] bg-[#C6A96B]/12 border border-[#C6A96B]/20 px-2.5 py-1 rounded-md tracking-wider uppercase mb-3 font-display">
                   <span>✦</span> ยามอัฏฐกาล
                 </span>
                 <h3 className="text-lg font-bold text-[#F8F6F1] group-hover:text-[#F2D49B] transition-colors duration-200 leading-snug">
@@ -484,7 +484,7 @@ export default function DashboardIndex() {
               <div className="flex items-center justify-between mt-6 pt-4"
                 style={{ borderTop: "1px solid rgba(198,169,107,0.10)" }}
               >
-                <span className="text-[11px] text-[#94A3B8] group-hover:text-[#F8F6F1] transition-colors">
+                <span className="text-[14px] text-[#94A3B8] group-hover:text-[#F8F6F1] transition-colors">
                   วิเคราะห์ดวงจักรกำเนิดด่วน
                 </span>
                 <span className="text-[#C6A96B] transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
@@ -512,7 +512,7 @@ export default function DashboardIndex() {
               />
 
               <div>
-                <span className="inline-flex items-center gap-1.5 text-[9px] font-bold text-[#E06B6B] bg-[#E06B6B]/10 border border-[#E06B6B]/20 px-2.5 py-1 rounded-md tracking-wider uppercase mb-3 font-display">
+                <span className="inline-flex items-center gap-1.5 text-[12px] font-bold text-[#E06B6B] bg-[#E06B6B]/10 border border-[#E06B6B]/20 px-2.5 py-1 rounded-md tracking-wider uppercase mb-3 font-display">
                   <span>◈</span> ภูมิปัญญาพยากรณ์
                 </span>
                 <h3 className="text-lg font-bold text-[#F8F6F1] group-hover:text-[#F9B4B4] transition-colors duration-200 leading-snug">
@@ -526,7 +526,7 @@ export default function DashboardIndex() {
               <div className="flex items-center justify-between mt-6 pt-4"
                 style={{ borderTop: "1px solid rgba(224,107,107,0.10)" }}
               >
-                <span className="text-[11px] text-[#94A3B8] group-hover:text-[#F8F6F1] transition-colors">
+                <span className="text-[14px] text-[#94A3B8] group-hover:text-[#F8F6F1] transition-colors">
                   สร้างบทวิเคราะห์ชีวิตใหม่
                 </span>
                 <span className="text-[#E06B6B] transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform">
@@ -682,7 +682,7 @@ export default function DashboardIndex() {
               </div>
               <div className="flex items-center gap-2.5 ml-auto shrink-0 mt-3 sm:mt-0">
                 {pendingRequestsCount > 0 && (
-                  <span className="text-[10px] text-[#38BDF8] bg-[#38BDF8]/10 border border-[#38BDF8]/20 px-2.5 py-0.5 rounded-full font-bold">
+                  <span className="text-[13px] text-[#38BDF8] bg-[#38BDF8]/10 border border-[#38BDF8]/20 px-2.5 py-0.5 rounded-full font-bold">
                     มีคำขอใหม่ {pendingRequestsCount} รายการ
                   </span>
                 )}
@@ -730,7 +730,7 @@ export default function DashboardIndex() {
               {/* Feature bullets */}
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3">
                 {["รายงาน AI ไม่จำกัด", "ผังดวงจักรพรรดิ", "วิเคราะห์วัยจร", "สิทธิ์ทุกฟีเจอร์"].map((f) => (
-                  <span key={f} className="text-[10px] text-[#C6A96B]/80 flex items-center gap-1">
+                  <span key={f} className="text-[13px] text-[#C6A96B]/80 flex items-center gap-1">
                     <span className="text-[#C6A96B]/50">✓</span> {f}
                   </span>
                 ))}
@@ -961,7 +961,7 @@ function MiniFeatureLink({
         >
           {icon}
         </div>
-        <span className="text-[10px] md:text-xs text-[#94A3B8] group-hover:text-[#F8F6F1] font-medium leading-tight transition-colors">
+        <span className="text-[13px] md:text-xs text-[#94A3B8] group-hover:text-[#F8F6F1] font-medium leading-tight transition-colors">
           {label}
         </span>
       </div>
@@ -1016,7 +1016,7 @@ function FeatureCard({
       <div className="flex flex-col justify-between h-full">
         <div>
           <span
-            className="inline-block text-[9px] font-bold tracking-widest uppercase px-2.5 py-1 rounded mb-3 font-display"
+            className="inline-block text-[12px] font-bold tracking-widest uppercase px-2.5 py-1 rounded mb-3 font-display"
             style={{
               color: tagColor,
               background: `${tagColor}14`,
@@ -1032,7 +1032,7 @@ function FeatureCard({
           >
             {title}
           </h4>
-          <p className="text-[11px] text-[#94A3B8] mt-1.5 leading-relaxed">{desc}</p>
+          <p className="text-[14px] text-[#94A3B8] mt-1.5 leading-relaxed">{desc}</p>
         </div>
         <div className="flex items-center justify-between mt-5 pt-3"
           style={{ borderTop: `1px solid ${tagColor}0F` }}
@@ -1040,7 +1040,7 @@ function FeatureCard({
           <span style={{ color: `${tagColor}55` }} className="group-hover:opacity-100 transition-opacity">
             {icon}
           </span>
-          <span className="text-[10px] text-[#94A3B8] group-hover:text-[#F8F6F1] flex items-center gap-1 transition-colors">
+          <span className="text-[13px] text-[#94A3B8] group-hover:text-[#F8F6F1] flex items-center gap-1 transition-colors">
             <span>เข้าใช้งาน</span>
             <span className="transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" style={{ color: tagColor }}>
               <IconArrowUpRight className="w-3 h-3" />

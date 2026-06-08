@@ -268,7 +268,7 @@ export default function NewReportPage() {
       {/* ── Header ── */}
       <div className="relative">
         <div className="absolute -top-4 -left-4 w-32 h-32 bg-[#C6A96B]/8 rounded-full blur-3xl pointer-events-none" />
-        <p className="text-[#C9A96E] text-[10px] tracking-[0.25em] uppercase font-bold mb-2">
+        <p className="text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold mb-2">
           ✦ สร้างใหม่
         </p>
         <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">
@@ -294,7 +294,7 @@ export default function NewReportPage() {
 
         {/* ── Report Type Grid ── */}
         <div>
-          <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-3">
+          <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-3">
             เลือกประเภทรายงาน
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -325,7 +325,7 @@ export default function NewReportPage() {
                     <p className={`text-sm font-bold ${selectedType === type.value ? 'text-[#F8F6F1]' : 'text-[#D9CDB7]'}`}>
                       {type.label}
                     </p>
-                    <p className="text-[10px] text-[#8A8070] mt-0.5 leading-relaxed">
+                    <p className="text-[13px] text-[#8A8070] mt-0.5 leading-relaxed">
                       {type.desc}
                     </p>
                   </div>
@@ -338,7 +338,7 @@ export default function NewReportPage() {
         {/* ── Profile Info ── */}
         <div className="space-y-6">
           <div>
-            <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-3 flex items-center justify-between">
+            <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-3 flex items-center justify-between">
               <span>ข้อมูลสำหรับผูกดวง</span>
               <span className="font-normal normal-case opacity-60">ดึงจากโปรไฟล์อัตโนมัติ - แก้ไขได้เพื่อใช้ในรายงานนี้</span>
             </p>
@@ -353,7 +353,7 @@ export default function NewReportPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold text-[#8A8070] uppercase tracking-wider ml-1">วันเกิด (พ.ศ.)</label>
+                  <label className="text-[13px] font-bold text-[#8A8070] uppercase tracking-wider ml-1">วันเกิด (พ.ศ.)</label>
                   <div className="grid grid-cols-3 gap-2">
                     <select name="birthDay" defaultValue={defaultBDay} className="bg-black/40 border border-white/10 rounded-xl px-2 py-2.5 text-xs text-[#F8F6F1] focus:border-[#C6A96B] transition-all">
                       {Array.from({ length: 31 }, (_, i) => (
@@ -401,8 +401,8 @@ export default function NewReportPage() {
               <p className="text-[#8A8070] text-xs">{selectedMeta.desc}</p>
             </div>
             <div className="text-right flex-shrink-0 hidden sm:block">
-              <p className="text-[#C9A96E] text-[10px] font-bold uppercase">ครูเด่นพยากรณ์</p>
-              <p className="text-[#8A8070] text-[10px]">~30–60 วิ</p>
+              <p className="text-[#C9A96E] text-[13px] font-bold uppercase">ครูเด่นพยากรณ์</p>
+              <p className="text-[#8A8070] text-[13px]">~30–60 วิ</p>
             </div>
           </div>
         )}
@@ -424,7 +424,7 @@ export default function NewReportPage() {
           )}
         </Button>
 
-        <p className="text-center text-[#8A8070] text-[11px]">
+        <p className="text-center text-[#8A8070] text-[14px]">
           ระบบ Living Wisdom ใช้เฉพาะข้อมูลดวงชะตาของคุณ ไม่เก็บข้อมูลส่วนตัวอื่น
         </p>
       </Form>

@@ -159,11 +159,11 @@ export default function UpgradePage() {
                 <div className="absolute top-4 right-4 w-5 h-5 rounded-full border-2 border-white/10 peer-checked:bg-[var(--pc)] peer-checked:border-[var(--pc)] transition-colors flex items-center justify-center">
                    <div className="w-2 h-2 bg-[#020617] rounded-full opacity-0 peer-checked:opacity-100" />
                 </div>
-                <p className="font-display text-[10px] tracking-[0.3em] uppercase mb-1" style={{ color: plan.color }}>{plan.name}</p>
+                <p className="font-display text-[13px] tracking-[0.3em] uppercase mb-1" style={{ color: plan.color }}>{plan.name}</p>
                 <p className="text-[#F8F6F1] font-bold text-2xl mb-4">{plan.price}</p>
                 <ul className="space-y-2.5 mb-2">
                   {plan.features.map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-[#94A3B8] text-[11px] leading-relaxed">
+                    <li key={f} className="flex items-start gap-2 text-[#94A3B8] text-[14px] leading-relaxed">
                       <span className="text-base -mt-1" style={{ color: plan.color }}>✧</span>
                       {f}
                     </li>

@@ -61,7 +61,7 @@ export default function DashboardCalendar() {
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <span className="text-[#C9A96E] text-[10px] tracking-[0.25em] uppercase font-bold block mb-1">
+          <span className="text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold block mb-1">
             ✦ Living Wisdom Calendar
           </span>
           <h1 className="font-display text-3xl font-bold text-[#F8F6F1] glow-gold">
@@ -153,10 +153,10 @@ export default function DashboardCalendar() {
 
               {/* Lunar Details */}
               <div className="mt-1 flex flex-col gap-1">
-                <span className={`text-[10px] md:text-xs leading-tight ${day.isWanPhra ? "text-amber-400 font-bold drop-shadow-md" : "text-[#D9CDB7]"}`}>
+                <span className={`text-[13px] md:text-xs leading-tight ${day.isWanPhra ? "text-amber-400 font-bold drop-shadow-md" : "text-[#D9CDB7]"}`}>
                   {day.moonPhase}
                 </span>
-                <span className="text-[9px] md:text-[10px] text-[#D9CDB7]/70 leading-none">
+                <span className="text-[12px] md:text-[13px] text-[#D9CDB7]/70 leading-none">
                   {day.lunarMonthName}
                 </span>
               </div>
@@ -168,7 +168,7 @@ export default function DashboardCalendar() {
               
               {/* Zodiac change indicator (Month 5 Day 1) */}
               {day.lunarMonth === 5 && day.lunarDay === 1 && day.moonPhase.includes("ขึ้น") && (
-                <div className="absolute bottom-1 right-1 px-1 rounded bg-[#C9A96E]/20 border border-[#C9A96E]/30 text-[7px] text-[#C9A96E] font-bold uppercase tracking-tighter">
+                <div className="absolute bottom-1 right-1 px-1 rounded bg-[#C9A96E]/20 border border-[#C9A96E]/30 text-[10px] text-[#C9A96E] font-bold uppercase tracking-tighter">
                   เปลี่ยนปี
                 </div>
               )}
@@ -185,13 +185,13 @@ export default function DashboardCalendar() {
       {/* ── Legend & Extra Info ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card className="p-4 bg-slate-950/20 border-white/5 text-xs space-y-2 text-[#8A8070]">
-          <h3 className="font-bold text-[#C9A96E] uppercase tracking-wider text-[10px] mb-2">สัญลักษณ์และคำอธิบาย</h3>
+          <h3 className="font-bold text-[#C9A96E] uppercase tracking-wider text-[13px] mb-2">สัญลักษณ์และคำอธิบาย</h3>
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 rounded-full bg-amber-500" />
             <span>วันพระ (ขึ้น 8, ขึ้น 15, แรม 8, และแรม 14 หรือ 15 ค่ำ)</span>
           </div>
           <div className="flex items-center gap-3">
-            <div className="px-1 rounded bg-[#C9A96E]/20 border border-[#C9A96E]/30 text-[7px] text-[#C9A96E] font-bold">เปลี่ยนปี</div>
+            <div className="px-1 rounded bg-[#C9A96E]/20 border border-[#C9A96E]/30 text-[10px] text-[#C9A96E] font-bold">เปลี่ยนปี</div>
             <span>วันขึ้น 1 ค่ำ เดือน 5 คือวันเริ่มต้นปีนักษัตรใหม่ตามปฏิทินหลวง</span>
           </div>
         </Card>

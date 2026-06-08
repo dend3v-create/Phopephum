@@ -581,7 +581,7 @@ export default function KarnchataPage() {
 
         {/* ── ผังทักษาจรวัน: 8 ช่อง ── */}
         <div className="bg-[#020617] border border-[#C6A96B]/12 rounded-2xl p-4 mb-6">
-          <p className="text-[10px] text-[#C6A96B]/70 font-bold uppercase tracking-wider mb-3">ผังทักษาจรวันนี้ — ตนุ ฐานวัน ฐาน ๑</p>
+          <p className="text-[13px] text-[#C6A96B]/70 font-bold uppercase tracking-wider mb-3">ผังทักษาจรวันนี้ — ตนุ ฐานวัน ฐาน ๑</p>
           <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
             {(_BHOP as readonly string[]).map((bhop, idx) => {
               const starNum = _SEQ[(_SEQ.indexOf(activeResult.dayStarNumber as typeof _SEQ[number]) + idx + 8) % 8] as number;
@@ -603,15 +603,15 @@ export default function KarnchataPage() {
                           : 'bg-[#0A1628] border-white/5'
                   }`}
                 >
-                  <p className={`text-[9px] font-bold leading-tight mb-0.5 ${isBad ? 'text-rose-400' : isGood ? 'text-emerald-400' : isNowYam ? 'text-[#C6A96B]' : 'text-[#8A8070]'}`}>
+                  <p className={`text-[12px] font-bold leading-tight mb-0.5 ${isBad ? 'text-rose-400' : isGood ? 'text-emerald-400' : isNowYam ? 'text-[#C6A96B]' : 'text-[#8A8070]'}`}>
                     {bhop}
                   </p>
                   <p className={`text-sm font-display font-black leading-none ${isNowYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>
                     {starNum}
                   </p>
-                  <p className="text-[9px] text-[#8A8070] leading-tight mt-0.5 hidden sm:block">{starName}</p>
+                  <p className="text-[12px] text-[#8A8070] leading-tight mt-0.5 hidden sm:block">{starName}</p>
                   {isNowYam && (
-                    <span className="text-[8px] text-[#C6A96B] font-bold mt-0.5 block">▲ ขณะนี้</span>
+                    <span className="text-[11px] text-[#C6A96B] font-bold mt-0.5 block">▲ ขณะนี้</span>
                   )}
                 </div>
               );
@@ -652,7 +652,7 @@ export default function KarnchataPage() {
                             : 'bg-[#020617] border-white/5'
                     }`}
                   >
-                    <span className="text-[10px] text-[#8A8070] font-mono shrink-0 w-[82px] sm:w-[92px] tabular-nums">{yam.timeStr}</span>
+                    <span className="text-[13px] text-[#8A8070] font-mono shrink-0 w-[82px] sm:w-[92px] tabular-nums">{yam.timeStr}</span>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-display font-bold shrink-0 ${
                         yam.isCurrentYam ? 'bg-[#C6A96B] text-[#020617] shadow-[0_0_8px_rgba(198,169,107,0.5)]' : 'bg-[#0A1628] border border-white/10 text-[#F8F6F1]'
@@ -664,7 +664,7 @@ export default function KarnchataPage() {
                     <span className={`text-xs font-bold shrink-0 w-14 sm:w-16 ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]'}`}>
                       {yam.quality || '—'}
                     </span>
-                    <span className="text-[10px] text-[#D9CDB7]/70 flex-1 leading-snug hidden lg:block">
+                    <span className="text-[13px] text-[#D9CDB7]/70 flex-1 leading-snug hidden lg:block">
                       {advice ? `${advice.emoji} ${advice.th}` : ''}
                     </span>
                     <span className={`text-sm shrink-0 ml-auto ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]/40'}`}>
@@ -724,7 +724,7 @@ export default function KarnchataPage() {
                             : 'bg-[#020617] border-white/5'
                     }`}
                   >
-                    <span className="text-[10px] text-[#8A8070] font-mono shrink-0 w-[82px] sm:w-[92px] tabular-nums">{yam.timeStr}</span>
+                    <span className="text-[13px] text-[#8A8070] font-mono shrink-0 w-[82px] sm:w-[92px] tabular-nums">{yam.timeStr}</span>
                     <div className="flex items-center gap-1.5 shrink-0">
                       <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-display font-bold shrink-0 ${
                         yam.isCurrentYam ? 'bg-[#C6A96B] text-[#020617] shadow-[0_0_8px_rgba(198,169,107,0.5)]' : 'bg-[#0A1628] border border-white/10 text-[#F8F6F1]'
@@ -736,7 +736,7 @@ export default function KarnchataPage() {
                     <span className={`text-xs font-bold shrink-0 w-14 sm:w-16 ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]'}`}>
                       {yam.quality || '—'}
                     </span>
-                    <span className="text-[10px] text-[#D9CDB7]/70 flex-1 leading-snug hidden lg:block">
+                    <span className="text-[13px] text-[#D9CDB7]/70 flex-1 leading-snug hidden lg:block">
                       {advice ? `${advice.emoji} ${advice.th}` : ''}
                     </span>
                     <span className={`text-sm shrink-0 ml-auto ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]/40'}`}>
@@ -766,7 +766,7 @@ export default function KarnchataPage() {
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap gap-3 mt-5 pt-4 border-t border-white/5 text-[10px]">
+        <div className="flex flex-wrap gap-3 mt-5 pt-4 border-t border-white/5 text-[13px]">
           <span className="flex items-center gap-1 text-emerald-400"><span className="font-bold">✦</span> เดช/ศรี/มูละ/มนตรี = ดีมาก</span>
           <span className="flex items-center gap-1 text-[#8A8070]"><span>▾</span> บริวาร/อายุ/อุตสาหะ = ปกติ</span>
           <span className="flex items-center gap-1 text-rose-400"><span>⚠</span> กาลกิณี = ระวัง</span>
@@ -792,7 +792,7 @@ export default function KarnchataPage() {
               }`}
             >
               <span className="text-lg sm:text-xl">{cat.icon}</span>
-              <span className={`text-[10px] sm:text-xs font-bold text-center leading-tight ${selectedCategory === cat.id ? "text-sky-400" : "text-[#8A8070]"}`}>
+              <span className={`text-[13px] sm:text-xs font-bold text-center leading-tight ${selectedCategory === cat.id ? "text-sky-400" : "text-[#8A8070]"}`}>
                 {cat.label.split(" ")[0]}
               </span>
             </button>
@@ -1005,9 +1005,9 @@ export default function KarnchataPage() {
                 {connectionItems.map(occ => (
                   <div key={occ.rIdx}
                     className={`rounded-lg px-3 py-1.5 border text-xs flex items-center gap-1.5 ${occ.rIdx < 3 || occ.rIdx >= 7 ? 'bg-[#0A1628] border-[#C6A96B]/20' : 'bg-[#020617] border-white/5'}`}>
-                    <span className={`font-black text-[10px] ${occ.rIdx < 3 ? 'text-[#C6A96B]' : occ.rIdx < 7 ? 'text-[#8A8070]' : 'text-[#C6A96B]'}`}>ฐาน{occ.baseThai}</span>
+                    <span className={`font-black text-[13px] ${occ.rIdx < 3 ? 'text-[#C6A96B]' : occ.rIdx < 7 ? 'text-[#8A8070]' : 'text-[#C6A96B]'}`}>ฐาน{occ.baseThai}</span>
                     <span className="text-[#F8F6F1] font-bold">{occ.bhopName || `ช่อง ${occ.colIdx + 1}`}</span>
-                    {occ.b4Power && <span className="text-sky-300 text-[10px]">· {occ.b4Power}</span>}
+                    {occ.b4Power && <span className="text-sky-300 text-[13px]">· {occ.b4Power}</span>}
                   </div>
                 ))}
               </div>
@@ -1023,7 +1023,7 @@ export default function KarnchataPage() {
             {[0, 1, 2].map(rIdx => (
               <div key={rIdx} className="flex items-stretch gap-2">
                 <div className="w-10 sm:w-14 shrink-0 flex items-center justify-end">
-                  <span className="text-[10px] sm:text-xs font-black text-[#C6A96B]">ฐาน{['๑','๒','๓'][rIdx]}</span>
+                  <span className="text-[13px] sm:text-xs font-black text-[#C6A96B]">ฐาน{['๑','๒','๓'][rIdx]}</span>
                 </div>
                 <div className="flex-1 grid grid-cols-7 gap-1">
                   {(activeResult.chart[rIdx] as number[]).map((star, cIdx) => {
@@ -1040,7 +1040,7 @@ export default function KarnchataPage() {
                         style={isSelected ? {background: col + '18', borderColor: col, ringColor: col, boxShadow: `0 0 12px ${col}44`} : {}}
                       >
                         <span className="text-base sm:text-lg font-display font-black leading-none" style={{color: col}}>{star}</span>
-                        <span className="text-[8px] sm:text-[9px] text-[#8A8070] text-center leading-tight w-full truncate">{BHOP_NATAL_NAMES[rIdx]?.[cIdx]}</span>
+                        <span className="text-[11px] sm:text-[12px] text-[#8A8070] text-center leading-tight w-full truncate">{BHOP_NATAL_NAMES[rIdx]?.[cIdx]}</span>
                       </button>
                     );
                   })}
@@ -1051,14 +1051,14 @@ export default function KarnchataPage() {
             {/* Divider — กำลังเทวดา */}
             <div className="flex items-center gap-2 py-1">
               <div className="flex-1 h-px bg-sky-500/20" />
-              <span className="text-[9px] text-sky-400/60 font-bold uppercase tracking-wider px-1">กำลังเทวดา</span>
+              <span className="text-[12px] text-sky-400/60 font-bold uppercase tracking-wider px-1">กำลังเทวดา</span>
               <div className="flex-1 h-px bg-sky-500/20" />
             </div>
 
             {/* ── ฐาน 4 ── */}
             <div className="flex items-stretch gap-2 bg-[#0B1E36]/40 border border-sky-500/15 rounded-2xl py-2 px-1">
               <div className="w-10 sm:w-14 shrink-0 flex items-center justify-end">
-                <span className="text-[10px] sm:text-xs font-black text-sky-400">ฐาน๔</span>
+                <span className="text-[13px] sm:text-xs font-black text-sky-400">ฐาน๔</span>
               </div>
               <div className="flex-1 grid grid-cols-7 gap-1">
                 {(activeResult.chart[3] as number[]).map((star, cIdx) => {
@@ -1073,7 +1073,7 @@ export default function KarnchataPage() {
                           : 'bg-[#020617] border border-sky-500/20 hover:border-sky-400/40'
                       }`}>
                       <span className="text-sm sm:text-base font-display font-black text-sky-300 leading-none">{star}</span>
-                      <span className="text-[7px] sm:text-[8px] text-sky-400/70 text-center leading-tight w-full truncate">{BASE4_POWER_NAMES[star] || ''}</span>
+                      <span className="text-[10px] sm:text-[11px] text-sky-400/70 text-center leading-tight w-full truncate">{BASE4_POWER_NAMES[star] || ''}</span>
                     </button>
                   );
                 })}
@@ -1083,7 +1083,7 @@ export default function KarnchataPage() {
             {/* Divider — ฐานสมทบ */}
             <div className="flex items-center gap-2 py-1">
               <div className="flex-1 h-px bg-white/5" />
-              <span className="text-[9px] text-[#8A8070]/40 font-bold uppercase tracking-wider px-1">ฐานสมทบ ๕–๗</span>
+              <span className="text-[12px] text-[#8A8070]/40 font-bold uppercase tracking-wider px-1">ฐานสมทบ ๕–๗</span>
               <div className="flex-1 h-px bg-white/5" />
             </div>
 
@@ -1091,7 +1091,7 @@ export default function KarnchataPage() {
             {[4, 5, 6].map(rIdx => (
               <div key={rIdx} className="flex items-center gap-2">
                 <div className="w-10 sm:w-14 shrink-0 flex items-center justify-end">
-                  <span className="text-[9px] sm:text-[10px] font-black text-[#F8F6F1]/35">ฐาน{['๕','๖','๗'][rIdx - 4]}</span>
+                  <span className="text-[12px] sm:text-[13px] font-black text-[#F8F6F1]/35">ฐาน{['๕','๖','๗'][rIdx - 4]}</span>
                 </div>
                 <div className="flex-1 grid grid-cols-7 gap-1">
                   {(activeResult.chart[rIdx] as number[]).map((star, cIdx) => {
@@ -1115,7 +1115,7 @@ export default function KarnchataPage() {
             {/* Divider — ภพชาตาลึก */}
             <div className="flex items-center gap-2 py-1">
               <div className="flex-1 h-px bg-[#C6A96B]/12" />
-              <span className="text-[9px] text-[#C6A96B]/45 font-bold uppercase tracking-wider px-1">ภพชาตาลึก ๘–๙</span>
+              <span className="text-[12px] text-[#C6A96B]/45 font-bold uppercase tracking-wider px-1">ภพชาตาลึก ๘–๙</span>
               <div className="flex-1 h-px bg-[#C6A96B]/12" />
             </div>
 
@@ -1123,7 +1123,7 @@ export default function KarnchataPage() {
             {[7, 8].map(rIdx => (
               <div key={rIdx} className="flex items-stretch gap-2">
                 <div className="w-10 sm:w-14 shrink-0 flex items-center justify-end">
-                  <span className="text-[10px] sm:text-xs font-black text-[#F8F6F1]">ฐาน{['๘','๙'][rIdx - 7]}</span>
+                  <span className="text-[13px] sm:text-xs font-black text-[#F8F6F1]">ฐาน{['๘','๙'][rIdx - 7]}</span>
                 </div>
                 <div className="flex-1 grid grid-cols-7 gap-1">
                   {(activeResult.chart[rIdx] as number[]).map((star, cIdx) => {
@@ -1138,7 +1138,7 @@ export default function KarnchataPage() {
                         }`}
                         style={isSelected ? {background: col + '18', borderColor: col, boxShadow: `0 0 12px ${col}44`} : {}}>
                         <span className="text-base sm:text-lg font-display font-black leading-none" style={{color: col}}>{star}</span>
-                        <span className="text-[8px] sm:text-[9px] text-[#8A8070] text-center leading-tight w-full truncate">{bhopName}</span>
+                        <span className="text-[11px] sm:text-[12px] text-[#8A8070] text-center leading-tight w-full truncate">{bhopName}</span>
                       </button>
                     );
                   })}
@@ -1202,8 +1202,8 @@ export default function KarnchataPage() {
                 {[0, 1, 2].map(rIdx => (
                   <div key={rIdx} className="flex items-start w-full max-w-3xl">
                     <div className="w-9 sm:w-16 shrink-0 pt-2.5">
-                      <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]">ฐาน {['๑','๒','๓'][rIdx]}</p>
-                      <p className="text-[8px] text-[#8A8070]/60 hidden sm:block">{['อัตตะ(ยาม)','ตนุ(วัน)','มรณะ(เดือน)'][rIdx]}</p>
+                      <p className="text-[13px] sm:text-xs font-bold text-[#F8F6F1]">ฐาน {['๑','๒','๓'][rIdx]}</p>
+                      <p className="text-[11px] text-[#8A8070]/60 hidden sm:block">{['อัตตะ(ยาม)','ตนุ(วัน)','มรณะ(เดือน)'][rIdx]}</p>
                     </div>
                     <div className="flex-1 flex justify-between">
                       {(hChart[rIdx] ?? []).map((star: number, cIdx: number) => (
@@ -1211,7 +1211,7 @@ export default function KarnchataPage() {
                           <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold bg-[#020617] border border-[#4B6FAE]/45 text-[#F8F6F1]">
                             {star}
                           </div>
-                          <span className="text-[8px] sm:text-[11px] font-medium text-center leading-tight text-[#8A8070]">
+                          <span className="text-[11px] sm:text-[14px] font-medium text-center leading-tight text-[#8A8070]">
                             {BHOP_NATAL_NAMES[rIdx][cIdx]}
                           </span>
                         </div>
@@ -1223,15 +1223,15 @@ export default function KarnchataPage() {
                 {/* Divider — กำลังเทวดา */}
                 <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
                   <div className="flex-1 h-px bg-sky-500/20" />
-                  <span className="text-[10px] text-sky-400/60 font-bold tracking-wider uppercase px-1">กำลังเทวดา</span>
+                  <span className="text-[13px] text-sky-400/60 font-bold tracking-wider uppercase px-1">กำลังเทวดา</span>
                   <div className="flex-1 h-px bg-sky-500/20" />
                 </div>
 
                 {/* ── ฐาน 4 ── */}
                 <div className="flex items-start w-full max-w-3xl bg-[#0B1E36]/40 border border-sky-500/12 py-3 px-1 sm:px-2 rounded-2xl">
                   <div className="w-9 sm:w-16 shrink-0 pt-1.5 pl-0.5">
-                    <p className="text-[10px] sm:text-xs font-bold text-sky-400">ฐาน ๔</p>
-                    <p className="text-[9px] text-sky-400/45 hidden sm:block">เทวดา</p>
+                    <p className="text-[13px] sm:text-xs font-bold text-sky-400">ฐาน ๔</p>
+                    <p className="text-[12px] text-sky-400/45 hidden sm:block">เทวดา</p>
                   </div>
                   <div className="flex-1 flex justify-between pr-1 sm:pr-2">
                     {(hChart[3] ?? []).map((star: number, cIdx: number) => (
@@ -1239,7 +1239,7 @@ export default function KarnchataPage() {
                         <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold bg-[#020617] border border-sky-500/40 text-[#F8F6F1]">
                           {star}
                         </div>
-                        <span className="text-[8px] sm:text-[11px] font-medium text-center leading-tight text-sky-400/75">
+                        <span className="text-[11px] sm:text-[14px] font-medium text-center leading-tight text-sky-400/75">
                           {BASE4_POWER_NAMES[star] || ""}
                         </span>
                       </div>
@@ -1250,7 +1250,7 @@ export default function KarnchataPage() {
                 {/* Divider — ฐานสมทบ */}
                 <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
                   <div className="flex-1 h-px bg-white/5" />
-                  <span className="text-[10px] text-[#8A8070]/40 font-bold tracking-wider uppercase px-1">ฐานสมทบ ๕–๗</span>
+                  <span className="text-[13px] text-[#8A8070]/40 font-bold tracking-wider uppercase px-1">ฐานสมทบ ๕–๗</span>
                   <div className="flex-1 h-px bg-white/5" />
                 </div>
 
@@ -1258,7 +1258,7 @@ export default function KarnchataPage() {
                 {[4, 5, 6].map(rIdx => (
                   <div key={rIdx} className="flex items-center w-full max-w-3xl">
                     <div className="w-9 sm:w-16 shrink-0">
-                      <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]/50">ฐาน {['๕','๖','๗'][rIdx - 4]}</p>
+                      <p className="text-[13px] sm:text-xs font-bold text-[#F8F6F1]/50">ฐาน {['๕','๖','๗'][rIdx - 4]}</p>
                     </div>
                     <div className="flex-1 flex justify-between">
                       {(hChart[rIdx] ?? []).map((star: number, cIdx: number) => (
@@ -1275,7 +1275,7 @@ export default function KarnchataPage() {
                 {/* Divider — ภพชาตาลึก */}
                 <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
                   <div className="flex-1 h-px bg-[#4B6FAE]/12" />
-                  <span className="text-[10px] text-[#4B6FAE]/45 font-bold tracking-wider uppercase px-1">ภพชาตาลึก ๘–๙</span>
+                  <span className="text-[13px] text-[#4B6FAE]/45 font-bold tracking-wider uppercase px-1">ภพชาตาลึก ๘–๙</span>
                   <div className="flex-1 h-px bg-[#4B6FAE]/12" />
                 </div>
 
@@ -1283,7 +1283,7 @@ export default function KarnchataPage() {
                 {[7, 8].map(rIdx => (
                   <div key={rIdx} className="flex items-start w-full max-w-3xl">
                     <div className="w-9 sm:w-16 shrink-0 pt-2.5">
-                      <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]">ฐาน {['๘','๙'][rIdx - 7]}</p>
+                      <p className="text-[13px] sm:text-xs font-bold text-[#F8F6F1]">ฐาน {['๘','๙'][rIdx - 7]}</p>
                     </div>
                     <div className="flex-1 flex justify-between">
                       {(hChart[rIdx] ?? []).map((star: number, cIdx: number) => {
@@ -1293,7 +1293,7 @@ export default function KarnchataPage() {
                             <div className="w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold bg-[#020617] border border-[#4B6FAE]/35 text-[#F8F6F1]">
                               {star}
                             </div>
-                            <span className="text-[8px] sm:text-[11px] font-medium text-center leading-tight text-[#8A8070]">
+                            <span className="text-[11px] sm:text-[14px] font-medium text-center leading-tight text-[#8A8070]">
                               {bhopName}
                             </span>
                           </div>
@@ -1344,16 +1344,16 @@ export default function KarnchataPage() {
               <button key={dir.id} onClick={() => setHoverNum(hoverNum === dir.id ? null : dir.id)}
                 className={`p-2 sm:p-3 md:p-4 rounded-xl sm:rounded-2xl border flex flex-col items-center text-center transition-all ${hoverNum === dir.id ? "bg-[#C6A96B]/10 border-[#C6A96B] shadow-[0_0_20px_rgba(198,169,107,0.15)] scale-[1.02]" : "bg-[#020617] border-white/5 hover:border-white/10"}`}
               >
-                <p className="text-[10px] sm:text-xs text-[#8A8070] font-bold mb-0.5 sm:mb-1 leading-tight">{dir.name}</p>
-                <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1] mb-0.5 sm:mb-1">ดาว {dir.star}</p>
+                <p className="text-[13px] sm:text-xs text-[#8A8070] font-bold mb-0.5 sm:mb-1 leading-tight">{dir.name}</p>
+                <p className="text-[13px] sm:text-xs font-bold text-[#F8F6F1] mb-0.5 sm:mb-1">ดาว {dir.star}</p>
                 <p className="text-xl sm:text-2xl font-display font-bold text-[#C6A96B] mb-1 sm:mb-2">({dir.id === 9 ? '๙' : dir.id})</p>
                 <div className="w-full space-y-0.5 sm:space-y-1 mt-auto">
                   {isCenter ? (
-                    <div className="px-1 sm:px-2 py-0.5 sm:py-1 rounded-lg border border-[#C6A96B]/30 text-[#C6A96B] text-[9px] sm:text-xs font-bold w-full">วิญญาณธาตุ</div>
+                    <div className="px-1 sm:px-2 py-0.5 sm:py-1 rounded-lg border border-[#C6A96B]/30 text-[#C6A96B] text-[12px] sm:text-xs font-bold w-full">วิญญาณธาตุ</div>
                   ) : (
                     <>
-                      <div className={`px-1 sm:px-2 py-0.5 sm:py-1 rounded-lg border text-[9px] sm:text-xs font-bold w-full ${kalaBg}`}>กาล: {kalaLabel}</div>
-                      <div className={`px-1 sm:px-2 py-0.5 sm:py-1 rounded-lg border text-[9px] sm:text-xs font-bold w-full ${birthBg}`}>เกิด: {birthLabel}</div>
+                      <div className={`px-1 sm:px-2 py-0.5 sm:py-1 rounded-lg border text-[12px] sm:text-xs font-bold w-full ${kalaBg}`}>กาล: {kalaLabel}</div>
+                      <div className={`px-1 sm:px-2 py-0.5 sm:py-1 rounded-lg border text-[12px] sm:text-xs font-bold w-full ${birthBg}`}>เกิด: {birthLabel}</div>
                     </>
                   )}
                 </div>

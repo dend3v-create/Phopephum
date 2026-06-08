@@ -369,7 +369,7 @@ export default function RahuDashboard() {
                 <p className="text-xs text-[#D9CDB7] mt-2 uppercase font-bold tracking-wider">
                   เวลาคงเหลือช่วงย่อย
                 </p>
-                <span className={`mt-2 px-2.5 py-0.5 rounded-full text-[9px] font-bold ${
+                <span className={`mt-2 px-2.5 py-0.5 rounded-full text-[12px] font-bold ${
                   rahuResult.is_current_moment_good 
                     ? "bg-emerald-500/20 text-emerald-400" 
                     : rahuResult.sub_block.is_good
@@ -509,7 +509,7 @@ function PredictionBox({ title, value, icon }: { title: string; value: string; i
     <Card className="p-4 rounded-2xl bg-slate-950/40 border-white/5 hover:border-[#C6A96B]/25 transition-all duration-300">
       <div className="flex items-center gap-2 mb-2">
         <span className="text-sm">{icon}</span>
-        <p className="text-[9px] text-[#8A8070] uppercase tracking-[0.15em] font-bold">{title}</p>
+        <p className="text-[12px] text-[#8A8070] uppercase tracking-[0.15em] font-bold">{title}</p>
       </div>
       <p className="text-[#F8F6F1] text-base font-semibold leading-snug">{value}</p>
     </Card>
@@ -547,7 +547,7 @@ function TimelineBlockCard({
           {/* ขอบเขตเวลา */}
           <div className="space-y-0.5">
             <p className="text-xs font-mono font-bold text-[#F8F6F1]">{block.start_time} - {block.end_time}</p>
-            <p className="text-[9px] text-[#8A8070] uppercase">รอบที่ {block.slot_number}</p>
+            <p className="text-[12px] text-[#8A8070] uppercase">รอบที่ {block.slot_number}</p>
           </div>
           
           <div className="w-px h-7 bg-white/5" />
@@ -557,10 +557,10 @@ function TimelineBlockCard({
             <p className="text-xs font-bold text-[#D9BC82] flex items-center gap-1.5">
               {yamRule.yam_name}
               {isCurrent && (
-                <span className="bg-[#C6A96B]/15 text-[#C6A96B] px-1.5 py-0.5 rounded text-[8px] font-bold">ปัจจุบัน</span>
+                <span className="bg-[#C6A96B]/15 text-[#C6A96B] px-1.5 py-0.5 rounded text-[11px] font-bold">ปัจจุบัน</span>
               )}
             </p>
-            <p className="text-[10px] text-[#8A8070] mt-0.5 leading-none">
+            <p className="text-[13px] text-[#8A8070] mt-0.5 leading-none">
               ผล: {yamRule.traibhum_result}
             </p>
           </div>
@@ -568,7 +568,7 @@ function TimelineBlockCard({
 
         {/* ฝั่งขวา: สรุปฤกษ์ย่อ & Expander */}
         <div className="flex items-center gap-3">
-          <span className="text-[10px] bg-slate-900 px-2.5 py-1 rounded-lg border border-white/5 text-[#8A8070] font-mono leading-none">
+          <span className="text-[13px] bg-slate-900 px-2.5 py-1 rounded-lg border border-white/5 text-[#8A8070] font-mono leading-none">
             {yamRule.good_phase_desc.split(" (")[0]}
           </span>
           {isExpanded ? <ChevronUp className="w-4 h-4 text-[#8A8070]" /> : <ChevronDown className="w-4 h-4 text-[#8A8070]" />}
@@ -579,7 +579,7 @@ function TimelineBlockCard({
       {isExpanded && (
         <div className="border-t border-white/5 bg-slate-950/40 p-4 space-y-4">
           {/* รายละเอียดคำทำนายยามหลัก */}
-          <div className="grid grid-cols-3 gap-2.5 text-[10px] bg-white/2.5 p-3 rounded-xl border border-white/5">
+          <div className="grid grid-cols-3 gap-2.5 text-[13px] bg-white/2.5 p-3 rounded-xl border border-white/5">
             <div>
               <p className="text-[#8A8070] mb-0.5">📢 คำสัตย์</p>
               <p className="text-[#F8F6F1] font-semibold">{yamRule.huajai_truth}</p>
@@ -596,7 +596,7 @@ function TimelineBlockCard({
 
           {/* รายการยามย่อย 9 ช่วง */}
           <div className="space-y-1.5">
-            <p className="text-[9px] uppercase tracking-wider text-[#8A8070] font-bold">
+            <p className="text-[12px] uppercase tracking-wider text-[#8A8070] font-bold">
               🔍 วิถียามย่อย 9 ช่วง (10 นาทีต่อช่วง)
             </p>
             <div className="grid grid-cols-3 gap-1.5">
@@ -618,7 +618,7 @@ function TimelineBlockCard({
                 return (
                   <div 
                     key={sb.id}
-                    className={`p-2 rounded-xl text-[9px] flex flex-col justify-between border transition-all ${
+                    className={`p-2 rounded-xl text-[12px] flex flex-col justify-between border transition-all ${
                       isAuspicious
                         ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400 font-bold"
                         : sb.is_good
@@ -631,7 +631,7 @@ function TimelineBlockCard({
                       {isAuspicious && <Sparkles className="w-2.5 h-2.5 text-emerald-400" />}
                     </div>
                     <div className="flex justify-between items-end">
-                      <span className="text-[10px]">{sb.name}</span>
+                      <span className="text-[13px]">{sb.name}</span>
                       <span className="opacity-75">
                         {isAuspicious ? "มงคลสูงสุด" : sb.is_good ? "ปานกลาง" : "อุปสรรค"}
                       </span>

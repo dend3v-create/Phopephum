@@ -562,7 +562,7 @@ export default function HoroscopePage() {
                 <span className={`text-sm font-extrabold tracking-wide leading-tight ${isSelected ? "text-[#020617]" : "text-[#F8F6F1]"}`}>
                   {tab.label}
                 </span>
-                <span className={`text-[11px] mt-0.5 leading-tight ${isSelected ? "text-[#020617]/70" : "text-[#8A8070]"}`}>
+                <span className={`text-[14px] mt-0.5 leading-tight ${isSelected ? "text-[#020617]/70" : "text-[#8A8070]"}`}>
                   {tab.desc}
                 </span>
               </div>
@@ -577,7 +577,7 @@ export default function HoroscopePage() {
           {/* ── ประวัติการวิเคราะห์ล่าสุด (Sticky History) ── */}
           {history && history.length > 0 && (
             <div className="animate-in fade-in slide-in-from-top-4 duration-500">
-              <p className="text-[#C6A96B] text-[10px] tracking-[0.2em] uppercase font-bold mb-3 flex items-center gap-2">
+              <p className="text-[#C6A96B] text-[13px] tracking-[0.2em] uppercase font-bold mb-3 flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B]" />
                 ดวงชะตาที่วิเคราะห์ล่าสุด
               </p>
@@ -592,14 +592,14 @@ export default function HoroscopePage() {
                     className="cursor-pointer group hover:scale-[1.01] active:scale-[0.99] transition-all"
                   >
                     <Card className="border-[#C6A96B]/10 p-4 bg-slate-950/20 group-hover:border-[#C6A96B]/30 transition-all flex flex-col gap-1.5">
-                      <p className="text-[11px] font-bold text-[#F8F6F1] truncate">
+                      <p className="text-[14px] font-bold text-[#F8F6F1] truncate">
                         ✨ {h.result_data?.nineBase?.lunarDate?.thaiDateText ?? "คำนวณสด"}
                       </p>
                       <div className="flex items-center justify-between mt-1 pt-1.5 border-t border-white/5">
-                         <span className="text-[9px] text-[#94A3B8]">
+                         <span className="text-[12px] text-[#94A3B8]">
                            {new Date(h.created_at).toLocaleDateString("th-TH")}
                          </span>
-                         <span className="text-[9px] text-[#C9A96E] font-bold">ใช้ข้อมูลนี้ ➔</span>
+                         <span className="text-[12px] text-[#C9A96E] font-bold">ใช้ข้อมูลนี้ ➔</span>
                       </div>
                     </Card>
                   </div>
@@ -626,7 +626,7 @@ export default function HoroscopePage() {
                   <span className="text-xs text-[#C9A96E] font-bold uppercase tracking-wider">วันกำเนิด (วันเกิด)</span>
                   {customers && customers.length > 0 && (
                     <select 
-                      className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#C9A96E] rounded px-2 py-1 text-[10px] outline-none"
+                      className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#C9A96E] rounded px-2 py-1 text-[13px] outline-none"
                       onChange={(e) => {
                         const cust = customers.find((c: any) => c.id === e.target.value);
                         if (cust) {
@@ -686,13 +686,13 @@ export default function HoroscopePage() {
                 <div className="flex items-center gap-3 pt-2">
                   <div className="flex items-center gap-1.5">
                     <input type="checkbox" name="saveCustomer" id="saveCustomer" className="w-3.5 h-3.5 accent-[#C9A96E] rounded cursor-pointer" />
-                    <label htmlFor="saveCustomer" className="text-[11px] text-[#94A3B8] cursor-pointer">บันทึกเป็นลูกค้าใหม่</label>
+                    <label htmlFor="saveCustomer" className="text-[14px] text-[#94A3B8] cursor-pointer">บันทึกเป็นลูกค้าใหม่</label>
                   </div>
                   <input 
                     type="text" 
                     name="customerName" 
                     placeholder="ชื่อลูกค้า (สำหรับบันทึก)..." 
-                    className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded px-2.5 py-1.5 text-[11px] outline-none focus:border-[#C9A96E]/50 flex-1 max-w-[200px]" 
+                    className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded px-2.5 py-1.5 text-[14px] outline-none focus:border-[#C9A96E]/50 flex-1 max-w-[200px]" 
                   />
                 </div>
               </div>
@@ -705,7 +705,7 @@ export default function HoroscopePage() {
               ) : (
                 <div className="space-y-4 pt-4 border-t border-white/5">
                   <div className="flex items-center justify-between border-b border-[#C9A96E]/15 pb-2">
-                    <span className="text-xs text-[#C9A96E] font-bold uppercase tracking-wider">วันจร (ทำนาย) <span className="text-[9px] font-normal lowercase ml-1">(เปลี่ยนค่าเพื่อดูผลแบบเรียลไทม์)</span></span>
+                    <span className="text-xs text-[#C9A96E] font-bold uppercase tracking-wider">วันจร (ทำนาย) <span className="text-[12px] font-normal lowercase ml-1">(เปลี่ยนค่าเพื่อดูผลแบบเรียลไทม์)</span></span>
                     <button
                       type="button"
                       onClick={() => {
@@ -722,7 +722,7 @@ export default function HoroscopePage() {
                         
                         triggerRealtimeUpdate();
                       }}
-                      className="text-[10px] font-bold border border-[#C9A96E]/40 text-[#C9A96E] px-2.5 py-1 rounded-md hover:bg-[#C9A96E]/10 transition-all"
+                      className="text-[13px] font-bold border border-[#C9A96E]/40 text-[#C9A96E] px-2.5 py-1 rounded-md hover:bg-[#C9A96E]/10 transition-all"
                     >
                       ใช้เวลาขณะนี้
                     </button>
@@ -882,7 +882,7 @@ export default function HoroscopePage() {
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[8px] font-bold bg-[#C6A96B] text-[#020617] px-1.5 py-[0.5px] rounded-full border border-[#C6A96B]/60 leading-none">ล</span>
+                  <span className="text-[11px] font-bold bg-[#C6A96B] text-[#020617] px-1.5 py-[0.5px] rounded-full border border-[#C6A96B]/60 leading-none">ล</span>
                   <span>ลัคนาเกิด</span>
                 </span>
                 <span className={`w-2 h-2 rounded-full transition-all ${showNatalLagna ? "bg-[#C6A96B] shadow-[0_0_8px_#C6A96B]" : "bg-white/10"}`} />
@@ -895,7 +895,7 @@ export default function HoroscopePage() {
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[8px] font-bold bg-[#4B6FAE] text-[#F8F6F1] px-1 py-[0.5px] rounded-full border border-[#4B6FAE]/60 leading-none animate-pulse">ลจ</span>
+                  <span className="text-[11px] font-bold bg-[#4B6FAE] text-[#F8F6F1] px-1 py-[0.5px] rounded-full border border-[#4B6FAE]/60 leading-none animate-pulse">ลจ</span>
                   <span>ลัคนาจร</span>
                 </span>
                 <span className={`w-2 h-2 rounded-full transition-all ${showTransitLagna ? "bg-[#4B6FAE] shadow-[0_0_8px_#4B6FAE]" : "bg-white/10"}`} />
@@ -908,7 +908,7 @@ export default function HoroscopePage() {
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-bold text-[#C9A96E] bg-white/5 px-1 py-[0.5px] rounded border border-white/10 leading-none">ท/ม</span>
+                  <span className="text-[13px] font-bold text-[#C9A96E] bg-white/5 px-1 py-[0.5px] rounded border border-white/10 leading-none">ท/ม</span>
                   <span>ทักษาจร</span>
                 </span>
                 <span className={`w-2 h-2 rounded-full transition-all ${showTaksaMahaBadges ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
@@ -1034,7 +1034,7 @@ export default function HoroscopePage() {
                 <span className="w-2 h-2 rounded-full bg-[#C9A96E] animate-ping" />
                 พื้นที่แชทตรวจดวงชะตาสด (AI Chat Assistant)
               </span>
-              <span className="text-[10px] text-[#8A8070]">ครูเด่น มาสเตอร์ฟา วิเคราะห์</span>
+              <span className="text-[13px] text-[#8A8070]">ครูเด่น มาสเตอร์ฟา วิเคราะห์</span>
             </div>
             
             {/* กล่องประวัติแชท */}
@@ -1048,7 +1048,7 @@ export default function HoroscopePage() {
                   }`}>
                     {msg.text}
                   </div>
-                  <span className="text-[9px] text-[#8A8070] mt-1 px-1">{msg.time}</span>
+                  <span className="text-[12px] text-[#8A8070] mt-1 px-1">{msg.time}</span>
                 </div>
               ))}
             </div>
@@ -1157,7 +1157,7 @@ export default function HoroscopePage() {
           {/* ส่วนรายงานชะตาชีวิต (AI Reports & Categories) */}
           <div className="space-y-6 pt-6 border-t border-[#C9A96E]/20">
             <div>
-              <span className="text-[#C9A96E] text-[10px] tracking-[0.25em] uppercase font-bold block mb-1">
+              <span className="text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold block mb-1">
                 ✦ ระบบภูมิปัญญาพยากรณ์
               </span>
               <h2 className="font-display text-2xl font-bold text-[#F8F6F1] glow-gold">
@@ -1217,11 +1217,11 @@ export default function HoroscopePage() {
                     <p className="font-semibold text-xs text-[#F8F6F1] group-hover:text-[#C9A96E] transition-colors leading-tight">
                       {cat.label}
                     </p>
-                    <p className="text-[10px] text-[#8A8070] mt-1 leading-snug">
+                    <p className="text-[13px] text-[#8A8070] mt-1 leading-snug">
                       {cat.desc}
                     </p>
                   </div>
-                  <span className="absolute bottom-2.5 right-3 text-[10px] text-[#C9A96E] opacity-0 group-hover:opacity-100 transition-opacity">
+                  <span className="absolute bottom-2.5 right-3 text-[13px] text-[#C9A96E] opacity-0 group-hover:opacity-100 transition-opacity">
                     ตรวจดวง ➔
                   </span>
                 </a>
@@ -1261,7 +1261,7 @@ export default function HoroscopePage() {
                             <p className="text-xs font-bold text-[#F8F6F1] group-hover:text-[#C9A96E] transition-colors">
                               ✨ {typeLabels[rep.report_type] ?? rep.report_type}
                             </p>
-                            <p className="text-[10px] text-[#8A8070] mt-1 truncate">
+                            <p className="text-[13px] text-[#8A8070] mt-1 truncate">
                               {new Date(rep.created_at).toLocaleDateString("th-TH", {
                                 day: "numeric",
                                 month: "short",
@@ -1400,7 +1400,7 @@ function TaksaMahaSection({
       {/* ── Section Header ── */}
       <div className="flex items-center gap-3">
         <div className="h-px flex-1 bg-[#C9A96E]/20" />
-        <p className="text-[#C9A96E] text-[10px] tracking-[0.25em] uppercase font-bold">
+        <p className="text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold">
           ระบบทักษา · มหาภูติ (Taksa-Mahabhuti Combined)
         </p>
         <div className="h-px flex-1 bg-[#C9A96E]/20" />
@@ -1449,8 +1449,8 @@ function CombinedTaksaCard({
   return (
     <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
       <div className="p-4 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-[#C9A96E]">ตารางทักษาคู่ (ทักษากำเนิด / ทักษาจร)</p>
-        <p className="text-[#8A8070] text-[11px] mt-0.5">
+        <p className="text-[14px] font-bold uppercase tracking-widest text-[#C9A96E]">ตารางทักษาคู่ (ทักษากำเนิด / ทักษาจร)</p>
+        <p className="text-[#8A8070] text-[14px] mt-0.5">
           บริวารเกิด: {STAR_NAMES[taksaNatal.bariStar as StarNumber]} ({taksaNatal.bariStar}) · บริวารจร: {STAR_NAMES[taksaTransit.bariStar as StarNumber]} ({taksaTransit.bariStar})
         </p>
       </div>
@@ -1494,7 +1494,7 @@ function CombinedTaksaCard({
                     <span className="font-display text-3xl md:text-4xl font-bold leading-none text-[#F8F6F1]">
                       {star}
                     </span>
-                    <span className="text-[11px] md:text-xs text-[#8A8070] font-medium mt-0.5">
+                    <span className="text-[14px] md:text-xs text-[#8A8070] font-medium mt-0.5">
                       {STAR_NAMES[star as StarNumber]}
                     </span>
                   </div>
@@ -1545,8 +1545,8 @@ function CombinedMahaCard({
   return (
     <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
       <div className="p-4 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-[#C9A96E]">มหาภูติกำเนิด จ.ศ.{natal.cs} / จร จ.ศ.{transit.cs}</p>
-        <p className="text-[#8A8070] text-[11px] mt-0.5">
+        <p className="text-[14px] font-bold uppercase tracking-widest text-[#C9A96E]">มหาภูติกำเนิด จ.ศ.{natal.cs} / จร จ.ศ.{transit.cs}</p>
+        <p className="text-[#8A8070] text-[14px] mt-0.5">
           เศษกำเนิด: {natal.remainder} · เศษจร: {transit.remainder}
         </p>
       </div>
@@ -1582,7 +1582,7 @@ function CombinedMahaCard({
                     <span className="font-display text-3xl md:text-4xl font-bold leading-none text-[#F8F6F1]">
                       {starNatal}
                     </span>
-                    <span className="text-[11px] md:text-xs text-[#8A8070] font-medium mt-0.5">
+                    <span className="text-[14px] md:text-xs text-[#8A8070] font-medium mt-0.5">
                       {STAR_NAMES[starNatal]}
                     </span>
                   </div>
@@ -1726,11 +1726,11 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
               ถอดรหัสดาวชะตา: {starInfo.title}
             </h4>
             <div className="flex flex-wrap gap-2 mt-1">
-              <span className="text-[9px] font-semibold bg-white/5 border border-white/10 px-2 py-0.5 rounded-full text-[#8A8070]">
+              <span className="text-[12px] font-semibold bg-white/5 border border-white/10 px-2 py-0.5 rounded-full text-[#8A8070]">
                 ธาตุ{starInfo.element} {ELEMENT_ICONS[starInfo.element]}
               </span>
               {pairNotice && pairInfo && (
-                <span className="text-[9px] font-semibold bg-[#C9A96E]/10 border border-[#C9A96E]/25 px-2 py-0.5 rounded-full text-[#C9A96E]">
+                <span className="text-[12px] font-semibold bg-[#C9A96E]/10 border border-[#C9A96E]/25 px-2 py-0.5 rounded-full text-[#C9A96E]">
                   คู่ธาตุ{pairInfo.element}
                 </span>
               )}
@@ -1740,7 +1740,7 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
 
         <div className="flex flex-wrap gap-1.5 md:justify-end">
           {currentTaksa && (
-            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-xl border ${
+            <span className={`text-[13px] font-bold px-2.5 py-1 rounded-xl border ${
               currentTaksa === "ศรี"
                 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
                 : currentTaksa === "กาลกิณี"
@@ -1751,7 +1751,7 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
             </span>
           )}
           {currentMaha && (
-            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-xl border ${
+            <span className={`text-[13px] font-bold px-2.5 py-1 rounded-xl border ${
               ["ธงชัย", "ขุมทรัพย์", "ราชา", "อธิบดี"].includes(currentMaha)
                 ? "bg-sky-500/10 border-sky-500/30 text-sky-400"
                 : ["อริ", "มรณะ", "โลกาวินาศ"].includes(currentMaha)
@@ -1766,13 +1766,13 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
 
       <div className="space-y-4 text-xs md:text-sm text-[#F3EFE8] leading-relaxed">
         <div className="bg-white/5 rounded-2xl p-3 border border-white/5">
-          <p className="text-[10px] uppercase font-bold text-[#8A8070] tracking-wider mb-1">บทบาทและอุปนิสัยดวงดาว</p>
+          <p className="text-[13px] uppercase font-bold text-[#8A8070] tracking-wider mb-1">บทบาทและอุปนิสัยดวงดาว</p>
           <p className="text-xs text-[#8A8070] italic">{starInfo.desc}</p>
         </div>
 
         <div className="space-y-3 pt-1">
           <div>
-            <p className="text-[10px] uppercase font-bold text-[#C9A96E] tracking-wider mb-1 flex items-center gap-1.5">
+            <p className="text-[13px] uppercase font-bold text-[#C9A96E] tracking-wider mb-1 flex items-center gap-1.5">
               <span>🍃</span> ปัจจัยภายนอก (ทักษาจรทำนายปีนี้)
             </p>
             <p className="text-xs bg-[#C9A96E]/5 border border-[#C9A96E]/10 rounded-xl p-3 text-[#F8F6F1]">
@@ -1782,7 +1782,7 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
 
           {currentMaha && (
             <div>
-              <p className="text-[10px] uppercase font-bold text-[#4B6FAE] tracking-wider mb-1 flex items-center gap-1.5">
+              <p className="text-[13px] uppercase font-bold text-[#4B6FAE] tracking-wider mb-1 flex items-center gap-1.5">
                 <span>🌊</span> สภาวะภายใน (มหาภูติจรทำนายจิตใจ)
               </p>
               <p className="text-xs bg-[#4B6FAE]/5 border border-[#4B6FAE]/10 rounded-xl p-3 text-[#F8F6F1]">
@@ -1792,7 +1792,7 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-3 pt-2 text-[10px] text-[#8A8070] border-t border-white/5">
+        <div className="grid grid-cols-2 gap-3 pt-2 text-[13px] text-[#8A8070] border-t border-white/5">
           <div className="flex flex-col gap-0.5 bg-slate-950/20 p-2 rounded-xl border border-white/5">
             <span>พื้นเพดวงเดิม (ทักษากำเนิด):</span>
             <span className="font-bold text-[#F8F6F1]">{natalTaksa ? `${natalTaksa}กำเนิด` : "ไม่มีตำแหน่งสำคัญ"}</span>
@@ -1850,7 +1850,7 @@ function HoroscopeResultDisplay({ result, phopephumResult }: { result: any; phop
       </div>
       <div className="flex items-center gap-2 mb-4">
         <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
-        <p className="text-[#C9A96E] text-[10px] uppercase tracking-widest font-bold">ปฏิทินจันทรคติไทย (ปฏิทิน 100 ปี)</p>
+        <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold">ปฏิทินจันทรคติไทย (ปฏิทิน 100 ปี)</p>
       </div>
       <p className="text-[#F3EFE8] font-semibold text-lg">
         วัน{lunar.dayName || lunar.dayPlanet} เดือน{lunar.lunarMonthName || lunar.lunarMonth} ปี{lunar.zodiacName || ''}
@@ -2053,7 +2053,7 @@ function FateMatrixPanel({
                             {showTaksaMahaBadges && taksaInd && (
                               <span 
                                 title={taksaInd.fullName}
-                                className={`absolute -top-1.5 -right-2 text-[7px] font-bold px-1 py-[1px] rounded-md border leading-none shadow-sm transition-all group-hover/cell:scale-105 ${taksaInd.color}`}
+                                className={`absolute -top-1.5 -right-2 text-[10px] font-bold px-1 py-[1px] rounded-md border leading-none shadow-sm transition-all group-hover/cell:scale-105 ${taksaInd.color}`}
                               >
                                 {taksaInd.label}
                               </span>
@@ -2063,7 +2063,7 @@ function FateMatrixPanel({
                             {showTaksaMahaBadges && mahaInd && (
                               <span 
                                 title={mahaInd.fullName}
-                                className={`absolute -top-1.5 -left-2 text-[7px] font-bold px-1 py-[1px] rounded-md border leading-none shadow-sm transition-all group-hover/cell:scale-105 ${mahaInd.color}`}
+                                className={`absolute -top-1.5 -left-2 text-[10px] font-bold px-1 py-[1px] rounded-md border leading-none shadow-sm transition-all group-hover/cell:scale-105 ${mahaInd.color}`}
                               >
                                 {mahaInd.label}
                               </span>
@@ -2073,7 +2073,7 @@ function FateMatrixPanel({
                             {showNatalLagna && isLagnaNatal && (
                               <span 
                                 title="ลัคนากำเนิด"
-                                className="absolute -bottom-1 -left-2.5 text-[8px] font-bold bg-[#C6A96B] text-[#020617] border border-[#C6A96B]/60 px-1 py-[0.5px] rounded-full leading-none shadow-md transition-all group-hover/cell:scale-105 select-none z-10"
+                                className="absolute -bottom-1 -left-2.5 text-[11px] font-bold bg-[#C6A96B] text-[#020617] border border-[#C6A96B]/60 px-1 py-[0.5px] rounded-full leading-none shadow-md transition-all group-hover/cell:scale-105 select-none z-10"
                               >
                                 ล
                               </span>
@@ -2083,7 +2083,7 @@ function FateMatrixPanel({
                             {showTransitLagna && isLagnaTransit && (
                               <span
                                 title={`ลัคนาจร (อายุย่าง ${phopephumResult?.taksaTransit?.ageYang ?? 0} ปี)`}
-                                className="absolute -bottom-1 -right-2.5 text-[8px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 px-1 py-[0.5px] rounded-full leading-none shadow-md transition-all group-hover/cell:scale-105 select-none animate-pulse z-10"
+                                className="absolute -bottom-1 -right-2.5 text-[11px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 px-1 py-[0.5px] rounded-full leading-none shadow-md transition-all group-hover/cell:scale-105 select-none animate-pulse z-10"
                               >
                                 ลจ
                               </span>
@@ -2125,7 +2125,7 @@ function FateMatrixPanel({
                           
                           <div className="flex flex-col items-center mt-1">
                             {showHouseNames && houseName && (
-                              <span className={`text-[9px] sm:text-[11px] font-bold leading-tight mb-0.5 transition-colors text-center ${
+                              <span className={`text-[12px] sm:text-[14px] font-bold leading-tight mb-0.5 transition-colors text-center ${
                                 isHighlighted
                                   ? "text-[#C9A96E] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                                   : "text-[#B4A790] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]"
@@ -2134,7 +2134,7 @@ function FateMatrixPanel({
                               </span>
                             )}
                             {showAgeRange && rIdx < 3 && (
-                              <span className="text-[10px] text-[#8A8070]/70 mt-1 leading-none font-sans font-semibold">
+                              <span className="text-[13px] text-[#8A8070]/70 mt-1 leading-none font-sans font-semibold">
                                 {getCellAgeRange(rIdx, cIdx, matrix)} ปี
                               </span>
                             )}
@@ -2156,7 +2156,7 @@ function FateMatrixPanel({
           {/* ลัคนาเกิด */}
           {showNatalLagna && (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="px-1.5 py-[1px] rounded-full text-[8px] font-bold bg-[#C6A96B] text-[#020617] leading-none select-none shrink-0">ล</span>
+              <span className="px-1.5 py-[1px] rounded-full text-[11px] font-bold bg-[#C6A96B] text-[#020617] leading-none select-none shrink-0">ล</span>
               <span className="text-[#C6A96B] font-semibold shrink-0">ลัคนาเกิด</span>
               <span className="text-[#8A8070]">ยามที่</span>
               <span className="text-[#F8F6F1] font-bold">{phopephumResult.lagna.yamYaiNumber ?? "—"}</span>
@@ -2229,7 +2229,7 @@ function FateMatrixPanel({
             const b4name = BASE4_MEANINGS[b4val] ?? "—";
             return (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
-                <span className="px-1 py-[1px] rounded-full text-[8px] font-bold bg-[#4B6FAE] text-[#F8F6F1] leading-none select-none shrink-0">ลจ</span>
+                <span className="px-1 py-[1px] rounded-full text-[11px] font-bold bg-[#4B6FAE] text-[#F8F6F1] leading-none select-none shrink-0">ลจ</span>
                 <span className="text-[#4B6FAE] font-semibold shrink-0">ลัคนาจร</span>
                 <span className="text-[#8A8070]">อายุย่าง</span>
                 <span className="text-[#F8F6F1] font-bold">{phopephumResult.taksaTransit?.ageYang ?? "—"} ปี</span>
@@ -2308,9 +2308,9 @@ function FateMatrixPanel({
 
       {/* Legend Block */}
       {taksaMaha && (
-        <div className="bg-[#0f172a]/50 p-4 border-t border-[#D9BC82]/10 text-[10px] space-y-2 text-[#8A8070]">
+        <div className="bg-[#0f172a]/50 p-4 border-t border-[#D9BC82]/10 text-[13px] space-y-2 text-[#8A8070]">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-            <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[9px] w-full">ปัจจัยภายนอก (ทักษาจร — 8 ภพ):</span>
+            <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[12px] w-full">ปัจจัยภายนอก (ทักษาจร — 8 ภพ):</span>
             {[
               { label: "บริวาร", desc: "บริวาร/สังคม/ผู้ติดตาม",            cls: "text-slate-300 bg-slate-800/80 border-slate-500/30" },
               { label: "อายุ",   desc: "สุขภาพ/อายุ/ความมั่นคง",             cls: "text-teal-300 bg-teal-950/80 border-teal-500/30" },
@@ -2322,14 +2322,14 @@ function FateMatrixPanel({
               { label: "กาลี",   desc: "กาลกิณี — อุปสรรค/อัปมงคล/ระวัง",  cls: "text-red-400 bg-red-950/80 border-red-500/30" },
             ].map(({ label, desc, cls }) => (
               <div key={label} className="flex items-center gap-1">
-                <span className={`px-1 py-[0.5px] rounded border text-[7px] font-bold leading-none ${cls}`}>{label}</span>
-                <span className="text-[9px]">{desc}</span>
+                <span className={`px-1 py-[0.5px] rounded border text-[10px] font-bold leading-none ${cls}`}>{label}</span>
+                <span className="text-[12px]">{desc}</span>
               </div>
             ))}
           </div>
 
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2 pt-1 border-t border-white/5">
-            <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[9px] w-full">ปัจจัยภายใน (มหาภูติจร — 7 ตำแหน่ง):</span>
+            <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[12px] w-full">ปัจจัยภายใน (มหาภูติจร — 7 ตำแหน่ง):</span>
             {[
               { label: "ราชา",    desc: "ความเป็นใหญ่/บารมีสูงสุด/ผู้นำ",             cls: "text-[#C6A96B] bg-[#C6A96B]/10 border-[#C6A96B]/40" },
               { label: "อธิบดี",  desc: "การควบคุม/ผู้บัญชาการ/บริหาร",              cls: "text-violet-300 bg-violet-950/80 border-violet-500/30" },
@@ -2340,23 +2340,23 @@ function FateMatrixPanel({
               { label: "อริ",     desc: "ศัตรู/การต่อสู้/ความขัดแย้ง",               cls: "text-red-300 bg-red-950/60 border-red-400/30" },
             ].map(({ label, desc, cls }) => (
               <div key={label} className="flex items-center gap-1">
-                <span className={`px-1 py-[0.5px] rounded border text-[7px] font-bold leading-none ${cls}`}>{label}</span>
-                <span className="text-[9px]">{desc}</span>
+                <span className={`px-1 py-[0.5px] rounded border text-[10px] font-bold leading-none ${cls}`}>{label}</span>
+                <span className="text-[12px]">{desc}</span>
               </div>
             ))}
           </div>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1 border-t border-white/5">
-            <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[9px]">สัญลักษณ์ผังดวง:</span>
+            <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[12px]">สัญลักษณ์ผังดวง:</span>
             {showNatalLagna && (
               <div className="flex items-center gap-1.5">
-                <span className="px-1.5 py-[0.5px] rounded-full text-[8px] font-bold bg-[#C6A96B] text-[#020617] border border-[#C6A96B]/60 leading-none select-none">ล</span>
+                <span className="px-1.5 py-[0.5px] rounded-full text-[11px] font-bold bg-[#C6A96B] text-[#020617] border border-[#C6A96B]/60 leading-none select-none">ล</span>
                 <span>ลัคนากำเนิด</span>
               </div>
             )}
             {showTransitLagna && (
               <div className="flex items-center gap-1.5">
-                <span className="px-1 py-[0.5px] rounded-full text-[9px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 leading-none select-none">ลจ</span>
+                <span className="px-1 py-[0.5px] rounded-full text-[12px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 leading-none select-none">ลจ</span>
                 <span>ลัคนาจร</span>
               </div>
             )}

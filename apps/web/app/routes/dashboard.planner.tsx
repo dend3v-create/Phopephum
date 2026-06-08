@@ -195,7 +195,7 @@ export default function PlannerPage() {
               <div className="flex items-center justify-between">
                 <h3 className="text-xl font-bold text-[#F8F6F1]">พลังงานวัน{dayName}</h3>
                 <div className="text-right">
-                  <span className="text-[10px] text-[#94A3B8] uppercase block">ผู้ปกครอง</span>
+                  <span className="text-[13px] text-[#94A3B8] uppercase block">ผู้ปกครอง</span>
                   <span className="text-lg font-bold text-[#D9BC82]">{currentRuler?.label} ({currentRuler?.symbol})</span>
                 </div>
               </div>
@@ -210,22 +210,22 @@ export default function PlannerPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <span className="text-[10px] text-green-400 uppercase font-bold flex items-center gap-1">
+                  <span className="text-[13px] text-green-400 uppercase font-bold flex items-center gap-1">
                     <CheckCircle className="w-3 h-3" /> เกื้อหนุนเป็นพิเศษ
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {currentRuler?.promotes.map(p => (
-                      <span key={p} className="px-2 py-0.5 bg-green-400/10 text-green-400 text-[10px] rounded-full border border-green-400/20">{p}</span>
+                      <span key={p} className="px-2 py-0.5 bg-green-400/10 text-green-400 text-[13px] rounded-full border border-green-400/20">{p}</span>
                     ))}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[10px] text-red-400 uppercase font-bold flex items-center gap-1">
+                  <span className="text-[13px] text-red-400 uppercase font-bold flex items-center gap-1">
                     <Zap className="w-3 h-3" /> พึงระวัง
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {currentRuler?.warns.map(w => (
-                      <span key={w} className="px-2 py-0.5 bg-red-400/10 text-red-400 text-[10px] rounded-full border border-red-400/20">{w}</span>
+                      <span key={w} className="px-2 py-0.5 bg-red-400/10 text-red-400 text-[13px] rounded-full border border-red-400/20">{w}</span>
                     ))}
                   </div>
                 </div>
@@ -249,11 +249,11 @@ export default function PlannerPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold text-[#94A3B8]">{slot.start} - {slot.end} น.</span>
-                        <span className="px-1.5 py-0.5 rounded bg-white/5 text-[9px] font-bold text-[#D9BC82] uppercase">{slot.label}</span>
+                        <span className="text-[13px] font-bold text-[#94A3B8]">{slot.start} - {slot.end} น.</span>
+                        <span className="px-1.5 py-0.5 rounded bg-white/5 text-[12px] font-bold text-[#D9BC82] uppercase">{slot.label}</span>
                       </div>
                       <h4 className="text-sm font-bold text-[#F8F6F1]">ผู้ครองยาม: {slot.ruler.label}</h4>
-                      <p className="text-[10px] text-[#94A3B8] italic mt-0.5">{slot.ruler.meaning}</p>
+                      <p className="text-[13px] text-[#94A3B8] italic mt-0.5">{slot.ruler.meaning}</p>
                     </div>
                   </div>
                   
@@ -289,7 +289,7 @@ export default function PlannerPage() {
               <h3 className="text-xl font-bold text-[#F8F6F1]">บันทึกพลังงาน & สะท้อนคิด</h3>
               
               <div className="space-y-3">
-                <span className="text-[10px] text-[#94A3B8] uppercase font-bold flex items-center gap-2">
+                <span className="text-[13px] text-[#94A3B8] uppercase font-bold flex items-center gap-2">
                   <Zap className="w-3 h-3 text-[#D9BC82]" /> ระดับพลังงานวันนี้ (Energy Level)
                 </span>
                 <div className="flex justify-between items-center gap-2 px-2">
@@ -312,14 +312,14 @@ export default function PlannerPage() {
                     </label>
                   ))}
                 </div>
-                <div className="flex justify-between text-[8px] text-[#4A5568] font-bold uppercase tracking-widest px-1">
+                <div className="flex justify-between text-[11px] text-[#4A5568] font-bold uppercase tracking-widest px-1">
                   <span>น้อยที่สุด</span>
                   <span>ยอดเยี่ยมที่สุด</span>
                 </div>
               </div>
 
               <div className="space-y-3">
-                <span className="text-[10px] text-[#94A3B8] uppercase font-bold flex items-center gap-2">
+                <span className="text-[13px] text-[#94A3B8] uppercase font-bold flex items-center gap-2">
                   <Target className="w-3 h-3 text-gold-400" /> ข้อสะท้อนคิดประจำวัน / ความสำเร็จวันนี้
                 </span>
                 <textarea
@@ -332,7 +332,7 @@ export default function PlannerPage() {
               </div>
 
               <div className="space-y-3">
-                <span className="text-[10px] text-[#94A3B8] uppercase font-bold flex items-center gap-2">
+                <span className="text-[13px] text-[#94A3B8] uppercase font-bold flex items-center gap-2">
                   <Heart className="w-3 h-3 text-red-400/60" /> ธรรมประธาน / คำสอนเติมพลังใจ
                 </span>
                 <textarea

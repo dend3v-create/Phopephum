@@ -38,6 +38,7 @@
 /* ── Base ── */
 html {
   scroll-behavior: smooth;
+  font-size: 18px; /* global body text scale-up */
 }
 
 body {

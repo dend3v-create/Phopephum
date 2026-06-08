@@ -299,7 +299,7 @@ export default function SettingsPage() {
                   />
 
                   <div className="flex flex-col">
-                    <label className="text-[#8A8070] text-[11px] uppercase tracking-widest block mb-2 font-bold">เพศกำเนิด (สำหรับโหราจร)</label>
+                    <label className="text-[#8A8070] text-[14px] uppercase tracking-widest block mb-2 font-bold">เพศกำเนิด (สำหรับโหราจร)</label>
                     <select
                       name="gender"
                       defaultValue={profile?.gender ?? ""}
@@ -316,7 +316,7 @@ export default function SettingsPage() {
                 {/* วัน / เดือน / ปี พ.ศ. */}
                 <div className="grid grid-cols-3 gap-3">
                   <div className="flex flex-col">
-                    <label className="text-[#8A8070] text-[11px] uppercase tracking-widest block mb-2 font-bold">
+                    <label className="text-[#8A8070] text-[14px] uppercase tracking-widest block mb-2 font-bold">
                       วันเกิด
                     </label>
                     <input
@@ -331,7 +331,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="flex flex-col">
-                    <label className="text-[#8A8070] text-[11px] uppercase tracking-widest block mb-2 font-bold">
+                    <label className="text-[#8A8070] text-[14px] uppercase tracking-widest block mb-2 font-bold">
                       เดือนเกิด
                     </label>
                     <select
@@ -356,7 +356,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="flex flex-col">
-                    <label className="text-[#8A8070] text-[11px] uppercase tracking-widest block mb-2 font-bold">
+                    <label className="text-[#8A8070] text-[14px] uppercase tracking-widest block mb-2 font-bold">
                       ปีเกิด (พ.ศ.)
                     </label>
                     <input
@@ -398,7 +398,7 @@ export default function SettingsPage() {
             <Card className="border-[#C6A96B]/20 p-6 bg-gradient-to-b from-[#0A1628] to-[#020617]">
               <h3 className="font-display font-bold text-[#F8F6F1] text-base mb-2">ระดับสมาชิกปัจจุบัน</h3>
               <div className="p-4 rounded-2xl bg-white/5 border border-[#C6A96B]/20 text-center mb-4">
-                 <p className="text-[10px] text-[#C6A96B] font-bold uppercase tracking-widest mb-1">Current Plan</p>
+                 <p className="text-[13px] text-[#C6A96B] font-bold uppercase tracking-widest mb-1">Current Plan</p>
                  <p className="text-2xl font-black text-[#F8F6F1] uppercase">{profile?.plan || 'FREE'}</p>
               </div>
               <p className="text-[#8A8070] text-xs leading-relaxed">
@@ -427,16 +427,16 @@ export default function SettingsPage() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
-                    <p className="text-[10px] text-[#8A8070] uppercase font-bold mb-1">สมาชิกทั่วไป/Basic</p>
+                    <p className="text-[13px] text-[#8A8070] uppercase font-bold mb-1">สมาชิกทั่วไป/Basic</p>
                     <p className="text-xl font-black text-[#F8F6F1]">3%</p>
                   </div>
                   <div className="bg-[#C6A96B]/10 border border-[#C6A96B]/30 rounded-2xl p-3 text-center relative overflow-hidden">
-                    <div className="absolute top-0 right-0 bg-[#C6A96B] text-[#020617] text-[8px] px-2 font-bold uppercase">Popular</div>
-                    <p className="text-[10px] text-[#C6A96B] uppercase font-bold mb-1">สมาชิกระดับ PRO</p>
+                    <div className="absolute top-0 right-0 bg-[#C6A96B] text-[#020617] text-[11px] px-2 font-bold uppercase">Popular</div>
+                    <p className="text-[13px] text-[#C6A96B] uppercase font-bold mb-1">สมาชิกระดับ PRO</p>
                     <p className="text-xl font-black text-[#C6A96B]">5%</p>
                   </div>
                   <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-3 text-center">
-                    <p className="text-[10px] text-indigo-400 uppercase font-bold mb-1">ระดับ IMPERIAL</p>
+                    <p className="text-[13px] text-indigo-400 uppercase font-bold mb-1">ระดับ IMPERIAL</p>
                     <p className="text-xl font-black text-indigo-400">10%</p>
                   </div>
                 </div>
@@ -471,7 +471,7 @@ export default function SettingsPage() {
               style={{ background: "rgba(198,169,107,0.06)" }}>
               <div>
                 <p className="text-[#C6A96B] text-xs font-bold mb-0.5">✦ อัปเกรดเพื่อรับคอมมิชชั่นสูงขึ้น</p>
-                <p className="text-[#94A3B8] text-[11px]">
+                <p className="text-[#94A3B8] text-[14px]">
                   Free: 3% · Basic: 3% · Pro: 5% · Imperial: 10% — ยิ่งระดับสูง ยิ่งได้มากขึ้น
                 </p>
               </div>
@@ -487,7 +487,7 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="relative overflow-hidden border-[#C6A96B]/30 p-6 bg-gradient-to-br from-[#0B1528] to-[#020617] shadow-xl">
               <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">💰</div>
-              <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-1">ยอดเงินคงเหลือในกระเป๋า</p>
+              <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-1">ยอดเงินคงเหลือในกระเป๋า</p>
               <h3 className="text-3xl font-black font-display text-[#F8F6F1]">฿{wallet.balance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</h3>
               <button
                 onClick={() => setShowWithdrawModal(true)}
@@ -500,22 +500,22 @@ export default function SettingsPage() {
             </Card>
 
             <Card className="border-white/5 p-6 bg-slate-900/40">
-              <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-1">แนะนำเพื่อนสำเร็จ</p>
+              <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-1">แนะนำเพื่อนสำเร็จ</p>
               <h3 className="text-3xl font-black font-display text-[#F8F6F1]">{wallet.referralsCount} <span className="text-sm font-normal text-[#8A8070]">ท่าน</span></h3>
-              <p className="text-[10px] text-[#C6A96B] mt-2 font-bold uppercase tracking-tighter">
+              <p className="text-[13px] text-[#C6A96B] mt-2 font-bold uppercase tracking-tighter">
                 คอมมิชชั่นปัจจุบัน {wallet.commissionRate}%
                 {isFreetier && <span className="text-[#4A5568] ml-1">(อัปเกรดเพื่อเพิ่ม)</span>}
               </p>
             </Card>
 
             <Card className="border-white/5 p-6 bg-slate-900/40">
-              <p className="text-[#8A8070] text-[10px] uppercase tracking-widest font-bold mb-1">รหัสแนะนำของคุณ</p>
+              <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-1">รหัสแนะนำของคุณ</p>
               {affiliateCode ? (
                 <>
                   <h3 className="text-3xl font-black font-display text-[#C6A96B] tracking-widest">{affiliateCode}</h3>
                   <button
                     onClick={handleCopyLink}
-                    className="mt-3 text-[10px] font-bold text-[#F8F6F1] underline hover:text-[#C6A96B] transition-colors"
+                    className="mt-3 text-[13px] font-bold text-[#F8F6F1] underline hover:text-[#C6A96B] transition-colors"
                   >
                     {copied ? "✓ คัดลอกลิงก์แล้ว" : "คัดลอกลิงก์แนะนำเพื่อน"}
                   </button>
@@ -536,7 +536,7 @@ export default function SettingsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-slate-950/60 text-[#8A8070] uppercase font-bold tracking-widest text-[9px]">
+                      <tr className="bg-slate-950/60 text-[#8A8070] uppercase font-bold tracking-widest text-[12px]">
                         <th className="px-6 py-3">วัน/เวลา</th>
                         <th className="px-6 py-3">รายการ</th>
                         <th className="px-6 py-3 text-right">จำนวนเงิน</th>
@@ -546,7 +546,7 @@ export default function SettingsPage() {
                       {wallet.history.length > 0 ? (
                         wallet.history.map((tx: any) => (
                           <tr key={tx.id} className="hover:bg-white/5 text-[#D9CDB7]">
-                            <td className="px-6 py-4 text-[10px]">
+                            <td className="px-6 py-4 text-[13px]">
                               {new Date(tx.created_at).toLocaleString("th-TH", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                             </td>
                             <td className="px-6 py-4">{tx.description}</td>
@@ -576,9 +576,9 @@ export default function SettingsPage() {
                       <div key={w.id} className="p-3 rounded-xl bg-black/20 border border-white/5 text-xs flex justify-between items-center">
                         <div className="space-y-1">
                           <p className="text-[#F8F6F1] font-bold">ถอน ฿{w.amount.toLocaleString()}</p>
-                          <p className="text-[9px] text-[#8A8070]">{new Date(w.created_at).toLocaleDateString("th-TH")}</p>
+                          <p className="text-[12px] text-[#8A8070]">{new Date(w.created_at).toLocaleDateString("th-TH")}</p>
                         </div>
-                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${
+                        <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${
                           w.status === 'completed' ? 'bg-green-500/20 text-green-400' :
                           w.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
                           'bg-yellow-500/20 text-yellow-400'
@@ -617,7 +617,7 @@ export default function SettingsPage() {
               />
 
               <div className="space-y-1.5">
-                <label className="text-[#8A8070] text-[10px] uppercase tracking-widest block font-bold">ธนาคาร</label>
+                <label className="text-[#8A8070] text-[13px] uppercase tracking-widest block font-bold">ธนาคาร</label>
                 <select name="bankName" className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1]" required>
                   <option value="กสิกรไทย">ธนาคารกสิกรไทย (KBANK)</option>
                   <option value="ไทยพาณิชย์">ธนาคารไทยพาณิชย์ (SCB)</option>

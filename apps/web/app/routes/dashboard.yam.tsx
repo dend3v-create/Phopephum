@@ -730,12 +730,12 @@ export default function YamPage() {
                 {data.moon.moonPhase}
               </span>
               {data.moon.isWanPhra && (
-                <span className="px-2 py-0.5 text-[9px] font-bold rounded-full text-[#D9BC82] border border-[#D9BC82]/30 bg-[#D9BC82]/10 uppercase tracking-wider">
+                <span className="px-2 py-0.5 text-[12px] font-bold rounded-full text-[#D9BC82] border border-[#D9BC82]/30 bg-[#D9BC82]/10 uppercase tracking-wider">
                   วันพระ 🕉️
                 </span>
               )}
             </div>
-            <p className="text-[10px] text-[#94A3B8] mt-0.5 truncate leading-relaxed max-w-[280px] sm:max-w-md">
+            <p className="text-[13px] text-[#94A3B8] mt-0.5 truncate leading-relaxed max-w-[280px] sm:max-w-md">
               {data.moon.guidance}
             </p>
           </div>
@@ -745,7 +745,7 @@ export default function YamPage() {
           <p className="text-lg font-display font-black text-[#F8F6F1] leading-none tabular-nums">
             {data.moon.illumination}%
           </p>
-          <span className="text-[8px] text-[#8A8070] uppercase font-bold tracking-widest block mt-0.5">
+          <span className="text-[11px] text-[#8A8070] uppercase font-bold tracking-widest block mt-0.5">
             ความสว่าง
           </span>
         </div>
@@ -861,7 +861,7 @@ export default function YamPage() {
                   </span>
                   
                   {/* Active Star label */}
-                  <span className="text-[9px] text-[#D9BC82] font-bold uppercase tracking-[0.3em] mt-3.5 bg-slate-950/80 px-2.5 py-0.5 rounded-full border border-[#D9BC82]/25 backdrop-blur">
+                  <span className="text-[12px] text-[#D9BC82] font-bold uppercase tracking-[0.3em] mt-3.5 bg-slate-950/80 px-2.5 py-0.5 rounded-full border border-[#D9BC82]/25 backdrop-blur">
                     {data.yamName} เจ้าครอง
                   </span>
                 </div>
@@ -906,7 +906,7 @@ export default function YamPage() {
                     />
                   </div>
                   
-                  <p className="text-[9px] text-[#8A8070] italic leading-relaxed pt-0.5">
+                  <p className="text-[12px] text-[#8A8070] italic leading-relaxed pt-0.5">
                     *ข้อมูลเวลาสากลคำนวณแบบพลวัตแบบเรียลไทม์ อัปเดตเสถียรทุก ๆ 1 นาที
                   </p>
                 </div>
@@ -914,7 +914,7 @@ export default function YamPage() {
                 {/* 3. Solar Times & Astronomical Boundaries */}
                 <div className="flex justify-between items-center pt-4 border-t border-white/10">
                   <div className="space-y-1">
-                    <span className="text-[10px] text-[#D9CDB7] uppercase tracking-widest block font-bold">ขอบข่ายท้องฟ้า</span>
+                    <span className="text-[13px] text-[#D9CDB7] uppercase tracking-widest block font-bold">ขอบข่ายท้องฟ้า</span>
                     <div className="flex gap-4 text-sm font-semibold text-[#F8F6F1]">
                       <span className="flex items-center gap-1.5">☀️ ขึ้น {sunrise.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</span>
                       <span className="flex items-center gap-1.5">☀️ ตก {sunset.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</span>
@@ -924,7 +924,7 @@ export default function YamPage() {
                   {/* Subtle live indicator blinking */}
                   <div className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/25 px-2.5 py-1 rounded-full">
                     <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-ping" />
-                    <span className="text-[8px] font-bold text-green-400 tracking-widest uppercase">LIVE</span>
+                    <span className="text-[11px] font-bold text-green-400 tracking-widest uppercase">LIVE</span>
                   </div>
                 </div>
 
@@ -1000,7 +1000,7 @@ export default function YamPage() {
                 </div>
 
                 <div className="flex-1 space-y-1">
-                  <span className="text-[10px] text-[#94A3B8] uppercase font-bold block">คำพยากรณ์เดินทางขณะนี้</span>
+                  <span className="text-[13px] text-[#94A3B8] uppercase font-bold block">คำพยากรณ์เดินทางขณะนี้</span>
                   <p className="text-base text-[#F8F6F1] font-medium leading-relaxed">
                     {data.travelAuspiciousness.description}
                   </p>
@@ -1023,21 +1023,21 @@ export default function YamPage() {
               </div>
               <div className="p-5 space-y-4">
                 <div>
-                  <span className="text-[10px] text-[#94A3B8] uppercase font-bold block mb-1">ด้านมงคลเด่น</span>
+                  <span className="text-[13px] text-[#94A3B8] uppercase font-bold block mb-1">ด้านมงคลเด่น</span>
                   <p className="text-base font-bold text-[#F8F6F1]">{data.prediction.auspicious}</p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1">
-                    <span className="text-[10px] text-green-400/70 uppercase font-bold block">สิ่งที่ควรทำ</span>
+                    <span className="text-[13px] text-green-400/70 uppercase font-bold block">สิ่งที่ควรทำ</span>
                     <p className="text-sm text-[#D9CDB7] leading-relaxed">{data.prediction.shouldDo}</p>
                   </div>
                   <div className="space-y-1">
-                    <span className="text-[10px] text-red-400/70 uppercase font-bold block">ไม่ควรทำ / ควรระวัง</span>
+                    <span className="text-[13px] text-red-400/70 uppercase font-bold block">ไม่ควรทำ / ควรระวัง</span>
                     <p className="text-sm text-[#D9CDB7] leading-relaxed">{data.prediction.shouldNotDo}</p>
                   </div>
                 </div>
                 <div className="pt-2 border-t border-white/5">
-                  <span className="text-[10px] text-blue-400/70 uppercase font-bold block mb-1">ถ้าจะทำ ทำแบบไหน</span>
+                  <span className="text-[13px] text-blue-400/70 uppercase font-bold block mb-1">ถ้าจะทำ ทำแบบไหน</span>
                   <p className="text-sm italic text-[#94A3B8] leading-relaxed">{data.prediction.howTo}</p>
                 </div>
               </div>
@@ -1111,7 +1111,7 @@ export default function YamPage() {
                     <button
                       type="button"
                       onClick={handleSetAshtaNow}
-                      className="px-3 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all bg-[#D9BC82]/10 border border-[#D9BC82]/20 text-[#D9BC82] hover:bg-[#D9BC82]/20"
+                      className="px-3 py-2 rounded-xl text-[13px] font-bold uppercase tracking-widest transition-all bg-[#D9BC82]/10 border border-[#D9BC82]/20 text-[#D9BC82] hover:bg-[#D9BC82]/20"
                     >
                       ปัจจุบัน
                     </button>
@@ -1130,7 +1130,7 @@ export default function YamPage() {
 
             {/* Title / Day Period */}
             <div className="text-center">
-              <span className="text-[10px] font-bold uppercase tracking-widest px-4 py-1 rounded-full bg-[#D9BC82]/10 border border-[#D9BC82]/20 text-[#D9BC82]">
+              <span className="text-[13px] font-bold uppercase tracking-widest px-4 py-1 rounded-full bg-[#D9BC82]/10 border border-[#D9BC82]/20 text-[#D9BC82]">
                 วัน{targetDayTh} — {periodLabel}
               </span>
             </div>
@@ -1139,19 +1139,19 @@ export default function YamPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {/* ยามที่ */}
               <div className="p-4 rounded-2xl text-center bg-[#1E293B]/20 border border-white/5 shadow-inner">
-                <span className="text-[9px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ยามที่</span>
+                <span className="text-[12px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ยามที่</span>
                 <span className="text-3xl font-black text-[#D9BC82]">{ashtaResult.yamNumber}</span>
               </div>
 
               {/* ชื่อยาม */}
               <div className="p-4 rounded-2xl text-center bg-[#1E293B]/20 border border-white/5 shadow-inner">
-                <span className="text-[9px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ชื่อยาม</span>
+                <span className="text-[12px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ชื่อยาม</span>
                 <span className="text-base font-bold text-[#F8F6F1]">{ashtaResult.yamName}</span>
               </div>
 
               {/* ดาวเสวยยาม */}
               <div className="p-4 rounded-2xl text-center bg-[#1E293B]/20 border border-white/5 shadow-inner">
-                <span className="text-[9px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ดาวเสวยยาม</span>
+                <span className="text-[12px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ดาวเสวยยาม</span>
                 <span className="text-base font-bold text-[#D9BC82] flex items-center justify-center gap-1">
                   <span>{symbol}</span>
                   <span>{ashtaResult.yamName}</span>
@@ -1160,11 +1160,11 @@ export default function YamPage() {
 
               {/* ช่วงเวลายาม */}
               <div className="p-4 rounded-2xl text-center bg-[#1E293B]/20 border border-white/5 shadow-inner">
-                <span className="text-[9px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ช่วงเวลายาม</span>
+                <span className="text-[12px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ช่วงเวลายาม</span>
                 <span className="text-xs font-bold text-[#F8F6F1] block">
                   {new Date(ashtaResult.date).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
                 </span>
-                <span className="text-[9px] text-[#94A3B8] block mt-0.5">
+                <span className="text-[12px] text-[#94A3B8] block mt-0.5">
                   ({PHASE_LABEL[ashtaResult.phase]})
                 </span>
               </div>
@@ -1177,7 +1177,7 @@ export default function YamPage() {
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className="text-base">🚩</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-[#D9BC82]">เรื่องที่ได้ยิน (ข่าวกาลกิณี/มงคล)</span>
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#D9BC82]">เรื่องที่ได้ยิน (ข่าวกาลกิณี/มงคล)</span>
                   </div>
                   <p className="text-xs leading-relaxed text-[#D9CDB7]">{ashtaResult.prediction.news}</p>
                 </div>
@@ -1186,7 +1186,7 @@ export default function YamPage() {
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className="text-base">🏥</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-rose-300">คนเจ็บไข้</span>
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-rose-300">คนเจ็บไข้</span>
                   </div>
                   <p className="text-xs leading-relaxed text-[#D9CDB7]">{ashtaResult.prediction.sickness}</p>
                 </div>
@@ -1195,7 +1195,7 @@ export default function YamPage() {
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className="text-base">🔍</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-amber-300">ของหาย</span>
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-amber-300">ของหาย</span>
                   </div>
                   <p className="text-xs leading-relaxed text-[#D9CDB7]">{ashtaResult.prediction.lostItem}</p>
                 </div>
@@ -1204,7 +1204,7 @@ export default function YamPage() {
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-1.5 mb-2">
                     <span className="text-base">🚗</span>
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-green-300">การเดินทาง ({PHASE_LABEL[ashtaResult.phase]})</span>
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-green-300">การเดินทาง ({PHASE_LABEL[ashtaResult.phase]})</span>
                   </div>
                   <p className="text-xs leading-relaxed text-[#D9CDB7]">
                     {ashtaResult.travelAuspiciousness.description}
@@ -1218,26 +1218,26 @@ export default function YamPage() {
               <div className="p-4 rounded-2xl space-y-3 bg-[#0A1628]/35 border border-[#D9BC82]/15">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-[#D9BC82]">✨</span>
-                  <span className="text-[10px] font-bold text-[#D9BC82] uppercase tracking-widest">พลังงานมงคลและคำแนะนำ</span>
+                  <span className="text-[13px] font-bold text-[#D9BC82] uppercase tracking-widest">พลังงานมงคลและคำแนะนำ</span>
                 </div>
                 <div className="space-y-3">
                   <div>
-                    <span className="text-[8px] text-[#94A3B8] uppercase font-bold block mb-0.5">ด้านมงคลเด่น:</span>
+                    <span className="text-[11px] text-[#94A3B8] uppercase font-bold block mb-0.5">ด้านมงคลเด่น:</span>
                     <p className="text-xs font-bold text-[#D9BC82]">{ashtaResult.prediction.auspicious}</p>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <span className="text-[8px] text-green-400/60 uppercase font-bold block mb-0.5">สิ่งที่ควรทำ:</span>
-                      <p className="text-[10px] text-[#D9CDB7] leading-snug">{ashtaResult.prediction.shouldDo}</p>
+                      <span className="text-[11px] text-green-400/60 uppercase font-bold block mb-0.5">สิ่งที่ควรทำ:</span>
+                      <p className="text-[13px] text-[#D9CDB7] leading-snug">{ashtaResult.prediction.shouldDo}</p>
                     </div>
                     <div>
-                      <span className="text-[8px] text-red-400/60 uppercase font-bold block mb-0.5">ไม่ควรทำ / ควรระวัง:</span>
-                      <p className="text-[10px] text-[#D9CDB7] leading-snug">{ashtaResult.prediction.shouldNotDo}</p>
+                      <span className="text-[11px] text-red-400/60 uppercase font-bold block mb-0.5">ไม่ควรทำ / ควรระวัง:</span>
+                      <p className="text-[13px] text-[#D9CDB7] leading-snug">{ashtaResult.prediction.shouldNotDo}</p>
                     </div>
                   </div>
                   <div>
-                    <span className="text-[8px] text-blue-400/60 uppercase font-bold block mb-0.5">ถ้าจะทำ ทำแบบไหน:</span>
-                    <p className="text-[10px] italic text-[#94A3B8] leading-snug">{ashtaResult.prediction.howTo}</p>
+                    <span className="text-[11px] text-blue-400/60 uppercase font-bold block mb-0.5">ถ้าจะทำ ทำแบบไหน:</span>
+                    <p className="text-[13px] italic text-[#94A3B8] leading-snug">{ashtaResult.prediction.howTo}</p>
                   </div>
                 </div>
               </div>
@@ -1246,7 +1246,7 @@ export default function YamPage() {
             {/* Travel timing guide — all 3 sub-yam */}
             {ashtaResult.prediction?.travel && (
               <div className="p-3 rounded-2xl space-y-2 bg-[#0A1628]/40 border border-white/5">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-[#94A3B8] block">🕐 การเดินทางตามช่วงยาม</span>
+                <span className="text-[12px] font-bold uppercase tracking-widest text-[#94A3B8] block">🕐 การเดินทางตามช่วงยาม</span>
                 {[
                   { label: "ยามต้น (0 - 30 นาทีแรก)", val: ashtaResult.prediction.travel.start, phase: "start" },
                   { label: "ยามกลาง (31 - 60 นาที)", val: ashtaResult.prediction.travel.middle, phase: "middle" },
@@ -1256,10 +1256,10 @@ export default function YamPage() {
                   return (
                     <div key={i} className="flex gap-2 items-start rounded-xl px-2.5 py-2 transition-all"
                       style={isActive ? { background: "rgba(198,169,107,0.12)", border: "1px solid rgba(217,188,130,0.25)" } : {}}>
-                      <span className={`text-[9px] font-black uppercase tracking-wider shrink-0 pt-0.5 ${
+                      <span className={`text-[12px] font-black uppercase tracking-wider shrink-0 pt-0.5 ${
                         isActive ? "text-[#D9BC82]" : "text-[#94A3B8]"
                       }`}>{t.label}{isActive ? " ◀" : ""}</span>
-                      <p className={`text-[10px] leading-relaxed ${
+                      <p className={`text-[13px] leading-relaxed ${
                         isActive ? "text-[#F8F6F1]" : "text-[#94A3B8]"
                       }`}>{t.val}</p>
                     </div>
@@ -1273,7 +1273,7 @@ export default function YamPage() {
               <div className="p-4 rounded-2xl flex items-center gap-3 bg-gradient-to-r from-[#C6A96B]/15 to-[#D9BC82]/5 border border-[#D9BC82]/30 shadow-[0_0_20px_rgba(217,188,130,0.08)]">
                 <span className="text-xl">⭐</span>
                 <div>
-                  <span className="text-[9px] text-[#D9BC82] font-bold uppercase tracking-widest block">เวลามงคลที่ดีที่สุดประจำยาม</span>
+                  <span className="text-[12px] text-[#D9BC82] font-bold uppercase tracking-widest block">เวลามงคลที่ดีที่สุดประจำยาม</span>
                   <p className="text-sm text-[#D9BC82] font-bold mt-0.5">{ashtaResult.prediction.bestTime}</p>
                 </div>
               </div>
@@ -1358,14 +1358,14 @@ export default function YamPage() {
                   <button
                     type="button"
                     onClick={handleSetToday}
-                    className="py-1.5 px-3 rounded-lg border border-white/5 bg-white/5 text-[10px] font-bold text-[#94A3B8] hover:bg-white/10 hover:text-[#F8F6F1] transition-all"
+                    className="py-1.5 px-3 rounded-lg border border-white/5 bg-white/5 text-[13px] font-bold text-[#94A3B8] hover:bg-white/10 hover:text-[#F8F6F1] transition-all"
                   >
                     📅 วันนี้
                   </button>
                   <button
                     type="button"
                     onClick={handleSetTomorrow}
-                    className="py-1.5 px-3 rounded-lg border border-white/5 bg-white/5 text-[10px] font-bold text-[#94A3B8] hover:bg-white/10 hover:text-[#F8F6F1] transition-all"
+                    className="py-1.5 px-3 rounded-lg border border-white/5 bg-white/5 text-[13px] font-bold text-[#94A3B8] hover:bg-white/10 hover:text-[#F8F6F1] transition-all"
                   >
                     📅 พรุ่งนี้
                   </button>
@@ -1383,7 +1383,7 @@ export default function YamPage() {
                     className="w-full bg-[#1E293B]/40 border border-white/10 rounded-xl px-4 py-3 text-[#F8F6F1] font-display text-lg focus:border-[#D9BC82]/40 outline-none transition-all"
                   />
                 </div>
-                <span className="text-[10px] text-[#94A3B8] block italic">*ใช้คำนวณสลับยามอัฏฐกาล 1.5 ชม. ตามดาราศาสตร์จริง</span>
+                <span className="text-[13px] text-[#94A3B8] block italic">*ใช้คำนวณสลับยามอัฏฐกาล 1.5 ชม. ตามดาราศาสตร์จริง</span>
               </div>
             </div>
 
@@ -1409,7 +1409,7 @@ export default function YamPage() {
                 <div className="p-6 flex flex-col md:flex-row items-center md:items-stretch gap-6">
                   {/* Score circle */}
                   <div className="flex flex-col items-center justify-center text-center p-5 bg-black/30 rounded-2xl border border-white/5 w-full md:w-48 shrink-0">
-                    <span className="text-[10px] text-[#94A3B8] uppercase font-bold block mb-1">คะแนนความเหมาะสม</span>
+                    <span className="text-[13px] text-[#94A3B8] uppercase font-bold block mb-1">คะแนนความเหมาะสม</span>
                     <div className="flex items-baseline gap-1 mt-1 text-[#D9BC82]">
                       <span className="text-5xl font-display font-bold">{calculatedResult.advice.score.toFixed(1)}</span>
                       <span className="text-sm text-[#94A3B8]">/10</span>
@@ -1445,10 +1445,10 @@ export default function YamPage() {
                       </div>
                       <h4 className="font-display text-2xl font-bold text-[#F8F6F1]">{calculatedResult.timeLabel}</h4>
                       <div className="flex gap-2 mt-1">
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-bold text-[#D9BC82]">
+                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[13px] font-bold text-[#D9BC82]">
                           ยาม{PHASE_LABEL[calculatedResult.phase]}
                         </span>
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[10px] font-bold text-[#94A3B8]">
+                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[13px] font-bold text-[#94A3B8]">
                           ดาว{calculatedResult.yamName} ({PLANET_SYMBOLS[calculatedResult.yamName]})
                         </span>
                       </div>
@@ -1506,7 +1506,7 @@ export default function YamPage() {
                     "{calculatedResult.advice.speechTemplate}"
                   </div>
 
-                  <p className="text-[10px] text-[#94A3B8] italic mt-3 text-right">
+                  <p className="text-[13px] text-[#94A3B8] italic mt-3 text-right">
                     *เจรจาด้วยน้ำเสียงนุ่มนวล มุ่งมั่นและจริงใจ
                   </p>
                 </Card>
@@ -1564,7 +1564,7 @@ export default function YamPage() {
               <table className="w-full text-left border-collapse min-w-[700px]">
                 <thead>
                   <tr className="border-b border-white/5 bg-white/[0.02]">
-                    <th className="p-3 text-[10px] font-bold uppercase tracking-wider text-[#94A3B8] text-center w-24">
+                    <th className="p-3 text-[13px] font-bold uppercase tracking-wider text-[#94A3B8] text-center w-24">
                       วัน
                     </th>
                     {Array.from({ length: 8 }).map((_, i) => {
@@ -1592,9 +1592,9 @@ export default function YamPage() {
                       }
 
                       return (
-                        <th key={i} className="p-3 text-[10px] font-bold uppercase tracking-wider text-center text-[#94A3B8]">
+                        <th key={i} className="p-3 text-[13px] font-bold uppercase tracking-wider text-center text-[#94A3B8]">
                           ยามที่ {num}
-                          <span className="block text-[8px] font-medium text-[#4A5568] tracking-normal mt-0.5">{label} น.</span>
+                          <span className="block text-[11px] font-medium text-[#4A5568] tracking-normal mt-0.5">{label} น.</span>
                         </th>
                       );
                     })}
@@ -1636,7 +1636,7 @@ export default function YamPage() {
                                   {yamName}
                                 </span>
                                 {/* Ticks */}
-                                <div className="flex gap-0.5 text-[8px] mt-0.5 justify-center">
+                                <div className="flex gap-0.5 text-[11px] mt-0.5 justify-center">
                                   {ticks > 0 ? (
                                     Array.from({ length: ticks }).map((_, starI) => (
                                       <span key={starI} className="text-green-400">✓</span>
@@ -1676,7 +1676,7 @@ export default function YamPage() {
                   </div>
                   <p className="text-xs text-[#D9CDB7] leading-relaxed mb-3">{gridDetailAdvice.love.description}</p>
                   <div className="space-y-1 pt-2 border-t border-white/5">
-                    <span className="text-[9px] text-[#94A3B8] font-bold uppercase block">คำพูดมัดใจ:</span>
+                    <span className="text-[12px] text-[#94A3B8] font-bold uppercase block">คำพูดมัดใจ:</span>
                     <p className="text-xs italic text-[#F8F6F1]">"{gridDetailAdvice.love.speechTemplate}"</p>
                   </div>
                 </Card>
@@ -1689,7 +1689,7 @@ export default function YamPage() {
                   </div>
                   <p className="text-xs text-[#D9CDB7] leading-relaxed mb-3">{gridDetailAdvice.trade.description}</p>
                   <div className="space-y-1 pt-2 border-t border-white/5">
-                    <span className="text-[9px] text-[#94A3B8] font-bold uppercase block">คำพูดกระตุ้นยอดขาย:</span>
+                    <span className="text-[12px] text-[#94A3B8] font-bold uppercase block">คำพูดกระตุ้นยอดขาย:</span>
                     <p className="text-xs italic text-[#F8F6F1]">"{gridDetailAdvice.trade.speechTemplate}"</p>
                   </div>
                 </Card>
@@ -1702,7 +1702,7 @@ export default function YamPage() {
                   </div>
                   <p className="text-xs text-[#D9CDB7] leading-relaxed mb-3">{gridDetailAdvice.negotiate.description}</p>
                   <div className="space-y-1 pt-2 border-t border-white/5">
-                    <span className="text-[9px] text-[#94A3B8] font-bold uppercase block">คำพูดเจรจาธุรกิจ:</span>
+                    <span className="text-[12px] text-[#94A3B8] font-bold uppercase block">คำพูดเจรจาธุรกิจ:</span>
                     <p className="text-xs italic text-[#F8F6F1]">"{gridDetailAdvice.negotiate.speechTemplate}"</p>
                   </div>
                 </Card>
@@ -1715,8 +1715,8 @@ export default function YamPage() {
                   </div>
                   <p className="text-xs text-[#D9CDB7] leading-relaxed mb-3">{gridDetailAdvice.travel.description}</p>
                   <div className="space-y-1.5 pt-2 border-t border-white/5">
-                    <span className="text-[9px] text-green-400/70 font-bold block">ควรทำ: {gridDetailAdvice.travel.shouldDo.join(" · ")}</span>
-                    <span className="text-[9px] text-red-400/70 font-bold block">ควรเลี่ยง: {gridDetailAdvice.travel.shouldAvoid.join(" · ")}</span>
+                    <span className="text-[12px] text-green-400/70 font-bold block">ควรทำ: {gridDetailAdvice.travel.shouldDo.join(" · ")}</span>
+                    <span className="text-[12px] text-red-400/70 font-bold block">ควรเลี่ยง: {gridDetailAdvice.travel.shouldAvoid.join(" · ")}</span>
                   </div>
                 </Card>
               </div>
@@ -1741,7 +1741,7 @@ export default function YamPage() {
             <Card className="bg-[#0A1628]/40 border-[#4B6FAE]/20 p-5">
               <h3 className="font-display text-sm font-bold text-[#F8F6F1] mb-4 border-b border-white/5 pb-2 flex items-center justify-between">
                 <span>🚗 ทางเลือกที่ 1 (Option A)</span>
-                <span className="text-[10px] text-[#4B6FAE] uppercase tracking-wider font-bold">สัญจร A</span>
+                <span className="text-[13px] text-[#4B6FAE] uppercase tracking-wider font-bold">สัญจร A</span>
               </h3>
               
               <div className="space-y-4">
@@ -1806,7 +1806,7 @@ export default function YamPage() {
             <Card className="bg-[#0A1628]/40 border-[#D9BC82]/20 p-5">
               <h3 className="font-display text-sm font-bold text-[#F8F6F1] mb-4 border-b border-white/5 pb-2 flex items-center justify-between">
                 <span>✈️ ทางเลือกที่ 2 (Option B)</span>
-                <span className="text-[10px] text-[#D9BC82] uppercase tracking-wider font-bold">สัญจร B</span>
+                <span className="text-[13px] text-[#D9BC82] uppercase tracking-wider font-bold">สัญจร B</span>
               </h3>
               
               <div className="space-y-4">
@@ -1884,13 +1884,13 @@ export default function YamPage() {
                 <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#D9BC82]/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#4B6FAE]/10 rounded-full blur-3xl pointer-events-none" />
                 
-                <span className="text-[#D9BC82] text-[10px] tracking-[0.25em] uppercase font-bold block mb-1">
+                <span className="text-[#D9BC82] text-[13px] tracking-[0.25em] uppercase font-bold block mb-1">
                   ✦ คำวินิจฉัยฤกษ์เดินทางที่ดีที่สุด ✦
                 </span>
                 <p className="text-sm text-[#F8F6F1] font-medium leading-relaxed max-w-2xl mx-auto py-2 border-y border-white/5 my-2">
                   {compareResult.verdict}
                 </p>
-                <p className="text-[10px] text-[#8A8070] italic">
+                <p className="text-[13px] text-[#8A8070] italic">
                   *การตรวจวิเคราะห์อ้างอิงจากฐานความมงคลยามอัฏฐกาลร่วมกับกำลังของเจ้าดารายามอย่างสมบูรณ์
                 </p>
               </Card>
@@ -1902,7 +1902,7 @@ export default function YamPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="text-[9px] text-[#4B6FAE] font-bold uppercase block">ทางเลือกที่ 1</span>
+                        <span className="text-[12px] text-[#4B6FAE] font-bold uppercase block">ทางเลือกที่ 1</span>
                         <h4 className="font-display text-lg font-bold text-[#F8F6F1] mt-0.5">{compareResult.a.dateLabel}</h4>
                         <p className="text-xs text-[#94A3B8]">{compareResult.a.timeLabel}</p>
                       </div>
@@ -1924,10 +1924,10 @@ export default function YamPage() {
                     </div>
 
                     <div className="space-y-1.5 pt-2 border-t border-white/5">
-                      <span className="text-[10px] text-green-400 font-bold block flex items-start gap-1">
+                      <span className="text-[13px] text-green-400 font-bold block flex items-start gap-1">
                         <span className="text-xs">✓</span> ควรทำ: {compareResult.a.advice.shouldDo.join(" · ")}
                       </span>
-                      <span className="text-[10px] text-red-400 font-bold block flex items-start gap-1">
+                      <span className="text-[13px] text-red-400 font-bold block flex items-start gap-1">
                         <span className="text-xs">✕</span> ควรเลี่ยง: {compareResult.a.advice.shouldAvoid.join(" · ")}
                       </span>
                     </div>
@@ -1939,7 +1939,7 @@ export default function YamPage() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
-                        <span className="text-[9px] text-[#D9BC82] font-bold uppercase block">ทางเลือกที่ 2</span>
+                        <span className="text-[12px] text-[#D9BC82] font-bold uppercase block">ทางเลือกที่ 2</span>
                         <h4 className="font-display text-lg font-bold text-[#F8F6F1] mt-0.5">{compareResult.b.dateLabel}</h4>
                         <p className="text-xs text-[#94A3B8]">{compareResult.b.timeLabel}</p>
                       </div>
@@ -1961,10 +1961,10 @@ export default function YamPage() {
                     </div>
 
                     <div className="space-y-1.5 pt-2 border-t border-white/5">
-                      <span className="text-[10px] text-green-400 font-bold block flex items-start gap-1">
+                      <span className="text-[13px] text-green-400 font-bold block flex items-start gap-1">
                         <span className="text-xs">✓</span> ควรทำ: {compareResult.b.advice.shouldDo.join(" · ")}
                       </span>
-                      <span className="text-[10px] text-red-400 font-bold block flex items-start gap-1">
+                      <span className="text-[13px] text-red-400 font-bold block flex items-start gap-1">
                         <span className="text-xs">✕</span> ควรเลี่ยง: {compareResult.b.advice.shouldAvoid.join(" · ")}
                       </span>
                     </div>
@@ -1985,7 +1985,7 @@ function PredCard({ icon, label, text }: { icon: string; label: string; text: st
     <Card className="flex items-start gap-3 p-4 bg-white/5 border-transparent hover:border-[#D9BC82]/20 transition-colors">
       <span className="text-xl shrink-0 mt-0.5">{icon}</span>
       <div>
-        <p className="text-[#D9BC82] text-[10px] font-bold uppercase mb-1 tracking-wider">{label}</p>
+        <p className="text-[#D9BC82] text-[13px] font-bold uppercase mb-1 tracking-wider">{label}</p>
         <p className="text-[#D9CDB7] text-sm leading-relaxed">{text}</p>
       </div>
     </Card>
