@@ -165,6 +165,17 @@ const BASE4_POWER_NAMES: Record<number, string> = {
 const BHOP_8_NAMES = ["อาตมะ", "ทาสา", "สิทธิโชค", "โภคทรัพย์", "โจร", "อุบาทว์", "อุปถัมภ์"];
 const BHOP_9_NAMES = ["อัตตะ", "สักกะ", "ญาติ", "ธนัง", "เคหัง", "นาวัง", "ภริยัง"];
 
+// สีประจำดาว 1–7 (ใช้แทนการ dim opacity)
+const PLANET_COLORS_BY_NUM: Record<number, string> = {
+  1: '#EF4444', // อาทิตย์
+  2: '#FBBF24', // จันทร์
+  3: '#F97316', // อังคาร
+  4: '#10B981', // พุธ
+  5: '#F59E0B', // พฤหัส
+  6: '#EC4899', // ศุกร์
+  7: '#8B5CF6', // เสาร์
+};
+
 // ── ลำดับดาวชั่วโมงแบบ Chaldean (ยามแต่ละช่วง) ──
 // อาทิตย์(1)→ศุกร์(6)→พุธ(4)→จันทร์(2)→เสาร์(7)→พฤหัส(5)→อังคาร(3)→อาทิตย์ ...
 const CHALDEAN_SEQ = [7, 5, 3, 1, 6, 4, 2] as const;
@@ -954,7 +965,7 @@ export default function KarnchataPage() {
         </div>
       </Card>
 
-      {/* ── ผังดวงกาลชะตา 9 ฐาน ── */}
+      {/* ── ผังดวงกาลชะตา 9 ฐาน (Table) ── */}
       <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8 relative">
         {/* Header */}
         <div className="flex items-center gap-3 mb-5">
@@ -974,86 +985,62 @@ export default function KarnchataPage() {
           )}
         </div>
 
-        {/* ── Connection Detail Panel ── */}
+        {/* ── Connection Banner ── */}
         {hoverNum !== null && (
-          <div className="mb-6 bg-gradient-to-br from-[#020617] to-[#09152b] border border-[#C6A96B]/35 rounded-2xl p-5 shadow-[0_0_24px_rgba(198,169,107,0.08)] animate-in fade-in duration-300">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-11 h-11 rounded-full bg-[#C6A96B] text-[#020617] flex items-center justify-center text-xl font-display font-black shadow-[0_0_18px_rgba(198,169,107,0.45)] shrink-0">
+          <div className="mb-5 bg-gradient-to-br from-[#020617] to-[#09152b] border border-[#C6A96B]/35 rounded-2xl p-4 animate-in fade-in duration-200">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-xl font-display font-black shrink-0 ring-2 ring-[#C6A96B]"
+                style={{background: PLANET_COLORS_BY_NUM[hoverNum] + '22', color: PLANET_COLORS_BY_NUM[hoverNum]}}>
                 {hoverNum}
               </div>
               <div>
                 <p className="text-sm font-bold text-[#C6A96B]">ดาว {STAR_NAMES[hoverNum as keyof typeof STAR_NAMES]}</p>
-                <p className="text-xs text-[#8A8070]">ปรากฏใน {connectionItems.length} ฐาน — เชื่อมโยงดังนี้</p>
+                <p className="text-xs text-[#8A8070]">ปรากฏใน {connectionItems.length} ฐาน</p>
               </div>
             </div>
             {connectionItems.length === 0 ? (
-              <p className="text-xs text-[#8A8070] text-center py-2">ไม่พบดาวนี้ในฐาน 1–3, 5–9</p>
+              <p className="text-xs text-[#8A8070] py-1">ไม่พบดาวนี้ในฐาน 1–3, 5–9</p>
             ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {connectionItems.map(occ => {
-                  const isNamedBase = occ.rIdx < 3 || occ.rIdx === 7 || occ.rIdx === 8;
-                  return (
-                    <div
-                      key={occ.rIdx}
-                      className={`rounded-xl p-3 border flex flex-col gap-1 ${isNamedBase ? 'bg-[#0A1628] border-[#C6A96B]/20' : 'bg-[#020617] border-white/5'}`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-black shrink-0 ${occ.rIdx < 3 ? 'text-[#C6A96B]' : occ.rIdx < 7 ? 'text-[#8A8070]' : 'text-[#C6A96B]'}`}>
-                          ฐาน{occ.baseThai}
-                        </span>
-                        <span className="text-xs text-[#F8F6F1] font-bold leading-tight truncate">
-                          {occ.bhopName || `ช่อง ${occ.colIdx + 1}`}
-                        </span>
-                      </div>
-                      {occ.b4Power && (
-                        <div className="flex items-center gap-1.5 pt-1 border-t border-sky-500/15">
-                          <span className="text-[9px] text-sky-400/70">เทวดา:</span>
-                          <span className="text-[10px] text-sky-300 font-bold">{occ.b4Power}</span>
-                        </div>
-                      )}
-                      {!occ.bhopName && (
-                        <span className="text-[10px] text-[#8A8070]">ฐานสมทบ</span>
-                      )}
-                    </div>
-                  );
-                })}
+              <div className="flex flex-wrap gap-2">
+                {connectionItems.map(occ => (
+                  <div key={occ.rIdx}
+                    className={`rounded-lg px-3 py-1.5 border text-xs flex items-center gap-1.5 ${occ.rIdx < 3 || occ.rIdx >= 7 ? 'bg-[#0A1628] border-[#C6A96B]/20' : 'bg-[#020617] border-white/5'}`}>
+                    <span className={`font-black text-[10px] ${occ.rIdx < 3 ? 'text-[#C6A96B]' : occ.rIdx < 7 ? 'text-[#8A8070]' : 'text-[#C6A96B]'}`}>ฐาน{occ.baseThai}</span>
+                    <span className="text-[#F8F6F1] font-bold">{occ.bhopName || `ช่อง ${occ.colIdx + 1}`}</span>
+                    {occ.b4Power && <span className="text-sky-300 text-[10px]">· {occ.b4Power}</span>}
+                  </div>
+                ))}
               </div>
             )}
           </div>
         )}
 
-        <p className="text-xs text-[#C6A96B]/50 mb-4 md:hidden text-center">← เลื่อนซ้าย-ขวาเพื่อดูผังเต็ม →</p>
-
-        <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
-          <div className="min-w-[320px] sm:min-w-[540px] flex flex-col gap-3 sm:gap-4 items-center pb-4">
+        {/* ── 9-Base Grid Table ── */}
+        <div className="overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
+          <div className="min-w-[340px] space-y-1.5">
 
             {/* ── ฐาน 1–3 ── */}
             {[0, 1, 2].map(rIdx => (
-              <div key={rIdx} className="flex items-start w-full max-w-3xl">
-                <div className="w-9 sm:w-16 shrink-0 pt-2.5">
-                  <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]">ฐาน {['๑','๒','๓'][rIdx]}</p>
+              <div key={rIdx} className="flex items-stretch gap-2">
+                <div className="w-10 sm:w-14 shrink-0 flex items-center justify-end">
+                  <span className="text-[10px] sm:text-xs font-black text-[#C6A96B]">ฐาน{['๑','๒','๓'][rIdx]}</span>
                 </div>
-                <div className="flex-1 flex justify-between">
+                <div className="flex-1 grid grid-cols-7 gap-1">
                   {(activeResult.chart[rIdx] as number[]).map((star, cIdx) => {
                     const isSelected = hoverNum === star;
-                    const isDimmed = hoverNum !== null && !isSelected;
+                    const col = PLANET_COLORS_BY_NUM[star] ?? '#F8F6F1';
                     return (
-                      <button
-                        key={cIdx}
-                        type="button"
+                      <button key={cIdx} type="button"
                         onClick={() => setHoverNum(isSelected ? null : star)}
-                        className="flex flex-col items-center gap-1 sm:gap-1.5 w-10 sm:w-14 focus:outline-none"
-                      >
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base sm:text-xl font-display font-bold transition-all duration-200 ${
+                        className={`rounded-xl py-2 px-1 flex flex-col items-center gap-0.5 transition-all active:scale-95 ${
                           isSelected
-                            ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_16px_rgba(198,169,107,0.65)] ring-2 ring-[#C6A96B]/30"
-                            : isDimmed
-                              ? "bg-[#020617] border border-white/10 text-[#F8F6F1]/50 hover:border-[#C6A96B]/30 hover:text-[#F8F6F1]/75"
-                              : "bg-[#020617] border border-[#8A8070]/45 text-[#F8F6F1] hover:border-[#C6A96B]/55 hover:scale-105"
-                        }`}>{star}</div>
-                        <span className={`text-[10px] sm:text-xs font-medium text-center leading-tight transition-opacity ${isDimmed ? 'text-[#8A8070]/50' : 'text-[#8A8070]'}`}>
-                          {BHOP_NATAL_NAMES[rIdx][cIdx]}
-                        </span>
+                            ? 'ring-2 shadow-lg'
+                            : 'bg-[#020617] border border-white/8 hover:border-white/20'
+                        }`}
+                        style={isSelected ? {background: col + '18', borderColor: col, ringColor: col, boxShadow: `0 0 12px ${col}44`} : {}}
+                      >
+                        <span className="text-base sm:text-lg font-display font-black leading-none" style={{color: col}}>{star}</span>
+                        <span className="text-[8px] sm:text-[9px] text-[#8A8070] text-center leading-tight w-full truncate">{BHOP_NATAL_NAMES[rIdx]?.[cIdx]}</span>
                       </button>
                     );
                   })}
@@ -1062,40 +1049,31 @@ export default function KarnchataPage() {
             ))}
 
             {/* Divider — กำลังเทวดา */}
-            <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
+            <div className="flex items-center gap-2 py-1">
               <div className="flex-1 h-px bg-sky-500/20" />
-              <span className="text-[10px] text-sky-400/60 font-bold tracking-wider uppercase px-1">กำลังเทวดา</span>
+              <span className="text-[9px] text-sky-400/60 font-bold uppercase tracking-wider px-1">กำลังเทวดา</span>
               <div className="flex-1 h-px bg-sky-500/20" />
             </div>
 
             {/* ── ฐาน 4 ── */}
-            <div className="flex items-start w-full max-w-3xl bg-[#0B1E36]/40 border border-sky-500/12 py-3 px-1 sm:px-2 rounded-2xl">
-              <div className="w-9 sm:w-16 shrink-0 pt-1.5 pl-0.5">
-                <p className="text-[10px] sm:text-xs font-bold text-sky-400">ฐาน ๔</p>
-                <p className="text-[9px] text-sky-400/45 hidden sm:block">เทวดา</p>
+            <div className="flex items-stretch gap-2 bg-[#0B1E36]/40 border border-sky-500/15 rounded-2xl py-2 px-1">
+              <div className="w-10 sm:w-14 shrink-0 flex items-center justify-end">
+                <span className="text-[10px] sm:text-xs font-black text-sky-400">ฐาน๔</span>
               </div>
-              <div className="flex-1 flex justify-between pr-1 sm:pr-2">
+              <div className="flex-1 grid grid-cols-7 gap-1">
                 {(activeResult.chart[3] as number[]).map((star, cIdx) => {
                   const base3Star = (activeResult.chart[2] as number[])[cIdx] ?? 0;
                   const isLit = hoverNum !== null && base3Star === hoverNum;
-                  const isDimmedB4 = hoverNum !== null && !isLit;
                   return (
-                    <button
-                      key={cIdx}
-                      type="button"
+                    <button key={cIdx} type="button"
                       onClick={() => setHoverNum(isLit ? null : base3Star)}
-                      className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none"
-                    >
-                      <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-200 ${
+                      className={`rounded-xl py-2 px-1 flex flex-col items-center gap-0.5 transition-all active:scale-95 ${
                         isLit
-                          ? "bg-[#4B6FAE] text-[#F8F6F1] scale-110 shadow-[0_0_16px_rgba(75,111,174,0.75)] ring-2 ring-[#4B6FAE]/30"
-                          : isDimmedB4
-                            ? "bg-[#020617] border border-sky-500/15 text-[#F8F6F1]/25"
-                            : "bg-[#020617] border border-sky-500/40 text-[#F8F6F1] hover:border-[#C6A96B]/50 hover:scale-105"
-                      }`}>{star}</div>
-                      <span className={`text-[8px] sm:text-[11px] font-medium text-center leading-tight transition-opacity ${isLit ? "text-sky-300" : isDimmedB4 ? "text-sky-400/25" : "text-sky-400/75"}`}>
-                        {BASE4_POWER_NAMES[star] || ""}
-                      </span>
+                          ? 'bg-[#4B6FAE]/20 ring-2 ring-[#4B6FAE] shadow-[0_0_12px_rgba(75,111,174,0.4)]'
+                          : 'bg-[#020617] border border-sky-500/20 hover:border-sky-400/40'
+                      }`}>
+                      <span className="text-sm sm:text-base font-display font-black text-sky-300 leading-none">{star}</span>
+                      <span className="text-[7px] sm:text-[8px] text-sky-400/70 text-center leading-tight w-full truncate">{BASE4_POWER_NAMES[star] || ''}</span>
                     </button>
                   );
                 })}
@@ -1103,36 +1081,30 @@ export default function KarnchataPage() {
             </div>
 
             {/* Divider — ฐานสมทบ */}
-            <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
+            <div className="flex items-center gap-2 py-1">
               <div className="flex-1 h-px bg-white/5" />
-              <span className="text-[10px] text-[#8A8070]/40 font-bold tracking-wider uppercase px-1">ฐานสมทบ ๕–๗</span>
+              <span className="text-[9px] text-[#8A8070]/40 font-bold uppercase tracking-wider px-1">ฐานสมทบ ๕–๗</span>
               <div className="flex-1 h-px bg-white/5" />
             </div>
 
-            {/* ── ฐาน 5–7 (smaller circles, less prominent) ── */}
+            {/* ── ฐาน 5–7 ── */}
             {[4, 5, 6].map(rIdx => (
-              <div key={rIdx} className="flex items-center w-full max-w-3xl">
-                <div className="w-9 sm:w-16 shrink-0">
-                  <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]/50">ฐาน {['๕','๖','๗'][rIdx - 4]}</p>
+              <div key={rIdx} className="flex items-center gap-2">
+                <div className="w-10 sm:w-14 shrink-0 flex items-center justify-end">
+                  <span className="text-[9px] sm:text-[10px] font-black text-[#F8F6F1]/35">ฐาน{['๕','๖','๗'][rIdx - 4]}</span>
                 </div>
-                <div className="flex-1 flex justify-between">
+                <div className="flex-1 grid grid-cols-7 gap-1">
                   {(activeResult.chart[rIdx] as number[]).map((star, cIdx) => {
                     const isSelected = hoverNum === star;
-                    const isDimmed = hoverNum !== null && !isSelected;
+                    const col = PLANET_COLORS_BY_NUM[star] ?? '#F8F6F1';
                     return (
-                      <button
-                        key={cIdx}
-                        type="button"
+                      <button key={cIdx} type="button"
                         onClick={() => setHoverNum(isSelected ? null : star)}
-                        className="flex flex-col items-center w-9 sm:w-14 focus:outline-none"
-                      >
-                        <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-display font-bold transition-all duration-200 ${
-                          isSelected
-                            ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_12px_rgba(198,169,107,0.5)]"
-                            : isDimmed
-                              ? "bg-[#020617] border border-white/5 text-[#F8F6F1]/20"
-                              : "bg-[#020617] border border-white/12 text-[#F8F6F1]/60 hover:border-[#C6A96B]/40 hover:scale-105"
-                        }`}>{star}</div>
+                        className={`rounded-lg py-1.5 flex items-center justify-center transition-all active:scale-95 ${
+                          isSelected ? 'ring-1' : 'bg-[#020617] border border-white/5 hover:border-white/15'
+                        }`}
+                        style={isSelected ? {background: col + '12', borderColor: col} : {}}>
+                        <span className="text-xs sm:text-sm font-display font-black text-[#F8F6F1]/50" style={isSelected ? {color: col} : {}}>{star}</span>
                       </button>
                     );
                   })}
@@ -1141,40 +1113,32 @@ export default function KarnchataPage() {
             ))}
 
             {/* Divider — ภพชาตาลึก */}
-            <div className="flex items-center w-full max-w-3xl gap-2 my-0.5">
+            <div className="flex items-center gap-2 py-1">
               <div className="flex-1 h-px bg-[#C6A96B]/12" />
-              <span className="text-[10px] text-[#C6A96B]/45 font-bold tracking-wider uppercase px-1">ภพชาตาลึก ๘–๙</span>
+              <span className="text-[9px] text-[#C6A96B]/45 font-bold uppercase tracking-wider px-1">ภพชาตาลึก ๘–๙</span>
               <div className="flex-1 h-px bg-[#C6A96B]/12" />
             </div>
 
             {/* ── ฐาน 8–9 ── */}
             {[7, 8].map(rIdx => (
-              <div key={rIdx} className="flex items-start w-full max-w-3xl">
-                <div className="w-9 sm:w-16 shrink-0 pt-2.5">
-                  <p className="text-[10px] sm:text-xs font-bold text-[#F8F6F1]">ฐาน {['๘','๙'][rIdx - 7]}</p>
+              <div key={rIdx} className="flex items-stretch gap-2">
+                <div className="w-10 sm:w-14 shrink-0 flex items-center justify-end">
+                  <span className="text-[10px] sm:text-xs font-black text-[#F8F6F1]">ฐาน{['๘','๙'][rIdx - 7]}</span>
                 </div>
-                <div className="flex-1 flex justify-between">
+                <div className="flex-1 grid grid-cols-7 gap-1">
                   {(activeResult.chart[rIdx] as number[]).map((star, cIdx) => {
                     const isSelected = hoverNum === star;
-                    const isDimmed = hoverNum !== null && !isSelected;
                     const bhopName = rIdx === 7 ? BHOP_8_NAMES[cIdx] : BHOP_9_NAMES[cIdx];
+                    const col = PLANET_COLORS_BY_NUM[star] ?? '#F8F6F1';
                     return (
-                      <button
-                        key={cIdx}
-                        type="button"
+                      <button key={cIdx} type="button"
                         onClick={() => setHoverNum(isSelected ? null : star)}
-                        className="flex flex-col items-center gap-1 sm:gap-1.5 w-10 sm:w-14 focus:outline-none"
-                      >
-                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base sm:text-xl font-display font-bold transition-all duration-200 ${
-                          isSelected
-                            ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_16px_rgba(198,169,107,0.65)] ring-2 ring-[#C6A96B]/30"
-                            : isDimmed
-                              ? "bg-[#020617] border border-white/10 text-[#F8F6F1]/50 hover:border-[#C6A96B]/30"
-                              : "bg-[#020617] border border-[#8A8070]/45 text-[#F8F6F1] hover:border-[#C6A96B]/55 hover:scale-105"
-                        }`}>{star}</div>
-                        <span className={`text-[10px] sm:text-xs font-medium text-center leading-tight transition-opacity ${isDimmed ? 'text-[#8A8070]/50' : 'text-[#8A8070]'}`}>
-                          {bhopName}
-                        </span>
+                        className={`rounded-xl py-2 px-1 flex flex-col items-center gap-0.5 transition-all active:scale-95 ${
+                          isSelected ? 'ring-2 shadow-lg' : 'bg-[#020617] border border-white/8 hover:border-white/20'
+                        }`}
+                        style={isSelected ? {background: col + '18', borderColor: col, boxShadow: `0 0 12px ${col}44`} : {}}>
+                        <span className="text-base sm:text-lg font-display font-black leading-none" style={{color: col}}>{star}</span>
+                        <span className="text-[8px] sm:text-[9px] text-[#8A8070] text-center leading-tight w-full truncate">{bhopName}</span>
                       </button>
                     );
                   })}
@@ -1183,17 +1147,17 @@ export default function KarnchataPage() {
             ))}
 
             {/* ── วิธีอ่าน ── */}
-            <div className="w-full max-w-3xl bg-[#020617] border border-[#C6A96B]/18 rounded-2xl p-5 mt-3">
-              <p className="text-xs font-bold text-[#C6A96B] mb-3 flex items-center gap-2">✦ วิธีอ่านรหัสชีวิต 3 Steps — Star Tracing</p>
-              <p className="text-xs text-rose-400/75 font-bold mb-4">⚑ ห้ามอ่านแนวดิ่ง — ใช้ "เลขดาว" เชื่อมโยง ฐาน 1 → 2 → 3</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="bg-[#020617] border border-[#C6A96B]/18 rounded-2xl p-4 mt-3">
+              <p className="text-xs font-bold text-[#C6A96B] mb-3">✦ วิธีอ่านรหัสชีวิต 3 ขั้นตอน — Star Tracing</p>
+              <p className="text-xs text-rose-400/75 font-bold mb-3">⚑ ห้ามอ่านแนวดิ่ง — ใช้ "เลขดาว" เชื่อมโยง ฐาน 1 → 2 → 3</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                 {[
-                  { step:"1", title:"ตั้งโจทย์", color:"text-[#C6A96B]", bg:"bg-[#C6A96B]/20", desc:"เลือกภพเรือนในฐาน 1 ที่ต้องการทราบ แล้วดูว่าคือเลขดาวอะไร — แตะเพื่อเริ่มติดตาม" },
-                  { step:"2", title:"ตามรอยดาว", color:"text-sky-400", bg:"bg-sky-500/20", desc:"แผงด้านบนจะแสดงทุกฐานที่ดาวนั้นปรากฏ พร้อมชื่อภพ — เชื่อมโยงฐาน 1 → 2 → 3 ได้ทันที" },
-                  { step:"3", title:"กำลังเทวดา", color:"text-[#4B6FAE]", bg:"bg-[#4B6FAE]/30", desc:"ดูดาวในฐาน 3 ตกช่องใด → อ่านฐาน 4 ช่องเดียวกัน (แสดงในแผง) เพื่อตัดสินคุณภาพดวง" },
+                  { step:"1", title:"ตั้งโจทย์", color:"text-[#C6A96B]", bg:"bg-[#C6A96B]/20", desc:"เลือกภพเรือนในฐาน 1 ที่ต้องการทราบ แล้วดูเลขดาว — แตะเพื่อเริ่มติดตาม" },
+                  { step:"2", title:"ตามรอยดาว", color:"text-sky-400", bg:"bg-sky-500/20", desc:"แถบด้านบนแสดงทุกฐานที่ดาวนั้นปรากฏ พร้อมชื่อภพ — เชื่อมโยง 1 → 2 → 3" },
+                  { step:"3", title:"กำลังเทวดา", color:"text-[#4B6FAE]", bg:"bg-[#4B6FAE]/30", desc:"ดาวในฐาน 3 ตกช่องใด → อ่านฐาน 4 ช่องเดียวกันเพื่อตัดสินคุณภาพดวง" },
                 ].map(s => (
-                  <div key={s.step} className="bg-[#0A1628] rounded-xl p-4 border border-white/5">
-                    <p className={`text-xs font-bold ${s.color} mb-2 flex items-center gap-1.5`}>
+                  <div key={s.step} className="bg-[#0A1628] rounded-xl p-3 border border-white/5">
+                    <p className={`text-xs font-bold ${s.color} mb-1.5 flex items-center gap-1.5`}>
                       <span className={`w-5 h-5 rounded-full ${s.bg} flex items-center justify-center text-xs font-black shrink-0`}>{s.step}</span>
                       {s.title}
                     </p>
