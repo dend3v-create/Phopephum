@@ -1949,7 +1949,7 @@ function FateMatrixPanel({
           <tbody>
             {matrix.map((row, rIdx) => {
               const isBase4 = rIdx === 3;
-              const isTargetRow = [0, 1, 2, 7, 8].includes(rIdx);
+              const isTargetRow = [0, 1, 2, 4, 5, 6, 7, 8].includes(rIdx); // ฐาน 5-7 (idx 4-6) ต้องแสดงดาวที่ลิงค์กันด้วย
               return (
                 <tr 
                   key={rIdx} 
