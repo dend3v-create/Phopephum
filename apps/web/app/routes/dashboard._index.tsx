@@ -592,6 +592,26 @@ export default function DashboardIndex() {
             id="feature-horoscope"
           />
           <FeatureCard
+            to="/dashboard/karnchata"
+            tag="กาลชะตา"
+            tagColor="#C6A96B"
+            orbColor="rgba(198,169,107,"
+            title="ทำนายกาลชะตา"
+            desc="วิเคราะห์รหัสชะตาชีวิตระดับวินาทีด้วย 7 ตัว 9 ฐาน ผสมผสานระบบ Q&A แชทอัจฉริยะ"
+            icon={<IconHourglassMini className="w-4 h-4" />}
+            id="feature-karnchata"
+          />
+          <FeatureCard
+            to="/dashboard/horanu"
+            tag="โหรทายหนู"
+            tagColor="#E09B45"
+            orbColor="rgba(224,155,69,"
+            title="โหรทายหนู"
+            desc="พยากรณ์กาลชะตาระดับนาทีด้วยระบบยามอัฐกาลและดาวลอยโบราณ แม่นยำและรวดเร็ว"
+            icon={<IconHoraNuMini className="w-4 h-4" />}
+            id="feature-horanu"
+          />
+          <FeatureCard
             to="/dashboard/planner"
             tag="วางแผนชีวิต"
             tagColor="#8B7FD4"
@@ -851,6 +871,23 @@ function IconYamMini() {
       <circle cx="12" cy="12" r="9" />
       <path d="M12 3v4M12 17v4M3 12h4M17 12h4" strokeLinecap="round" />
       <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function IconHourglassMini({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className}>
+      <path d="M5 2h14M5 22h14M19 2v4a7 7 0 0 1-7 7 7 7 0 0 1-7-7V2M5 22v-4a7 7 0 0 1 7-7 7 7 0 0 1 7 7v4" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconHoraNuMini({ className = "w-4 h-4" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" strokeLinecap="round" />
     </svg>
   );
 }
