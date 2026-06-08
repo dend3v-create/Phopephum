@@ -436,7 +436,7 @@ export default function HoroscopePage() {
     try {
       const res = await calculatePhopephum({
         birthDate: activeResult.birthDate,
-        birthTime: activeResult.phopephumResult?.input_data?.birthTime || profile?.birth_time || "12:00",
+        birthTime: activeResult.birthTime || profile?.birth_time || "12:00",
         birthPlace: profile?.birth_place || "กรุงเทพมหานคร",
       }, checkDate);
 
@@ -458,7 +458,7 @@ export default function HoroscopePage() {
     } catch (e) {
       console.error("Realtime update error:", e);
     }
-  }, [activeResult?.birthDate, profile]);
+  }, [activeResult?.birthDate, activeResult?.birthTime, profile]);
 
   // ── คำนวณค่าเริ่มต้นวันเกิด (พ.ศ.) ──
   const birthDateObj = profile?.birth_date ? new Date(profile.birth_date) : null;
