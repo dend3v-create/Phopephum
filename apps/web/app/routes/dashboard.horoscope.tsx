@@ -941,6 +941,32 @@ export default function HoroscopePage() {
               </button>
               <button
                 type="button"
+                onClick={() => setShowMonthlyJorn(!showMonthlyJorn)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showMonthlyJorn ? "bg-pink-500/10 border-pink-500/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-pink-500" />
+                  <span>เดือนจร</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showMonthlyJorn ? "bg-pink-500 shadow-[0_0_8px_#ec4899]" : "bg-white/10"}`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowDailyJorn(!showDailyJorn)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showDailyJorn ? "bg-emerald-500/10 border-emerald-500/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span>วันจร</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showDailyJorn ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : "bg-white/10"}`} />
+              </button>
+              <button
+                type="button"
                 onClick={() => setShowAgeRange(!showAgeRange)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
                   showAgeRange ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
@@ -2135,6 +2161,50 @@ function FateMatrixPanel({
               <span className="text-[#8A8070]">→</span>
               <span className="text-[#4B6FAE] font-bold">ฐาน {phopephumResult.lagnaTransit.row}</span>
               <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.lagnaTransit.houseName}</span>
+            </div>
+          )}
+          {/* เดือนจร */}
+          {showMonthlyJorn && phopephumResult?.monthlyJorn && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
+              <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" />
+              <span className="text-pink-400 font-semibold shrink-0">เดือนจร</span>
+              <span className="text-[#8A8070]">เดือน</span>
+              <span className="text-[#F8F6F1] font-bold">
+                {phopephumResult.horary?.lunarDate?.lunarMonthName ?? phopephumResult.horary?.lunarDate?.lunarMonth ?? "—"}
+              </span>
+              <span className="text-[#8A8070]">→</span>
+              <span className="text-pink-400 font-bold">ฐาน {phopephumResult.monthlyJorn.row}</span>
+              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.monthlyJorn.houseName}</span>
+              {phopephumResult.monthlyJorn.yumStar && (
+                <>
+                  <span className="text-[#8A8070]">ดาวยํ้าฐาน {phopephumResult.monthlyJorn.yumBase ?? 6}</span>
+                  <span className="text-pink-300 font-bold">
+                    {STAR_NAMES[phopephumResult.monthlyJorn.yumStar as 1|2|3|4|5|6|7] ?? phopephumResult.monthlyJorn.yumStar}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+          {/* วันจร */}
+          {showDailyJorn && phopephumResult?.dailyJorn && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+              <span className="text-emerald-400 font-semibold shrink-0">วันจร</span>
+              <span className="text-[#8A8070]">วัน</span>
+              <span className="text-[#F8F6F1] font-bold">
+                {phopephumResult.horary?.lunarDate?.dayName ?? "—"}
+              </span>
+              <span className="text-[#8A8070]">→</span>
+              <span className="text-emerald-400 font-bold">ฐาน {phopephumResult.dailyJorn.row}</span>
+              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.dailyJorn.houseName}</span>
+              {phopephumResult.dailyJorn.yumStar && (
+                <>
+                  <span className="text-[#8A8070]">ดาวยํ้าฐาน {phopephumResult.dailyJorn.yumBase ?? 5}</span>
+                  <span className="text-emerald-300 font-bold">
+                    {STAR_NAMES[phopephumResult.dailyJorn.yumStar as 1|2|3|4|5|6|7] ?? phopephumResult.dailyJorn.yumStar}
+                  </span>
+                </>
+              )}
             </div>
           )}
         </div>
