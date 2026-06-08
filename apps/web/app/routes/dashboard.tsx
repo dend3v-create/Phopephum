@@ -69,7 +69,7 @@ export default function DashboardLayout() {
             </div>
           </div>
           <div>
-            <p className="text-[#D9BC82] text-[8px] tracking-[0.2em] uppercase mb-0.5 opacity-70">
+            <p className="text-[#D9BC82] text-[11px] tracking-[0.2em] uppercase mb-0.5 opacity-70">
               Living Wisdom OS
             </p>
             <h2 className="font-display text-xl font-bold text-[#F8F6F1] glow-gold leading-none">
@@ -183,8 +183,8 @@ export default function DashboardLayout() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-[#F8F6F1] truncate font-medium">{displayName}</p>
-              <p className="text-[10px] text-[#94A3B8]/60 truncate">{user.email}</p>
-              <p className="text-[10px] truncate capitalize font-semibold"
+              <p className="text-[13px] text-[#94A3B8]/60 truncate">{user.email}</p>
+              <p className="text-[13px] truncate capitalize font-semibold"
                 style={{ color: profile?.role === 'admin' ? "#38BDF8" : profile?.plan === 'imperial' ? "#C6A96B" : "#94A3B8" }}>
                 {profile?.role === 'admin' ? '⌘ Administrator' : profile?.plan === 'imperial' ? '✦ Imperial' : profile?.plan === 'pro' ? '◈ Pro' : 'Basic'}
               </p>

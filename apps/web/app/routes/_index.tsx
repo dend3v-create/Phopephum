@@ -21,7 +21,7 @@ export const meta: MetaFunction = () => [
 
   // AEO / GEO / SEO Directives
   { name: "keywords", content: "ภพภูมิ, PhopePhum, ยามอัฏฐกาล, ยามราหูค้นทรัพย์, เลข 7 ตัว 9 ฐาน, ผังดวงจักรพรรดิ, ดูดวง, ฤกษ์มงคล, ตรวจดวงชะตา, พยากรณ์ชีวิต, ตารางยามรายวัน, ศาสตร์โบราณ" },
-  { name: "author", content: "ครูเด่น มาสเตอร์ฟา" },
+  { name: "author", content: "Wisdom Guidance" },
 ];
 
 
@@ -97,8 +97,8 @@ const SCHEMA_MARKUP = {
     {
       "@type": "Person",
       "@id": "https://phopephum.com/#person",
-      "name": "ครูเด่น มาสเตอร์ฟา",
-      "alternateName": "Kru Den Master Fa",
+      "name": "Wisdom Guidance",
+      "alternateName": "Wisdom Guidance",
       "jobTitle": "Senior Digital SaaS Architect & Astro-Sage",
       "description": "ผู้เชี่ยวชาญด้านสถาปัตยกรรมเทคโนโลยีดิจิทัลและโหราศาสตร์โบราณ ผู้พัฒนาศาสตร์ระบบปฏิบัติการนำทางชีวิต ภพภูมิ (PhopePhum)",
       "url": "https://phopephum.com",
@@ -161,7 +161,7 @@ const SCHEMA_MARKUP = {
           "name": "การตรวจดวงชะตาด้วยระบบ PhopePhum ปลอดภัยหรือไม่?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "ระบบวิเคราะห์ชีวิตของภพภูมิ มีความปลอดภัยสูงสุด ใช้ข้อมูลดวงเกิดของท่านเพื่อการผูกดวงเฉพาะบุคคลโดยไม่เปิดเผยหรือเก็บข้อมูลส่วนตัวของท่านในรูปแบบสาธารณะ พัฒนาและควบคุมระบบโดยครูเด่น มาสเตอร์ฟา"
+            "text": "ระบบวิเคราะห์ชีวิตของภพภูมิ มีความปลอดภัยสูงสุด ใช้ข้อมูลดวงเกิดของท่านเพื่อการผูกดวงเฉพาะบุคคลโดยไม่เปิดเผยหรือเก็บข้อมูลส่วนตัวของท่านในรูปแบบสาธารณะ พัฒนาและควบคุมระบบโดยWisdom Guidance"
           }
         }
       ]

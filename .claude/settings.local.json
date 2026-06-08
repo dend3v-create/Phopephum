@@ -62,7 +62,15 @@
       "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\('scripts',{}\\), indent=2\\)\\)\")",
       "Bash(git push:*)",
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
-      "Bash(grep -v \"^$\")"
+      "Bash(grep -v \"^$\")",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(xargs grep:*)",
+      "Bash(ls /e/00.1_DenD3v_AI/phopephum-v2/apps/web/app/routes/dashboard*)",
+      "Bash(grep -hE \"text-\\\\[?\\(xs|sm|base|[0-9]+px\\)\\\\]?\" dashboard.*.tsx)",
+      "Bash(grep -hE \"text-\\\\[?\\(xs|sm|[0-9]+px\\)\\\\]?\" components/**/*.tsx)",
+      "Bash(ls dashboard.*.tsx)",
+      "Bash(python3 -c ':*)"
     ]
   }
 }

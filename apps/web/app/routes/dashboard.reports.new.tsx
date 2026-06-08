@@ -401,7 +401,7 @@ export default function NewReportPage() {
               <p className="text-[#8A8070] text-xs">{selectedMeta.desc}</p>
             </div>
             <div className="text-right flex-shrink-0 hidden sm:block">
-              <p className="text-[#C9A96E] text-[13px] font-bold uppercase">ครูเด่นพยากรณ์</p>
+              <p className="text-[#C9A96E] text-[13px] font-bold uppercase">Wisdom Guidance</p>
               <p className="text-[#8A8070] text-[13px]">~30–60 วิ</p>
             </div>
           </div>

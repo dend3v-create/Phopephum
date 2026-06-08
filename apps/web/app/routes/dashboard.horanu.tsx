@@ -9,7 +9,6 @@ import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { useState, useEffect, useMemo } from "react";
 import { HoraNuChart } from "~/components/horanu/HoraNuChart";
-import type { PlanetPlacement, SubPeriodInfo } from "~/components/horanu/HoraNuChart";
 
 export const meta: MetaFunction = () => [
   { title: "โหรทายหนู — PhopePhum" },
@@ -272,57 +271,16 @@ export default function HoraNuPage() {
 
               {/* SVG Wheel */}
               <div className="flex justify-center">
-                 {(() => {
-                   // Build planet placements from lord planets of each house
-                   // (Prototype: lord planet placed in their primary house)
-                   const chartPlacements: PlanetPlacement[] = result.houseChart
-                     .filter(h => h.isCurrentYam || h.isSecondaryKaset)
-                     .map(h => ({
-                       planet: h.lordPlanet,
-                       house: h.houseNum,
-                       dignity: h.lordStatus === 'KASET' ? 'kaset'
-                         : h.lordStatus === 'MAHA_UCH' ? 'mahauch'
-                         : h.lordStatus === 'NEECH' ? 'nich'
-                         : h.lordStatus === 'PRA' ? 'pra'
-                         : 'neutral',
-                     } as PlanetPlacement));
-
-                   // Add all lord planets to their houses for full chart
-                   const allPlacements: PlanetPlacement[] = result.houseChart.map(h => ({
-                     planet: h.lordPlanet,
-                     house: h.houseNum,
-                     dignity: h.lordStatus === 'KASET' ? 'kaset'
-                       : h.lordStatus === 'MAHA_UCH' ? 'mahauch'
-                       : h.lordStatus === 'NEECH' ? 'nich'
-                       : h.lordStatus === 'PRA' ? 'pra'
-                       : 'neutral',
-                   } as PlanetPlacement));
-
-                   const subPeriodsData: SubPeriodInfo[] = result.yamSchedule.map((yam, i) => ({
-                     num: i + 1,
-                     startTime: yam.startTime,
-                     isCurrent: yam.isCurrent,
-                   }));
-
-                   return (
-                     <HoraNuChart
-                       weekday={result.dayName}
-                       yama={result.yamNumber}
-                       period={result.phase}
-                       yamStartTime={result.mainPeriodStart}
-                       yamEndTime={result.mainPeriodEnd}
-                       currentPlanet={result.currentPlanet}
-                       currentPlanetName={result.currentPlanetName}
-                       currentDirection={result.currentDirection}
-                       currentDirectionAngle={result.currentDirectionAngle}
-                       placements={allPlacements}
-                       subPeriods={subPeriodsData}
-                       currentSubPeriod={result.subYamNumber}
-                       size={340}
-                       className="max-w-full"
-                     />
-                   );
-                 })()}
+                <HoraNuChart
+                  weekday={result.dayName}
+                  yama={result.yamNumber}
+                  period={result.phase}
+                  yamStartTime={result.mainPeriodStart}
+                  currentPlanet={result.currentPlanet}
+                  currentSubYam={result.subYamNumber}
+                  size={500}
+                  className="max-w-full"
+                />
               </div>
 
               {/* Status badges */}
