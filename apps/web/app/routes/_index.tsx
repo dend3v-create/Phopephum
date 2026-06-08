@@ -2,28 +2,24 @@ import type { MetaFunction } from "@remix-run/cloudflare";
 import { Link } from "@remix-run/react";
 
 export const meta: MetaFunction = () => [
-  { title: "ภพภูมิ — PhopePhum | ระบบปฏิบัติการนำทางชีวิตด้วยยามมงคลอัฏฐกาลและเลข 7 ตัว 9 ฐาน" },
-  { name: "description", content: "ภพภูมิ (PhopePhum) ระบบปฏิบัติการจัดการชีวิตและคำนวณยามมงคลระดับนาทีด้วยศาสตร์ยามอัฏฐกาลโบราณ, เลข 7 ตัว 9 ฐาน และผังดวงจักรพรรดิ ตรวจสอบฤกษ์มงคล ค้นทรัพย์ และเจรจาได้แบบเรียลไทม์" },
-  
-  // Open Graph / Facebook
+  { title: "ภพภูมิ — PhopePhum | Wisdom Guidance ที่ปรึกษาชีวิตส่วนตัวขับเคลื่อนด้วย AI" },
+  { name: "description", content: "ภพภูมิ (PhopePhum) ที่ปรึกษาชีวิตส่วนตัว อ่านพลังงานวัน เข้าใจเส้นทางชีวิต และรับคำแนะนำจาก Wisdom AI ที่เข้าใจชะตาคุณ เริ่มฟรี ไม่ต้องใช้บัตรเครดิต" },
+
   { property: "og:type", content: "website" },
   { property: "og:url", content: "https://phopephum.com" },
-  { property: "og:title", content: "ภพภูมิ — PhopePhum | ระบบนำทางชีวิตด้วยยามมงคลอัฏฐกาลและเลข 7 ตัว 9 ฐาน" },
-  { property: "og:description", content: "คำนวณฤกษ์มงคล ยามราหูค้นทรัพย์ และชะตาชีวิตระดับนาทีด้วยสูตรโบราณดั้งเดิม พร้อมบทวิเคราะห์ชะตาชีวิตเชิงลึก" },
+  { property: "og:title", content: "ภพภูมิ — PhopePhum | Wisdom Guidance ที่ปรึกษาชีวิตส่วนตัว" },
+  { property: "og:description", content: "อ่านพลังงานวัน เข้าใจเส้นทางชีวิต รับคำแนะนำจาก Wisdom AI ส่วนตัว" },
   { property: "og:image", content: "https://phopephum.com/favicon.svg" },
 
-  // Twitter
   { name: "twitter:card", content: "summary_large_image" },
   { name: "twitter:url", content: "https://phopephum.com" },
-  { name: "twitter:title", content: "ภพภูมิ — PhopePhum | ระบบนำทางชีวิตด้วยยามมงคลอัฏฐกาล" },
-  { name: "twitter:description", content: "คำนวณฤกษ์มงคล ยามราหูค้นทรัพย์ และชะตาชีวิตระดับนาทีด้วยสูตรโบราณดั้งเดิม" },
+  { name: "twitter:title", content: "ภพภูมิ — PhopePhum | Wisdom Guidance" },
+  { name: "twitter:description", content: "ที่ปรึกษาชีวิตส่วนตัวขับเคลื่อนด้วยภูมิปัญญาโบราณและ AI" },
   { name: "twitter:image", content: "https://phopephum.com/favicon.svg" },
 
-  // AEO / GEO / SEO Directives
-  { name: "keywords", content: "ภพภูมิ, PhopePhum, ยามอัฏฐกาล, ยามราหูค้นทรัพย์, เลข 7 ตัว 9 ฐาน, ผังดวงจักรพรรดิ, ดูดวง, ฤกษ์มงคล, ตรวจดวงชะตา, พยากรณ์ชีวิต, ตารางยามรายวัน, ศาสตร์โบราณ" },
+  { name: "keywords", content: "ภพภูมิ, PhopePhum, Wisdom Guidance, ที่ปรึกษาชีวิต, ดูดวง, เส้นทางชีวิต, พลังงานวัน, ดวงชาตา, AI ดูดวง, วางแผนชีวิต" },
   { name: "author", content: "Wisdom Guidance" },
 ];
-
 
 const STARS = [
   { x: 8,  y: 12, s: 1.5, delay: 0,   blue: false },
@@ -48,69 +44,52 @@ const STARS = [
 
 const FEATURES = [
   {
-    icon: "☽",
-    title: "ยามอัฏฐกาลสด",
-    desc: "คำนวณยามปัจจุบันแบบ real-time พร้อม countdown ถึงยามถัดไป ใช้สูตรโบราณดั้งเดิมที่แม่นยำระดับนาที",
-  },
-  {
     icon: "✦",
-    title: "เลข 7 ตัว 9 ฐาน",
-    desc: "ระบบคำนวณดวงชะตาเชิงลึกด้วยเลขฐาน 1-7 จากวัน เดือน ปีนักษัตร ตามศาสตร์ไทยแท้",
-  },
-  {
-    icon: "⊕",
-    title: "ผังดวงจักรพรรดิ",
-    desc: "Emperor Chart คำนวณจักรกำเนิด วัยจร ปีจร และทิศทางชีวิตทุกช่วงอายุในรูปแบบหรูหราพรีเมียม",
+    title: "รู้จักตัวเองลึกขึ้น",
+    desc: "เข้าใจรหัสชะตาตนเอง บุคลิก จุดแข็ง และทิศทางชีวิตที่เหมาะกับคุณ จากวันเดือนปีเกิด",
   },
   {
     icon: "◈",
-    title: "บทวิเคราะห์ชีวิต",
-    desc: "บทวิเคราะห์ชีวิตเชิงลึก 6 ประเภท โดยผู้ทรงปัญญาแห่งศาสตร์ไทยโบราณ นำพาให้เข้าใจตนเองและเส้นทางชีวิต",
+    title: "Wisdom AI ส่วนตัว",
+    desc: "ที่ปรึกษา AI ที่เข้าใจชะตาคุณ ถามได้ทุกเรื่องชีวิต ความรัก การงาน และการตัดสินใจ",
+  },
+  {
+    icon: "☽",
+    title: "พลังงานแห่งวัน",
+    desc: "อ่านพลังงานและจังหวะชีวิตประจำวัน real-time เพื่อเลือกเวลาที่ใช่สำหรับทุกสิ่ง",
+  },
+  {
+    icon: "⊕",
+    title: "เส้นทางชีวิต",
+    desc: "ดูวาระสำคัญ ช่วงเวลาก้าวหน้า และทิศทางชีวิตในแต่ละช่วงอายุอย่างละเอียด",
   },
   {
     icon: "⟁",
-    title: "TQM Planner",
-    desc: "วางแผนชีวิตสอดคล้องกับยามมงคลประจำวัน ตั้งเจตนา ลำดับความสำคัญ และสะท้อนความสำเร็จ",
+    title: "บันทึก & วางแผน",
+    desc: "จดบันทึกเจตนา ตั้งเป้าหมาย และสะท้อนความก้าวหน้าของชีวิตในแต่ละวัน",
   },
   {
     icon: "⌘",
-    title: "ปฏิทิน 100 ปี",
-    desc: "ฐานข้อมูลจันทรคติไทยครบถ้วน 121 ปี คำนวณด้วย Meeus Algorithm ±2 นาที จาก CE 1920–2040",
+    title: "ปฏิทินพลังงาน",
+    desc: "ดูพลังงานล่วงหน้า 7 วัน เพื่อวางแผนการตัดสินใจสำคัญในช่วงเวลาที่เหมาะสม",
   },
 ];
 
 const STEPS = [
-  { num: "01", title: "ลงทะเบียนฟรี", desc: "ใส่ชื่อและอีเมล เริ่มต้นได้ทันทีโดยไม่ต้องใช้บัตรเครดิต" },
+  { num: "01", title: "สมัครฟรี 1 นาที", desc: "ใส่ชื่อและอีเมล เริ่มต้นได้ทันทีโดยไม่ต้องใช้บัตรเครดิต" },
   { num: "02", title: "กรอกวันเกิด", desc: "วัน เดือน ปี และเวลาเกิด (ถ้ามี) เพื่อความแม่นยำสูงสุด" },
-  { num: "03", title: "รับผลทันที", desc: "ระบบคำนวณดวงชะตาและยามมงคลให้คุณแบบ real-time ทันที" },
+  { num: "03", title: "รับคำแนะนำทันที", desc: "Wisdom AI วิเคราะห์ชะตาคุณและพร้อมตอบทุกคำถามแบบ real-time" },
 ];
 
 const TESTIMONIALS = [
-  { name: "คุณสุรีย์", role: "นักธุรกิจ", text: "ใช้ยามอัฏฐกาลเลือกวันทำสัญญาสำคัญ ผลออกมาดีกว่าที่คิดมาก แนะนำสำหรับผู้ที่เชื่อในศาสตร์ไทย" },
-  { name: "คุณมาลี", role: "แม่บ้านนักลงทุน", text: "บทวิเคราะห์ดวงได้ละเอียดมาก อ่านแล้วรู้สึกว่าเข้าใจตัวเองมากขึ้น ข้อมูลครบและหรูหรา" },
-  { name: "คุณวิชัย", role: "โหรสมัครเล่น", text: "เลข 7 ตัวแม่นยำตามตำราที่เคยศึกษามา ระบบปฏิทินจันทรคติครบถ้วนมาก ใช้อ้างอิงได้เลย" },
+  { name: "คุณสุรีย์", role: "นักธุรกิจ", text: "ใช้ Wisdom AI ช่วยตัดสินใจก่อนทำสัญญาสำคัญ ผลออกมาดีกว่าที่คิดมาก แนะนำสำหรับคนที่ต้องตัดสินใจบ่อยๆ" },
+  { name: "คุณมาลี", role: "แม่บ้านนักลงทุน", text: "อ่านเส้นทางชีวิตแล้วรู้สึกว่าเข้าใจตัวเองมากขึ้น ช่วยให้วางแผนชีวิตได้ดีขึ้นจริงๆ" },
+  { name: "คุณวิชัย", role: "ฟรีแลนซ์", text: "ชอบฟีเจอร์พลังงานวันมาก ใช้ดูว่าวันไหนควรเริ่มงานใหม่หรือเจรจา ได้ผลดีมาก" },
 ];
 
 const SCHEMA_MARKUP = {
   "@context": "https://schema.org",
   "@graph": [
-    {
-      "@type": "Person",
-      "@id": "https://phopephum.com/#person",
-      "name": "Wisdom Guidance",
-      "alternateName": "Wisdom Guidance",
-      "jobTitle": "Senior Digital SaaS Architect & Astro-Sage",
-      "description": "ผู้เชี่ยวชาญด้านสถาปัตยกรรมเทคโนโลยีดิจิทัลและโหราศาสตร์โบราณ ผู้พัฒนาศาสตร์ระบบปฏิบัติการนำทางชีวิต ภพภูมิ (PhopePhum)",
-      "url": "https://phopephum.com",
-      "knowsAbout": [
-        "โหราศาสตร์ไทยโบราณ",
-        "ยามอัฏฐกาล",
-        "เลข 7 ตัว 9 ฐาน",
-        "ผังดวงจักรพรรดิ",
-        "Digital Architecture",
-        "SaaS Architecture"
-      ]
-    },
     {
       "@type": "Organization",
       "@id": "https://phopephum.com/#organization",
@@ -122,19 +101,14 @@ const SCHEMA_MARKUP = {
         "width": "100",
         "height": "100"
       },
-      "founder": {
-        "@id": "https://phopephum.com/#person"
-      }
     },
     {
       "@type": "WebSite",
       "@id": "https://phopephum.com/#website",
       "url": "https://phopephum.com",
       "name": "ภพภูมิ - PhopePhum",
-      "publisher": {
-        "@id": "https://phopephum.com/#organization"
-      },
-      "description": "ระบบปฏิบัติการจัดการชีวิตด้วยยามมงคลอัฏฐกาลและเลข 7 ตัว 9 ฐาน"
+      "publisher": { "@id": "https://phopephum.com/#organization" },
+      "description": "Wisdom Guidance Operating System — ที่ปรึกษาชีวิตส่วนตัวขับเคลื่อนด้วยภูมิปัญญาโบราณและ AI",
     },
     {
       "@type": "FAQPage",
@@ -145,23 +119,23 @@ const SCHEMA_MARKUP = {
           "name": "ภพภูมิ (PhopePhum) คืออะไร?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "ภพภูมิ คือระบบปฏิบัติการนำทางและจัดการชีวิตอัจฉริยะ (Living Wisdom OS) ที่ผสานการคำนวณยามมงคลโบราณระดับนาทีด้วยยามอัฏฐกาล, ยามราหูค้นทรัพย์, เลข 7 ตัว 9 ฐาน, และผังดวงจักรพรรดิ"
+            "text": "ภพภูมิ คือ Wisdom Guidance Operating System ที่ปรึกษาชีวิตส่วนตัวขับเคลื่อนด้วยภูมิปัญญาโบราณและ AI ช่วยให้คุณเข้าใจตัวเอง รู้จักเส้นทางชีวิต และตัดสินใจถูกเวลา"
           }
         },
         {
           "@type": "Question",
-          "name": "ยามอัฏฐกาลโบราณคำนวณอย่างไร?",
+          "name": "ใช้ฟรีได้อะไรบ้าง?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "ยามอัฏฐกาลคำนวณตามตำราดั้งเดิม โดยการแบ่งเวลาช่วงกลางวันและกลางคืนออกเป็น 8 ช่วงย่อย (รวม 16 ยามย่อย) อ้างอิงจากตำแหน่งดวงดาวจริงและกฎจันทรคติไทยแท้เพื่อค้นหาฤกษ์มงคลระดับนาที"
+            "text": "สมาชิกฟรีสามารถดู Dashboard พลังงานวันนี้ ข้อมูลชาตาส่วนตัว และใช้ Wisdom AI ได้ในระดับเบื้องต้น"
           }
         },
         {
           "@type": "Question",
-          "name": "การตรวจดวงชะตาด้วยระบบ PhopePhum ปลอดภัยหรือไม่?",
+          "name": "ข้อมูลส่วนตัวปลอดภัยหรือไม่?",
           "acceptedAnswer": {
             "@type": "Answer",
-            "text": "ระบบวิเคราะห์ชีวิตของภพภูมิ มีความปลอดภัยสูงสุด ใช้ข้อมูลดวงเกิดของท่านเพื่อการผูกดวงเฉพาะบุคคลโดยไม่เปิดเผยหรือเก็บข้อมูลส่วนตัวของท่านในรูปแบบสาธารณะ พัฒนาและควบคุมระบบโดยWisdom Guidance"
+            "text": "ข้อมูลวันเกิดของคุณถูกเข้ารหัสและไม่ถูกเปิดเผยต่อสาธารณะ ระบบพัฒนาโดย PhopePhum บน Cloudflare infrastructure ที่ปลอดภัยระดับสูง"
           }
         }
       ]
@@ -194,7 +168,6 @@ export default function Index() {
 
       {/* ── Navbar ── */}
       <nav className="relative z-50 flex items-center justify-between px-6 py-4 max-w-6xl mx-auto">
-        {/* Logo */}
         <Link to="/" className="flex items-center gap-2 group">
           <div className="relative w-8 h-8 flex items-center justify-center transition-transform group-hover:rotate-90 duration-700">
             <div className="absolute inset-0 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/5" />
@@ -208,23 +181,35 @@ export default function Index() {
           <span className="font-display text-[#F8F6F1] font-bold text-lg tracking-wide group-hover:text-[#C6A96B] transition-colors">PhopePhum</span>
         </Link>
 
-        {/* Nav links (desktop) */}
         <div className="hidden md:flex items-center gap-6 text-sm text-[#94A3B8]">
-          <Link to="/pricing" className="hover:text-[#C6A96B] transition-colors">แผนสมาชิก</Link>
+          <Link to="/pricing" className="hover:text-[#C6A96B] transition-colors">ราคา</Link>
           <a href="#features" className="hover:text-[#C6A96B] transition-colors">ฟีเจอร์</a>
           <a href="#how" className="hover:text-[#C6A96B] transition-colors">วิธีใช้</a>
+        </div>
+
+        <div className="flex items-center gap-3">
+          <Link to="/login" className="hidden sm:block text-sm text-[#94A3B8] hover:text-[#F8F6F1] transition-colors">
+            เข้าสู่ระบบ
+          </Link>
+          <Link
+            to="/register"
+            className="text-sm font-bold px-4 py-2 rounded-full transition-all hover:scale-105 active:scale-95"
+            style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)", color: "#020617" }}
+          >
+            เริ่มฟรี
+          </Link>
         </div>
       </nav>
 
       {/* ── Hero ── */}
-      <section className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-12 pb-24">
+      <section className="relative z-10 text-center max-w-4xl mx-auto px-4 pt-10 pb-24">
         <div className="flex justify-center mb-8 animate-float">
           <LogoSymbol />
         </div>
 
         <p className="text-[#D9BC82] text-[9px] tracking-[0.4em] uppercase mb-4 animate-fade-up"
           style={{ animationDelay: "0.1s" }}>
-          Living Wisdom Operating System
+          Wisdom Guidance Operating System
         </p>
 
         <h1 className="font-display text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-[#F8F6F1] glow-gold mb-4 animate-fade-up leading-tight"
@@ -234,20 +219,19 @@ export default function Index() {
 
         <p className="font-cormorant text-[#9AB3D9] text-2xl sm:text-3xl md:text-4xl italic mb-1 animate-fade-up"
           style={{ animationDelay: "0.28s" }}>
-          เปิดประตูสู่อนาคตด้วย
+          เพื่อนผู้ทรงปัญญา
         </p>
         <p className="font-display text-[#D9BC82] text-xl sm:text-2xl md:text-3xl font-semibold tracking-wide mb-6 animate-fade-up"
           style={{ animationDelay: "0.32s" }}>
-          ศาสตร์ยามอัฏฐกาลชั้นสูง
+          ที่นำทางชีวิตคุณ
         </p>
 
         <p className="text-[#94A3B8] text-base md:text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto mb-10 animate-fade-up"
           style={{ animationDelay: "0.38s" }}>
-          คำนวณยามมงคลและชะตาจรระดับนาทีด้วยสูตรโบราณดั้งเดิม<br />
-          พร้อมบทวิเคราะห์ดวงชะตาเชิงลึก ส่งรายงานวิเคราะห์ชีวิตสู่มือคุณ
+          รับคำแนะนำส่วนตัวจาก Wisdom AI อ่านพลังงานวัน<br />
+          และเข้าใจเส้นทางชีวิตจากภูมิปัญญาโบราณที่ถูกปลุกชีพด้วย AI
         </p>
 
-        {/* Hero CTAs */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up"
           style={{ animationDelay: "0.44s" }}>
           <Link
@@ -265,12 +249,10 @@ export default function Index() {
           </Link>
         </div>
 
-        {/* Trust line */}
         <p className="text-[#94A3B8]/50 text-xs mt-5 animate-fade-up" style={{ animationDelay: "0.52s" }}>
           ฟรีตลอดชีพ · ไม่ต้องใช้บัตรเครดิต · ยกเลิกได้ทุกเมื่อ
         </p>
 
-        {/* Divider */}
         <div className="flex items-center justify-center gap-3 mt-14 animate-fade-up" style={{ animationDelay: "0.56s" }}>
           <div className="h-px w-24 bg-gradient-to-r from-transparent to-[#C6A96B]/30" />
           <span className="text-[#C6A96B]/50 text-xs">✦</span>
@@ -281,12 +263,12 @@ export default function Index() {
       {/* ── Features ── */}
       <section id="features" className="relative z-10 max-w-6xl mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">ฟีเจอร์หลัก</p>
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">สิ่งที่คุณจะได้รับ</p>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] mb-3">
-            ทุกศาสตร์ที่คุณต้องการ
+            ครบทุกสิ่งที่ชีวิตต้องการ
           </h2>
           <p className="text-[#94A3B8] text-base max-w-md mx-auto">
-            รวมทุกเครื่องมือโหราศาสตร์ไทยในที่เดียว ใช้งานได้ทันที
+            ที่ปรึกษาชีวิตส่วนตัวที่เข้าใจคุณ ใช้งานได้ทันที
           </p>
         </div>
 
@@ -308,9 +290,9 @@ export default function Index() {
       {/* ── How it works ── */}
       <section id="how" className="relative z-10 max-w-4xl mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">วิธีเริ่มต้น</p>
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">เริ่มต้นง่ายมาก</p>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1]">
-            เริ่มใช้ใน 3 ขั้นตอน
+            3 ขั้นตอน พร้อมใช้งาน
           </h2>
         </div>
 
@@ -341,10 +323,10 @@ export default function Index() {
               className="rounded-2xl border border-white/5 p-6"
               style={{ backdropFilter: "blur(20px)", background: "rgba(10,34,64,0.4)" }}>
               <p className="text-[#C6A96B] text-lg mb-3">"</p>
-              <p className="text-[#D9CDB7] text-xs leading-relaxed mb-4">{t.text}</p>
+              <p className="text-[#D9CDB7] text-sm leading-relaxed mb-4">{t.text}</p>
               <div className="border-t border-white/5 pt-3">
-                <p className="text-[#F8F6F1] text-xs font-semibold">{t.name}</p>
-                <p className="text-[#94A3B8] text-[10px]">{t.role}</p>
+                <p className="text-[#F8F6F1] text-sm font-semibold">{t.name}</p>
+                <p className="text-[#94A3B8] text-xs">{t.role}</p>
               </div>
             </div>
           ))}
@@ -352,17 +334,19 @@ export default function Index() {
       </section>
 
       {/* ── Pricing teaser ── */}
-      <section className="relative z-10 max-w-3xl mx-auto px-4 py-16 text-center">
-        <div className="rounded-3xl border border-[#C6A96B]/20 p-10"
+      <section className="relative z-10 max-w-2xl mx-auto px-4 py-16">
+        <div className="rounded-3xl border border-[#C6A96B]/20 p-10 text-center"
           style={{ backdropFilter: "blur(24px)", background: "rgba(198,169,107,0.05)", boxShadow: "0 0 80px rgba(198,169,107,0.08)" }}>
           <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">แผนราคา</p>
-          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] mb-3">
-            เริ่มต้น ฿0 ตลอดชีพ
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] mb-2">
+            เริ่มต้น ฿0
           </h2>
-          <p className="text-[#94A3B8] text-sm mb-6 max-w-md mx-auto">
-            ใช้ฟรีได้เลย ไม่มีวันหมดอายุ อัปเกรดเมื่อพร้อม
+          <p className="text-[#94A3B8] text-sm mb-1">
+            อัปเกรดเต็มประสิทธิภาพเพียง
           </p>
-
+          <p className="font-display text-[#D9BC82] text-2xl font-bold mb-6">
+            ฿159 / เดือน
+          </p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <Link
               to="/register"
@@ -375,7 +359,7 @@ export default function Index() {
               to="/pricing"
               className="inline-flex items-center justify-center px-8 py-3.5 rounded-full font-medium border border-white/15 text-[#94A3B8] hover:border-[#C6A96B]/40 hover:text-[#D9BC82] transition-all"
             >
-              ดูแผนทั้งหมด →
+              ดูรายละเอียดแผน →
             </Link>
           </div>
         </div>
@@ -387,18 +371,17 @@ export default function Index() {
           <div className="flex items-center gap-2">
             <span className="text-[#C6A96B] text-sm">✦</span>
             <span className="font-display text-[#F8F6F1] font-bold">PhopePhum</span>
-            <span className="text-[#94A3B8] text-xs ml-2">Living Wisdom OS</span>
+            <span className="text-[#94A3B8] text-xs ml-2">Wisdom Guidance OS</span>
           </div>
           <div className="flex items-center gap-6 text-xs text-[#94A3B8]">
-            <Link to="/pricing" className="hover:text-[#C6A96B] transition-colors">แผนสมาชิก</Link>
+            <Link to="/pricing" className="hover:text-[#C6A96B] transition-colors">ราคา</Link>
             <Link to="/login" className="hover:text-[#C6A96B] transition-colors">เข้าสู่ระบบ</Link>
             <Link to="/register" className="hover:text-[#C6A96B] transition-colors">สมัครสมาชิก</Link>
           </div>
-          <p className="text-[#94A3B8]/40 text-[10px]">© 2025 PhopePhum · ศาสตร์ไทยแท้ดั้งเดิม</p>
+          <p className="text-[#94A3B8]/40 text-[10px]">© 2025 PhopePhum · Wisdom Guidance OS</p>
         </div>
       </footer>
 
-      {/* ── Schema JSON-LD (SEO/AEO/GEO) ── */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(SCHEMA_MARKUP) }}
@@ -412,7 +395,6 @@ function LogoSymbol() {
   return (
     <div className="relative">
       <svg width="120" height="120" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Background glow */}
         <circle cx="50" cy="50" r="35" fill="url(#logo-glow)" opacity="0.4" />
         <defs>
           <radialGradient id="logo-glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(50 50) rotate(90) scale(35)">
@@ -420,29 +402,19 @@ function LogoSymbol() {
             <stop offset="1" stopColor="#C6A96B" stopOpacity="0" />
           </radialGradient>
         </defs>
-
-        {/* Outer burst */}
         {[0, 45, 90, 135].map((deg) => (
           <ellipse key={`o-${deg}`} cx="50" cy="50" rx="9" ry="32"
             stroke="#C6A96B" strokeWidth="0.8" fill="none" opacity="0.5"
             transform={`rotate(${deg} 50 50)`} />
         ))}
-
-        {/* Inner burst */}
         {[22.5, 67.5, 112.5, 157.5].map((deg) => (
           <ellipse key={`i-${deg}`} cx="50" cy="50" rx="6" ry="24"
             stroke="#6D8FC7" strokeWidth="0.6" fill="none" opacity="0.35"
             transform={`rotate(${deg} 50 50)`} />
         ))}
-
-        {/* Center circles */}
         <circle cx="50" cy="50" r="14" stroke="#C6A96B" strokeWidth="0.5" fill="rgba(2, 6, 23, 0.8)" />
         <circle cx="50" cy="50" r="12" stroke="#D9BC82" strokeWidth="1" fill="none" opacity="0.8" />
-        
-        {/* The 'P' */}
         <text x="50" y="58" font-family="Cinzel, serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#F8F6F1" className="drop-shadow-sm">P</text>
-
-        {/* Floating dots */}
         {([[50,38],[62,50],[50,62],[38,50]] as [number,number][]).map(([cx,cy],i) => (
           <circle key={i} cx={cx} cy={cy} r="1" fill="#C6A96B" opacity="0.6" />
         ))}
