@@ -165,6 +165,22 @@ const BASE4_POWER_NAMES: Record<number, string> = {
 const BHOP_8_NAMES = ["อาตมะ", "ทาสา", "สิทธิโชค", "โภคทรัพย์", "โจร", "อุบาทว์", "อุปถัมภ์"];
 const BHOP_9_NAMES = ["อัตตะ", "สักกะ", "ญาติ", "ธนัง", "เคหัง", "นาวัง", "ภริยัง"];
 
+// ── ลำดับดาวชั่วโมงแบบ Chaldean (ยามแต่ละช่วง) ──
+// อาทิตย์(1)→ศุกร์(6)→พุธ(4)→จันทร์(2)→เสาร์(7)→พฤหัส(5)→อังคาร(3)→อาทิตย์ ...
+const CHALDEAN_SEQ = [7, 5, 3, 1, 6, 4, 2] as const;
+
+// คำแนะนำการวางแผนต่อทักษาจร
+const TAKSA_PLAN_ADVICE: Record<string, { emoji: string; th: string; level: 0|1|2|3 }> = {
+  "บริวาร":   { emoji: "👥", th: "ประชุม บริหารทีม รับสั่งการ",            level: 2 },
+  "อายุ":     { emoji: "🧘", th: "ดูแลสุขภาพ พักฟื้น ออกกำลังกาย",        level: 2 },
+  "เดช":      { emoji: "⚡", th: "ตัดสินใจ เจรจาดีล ปิดสัญญา",            level: 3 },
+  "ศรี":      { emoji: "💰", th: "ลงทุน ทำธุรกรรม รับโชคลาภ",             level: 3 },
+  "มูละ":     { emoji: "🌱", th: "วางรากฐาน ริเริ่มโครงการระยะยาว",       level: 3 },
+  "อุตสาหะ":  { emoji: "💪", th: "ทำงานหนัก ขยัน ทุ่มเทความพยายาม",       level: 2 },
+  "มนตรี":    { emoji: "🤝", th: "ใช้เส้นสาย หาพันธมิตร เจรจาชั้นสูง",   level: 3 },
+  "กาลกิณี":  { emoji: "⚠️", th: "ระวัง! หลีกเลี่ยงการตัดสินใจสำคัญ",    level: 0 },
+};
+
 export default function KarnchataPage() {
   const { profile, initialResult, phopephumResult: initialPhopephum, thaiDateLabel, lunarInfo: initialLunar } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
@@ -376,6 +392,45 @@ export default function KarnchataPage() {
     return items;
   }, [hoverNum, activeResult]);
 
+  // ── ตารางยามรายวัน: 8 ยามกลางวัน + 8 ยามกลางคืน ──
+  const dayYamTable = useMemo(() => {
+    const dayStarN = (activeResult.dayStarNumber ?? 1) as number;
+    const chaldIdx = CHALDEAN_SEQ.indexOf(dayStarN as typeof CHALDEAN_SEQ[number]);
+    const dayStarPos8 = _SEQ.indexOf(dayStarN as typeof _SEQ[number]);
+
+    return Array.from({ length: 16 }, (_, i) => {
+      const cIdx = chaldIdx !== -1 ? (chaldIdx + i) % 7 : i % 7;
+      const star = CHALDEAN_SEQ[cIdx] as number;
+      const isDay = i < 8;
+      const slot = i % 8;
+      const hf = (isDay ? 6 : 18) + slot * 1.5;
+      const ef = hf + 1.5;
+      const fmt = (h: number, m: number) =>
+        `${String(Math.floor(h) % 24).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      const timeStr = `${fmt(hf, hf % 1 ? 30 : 0)}–${fmt(ef, ef % 1 ? 30 : 0)}`;
+
+      // ทักษาจร: relative to day star
+      const yamStarPos8 = _SEQ.indexOf(star as typeof _SEQ[number]);
+      const qualIdx = dayStarPos8 !== -1 && yamStarPos8 !== -1
+        ? (yamStarPos8 - dayStarPos8 + 8) % 8
+        : -1;
+      const quality = qualIdx !== -1 ? (_BHOP[qualIdx] ?? '') : '';
+
+      // ฐาน ๑ ภพ: find this star in chart row 0
+      const chart0 = (activeResult.chart[0] ?? []) as number[];
+      const b1Col = chart0.indexOf(star);
+      const b1Bhop = b1Col !== -1 ? (BHOP_NATAL_NAMES[0]?.[b1Col] ?? '') : '';
+
+      // Is this the current ยาม?
+      const bkkH = (time.getUTCHours() + 7) % 24;
+      const totalMin = bkkH * 60 + time.getUTCMinutes();
+      const slotStartMin = (isDay ? 6 : 18) * 60 + slot * 90;
+      const isCurrentYam = totalMin >= slotStartMin && totalMin < slotStartMin + 90;
+
+      return { yamNum: slot + 1, isDay, star, timeStr, quality, qualIdx, b1Bhop, b1Col, isCurrentYam };
+    });
+  }, [activeResult, time]);
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
 
@@ -494,6 +549,189 @@ export default function KarnchataPage() {
               </div>
             ))}
           </div>
+        </div>
+      </Card>
+
+      {/* ── ตารางกาลชะตารายวัน ── */}
+      <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8">
+        {/* Header */}
+        <div className="flex items-start gap-3 mb-6">
+          <span className="text-2xl shrink-0">📅</span>
+          <div className="flex-1">
+            <h3 className="text-base font-bold text-[#F8F6F1]">ตารางกาลชะตารายวัน</h3>
+            <p className="text-xs text-[#8A8070] mt-0.5">
+              ทักษาจร × ฐาน ๑ เพื่อการวางแผน &nbsp;•&nbsp; ดาวประจำวัน:&nbsp;
+              <span className="text-[#C6A96B] font-bold">{STAR_NAMES[activeResult.dayStarNumber as keyof typeof STAR_NAMES]} ({activeResult.dayStarNumber})</span>
+              &nbsp;= บริวาร
+            </p>
+          </div>
+        </div>
+
+        {/* ── ผังทักษาจรวัน: 8 ช่อง ── */}
+        <div className="bg-[#020617] border border-[#C6A96B]/12 rounded-2xl p-4 mb-6">
+          <p className="text-[10px] text-[#C6A96B]/70 font-bold uppercase tracking-wider mb-3">ผังทักษาจรวันนี้ — ตนุ ฐานวัน ฐาน ๑</p>
+          <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+            {(_BHOP as readonly string[]).map((bhop, idx) => {
+              const starNum = _SEQ[(_SEQ.indexOf(activeResult.dayStarNumber as typeof _SEQ[number]) + idx + 8) % 8] as number;
+              const starName = STAR_NAMES[starNum as keyof typeof STAR_NAMES] ?? '';
+              const isNowYam = starNum === activeResult.yamYaiNumber;
+              const advice = TAKSA_PLAN_ADVICE[bhop];
+              const isGood = (advice?.level ?? 0) >= 3;
+              const isBad = bhop === 'กาลกิณี';
+              return (
+                <div
+                  key={bhop}
+                  className={`rounded-xl p-2 border text-center transition-all ${
+                    isNowYam
+                      ? 'bg-[#C6A96B]/15 border-[#C6A96B]/50 shadow-[0_0_10px_rgba(198,169,107,0.15)]'
+                      : isBad
+                        ? 'bg-rose-950/15 border-rose-500/15'
+                        : isGood
+                          ? 'bg-emerald-950/10 border-emerald-500/12'
+                          : 'bg-[#0A1628] border-white/5'
+                  }`}
+                >
+                  <p className={`text-[9px] font-bold leading-tight mb-0.5 ${isBad ? 'text-rose-400' : isGood ? 'text-emerald-400' : isNowYam ? 'text-[#C6A96B]' : 'text-[#8A8070]'}`}>
+                    {bhop}
+                  </p>
+                  <p className={`text-sm font-display font-black leading-none ${isNowYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>
+                    {starNum}
+                  </p>
+                  <p className="text-[9px] text-[#8A8070] leading-tight mt-0.5 hidden sm:block">{starName}</p>
+                  {isNowYam && (
+                    <span className="text-[8px] text-[#C6A96B] font-bold mt-0.5 block">▲ ขณะนี้</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── ยามกลางวัน ── */}
+        <div className="mb-5">
+          <p className="text-xs font-bold text-amber-400/80 mb-3 flex items-center gap-2">
+            <span>☀️</span> ยามกลางวัน (06:00–18:00)
+          </p>
+          <div className="space-y-1.5">
+            {dayYamTable.filter(y => y.isDay).map(yam => {
+              const advice = TAKSA_PLAN_ADVICE[yam.quality];
+              const lvl = advice?.level ?? 1;
+              const isBad = yam.quality === 'กาลกิณี';
+              const isGreat = lvl >= 3;
+              return (
+                <div
+                  key={yam.yamNum}
+                  className={`flex items-center gap-2 sm:gap-3 px-3 py-2.5 rounded-xl border transition-all ${
+                    yam.isCurrentYam
+                      ? 'bg-[#C6A96B]/10 border-[#C6A96B]/45 shadow-[0_0_12px_rgba(198,169,107,0.10)] ring-1 ring-[#C6A96B]/20'
+                      : isBad
+                        ? 'bg-rose-950/12 border-rose-500/12'
+                        : isGreat
+                          ? 'bg-emerald-950/8 border-emerald-500/8'
+                          : 'bg-[#020617] border-white/5'
+                  }`}
+                >
+                  {/* เวลา */}
+                  <span className="text-[10px] text-[#8A8070] font-mono shrink-0 w-[82px] sm:w-[92px] tabular-nums">
+                    {yam.timeStr}
+                  </span>
+
+                  {/* ดาว */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-display font-bold shrink-0 ${
+                      yam.isCurrentYam ? 'bg-[#C6A96B] text-[#020617] shadow-[0_0_8px_rgba(198,169,107,0.5)]' : 'bg-[#0A1628] border border-white/10 text-[#F8F6F1]'
+                    }`}>
+                      {yam.star}
+                    </div>
+                    <span className={`text-xs font-bold shrink-0 hidden sm:block ${yam.isCurrentYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>
+                      {STAR_NAMES[yam.star as keyof typeof STAR_NAMES]}
+                    </span>
+                  </div>
+
+                  {/* ทักษา */}
+                  <span className={`text-xs font-bold shrink-0 w-16 ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]'}`}>
+                    {yam.quality || '—'}
+                  </span>
+
+                  {/* ฐาน ๑ ภพ */}
+                  <span className="text-[10px] text-[#8A8070]/70 shrink-0 w-14 hidden md:block">
+                    {yam.b1Bhop || '—'}
+                  </span>
+
+                  {/* คำแนะนำ */}
+                  <span className="text-[10px] text-[#D9CDB7]/70 flex-1 leading-snug hidden lg:block">
+                    {advice ? `${advice.emoji} ${advice.th}` : ''}
+                  </span>
+
+                  {/* สัญลักษณ์ */}
+                  <span className={`text-sm shrink-0 ml-auto ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]/40'}`}>
+                    {isBad ? '⚠' : isGreat ? '✦' : '·'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* ── ยามกลางคืน ── */}
+        <div>
+          <p className="text-xs font-bold text-indigo-400/80 mb-3 flex items-center gap-2">
+            <span>🌙</span> ยามกลางคืน (18:00–06:00)
+          </p>
+          <div className="space-y-1.5">
+            {dayYamTable.filter(y => !y.isDay).map(yam => {
+              const advice = TAKSA_PLAN_ADVICE[yam.quality];
+              const lvl = advice?.level ?? 1;
+              const isBad = yam.quality === 'กาลกิณี';
+              const isGreat = lvl >= 3;
+              return (
+                <div
+                  key={yam.yamNum}
+                  className={`flex items-center gap-2 sm:gap-3 px-3 py-2.5 rounded-xl border transition-all ${
+                    yam.isCurrentYam
+                      ? 'bg-[#C6A96B]/10 border-[#C6A96B]/45 shadow-[0_0_12px_rgba(198,169,107,0.10)] ring-1 ring-[#C6A96B]/20'
+                      : isBad
+                        ? 'bg-rose-950/12 border-rose-500/12'
+                        : isGreat
+                          ? 'bg-emerald-950/8 border-emerald-500/8'
+                          : 'bg-[#020617] border-white/5'
+                  }`}
+                >
+                  <span className="text-[10px] text-[#8A8070] font-mono shrink-0 w-[82px] sm:w-[92px] tabular-nums">
+                    {yam.timeStr}
+                  </span>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center text-xs font-display font-bold shrink-0 ${
+                      yam.isCurrentYam ? 'bg-[#C6A96B] text-[#020617] shadow-[0_0_8px_rgba(198,169,107,0.5)]' : 'bg-[#0A1628] border border-white/10 text-[#F8F6F1]'
+                    }`}>
+                      {yam.star}
+                    </div>
+                    <span className={`text-xs font-bold shrink-0 hidden sm:block ${yam.isCurrentYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>
+                      {STAR_NAMES[yam.star as keyof typeof STAR_NAMES]}
+                    </span>
+                  </div>
+                  <span className={`text-xs font-bold shrink-0 w-16 ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]'}`}>
+                    {yam.quality || '—'}
+                  </span>
+                  <span className="text-[10px] text-[#8A8070]/70 shrink-0 w-14 hidden md:block">{yam.b1Bhop || '—'}</span>
+                  <span className="text-[10px] text-[#D9CDB7]/70 flex-1 leading-snug hidden lg:block">
+                    {advice ? `${advice.emoji} ${advice.th}` : ''}
+                  </span>
+                  <span className={`text-sm shrink-0 ml-auto ${isBad ? 'text-rose-400' : isGreat ? 'text-emerald-400' : 'text-[#8A8070]/40'}`}>
+                    {isBad ? '⚠' : isGreat ? '✦' : '·'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-wrap gap-3 mt-5 pt-4 border-t border-white/5 text-[10px]">
+          <span className="flex items-center gap-1 text-emerald-400"><span className="font-bold">✦</span> เดช/ศรี/มูละ/มนตรี = ดีมาก</span>
+          <span className="flex items-center gap-1 text-[#8A8070]"><span>·</span> บริวาร/อายุ/อุตสาหะ = ปกติ</span>
+          <span className="flex items-center gap-1 text-rose-400"><span>⚠</span> กาลกิณี = ระวัง</span>
+          <span className="flex items-center gap-1 text-[#C6A96B]"><span>▲</span> ยามปัจจุบัน</span>
         </div>
       </Card>
 
