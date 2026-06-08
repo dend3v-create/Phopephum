@@ -48,14 +48,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const transitTime = String(formData.get("transitTime") || "12:00");
 
     if (!bDay || !bMonth || !bYear || !tDay || !tMonth || !tYear) {
-      return json({ error: "กรุณาระบุข้อมูลวันเดือนปีให้ครบถ้วน" }, { status: 400 });
+      return json({ result: null, error: "กรุณาระบุข้อมูลวันเดือนปีให้ครบถ้วน" }, { status: 400 });
     }
 
     const birthDateISO = buddhistPartsToISODate({ day: bDay, month: bMonth, yearBE: bYear });
     const transitDateISO = buddhistPartsToISODate({ day: tDay, month: tMonth, yearBE: tYear });
 
     if (!birthDateISO || !transitDateISO) {
-      return json({ error: "รูปแบบวันที่ไม่ถูกต้อง" }, { status: 400 });
+      return json({ result: null, error: "รูปแบบวันที่ไม่ถูกต้อง" }, { status: 400 });
     }
 
     const [ty, tm, td] = transitDateISO.split("-").map(Number);
@@ -63,10 +63,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
     // Construct local Date for the check date
     const checkDate = new Date(ty, tm - 1, td, th, tmin, 0);
 
+    const birthPlace = String(formData.get("birthPlace") || "กรุงเทพมหานคร");
+
     const result = await calculatePhopephum({
       birthDate: birthDateISO,
       birthTime,
-      birthPlace: "กรุงเทพมหานคร",
+      birthPlace,
     }, checkDate);
 
     return json({
@@ -76,7 +78,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   } catch (err: any) {
     console.error("[horoscope-baseline] Action Error:", err);
-    return json({ error: err.message || "เกิดข้อผิดพลาดในการคำนวณ" }, { status: 500 });
+    return json({ result: null, error: err.message || "เกิดข้อผิดพลาดในการคำนวณ" }, { status: 500 });
   }
 }
 
@@ -90,6 +92,7 @@ export default function HoroscopeBaselinePage() {
   const [birthMonth, setBirthMonth] = useState(profile?.birth_date ? Number(profile.birth_date.slice(5, 7)) : 1);
   const [birthDay, setBirthDay] = useState(profile?.birth_date ? Number(profile.birth_date.slice(8, 10)) : 1);
   const [birthTime, setBirthTime] = useState(profile?.birth_time || "12:00");
+  const [birthPlace, setBirthPlace] = useState(profile?.birth_place || "");
 
   const [transitYear, setTransitYear] = useState(todayParts.yearBE);
   const [transitMonth, setTransitMonth] = useState(todayParts.month);
@@ -126,6 +129,10 @@ export default function HoroscopeBaselinePage() {
               <div>
                 <label className="text-xs text-[#8A8070] mb-1 block">เวลาเกิด</label>
                 <Input name="birthTime" type="time" value={birthTime} onChange={(e) => setBirthTime(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-xs text-[#8A8070] mb-1 block">จังหวัดที่เกิด</label>
+                <Input name="birthPlace" value={birthPlace} onChange={(e) => setBirthPlace(e.target.value)} placeholder="เช่น กรุงเทพมหานคร" />
               </div>
             </div>
 
