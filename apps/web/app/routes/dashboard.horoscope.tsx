@@ -816,6 +816,83 @@ export default function HoroscopePage() {
       {activeTab === "chart" && activeResult?.matrix && (
         <div className="space-y-6 animate-in fade-in duration-300">
 
+          {/* ── Chart Display Config (ด้านบนผัง) ── */}
+          <Card className="border-[#C9A96E]/20 bg-slate-950/40 backdrop-blur-md p-4 space-y-3">
+            <div>
+              <h3 className="text-xs font-bold uppercase tracking-widest text-[#C9A96E] flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C9A96E]" />
+                ตัวเลือกการแสดงผลสัญลักษณ์ผังดวง (Chart Display Config)
+              </h3>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 text-[11px]">
+              <button
+                type="button"
+                onClick={() => setShowTaksaMahaBadges(!showTaksaMahaBadges)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showTaksaMahaBadges ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold text-[#C9A96E] bg-white/5 px-1 py-[0.5px] rounded border border-white/10 leading-none">ท/ม</span>
+                  <span>ทักษา (กำเนิด/จร)</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showTaksaMahaBadges ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowVayaJorn(!showVayaJorn)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showVayaJorn ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse" />
+                  <span>วัยจร</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showVayaJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowYearlyJorn(!showYearlyJorn)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showYearlyJorn ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#4B6FAE]" />
+                  <span>ปีจร</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showYearlyJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAgeRange(!showAgeRange)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showAgeRange ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-rose-500/50" />
+                  <span>ช่วงอายุ (วัยจร)</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showAgeRange ? "bg-rose-500 shadow-[0_0_8px_#f43f5e]" : "bg-white/10"}`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowHouseNames(!showHouseNames)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showHouseNames ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-[#C6A96B]/60" />
+                  <span>ชื่อภพเรือน (35 ภพ)</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showHouseNames ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
+              </button>
+            </div>
+          </Card>
+
           {/* ผังดวงจักรพรรดิเลข 7 ตัว 9 ฐาน */}
           <FateMatrixPanel
             matrix={activeResult.matrix}
@@ -845,7 +922,73 @@ export default function HoroscopePage() {
             showHouseNames={showHouseNames}
             showTaksaMahaBadges={showTaksaMahaBadges}
           />
-          
+
+          {/* ── Symbol Legend: ทักษาจร & มหาภูติจร ใต้ผังดวง ── */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* ทักษาจร — โทนสีฟ้า/sky */}
+            <div className="rounded-2xl border border-sky-500/25 bg-gradient-to-br from-sky-950/25 to-slate-950/50 p-4 space-y-2.5 backdrop-blur-sm">
+              <div className="flex items-center gap-2 pb-2 border-b border-sky-500/15">
+                <span className="w-2 h-2 rounded-full bg-sky-400" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-sky-400">ปัจจัยภายนอก · ทักษาจรประจำปี</span>
+              </div>
+              <div className="space-y-1">
+                {([
+                  { name: "บริวาร", desc: "บุคคลรอบข้าง / ผู้ช่วยเหลือ", cls: "border-sky-500/15 text-sky-300 bg-sky-950/20" },
+                  { name: "อายุ",   desc: "สุขภาพ / ความยืนยาว",         cls: "border-sky-500/15 text-sky-300 bg-sky-950/20" },
+                  { name: "เดช",   desc: "เกียรติยศ / อำนาจ",             cls: "border-white/15 text-white bg-white/5" },
+                  { name: "ศรี",   desc: "โอกาส / โชคลาภ",               cls: "border-emerald-500/30 text-emerald-400 bg-emerald-950/20" },
+                  { name: "มูละ",  desc: "ทรัพย์สิน / ฐานราก",            cls: "border-sky-500/15 text-sky-300 bg-sky-950/20" },
+                  { name: "อุตสาหะ", desc: "ความพยายาม / การงาน",        cls: "border-sky-500/15 text-sky-300 bg-sky-950/20" },
+                  { name: "มนตรี", desc: "ผู้อุปถัมภ์ / สนับสนุน",        cls: "border-cyan-500/30 text-cyan-400 bg-cyan-950/20" },
+                  { name: "กาลกิณี", desc: "อุปสรรค / ควรระวัง",          cls: "border-rose-500/30 text-rose-400 bg-rose-950/20" },
+                ] as { name: string; desc: string; cls: string }[]).map(({ name, desc, cls }) => {
+                  const starNum = taksaTransit?.map
+                    ? (Object.entries(taksaTransit.map).find(([_, b]) => b === name)?.[0] ?? null)
+                    : null;
+                  return (
+                    <div key={name} className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border ${cls}`}>
+                      <span className="flex items-center gap-2 min-w-0">
+                        <span className="text-[10px] font-bold shrink-0">{name}จร</span>
+                        <span className="text-[9px] text-[#8A8070] truncate">{desc}</span>
+                      </span>
+                      {starNum && <span className="text-[9px] font-bold text-[#C9A96E] shrink-0">ดาว {starNum}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* มหาภูติจร — โทนสีม่วง/violet */}
+            <div className="rounded-2xl border border-violet-500/25 bg-gradient-to-br from-violet-950/25 to-slate-950/50 p-4 space-y-2.5 backdrop-blur-sm">
+              <div className="flex items-center gap-2 pb-2 border-b border-violet-500/15">
+                <span className="w-2 h-2 rounded-full bg-violet-400" />
+                <span className="text-[10px] font-bold uppercase tracking-widest text-violet-400">ปัจจัยภายใน · มหาภูติจรประจำปี</span>
+              </div>
+              <div className="space-y-1">
+                {([
+                  { name: "อธิบดี",     desc: "ความเป็นใหญ่ / ผู้นำ",           cls: "border-violet-500/20 text-violet-300 bg-violet-950/20" },
+                  { name: "ราชา",       desc: "ราชศักดิ์ / เกียรติยศ",           cls: "border-violet-500/20 text-violet-300 bg-violet-950/20" },
+                  { name: "ธงชัย",     desc: "ชัยชนะ / ความสำเร็จ",            cls: "border-emerald-500/30 text-emerald-400 bg-emerald-950/20" },
+                  { name: "ขุมทรัพย์", desc: "โชคลาภ / ทรัพย์สมบัติ",          cls: "border-emerald-500/30 text-emerald-400 bg-emerald-950/20" },
+                  { name: "มรณะ",      desc: "อุปสรรค / การสูญเสีย",           cls: "border-amber-500/30 text-amber-400 bg-amber-950/20" },
+                  { name: "อริ",        desc: "ศัตรู / ความขัดแย้ง",            cls: "border-amber-500/30 text-amber-400 bg-amber-950/20" },
+                  { name: "โลกาวินาศ", desc: "ความแปรปรวน / ความเครียดภายใน", cls: "border-amber-500/40 text-amber-300 bg-amber-950/25" },
+                ] as { name: string; desc: string; cls: string }[]).map(({ name, desc, cls }) => {
+                  const starNum = mahaTransit?.map?.[name] ?? null;
+                  return (
+                    <div key={name} className={`flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl border ${cls}`}>
+                      <span className="flex items-center gap-2 min-w-0">
+                        <span className="text-[10px] font-bold shrink-0">{name}จร</span>
+                        <span className="text-[9px] text-[#8A8070] truncate">{desc}</span>
+                      </span>
+                      {starNum && <span className="text-[9px] font-bold text-[#C9A96E] shrink-0">ดาว {starNum}</span>}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
           {/* ── ลัคนาและฤกษ์เกิด (Birth Ascendant & Nakshatra) ── */}
           {activeResult?.phopephumResult?.lagna && activeResult?.lagnaNakshatra && (
             <Card className="border-[#C6A96B]/20 bg-gradient-to-br from-[#0A2240]/80 to-[#020617]/90 backdrop-blur-xl p-5 relative overflow-hidden shadow-2xl rounded-2xl animate-in fade-in slide-in-from-bottom-4">
@@ -1044,86 +1187,6 @@ export default function HoroscopePage() {
                   })}
                 </div>
               </div>
-            </div>
-          </Card>
-
-          {/* แผงแสดงสัญลักษณ์ผังดวง Config */}
-          <Card className="border-[#C9A96E]/20 bg-slate-950/40 backdrop-blur-md p-4 space-y-3">
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-widest text-[#C9A96E] flex items-center gap-2">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C9A96E]" />
-                ตัวเลือกการแสดงผลสัญลักษณ์ผังดวง (Chart Display Config)
-              </h3>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-2 text-[11px]">
-              <button
-                type="button"
-                onClick={() => setShowTaksaMahaBadges(!showTaksaMahaBadges)}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showTaksaMahaBadges ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-bold text-[#C9A96E] bg-white/5 px-1 py-[0.5px] rounded border border-white/10 leading-none">ท/ม</span>
-                  <span>ทักษา (กำเนิด/จร)</span>
-                </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showTaksaMahaBadges ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowVayaJorn(!showVayaJorn)}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showVayaJorn ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse" />
-                  <span>วัยจร</span>
-                </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showVayaJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowYearlyJorn(!showYearlyJorn)}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showYearlyJorn ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#4B6FAE]" />
-                  <span>ปีจร</span>
-                </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showYearlyJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
-              </button>
-              
-              <button
-                type="button"
-                onClick={() => setShowAgeRange(!showAgeRange)}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showAgeRange ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500/50" />
-                  <span>ช่วงอายุ (วัยจร)</span>
-                </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showAgeRange ? "bg-rose-500 shadow-[0_0_8px_#f43f5e]" : "bg-white/10"}`} />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setShowHouseNames(!showHouseNames)}
-                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showHouseNames ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
-                }`}
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-[#C6A96B]/60" />
-                  <span>ชื่อภพเรือน (35 ภพ)</span>
-                </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showHouseNames ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
-              </button>
             </div>
           </Card>
 
