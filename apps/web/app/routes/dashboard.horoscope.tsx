@@ -512,6 +512,21 @@ export default function HoroscopePage() {
   return (
     <div className="space-y-6 max-w-5xl pb-20 animate-fade-up">
 
+      {/* ── เมนูหลัก (Page Header) ── */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-2">
+        <div>
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase font-bold">
+            ดวงดีมีชัย · ตรวจดวงชะตา
+          </p>
+          <h1 className="font-display text-4xl font-extrabold text-[#F8F6F1] tracking-tight mt-1">
+            ผังดวงจักรพรรดิ
+          </h1>
+          <p className="text-[#8A8070] text-xs font-medium mt-1 font-sans">
+            {formattedTransitDate}
+          </p>
+        </div>
+      </div>
+
       {/* ── Sub-menu Card Navigation — บนสุด ── */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
         {[
