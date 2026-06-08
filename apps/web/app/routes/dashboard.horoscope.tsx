@@ -2102,7 +2102,44 @@ function FateMatrixPanel({
           </tbody>
         </table>
       </div>
-      
+
+      {/* ── ลัคนาเกิด / ลัคนาจร Detail Panel ── */}
+      {phopephumResult?.lagna && (
+        <div className="bg-[#020617]/60 border-t border-[#C6A96B]/15 px-5 py-3 space-y-2 text-[11px]">
+          {/* ลัคนาเกิด */}
+          {showNatalLagna && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="px-1.5 py-[1px] rounded-full text-[8px] font-bold bg-[#C6A96B] text-[#020617] leading-none select-none shrink-0">ล</span>
+              <span className="text-[#C6A96B] font-semibold shrink-0">ลัคนาเกิด</span>
+              <span className="text-[#8A8070]">ยามที่</span>
+              <span className="text-[#F8F6F1] font-bold">{phopephumResult.lagna.yamYaiNumber ?? "—"}</span>
+              <span className="text-[#8A8070]">ดาว</span>
+              <span className="text-[#F8F6F1] font-bold">{STAR_NAMES[phopephumResult.lagna.star as 1|2|3|4|5|6|7] ?? "—"}</span>
+              <span className="text-[#8A8070]">{phopephumResult.lagna.subPeriod === 'early' ? 'ยามต้น' : phopephumResult.lagna.subPeriod === 'middle' ? 'ยามกลาง' : 'ยามปลาย'}</span>
+              <span className="text-[#8A8070]">ฤกษ์</span>
+              <span className="text-[#F8F6F1] font-bold">{phopephumResult.lagna.reksName ?? "—"}</span>
+              <span className="text-[#8A8070]">→</span>
+              <span className="text-[#C6A96B] font-bold">ฐาน {phopephumResult.lagna.row}</span>
+              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.lagna.houseName}</span>
+            </div>
+          )}
+          {/* ลัคนาจร */}
+          {showTransitLagna && phopephumResult?.lagnaTransit && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+              <span className="px-1 py-[1px] rounded-full text-[8px] font-bold bg-[#4B6FAE] text-[#F8F6F1] leading-none select-none shrink-0">ลจ</span>
+              <span className="text-[#4B6FAE] font-semibold shrink-0">ลัคนาจร</span>
+              <span className="text-[#8A8070]">อายุย่าง</span>
+              <span className="text-[#F8F6F1] font-bold">{phopephumResult.taksaTransit?.ageYang ?? "—"} ปี</span>
+              <span className="text-[#8A8070]">นับจาก</span>
+              <span className="text-[#C6A96B]">ฐาน {phopephumResult.lagna.row} {phopephumResult.lagna.houseName}</span>
+              <span className="text-[#8A8070]">→</span>
+              <span className="text-[#4B6FAE] font-bold">ฐาน {phopephumResult.lagnaTransit.row}</span>
+              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.lagnaTransit.houseName}</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Legend Block */}
       {taksaMaha && (
         <div className="bg-[#0f172a]/50 p-4 border-t border-[#D9BC82]/10 text-[10px] space-y-2 text-[#8A8070]">

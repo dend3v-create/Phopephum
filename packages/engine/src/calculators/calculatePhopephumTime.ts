@@ -93,7 +93,7 @@ export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: 
   // ยามปลาย (end) -> ฐาน 3 (Row 2)
   const row = time.subPeriod === 'early' ? 0 : (time.subPeriod === 'middle' ? 1 : 2);
 
-  // คำนวณฤกษ์ 10 นาที (0-8) และหาดาวประจำฤกษ์
+  // คำนวณฤกษ์ 10 นาที (0-8) — ใช้สำหรับแสดงชื่อฤกษ์เท่านั้น
   const totalMin = date.getHours() * 60 + date.getMinutes();
   let adjusted = (totalMin - 360 + 1440) % 1440;
   const isDay = adjusted < 720;
@@ -102,21 +102,20 @@ export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: 
   const reksIndex = Math.floor(minInYam / 10);
   const reksName = REKS_NAMES[reksIndex] || "—";
 
-  // ดาวประจำฤกษ์ = เริ่มจาก yamYai แล้วเดิน Chaldean reksIndex ก้าว
-  const yamYaiIdx = YAM_ORDER.indexOf(time.yamYai);
-  const reksStar = YAM_ORDER[(yamYaiIdx + reksIndex) % 7];
-
-  // column = ตำแหน่งที่ดาวประจำฤกษ์ปรากฏในแถวนั้น
-  const col = matrix[row].indexOf(reksStar);
+  // column = ตำแหน่งที่ดาวยาม (yamYai) ปรากฏในแถวนั้น
+  // ตามหลักการ: "หาดาวยามในฐาน" ใช้ดาวประจำยาม 90 นาที เป็นตัวกำหนดคอลัมน์
+  const col = matrix[row].indexOf(time.yamYai);
   const safeCol = col === -1 ? 0 : col;
 
   return {
     row: row + 1,
     col: safeCol + 1,
     houseName: PHOPEPHUM_HOUSES[row][safeCol],
-    star: reksStar,
+    star: time.yamYai,
     reksName,
-    reksIndex
+    reksIndex,
+    yamYaiNumber: time.yamYaiNumber,
+    subPeriod: time.subPeriod,
   };
 }
 
