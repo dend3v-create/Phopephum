@@ -78,8 +78,7 @@ export async function POST(req: NextRequest) {
         rules:      rules.slice(0, 5),
         // ─── Lunar layer ─────────────────────────────────────────────────
         lunar:       result.lunar,
-        sevenBase:   result.sevenBase,
-        nineBase:    result.nineBase,
+        matrix:      result.matrix,
         ageCycle:    result.ageCycle,
         emperorChart: result.emperorChart,
         currentTaksa8: result.currentTaksa8,

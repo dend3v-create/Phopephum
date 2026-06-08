@@ -198,9 +198,9 @@ interface NavTab {
 }
 
 const NAV_TABS: NavTab[] = [
-  { id: "horoscope", label: "ดวงชะตา",   icon: "◎",  href: "/dashboard" },
+  { id: "horoscope", label: "ผูกดวง",   icon: "◎",  href: "/dashboard/horoscope" },
   { id: "planner",   label: "แพลนเนอร์", icon: "📅", href: "/dashboard/planner" },
-  { id: "ai-coach",  label: "พยากรณ์พื้นดวง",   icon: "✦",  href: "/dashboard/coach" },
+  { id: "ai-coach",  label: "พยากรณ์",   icon: "✦",  href: "/dashboard/coach" },
   { id: "yam",    label: "ยามปัจจุบัน",    icon: "⌚",  href: "/dashboard/yam" },
 ];
 
@@ -210,10 +210,11 @@ function BottomNav() {
 
   // หา active tab จาก pathname จริง
   const active = React.useMemo<TabId>(() => {
-    if (pathname === "/dashboard") return "horoscope";
+    if (pathname.startsWith("/dashboard/horoscope")) return "horoscope";
     if (pathname.startsWith("/dashboard/planner")) return "planner";
     if (pathname.startsWith("/dashboard/coach")) return "ai-coach";
     if (pathname.startsWith("/dashboard/yam")) return "yam";
+    if (pathname === "/dashboard") return "horoscope";
     return "horoscope";
   }, [pathname]);
 
