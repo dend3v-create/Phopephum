@@ -512,7 +512,7 @@ export default function HoroscopePage() {
   const placeholderMatrix = Array(9).fill(0).map(() => Array(7).fill(0));
 
   return (
-    <div className="space-y-6 max-w-2xl pb-20 animate-fade-up">
+    <div className="space-y-6 max-w-2xl pb-20 animate-fade-up w-full" style={{ overflowX: "hidden" }}>
 
       {/* ── เมนูหลัก (Page Header) ── */}
       <div>
@@ -1942,8 +1942,8 @@ function FateMatrixPanel({
         <p className="text-[#D9BC82] text-sm sm:text-lg font-bold uppercase tracking-widest">ผังดวงเลข 7 ตัว 9 ฐาน (35 ภพเรือนสมบูรณ์)</p>
         <span className="text-xs sm:text-sm text-[#8A8070]">แตะตัวเลขเพื่อดูความเชื่อมโยง</span>
       </div>
-      <div className="overflow-x-auto p-2 sm:p-6 bg-slate-900/30">
-        <table className="w-full border-collapse">
+      <div className="overflow-x-auto p-1 sm:p-6 bg-slate-900/30">
+        <table className="w-full border-collapse table-fixed">
           <tbody>
             {matrix.map((row, rIdx) => {
               const isBase4 = rIdx === 3;
@@ -1957,7 +1957,7 @@ function FateMatrixPanel({
                       : "hover:bg-white/5"
                   }`}
                 >
-                  <td className="py-1 pr-1 sm:pr-4 text-left whitespace-nowrap min-w-[36px] sm:min-w-[80px]">
+                  <td className="py-1 pr-1 sm:pr-4 text-left whitespace-nowrap w-[32px] sm:w-[80px]">
                     <p className={`text-xs sm:text-sm font-bold ${isBase4 ? "text-[#8AA7DF]" : "text-[#F8F6F1]"}`}>{ROW_META[rIdx].label}</p>
                   </td>
                   {row.map((num, cIdx) => {
@@ -2029,7 +2029,7 @@ function FateMatrixPanel({
                       phopephumResult.dailyJorn.col === (cIdx + 1);
 
                     return (
-                      <td key={cIdx} className="p-0.5 sm:p-2 min-w-[40px] sm:min-w-[60px]">
+                      <td key={cIdx} className="p-0.5 sm:p-2 w-[40px] sm:w-[60px]">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -2039,7 +2039,7 @@ function FateMatrixPanel({
                           className="flex flex-col items-center gap-1 sm:gap-1.5 w-full focus:outline-none relative group/cell"
                         >
                           <div className="relative">
-                            <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-sans text-[18px] sm:text-[22px] border transition-all duration-300 transform
+                            <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-sans text-[16px] sm:text-[22px] border transition-all duration-300 transform
                               ${isHighlighted ? "scale-125 z-10 shadow-[0_0_15px_rgba(201,169,110,0.6)] border-[#C9A96E]" : ""}
                               ${isDimmed ? "opacity-40 scale-90 border-white/5 saturate-50" : ""}
                               ${isGlowFiltered ? "animate-pulse ring-2 ring-[#C9A96E] ring-offset-2 ring-offset-slate-950" : ""}
