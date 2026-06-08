@@ -823,63 +823,83 @@ export default function HoroscopePage() {
               <div className="absolute inset-0 bg-gradient-to-br from-[#C6A96B]/5 via-transparent to-[#4B6FAE]/5 pointer-events-none" />
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-px bg-gradient-to-r from-transparent via-[#C6A96B]/40 to-transparent" />
 
-              <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                {/* ชื่อ + วันจร */}
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#C6A96B]/70">เจ้าชะตา</span>
-                  <span className="font-display text-xl font-extrabold text-[#F8F6F1] leading-tight">
-                    {profile?.display_name ?? "ไม่ระบุชื่อ"}
-                  </span>
+              <div className="relative z-10 space-y-3">
+                {/* แถวบน: จันทรคติจร (วันนี้) + วันที่จร */}
+                <div className="flex flex-wrap items-center gap-2 pb-2 border-b border-[#C6A96B]/15">
+                  {activeResult.phopephumResult?.transitLunar?.moonPhase && (
+                    <span className="text-[9px] font-bold bg-[#C6A96B]/10 border border-[#C6A96B]/25 text-[#C6A96B] px-2.5 py-1 rounded-full">
+                      {activeResult.phopephumResult.transitLunar.moonPhase}
+                      {activeResult.phopephumResult.transitLunar.lunarMonthName
+                        ? ` เดือน${activeResult.phopephumResult.transitLunar.lunarMonthName}`
+                        : activeResult.phopephumResult.transitLunar.lunarMonth
+                        ? ` เดือน${activeResult.phopephumResult.transitLunar.lunarMonth}`
+                        : ""}
+                      {activeResult.phopephumResult.transitLunar.zodiacName
+                        ? ` ปี${activeResult.phopephumResult.transitLunar.zodiacName}`
+                        : ""}
+                    </span>
+                  )}
                   <span className="text-[10px] text-[#8A8070]">{formattedTransitDate}</span>
                 </div>
 
-                {/* ข้อมูลเกิด */}
-                <div className="flex flex-wrap gap-x-4 gap-y-1.5 md:justify-end text-[10px]">
-                  {/* วันเกิด */}
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-[#C6A96B]">☀</span>
-                    <span className="text-[#8A8070]">วันเกิด</span>
-                    <span className="text-[#F8F6F1] font-semibold">
-                      {(() => {
-                        const d = new Date(activeResult.birthDate);
-                        return d.toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" });
-                      })()}
+                {/* แถวกลาง: ชื่อเจ้าชะตา + ข้อมูลเกิด */}
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
+                  {/* ชื่อ */}
+                  <div className="flex flex-col gap-0.5">
+                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#C6A96B]/70">เจ้าชะตา</span>
+                    <span className="font-display text-xl font-extrabold text-[#F8F6F1] leading-tight">
+                      {profile?.display_name ?? "ไม่ระบุชื่อ"}
                     </span>
                   </div>
-                  {/* เวลาเกิด */}
-                  {activeResult.phopephumResult?.input_data?.birthTime && (
+
+                  {/* ข้อมูลเกิด */}
+                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 md:justify-end text-[10px]">
+                    {/* วันเกิด */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[#C6A96B]">◷</span>
-                      <span className="text-[#8A8070]">เวลาเกิด</span>
-                      <span className="text-[#F8F6F1] font-semibold">{activeResult.phopephumResult.input_data.birthTime} น.</span>
-                    </div>
-                  )}
-                  {/* จังหวัดเกิด */}
-                  {profile?.birth_place && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[#C6A96B]">◎</span>
-                      <span className="text-[#8A8070]">จังหวัด</span>
-                      <span className="text-[#F8F6F1] font-semibold">{profile.birth_place}</span>
-                    </div>
-                  )}
-                  {/* อายุย่าง */}
-                  {currentAge > 0 && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[#C6A96B]">◈</span>
-                      <span className="text-[#8A8070]">อายุย่าง</span>
-                      <span className="text-[#C6A96B] font-extrabold font-display">{currentAge} ปี</span>
-                    </div>
-                  )}
-                  {/* วันจันทรคติเกิด */}
-                  {lunar?.dayName && (
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[#C6A96B]">☽</span>
-                      <span className="text-[#8A8070]">จันทรคติเกิด</span>
+                      <span className="text-[#C6A96B]">#</span>
+                      <span className="text-[#8A8070]">วันเกิด</span>
                       <span className="text-[#F8F6F1] font-semibold">
-                        วัน{lunar.dayName} เดือน{lunar.lunarMonthName ?? lunar.lunarMonth} ปี{lunar.zodiacName ?? ""}
+                        {(() => {
+                          const d = new Date(activeResult.birthDate);
+                          return d.toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" });
+                        })()}
                       </span>
                     </div>
-                  )}
+                    {/* เวลาเกิด */}
+                    {activeResult.phopephumResult?.input_data?.birthTime && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[#C6A96B]">◷</span>
+                        <span className="text-[#8A8070]">เวลาเกิด</span>
+                        <span className="text-[#F8F6F1] font-semibold">{activeResult.phopephumResult.input_data.birthTime} น.</span>
+                      </div>
+                    )}
+                    {/* จังหวัดเกิด */}
+                    {profile?.birth_place && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[#C6A96B]">@</span>
+                        <span className="text-[#8A8070]">จังหวัด</span>
+                        <span className="text-[#F8F6F1] font-semibold">{profile.birth_place}</span>
+                      </div>
+                    )}
+                    {/* อายุย่าง */}
+                    {currentAge > 0 && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[#C6A96B]">·</span>
+                        <span className="text-[#8A8070]">อายุย่าง</span>
+                        <span className="text-[#C6A96B] font-extrabold font-display">{currentAge} ปี</span>
+                      </div>
+                    )}
+                    {/* วันจันทรคติเกิด */}
+                    {lunar?.dayName && (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[#C6A96B]">☽</span>
+                        <span className="text-[#8A8070]">จันทรคติเกิด</span>
+                        <span className="text-[#F8F6F1] font-semibold">
+                          วัน{lunar.dayName} เดือน{lunar.lunarMonthName ?? lunar.lunarMonth} ปี{lunar.zodiacName ?? ""}
+                        </span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
