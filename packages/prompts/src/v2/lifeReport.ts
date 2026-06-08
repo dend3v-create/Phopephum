@@ -4,9 +4,9 @@ import { buildAtthakarnContext, ATTHAKARN_CORE_PRINCIPLES, type AtthakarnBirthYa
 export const PROMPT_VERSION = "v6.0.0"; // Star Tracing Wisdom Guidance Architecture
 
 const HOUSE_ROWS = [
-  ['อัตตา', 'ตนุ',    'หินะ',    'ปิตา',   'มาตา', 'โภคา', 'มรณะ'],
-  ['ตนุ',   'กดุมพะ', 'สหัชชะ',  'พันธุ',  'ปุตตะ','อริ',  'ปัตนิ'],
-  ['ศุภะ',  'กัมมะ',  'ลาภะ',    'พยายะ',  'ทาสา', 'ทาสี', 'ทาสี'],
+  ["อัตตะ", "หินะ", "ธนัง", "ปิตา", "มาตา", "โภคา", "มัชฌิมา"],
+  ["ตนุ", "กฎุมภะ", "สหัชชะ", "พันธุ", "ปุตตะ", "อริ", "ปัตนิ"],
+  ["มรณะ", "ศุภะ", "กัมมะ", "ลาภะ", "พยายะ", "ทาสา", "ทาสี"],
 ];
 
 const PLANET_NAMES_MAP: Record<number, string> = {
