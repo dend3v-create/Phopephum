@@ -1991,7 +1991,8 @@ function FateMatrixPanel({
                     const actualNum = isBase4 ? getStarFromBase4(num) : (num % 7 || 7);
                     
                     const isBaseHighlight = activeNum !== null && (isBase4 ? matrix[2]?.[cIdx] === activeNum : (actualNum === activeNum && isTargetRow));
-                    const isGlowFiltered = isFiltering && highlightedStars.has(isBase4 ? matrix[2]?.[cIdx] : actualNum);
+                    // isGlowFiltered: จำกัดเฉพาะฐาน 1-3-4-8-9 (ไม่รวมฐาน 5-6-7)
+                    const isGlowFiltered = isFiltering && (isTargetRow || isBase4) && highlightedStars.has(isBase4 ? matrix[2]?.[cIdx] : actualNum);
                     const isHighlighted = isBaseHighlight || isGlowFiltered;
                     const isDimmed = isFiltering && !isGlowFiltered;
                     
