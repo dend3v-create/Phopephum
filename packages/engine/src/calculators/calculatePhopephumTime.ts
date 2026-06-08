@@ -70,24 +70,66 @@ export function calculateTimeEngine(date: Date): TimeEngineResult {
   };
 }
 
+// ฤกษ์ 9 หมวด (10 นาทีต่อฤกษ์ ใน 1 ยามใหญ่ 90 นาที)
+export const REKS_NAMES = [
+  "ทาสา", "ทาสี", "กาลกิณี", "สิทธิโชค", "มหาอุจ", "โโฬส", "ทลัทบท", "ธนบดินทร์", "นักพรต"
+];
+
 /**
  * คำนวณลัคนาเกิด (Birth Ascendant)
  */
-export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: number, col: number, houseName: string, star: number } {
+export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: number, col: number, houseName: string, star: number, reksName: string, reksIndex: number } {
   const time = calculateTimeEngine(date);
   const starToFind = time.yamYai;
   
   // ช่วงยาม 30 นาที บอกฐาน (row)
+  // ยามต้น (early) -> ฐาน 1 (Row 0)
+  // ยามกลาง (middle) -> ฐาน 2 (Row 1)
+  // ยามปลาย (end) -> ฐาน 3 (Row 2)
   const row = time.subPeriod === 'early' ? 0 : (time.subPeriod === 'middle' ? 1 : 2);
   
-  // หาว่าดาวดวงนั้นอยู่ใน column ไหนของแถวนั้น
+  // หาว่าดาวประจำยามใหญ่อยู่ใน column ไหนของแถวนั้น
   const col = matrix[row].indexOf(starToFind);
+  const safeCol = col === -1 ? 0 : col;
+  
+  // คำนวณฤกษ์ 10 นาที (0-8)
+  const totalMin = date.getHours() * 60 + date.getMinutes();
+  let adjusted = (totalMin - 360 + 1440) % 1440;
+  const isDay = adjusted < 720;
+  const periodMin = isDay ? adjusted : adjusted - 720;
+  const minInYam = periodMin % 90;
+  const reksIndex = Math.floor(minInYam / 10);
+  const reksName = REKS_NAMES[reksIndex] || "—";
+  
+  return {
+    row: row + 1,
+    col: safeCol + 1,
+    houseName: PHOPEPHUM_HOUSES[row][safeCol],
+    star: starToFind,
+    reksName,
+    reksIndex
+  };
+}
+
+/**
+ * คำนวณลัคนาจร (Progressed Ascendant)
+ * นับจากลัคนาเกิดไปตามเข็มนาฬิกา (หรือตามแนวนอน) ทีละภพตามอายุย่าง
+ */
+export function calculateLagnaJorn(matrix: FateMatrix, natalLagna: { row: number, col: number }, ageYang: number): { row: number, col: number, houseName: string, star: number } {
+  // แปลงตำแหน่งลัคนาเกิดเป็น index 0-20 (R1, R2, R3)
+  const natalIdx = (natalLagna.row - 1) * 7 + (natalLagna.col - 1);
+  
+  // คำนวณตำแหน่งจรตามอายุย่าง (นับจากตำแหน่งเกิดเป็นปีที่ 1)
+  const transitIdx = ((natalIdx + (ageYang - 1)) % 21);
+  
+  const row = Math.floor(transitIdx / 7);
+  const col = transitIdx % 7;
   
   return {
     row: row + 1,
     col: col + 1,
     houseName: PHOPEPHUM_HOUSES[row][col],
-    star: starToFind
+    star: matrix[row][col]
   };
 }
 
