@@ -2149,9 +2149,51 @@ function FateMatrixPanel({
               <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.lagna.houseName}</span>
             </div>
           )}
+          {/* วัยจร */}
+          {showVayaJorn && phopephumResult?.vayaJorn && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
+              <span className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse shrink-0" />
+              <span className="text-[#C6A96B] font-semibold shrink-0">วัยจร</span>
+              <span className="text-[#8A8070]">อายุย่าง</span>
+              <span className="text-[#F8F6F1] font-bold">{phopephumResult.taksaTransit?.ageYang ?? "—"} ปี</span>
+              <span className="text-[#8A8070]">ช่วง</span>
+              <span className="text-[#F8F6F1] font-bold">{phopephumResult.vayaJorn.ageRange ?? "—"}</span>
+              <span className="text-[#8A8070]">→</span>
+              <span className="text-[#C6A96B] font-bold">ฐาน {phopephumResult.vayaJorn.row}</span>
+              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.vayaJorn.houseName}</span>
+              {phopephumResult.vayaJorn.yumStar && (
+                <>
+                  <span className="text-[#8A8070]">ดาวยํ้าฐาน {phopephumResult.vayaJorn.yumBase ?? "—"}</span>
+                  <span className="text-amber-300 font-bold">
+                    {STAR_NAMES[phopephumResult.vayaJorn.yumStar as 1|2|3|4|5|6|7] ?? phopephumResult.vayaJorn.yumStar}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
+          {/* ปีจร */}
+          {showYearlyJorn && phopephumResult?.yearlyJorn && (
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
+              <span className="w-2 h-2 rounded-full bg-[#4B6FAE] shrink-0" />
+              <span className="text-[#4B6FAE] font-semibold shrink-0">ปีจร</span>
+              <span className="text-[#8A8070]">อายุย่าง</span>
+              <span className="text-[#F8F6F1] font-bold">{phopephumResult.taksaTransit?.ageYang ?? "—"} ปี</span>
+              <span className="text-[#8A8070]">→</span>
+              <span className="text-[#4B6FAE] font-bold">ฐาน {phopephumResult.yearlyJorn.row}</span>
+              <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.yearlyJorn.houseName}</span>
+              {phopephumResult.yearlyJorn.yumStar && (
+                <>
+                  <span className="text-[#8A8070]">ดาวยํ้าฐาน {phopephumResult.yearlyJorn.yumBase ?? "—"}</span>
+                  <span className="text-sky-300 font-bold">
+                    {STAR_NAMES[phopephumResult.yearlyJorn.yumStar as 1|2|3|4|5|6|7] ?? phopephumResult.yearlyJorn.yumStar}
+                  </span>
+                </>
+              )}
+            </div>
+          )}
           {/* ลัคนาจร */}
           {showTransitLagna && phopephumResult?.lagnaTransit && (
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
               <span className="px-1 py-[1px] rounded-full text-[8px] font-bold bg-[#4B6FAE] text-[#F8F6F1] leading-none select-none shrink-0">ลจ</span>
               <span className="text-[#4B6FAE] font-semibold shrink-0">ลัคนาจร</span>
               <span className="text-[#8A8070]">อายุย่าง</span>
@@ -2161,6 +2203,14 @@ function FateMatrixPanel({
               <span className="text-[#8A8070]">→</span>
               <span className="text-[#4B6FAE] font-bold">ฐาน {phopephumResult.lagnaTransit.row}</span>
               <span className="text-[#F8F6F1] font-semibold">ภพ{phopephumResult.lagnaTransit.houseName}</span>
+              {phopephumResult.lagnaTransit.yumStar && (
+                <>
+                  <span className="text-[#8A8070]">ดาวยํ้าฐาน {phopephumResult.lagnaTransit.yumBase ?? "—"}</span>
+                  <span className="text-violet-300 font-bold">
+                    {STAR_NAMES[phopephumResult.lagnaTransit.yumStar as 1|2|3|4|5|6|7] ?? phopephumResult.lagnaTransit.yumStar}
+                  </span>
+                </>
+              )}
             </div>
           )}
           {/* เดือนจร */}

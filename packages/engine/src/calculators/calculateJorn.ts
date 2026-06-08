@@ -36,24 +36,30 @@ export function calculateVayaJorn(matrix: FateMatrix, age: number): JornResult {
       const currentAgeEnd = currentAgeStart + star - 1;
       
       if (age >= currentAgeStart && age <= currentAgeEnd) {
+        const yumBase = row === 0 ? 5 : (row === 1 ? 6 : 7);
+        const yumStar = matrix[yumBase - 1][col];
         return {
           row: row + 1,
           col: col + 1,
           houseName: PHOPEPHUM_HOUSES[row][col],
           star: star,
+          yumBase,
+          yumStar,
           ageRange: `${currentAgeStart}-${currentAgeEnd}`
         };
       }
-      
+
       currentAgeStart = currentAgeEnd + 1;
     }
   }
-  
+
   return {
     row: 3,
     col: 7,
     houseName: PHOPEPHUM_HOUSES[2][6],
     star: matrix[2][6],
+    yumBase: 7,
+    yumStar: matrix[6][6],
     ageRange: "84+"
   };
 }

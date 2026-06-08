@@ -123,21 +123,27 @@ export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: 
  * คำนวณลัคนาจร (Progressed Ascendant)
  * นับจากลัคนาเกิดไปตามเข็มนาฬิกา (หรือตามแนวนอน) ทีละภพตามอายุย่าง
  */
-export function calculateLagnaJorn(matrix: FateMatrix, natalLagna: { row: number, col: number }, ageYang: number): { row: number, col: number, houseName: string, star: number } {
+export function calculateLagnaJorn(matrix: FateMatrix, natalLagna: { row: number, col: number }, ageYang: number): { row: number, col: number, houseName: string, star: number, yumBase: number, yumStar: number } {
   // แปลงตำแหน่งลัคนาเกิดเป็น index 0-20 (R1, R2, R3)
   const natalIdx = (natalLagna.row - 1) * 7 + (natalLagna.col - 1);
-  
+
   // คำนวณตำแหน่งจรตามอายุย่าง (นับจากตำแหน่งเกิดเป็นปีที่ 1)
   const transitIdx = ((natalIdx + (ageYang - 1)) % 21);
-  
+
   const row = Math.floor(transitIdx / 7);
   const col = transitIdx % 7;
-  
+
+  // ดาวยํ้า: ตกฐานวัน→ฐาน5, ตกฐานเดือน→ฐาน6, ตกฐานปี→ฐาน7
+  const yumBase = row === 0 ? 5 : (row === 1 ? 6 : 7);
+  const yumStar = matrix[yumBase - 1][col];
+
   return {
     row: row + 1,
     col: col + 1,
     houseName: PHOPEPHUM_HOUSES[row][col],
-    star: matrix[row][col]
+    star: matrix[row][col],
+    yumBase,
+    yumStar,
   };
 }
 

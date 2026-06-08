@@ -137,6 +137,8 @@ export interface LagnaPhopephumResult {
   reksIndex?: number;
   yamYaiNumber?: number;
   subPeriod?: 'early' | 'middle' | 'end';
+  yumBase?: number;
+  yumStar?: number;
 }
 
 // ─── Integrated Results (สหวิชาพยากรณ์) ──────────────────────────────────────────
