@@ -109,6 +109,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           alerts: phopephumResult.crossCheck.alerts,
         },
         birthDate: profile.birth_date,
+        birthTime: profile.birth_time || "",
         transitDate: new Date().toISOString().split("T")[0],
         transitTime: "12:00",
         lagnaNakshatra: calculateLagnaNakshatra(profile.birth_date, profile.birth_time || "12:00"),
@@ -238,6 +239,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
         alerts: phopephumResult.crossCheck.alerts,
       },
       birthDate: parsed.data.birthDate,
+      birthTime: parsed.data.birthTime || "",
       birthYearThai: new Date(parsed.data.birthDate).getFullYear() + 543,
       currentYearThai: checkDate.getFullYear() + 543,
       transitDate,
@@ -824,11 +826,11 @@ export default function HoroscopePage() {
                       </span>
                     </div>
                     {/* เวลาเกิด */}
-                    {activeResult.phopephumResult?.input_data?.birthTime && (
+                    {(activeResult?.birthTime || profile?.birth_time) && (
                       <div className="flex items-center gap-1.5">
                         <span className="text-[#C6A96B]">◷</span>
                         <span className="text-[#8A8070]">เวลาเกิด</span>
-                        <span className="text-[#F8F6F1] font-semibold">{activeResult.phopephumResult.input_data.birthTime} น.</span>
+                        <span className="text-[#F8F6F1] font-semibold">{activeResult?.birthTime || profile?.birth_time} น.</span>
                       </div>
                     )}
                     {/* จังหวัดเกิด */}
