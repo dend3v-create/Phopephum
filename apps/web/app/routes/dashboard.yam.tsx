@@ -1592,9 +1592,16 @@ export default function YamPage() {
                       }
 
                       return (
-                        <th key={i} className="p-3 text-[13px] font-bold uppercase tracking-wider text-center text-[#94A3B8]">
+                        <th key={i} className="p-2 text-[13px] font-bold uppercase tracking-wider text-center text-[#94A3B8]">
                           ยามที่ {num}
                           <span className="block text-[11px] font-medium text-[#4A5568] tracking-normal mt-0.5">{label} น.</span>
+                          <div className="flex justify-center gap-px mt-1.5">
+                            {["ต้น","กลาง","ปลาย"].map(p => (
+                              <span key={p} className="text-[10px] font-normal text-[#4A5568] bg-white/[0.04] px-1 py-px rounded">
+                                {p}
+                              </span>
+                            ))}
+                          </div>
                         </th>
                       );
                     })}
@@ -1622,28 +1629,35 @@ export default function YamPage() {
                             <td
                               key={yIdx}
                               onClick={() => handleGridCellClick(dayName, yIdx + 1)}
-                              className={`p-3 text-center cursor-pointer transition-all border-r border-white/5 select-none ${
+                              className={`p-2 text-center cursor-pointer transition-all border-r border-white/5 select-none align-top ${
                                 isSelected
                                   ? "bg-[#D9BC82]/15 text-[#D9BC82]"
                                   : "hover:bg-white/5"
                               }`}
                             >
-                              <div className="text-xs font-bold flex flex-col items-center justify-center gap-1">
+                              <div className="text-xs font-bold flex flex-col items-center gap-1 min-w-[70px]">
+                                {/* Planet */}
                                 <span className="text-base text-[#D9BC82]" style={{ fontFamily: "serif" }}>
                                   {PLANET_SYMBOLS[yamName] || "✦"}
                                 </span>
-                                <span className={isSelected ? "text-[#D9BC82]" : "text-[#D9CDB7]"}>
+                                <span className={`text-[13px] font-bold ${isSelected ? "text-[#D9BC82]" : "text-[#D9CDB7]"}`}>
                                   {yamName}
                                 </span>
-                                {/* Ticks */}
-                                <div className="flex gap-0.5 text-[11px] mt-0.5 justify-center">
-                                  {ticks > 0 ? (
-                                    Array.from({ length: ticks }).map((_, starI) => (
-                                      <span key={starI} className="text-green-400">✓</span>
-                                    ))
-                                  ) : (
-                                    <span className="text-red-400 font-bold">⚠️</span>
-                                  )}
+                                {/* ยามต้น / ยามกลาง / ยามปลาย */}
+                                <div className="flex flex-col gap-0.5 w-full mt-0.5 border-t border-white/10 pt-1">
+                                  {(["ต้น","กลาง","ปลาย"] as const).map((phase, pIdx) => {
+                                    const isGood = ticks >= (pIdx + 1);
+                                    return (
+                                      <div key={phase} className={`flex items-center justify-between text-[12px] px-1 rounded-sm ${
+                                        isSelected
+                                          ? (isGood ? "text-[#D9BC82]" : "text-[#D9BC82]/25")
+                                          : (isGood ? "text-green-400" : "text-[#3A4A5A]")
+                                      }`}>
+                                        <span>ยาม{phase}</span>
+                                        <span className="font-mono">{isGood ? "✓" : "–"}</span>
+                                      </div>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             </td>
