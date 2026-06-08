@@ -1856,7 +1856,7 @@ function HoroscopeResultDisplay({ result, phopephumResult }: { result: any; phop
         วัน{lunar.dayName || lunar.dayPlanet} เดือน{lunar.lunarMonthName || lunar.lunarMonth} ปี{lunar.zodiacName || ''}
         <span className="text-[#C9A96E] ml-3 text-sm font-normal">({lunar.moonPhase})</span>
       </p>
-      <div className="flex gap-4 mt-4 text-xs text-[#8A8070]">
+      <div className="flex flex-wrap gap-2 mt-4 text-xs text-[#8A8070]">
         <span className="bg-white/5 px-3 py-1 rounded-full">ดาวประจำวัน: <span className="text-[#C9A96E] font-bold">{lunar.dayPlanet}</span></span>
         <span className="bg-white/5 px-3 py-1 rounded-full">ขึ้น/แรม: {lunar.moonPhase || `ขึ้น ${lunar.lunarDay} ค่ำ เดือน ${lunar.lunarMonth}`}</span>
       </div>
@@ -1939,12 +1939,12 @@ function FateMatrixPanel({
       <Card className="p-0 overflow-hidden border-[#D9BC82]/20 shadow-2xl cursor-default">
       <div 
         onClick={(e) => e.stopPropagation()} 
-        className="bg-[#D9BC82]/10 p-4 border-b border-[#D9BC82]/20 flex justify-between items-center"
+        className="bg-[#D9BC82]/10 p-4 border-b border-[#D9BC82]/20 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1"
       >
-        <p className="text-[#D9BC82] text-lg sm:text-xl font-bold uppercase tracking-widest">ผังดวงเลข 7 ตัว 9 ฐาน (35 ภพเรือนสมบูรณ์)</p>
-        <span className="text-sm text-[#8A8070]">แตะตัวเลขเพื่อดูความเชื่อมโยง</span>
+        <p className="text-[#D9BC82] text-sm sm:text-lg font-bold uppercase tracking-widest">ผังดวงเลข 7 ตัว 9 ฐาน (35 ภพเรือนสมบูรณ์)</p>
+        <span className="text-xs sm:text-sm text-[#8A8070]">แตะตัวเลขเพื่อดูความเชื่อมโยง</span>
       </div>
-      <div className="overflow-x-auto p-6 bg-slate-900/30">
+      <div className="overflow-x-auto p-2 sm:p-6 bg-slate-900/30">
         <table className="w-full border-collapse">
           <tbody>
             {matrix.map((row, rIdx) => {
@@ -1959,7 +1959,7 @@ function FateMatrixPanel({
                       : "hover:bg-white/5"
                   }`}
                 >
-                  <td className="py-2 pr-2 sm:pr-4 text-left whitespace-nowrap min-w-[60px] sm:min-w-[100px]">
+                  <td className="py-1 pr-1 sm:pr-4 text-left whitespace-nowrap min-w-[36px] sm:min-w-[80px]">
                     <p className={`text-xs sm:text-sm font-bold ${isBase4 ? "text-[#8AA7DF]" : "text-[#F8F6F1]"}`}>{ROW_META[rIdx].label}</p>
                   </td>
                   {row.map((num, cIdx) => {
@@ -2031,7 +2031,7 @@ function FateMatrixPanel({
                       phopephumResult.dailyJorn.col === (cIdx + 1);
 
                     return (
-                      <td key={cIdx} className="p-1 sm:p-2 min-w-[52px] sm:min-w-[72px]">
+                      <td key={cIdx} className="p-0.5 sm:p-2 min-w-[40px] sm:min-w-[60px]">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -2041,7 +2041,7 @@ function FateMatrixPanel({
                           className="flex flex-col items-center gap-1 sm:gap-1.5 w-full focus:outline-none relative group/cell"
                         >
                           <div className="relative">
-                            <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center font-sans text-[22px] sm:text-[28px] border transition-all duration-300 transform
+                            <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-sans text-[18px] sm:text-[22px] border transition-all duration-300 transform
                               ${isHighlighted ? "scale-125 z-10 shadow-[0_0_15px_rgba(201,169,110,0.6)] border-[#C9A96E]" : ""}
                               ${isDimmed ? "opacity-40 scale-90 border-white/5 saturate-50" : ""}
                               ${isGlowFiltered ? "animate-pulse ring-2 ring-[#C9A96E] ring-offset-2 ring-offset-slate-950" : ""}
@@ -2125,7 +2125,7 @@ function FateMatrixPanel({
                           
                           <div className="flex flex-col items-center mt-1">
                             {showHouseNames && houseName && (
-                              <span className={`text-[11px] sm:text-[13px] font-bold leading-tight mb-0.5 transition-colors text-center ${
+                              <span className={`text-[9px] sm:text-[11px] font-bold leading-tight mb-0.5 transition-colors text-center ${
                                 isHighlighted
                                   ? "text-[#C9A96E] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                                   : "text-[#B4A790] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]"
