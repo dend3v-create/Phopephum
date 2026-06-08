@@ -301,27 +301,37 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Input
-                    name="birthDate"
-                    type="date"
-                    label="วันเกิดคริสต์ศักราช (ค.ศ.)"
-                    defaultValue={profile?.birth_date ?? ""}
-                  />
+                <div className="space-y-4">
+                  <h3 className="text-[#8A8070] text-sm font-bold border-b border-white/10 pb-2">ข้อมูลวันเกิด</h3>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div>
+                      <label className="text-xs text-[#8A8070] mb-1 block">วันที่</label>
+                      <Input name="birthDay" type="number" min="1" max="31" value={birthDay} onChange={(e) => setBirthDay(Number(e.target.value))} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-[#8A8070] mb-1 block">เดือน</label>
+                      <Input name="birthMonth" type="number" min="1" max="12" value={birthMonth} onChange={(e) => setBirthMonth(Number(e.target.value))} />
+                    </div>
+                    <div>
+                      <label className="text-xs text-[#8A8070] mb-1 block">ปี พ.ศ.</label>
+                      <Input name="birthYear" type="number" value={birthYear} onChange={(e) => setBirthYear(Number(e.target.value))} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <Input
+                      name="birthTime"
+                      type="time"
+                      label="เวลาเกิด (ตามสูติบัตร)"
+                      defaultValue={profile?.birth_time ?? ""}
+                    />
 
-                  <Input
-                    name="birthTime"
-                    type="time"
-                    label="เวลาเกิด (ตามสูติบัตร)"
-                    defaultValue={profile?.birth_time ?? ""}
-                  />
-
-                  <Input
-                    name="birthPlace"
-                    label="จังหวัดที่เกิด"
-                    defaultValue={profile?.birth_place ?? ""}
-                    placeholder="เช่น กรุงเทพมหานคร"
-                  />
+                    <Input
+                      name="birthPlace"
+                      label="จังหวัดที่เกิด"
+                      defaultValue={profile?.birth_place ?? ""}
+                      placeholder="เช่น กรุงเทพมหานคร"
+                    />
+                  </div>
                 </div>
 
                 <Button type="submit" loading={isLoading} className="mt-2">
