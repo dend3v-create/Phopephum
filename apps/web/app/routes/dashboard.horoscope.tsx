@@ -517,13 +517,13 @@ export default function HoroscopePage() {
       {/* ── เมนูหลัก (Page Header) ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-2">
         <div>
-          <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase font-bold">
+          <p className="text-[#C6A96B] text-xs tracking-[0.3em] uppercase font-bold">
             ดวงดีมีชัย · ตรวจดวงชะตา
           </p>
-          <h1 className="font-display text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#F8F6F1] tracking-tight mt-1">
+          <h1 className="font-display text-3xl sm:text-4xl md:text-5xl font-extrabold text-[#F8F6F1] tracking-tight mt-1">
             ผังดวงจักรพรรดิ
           </h1>
-          <p className="text-[#8A8070] text-xs font-medium mt-1 font-sans">
+          <p className="text-[#8A8070] text-sm font-medium mt-1 font-sans">
             {formattedTransitDate}
           </p>
         </div>
@@ -559,10 +559,10 @@ export default function HoroscopePage() {
                 {tab.icon}
               </span>
               <div className="flex flex-col min-w-0">
-                <span className={`text-xs font-extrabold tracking-wide leading-tight ${isSelected ? "text-[#020617]" : "text-[#F8F6F1]"}`}>
+                <span className={`text-sm font-extrabold tracking-wide leading-tight ${isSelected ? "text-[#020617]" : "text-[#F8F6F1]"}`}>
                   {tab.label}
                 </span>
-                <span className={`text-[9px] mt-0.5 leading-none ${isSelected ? "text-[#020617]/70" : "text-[#8A8070]"}`}>
+                <span className={`text-[11px] mt-0.5 leading-tight ${isSelected ? "text-[#020617]/70" : "text-[#8A8070]"}`}>
                   {tab.desc}
                 </span>
               </div>
@@ -786,19 +786,19 @@ export default function HoroscopePage() {
                       {isWaxing ? "🌕" : "🌑"}
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[#F8F6F1] font-extrabold text-sm leading-tight flex flex-wrap items-center gap-1.5">
+                      <span className="text-[#F8F6F1] font-extrabold text-base leading-tight flex flex-wrap items-center gap-1.5">
                         <span>{moonPhaseText}</span>
-                        <span className="text-[#C6A96B] text-[9px] font-normal border border-[#C6A96B]/25 px-1.5 py-[0.5px] rounded-md bg-[#C6A96B]/5">
+                        <span className="text-[#C6A96B] text-xs font-normal border border-[#C6A96B]/25 px-1.5 py-[0.5px] rounded-md bg-[#C6A96B]/5">
                           เดือน {lunar?.lunarMonthName || lunar?.lunarMonth} ปี {lunar?.zodiacName || ''}
                         </span>
                       </span>
-                      <span className="text-[#8A8070] text-[10px] italic leading-tight">{lunarDescText}</span>
+                      <span className="text-[#8A8070] text-xs italic leading-tight">{lunarDescText}</span>
                     </div>
                   </div>
                   <div className="text-right shrink-0 pl-3 border-l border-white/10">
-                    <span className="text-[#C6A96B] font-display font-extrabold text-lg leading-tight block">{brightnessText}</span>
-                    <span className="text-[#8A8070] text-[8px] uppercase tracking-widest font-bold">ความสว่าง</span>
-                    <span className="text-[9px] text-[#8A8070] block mt-0.5">{formattedTransitDate}</span>
+                    <span className="text-[#C6A96B] font-display font-extrabold text-xl leading-tight block">{brightnessText}</span>
+                    <span className="text-[#8A8070] text-xs uppercase tracking-widest font-bold">ความสว่าง</span>
+                    <span className="text-xs text-[#8A8070] block mt-0.5">{formattedTransitDate}</span>
                   </div>
                 </div>
 
@@ -806,14 +806,14 @@ export default function HoroscopePage() {
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
                   {/* ชื่อ */}
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-[9px] font-bold uppercase tracking-[0.3em] text-[#C6A96B]/70">เจ้าชะตา</span>
-                    <span className="font-display text-xl font-extrabold text-[#F8F6F1] leading-tight">
+                    <span className="text-xs font-bold uppercase tracking-[0.3em] text-[#C6A96B]/70">เจ้าชะตา</span>
+                    <span className="font-display text-2xl font-extrabold text-[#F8F6F1] leading-tight">
                       {profile?.display_name ?? "ไม่ระบุชื่อ"}
                     </span>
                   </div>
 
                   {/* ข้อมูลเกิด */}
-                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 md:justify-end text-[10px]">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1.5 md:justify-end text-xs sm:text-sm">
                     {/* วันเกิด */}
                     <div className="flex items-center gap-1.5">
                       <span className="text-[#C6A96B]">#</span>
@@ -873,7 +873,7 @@ export default function HoroscopePage() {
                 ตัวเลือกการแสดงผลสัญลักษณ์ผังดวง (Chart Display Config)
               </h3>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 text-[10px] sm:text-[11px]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 text-xs sm:text-sm">
               <button
                 type="button"
                 onClick={() => setShowNatalLagna(!showNatalLagna)}
@@ -1941,8 +1941,8 @@ function FateMatrixPanel({
         onClick={(e) => e.stopPropagation()} 
         className="bg-[#D9BC82]/10 p-4 border-b border-[#D9BC82]/20 flex justify-between items-center"
       >
-        <p className="text-[#D9BC82] text-base font-bold uppercase tracking-widest">ผังดวงเลข 7 ตัว 9 ฐาน (35 ภพเรือนสมบูรณ์)</p>
-        <span className="text-xs text-[#8A8070]">แตะตัวเลขเพื่อดูความเชื่อมโยง</span>
+        <p className="text-[#D9BC82] text-lg sm:text-xl font-bold uppercase tracking-widest">ผังดวงเลข 7 ตัว 9 ฐาน (35 ภพเรือนสมบูรณ์)</p>
+        <span className="text-sm text-[#8A8070]">แตะตัวเลขเพื่อดูความเชื่อมโยง</span>
       </div>
       <div className="overflow-x-auto p-6 bg-slate-900/30">
         <table className="w-full border-collapse">
@@ -1959,8 +1959,8 @@ function FateMatrixPanel({
                       : "hover:bg-white/5"
                   }`}
                 >
-                  <td className="py-2 pr-2 sm:pr-6 text-left whitespace-nowrap min-w-[60px] sm:min-w-[120px]">
-                    <p className={`text-[11px] sm:text-sm font-bold ${isBase4 ? "text-[#8AA7DF]" : "text-[#F8F6F1]"}`}>{ROW_META[rIdx].label}</p>
+                  <td className="py-2 pr-2 sm:pr-4 text-left whitespace-nowrap min-w-[60px] sm:min-w-[100px]">
+                    <p className={`text-xs sm:text-sm font-bold ${isBase4 ? "text-[#8AA7DF]" : "text-[#F8F6F1]"}`}>{ROW_META[rIdx].label}</p>
                   </td>
                   {row.map((num, cIdx) => {
                     const isBase4 = rIdx === 3;
@@ -2031,7 +2031,7 @@ function FateMatrixPanel({
                       phopephumResult.dailyJorn.col === (cIdx + 1);
 
                     return (
-                      <td key={cIdx} className="p-1 sm:p-2 min-w-[44px] sm:min-w-[64px]">
+                      <td key={cIdx} className="p-1 sm:p-2 min-w-[52px] sm:min-w-[72px]">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -2041,9 +2041,9 @@ function FateMatrixPanel({
                           className="flex flex-col items-center gap-1 sm:gap-1.5 w-full focus:outline-none relative group/cell"
                         >
                           <div className="relative">
-                            <div className={`w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-sans text-[17px] sm:text-[22px] border transition-all duration-300 transform
-                              ${isHighlighted ? "scale-125 z-10 shadow-[0_0_15px_rgba(201,169,110,0.6)] border-[#C9A96E]" : ""} 
-                              ${isDimmed ? "opacity-25 scale-90 border-white/5 saturate-50" : ""} 
+                            <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center font-sans text-[22px] sm:text-[28px] border transition-all duration-300 transform
+                              ${isHighlighted ? "scale-125 z-10 shadow-[0_0_15px_rgba(201,169,110,0.6)] border-[#C9A96E]" : ""}
+                              ${isDimmed ? "opacity-40 scale-90 border-white/5 saturate-50" : ""}
                               ${isGlowFiltered ? "animate-pulse ring-2 ring-[#C9A96E] ring-offset-2 ring-offset-slate-950" : ""}
                               ${c.bg} ${c.text} ${c.border}`}>
                               {num}
@@ -2125,9 +2125,9 @@ function FateMatrixPanel({
                           
                           <div className="flex flex-col items-center mt-1">
                             {showHouseNames && houseName && (
-                              <span className={`text-[9px] sm:text-[12px] font-bold leading-none mb-0.5 transition-colors ${
-                                isHighlighted 
-                                  ? "text-[#C9A96E] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" 
+                              <span className={`text-[11px] sm:text-[13px] font-bold leading-tight mb-0.5 transition-colors text-center ${
+                                isHighlighted
+                                  ? "text-[#C9A96E] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
                                   : "text-[#B4A790] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]"
                               }`}>
                                 {houseName}
@@ -2152,7 +2152,7 @@ function FateMatrixPanel({
 
       {/* ── ลัคนาเกิด / ลัคนาจร Detail Panel ── */}
       {phopephumResult?.lagna && (
-        <div className="bg-[#020617]/60 border-t border-[#C6A96B]/15 px-3 sm:px-5 py-3 space-y-2 text-[10px] sm:text-[11px]">
+        <div className="bg-[#020617]/60 border-t border-[#C6A96B]/15 px-3 sm:px-5 py-3 space-y-2 text-xs sm:text-sm">
           {/* ลัคนาเกิด */}
           {showNatalLagna && (
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">

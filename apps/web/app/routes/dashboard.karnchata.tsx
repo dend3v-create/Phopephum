@@ -1042,16 +1042,16 @@ export default function KarnchataPage() {
                         key={cIdx}
                         type="button"
                         onClick={() => setHoverNum(isSelected ? null : star)}
-                        className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none"
+                        className="flex flex-col items-center gap-1 sm:gap-1.5 w-10 sm:w-14 focus:outline-none"
                       >
-                        <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-200 ${
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base sm:text-xl font-display font-bold transition-all duration-200 ${
                           isSelected
                             ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_16px_rgba(198,169,107,0.65)] ring-2 ring-[#C6A96B]/30"
                             : isDimmed
-                              ? "bg-[#020617] border border-white/8 text-[#F8F6F1]/25 hover:border-[#C6A96B]/30 hover:text-[#F8F6F1]/60"
+                              ? "bg-[#020617] border border-white/10 text-[#F8F6F1]/50 hover:border-[#C6A96B]/30 hover:text-[#F8F6F1]/75"
                               : "bg-[#020617] border border-[#8A8070]/45 text-[#F8F6F1] hover:border-[#C6A96B]/55 hover:scale-105"
                         }`}>{star}</div>
-                        <span className={`text-[8px] sm:text-[11px] font-medium text-center leading-tight transition-opacity ${isDimmed ? 'text-[#8A8070]/30' : 'text-[#8A8070]'}`}>
+                        <span className={`text-[10px] sm:text-xs font-medium text-center leading-tight transition-opacity ${isDimmed ? 'text-[#8A8070]/50' : 'text-[#8A8070]'}`}>
                           {BHOP_NATAL_NAMES[rIdx][cIdx]}
                         </span>
                       </button>
@@ -1163,16 +1163,16 @@ export default function KarnchataPage() {
                         key={cIdx}
                         type="button"
                         onClick={() => setHoverNum(isSelected ? null : star)}
-                        className="flex flex-col items-center gap-0.5 sm:gap-1.5 w-9 sm:w-14 focus:outline-none"
+                        className="flex flex-col items-center gap-1 sm:gap-1.5 w-10 sm:w-14 focus:outline-none"
                       >
-                        <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-xs sm:text-lg font-display font-bold transition-all duration-200 ${
+                        <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-base sm:text-xl font-display font-bold transition-all duration-200 ${
                           isSelected
                             ? "bg-[#C6A96B] text-[#020617] scale-110 shadow-[0_0_16px_rgba(198,169,107,0.65)] ring-2 ring-[#C6A96B]/30"
                             : isDimmed
-                              ? "bg-[#020617] border border-white/8 text-[#F8F6F1]/25 hover:border-[#C6A96B]/30"
+                              ? "bg-[#020617] border border-white/10 text-[#F8F6F1]/50 hover:border-[#C6A96B]/30"
                               : "bg-[#020617] border border-[#8A8070]/45 text-[#F8F6F1] hover:border-[#C6A96B]/55 hover:scale-105"
                         }`}>{star}</div>
-                        <span className={`text-[8px] sm:text-[11px] font-medium text-center leading-tight transition-opacity ${isDimmed ? 'text-[#8A8070]/25' : 'text-[#8A8070]'}`}>
+                        <span className={`text-[10px] sm:text-xs font-medium text-center leading-tight transition-opacity ${isDimmed ? 'text-[#8A8070]/50' : 'text-[#8A8070]'}`}>
                           {bhopName}
                         </span>
                       </button>
