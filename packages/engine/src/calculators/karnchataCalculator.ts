@@ -1,20 +1,24 @@
 import { r7_local } from "../engine/seven-numbers-v2.js";
 import { calculateNineBase } from "./nineBase.js";
 import { calculateYam } from "../yam/core/yamCalculator.js";
-import { yamDayTable } from "../yam/constants/yamDayTable.js";
-import { yamNightTable } from "../yam/constants/yamNightTable.js";
 import { DAY_INDEX_MAP } from "../yam/constants/dayMap.js";
-import { getBKKDay, getBKKHour, getMinutes, isDayTime, getSunTimes } from "../yam/core/timeUtils.js";
+import { getBKKDay, getBKKHour } from "../yam/core/timeUtils.js";
 import { gregorianToThaiLunarV3 } from "../core/thaiLunar.js";
 
 const YAM_TO_PLANET: Record<string, number> = {
   "สุริชะ": 1, "ระวิ": 1,
-  "จันเทา": 2, "คะศิ": 2,
+  "จันเทา": 2, "ศะศิ": 2,   // ← fixed: "คะศิ" was wrong
   "ภุมมะ": 3, "ภุมโม": 3,
-  "พุธะ": 4,  "พุทโธ": 4,
+  "พุธะ": 4,  "พุโธ": 4,    // ← fixed: "พุทโธ" was wrong
   "ครู": 5,   "ชีโว": 5,
   "ศุกระ": 6, "ศุโกร": 6,
   "เสารี": 7, "โสโร": 7,
+};
+
+/** Chaldean sequence: เสาร์→พฤหัส→อังคาร→อาทิตย์→ศุกร์→พุธ→จันทร์ */
+const CHALDEAN_ARR = [7, 5, 3, 1, 6, 4, 2] as const;
+const PLANET_NAME_DAY: Record<number, string> = {
+  1: "สุริชะ", 2: "จันเทา", 3: "ภุมมะ", 4: "พุธะ", 5: "ครู", 6: "ศุกระ", 7: "เสารี",
 };
 
 export interface KarnchataResult {
@@ -49,21 +53,16 @@ export function calculateKarnchata(date: Date): KarnchataResult {
   const yamYaiName = yamInfo.yamName;
   const yamYaiNumber = YAM_TO_PLANET[yamYaiName];
 
-  // 3. Yam Soy (ยามซอย)
-  // Get current minute
+  // 3. Yam Soy (ยามซอย) — แบ่ง 8 ซอย ต่อ 30 นาที (3.75 นาที/ซอย)
+  // ลำดับยามซอยเริ่มต้นจากดาวยามใหญ่ แล้วเดินตามลำดับกาลเทวี (Chaldean)
   const minuteOfHour = date.getUTCMinutes();
-  // We use modulo 30, and each Yam Soy is 3.75 minutes (3m 45s)
-  const mMod = minuteOfHour % 30;
-  const soyIndex = Math.floor(mMod / 3.75); // 0 to 7
-  
-  // The sequence depends on whether it's currently day or night period
-  const sunTimes = getSunTimes(adjustedDate);
-  const period = isDayTime(date, sunTimes) ? "day" : "night";
-  const sequence = period === "day" ? yamDayTable[dayName] : yamNightTable[dayName];
-  
-  // The Yam Soy sequence starts according to the current Thai Day
-  const yamSoyName = sequence[soyIndex] ?? sequence[0];
-  const yamSoyNumber = YAM_TO_PLANET[yamSoyName];
+  const soyIndex = Math.floor((minuteOfHour % 30) / 3.75); // 0–7
+
+  const yamYaiChalIdx = CHALDEAN_ARR.indexOf(yamYaiNumber as typeof CHALDEAN_ARR[number]);
+  const yamSoyNumber = yamYaiChalIdx !== -1
+    ? CHALDEAN_ARR[(yamYaiChalIdx + soyIndex) % 7]
+    : yamYaiNumber;
+  const yamSoyName = PLANET_NAME_DAY[yamSoyNumber] ?? "สุริชะ";
 
   // 4. Build the Seven Base Chart (9 Bases)
   // Rule for Karnchata:

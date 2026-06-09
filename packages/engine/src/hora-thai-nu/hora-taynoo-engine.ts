@@ -17,18 +17,18 @@
 
 /** 12 ราศีเรียง CCW จาก index 0 = พฤษภ (330°) ตาม อ.กานดา */
 export const ZODIAC_ORDER = [
-  { index: 0,  name: 'พฤษภ',  nameEn: 'Taurus',      sectorAngle: 330 },
-  { index: 1,  name: 'เมถุน',  nameEn: 'Gemini',      sectorAngle: 300 },
-  { index: 2,  name: 'กรกฎ',  nameEn: 'Cancer',      sectorAngle: 270 },
-  { index: 3,  name: 'สิงห์',  nameEn: 'Leo',         sectorAngle: 240 },
-  { index: 4,  name: 'กันย์',  nameEn: 'Virgo',       sectorAngle: 210 },
-  { index: 5,  name: 'ตุลย์',  nameEn: 'Libra',       sectorAngle: 180 },
-  { index: 6,  name: 'พิจิก',  nameEn: 'Scorpio',     sectorAngle: 150 },
-  { index: 7,  name: 'ธนู',   nameEn: 'Sagittarius', sectorAngle: 120 },
-  { index: 8,  name: 'มังกร',  nameEn: 'Capricorn',   sectorAngle: 90  },
-  { index: 9,  name: 'กุมภ์',  nameEn: 'Aquarius',    sectorAngle: 60  },
-  { index: 10, name: 'มีน',   nameEn: 'Pisces',       sectorAngle: 30  },
-  { index: 11, name: 'เมษ',   nameEn: 'Aries',        sectorAngle: 0   },
+  { index: 0,  name: 'พฤษภ',  nameEn: 'Taurus',      sectorAngle: 240 },
+  { index: 1,  name: 'เมถุน',  nameEn: 'Gemini',      sectorAngle: 210 },
+  { index: 2,  name: 'กรกฎ',  nameEn: 'Cancer',      sectorAngle: 180 },
+  { index: 3,  name: 'สิงห์',  nameEn: 'Leo',         sectorAngle: 150 },
+  { index: 4,  name: 'กันย์',  nameEn: 'Virgo',       sectorAngle: 120 },
+  { index: 5,  name: 'ตุลย์',  nameEn: 'Libra',       sectorAngle: 90  },
+  { index: 6,  name: 'พิจิก',  nameEn: 'Scorpio',     sectorAngle: 60  },
+  { index: 7,  name: 'ธนู',   nameEn: 'Sagittarius', sectorAngle: 30  },
+  { index: 8,  name: 'มังกร',  nameEn: 'Capricorn',   sectorAngle: 0   },
+  { index: 9,  name: 'กุมภ์',  nameEn: 'Aquarius',    sectorAngle: 330 },
+  { index: 10, name: 'มีน',   nameEn: 'Pisces',       sectorAngle: 300 },
+  { index: 11, name: 'เมษ',   nameEn: 'Aries',        sectorAngle: 270 },
 ]
 
 /** ดาวเกษตร: zodiac index ที่ดาวแต่ละดวงปกครอง (อิง ZODIAC_ORDER ใหม่) */
