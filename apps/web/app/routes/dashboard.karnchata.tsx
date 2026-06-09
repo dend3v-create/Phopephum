@@ -208,6 +208,7 @@ export default function KarnchataPage() {
   const [time, setTime] = useState<Date>(new Date());
   const [selectedDirection, setSelectedDirection] = useState<number | null>(null);
   const [selectedYamKey, setSelectedYamKey] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"daily" | "hourly" | "minute">("hourly");
 
   // ── Derived display values ──
   const bkkHour = (time.getUTCHours() + 7) % 24;
@@ -490,6 +491,28 @@ export default function KarnchataPage() {
             <input type="time" autoComplete="off" className="bg-[#020617] border border-white/10 text-[#F8F6F1] text-sm rounded-xl px-3 py-2 outline-none focus:border-[#C6A96B] w-full sm:w-[110px]" defaultValue="12:00" />
           </div>
         )}
+      </div>
+
+      {/* ── Tab Navigation ── */}
+      <div className="flex bg-[#0A1628]/60 p-1.5 rounded-2xl border border-white/5 gap-1.5 sticky top-2 z-30 backdrop-blur-xl">
+        {[
+          { id: "daily", label: "รายวัน", icon: "📅" },
+          { id: "hourly", label: "รายชั่วโมง", icon: "⏱" },
+          { id: "minute", label: "นาที 3.45", icon: "🎯" },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              activeTab === tab.id
+                ? "bg-[#C6A96B] text-[#020617] shadow-lg shadow-[#C6A96B]/20"
+                : "text-[#8A8070] hover:text-[#F8F6F1] hover:bg-white/5"
+            }`}
+          >
+            <span className="text-base sm:text-lg">{tab.icon}</span>
+            <span>{tab.label}</span>
+          </button>
+        ))}
       </div>
 
       {/* ── Hero Clock Card ── */}

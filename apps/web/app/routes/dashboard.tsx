@@ -32,7 +32,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 const NAV_ITEMS = [
   { to: "/dashboard",            label: "วันนี้",           icon: "today",   exact: true  },
   { to: "/dashboard/chat",       label: "Wisdom AI",        icon: "ai",      exact: false },
-  { to: "/dashboard/horoscope",  label: "เส้นทางชีวิต",    icon: "journey", exact: false },
+  { to: "/dashboard/horoscope",  label: "ตั้งดวงชะตา",     icon: "journey", exact: false },
   { to: "/dashboard/planner",    label: "บันทึก",           icon: "journal", exact: false },
   { to: "/dashboard/settings",   label: "โปรไฟล์",         icon: "profile", exact: false },
 ] as const;
@@ -122,6 +122,20 @@ function NavIcon({ name, size = 5 }: { name: IconKey | string; size?: number }) 
       <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
+  if (name === "taksa") return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={cls}>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 3v9l5 3" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="12" r="2" fill="currentColor" />
+    </svg>
+  );
+  if (name === "phuti") return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={cls}>
+      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+      <path d="M7 10c0-2.761 2.239-5 5-5s5 2.239 5 5-4 6-5 7c-1-1-5-4.239-5-7z" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="12" cy="10" r="1.5" fill="currentColor" />
+    </svg>
+  );
   return null;
 }
 
@@ -197,13 +211,15 @@ export default function DashboardLayout() {
           {isPro && (
             <div className="mt-5 pt-4 border-t" style={{ borderColor: "rgba(217,188,130,0.08)" }}>
               <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#C6A96B]/50 px-3 mb-1.5">
-                ✦ Pro Tools
+                ✦ เครื่องมือนักพยากรณ์
               </p>
-              <NavLink to="/dashboard/yam"       exact={false} icon={<NavIcon name="yam" />}       label="Wisdom Timing" />
-              <NavLink to="/dashboard/karnchata" exact={false} icon={<NavIcon name="hourglass" />} label="Time Oracle" />
-              <NavLink to="/dashboard/horanu"    exact={false} icon={<NavIcon name="horanu" />}    label="Hora Nu Chart" />
-              <NavLink to="/dashboard/rahu"      exact={false} icon={<NavIcon name="rahu" />}      label="Rahu Transit" />
-              <NavLink to="/dashboard/calendar"  exact={false} icon={<NavIcon name="list" />}      label="100-Year Calendar" />
+              <NavLink to="/dashboard/yam"          exact={false} icon={<NavIcon name="yam" />}        label="ยามอัฐกาลชั้นฉาย" />
+              <NavLink to="/dashboard/karnchata"    exact={false} icon={<NavIcon name="hourglass" />}  label="เลข ๗ ตัวกาลชะตา" />
+              <NavLink to="/dashboard/horanu"       exact={false} icon={<NavIcon name="horanu" />}     label="ยามพรายกระซิบ" />
+              <NavLink to="/dashboard/rahu"         exact={false} icon={<NavIcon name="rahu" />}       label="ยามราหูค้นทรัพย์" />
+              <NavLink to="/dashboard/calendar"     exact={false} icon={<NavIcon name="list" />}       label="ปฏิทิน 100 ปี" />
+              <NavLink to="/dashboard/mahathaksa"   exact={false} icon={<NavIcon name="taksa" />}     label="มหาทักษาพยากรณ์" />
+              <NavLink to="/dashboard/mahaphuti"    exact={false} icon={<NavIcon name="phuti" />}     label="มหาภูติกำเนิด" />
             </div>
           )}
 
