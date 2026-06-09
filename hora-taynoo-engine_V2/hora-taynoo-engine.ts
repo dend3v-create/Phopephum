@@ -15,32 +15,31 @@
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 
-/** 12 ราศีเรียง CCW จาก index 0 = พฤษภ (330°) ตาม อ.กานดา */
+/** 12 ราศีเรียง CCW จาก index 0 = พฤษก (บนซ้าย) */
 export const ZODIAC_ORDER = [
-  { index: 0,  name: 'พฤษภ',  nameEn: 'Taurus',      sectorAngle: 330 },
-  { index: 1,  name: 'เมถุน',  nameEn: 'Gemini',      sectorAngle: 300 },
-  { index: 2,  name: 'กรกฎ',  nameEn: 'Cancer',      sectorAngle: 270 },
-  { index: 3,  name: 'สิงห์',  nameEn: 'Leo',         sectorAngle: 240 },
-  { index: 4,  name: 'กันย์',  nameEn: 'Virgo',       sectorAngle: 210 },
-  { index: 5,  name: 'ตุลย์',  nameEn: 'Libra',       sectorAngle: 180 },
-  { index: 6,  name: 'พิจิก',  nameEn: 'Scorpio',     sectorAngle: 150 },
-  { index: 7,  name: 'ธนู',   nameEn: 'Sagittarius', sectorAngle: 120 },
-  { index: 8,  name: 'มังกร',  nameEn: 'Capricorn',   sectorAngle: 90  },
-  { index: 9,  name: 'กุมภ์',  nameEn: 'Aquarius',    sectorAngle: 60  },
-  { index: 10, name: 'มีน',   nameEn: 'Pisces',       sectorAngle: 30  },
-  { index: 11, name: 'เมษ',   nameEn: 'Aries',        sectorAngle: 0   },
+  { index: 0,  name: 'พฤษก',  nameEn: 'Taurus',      sectorAngle: 255 },
+  { index: 1,  name: 'เมษ',   nameEn: 'Aries',       sectorAngle: 285 },
+  { index: 2,  name: 'มีน',   nameEn: 'Pisces',      sectorAngle: 315 },
+  { index: 3,  name: 'กุมภ์',  nameEn: 'Aquarius',    sectorAngle: 345 },
+  { index: 4,  name: 'มกร',   nameEn: 'Capricorn',   sectorAngle: 15  },
+  { index: 5,  name: 'ธนู',   nameEn: 'Sagittarius', sectorAngle: 45  },
+  { index: 6,  name: 'พิจก',  nameEn: 'Scorpio',     sectorAngle: 75  },
+  { index: 7,  name: 'ตุลย์',  nameEn: 'Libra',       sectorAngle: 105 },
+  { index: 8,  name: 'กันย์',  nameEn: 'Virgo',       sectorAngle: 135 },
+  { index: 9,  name: 'สิงห์',  nameEn: 'Leo',         sectorAngle: 165 },
+  { index: 10, name: 'กรกฎ',  nameEn: 'Cancer',      sectorAngle: 195 },
+  { index: 11, name: 'เมถุน',  nameEn: 'Gemini',      sectorAngle: 225 },
 ]
 
-/** ดาวเกษตร: zodiac index ที่ดาวแต่ละดวงปกครอง (อิง ZODIAC_ORDER ใหม่) */
+/** ดาวเกษตร: zodiac index ที่ดาวแต่ละดวงปกครอง */
 export const PLANET_KASTERN: Record<number, number[]> = {
-  1: [3],        // อาทิตย์ → สิงห์  (index 3)
-  2: [2],        // จันทร์  → กรกฎ   (index 2)
-  3: [11, 6],    // อังคาร  → เมษ (11), พิจิก (6)
-  4: [1, 4],     // พุธ     → เมถุน (1), กันย์ (4)
-  5: [7, 10],    // พฤหัส   → ธนู (7), มีน (10)
-  6: [0, 5],     // ศุกร์    → พฤษภ (0), ตุลย์ (5)
-  7: [8],        // เสาร์    → มังกร (8)
-  8: [9],        // ราหู    → กุมภ์ (9)
+  1: [9],        // อาทิตย์ → สิงห์
+  2: [10],       // จันทร์  → กรกฎ
+  3: [1, 6],     // อังคาร  → เมษ, พิจก
+  4: [11, 8],    // พุธ     → เมถุน, กันย์
+  5: [5, 2],     // พฤหัส   → ธนู, มีน
+  6: [0, 7],     // ศุกร์    → พฤษก, ตุลย์
+  7: [4, 3],     // เสาร์    → มกร, กุมภ์
 }
 
 /** ดาวประจำวัน */
@@ -236,10 +235,24 @@ export function getPlanetSteps(
 
   // yamAsked อยู่ที่ index yamAsked-1 (0-based)
   let idx = yamAsked - 1
+  let folded = false
+  let goingBack = false
 
   for (let p = 0; p < 11; p++) {
     steps.push(row[idx])
-    idx = (idx + 1) % 8 // เดินหน้าวนลูป 8 ยามปกติ
+
+    if (!folded) {
+      if (idx === 7) {
+        // ถึงยามที่ 8 → พับ (ย้ำยาม 8 ก่อน แล้วถอย)
+        folded = true
+        goingBack = true
+        // idx ยังเป็น 7 (ย้ำ) → loop ถัดไปถึงจะถอย
+      } else {
+        idx++ // เดินหน้า
+      }
+    } else {
+      idx-- // ถอยหลัง
+    }
   }
   return steps
 }
@@ -312,7 +325,7 @@ export function buildSubTimeSlots(
   const DURATION = 7.5 // นาที
 
   for (let i = 0; i < 12; i++) {
-    const zIdx = (startZodiacIndex - i + 12) % 12
+    const zIdx = (startZodiacIndex + i) % 12
     const startMin = yamStartMin + i * DURATION
     const endMin = startMin + DURATION
     slots.push({
@@ -419,167 +432,118 @@ interface ChartConfig {
 }
 
 /**
- * generateHoraTaynooSVG — สร้าง SVG ผังโหรทายหนู Canonical 4-Layer
- *
- * Layer 1: Outer Zodiac Ring   R1 = 100%  (ชื่อราศี 12 ช่อง)
- * Layer 2: House Ring          R2 = 82%   (ชื่อภพ 12 หลัง)
- * Layer 3: Planet Ring         R3 = 65%   (ดาวลอย 11 ดวง)
- * Layer 4: Core Grid           R4 = 37%   (แกนกลาง 8 ภาค + Anchor 1-8)
- *
- * พฤษภ อยู่ที่ 330° เรียง CCW (ตาม อ.กานดา)
+ * generateHoraTaynooSVG — สร้าง SVG string ของผังดวง
+ * ใช้สำหรับ server-side render หรือ React dangerouslySetInnerHTML
  */
 export function generateHoraTaynooSVG(
   result: HoraTaynooResult,
   config: ChartConfig = {}
 ): string {
-  const SIZE = config.size ?? 520
-  const CX   = SIZE / 2
-  const CY   = SIZE / 2
-  const s    = SIZE / 520  // scale factor
+  const SIZE = config.size ?? 680
+  const CX = SIZE / 2
+  const CY = SIZE / 2
+  const scale = SIZE / 680
 
-  // ── Radii ──────────────────────────────────────────────────────────────────
-  const R1   = SIZE * 0.44              // Outer zodiac ring   (100%)
-  const R2   = R1 * 0.82               // House ring boundary (82%)
-  const R3   = R1 * 0.65               // Planet ring boundary(65%)
-  const R4   = R1 * 0.37               // Core boundary       (~37%)
+  const R_OUT  = 240 * scale
+  const R_ZIN  = 176 * scale
+  const R_YIN  = 140 * scale
+  const R_GRD  = 106 * scale
+  const R_LBL  = 208 * scale
+  const R_NUM  = 158 * scale
+  const R_COR  = 256 * scale
 
-  const R_ZOD = (R1 + R2) / 2          // zodiac label midpoint
-  const R_HOU = (R2 + R3) / 2          // house label midpoint
-  const R_PLN = (R3 + R4) / 2          // planet label midpoint
-
-  // ── Colors ─────────────────────────────────────────────────────────────────
-  const GOLD      = '#C9A96E'
-  const GOLD_MED  = '#C9A96E60'
-  const GOLD_DIM  = '#C9A96E28'
-  const TXT       = '#F5F0E8'
-  const TXT_DIM   = '#8B7E6E'
-  const LAGNA_BG  = '#1A4E9A22'
-  const PLN_BG    = '#C9A96E14'
-  const GOOD_CLR  = '#6EE7B7'
-  const BAD_CLR   = '#FDA4AF'
-  const MED_CLR   = '#A89880'
-
-  // ── Helpers ─────────────────────────────────────────────────────────────────
-  const GOOD_BHAVA = new Set(['ตนุ','กฎุมภะ','ปุตตะ','ปัตนิ','ศุภะ','กัมมะ','ลาภะ'])
-  const BAD_BHAVA  = new Set(['อริ','มรณะ','วินาศ'])
+  const GOLD = config.theme === 'dark' ? '#C9A96E' : '#8B6914'
+  const GOLD2 = config.theme === 'dark' ? '#C9A96E40' : '#8B691440'
+  const TXT   = config.theme === 'dark' ? '#F5F0E8' : '#1a1714'
+  const TXT2  = config.theme === 'dark' ? '#8B7E6E' : '#5a5148'
+  const HIGHL = config.theme === 'dark' ? '#C9A96E20' : '#C9A96E15'
 
   function polar(deg: number, r: number) {
     const rad = (deg * Math.PI) / 180
     return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) }
   }
 
-  /** วาด sector ระหว่าง rInner–rOuter ที่มุมกลาง angleMid ±15° */
-  function sectorPath(angleMid: number, rInner: number, rOuter: number): string {
-    const a1 = angleMid + 15  // CCW boundary (higher angle)
-    const a2 = angleMid - 15  // CW boundary  (lower angle)
-    const o1 = polar(a1, rOuter), o2 = polar(a2, rOuter)
-    const i2 = polar(a2, rInner), i1 = polar(a1, rInner)
-    const ro = rOuter.toFixed(1), ri = rInner.toFixed(1)
-    // outer arc CCW (sweep=0): from a1→a2 via angleMid (decreasing angle)
-    // inner arc CW  (sweep=1): from a2→a1
-    return `M${o1.x.toFixed(1)} ${o1.y.toFixed(1)} ` +
-           `A${ro} ${ro} 0 0 0 ${o2.x.toFixed(1)} ${o2.y.toFixed(1)} ` +
-           `L${i2.x.toFixed(1)} ${i2.y.toFixed(1)} ` +
-           `A${ri} ${ri} 0 0 1 ${i1.x.toFixed(1)} ${i1.y.toFixed(1)} Z`
-  }
-
-  // ── Build planet-by-zodiac map ──────────────────────────────────────────────
-  const byZodiac: Record<number, PlanetEntry[]> = {}
-  for (const e of result.planetEntries) {
-    ;(byZodiac[e.zodiacIndex] ??= []).push(e)
-  }
-
-  // ── Sector highlights ───────────────────────────────────────────────────────
-  let highlights = ''
-  for (const z of ZODIAC_ORDER) {
-    const isLagna    = z.index === result.lagnaZodiacIndex
-    const hasPlanets = (byZodiac[z.index] ?? []).length > 0
-    if (!isLagna && !hasPlanets) continue
-    highlights += `<path d="${sectorPath(z.sectorAngle, R4, R1)}" fill="${isLagna ? LAGNA_BG : PLN_BG}" stroke="none"/>`
-  }
-
-  // ── Circles ─────────────────────────────────────────────────────────────────
-  const circles = [
-    `<circle cx="${CX}" cy="${CY}" r="${R1.toFixed(1)}" fill="none" stroke="${GOLD}" stroke-width="1.5"/>`,
-    `<circle cx="${CX}" cy="${CY}" r="${R2.toFixed(1)}" fill="none" stroke="${GOLD}" stroke-width="1"/>`,
-    `<circle cx="${CX}" cy="${CY}" r="${R3.toFixed(1)}" fill="none" stroke="${GOLD_MED}" stroke-width="0.7"/>`,
-    `<circle cx="${CX}" cy="${CY}" r="${R4.toFixed(1)}" fill="none" stroke="${GOLD}" stroke-width="1"/>`,
-  ].join('\n')
-
-  // ── 12 radial dividers (zodiac sector boundaries) ───────────────────────────
-  // Boundaries at 345°, 315°, 285°, … (= 345° − 30°*i)
+  // 12 เส้นแบ่ง
   let dividers = ''
   for (let i = 0; i < 12; i++) {
-    const angle = 345 - 30 * i
-    const inner = polar(angle, R4)
-    const outer = polar(angle, R1)
+    const angle = 240 + i * 30
+    const inner = polar(angle, R_YIN)
+    const outer = polar(angle, R_OUT)
     dividers += `<line x1="${inner.x.toFixed(1)}" y1="${inner.y.toFixed(1)}" x2="${outer.x.toFixed(1)}" y2="${outer.y.toFixed(1)}" stroke="${GOLD}" stroke-width="0.8"/>`
   }
 
-  // ── Layer 1: Zodiac names ────────────────────────────────────────────────────
+  // ราศี + ไฮไลท์
   let zodiacLabels = ''
+  let highlights = ''
+  const entryByZodiac: Record<number, PlanetEntry[]> = {}
+  result.planetEntries.forEach(e => {
+    if (!entryByZodiac[e.zodiacIndex]) entryByZodiac[e.zodiacIndex] = []
+    entryByZodiac[e.zodiacIndex].push(e)
+  })
+
   for (const z of ZODIAC_ORDER) {
-    const pos   = polar(z.sectorAngle, R_ZOD)
+    const mid = polar(z.sectorAngle, R_LBL)
+    const entries = entryByZodiac[z.index] ?? []
     const isLagna = z.index === result.lagnaZodiacIndex
-    const color = isLagna ? '#6EB0F5' : TXT
-    zodiacLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${10.5*s}" font-family="sans-serif" fill="${color}" font-weight="${isLagna ? '700' : '500'}">${z.name}</text>`
+    const hasFloating = entries.length > 0
+
+    // highlight sector
+    if (hasFloating || isLagna) {
+      const a1 = z.sectorAngle - 15
+      const a2 = z.sectorAngle + 15
+      const p1 = polar(a1, R_ZIN), p2 = polar(a2, R_ZIN)
+      const p3 = polar(a2, R_OUT), p4 = polar(a1, R_OUT)
+      const fill = isLagna ? '#185FA520' : HIGHL
+      highlights += `<path d="M${p1.x.toFixed(1)} ${p1.y.toFixed(1)} A${R_ZIN} ${R_ZIN} 0 0 1 ${p2.x.toFixed(1)} ${p2.y.toFixed(1)} L${p3.x.toFixed(1)} ${p3.y.toFixed(1)} A${R_OUT} ${R_OUT} 0 0 0 ${p4.x.toFixed(1)} ${p4.y.toFixed(1)} Z" fill="${fill}" stroke="none"/>`
+    }
+
+    // ชื่อราศี
+    zodiacLabels += `<text x="${mid.x.toFixed(1)}" y="${mid.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${13*scale}" font-family="sans-serif" fill="${TXT}" font-weight="500">${z.name}</text>`
+
+    // ดาวลอย
+    if (entries.length > 0) {
+      const innerMid = polar(z.sectorAngle, R_NUM)
+      const labels = entries.map(e => e.label).join(',')
+      const p = entries.find(e => e.planetNum != null)
+      const pInfo = p?.planetNum ? PLANET_INFO[p.planetNum] : null
+      const color = pInfo?.color ?? GOLD
+      zodiacLabels += `<text x="${innerMid.x.toFixed(1)}" y="${innerMid.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${12*scale}" font-family="sans-serif" fill="${color}" font-weight="500">${labels}</text>`
+    }
   }
 
-  // ── Layer 2: House names ─────────────────────────────────────────────────────
-  let houseLabels = ''
-  for (const z of ZODIAC_ORDER) {
-    const bhava = result.bhavaMap[z.index]
-    if (!bhava) continue
-    const pos   = polar(z.sectorAngle, R_HOU)
-    const color = BAD_BHAVA.has(bhava) ? BAD_CLR : GOOD_BHAVA.has(bhava) ? GOOD_CLR : MED_CLR
-    houseLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${8.5*s}" font-family="sans-serif" fill="${color}">${bhava}</text>`
+  // ตัวเลขมุมนอก
+  const CORNER_NUMS = [2,1,2,3,4,5,6,7,6,5,4,3]
+  let cornerNums = ''
+  for (let i = 0; i < 12; i++) {
+    const angle = 240 + i * 30
+    const pos = polar(angle, R_COR)
+    if (pos.x >= 10 && pos.x <= SIZE-10 && pos.y >= 10 && pos.y <= SIZE-10) {
+      cornerNums += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${14*scale}" font-family="sans-serif" fill="${TXT2}" font-weight="500">${CORNER_NUMS[i]}</text>`
+    }
   }
 
-  // ── Layer 3: Planet labels ────────────────────────────────────────────────────
-  let planetLabels = ''
-  for (const z of ZODIAC_ORDER) {
-    const entries = byZodiac[z.index] ?? []
-    if (entries.length === 0) continue
-    const labels = entries.map(e => e.label).join(' ')
-    const pos    = polar(z.sectorAngle, R_PLN)
-    const first  = entries.find(e => e.planetNum != null && e.planetNum <= 7)
-    const color  = first ? (PLANET_INFO[first.planetNum!]?.color ?? GOLD) : GOLD
-    planetLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${13*s}" font-family="sans-serif" fill="${color}" font-weight="700">${labels}</text>`
-  }
-
-  // ── Layer 4: Core grid ────────────────────────────────────────────────────────
-  // 6 เส้นหลัก: แกนตั้ง (90/270) + แกนนอน (0/180) + ทแยง 4 ทิศ (45/225, 135/315)
-  let coreLines = ''
-  for (const angle of [0, 45, 90, 135]) {
-    const p1 = polar(angle, R4), p2 = polar(angle + 180, R4)
-    coreLines += `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${GOLD}" stroke-width="0.8"/>`
-  }
-
-  // Anchor Numbers 1-8 (ตำแหน่ง Fixed ตามตำรา)
-  const ANCHORS: Record<number, [number, number]> = {
-    1: [-35, 40], 2: [-60, 0],  3: [0, -65], 4: [-65, -25],
-    5: [60, -25], 6: [35, 40],  7: [0, 10],  8: [35, -65],
-  }
-  let anchorLabels = ''
-  for (const [num, [dx, dy]] of Object.entries(ANCHORS)) {
-    const x = (CX + Number(dx) * s).toFixed(1)
-    const y = (CY + Number(dy) * s).toFixed(1)
-    anchorLabels += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${11*s}" font-family="sans-serif" fill="${GOLD}" font-weight="700" opacity="0.6">${num}</text>`
-  }
-
-  // Day planet in center
-  const centerLabel = `<text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="central" font-size="${16*s}" font-family="sans-serif" fill="${GOLD}" font-weight="700">${result.dayPlanet}</text>`
+  // Inner grid
+  const gSize = R_GRD * 0.65
+  const innerGrid = `
+    <line x1="${(CX-gSize).toFixed(1)}" y1="${CY.toFixed(1)}" x2="${(CX+gSize).toFixed(1)}" y2="${CY.toFixed(1)}" stroke="${GOLD}" stroke-width="0.6"/>
+    <line x1="${CX.toFixed(1)}" y1="${(CY-gSize).toFixed(1)}" x2="${CX.toFixed(1)}" y2="${(CY+gSize).toFixed(1)}" stroke="${GOLD}" stroke-width="0.6"/>
+    <line x1="${(CX-gSize*0.4).toFixed(1)}" y1="${(CY-gSize).toFixed(1)}" x2="${(CX-gSize*0.4).toFixed(1)}" y2="${(CY+gSize).toFixed(1)}" stroke="${GOLD2}" stroke-width="0.4"/>
+    <line x1="${(CX+gSize*0.4).toFixed(1)}" y1="${(CY-gSize).toFixed(1)}" x2="${(CX+gSize*0.4).toFixed(1)}" y2="${(CY+gSize).toFixed(1)}" stroke="${GOLD2}" stroke-width="0.4"/>
+    <line x1="${(CX-gSize).toFixed(1)}" y1="${(CY-gSize*0.35).toFixed(1)}" x2="${(CX+gSize).toFixed(1)}" y2="${(CY-gSize*0.35).toFixed(1)}" stroke="${GOLD2}" stroke-width="0.4"/>
+    <line x1="${(CX-gSize).toFixed(1)}" y1="${(CY+gSize*0.35).toFixed(1)}" x2="${(CX+gSize).toFixed(1)}" y2="${(CY+gSize*0.35).toFixed(1)}" stroke="${GOLD2}" stroke-width="0.4"/>
+    <text x="${CX.toFixed(1)}" y="${(CY+gSize*0.6).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${18*scale}" font-family="sans-serif" fill="${GOLD}" font-weight="500">${result.dayPlanet}</text>
+  `
 
   return `<svg viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg">
-${highlights}
-${circles}
-${dividers}
-${zodiacLabels}
-${houseLabels}
-${planetLabels}
-${coreLines}
-${anchorLabels}
-${centerLabel}
+  <circle cx="${CX}" cy="${CY}" r="${R_OUT}" fill="none" stroke="${GOLD}" stroke-width="1.5"/>
+  <circle cx="${CX}" cy="${CY}" r="${R_ZIN}" fill="none" stroke="${GOLD}" stroke-width="0.8"/>
+  <circle cx="${CX}" cy="${CY}" r="${R_YIN}" fill="none" stroke="${GOLD2}" stroke-width="0.5"/>
+  <circle cx="${CX}" cy="${CY}" r="${R_GRD}" fill="none" stroke="${GOLD}" stroke-width="1"/>
+  ${highlights}
+  ${dividers}
+  ${zodiacLabels}
+  ${cornerNums}
+  ${innerGrid}
 </svg>`
 }
 
@@ -601,112 +565,4 @@ export function calculateAt(
   minute: number = 0
 ): HoraTaynooResult {
   return calculateHoraTaynoo({ dayOverride: day, hour, minute })
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SUCCESS YAM DATABASE (112 ผัง)
-// 7 วัน × 2 ช่วง × 8 ยาม = 112 ดวงยามสำเร็จ
-// ─────────────────────────────────────────────────────────────────────────────
-
-// ─────────────────────────────────────────────────────────────────────────────
-// SUCCESS YAM CHART INTERFACE (Phase C Schema)
-// ─────────────────────────────────────────────────────────────────────────────
-
-/** โครงสร้างดวงยามสำเร็จ 1 ผัง ตามสเปค Phase C */
-export interface SuccessYamChart {
-  id: string
-  weekday: 'sun'|'mon'|'tue'|'wed'|'thu'|'fri'|'sat'
-  period: 'day' | 'night'
-  yamNo: number
-  startTime: string
-  endTime: string
-
-  /** zodiac index (0-11) ที่ดาวลอยแต่ละดวงลงไป */
-  planets: {
-    '1': number; '2': number; '3': number; '4': number; '5': number;
-    '6': number; '7': number; '8': number; '9': number; '0': number;
-    'la': number;
-  }
-
-  /** zodiac index ที่ภพแต่ละภพตั้งอยู่ */
-  houses: {
-    tanu: number;    dhan: number;   saha: number;   bandhu: number;
-    putta: number;   ari: number;    patni: number;  marana: number;
-    subha: number;   karma: number;  labha: number;  vinasa: number;
-  }
-
-  /** เวลาเริ่มต้นของยามย่อย 12 ช่อง (7.5 นาที × 12) */
-  timeSlots: string[]
-}
-
-/** ข้อมูล meta ของยามแต่ละช่วง */
-export interface SuccessYamMeta {
-  id: string
-  weekday: number          // 0=อาทิตย์ ... 6=เสาร์
-  weekdayName: string
-  period: 'day' | 'night'
-  yamNo: number            // 1-8
-  start: string            // "HH:MM"
-  end: string
-}
-
-const WEEKDAY_NAMES = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์']
-const WEEKDAY_ID    = ['sun','mon','tue','wed','thu','fri','sat']
-
-function _minToHHMM(m: number): string {
-  const safe = ((m % 1440) + 1440) % 1440
-  return `${String(Math.floor(safe / 60)).padStart(2,'0')}:${String(Math.floor(safe % 60)).padStart(2,'0')}`
-}
-
-/**
- * getYamTimeRange — ดึงช่วงเวลาของยาม
- */
-export function getYamTimeRange(
-  period: 'day' | 'night',
-  yamNo: number,
-): { start: string; end: string } {
-  const s = YAM_START[period][yamNo - 1]
-  return { start: _minToHHMM(s), end: _minToHHMM(s + 90) }
-}
-
-/**
- * getSuccessYamMeta — ดึง meta array ทั้ง 112 รายการ (ไม่คำนวณผัง)
- */
-export function getSuccessYamMeta(): SuccessYamMeta[] {
-  const list: SuccessYamMeta[] = []
-  for (let w = 0; w < 7; w++) {
-    for (const period of ['day','night'] as const) {
-      for (let y = 1; y <= 8; y++) {
-        const { start, end } = getYamTimeRange(period, y)
-        list.push({
-          id: `${WEEKDAY_ID[w]}-${period}-${y}`,
-          weekday: w,
-          weekdayName: WEEKDAY_NAMES[w],
-          period,
-          yamNo: y,
-          start,
-          end,
-        })
-      }
-    }
-  }
-  return list
-}
-
-/**
- * loadSuccessYam — โหลดดวงยามสำเร็จ 1 ใน 112 ผัง
- * @param weekday 0=อาทิตย์...6=เสาร์ (astronomical day)
- * @param period 'day' | 'night'
- * @param yamNo 1–8
- */
-export function loadSuccessYam(
-  weekday: number,
-  period: 'day' | 'night',
-  yamNo: number,
-): HoraTaynooResult {
-  const startMin = YAM_START[period][yamNo - 1]
-  const safeMin  = ((startMin % 1440) + 1440) % 1440
-  const hour     = Math.floor(safeMin / 60)
-  const minute   = safeMin % 60
-  return calculateHoraTaynoo({ dayOverride: weekday, hour, minute })
 }
