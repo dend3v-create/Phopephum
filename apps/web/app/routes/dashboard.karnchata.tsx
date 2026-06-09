@@ -188,7 +188,7 @@ function NineBaseChart({
         if (rIdx < 3) bhopName = BHOP_NATAL_NAMES[rIdx]?.[colIdx] ?? "";
         else if (rIdx === 7) bhopName = BHOP_8_NAMES[colIdx] ?? "";
         else if (rIdx === 8) bhopName = BHOP_9_NAMES[colIdx] ?? "";
-        items.push({ rIdx, colIdx, bhopName, baseThai: rIdx === 3 ? "๔" : THAI_NUMS[rIdx < 3 ? rIdx : rIdx - 1] });
+        items.push({ rIdx, colIdx, bhopName, baseThai: THAI_NUMS[rIdx] });
       }
     });
     return items;
@@ -224,10 +224,30 @@ function NineBaseChart({
 
       <div className="overflow-x-auto">
         <div className="min-w-[340px] space-y-1.5">
-          {[0, 1, 2, 4, 5, 6, 7, 8].map((rIdx) => {
+          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((rIdx) => {
             const rowData = chart[rIdx] ?? [];
             if (rowData.length === 0) return null;
-            const label = rIdx === 0 ? base1Label : rIdx === 3 ? "ฐาน๔" : `ฐาน${THAI_NUMS[rIdx < 3 ? rIdx : rIdx - 1]}`;
+            const label = rIdx === 0 ? base1Label : `ฐาน${THAI_NUMS[rIdx]}`;
+            const isBase4 = rIdx === 3; // กำลังเทวดา — สีฟ้า
+
+            if (isBase4) {
+              return (
+                <div key={rIdx} className="flex items-stretch gap-2 bg-[#0B1E36]/50 border border-sky-500/20 rounded-xl py-1 px-1">
+                  <div className="w-14 shrink-0 flex items-center justify-end">
+                    <span className="text-[12px] font-black text-sky-400">{label}</span>
+                  </div>
+                  <div className="flex-1 grid grid-cols-7 gap-1">
+                    {rowData.map((s, cIdx) => (
+                      <div key={cIdx} className="rounded-lg py-1.5 flex flex-col items-center bg-[#020617] border border-sky-500/20">
+                        <span className="text-sm font-black text-sky-300">{s}</span>
+                        <span className="text-[9px] text-sky-400/70 truncate w-full text-center px-1">{BASE4_POWER_NAMES[s]}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+
             return (
               <div key={rIdx} className="flex items-stretch gap-2">
                 <div className="w-14 shrink-0 flex items-center justify-end">
@@ -235,7 +255,7 @@ function NineBaseChart({
                 </div>
                 <div className="flex-1 grid grid-cols-7 gap-1">
                   {rowData.map((s, cIdx) => {
-                    const bhopName = rIdx < 3 ? BHOP_NATAL_NAMES[rIdx]?.[cIdx] ?? "" : rIdx === 7 ? BHOP_8_NAMES[cIdx] : rIdx === 8 ? BHOP_9_NAMES[cIdx] : "";
+                    const bhopName = rIdx < 3 ? (BHOP_NATAL_NAMES[rIdx]?.[cIdx] ?? "") : rIdx === 7 ? BHOP_8_NAMES[cIdx] : rIdx === 8 ? BHOP_9_NAMES[cIdx] : "";
                     return (
                       <button key={cIdx} onClick={() => setHoverNum(hoverNum === s ? null : s)}
                         className={`rounded-xl py-2 flex flex-col items-center border transition-all ${hoverNum === s ? "bg-[#C6A96B]/20 border-[#C6A96B] ring-1 ring-[#C6A96B]/30" : "bg-[#020617] border-white/5 hover:border-white/20"}`}>
@@ -248,24 +268,6 @@ function NineBaseChart({
               </div>
             );
           })}
-          <div className="flex items-center gap-2 py-1">
-            <div className="flex-1 h-px bg-sky-500/20" />
-            <span className="text-[11px] text-sky-400/60 font-bold px-1 uppercase tracking-wider">กำลังเทวดา</span>
-            <div className="flex-1 h-px bg-sky-500/20" />
-          </div>
-          <div className="flex items-stretch gap-2 bg-[#0B1E36]/40 border border-sky-500/15 rounded-xl py-1 px-1">
-            <div className="w-14 shrink-0 flex items-center justify-end">
-              <span className="text-[12px] font-black text-sky-400">ฐาน๔</span>
-            </div>
-            <div className="flex-1 grid grid-cols-7 gap-1">
-              {(chart[3] ?? []).map((s, cIdx) => (
-                <div key={cIdx} className="rounded-lg py-1.5 flex flex-col items-center bg-[#020617] border border-sky-500/20">
-                  <span className="text-sm font-black text-sky-300">{s}</span>
-                  <span className="text-[9px] text-sky-400/70 truncate w-full text-center px-1">{BASE4_POWER_NAMES[s]}</span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
     </Card>
