@@ -421,14 +421,25 @@ export default function KarnchataPage() {
           <Card className="border-[#4B6FAE]/30 bg-[#0A1628] p-6 sm:p-8">
             <h3 className="text-base font-bold text-[#F8F6F1] mb-5">ผังดวงกาลชะตา 9 ฐาน (รายชั่วโมง)</h3>
             <div className="overflow-x-auto"><div className="min-w-[340px] space-y-1.5">
-              {[0,1,2,4,5,6,7,8].map(rIdx => {
+              {[0, 1, 2, 4, 5, 6, 7, 8].map((rIdx) => {
                 const hChart = (activeResult.hourlyChart ?? []) as number[][];
-                const rLabel = rIdx < 3 ? `ฐาน ${THAI_NUMS[rIdx]}` : `ฐาน ${THAI_NUMS[rIdx < 7 ? rIdx-1 : rIdx-1]}`;
                 return (
-                  <div key={rIdx} className="flex items-stretch gap-2"><div className="w-12 shrink-0 flex items-center justify-end"><span className="text-[12px] font-black text-[#C6A96B]">{rLabel}</span></div><div className="flex-1 grid grid-cols-7 gap-1">{(hChart[rIdx] ?? []).map((s, cIdx) => {
-                    const bhopName = rIdx < 3 ? BHOP_NATAL_NAMES[rIdx][cIdx] : rIdx === 7 ? BHOP_8_NAMES[cIdx] : rIdx === 8 ? BHOP_9_NAMES[cIdx] : "";
-                    return (<div key={cIdx} className="rounded-xl py-2 flex flex-col items-center bg-[#020617] border border-white/5"><span className="text-base font-display font-black" style={{color: PLANET_COLORS_BY_NUM[s]}}>{s}</span><span className="text-[10px] text-[#8A8070] truncate w-full text-center">{bhopName}</span></div>);
-                  })}</div></div>
+                  <div key={rIdx} className="flex items-stretch gap-2">
+                    <div className="w-12 shrink-0 flex items-center justify-end">
+                      <span className="text-[12px] font-black text-[#C6A96B]">ฐาน{THAI_NUMS[rIdx]}</span>
+                    </div>
+                    <div className="flex-1 grid grid-cols-7 gap-1">
+                      {(hChart[rIdx] ?? []).map((s, cIdx) => {
+                        const bhopName = rIdx < 3 ? BHOP_NATAL_NAMES[rIdx][cIdx] : rIdx === 7 ? BHOP_8_NAMES[cIdx] : rIdx === 8 ? BHOP_9_NAMES[cIdx] : "";
+                        return (
+                          <div key={cIdx} className="rounded-xl py-2 flex flex-col items-center bg-[#020617] border border-white/5">
+                            <span className="text-base font-display font-black" style={{ color: PLANET_COLORS_BY_NUM[s] }}>{s}</span>
+                            <span className="text-[10px] text-[#8A8070] truncate w-full text-center">{bhopName}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 );
               })}
               <div className="flex items-center gap-2 py-1"><div className="flex-1 h-px bg-sky-500/20"/><span className="text-[11px] text-sky-400/60 font-bold px-1">กำลังเทวดา</span><div className="flex-1 h-px bg-sky-500/20"/></div>
