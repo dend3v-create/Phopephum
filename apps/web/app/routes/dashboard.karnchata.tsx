@@ -132,7 +132,6 @@ const TAKSA_DIRECTIONS = [
   { id: 7, name: "ตะวันตกเฉียงใต้", star: "เสาร์" },
 ];
 
-// ชื่อภพฐาน 1-3
 const BHOP_NATAL_NAMES = [
   ["อัตตะ", "หินะ", "ธนัง", "ปิตา", "มาตา", "โภคา", "มัชฌิมา"],
   ["ตนุ", "กฎุมภะ", "สหัชชะ", "พันธุ", "ปุตตะ", "อริ", "ปัตนิ"],
@@ -140,25 +139,7 @@ const BHOP_NATAL_NAMES = [
 ];
 
 const BASE4_POWER_NAMES: Record<number, string> = {
-  3:  "อังคารเล็ก",
-  4:  "พุธเล็ก",
-  5:  "พฤหัสเล็ก",
-  6:  "พระอาทิตย์",
-  7:  "เสาร์เล็ก",
-  8:  "อังคารใหญ่",
-  9:  "พระเกตุ",
-  10: "พระเสาร์",
-  11: "ราชาโชค",
-  12: "พระราหู",
-  13: "มหาอุจ",
-  14: "จักรพรรดิ",
-  15: "พระจันทร์",
-  16: "โสฬสมงคล",
-  17: "พุธใหญ่",
-  18: "มหาจักรพรรดิ์",
-  19: "พระพฤหัส",
-  20: "เสาร์ใหญ่",
-  21: "พระศุกร์",
+  3:  "อังคารเล็ก", 4:  "พุธเล็ก", 5:  "พฤหัสเล็ก", 6:  "พระอาทิตย์", 7:  "เสาร์เล็ก", 8:  "อังคารใหญ่", 9:  "พระเกตุ", 10: "พระเสาร์", 11: "ราชาโชค", 12: "พระราหู", 13: "มหาอุจ", 14: "จักรพรรดิ", 15: "พระจันทร์", 16: "โสฬสมงคล", 17: "พุธใหญ่", 18: "มหาจักรพรรดิ์", 19: "พระพฤหัส", 20: "เสาร์ใหญ่", 21: "พระศุกร์",
 };
 
 const BHOP_8_NAMES = ["อาตมะ", "ทาสา", "สิทธิโชค", "โภคทรัพย์", "โจร", "อุบาทว์", "อุปถัมภ์"];
@@ -218,7 +199,6 @@ export default function KarnchataPage() {
   const [selectedYamKey, setSelectedYamKey] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"daily" | "hourly" | "minute">("hourly");
 
-  // Timer
   useEffect(() => {
     const timer = setInterval(() => {
       setTime(new Date());
@@ -238,17 +218,19 @@ export default function KarnchataPage() {
 
   const formatTime = (date: Date) => date.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 
-  // ── Derived values ──
   const bkkHour = (time.getUTCHours() + 7) % 24;
   const isDaytime = bkkHour >= 6 && bkkHour < 18;
   const yamSeq = Math.floor(((bkkHour - 6 + 24) % 24) / 1.5) % 8 + 1;
   const yaiN = activeResult.yamYaiNumber || activeResult.dayStarNumber || 1;
   const soyN = activeResult.yamSoyNumber || activeResult.dayStarNumber || 1;
+  
+  // ลัคนายาม 3.75 นาที
+  const secInCycle = (time.getUTCMinutes() % 30 * 60 + time.getUTCSeconds()) % Math.round(3.75 * 60);
+  const cycleSec = Math.round(3.75 * 60);
+  const soySlot = Math.floor((time.getUTCMinutes() % 30) / 3.75) + 1;
+  const lagnamPos = secInCycle < cycleSec / 3 ? "ยามต้น" : secInCycle < (cycleSec * 2) / 3 ? "ยามกลาง" : "ยามปลาย";
 
-  const tradeScore = 75; // simplified mock scores
-  const loveScore = 80;
-  const wealthScore = 65;
-  const dangerScore = 15;
+  const tradeScore = 75; const loveScore = 80; const wealthScore = 65; const dangerScore = 15;
 
   const _SEQ = [6, 1, 2, 3, 4, 7, 5, 8] as const;
   const _BHOP = ["บริวาร", "อายุ", "เดช", "ศรี", "มูละ", "อุตสาหะ", "มนตรี", "กาลกิณี"] as const;
@@ -272,14 +254,11 @@ export default function KarnchataPage() {
       const yamStarPos8 = _SEQ.indexOf(star as any);
       const qualIdx = dayStarPos8 !== -1 && yamStarPos8 !== -1 ? (yamStarPos8 - dayStarPos8 + 8) % 8 : -1;
       const quality = qualIdx !== -1 ? (_BHOP[qualIdx] ?? '') : '';
-      const chart0 = (activeResult.chart[0] ?? []) as number[];
-      const b1Col = chart0.indexOf(star);
-      const b1Bhop = b1Col !== -1 ? (BHOP_NATAL_NAMES[0]?.[b1Col] ?? '') : '';
       const bkkH = (time.getUTCHours() + 7) % 24;
       const totalMin = bkkH * 60 + time.getUTCMinutes();
       const slotStartMin = (isDay ? 6 : 18) * 60 + slot * 90;
       const isCurrentYam = totalMin >= slotStartMin && totalMin < slotStartMin + 90;
-      return { yamNum: slot + 1, isDay, star, timeStr, quality, qualIdx, b1Bhop, b1Col, isCurrentYam };
+      return { yamNum: slot + 1, isDay, star, timeStr, quality, qualIdx, isCurrentYam };
     });
   }, [activeResult, time]);
 
@@ -287,22 +266,44 @@ export default function KarnchataPage() {
   const connectionItems = useMemo(() => {
     if (hoverNum === null) return [];
     const chart = activeResult.chart as number[][];
-    const items: Array<{ rIdx: number; colIdx: number; bhopName: string; b4Power: string | null; baseThai: string }> = [];
-    chart.forEach((row, rIdx) => {
-      if (rIdx === 3) return;
-      const colIdx = row.indexOf(hoverNum);
-      if (colIdx === -1) return;
-      let bhopName = '';
-      if (rIdx < 3) bhopName = BHOP_NATAL_NAMES[rIdx]?.[colIdx] ?? '';
-      else if (rIdx === 7) bhopName = BHOP_8_NAMES[colIdx] ?? '';
-      else if (rIdx === 8) bhopName = BHOP_9_NAMES[colIdx] ?? '';
-      const b4Power = rIdx === 2 ? (BASE4_POWER_NAMES[(chart[3]?.[colIdx] ?? 0)] ?? null) : null;
-      items.push({ rIdx, colIdx, bhopName, b4Power, baseThai: THAI_NUMS[rIdx] ?? '' });
-    });
+    const hChart = activeResult.hourlyChart as number[][];
+    const items: Array<{ rIdx: number; colIdx: number; bhopName: string; baseThai: string }> = [];
+    
+    // Check main chart (Minute)
+    if (chart && Array.isArray(chart)) {
+      chart.forEach((row, rIdx) => {
+        if (!Array.isArray(row)) return;
+        const colIdx = row.indexOf(hoverNum);
+        if (colIdx !== -1) {
+          let bhopName = '';
+          if (rIdx < 3) bhopName = BHOP_NATAL_NAMES[rIdx]?.[colIdx] ?? '';
+          else if (rIdx === 7) bhopName = BHOP_8_NAMES[colIdx] ?? '';
+          else if (rIdx === 8) bhopName = BHOP_9_NAMES[colIdx] ?? '';
+          items.push({ rIdx, colIdx, bhopName, baseThai: rIdx === 3 ? "๔" : THAI_NUMS[rIdx < 3 ? rIdx : rIdx - 1] });
+        }
+      });
+    }
+    
+    // Check hourly chart
+    if (hChart && Array.isArray(hChart)) {
+      hChart.forEach((row, rIdx) => {
+        if (!Array.isArray(row)) return;
+        const colIdx = row.indexOf(hoverNum);
+        if (colIdx !== -1) {
+          let bhopName = '';
+          if (rIdx < 3) bhopName = BHOP_NATAL_NAMES[rIdx]?.[colIdx] ?? '';
+          else if (rIdx === 7) bhopName = BHOP_8_NAMES[colIdx] ?? '';
+          else if (rIdx === 8) bhopName = BHOP_9_NAMES[colIdx] ?? '';
+          if (!items.some(it => it.rIdx === rIdx && it.colIdx === colIdx && it.bhopName === bhopName)) {
+            items.push({ rIdx, colIdx, bhopName, baseThai: rIdx === 3 ? "๔" : THAI_NUMS[rIdx < 3 ? rIdx : rIdx - 1] });
+          }
+        }
+      });
+    }
+
     return items;
   }, [hoverNum, activeResult]);
 
-  // Chat
   const [chatMessages, setChatMessages] = useState([{ sender: "ai", text: "สวัสดีครับ พร้อมวิเคราะห์จังหวะชีวิตเรียลไทม์แล้วครับ ท่านอยากตรวจสอบเรื่องใด?", time: "" }]);
   const [userInput, setUserInput] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -351,7 +352,6 @@ export default function KarnchataPage() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-      {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
           <span className="text-[#C6A96B] text-xs tracking-[0.25em] uppercase font-bold block mb-1">✦ คัมภีร์พยากรณ์ลับเฉพาะกาล</span>
@@ -364,7 +364,6 @@ export default function KarnchataPage() {
         </div>
       </div>
 
-      {/* ── Control Bar ── */}
       <div className="bg-[#0A1628]/80 border border-white/5 rounded-2xl p-2 flex flex-col gap-2">
         <div className="flex bg-[#020617] rounded-xl p-1 border border-white/5">
           <button onClick={() => setTimeMode("live")} className={`flex-1 px-4 py-2.5 text-sm font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#1E1730] text-[#F8F6F1]" : "text-[#8A8070]"}`}>⏱ เรียลไทม์</button>
@@ -372,13 +371,8 @@ export default function KarnchataPage() {
         </div>
       </div>
 
-      {/* ── Tabs ── */}
       <div className="flex bg-[#0A1628]/60 p-1.5 rounded-2xl border border-white/5 gap-1.5 sticky top-2 z-30 backdrop-blur-xl">
-        {[
-          { id: "daily", label: "รายวัน", icon: "📅" },
-          { id: "hourly", label: "รายชั่วโมง", icon: "⏱" },
-          { id: "minute", label: "รายนาที 3.45", icon: "🎯" },
-        ].map((tab) => (
+        {[ { id: "daily", label: "รายวัน", icon: "📅" }, { id: "hourly", label: "รายชั่วโมง", icon: "⏱" }, { id: "minute", label: "รายนาที 3.45", icon: "🎯" } ].map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id as any)} className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === tab.id ? "bg-[#C6A96B] text-[#020617]" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}>
             <span>{tab.icon}</span><span>{tab.label}</span>
           </button>
@@ -418,32 +412,27 @@ export default function KarnchataPage() {
             </div>
           </Card>
 
-          <Card className="border-[#4B6FAE]/30 bg-[#0A1628] p-6 sm:p-8">
-            <h3 className="text-base font-bold text-[#F8F6F1] mb-5">ผังดวงกาลชะตา 9 ฐาน (รายชั่วโมง)</h3>
+          <Card className="border-[#4B6FAE]/30 bg-[#0A1628] p-6 sm:p-8 relative">
+            <div className="flex items-center gap-3 mb-5"><span className="text-2xl shrink-0">⏰</span><div className="flex-1"><h3 className="text-base font-bold text-[#F8F6F1]">ผังดวงกาลชะตา 9 ฐาน (รายชั่วโมง)</h3><p className="text-xs text-[#8A8070] mt-0.5">วิเคราะห์เจาะลึกอิทธิพลยามใหญ่และฐานที่เกี่ยวข้อง</p></div>{hoverNum !== null && (<button type="button" onClick={() => setHoverNum(null)} className="shrink-0 text-xs text-[#8A8070] hover:text-[#F8F6F1] border border-white/10 px-3 py-1 rounded-lg">✕ ล้าง</button>)}</div>
+            {hoverNum !== null && (
+              <div className="mb-4 bg-[#020617] border border-[#C6A96B]/30 rounded-xl p-3 animate-in fade-in"><div className="flex items-center gap-3 mb-2"><div className="w-8 h-8 rounded-full flex items-center justify-center font-bold ring-2 ring-[#C6A96B]" style={{color: PLANET_COLORS_BY_NUM[hoverNum]}}>{hoverNum}</div><p className="text-sm font-bold text-[#C6A96B]">ดาว {STAR_NAMES[hoverNum as keyof typeof STAR_NAMES]}</p></div><div className="flex flex-wrap gap-1.5">{connectionItems.map((occ, i) => (<div key={i} className="bg-[#0A1628] border border-white/5 rounded px-2 py-1 text-[10px] text-[#F8F6F1]"><span className="text-[#C6A96B] font-bold">ฐาน{occ.baseThai}</span> {occ.bhopName}</div>))}</div></div>
+            )}
             <div className="overflow-x-auto"><div className="min-w-[340px] space-y-1.5">
               {[0, 1, 2, 4, 5, 6, 7, 8].map((rIdx) => {
                 const hChart = (activeResult.hourlyChart ?? []) as number[][];
+                const rowData = hChart[rIdx] ?? [];
+                if (rowData.length === 0) return null;
                 return (
-                  <div key={rIdx} className="flex items-stretch gap-2">
-                    <div className="w-12 shrink-0 flex items-center justify-end">
-                      <span className="text-[12px] font-black text-[#C6A96B]">ฐาน{THAI_NUMS[rIdx]}</span>
-                    </div>
-                    <div className="flex-1 grid grid-cols-7 gap-1">
-                      {(hChart[rIdx] ?? []).map((s, cIdx) => {
-                        const bhopName = rIdx < 3 ? BHOP_NATAL_NAMES[rIdx][cIdx] : rIdx === 7 ? BHOP_8_NAMES[cIdx] : rIdx === 8 ? BHOP_9_NAMES[cIdx] : "";
-                        return (
-                          <div key={cIdx} className="rounded-xl py-2 flex flex-col items-center bg-[#020617] border border-white/5">
-                            <span className="text-base font-display font-black" style={{ color: PLANET_COLORS_BY_NUM[s] }}>{s}</span>
-                            <span className="text-[10px] text-[#8A8070] truncate w-full text-center">{bhopName}</span>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
+                  <div key={rIdx} className="flex items-stretch gap-2"><div className="w-12 shrink-0 flex items-center justify-end"><span className="text-[12px] font-black text-[#C6A96B]">ฐาน{THAI_NUMS[rIdx < 3 ? rIdx : rIdx - 1]}</span></div><div className="flex-1 grid grid-cols-7 gap-1">
+                    {rowData.map((s, cIdx) => {
+                      const bhopName = rIdx < 3 ? BHOP_NATAL_NAMES[rIdx][cIdx] : rIdx === 7 ? BHOP_8_NAMES[cIdx] : rIdx === 8 ? BHOP_9_NAMES[cIdx] : "";
+                      return (<button key={cIdx} onClick={() => setHoverNum(hoverNum === s ? null : s)} className={`rounded-xl py-2 flex flex-col items-center border transition-all ${hoverNum === s ? 'bg-[#C6A96B]/20 border-[#C6A96B] ring-1 ring-[#C6A96B]/30' : 'bg-[#020617] border-white/5 hover:border-white/20'}`}><span className="text-base font-display font-black" style={{ color: hoverNum === s ? PLANET_COLORS_BY_NUM[s] : (PLANET_COLORS_BY_NUM[s] + 'cc') }}>{s}</span><span className="text-[10px] text-[#8A8070] truncate w-full text-center px-1">{bhopName}</span></button>);
+                    })}
+                  </div></div>
                 );
               })}
-              <div className="flex items-center gap-2 py-1"><div className="flex-1 h-px bg-sky-500/20"/><span className="text-[11px] text-sky-400/60 font-bold px-1">กำลังเทวดา</span><div className="flex-1 h-px bg-sky-500/20"/></div>
-              <div className="flex items-stretch gap-2 bg-[#0B1E36]/40 border border-sky-500/15 rounded-xl py-1 px-1"><div className="w-12 shrink-0 flex items-center justify-end"><span className="text-[12px] font-black text-sky-400">ฐาน๔</span></div><div className="flex-1 grid grid-cols-7 gap-1">{(activeResult.hourlyChart[3] ?? []).map((s, cIdx) => (<div key={cIdx} className="rounded-lg py-1.5 flex flex-col items-center bg-[#020617] border border-sky-500/20"><span className="text-sm font-black text-sky-300">{s}</span><span className="text-[9px] text-sky-400/70 truncate w-full px-1">{BASE4_POWER_NAMES[s]}</span></div>))}</div></div>
+              <div className="flex items-center gap-2 py-1"><div className="flex-1 h-px bg-sky-500/20"/><span className="text-[11px] text-sky-400/60 font-bold px-1 uppercase tracking-wider">กำลังเทวดา</span><div className="flex-1 h-px bg-sky-500/20"/></div>
+              <div className="flex items-stretch gap-2 bg-[#0B1E36]/40 border border-sky-500/15 rounded-xl py-1 px-1"><div className="w-12 shrink-0 flex items-center justify-end"><span className="text-[12px] font-black text-sky-400">ฐาน๔</span></div><div className="flex-1 grid grid-cols-7 gap-1">{(activeResult.hourlyChart?.[3] ?? []).map((s, cIdx) => (<div key={cIdx} className="rounded-lg py-1.5 flex flex-col items-center bg-[#020617] border border-sky-500/20"><span className="text-sm font-black text-sky-300">{s}</span><span className="text-[9px] text-sky-400/70 truncate w-full px-1 text-center">{BASE4_POWER_NAMES[s]}</span></div>))}</div></div>
             </div></div>
           </Card>
         </>
@@ -455,25 +444,26 @@ export default function KarnchataPage() {
             <h3 className="text-base font-bold text-[#F8F6F1] mb-5">ตารางกาลชะตารายวัน</h3>
             <div className="bg-[#020617] border border-[#C6A96B]/12 rounded-2xl p-4 mb-6"><div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">{_BHOP.map((bhop, idx) => {
               const s = _SEQ[(_SEQ.indexOf(activeResult.dayStarNumber as any) + idx + 8) % 8] as number;
-              return (<div key={bhop} className="rounded-xl p-2 border border-white/5 text-center"><p className="text-[12px] font-bold text-[#8A8070]">{bhop}</p><p className="text-sm font-display font-black text-[#F8F6F1]">{s}</p></div>);
+              const isNow = s === activeResult.yamYaiNumber;
+              return (<div key={bhop} className={`rounded-xl p-2 border text-center transition-colors ${isNow ? 'bg-[#C6A96B]/10 border-[#C6A96B]/40' : 'border-white/5 bg-[#0A1628]'}`}><p className={`text-[11px] font-bold ${isNow ? 'text-[#C6A96B]' : 'text-[#8A8070]'}`}>{bhop}</p><p className={`text-sm font-display font-black ${isNow ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>{s}</p></div>);
             })}</div></div>
             <div className="space-y-6">
               <div><p className="text-xs font-bold text-amber-400/80 mb-3">☀️ กลางวัน (06:00–18:00)</p><div className="space-y-1.5">{dayYamTable.filter(y => y.isDay).map(y => {
                 const yamKey = `day-${y.yamNum}`; const isEx = selectedYamKey === yamKey;
-                return (<div key={y.yamNum} className="flex flex-col"><button onClick={() => setSelectedYamKey(isEx ? null : yamKey)} className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs ${y.isCurrentYam ? 'bg-[#C6A96B]/10 border-[#C6A96B]/40' : 'bg-[#020617] border-white/5'}`}><span className="w-20 font-mono text-[#8A8070]">{y.timeStr}</span><span className={`w-16 font-bold ${y.isCurrentYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span><span className="w-14 text-[#8A8070]">{y.quality}</span><span className="flex-1 text-[#8A8070] truncate text-left">{TAKSA_PLAN_ADVICE[y.quality]?.th}</span><span>{isEx ? "▲" : "▼"}</span></button>
+                return (<div key={y.yamNum} className="flex flex-col"><button onClick={() => setSelectedYamKey(isEx ? null : yamKey)} className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs ${y.isCurrentYam ? 'bg-[#C6A96B]/10 border-[#C6A96B]/40' : 'bg-[#020617] border-white/5'}`}><span className="w-20 font-mono text-[#8A8070]">{y.timeStr}</span><span className={`w-16 font-bold ${y.isCurrentYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span><span className="w-14 text-[#8A8070] font-bold">{y.quality}</span><span className="flex-1 text-[#8A8070] truncate text-left">{TAKSA_PLAN_ADVICE[y.quality]?.th}</span><span className="text-[#8A8070]/50">{isEx ? "▲" : "▼"}</span></button>
                   {isEx && (<div className="px-4 py-3 bg-[#020617]/40 border-x border-b border-white/5 rounded-b-xl"><p className="text-xs text-[#C6A96B] font-bold">{y.quality} — {TAKSA_PLAN_ADVICE[y.quality]?.th}</p><p className="text-[11px] text-[#D9CDB7] leading-relaxed mt-1">{(YAM_DESC[y.star] || YAM_DESC[1]).desc}</p></div>)}
                 </div>);
               })}</div></div>
               <div><p className="text-xs font-bold text-indigo-400/80 mb-3">🌙 กลางคืน (18:00–06:00)</p><div className="space-y-1.5">{dayYamTable.filter(y => !y.isDay).map(y => {
                 const yamKey = `night-${y.yamNum}`; const isEx = selectedYamKey === yamKey;
-                return (<div key={y.yamNum} className="flex flex-col"><button onClick={() => setSelectedYamKey(isEx ? null : yamKey)} className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs ${y.isCurrentYam ? 'bg-[#C6A96B]/10 border-[#C6A96B]/40' : 'bg-[#020617] border-white/5'}`}><span className="w-20 font-mono text-[#8A8070]">{y.timeStr}</span><span className={`w-16 font-bold ${y.isCurrentYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span><span className="w-14 text-[#8A8070]">{y.quality}</span><span className="flex-1 text-[#8A8070] truncate text-left">{TAKSA_PLAN_ADVICE[y.quality]?.th}</span><span>{isEx ? "▲" : "▼"}</span></button>
+                return (<div key={y.yamNum} className="flex flex-col"><button onClick={() => setSelectedYamKey(isEx ? null : yamKey)} className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs ${y.isCurrentYam ? 'bg-[#C6A96B]/10 border-[#C6A96B]/40' : 'bg-[#020617] border-white/5'}`}><span className="w-20 font-mono text-[#8A8070]">{y.timeStr}</span><span className={`w-16 font-bold ${y.isCurrentYam ? 'text-[#C6A96B]' : 'text-[#F8F6F1]'}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span><span className="w-14 text-[#8A8070] font-bold">{y.quality}</span><span className="flex-1 text-[#8A8070] truncate text-left">{TAKSA_PLAN_ADVICE[y.quality]?.th}</span><span className="text-[#8A8070]/50">{isEx ? "▲" : "▼"}</span></button>
                   {isEx && (<div className="px-4 py-3 bg-[#020617]/40 border-x border-b border-white/5 rounded-b-xl"><p className="text-xs text-[#C6A96B] font-bold">{y.quality} — {TAKSA_PLAN_ADVICE[y.quality]?.th}</p><p className="text-[11px] text-[#D9CDB7] leading-relaxed mt-1">{(YAM_DESC[y.star] || YAM_DESC[1]).desc}</p></div>)}
                 </div>);
               })}</div></div>
             </div>
           </Card>
-          <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8"><div className="flex items-start gap-3 mb-6"><span className="text-2xl">🧭</span><div><h3 className="text-base font-bold text-[#F8F6F1]">ผังทิศทักษาจรแปดทิศ</h3></div></div><div className="grid grid-cols-3 gap-2">{TAKSA_DIRECTIONS.map(dir => (<button key={dir.id} className="bg-[#020617] border border-white/5 rounded-xl p-3 flex flex-col items-center transition-all hover:bg-white/5"><p className="text-[11px] text-[#8A8070] font-bold">{dir.name}</p><p className="text-xl font-display font-bold text-[#C6A96B]">({dir.id === 9 ? '๙' : dir.id})</p></button>))}</div></Card>
-          <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8"><div className="flex items-start gap-3 mb-6"><span className="text-2xl">👤</span><div><h3 className="text-base font-bold text-[#F8F6F1]">ทักษา & มหาภูติจรส่วนบุคคล</h3></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="bg-[#020617] rounded-2xl p-5 border border-white/5"><p className="text-sm font-bold text-[#F8F6F1] mb-3">🎯 ทักษาจรประจำปี</p>{activePhopephum?.taksaTransit?.map ? Object.entries(activePhopephum.taksaTransit.map).map(([s, b]) => (<div key={s} className="flex justify-between text-xs py-1 border-b border-white/5"><span className="text-[#8A8070]">{STAR_NAMES[Number(s) as keyof typeof STAR_NAMES]} ({s})</span><span className="text-[#F8F6F1] font-bold">{b as string}</span></div>)) : <p className="text-xs text-[#8A8070]">กรุณาระบุวันเกิด</p>}</div><div className="bg-[#020617] rounded-2xl p-5 border border-white/5"><p className="text-sm font-bold text-[#F8F6F1] mb-3">🧠 มหาภูติจร</p>{activePhopephum?.mahaTransit?.map ? Object.entries(activePhopephum.mahaTransit.map).map(([b, s]) => (<div key={b} className="flex justify-between text-xs py-1 border-b border-white/5"><span className="text-[#8A8070]">{b}</span><span className="text-[#F8F6F1] font-bold">{STAR_NAMES[Number(s) as keyof typeof STAR_NAMES]} ({s})</span></div>)) : <p className="text-xs text-[#8A8070]">กรุณาระบุวันเกิด</p>}</div></div></Card>
+          <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8"><div className="flex items-start gap-3 mb-6"><span className="text-2xl">🧭</span><div><h3 className="text-base font-bold text-[#F8F6F1]">ผังทิศทักษาจรแปดทิศ</h3><p className="text-xs text-[#8A8070] mt-1">ทิศทางที่เป็นคุณ/เป็นภัยในนาทีนี้</p></div></div><div className="grid grid-cols-3 gap-2">{TAKSA_DIRECTIONS.map(dir => (<button key={dir.id} onClick={() => setHoverNum(hoverNum === dir.id ? null : dir.id)} className={`bg-[#020617] border rounded-xl p-3 flex flex-col items-center transition-all ${hoverNum === dir.id ? 'border-[#C6A96B] bg-[#C6A96B]/5' : 'border-white/5 hover:bg-white/5'}`}><p className="text-[11px] text-[#8A8070] font-bold">{dir.name}</p><p className="text-xl font-display font-bold text-[#C6A96B]">({dir.id === 9 ? '๙' : dir.id})</p></button>))}</div></Card>
+          <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8"><div className="flex items-start gap-3 mb-6"><span className="text-2xl">👤</span><div><h3 className="text-base font-bold text-[#F8F6F1]">ทักษา & มหาภูติจรส่วนบุคคล</h3><p className="text-xs text-[#8A8070] mt-1">ดึงจากวันเกิดในโปรไฟล์</p></div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-4"><div className="bg-[#020617] rounded-2xl p-5 border border-white/5"><p className="text-sm font-bold text-[#F8F6F1] mb-3">🎯 ทักษาจรประจำปี</p>{activePhopephum?.taksaTransit?.map ? Object.entries(activePhopephum.taksaTransit.map).map(([s, b]) => (<div key={s} className="flex justify-between text-xs py-1 border-b border-white/5"><span className="text-[#8A8070]">{STAR_NAMES[Number(s) as keyof typeof STAR_NAMES]} ({s})</span><span className="text-[#F8F6F1] font-bold">{b as string}</span></div>)) : <p className="text-xs text-[#8A8070]">กรุณาระบุวันเกิด</p>}</div><div className="bg-[#020617] rounded-2xl p-5 border border-white/5"><p className="text-sm font-bold text-[#F8F6F1] mb-3">🧠 มหาภูติจร</p>{activePhopephum?.mahaTransit?.map ? Object.entries(activePhopephum.mahaTransit.map).map(([b, s]) => (<div key={b} className="flex justify-between text-xs py-1 border-b border-white/5"><span className="text-[#8A8070]">{b}</span><span className="text-[#F8F6F1] font-bold">{STAR_NAMES[Number(s) as keyof typeof STAR_NAMES]} ({s})</span></div>)) : <p className="text-xs text-[#8A8070]">กรุณาระบุวันเกิด</p>}</div></div></Card>
         </>
       )}
 
@@ -484,18 +474,29 @@ export default function KarnchataPage() {
             <div className="relative z-10"><div className="flex items-center justify-between mb-6"><div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-300 text-xs font-bold uppercase tracking-wider">🎯 ยามรายนาที (3.45 นาที)</div></div><div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center text-center md:text-left"><div><p className="text-xs text-sky-400/70 uppercase mb-2 font-bold">ลัคนายามขณะนี้</p><p className="text-6xl font-display font-black text-[#F8F6F1]">{soySlot} <span className="text-sky-400">{lagnamPos}</span></p><div className="inline-flex gap-4 bg-[#020617] border border-sky-500/30 rounded-2xl px-6 py-4 mt-4 text-left"><div><p className="text-[10px] text-sky-400/60 font-bold">ดาวยามซอย</p><p className="text-xl font-bold text-[#F8F6F1]">{activeResult.yamSoyName} ({soyN})</p></div><div className="w-px h-10 bg-sky-500/20" /><div><p className="text-[10px] text-sky-400/60 font-bold">ช่วงเวลา</p><p className="text-xs font-mono text-sky-300">รอบละ 225 วินาที</p></div></div></div><div className="bg-[#020617]/60 border border-white/5 rounded-2xl p-6 backdrop-blur-sm text-left"><h4 className="text-sm font-bold text-[#F8F6F1] mb-2 flex items-center gap-2"><span className="w-2 h-2 rounded-full bg-sky-400" />อิทธิพลรายนาที</h4><p className="text-xs text-[#D9CDB7] leading-relaxed mb-4">วิเคราะห์จังหวะชีวิตระดับนาทีทอง เพื่อหาจังหวะเริ่มต้น การเจรจา หรือการเคลื่อนไหวที่ให้ผลลัพธ์สูงสุด</p></div></div></div>
           </Card>
           <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8 relative">
-            <h3 className="text-base font-bold text-[#F8F6F1] mb-5">ผังดวงกาลชะตา 9 ฐาน (เจาะลึกรายนาที)</h3>
+            <div className="flex items-center gap-3 mb-5"><span className="text-2xl shrink-0">☸️</span><div className="flex-1"><h3 className="text-base font-bold text-[#F8F6F1]">ผังดวงกาลชะตา 9 ฐาน (นาทีนี้)</h3><p className="text-xs text-[#8A8070] mt-0.5">วิเคราะห์เจาะลึกรหัสรหัสชะตาระดับนาที</p></div>{hoverNum !== null && (<button type="button" onClick={() => setHoverNum(null)} className="shrink-0 text-xs text-[#8A8070] hover:text-[#F8F6F1] border border-white/10 px-3 py-1 rounded-lg">✕ ล้าง</button>)}</div>
+            {hoverNum !== null && (
+              <div className="mb-4 bg-[#020617] border border-[#C6A96B]/30 rounded-xl p-3 animate-in fade-in"><div className="flex items-center gap-3 mb-2"><div className="w-8 h-8 rounded-full flex items-center justify-center font-bold ring-2 ring-[#C6A96B]" style={{color: PLANET_COLORS_BY_NUM[hoverNum]}}>{hoverNum}</div><p className="text-sm font-bold text-[#C6A96B]">ดาว {STAR_NAMES[hoverNum as keyof typeof STAR_NAMES]}</p></div><div className="flex flex-wrap gap-1.5">{connectionItems.map((occ, i) => (<div key={i} className="bg-[#0A1628] border border-white/5 rounded px-2 py-1 text-[10px] text-[#F8F6F1]"><span className="text-[#C6A96B] font-bold">ฐาน{occ.baseThai}</span> {occ.bhopName}</div>))}</div></div>
+            )}
             <div className="overflow-x-auto"><div className="min-w-[340px] space-y-1.5">
-              {[0,1,2,4,5,6,7,8].map(rIdx => (
-                <div key={rIdx} className="flex items-stretch gap-2"><div className="w-12 shrink-0 flex items-center justify-end"><span className="text-[12px] font-black text-[#C6A96B]">ฐาน{THAI_NUMS[rIdx < 3 ? rIdx : rIdx-1]}</span></div><div className="flex-1 grid grid-cols-7 gap-1">{(activeResult.chart[rIdx] as number[]).map((s, cIdx) => {
-                  const bName = rIdx < 3 ? BHOP_NATAL_NAMES[rIdx][cIdx] : rIdx === 7 ? BHOP_8_NAMES[cIdx] : rIdx === 8 ? BHOP_9_NAMES[cIdx] : "";
-                  return (<button key={cIdx} onClick={() => setHoverNum(hoverNum === s ? null : s)} className={`rounded-xl py-2 flex flex-col items-center border transition-all ${hoverNum === s ? 'bg-[#C6A96B]/20 border-[#C6A96B]' : 'bg-[#020617] border-white/5'}`}><span className="text-base font-display font-black" style={{color: PLANET_COLORS_BY_NUM[s]}}>{s}</span><span className="text-[9px] text-[#8A8070] truncate w-full text-center">{bName}</span></button>);
-                })}</div></div>
-              ))}
-              <div className="flex items-center gap-2 py-1"><div className="flex-1 h-px bg-sky-500/20"/><span className="text-[11px] text-sky-400/60 font-bold uppercase px-1">กำลังเทวดา</span><div className="flex-1 h-px bg-sky-500/20"/></div>
-              <div className="flex items-stretch gap-2 bg-[#0B1E36]/40 border border-sky-500/15 rounded-xl py-1 px-1"><div className="w-12 shrink-0 flex items-center justify-end"><span className="text-[12px] font-black text-sky-400">ฐาน๔</span></div><div className="flex-1 grid grid-cols-7 gap-1">{(activeResult.chart[3] as number[]).map((s, cIdx) => (<div key={cIdx} className="rounded-lg py-1.5 flex flex-col items-center bg-[#020617] border border-sky-500/20"><span className="text-sm font-black text-sky-300">{s}</span><span className="text-[9px] text-sky-400/70 truncate w-full text-center px-1">{BASE4_POWER_NAMES[s]}</span></div>))}</div></div>
+              {[0, 1, 2, 4, 5, 6, 7, 8].map(rIdx => {
+                const chart = (activeResult.chart ?? []) as number[][];
+                const rowData = chart[rIdx] ?? [];
+                if (rowData.length === 0) return null;
+                return (
+                  <div key={rIdx} className="flex items-stretch gap-2"><div className="w-12 shrink-0 flex items-center justify-end"><span className="text-[12px] font-black text-[#C6A96B]">ฐาน{THAI_NUMS[rIdx < 3 ? rIdx : rIdx-1]}</span></div><div className="flex-1 grid grid-cols-7 gap-1">
+                    {rowData.map((s, cIdx) => {
+                      const bName = rIdx < 3 ? BHOP_NATAL_NAMES[rIdx][cIdx] : rIdx === 7 ? BHOP_8_NAMES[cIdx] : rIdx === 8 ? BHOP_9_NAMES[cIdx] : "";
+                      return (<button key={cIdx} onClick={() => setHoverNum(hoverNum === s ? null : s)} className={`rounded-xl py-2 flex flex-col items-center border transition-all ${hoverNum === s ? 'bg-[#C6A96B]/20 border-[#C6A96B] ring-1 ring-[#C6A96B]/30' : 'bg-[#020617] border-white/5 hover:border-white/20'}`}><span className="text-base font-display font-black" style={{color: hoverNum === s ? PLANET_COLORS_BY_NUM[s] : (PLANET_COLORS_BY_NUM[s] + 'cc')}}>{s}</span><span className="text-[9px] text-[#8A8070] truncate w-full text-center px-1">{bName}</span></button>);
+                    })}
+                  </div></div>
+                );
+              })}
+              <div className="flex items-center gap-2 py-1"><div className="flex-1 h-px bg-sky-500/20"/><span className="text-[11px] text-sky-400/60 font-bold uppercase px-1 tracking-wider">กำลังเทวดา</span><div className="flex-1 h-px bg-sky-500/20"/></div>
+              <div className="flex items-stretch gap-2 bg-[#0B1E36]/40 border border-sky-500/15 rounded-xl py-1 px-1"><div className="w-12 shrink-0 flex items-center justify-end"><span className="text-[12px] font-black text-sky-400">ฐาน๔</span></div><div className="flex-1 grid grid-cols-7 gap-1">{(activeResult.chart?.[3] ?? []).map((s, cIdx) => (<div key={cIdx} className="rounded-lg py-1.5 flex flex-col items-center bg-[#020617] border border-sky-500/20"><span className="text-sm font-black text-sky-300">{s}</span><span className="text-[9px] text-sky-400/70 truncate w-full text-center px-1">{BASE4_POWER_NAMES[s]}</span></div>))}</div></div>
             </div></div>
           </Card>
+
           <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
             <Card className="p-6 sm:p-8 border-[#C6A96B]/20 bg-[#0A1628]"><h3 className="text-base font-bold text-[#F8F6F1] mb-5">🎯 เลือกเรื่องที่ต้องการถาม</h3>
               <div className="grid grid-cols-3 gap-2 mb-6">{CATEGORIES.map(cat => (<button key={cat.id} onClick={() => setSelectedCategory(cat.id)} className={`p-3 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all ${selectedCategory === cat.id ? "bg-[#0B1E36] border-sky-500/50" : "bg-[#020617] border-white/5"}`}><span className="text-xl">{cat.icon}</span><span className={`text-xs font-bold ${selectedCategory === cat.id ? "text-sky-400" : "text-[#8A8070]"}`}>{cat.label.split(" ")[0]}</span></button>))}</div>
