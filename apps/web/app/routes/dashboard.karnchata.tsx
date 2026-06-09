@@ -350,6 +350,14 @@ export default function KarnchataPage() {
     }
   };
 
+  const activeCategory = CATEGORIES.find(c => c.id === selectedCategory);
+  const handleAutoSend = (q: string) => doChatFetch(q);
+  const handleSendChat = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userInput.trim()) return;
+    doChatFetch(userInput);
+  };
+
   return (
     <div className="space-y-8 animate-in fade-in duration-700 pb-20">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
