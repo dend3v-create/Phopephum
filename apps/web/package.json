@@ -9,7 +9,7 @@
     "build": "remix vite:build",
     "typecheck": "tsc",
     "lint": "eslint app/",
-    "deploy": "wrangler pages deploy ./build/client --branch=phopephum --commit-dirty=true"
+    "deploy": "wrangler pages deploy ./build/client --project-name=phopephum-web --commit-dirty=true"
   },
   "dependencies": {
     "@phopephum/analytics": "workspace:*",
