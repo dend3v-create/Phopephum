@@ -70,7 +70,8 @@
       "Bash(grep -hE \"text-\\\\[?\\(xs|sm|base|[0-9]+px\\)\\\\]?\" dashboard.*.tsx)",
       "Bash(grep -hE \"text-\\\\[?\\(xs|sm|[0-9]+px\\)\\\\]?\" components/**/*.tsx)",
       "Bash(ls dashboard.*.tsx)",
-      "Bash(python3 -c ':*)"
+      "Bash(python3 -c ':*)",
+      "Bash(grep -v \"^.*//.*export\")"
     ]
   }
 }
