@@ -1,4 +1,28 @@
 export { calculateHoraNu } from './calculators/horaEngine.js';
+export {
+  calculateHoraTaynoo,
+  generateHoraTaynooSVG,
+  calculateNow as calculateHoraTaynooNow,
+  calculateAt as calculateHoraTaynooAt,
+  getPlanetSteps,
+  calculatePositions,
+  buildBhavaMap,
+  findLagnaRuler,
+  buildSubTimeSlots,
+  ZODIAC_ORDER,
+  PLANET_INFO,
+  BHAVA_NAMES,
+  DAY_YAM,
+  NIGHT_YAM,
+  YAM_START,
+  DAY_PLANET,
+} from './hora-taynoo-engine.js';
+export type {
+  HoraTaynooInput,
+  HoraTaynooResult,
+  PlanetEntry,
+  SubTimeSlot as HoraTaynooSubSlot,
+} from './hora-taynoo-engine.js';
 export type { HoraNuChartData, HoraNuHouseEntry, HoraNuYamPeriod } from './types/horaNu.types.js';
 export {
   PlanetStatus,

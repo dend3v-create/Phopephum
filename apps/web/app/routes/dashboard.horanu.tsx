@@ -1,387 +1,420 @@
+/**
+ * dashboard.horanu.tsx — ยามพรายกระซิบ
+ * ผังดวงโหรทายหนู V2 — ระบบยามอัฐกาล + ดาวลอย 11 ดวง + ภพ 12 หลัง
+ */
 import { json } from "@remix-run/cloudflare";
-import { Form, useActionData, useNavigation, useLoaderData, useSubmit } from "@remix-run/react";
+import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { requireAuth, getProfile, requireMinPlan } from "~/services/auth.server";
-import { calculateHoraNu } from "@phopephum/engine";
-import type { Env } from "~/env.server";
+import { requireMinPlan, requireAuth } from "~/services/auth.server";
+import {
+  calculateHoraTaynoo,
+  generateHoraTaynooSVG,
+  PLANET_INFO,
+  ZODIAC_ORDER,
+  BHAVA_NAMES,
+} from "@phopephum/engine";
+import type { HoraTaynooResult } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
-import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
-import { useState, useEffect, useMemo } from "react";
-import { HoraNuChart } from "~/components/horanu/HoraNuChart";
+import type { Env } from "~/env.server";
+import { useState, useEffect, useCallback } from "react";
 
 export const meta: MetaFunction = () => [
-  { title: "โหรทายหนู — PhopePhum" },
-  { name: "description", content: "พยากรณ์กาลชะตาด้วยระบบยามอัฐกาลและดาวลอยโบราณ" },
+  { title: "ยามพรายกระซิบ — PhopePhum" },
+  { name: "description", content: "ผังดวงโหรทายหนู ระบบยามอัฐกาลและดาวลอยโบราณ 11 ดวง ภพ 12 หลัง" },
 ];
+
+// ─── Loader ───────────────────────────────────────────────────────────────────
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   await requireMinPlan("basic", request, env);
 
   const now = new Date();
-  const result = calculateHoraNu(now);
+  const result = calculateHoraTaynoo({ dateAsked: now });
+  const svg = generateHoraTaynooSVG(result, { size: 520, theme: "dark" });
 
-  const thaiDateLabel = now.toLocaleDateString("th-TH", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-
-  return json({
-    result,
-    thaiDateLabel,
-    currentTime: now.toISOString(),
-  });
+  return json({ result, svg, serverTime: now.toISOString() });
 }
+
+// ─── Action ───────────────────────────────────────────────────────────────────
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
   await requireAuth(request, env);
 
   const formData = await request.formData();
-  const timeMode = formData.get("timeMode") as "live" | "custom";
-  
+  const mode = formData.get("mode") as string;
+
   let targetDate = new Date();
-  
-  if (timeMode === "custom") {
-    const tDay = Number(formData.get("customDay"));
-    const tMonth = Number(formData.get("customMonth"));
-    const tYear = Number(formData.get("customYear"));
-    const tYearCE = tYear - 543;
-    const timeStr = String(formData.get("customTime") || "12:00");
-    const [th, tmin] = timeStr.split(":").map(Number);
-    
-    if (tDay && tMonth && tYear) {
-      targetDate = new Date(tYearCE, tMonth - 1, tDay, th, tmin, 0);
+
+  if (mode === "custom") {
+    const day   = Number(formData.get("day")   ?? 0);
+    const month = Number(formData.get("month") ?? 0);
+    const year  = Number(formData.get("year")  ?? 0);
+    const time  = String(formData.get("time")  ?? "12:00");
+    const [h, m] = time.split(":").map(Number);
+    if (day && month && year) {
+      targetDate = new Date(year - 543, month - 1, day, h, m, 0);
     }
   }
 
-  const result = calculateHoraNu(targetDate);
+  const result = calculateHoraTaynoo({ dateAsked: targetDate });
+  const svg = generateHoraTaynooSVG(result, { size: 520, theme: "dark" });
 
-  return json({ result });
+  return json({ result, svg });
 }
 
-export default function HoraNuPage() {
-  const { result: initialResult, thaiDateLabel, currentTime } = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
-  const navigation = useNavigation();
-  const submit = useSubmit();
-  const isSubmitting = navigation.state !== "idle";
+// ─── Planet display helpers ───────────────────────────────────────────────────
 
-  const result = actionData?.result || initialResult;
+const DAY_NAMES_TH = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
 
-  const [timeMode, setTimeMode] = useState<"live" | "custom">("live");
-  const [localTime, setLocalTime] = useState(new Date(currentTime));
+function planetColor(num: number | null): string {
+  if (!num) return "#8A8070";
+  return PLANET_INFO[num]?.color ?? "#C9A96E";
+}
 
-  useEffect(() => {
-    if (timeMode === "live") {
-      const timer = setInterval(() => {
-        setLocalTime(new Date());
-        // auto refresh results every minute in live mode
-        if (new Date().getSeconds() === 0) {
-          submit(new FormData(), { method: "post" });
-        }
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [timeMode, submit]);
+function planetThai(num: number | null): string {
+  if (!num) return "—";
+  return PLANET_INFO[num]?.thai ?? `ดาว${num}`;
+}
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
+
+function YamBadge({ result }: { result: HoraTaynooResult }) {
+  return (
+    <div className="grid grid-cols-3 gap-3 text-center">
+      <div className="bg-[#C9A96E]/10 border border-[#C9A96E]/25 rounded-2xl p-3">
+        <p className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1">วัน</p>
+        <p className="font-display text-lg font-bold text-[#F8F6F1]">{DAY_NAMES_TH[result.dayOfWeek]}</p>
+      </div>
+      <div className="bg-[#C9A96E]/10 border border-[#C9A96E]/25 rounded-2xl p-3">
+        <p className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1">ยามที่</p>
+        <p className="font-display text-3xl font-bold text-[#C9A96E]">{result.yamAsked}</p>
+        <p className="text-[10px] text-[#8A8070]">{result.period === "day" ? "กลางวัน" : "กลางคืน"}</p>
+      </div>
+      <div className="bg-[#C9A96E]/10 border border-[#C9A96E]/25 rounded-2xl p-3">
+        <p className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1">เวลายาม</p>
+        <p className="text-sm font-bold text-[#F8F6F1]">{result.yamStartStr}</p>
+        <p className="text-[10px] text-[#8A8070]">— {result.yamEndStr}</p>
+      </div>
+    </div>
+  );
+}
+
+function PlanetSummary({ result }: { result: HoraTaynooResult }) {
+  const dayP  = PLANET_INFO[result.dayPlanet];
+  const yamP  = PLANET_INFO[result.yamPlanet];
 
   return (
-    <div className="space-y-8 pb-20">
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <h1 className="text-3xl font-display font-bold text-[#F8F6F1] glow-gold mb-2">
-            โหรทายหนู
-          </h1>
-          <p className="text-[#94A3B8]">
-            พยากรณ์กาลชะตาระดับนาทีด้วยระบบยามอัฐกาลและดาวลอย
-          </p>
-        </div>
-
-        <Card className="p-1 bg-[#0F172A]/80 border-[#C6A96B]/20 backdrop-blur-md">
-          <div className="flex gap-1">
-            <button
-              onClick={() => setTimeMode("live")}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                timeMode === "live" 
-                ? "bg-[#C6A96B] text-[#020617] shadow-lg shadow-[#C6A96B]/20" 
-                : "text-[#94A3B8] hover:text-[#F8F6F1]"
-              }`}
-            >
-              เวลาปัจจุบัน (Live)
-            </button>
-            <button
-              onClick={() => setTimeMode("custom")}
-              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                timeMode === "custom" 
-                ? "bg-[#C6A96B] text-[#020617] shadow-lg shadow-[#C6A96B]/20" 
-                : "text-[#94A3B8] hover:text-[#F8F6F1]"
-              }`}
-            >
-              กำหนดเวลาเอง
-            </button>
+    <div className="grid grid-cols-2 gap-3">
+      <div className="border border-white/8 bg-slate-900/30 rounded-2xl p-4">
+        <p className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-2">ดาวประจำวัน</p>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center font-display text-lg font-bold shrink-0"
+            style={{ background: `${dayP?.color}20`, border: `1px solid ${dayP?.color}50`, color: dayP?.color }}>
+            {result.dayPlanet}
           </div>
-        </Card>
-      </div>
-
-      {/* Control Panel for Custom Time */}
-      {timeMode === "custom" && (
-        <Card className="p-6 border-[#C6A96B]/20 bg-[#0F172A]/40">
-          <Form method="post" className="flex flex-wrap items-end gap-4">
-            <input type="hidden" name="timeMode" value="custom" />
-            <div className="space-y-2">
-              <label className="text-[13px] uppercase tracking-wider text-[#94A3B8] font-bold">วันที่</label>
-              <Input 
-                type="number" 
-                name="customDay" 
-                defaultValue={new Date().getDate()} 
-                className="w-20 bg-[#020617]/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[13px] uppercase tracking-wider text-[#94A3B8] font-bold">เดือน</label>
-              <Input 
-                type="number" 
-                name="customMonth" 
-                defaultValue={new Date().getMonth() + 1} 
-                className="w-20 bg-[#020617]/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[13px] uppercase tracking-wider text-[#94A3B8] font-bold">ปี (พ.ศ.)</label>
-              <Input 
-                type="number" 
-                name="customYear" 
-                defaultValue={new Date().getFullYear() + 543} 
-                className="w-28 bg-[#020617]/50"
-              />
-            </div>
-            <div className="space-y-2">
-              <label className="text-[13px] uppercase tracking-wider text-[#94A3B8] font-bold">เวลา</label>
-              <Input 
-                type="time" 
-                name="customTime" 
-                defaultValue={new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })} 
-                className="w-32 bg-[#020617]/50"
-              />
-            </div>
-            <Button 
-              type="submit" 
-              disabled={isSubmitting}
-              className="bg-[#C6A96B] hover:bg-[#D9BC82] text-[#020617] font-bold px-8"
-            >
-              {isSubmitting ? "กำลังคำนวณ..." : "คำนวณดวง"}
-            </Button>
-          </Form>
-        </Card>
-      )}
-
-      {/* Result Dashboard */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column: Summary & Yama */}
-        <div className="lg:col-span-5 space-y-6">
-          <Card className="p-8 border-[#C6A96B]/30 bg-gradient-to-br from-[#0F172A] to-[#020617] relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-               <IconHoraNuLarge />
-            </div>
-            
-            <div className="relative z-10 space-y-6 text-center">
-              <div>
-                <p className="text-[#C6A96B] text-xs font-bold uppercase tracking-[0.2em] mb-2">
-                   {result.dayName} {result.phase === 'day' ? 'กาลกลางวัน' : 'กาลกลางคืน'}
-                </p>
-                <div className="text-4xl font-display font-bold text-[#F8F6F1] mb-1">
-                   {result.currentPlanetSymbol} ดาว{result.currentPlanetName}
-                </div>
-                <p className="text-[#94A3B8] text-sm italic">
-                  เจ้าเรือน{result.currentZodiacName} — {result.currentStatusLabel}
-                </p>
-              </div>
-
-              <div className="py-6 border-y border-[#C6A96B]/10 flex justify-around items-center">
-                 <div className="text-center">
-                   <p className="text-[13px] text-[#94A3B8] uppercase font-bold mb-1">ยามที่</p>
-                   <p className="text-2xl font-bold text-[#F8F6F1]">{result.yamNumber}</p>
-                 </div>
-                 <div className="h-8 w-px bg-[#C6A96B]/20" />
-                 <div className="text-center">
-                   <p className="text-[13px] text-[#94A3B8] uppercase font-bold mb-1">ทิศมงคล</p>
-                   <p className="text-2xl font-bold text-[#F8F6F1]">{result.currentDirection}</p>
-                 </div>
-              </div>
-
-              <div className="space-y-4">
-                 <p className="text-xs text-[#94A3B8] font-medium leading-relaxed max-w-sm mx-auto">
-                    {result.prediction}
-                 </p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Yama Schedule */}
-          <Card className="p-0 overflow-hidden border-[#C6A96B]/10 bg-[#0F172A]/40">
-             <div className="p-4 border-b border-[#C6A96B]/10 bg-white/5">
-                <h3 className="text-xs font-bold text-[#C6A96B] uppercase tracking-wider">ตารางกาลเวลาประจำวัน</h3>
-             </div>
-             <div className="divide-y divide-[#C6A96B]/5">
-                {result.yamSchedule.map((yam) => (
-                  <div 
-                    key={yam.periodNum} 
-                    className={`flex items-center p-4 gap-4 transition-colors ${yam.isCurrent ? 'bg-[#C6A96B]/10 border-l-2 border-[#C6A96B]' : 'hover:bg-white/5'}`}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${yam.isCurrent ? 'bg-[#C6A96B] text-[#020617]' : 'bg-[#020617] text-[#94A3B8]'}`}>
-                      {yam.periodNum}
-                    </div>
-                    <div className="flex-1">
-                       <p className={`text-sm font-bold ${yam.isCurrent ? 'text-[#F8F6F1]' : 'text-[#94A3B8]'}`}>
-                          {yam.startTime} - {yam.endTime}
-                       </p>
-                       <p className="text-[13px] text-[#94A3B8]">ดาว {yam.planetName} · ทิศ {yam.direction}</p>
-                    </div>
-                    {yam.isCurrent && (
-                       <div className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B] animate-pulse" />
-                          <span className="text-[13px] font-bold text-[#C6A96B]">ขณะนี้</span>
-                       </div>
-                    )}
-                  </div>
-                ))}
-             </div>
-          </Card>
+          <div>
+            <p className="text-sm font-bold text-[#F8F6F1]">{dayP?.thai}</p>
+            <p className="text-[10px] text-[#8A8070]">{result.period === "day" ? dayP?.day : dayP?.night}</p>
+          </div>
         </div>
-
-        {/* Right Column: SVG Wheel Chart + Houses */}
-        <div className="lg:col-span-7 space-y-6">
-
-           {/* ── HoraNu SVG Chart ── */}
-           <Card className="p-4 sm:p-6 border-[#C6A96B]/20 bg-[#020617]/60">
-              <div className="flex items-center justify-between mb-4">
-                 <div>
-                    <h3 className="text-sm font-bold text-[#F8F6F1] uppercase tracking-wider">ผังโหรทายหนู</h3>
-                    <p className="text-[13px] text-[#94A3B8] mt-0.5">วงล้อชะตากาลเวลา — 12 ราศี × 8 ทิศ</p>
-                 </div>
-                 <div className="flex items-center gap-2 text-[13px] text-[#94A3B8]">
-                    <div className="w-2 h-2 rounded-full bg-[#C6A96B]" />
-                    <span>ยามปัจจุบัน</span>
-                 </div>
-              </div>
-
-              {/* SVG Wheel */}
-              <div className="flex justify-center">
-                <HoraNuChart
-                  weekday={result.dayName}
-                  yama={result.yamNumber}
-                  period={result.phase}
-                  yamStartTime={result.mainPeriodStart}
-                  currentPlanet={result.currentPlanet}
-                  currentSubYam={result.subYamNumber}
-                  size={500}
-                  className="max-w-full"
-                />
-              </div>
-
-              {/* Status badges */}
-              <div className="mt-4 flex flex-wrap gap-2 justify-center">
-                 <div className="px-3 py-1.5 rounded-lg bg-[#C6A96B]/10 border border-[#C6A96B]/25 text-xs font-bold text-[#C6A96B]">
-                    {result.currentStatusSymbol} {result.currentStatusLabel}
-                 </div>
-                 <div className="px-3 py-1.5 rounded-lg bg-[#4B6FAE]/10 border border-[#4B6FAE]/25 text-xs font-bold text-[#4B6FAE]">
-                    ทิศ{result.currentDirection}
-                 </div>
-                 <div className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-xs text-[#94A3B8]">
-                    ราศี{result.currentZodiacName}
-                 </div>
-              </div>
-           </Card>
-
-           {/* ── Zodiac House Grid ── */}
-           <Card className="p-4 sm:p-6 border-[#C6A96B]/10 bg-[#0F172A]/40">
-              <h3 className="text-xs font-bold text-[#C6A96B] uppercase tracking-wider mb-4">เรือนชะตา 12 ราศี</h3>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                 {result.houseChart.map((house) => (
-                   <div
-                    key={house.zodiacIndex}
-                    className={`p-3 rounded-xl border transition-all ${
-                      house.isCurrentYam
-                      ? 'bg-[#C6A96B]/10 border-[#C6A96B]/40 shadow shadow-[#C6A96B]/10'
-                      : house.isSecondaryKaset
-                      ? 'bg-[#4B6FAE]/10 border-[#4B6FAE]/30'
-                      : 'bg-white/3 border-white/5'
-                    }`}
-                   >
-                     <div className="flex items-center justify-between mb-1.5">
-                        <span className="text-[12px] font-bold text-[#94A3B8]">{house.zodiacName}</span>
-                        <span className="text-[12px] font-bold text-[#C6A96B]">{house.houseName}</span>
-                     </div>
-                     <div className="flex items-center gap-1.5">
-                        <span className="text-lg font-display font-bold" style={{color: house.lordColor}}>{house.lordSymbol}</span>
-                        <div className="min-w-0 flex-1">
-                           <p className="text-[12px] text-[#94A3B8] truncate">{house.lordName}</p>
-                           <p className="text-[11px] font-bold" style={{ color: house.lordStatusColor }}>
-                              {house.lordStatusSymbol}
-                           </p>
-                        </div>
-                     </div>
-                   </div>
-                 ))}
-              </div>
-           </Card>
-
-           {/* Tips */}
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Card className="p-4 border-white/5 bg-white/5">
-                 <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400"><IconSparkle /></div>
-                    <h5 className="text-xs font-bold text-[#F8F6F1]">เคล็ดลับมงคล</h5>
-                 </div>
-                 <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    การกระทำการในยามที่เป็นเกษตรหรืออุจ จะช่วยให้กิจการนั้นมีความมั่นคงและยั่งยืน
-                 </p>
-              </Card>
-              <Card className="p-4 border-white/5 bg-white/5">
-                 <div className="flex items-center gap-3 mb-3">
-                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400"><IconCompass /></div>
-                    <h5 className="text-xs font-bold text-[#F8F6F1]">ทิศให้ลาภ</h5>
-                 </div>
-                 <p className="text-xs text-[#94A3B8] leading-relaxed">
-                    ในยามนี้ทิศ {result.currentDirection} เป็นทิศแห่งโชคลาภ เหมาะแก่การหันหน้าไปทางทิศนี้
-                 </p>
-              </Card>
-           </div>
+      </div>
+      <div className="border border-white/8 bg-slate-900/30 rounded-2xl p-4">
+        <p className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-2">ดาวเจ้ายาม</p>
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center font-display text-lg font-bold shrink-0"
+            style={{ background: `${yamP?.color}20`, border: `1px solid ${yamP?.color}50`, color: yamP?.color }}>
+            {result.yamPlanet}
+          </div>
+          <div>
+            <p className="text-sm font-bold text-[#F8F6F1]">{yamP?.thai}</p>
+            <p className="text-[10px] text-[#8A8070]">เกษตร: {ZODIAC_ORDER[result.kasternZodiacIndex]?.name}</p>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Local Icons ────────────────────────────────────────────────────────────────
-
-function IconHoraNuLarge() {
+function PlanetTable({ result }: { result: HoraTaynooResult }) {
+  const lagna = result.planetEntries[8]; // ล
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1} className="w-32 h-32 text-[#C6A96B]">
-      <circle cx="12" cy="12" r="9" strokeDasharray="2 2" />
-      <path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6L5.6 18.4" />
-      <circle cx="12" cy="12" r="3" />
-    </svg>
+    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 bg-[#C9A96E] rounded-full" />
+        <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">ดาวลอย 11 ดวง</p>
+        <span className="ml-auto text-[10px] text-[#8A8070]">ลัคนา: {ZODIAC_ORDER[result.lagnaZodiacIndex]?.name}</span>
+      </div>
+      <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+        {result.planetEntries.map((entry, i) => {
+          const pInfo = entry.planetNum ? PLANET_INFO[entry.planetNum] : null;
+          const color = pInfo?.color ?? (entry.isLagna ? "#4B6FAE" : "#5A5148");
+          const zodiac = ZODIAC_ORDER[entry.zodiacIndex];
+          const bhava = result.bhavaMap[entry.zodiacIndex] ?? "";
+          return (
+            <div
+              key={i}
+              className={`rounded-xl p-2 text-center border transition-all ${
+                entry.isLagna
+                  ? "border-[#4B6FAE]/40 bg-[#4B6FAE]/10"
+                  : "border-white/5 bg-slate-950/20 hover:border-[#C9A96E]/20"
+              }`}
+            >
+              <div className="font-display text-xl font-bold mb-0.5" style={{ color }}>
+                {entry.label}
+              </div>
+              <div className="text-[10px] text-[#8A8070] leading-tight">{zodiac?.name}</div>
+              {bhava && (
+                <div className="text-[9px] mt-0.5 font-medium" style={{ color: `${color}cc` }}>
+                  {bhava}
+                </div>
+              )}
+              <div className="text-[9px] text-[#4A5568] mt-0.5">{entry.steps}ก้าว</div>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
   );
 }
 
-function IconSparkle() {
+function BhavaTable({ result }: { result: HoraTaynooResult }) {
+  const entries = Object.entries(result.bhavaMap).map(([zodiacIdx, bhava]) => ({
+    zodiacIndex: Number(zodiacIdx),
+    bhava,
+    zodiacName: ZODIAC_ORDER[Number(zodiacIdx)]?.name ?? "",
+    planets: result.planetEntries.filter(e => e.zodiacIndex === Number(zodiacIdx)),
+  }));
+
+  const bhavaOrder = BHAVA_NAMES.map((name, i) =>
+    entries.find(e => e.bhava === name) ?? { bhava: name, zodiacName: "—", planets: [], zodiacIndex: -1 }
+  );
+
+  const goodBhava = new Set(["ตนุ","กฎุมภะ","ปุตตะ","ปัตนิ","ศุภะ","กัมมะ","ลาภะ"]);
+  const badBhava  = new Set(["อริ","มรณะ","วินาศ"]);
+
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-      <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z" />
-    </svg>
+    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 bg-[#4B6FAE] rounded-full" />
+        <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">ภพ 12 หลัง</p>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {bhavaOrder.map((b, i) => {
+          const isGood = goodBhava.has(b.bhava);
+          const isBad  = badBhava.has(b.bhava);
+          const hasPlanets = b.planets.length > 0;
+          return (
+            <div key={i}
+              className={`rounded-xl p-2.5 border ${
+                isBad  ? "border-rose-500/20 bg-rose-950/10" :
+                isGood && hasPlanets ? "border-emerald-500/20 bg-emerald-950/10" :
+                "border-white/5 bg-slate-950/20"
+              }`}
+            >
+              <div className="flex items-center justify-between mb-0.5">
+                <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                  isBad ? "text-rose-400" : isGood ? "text-emerald-400" : "text-[#8A8070]"
+                }`}>{i + 1}. {b.bhava}</span>
+                {hasPlanets && (
+                  <span className="text-[9px] text-[#C9A96E] font-bold">
+                    {b.planets.map(p => p.label).join(",")}
+                  </span>
+                )}
+              </div>
+              <div className="text-[11px] text-[#F8F6F1] font-medium">{b.zodiacName}</div>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
   );
 }
 
-function IconCompass() {
+function SubTimePanel({ result }: { result: HoraTaynooResult }) {
+  const now = new Date();
+  const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
+
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
-      <circle cx="12" cy="12" r="9" />
-      <path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z" />
-    </svg>
+    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
+        <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">ยามย่อย (7.5 นาที × 12)</p>
+      </div>
+      <div className="space-y-1.5">
+        {result.subTimeSlots.map((slot, i) => {
+          const isCurrent = nowMin >= slot.startMin && nowMin < slot.endMin;
+          return (
+            <div key={i}
+              className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all ${
+                isCurrent
+                  ? "bg-[#C9A96E]/15 border border-[#C9A96E]/30"
+                  : "border border-transparent hover:border-white/5 hover:bg-white/2"
+              }`}
+            >
+              {isCurrent && (
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C9A96E] animate-pulse shrink-0" />
+              )}
+              {!isCurrent && <span className="w-1.5 h-1.5 shrink-0" />}
+              <span className="w-14 font-mono text-[11px] text-[#8A8070]">{slot.startStr}</span>
+              <span className="flex-1 font-medium text-[#F8F6F1]">{slot.zodiacName}</span>
+              <span className={`text-[10px] font-bold ${
+                ["ตนุ","ลาภะ","กัมมะ","ศุภะ"].includes(slot.bhavaName)
+                  ? "text-emerald-400"
+                  : ["อริ","มรณะ","วินาศ"].includes(slot.bhavaName)
+                  ? "text-rose-400"
+                  : "text-[#8A8070]"
+              }`}>{slot.bhavaName}</span>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
+function CustomTimeForm() {
+  const now = new Date();
+  return (
+    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-5">
+      <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold mb-4">ตั้งเวลาเอง</p>
+      <Form method="post" className="flex flex-wrap items-end gap-3">
+        <input type="hidden" name="mode" value="custom" />
+        {[
+          { name: "day",   label: "วัน",  placeholder: now.getDate(),       w: "w-16" },
+          { name: "month", label: "เดือน", placeholder: now.getMonth() + 1,  w: "w-16" },
+          { name: "year",  label: "ปี พ.ศ.", placeholder: now.getFullYear() + 543, w: "w-24" },
+        ].map(f => (
+          <div key={f.name}>
+            <label className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1 block">{f.label}</label>
+            <input name={f.name} type="number" placeholder={String(f.placeholder)}
+              className={`${f.w} bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40`} />
+          </div>
+        ))}
+        <div>
+          <label className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1 block">เวลา</label>
+          <input name="time" type="time"
+            defaultValue={`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`}
+            className="w-32 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
+        </div>
+        <Button type="submit" className="self-end">คำนวณ</Button>
+      </Form>
+    </Card>
+  );
+}
+
+// ─── Live Clock ───────────────────────────────────────────────────────────────
+
+function LiveClock({ serverTime }: { serverTime: string }) {
+  const [t, setT] = useState(new Date(serverTime));
+  useEffect(() => {
+    const id = setInterval(() => setT(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const fmt = (n: number) => String(n).padStart(2, "0");
+  return (
+    <span className="font-mono text-[#C9A96E] text-sm font-bold tabular-nums">
+      {fmt(t.getHours())}:{fmt(t.getMinutes())}:{fmt(t.getSeconds())}
+    </span>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default function HoraNuPage() {
+  const loaderData = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "submitting";
+
+  const result  = (actionData as any)?.result ?? loaderData.result;
+  const svgStr  = (actionData as any)?.svg    ?? loaderData.svg;
+
+  const [showCustom, setShowCustom] = useState(false);
+
+  return (
+    <div className="space-y-5 pb-10">
+
+      {/* ── Header ── */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
+            <p className="text-[#C9A96E] text-[11px] tracking-[0.3em] uppercase font-bold">Hora Taynoo System</p>
+          </div>
+          <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">ยามพรายกระซิบ</h1>
+          <p className="text-[#8A8070] text-sm mt-1">ผังดวงโหรทายหนู — ยามอัฐกาล + ดาวลอย 11 + ภพ 12</p>
+        </div>
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <LiveClock serverTime={loaderData.serverTime} />
+          <button
+            onClick={() => setShowCustom(v => !v)}
+            className={`text-[11px] font-bold px-3 py-1.5 rounded-full border transition-all ${
+              showCustom
+                ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#C9A96E]"
+                : "border-white/10 text-[#8A8070] hover:border-[#C9A96E]/30 hover:text-[#C9A96E]"
+            }`}
+          >
+            {showCustom ? "✕ ปิด" : "⚙ ตั้งเวลา"}
+          </button>
+        </div>
+      </div>
+
+      {/* Custom time form */}
+      {showCustom && <CustomTimeForm />}
+
+      {/* Main Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+
+        {/* ── Left: Chart + Legend ── */}
+        <div className="lg:col-span-6 xl:col-span-7 space-y-4">
+          {/* SVG Chart */}
+          <Card className="p-4 sm:p-6 border-[#C9A96E]/20 bg-[#020617]/70">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <p className="text-[11px] font-bold text-[#C9A96E] uppercase tracking-widest">ผังดวงโหรทายหนู</p>
+                <p className="text-[10px] text-[#8A8070] mt-0.5">12 ราศี · ยาม {result.yamAsked} · ลัคนา {ZODIAC_ORDER[result.lagnaZodiacIndex]?.name}</p>
+              </div>
+              <div className="text-right text-[10px] text-[#8A8070]">
+                <p>เกษตร: <span className="text-[#C9A96E] font-bold">{ZODIAC_ORDER[result.kasternZodiacIndex]?.name}</span></p>
+                <p>ดาวยาม: <span className="text-[#C9A96E] font-bold">{PLANET_INFO[result.yamPlanet]?.thai}</span></p>
+              </div>
+            </div>
+            {/* SVG */}
+            <div
+              className="w-full max-w-[480px] mx-auto"
+              dangerouslySetInnerHTML={{ __html: svgStr }}
+            />
+          </Card>
+
+          {/* Yam badges */}
+          <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+            <YamBadge result={result} />
+            <div className="mt-3">
+              <PlanetSummary result={result} />
+            </div>
+          </Card>
+        </div>
+
+        {/* ── Right: Tables ── */}
+        <div className="lg:col-span-6 xl:col-span-5 space-y-4">
+          <PlanetTable result={result} />
+          <SubTimePanel result={result} />
+          <BhavaTable result={result} />
+        </div>
+      </div>
+
+      {/* Loading overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-[#020617] border border-[#C9A96E]/30 rounded-2xl p-8 flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-2 border-[#C9A96E]/30 border-t-[#C9A96E] rounded-full animate-spin" />
+            <p className="text-[#C9A96E] text-sm font-bold">กำลังคำนวณยาม...</p>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
