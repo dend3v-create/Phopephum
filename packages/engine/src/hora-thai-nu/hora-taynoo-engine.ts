@@ -251,7 +251,7 @@ export function getPlanetSteps(
         idx++ // เดินหน้า
       }
     } else {
-      idx-- // ถอยหลัง
+      idx = ((idx - 1) + 8) % 8 // ถอยหลัง (wrap 0 → 7)
     }
   }
   return steps

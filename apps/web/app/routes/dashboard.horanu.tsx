@@ -31,14 +31,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   await requireMinPlan("basic", request, env);
 
   const now = new Date();
-  try {
-    const result = calculateHoraTaynoo({ dateAsked: now });
-    const svg = generateHoraTaynooSVG(result, { size: 520, theme: "dark" });
-    return json({ result, svg, serverTime: now.toISOString(), error: null });
-  } catch (e: unknown) {
-    const msg = e instanceof Error ? `${e.message}\n${e.stack}` : String(e);
-    return json({ result: null, svg: null, serverTime: now.toISOString(), error: msg }, { status: 200 });
-  }
+  const result = calculateHoraTaynoo({ dateAsked: now });
+  const svg = generateHoraTaynooSVG(result, { size: 520, theme: "dark" });
+  return json({ result, svg, serverTime: now.toISOString(), error: null });
 }
 
 // ─── Action ───────────────────────────────────────────────────────────────────
@@ -335,16 +330,6 @@ export default function HoraNuPage() {
 
   const result  = (actionData as any)?.result ?? loaderData.result;
   const svgStr  = (actionData as any)?.svg    ?? loaderData.svg;
-  const errMsg  = (loaderData as any)?.error;
-
-  if (errMsg || !result) {
-    return (
-      <div className="p-6">
-        <h1 className="text-red-400 font-bold mb-2">Engine Error</h1>
-        <pre className="text-xs text-red-300 bg-red-950/30 border border-red-500/20 rounded-xl p-4 overflow-x-auto whitespace-pre-wrap">{errMsg ?? "result is null"}</pre>
-      </div>
-    );
-  }
 
   const [showCustom, setShowCustom] = useState(false);
 
