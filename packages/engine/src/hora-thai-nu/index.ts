@@ -21,6 +21,11 @@ export {
   DAY_PLANET,
 } from './hora-taynoo-engine.js';
 export type { SuccessYamMeta } from './hora-taynoo-engine.js';
+export {
+  getSuccessYamDatabase,
+  findSuccessYam,
+} from './charts/success-yam-database.js';
+export type { SuccessYamChart } from './hora-taynoo-engine.js';
 export type {
   HoraTaynooInput,
   HoraTaynooResult,
