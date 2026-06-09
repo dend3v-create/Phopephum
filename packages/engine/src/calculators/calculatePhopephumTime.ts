@@ -84,7 +84,7 @@ export const REKS_NAMES = [
  * 3. หาฤกษ์ 10 นาที (9 ฤกษ์ใน 1 ยาม) → ได้ดาวประจำฤกษ์
  * 4. ดาวประจำฤกษ์ → column ในแถวนั้น
  */
-export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: number, col: number, houseName: string, star: number, reksName: string, reksIndex: number } {
+export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: number, col: number, houseName: string, star: number, reksName: string, reksIndex: number, yamYaiNumber?: number, subPeriod?: any } {
   const time = calculateTimeEngine(date);
 
   // ช่วงยาม 30 นาที บอกฐาน (row)
