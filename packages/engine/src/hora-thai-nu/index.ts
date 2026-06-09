@@ -9,6 +9,9 @@ export {
   buildBhavaMap,
   findLagnaRuler,
   buildSubTimeSlots,
+  loadSuccessYam,
+  getSuccessYamMeta,
+  getYamTimeRange,
   ZODIAC_ORDER,
   PLANET_INFO,
   BHAVA_NAMES,
@@ -17,6 +20,7 @@ export {
   YAM_START,
   DAY_PLANET,
 } from './hora-taynoo-engine.js';
+export type { SuccessYamMeta } from './hora-taynoo-engine.js';
 export type {
   HoraTaynooInput,
   HoraTaynooResult,

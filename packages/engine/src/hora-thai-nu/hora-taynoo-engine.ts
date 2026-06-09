@@ -615,3 +615,80 @@ export function calculateAt(
 ): HoraTaynooResult {
   return calculateHoraTaynoo({ dayOverride: day, hour, minute })
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SUCCESS YAM DATABASE (112 ผัง)
+// 7 วัน × 2 ช่วง × 8 ยาม = 112 ดวงยามสำเร็จ
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** ข้อมูล meta ของยามแต่ละช่วง */
+export interface SuccessYamMeta {
+  id: string
+  weekday: number          // 0=อาทิตย์ ... 6=เสาร์
+  weekdayName: string
+  period: 'day' | 'night'
+  yamNo: number            // 1-8
+  start: string            // "HH:MM"
+  end: string
+}
+
+const WEEKDAY_NAMES = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์']
+const WEEKDAY_ID    = ['sun','mon','tue','wed','thu','fri','sat']
+
+function _minToHHMM(m: number): string {
+  const safe = ((m % 1440) + 1440) % 1440
+  return `${String(Math.floor(safe / 60)).padStart(2,'0')}:${String(Math.floor(safe % 60)).padStart(2,'0')}`
+}
+
+/**
+ * getYamTimeRange — ดึงช่วงเวลาของยาม
+ */
+export function getYamTimeRange(
+  period: 'day' | 'night',
+  yamNo: number,
+): { start: string; end: string } {
+  const s = YAM_START[period][yamNo - 1]
+  return { start: _minToHHMM(s), end: _minToHHMM(s + 90) }
+}
+
+/**
+ * getSuccessYamMeta — ดึง meta array ทั้ง 112 รายการ (ไม่คำนวณผัง)
+ */
+export function getSuccessYamMeta(): SuccessYamMeta[] {
+  const list: SuccessYamMeta[] = []
+  for (let w = 0; w < 7; w++) {
+    for (const period of ['day','night'] as const) {
+      for (let y = 1; y <= 8; y++) {
+        const { start, end } = getYamTimeRange(period, y)
+        list.push({
+          id: `${WEEKDAY_ID[w]}-${period}-${y}`,
+          weekday: w,
+          weekdayName: WEEKDAY_NAMES[w],
+          period,
+          yamNo: y,
+          start,
+          end,
+        })
+      }
+    }
+  }
+  return list
+}
+
+/**
+ * loadSuccessYam — โหลดดวงยามสำเร็จ 1 ใน 112 ผัง
+ * @param weekday 0=อาทิตย์...6=เสาร์ (astronomical day)
+ * @param period 'day' | 'night'
+ * @param yamNo 1–8
+ */
+export function loadSuccessYam(
+  weekday: number,
+  period: 'day' | 'night',
+  yamNo: number,
+): HoraTaynooResult {
+  const startMin = YAM_START[period][yamNo - 1]
+  const safeMin  = ((startMin % 1440) + 1440) % 1440
+  const hour     = Math.floor(safeMin / 60)
+  const minute   = safeMin % 60
+  return calculateHoraTaynoo({ dayOverride: weekday, hour, minute })
+}
