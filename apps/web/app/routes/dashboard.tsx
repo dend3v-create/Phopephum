@@ -217,9 +217,9 @@ export default function DashboardLayout() {
               <NavLink to="/dashboard/karnchata"    exact={false} icon={<NavIcon name="hourglass" />}  label="เลข ๗ ตัวกาลชะตา" />
               <NavLink to="/dashboard/horanu"       exact={false} icon={<NavIcon name="horanu" />}     label="ยามพรายกระซิบ" />
               <NavLink to="/dashboard/rahu"         exact={false} icon={<NavIcon name="rahu" />}       label="ยามราหูค้นทรัพย์" />
-              <NavLink to="/dashboard/calendar"     exact={false} icon={<NavIcon name="list" />}       label="ปฏิทิน 100 ปี" />
               <NavLink to="/dashboard/mahathaksa"   exact={false} icon={<NavIcon name="taksa" />}     label="มหาทักษาพยากรณ์" />
               <NavLink to="/dashboard/mahaphuti"    exact={false} icon={<NavIcon name="phuti" />}     label="มหาภูติกำเนิด" />
+              <NavLink to="/dashboard/calendar"     exact={false} icon={<NavIcon name="list" />}       label="ปฏิทิน 100 ปี" />
             </div>
           )}
 
