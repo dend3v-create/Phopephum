@@ -21,7 +21,7 @@ import type { HoraTaynooResult, SuccessYamMeta, ChartConfig, ChartInterpretation
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import type { Env } from "~/env.server";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export const meta: MetaFunction = () => [
   { title: "ยามพรายกระซิบ — PhopePhum" },
@@ -444,6 +444,170 @@ function LiveClock({ serverTime }: { serverTime: string }) {
   );
 }
 
+// ─── Chat Panel ───────────────────────────────────────────────────────────────
+
+const SUGGESTED_QUESTIONS = [
+  "การเงินช่วงนี้เป็นอย่างไร?",
+  "งานที่ทำอยู่จะสำเร็จไหม?",
+  "ความรักจะพัฒนาไปได้ไหม?",
+  "ปัญหาที่มีจะคลี่คลายไหม?",
+  "โชคลาภช่วงนี้เป็นอย่างไร?",
+];
+
+function HoranuChatPanel() {
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [lockedTime, setLockedTime] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const answerRef = useRef<HTMLDivElement>(null);
+
+  const handleAsk = async () => {
+    if (!question.trim() || isLoading) return;
+
+    const now = new Date().toISOString();
+    setLockedTime(now);
+    setAnswer("");
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      const res = await fetch("/api/horanu-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: question.trim(), isoTime: now }),
+      });
+
+      if (!res.ok || !res.body) {
+        setError("เกิดข้อผิดพลาดจาก AI service กรุณาลองใหม่อีกครั้ง");
+        setIsLoading(false);
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const raw = line.slice(6).trim();
+          if (raw === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(raw) as { text?: string };
+            if (parsed.text) setAnswer(prev => prev + parsed.text);
+          } catch { /* skip malformed */ }
+        }
+      }
+    } catch {
+      setError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Auto-scroll to answer as it streams
+  useEffect(() => {
+    if (answer && answerRef.current) {
+      answerRef.current.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [answer]);
+
+  const fmtTime = (iso: string) =>
+    new Date(iso).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+  return (
+    <Card className="border-[#C9A96E]/20 bg-[#020617]/60 p-5">
+      {/* Header */}
+      <div className="flex items-center gap-2 mb-4">
+        <div className={`w-2 h-2 rounded-full ${isLoading ? "bg-[#C9A96E] animate-pulse" : "bg-[#C9A96E]"}`} />
+        <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">ถามโหรพรายกระซิบ</p>
+        <span className="ml-1 text-[10px] text-[#5A5148]">— ตีความตามดวงยาม ณ เวลาที่กดถาม</span>
+        {lockedTime && (
+          <span className="ml-auto text-[9px] text-[#8A8070] font-mono shrink-0">
+            ล็อกเวลา {fmtTime(lockedTime)} น.
+          </span>
+        )}
+      </div>
+
+      {/* Suggested questions */}
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {SUGGESTED_QUESTIONS.map(q => (
+          <button
+            key={q}
+            type="button"
+            onClick={() => setQuestion(q)}
+            disabled={isLoading}
+            className="text-[10px] px-2.5 py-1 rounded-full border border-white/10 text-[#8A8070] hover:border-[#C9A96E]/30 hover:text-[#C9A96E] disabled:opacity-40 transition-all"
+          >
+            {q}
+          </button>
+        ))}
+      </div>
+
+      {/* Input row */}
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={question}
+          onChange={e => setQuestion(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && handleAsk()}
+          placeholder="พิมพ์คำถามของคุณ... (กด Enter หรือปุ่ม ถามยาม)"
+          disabled={isLoading}
+          className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1] placeholder:text-[#5A5148] focus:outline-none focus:border-[#C9A96E]/40 disabled:opacity-60"
+        />
+        <button
+          type="button"
+          onClick={handleAsk}
+          disabled={isLoading || !question.trim()}
+          className="px-5 py-2.5 rounded-xl font-bold text-sm border border-[#C9A96E]/40 bg-[#C9A96E]/10 text-[#C9A96E] hover:bg-[#C9A96E]/20 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+        >
+          {isLoading ? "กำลังอ่าน..." : "ถามยาม"}
+        </button>
+      </div>
+
+      {/* Error */}
+      {error && (
+        <p className="mt-3 text-xs text-rose-400 px-1">{error}</p>
+      )}
+
+      {/* Streaming answer */}
+      {(answer || (isLoading && !error)) && (
+        <div
+          ref={answerRef}
+          className="mt-4 p-4 rounded-xl bg-[#020617]/80 border border-[#C9A96E]/10 text-sm text-[#F8F6F1] leading-relaxed whitespace-pre-wrap"
+        >
+          {isLoading && !answer ? (
+            <span className="inline-flex items-center gap-2 text-[#8A8070]">
+              <span className="w-1.5 h-1.5 bg-[#C9A96E] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 bg-[#C9A96E] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 bg-[#C9A96E] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+              <span className="text-xs">กำลังอ่านดวง...</span>
+            </span>
+          ) : (
+            <>
+              {answer}
+              {isLoading && (
+                <span className="inline-block w-0.5 h-4 bg-[#C9A96E] animate-pulse ml-0.5 align-middle" />
+              )}
+            </>
+          )}
+        </div>
+      )}
+
+      {/* Hint */}
+      <p className="text-[9px] text-[#4A5568] mt-3 text-center">
+        เวลาที่กดปุ่มถามคือเวลาที่ใช้คำนวณผังดวง — ผลลัพธ์จะเปลี่ยนทุก 7.5 นาที
+      </p>
+    </Card>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function HoraNuPage() {
@@ -599,6 +763,9 @@ export default function HoraNuPage() {
           <BhavaTable result={result} />
         </div>
       </div>
+
+      {/* ── Horanu Chat ── */}
+      <HoranuChatPanel />
 
       {/* Loading overlay */}
       {isSubmitting && (

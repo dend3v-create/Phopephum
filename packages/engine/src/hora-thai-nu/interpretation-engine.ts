@@ -193,3 +193,26 @@ export function interpretChart(chart: HoraTaynooResult): ChartInterpretation {
     }
   };
 }
+
+/**
+ * วิเคราะห์เจาะลึกเฉพาะจุดเวลา (7.5 นาที) สำหรับคำถามเฉพาะ
+ */
+export function analyzeSpecificSlot(chart: HoraTaynooResult, currentTimeMin: number) {
+  const slot = chart.subTimeSlots.find(s => currentTimeMin >= s.startMin && currentTimeMin < s.endMin);
+  if (!slot) return null;
+
+  // หาดาวที่สถิตในราศีของ slot นี้
+  const planetsInSlot = chart.planetEntries.filter(p => p.zodiacIndex === slot.zodiacIndex && p.planetNum !== null);
+  
+  const interpretations = planetsInSlot.map(p => interpretPlanet(p, chart.bhavaMap)).filter(Boolean) as PlanetInterpretation[];
+
+  const bhavaInfo = BHAVA_KNOWLEDGE[slot.bhavaName];
+  
+  return {
+    slot,
+    bhavaInfo,
+    interpretations,
+    // กฎ: ถ้าเป็นภพเสีย (อริ, มรณะ, วินาศ) แล้วดาวเข้มแข็ง = ปัญหาเข้มแข็ง
+    isBadBhava: ['อริ', 'มรณะ', 'วินาศ'].includes(slot.bhavaName),
+  };
+}

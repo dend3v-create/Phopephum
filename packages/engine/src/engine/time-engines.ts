@@ -72,10 +72,20 @@ export function calculateAtthakarn(date: Date): SystematicAtthakarnResult {
   const majorIndex = Math.floor(elapsed / 90); // 0–7
   const subIndex = Math.floor((elapsed % 90) / (90 / 8)); // 0–7
 
-  const order = isDaytime ? PLANET_ORDER_DAY : PLANET_ORDER_NIGHT;
-  const startIdx = DAY_TO_PLANET_IDX[dow] ?? 0;
+  let majorPlanet: StarNumber;
+  
+  // พิเศษ: ยามอัฐกาลวันจันทร์ กลางวัน (มีการแก้ไขตามตำราเฉพาะ)
+  // ลำดับ: [2, 6, 4, 2, 5, 3, 1, 6]
+  if (dow === 1 && isDaytime) {
+    const mondayDaySequence = [2, 6, 4, 2, 5, 3, 1, 6];
+    majorPlanet = mondayDaySequence[majorIndex] as StarNumber;
+  } else {
+    const order = isDaytime ? PLANET_ORDER_DAY : PLANET_ORDER_NIGHT;
+    const startIdx = DAY_TO_PLANET_IDX[dow] ?? 0;
+    majorPlanet = order[(startIdx + majorIndex) % 7] as StarNumber;
+  }
 
-  const majorPlanet = order[(startIdx + majorIndex) % 7] as StarNumber;
+  const order = isDaytime ? PLANET_ORDER_DAY : PLANET_ORDER_NIGHT;
   const subPlanet = order[(order.indexOf(majorPlanet) + subIndex) % 7] as StarNumber;
 
   // คำนวณเวลาเริ่มต้น-สิ้นสุดของยามใหญ่
