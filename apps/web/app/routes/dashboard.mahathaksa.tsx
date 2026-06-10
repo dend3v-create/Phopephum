@@ -139,6 +139,17 @@ const TAKSA_GRID_3X3: (StarNumber | null)[][] = [
   [8, 5, 7],
 ];
 
+const STAR_DIRECTIONS: Record<number, string> = {
+  1: "ตะวันออกเฉียงเหนือ", // NE
+  2: "ตะวันออก",          // E
+  3: "ตะวันออกเฉียงใต้",    // SE
+  4: "ทิศใต้",           // S
+  7: "ตะวันตกเฉียงใต้",    // SW
+  5: "ตะวันตก",          // W
+  8: "ตะวันตกเฉียงเหนือ",   // NW
+  6: "ทิศเหนือ",          // N
+};
+
 const ELEMENT_ICONS: Record<string, string> = { ไฟ: "🔥", ดิน: "🌿", ลม: "💨", น้ำ: "💧" };
 
 const STAR_CORE_MEANINGS: Record<number, { title: string; element: string; desc: string }> = {

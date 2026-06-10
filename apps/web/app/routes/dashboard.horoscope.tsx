@@ -1458,6 +1458,17 @@ const TAKSA_GRID_3X3: GridSlot[][] = [
   [8, 5, 7],
 ];
 
+const STAR_DIRECTIONS: Record<number, string> = {
+  1: "ตะวันออกเฉียงเหนือ", // NE
+  2: "ตะวันออก",          // E
+  3: "ตะวันออกเฉียงใต้",    // SE
+  4: "ทิศใต้",           // S
+  7: "ตะวันตกเฉียงใต้",    // SW
+  5: "ตะวันตก",          // W
+  8: "ตะวันตกเฉียงเหนือ",   // NW
+  6: "ทิศเหนือ",          // N
+};
+
 function CombinedTaksaCard({
   taksaNatal,
   taksaTransit,
@@ -1493,6 +1504,7 @@ function CombinedTaksaCard({
               }
               const bhopNatal = taksaNatal.map[star] as string | undefined;
               const bhopTransit = taksaTransit.map[star] as string | undefined;
+              const direction = STAR_DIRECTIONS[star];
               
               const isKalaNatal = bhopNatal === "กาลกิณี";
               const isBariNatal = bhopNatal === "บริวาร";
@@ -1503,29 +1515,34 @@ function CombinedTaksaCard({
               return (
                 <div
                   key={`star-combined-${star}`}
-                  className="aspect-square flex flex-col items-center justify-between rounded-2xl border border-white/5 bg-slate-900/35 p-2 relative overflow-hidden transition-all hover:border-[#C9A96E]/30"
+                  className="aspect-square flex flex-col items-center justify-between rounded-2xl border border-white/5 bg-slate-900/35 p-1 relative overflow-hidden transition-all hover:border-[#C9A96E]/30"
                 >
+                  {/* Direction Label (Tiny) */}
+                  <span className="text-[8px] md:text-[9px] text-[#8A8070] font-bold uppercase tracking-tighter text-center leading-none">
+                    {direction}
+                  </span>
+
                   {/* ทักษากำเนิด (ด้านบน) */}
-                  <span className="text-xs md:text-sm font-semibold leading-none text-[#8A8070]">
+                  <span className="text-[10px] md:text-xs font-semibold leading-none text-[#8A8070]">
                     {bhopNatal ?? "—"}
                   </span>
 
                   {/* ตัวเลขดาว (ตรงกลาง) */}
                   <div className="flex flex-col items-center justify-center my-0.5">
-                    <span className="font-display text-3xl md:text-4xl font-bold leading-none text-[#F8F6F1]">
+                    <span className="font-display text-2xl md:text-3xl font-bold leading-none text-[#F8F6F1]">
                       {star}
                     </span>
-                    <span className="text-[14px] md:text-xs text-[#8A8070] font-medium mt-0.5">
+                    <span className="text-[10px] md:text-[11px] text-[#8A8070] font-medium mt-0.5">
                       {STAR_NAMES[star as StarNumber]}
                     </span>
                   </div>
 
                   {/* ทักษาจร (ด้านล่าง) */}
-                  <span className={`text-xs md:text-sm font-bold leading-none ${
+                  <span className={`text-[10px] md:text-xs font-bold leading-none ${
                     isKalaTransit
-                      ? "text-rose-400 bg-red-950/40 border border-red-500/25 px-2 py-0.5 rounded-md"
+                      ? "text-rose-400 bg-red-950/40 border border-red-500/25 px-1 py-0.5 rounded-md"
                       : isBariTransit
-                      ? "text-[#C9A96E] bg-[#C9A96E]/10 border border-[#C9A96E]/20 px-2 py-0.5 rounded-md"
+                      ? "text-[#C9A96E] bg-[#C9A96E]/10 border border-[#C9A96E]/20 px-1 py-0.5 rounded-md"
                       : "text-[#C9A96E]"
                   }`}>
                     {bhopTransit ? `${bhopTransit}จร` : "—"}
