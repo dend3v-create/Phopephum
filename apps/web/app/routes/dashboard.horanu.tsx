@@ -21,6 +21,8 @@ import type { HoraTaynooResult, SuccessYamMeta, ChartConfig, ChartInterpretation
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import type { Env } from "~/env.server";
+import { getYamLibrary } from "~/services/yam-library.server";
+import type { YamLibraryRow } from "~/services/yam-library.server";
 import { useState, useEffect, useRef } from "react";
 
 export const meta: MetaFunction = () => [
@@ -39,8 +41,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const interpretation = interpretChart(result);
   const svg    = generateHoraTaynooSVG(result, { size: 520, theme: "dark" });
   const meta   = getSuccessYamMeta();
+  const library = await getYamLibrary(env);
 
-  return json({ result, interpretation, svg, serverTime: now.toISOString(), meta });
+  return json({ result, interpretation, svg, serverTime: now.toISOString(), meta, library });
 }
 
 // ─── Action ───────────────────────────────────────────────────────────────────
@@ -328,75 +331,184 @@ function PlanetStatusLegend() {
 
 // ─── Success Yam Browser ──────────────────────────────────────────────────────
 
-function SuccessYamBrowser() {
-  const [day,    setDay]    = useState(0);
-  const [period, setPeriod] = useState<"day"|"night">("day");
-  const [yamNo,  setYamNo]  = useState(1);
+// ─── Grade helpers ────────────────────────────────────────────────────────────
 
-  const timeRanges = Array.from({ length: 8 }, (_, i) => getYamTimeRange(period, i + 1));
+const GRADE_COLOR: Record<string, string> = {
+  A: "text-emerald-400 border-emerald-500/40 bg-emerald-950/30",
+  B: "text-blue-400   border-blue-500/40   bg-blue-950/30",
+  C: "text-amber-400  border-amber-500/40  bg-amber-950/30",
+  D: "text-orange-400 border-orange-500/40 bg-orange-950/30",
+  F: "text-rose-400   border-rose-500/40   bg-rose-950/30",
+};
+
+const GRADE_DOT: Record<string, string> = {
+  A: "bg-emerald-400", B: "bg-blue-400", C: "bg-amber-400",
+  D: "bg-orange-400",  F: "bg-rose-400",
+};
+
+// ─── Library Grid (112 ผัง จาก Supabase) ─────────────────────────────────────
+
+function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
+  const [filterDay,    setFilterDay]    = useState<number | null>(null);
+  const [filterPeriod, setFilterPeriod] = useState<"day" | "night" | null>(null);
+  const [filterGrade,  setFilterGrade]  = useState<string | null>(null);
+  const [selectedId,   setSelectedId]   = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+  const [formVals, setFormVals] = useState({ weekday: 0, period: "day" as "day"|"night", yamNo: 1 });
+
+  const filtered = library.filter(row => {
+    if (filterDay    !== null && row.weekday_num !== filterDay)    return false;
+    if (filterPeriod !== null && row.period      !== filterPeriod) return false;
+    if (filterGrade  !== null && row.grade       !== filterGrade)  return false;
+    return true;
+  });
+
+  const handleSelect = (row: YamLibraryRow) => {
+    setSelectedId(row.id);
+    setFormVals({ weekday: row.weekday_num, period: row.period, yamNo: row.yam_no });
+    setTimeout(() => formRef.current?.requestSubmit(), 50);
+  };
+
+  // Grade distribution
+  const gradeCounts = library.reduce((acc, r) => {
+    acc[r.grade] = (acc[r.grade] ?? 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
-    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-5">
-      <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold mb-4">
-        เลือกดวงยาม — {DAY_NAMES_TH[day]} {period === "day" ? "กลางวัน" : "กลางคืน"} ยาม {yamNo}
-      </p>
-
-      <Form method="post">
+    <div className="space-y-4">
+      {/* Hidden submit form */}
+      <Form method="post" ref={formRef}>
         <input type="hidden" name="mode"    value="success-yam" />
-        <input type="hidden" name="weekday" value={day} />
-        <input type="hidden" name="period"  value={period} />
-        <input type="hidden" name="yamNo"   value={yamNo} />
+        <input type="hidden" name="weekday" value={formVals.weekday} />
+        <input type="hidden" name="period"  value={formVals.period} />
+        <input type="hidden" name="yamNo"   value={formVals.yamNo} />
+      </Form>
 
-        {/* Day selector */}
-        <div className="flex flex-wrap gap-1.5 mb-4">
+      <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+        {/* Header + stats */}
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-[#C9A96E] rounded-full" />
+            <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">
+              ดวงยามสำเร็จ {filtered.length}/{library.length} ผัง
+            </p>
+          </div>
+          {/* Grade legend */}
+          <div className="flex gap-2 flex-wrap">
+            {(["A","B","C","D","F"] as const).map(g => (
+              <button key={g} type="button"
+                onClick={() => setFilterGrade(filterGrade === g ? null : g)}
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
+                  filterGrade === g
+                    ? GRADE_COLOR[g]
+                    : "border-white/10 text-[#8A8070] hover:border-white/20"
+                }`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${GRADE_DOT[g]}`} />
+                {g} ({gradeCounts[g] ?? 0})
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Day filter */}
+        <div className="flex flex-wrap gap-1.5 mb-3">
+          <button type="button"
+            onClick={() => setFilterDay(null)}
+            className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
+              filterDay === null
+                ? "border-[#C9A96E]/50 bg-[#C9A96E]/10 text-[#C9A96E]"
+                : "border-white/10 text-[#8A8070] hover:border-white/20"
+            }`}>ทั้งหมด</button>
           {DAY_NAMES_TH.map((name, i) => (
-            <button key={i} type="button" onClick={() => setDay(i)}
-              className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
-                day === i
+            <button key={i} type="button"
+              onClick={() => setFilterDay(filterDay === i ? null : i)}
+              className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
+                filterDay === i
                   ? "border-[#C9A96E]/50 text-[#C9A96E]"
                   : "border-white/10 text-[#8A8070] hover:border-white/20 hover:text-[#F8F6F1]"
               }`}
-              style={day === i ? { background: `${DAY_COLORS[i]}15` } : {}}>
+              style={filterDay === i ? { background: `${DAY_COLORS[i]}20` } : {}}>
               {name}
             </button>
           ))}
         </div>
 
-        {/* Period toggle */}
-        <div className="grid grid-cols-2 gap-2 mb-4">
-          {(["day","night"] as const).map(p => (
-            <button key={p} type="button" onClick={() => setPeriod(p)}
-              className={`py-2 rounded-xl text-sm font-bold border transition-all ${
-                period === p
+        {/* Period filter */}
+        <div className="flex gap-2 mb-4">
+          {([null, "day", "night"] as const).map(p => (
+            <button key={String(p)} type="button"
+              onClick={() => setFilterPeriod(p)}
+              className={`flex-1 py-1.5 rounded-xl text-xs font-bold border transition-all ${
+                filterPeriod === p
                   ? "bg-[#4B6FAE]/15 border-[#4B6FAE]/40 text-[#4B6FAE]"
                   : "border-white/8 text-[#8A8070] hover:border-white/15"
               }`}>
-              {p === "day" ? "☀ กลางวัน" : "☽ กลางคืน"}
+              {p === null ? "ทั้งวัน" : p === "day" ? "☀ กลางวัน" : "☽ กลางคืน"}
             </button>
           ))}
         </div>
 
-        {/* Yam grid */}
-        <div className="grid grid-cols-4 gap-2 mb-4">
-          {timeRanges.map((range, i) => (
-            <button key={i} type="button" onClick={() => setYamNo(i + 1)}
-              className={`rounded-xl p-2.5 border text-center transition-all ${
-                yamNo === i + 1
-                  ? "border-[#C9A96E]/50 bg-[#C9A96E]/10 text-[#C9A96E]"
-                  : "border-white/5 bg-slate-950/30 text-[#8A8070] hover:border-white/15 hover:text-[#F8F6F1]"
-              }`}>
-              <div className="font-display text-xl font-bold">{i + 1}</div>
-              <div className="text-[9px] leading-tight mt-0.5 font-mono">{range.start}</div>
-              <div className="text-[9px] leading-tight font-mono">{range.end}</div>
-            </button>
-          ))}
-        </div>
+        {/* Grid */}
+        {library.length === 0 ? (
+          <div className="text-center py-10 text-[#8A8070] text-sm">
+            ไม่พบข้อมูล — กรุณา Seed ที่ /admin/seed-yam ก่อน
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-1.5">
+            {filtered.map(row => {
+              const isSelected = selectedId === row.id;
+              const gc = GRADE_COLOR[row.grade] ?? "";
+              return (
+                <button key={row.id} type="button"
+                  onClick={() => handleSelect(row)}
+                  className={`rounded-xl p-2.5 border text-left transition-all hover:scale-[1.02] active:scale-95 ${
+                    isSelected
+                      ? `${gc} shadow-lg`
+                      : "border-white/8 bg-slate-950/30 hover:border-[#C9A96E]/25"
+                  }`}>
+                  {/* Grade badge */}
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className={`text-xs font-display font-bold ${
+                      isSelected ? "" : (GRADE_COLOR[row.grade]?.split(" ")[0] ?? "text-[#8A8070]")
+                    }`}>{row.grade}</span>
+                    <span className="text-[9px] text-[#5A5148] font-mono">
+                      {row.period === "day" ? "☀" : "☽"}{row.yam_no}
+                    </span>
+                  </div>
+                  {/* Day name */}
+                  <p className="text-[10px] font-bold text-[#F8F6F1] leading-tight truncate">
+                    {row.weekday_name_th}
+                  </p>
+                  {/* Time */}
+                  <p className="text-[9px] text-[#8A8070] font-mono mt-0.5 leading-tight">
+                    {row.start_time}
+                  </p>
+                  {/* Lagna */}
+                  {row.lagna_zodiac_name && (
+                    <p className="text-[9px] text-[#C9A96E] mt-0.5 truncate leading-tight">
+                      {row.lagna_zodiac_name}
+                    </p>
+                  )}
+                  {/* Score bar */}
+                  <div className="mt-2 h-0.5 rounded-full bg-white/5 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all ${GRADE_DOT[row.grade] ?? "bg-white/20"}`}
+                      style={{ width: `${row.overall_score ?? 0}%` }}
+                    />
+                  </div>
+                  <p className="text-[8px] text-[#5A5148] mt-0.5 text-right">{row.overall_score}</p>
+                </button>
+              );
+            })}
+          </div>
+        )}
 
-        <Button type="submit" className="w-full">
-          โหลดดวงยาม {DAY_NAMES_TH[day]} {period === "day" ? "กลางวัน" : "กลางคืน"} ยามที่ {yamNo}
-        </Button>
-      </Form>
-    </Card>
+        {filtered.length === 0 && library.length > 0 && (
+          <p className="text-center text-[#8A8070] text-sm py-8">ไม่มีผังที่ตรงกับ filter</p>
+        )}
+      </Card>
+    </div>
   );
 }
 
@@ -622,6 +734,8 @@ export default function HoraNuPage() {
   const initialSvg  = (actionData as any)?.svg    ?? loaderData.svg;
   const isLive      = activeMode !== "success-yam";
 
+  const library = (loaderData as any).library as YamLibraryRow[] ?? [];
+
   const [tab,       setTab]       = useState<"live"|"library">("live");
   const [showCustom,setShowCustom] = useState(false);
 
@@ -693,7 +807,7 @@ export default function HoraNuPage() {
       {tab === "live" && showCustom && <CustomTimeForm />}
 
       {/* ── Library mode browser ── */}
-      {tab === "library" && <SuccessYamBrowser />}
+      {tab === "library" && <LibraryGrid library={library} />}
 
       {/* ── Main chart grid ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
