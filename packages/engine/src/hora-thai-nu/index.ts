@@ -5,6 +5,7 @@ export {
   calculateNow as calculateHoraTaynooNow,
   calculateAt as calculateHoraTaynooAt,
   getPlanetSteps,
+  getPlanetStatus,
   calculatePositions,
   buildBhavaMap,
   findLagnaRuler,

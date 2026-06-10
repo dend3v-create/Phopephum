@@ -43,3 +43,26 @@ export async function getYamLibrary(env: Env): Promise<YamLibraryRow[]> {
 
   return (data ?? []) as YamLibraryRow[];
 }
+
+export interface YamRowDetail {
+  id: string;
+  planets: Record<string, number>;
+  lagna_zodiac_index: number;
+}
+
+/** Fetch a single row's planet data (for action override) */
+export async function getYamRow(env: Env, id: string): Promise<YamRowDetail | null> {
+  const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
+  const { data, error } = await supabase
+    .from("success_yam_charts")
+    .select("id,planets,lagna_zodiac_index")
+    .eq("id", id)
+    .single();
+
+  if (error || !data) return null;
+  return {
+    id: data.id,
+    planets: (data.planets ?? {}) as Record<string, number>,
+    lagna_zodiac_index: data.lagna_zodiac_index ?? 0,
+  };
+}

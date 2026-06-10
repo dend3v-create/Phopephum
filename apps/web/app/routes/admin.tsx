@@ -70,7 +70,12 @@ export default function AdminLayout() {
           <NavLink to="/admin" icon={<IconHome />} label="Overview" />
           <NavLink to="/admin/users" icon={<IconUsers />} label="จัดการสมาชิก" />
           <NavLink to="/admin/approvals" icon={<IconApprove />} label="อนุมัติคำขอ" />
-          <div className="mt-8 mb-2">
+          <div className="mt-4 mb-2">
+            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider pl-3">Yam Database</p>
+          </div>
+          <NavLink to="/admin/yam-editor" icon={<IconYam />} label="กรอกข้อมูลยาม" />
+          <NavLink to="/admin/seed-yam" icon={<IconSeed />} label="Seed อัตโนมัติ" />
+          <div className="mt-4 mb-2">
             <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider pl-3">Back to App</p>
           </div>
           <NavLink to="/dashboard" icon={<IconApp />} label="User Dashboard" />
@@ -175,6 +180,24 @@ function IconApprove() {
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
       <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
       <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" />
+    </svg>
+  );
+}
+
+function IconYam() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 3" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconSeed() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
+      <path d="M12 2v20M2 12h20" strokeLinecap="round" />
+      <path d="M6 6l12 12M18 6 6 18" strokeLinecap="round" />
     </svg>
   );
 }
