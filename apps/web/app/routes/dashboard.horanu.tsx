@@ -12,11 +12,12 @@ import {
   loadSuccessYam,
   getSuccessYamMeta,
   getYamTimeRange,
+  interpretChart,
   PLANET_INFO,
   ZODIAC_ORDER,
   BHAVA_NAMES,
 } from "@phopephum/engine";
-import type { HoraTaynooResult, SuccessYamMeta, ChartConfig } from "@phopephum/engine";
+import type { HoraTaynooResult, SuccessYamMeta, ChartConfig, ChartInterpretation } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import type { Env } from "~/env.server";
@@ -35,10 +36,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const now    = new Date();
   const result = calculateHoraTaynoo({ dateAsked: now });
+  const interpretation = interpretChart(result);
   const svg    = generateHoraTaynooSVG(result, { size: 520, theme: "dark" });
   const meta   = getSuccessYamMeta();
 
-  return json({ result, svg, serverTime: now.toISOString(), meta });
+  return json({ result, interpretation, svg, serverTime: now.toISOString(), meta });
 }
 
 // ─── Action ───────────────────────────────────────────────────────────────────
@@ -71,8 +73,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
     result = calculateHoraTaynoo({ dateAsked: targetDate });
   }
 
+  const interpretation = interpretChart(result);
   const svg = generateHoraTaynooSVG(result, { size: 520, theme: "dark" });
-  return json({ result, svg, mode });
+  return json({ result, interpretation, svg, mode });
 }
 
 // ─── Display helpers ──────────────────────────────────────────────────────────
@@ -81,6 +84,46 @@ const DAY_NAMES_TH = ["อาทิตย์","จันทร์","อังค
 const DAY_COLORS   = ["#E8920A","#7B8FA1","#C0392B","#27AE60","#B8860B","#9B59B6","#546E7A"];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
+
+function ChartInterpretationPanel({ interpretation }: { interpretation: ChartInterpretation }) {
+  const { overallScore, grade, categories } = interpretation;
+  const gradeColor = grade === 'A' ? 'text-emerald-400' : grade === 'B' ? 'text-blue-400' : grade === 'C' ? 'text-yellow-400' : 'text-rose-400';
+  
+  return (
+    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="w-2 h-2 bg-[#6EB0F5] rounded-full" />
+          <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">คำพยากรณ์ดวงยาม (Rule-Based)</p>
+        </div>
+        <div className="text-right flex items-end gap-2">
+          <span className={`font-display text-2xl font-bold leading-none ${gradeColor}`}>{grade}</span>
+          <span className="text-[#8A8070] text-[10px]">Score: {overallScore}/100</span>
+        </div>
+      </div>
+      
+      <div className="space-y-2">
+        {[
+          { label: 'การเงิน', text: categories.finance, icon: '💰' },
+          { label: 'การงาน', text: categories.work, icon: '💼' },
+          { label: 'ความรัก', text: categories.love, icon: '❤️' },
+          { label: 'สุขภาพ', text: categories.health, icon: '🏥' },
+          { label: 'คดีความ', text: categories.law, icon: '⚖️' },
+        ].map(cat => (
+          <div key={cat.label} className="bg-[#020617]/50 rounded-xl p-3 border border-white/5">
+            <div className="flex items-start gap-3">
+              <span className="text-lg mt-0.5">{cat.icon}</span>
+              <div>
+                <p className="text-[10px] text-[#C9A96E] font-bold mb-0.5">{cat.label}</p>
+                <p className="text-xs text-[#F8F6F1] leading-relaxed">{cat.text}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
 
 function YamBadge({ result }: { result: HoraTaynooResult }) {
   return (
@@ -411,6 +454,7 @@ export default function HoraNuPage() {
 
   const activeMode  = (actionData as any)?.mode ?? "live";
   const result: HoraTaynooResult = (actionData as any)?.result ?? loaderData.result;
+  const interpretation: ChartInterpretation = (actionData as any)?.interpretation ?? (loaderData as any).interpretation;
   const initialSvg  = (actionData as any)?.svg    ?? loaderData.svg;
   const isLive      = activeMode !== "success-yam";
 
@@ -547,8 +591,9 @@ export default function HoraNuPage() {
           </Card>
         </div>
 
-        {/* Right: Tables */}
+        {/* Right: Tables & Interpretation */}
         <div className="lg:col-span-6 xl:col-span-5 space-y-4">
+          {interpretation && <ChartInterpretationPanel interpretation={interpretation} />}
           <PlanetTable result={result} />
           <SubTimePanel result={result} isLive={isLive} />
           <BhavaTable result={result} />
