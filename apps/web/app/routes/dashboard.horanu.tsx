@@ -258,6 +258,31 @@ function SubTimePanel({ result, isLive }: { result: HoraTaynooResult; isLive: bo
   );
 }
 
+// ─── Status Legend ────────────────────────────────────────────────────────────
+
+function PlanetStatusLegend() {
+  const statuses = [
+    { glyph: '✿', char: 'มหาอุจจ์', color: '#22C55E', desc: 'กำลังสูงสุด' },
+    { glyph: '△', char: 'เกษตร',   color: '#EF4444', desc: 'ความมั่นคง' },
+    { glyph: '⬡', char: 'ราชาโชค', color: '#3B82F6', desc: 'โชคลาภนิยม' },
+    { glyph: '□', char: 'มหาจักร',  color: '#EAB308', desc: 'ความรุ่งโรจน์' },
+    { glyph: '○', char: 'ประ',    color: '#EF4444', desc: 'อ่อนกำลัง' },
+    { glyph: '✳', char: 'นิจ',     color: '#EF4444', desc: 'ตกต่ำ' },
+  ];
+
+  return (
+    <div className="flex flex-wrap justify-center gap-x-4 gap-y-2 pt-4 border-t border-[#C9A96E]/10 mt-2">
+      {statuses.map(s => (
+        <div key={s.char} className="flex items-center gap-1.5">
+          <span className="text-lg font-bold" style={{ color: s.color }}>{s.glyph}</span>
+          <span className="text-[10px] text-[#F8F6F1] font-bold whitespace-nowrap">{s.char}</span>
+          <span className="text-[9px] text-[#8A8070] hidden sm:inline">({s.desc})</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 // ─── Success Yam Browser ──────────────────────────────────────────────────────
 
 function SuccessYamBrowser() {
@@ -511,6 +536,9 @@ export default function HoraNuPage() {
                 </label>
               ))}
             </div>
+
+            {/* Planet Status Legend */}
+            <PlanetStatusLegend />
           </Card>
 
           <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">

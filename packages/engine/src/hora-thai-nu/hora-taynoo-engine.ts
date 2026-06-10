@@ -516,10 +516,11 @@ export interface ChartConfig {
 }
 
 /**
- * generateHoraTaynooSVG — สร้าง SVG ผังยามพรายกระซิบ Canonical 4-Layer (Version 2.0)
+ * generateHoraTaynooSVG — สร้าง SVG ผังยามพรายกระซิบ Canonical 4-Layer (Version 2.0 - Final Spec)
  *
- * Layer A: Fixed Kastern Numbers (Arabic, opacity 0.45)
- * Layer B: Floating Planets (Thai Numerals)
+ * Ring 1 (Outer): Zodiac + Bhava/Time labels
+ * Ring 2 (Middle): Floating Planets (Thai Numerals)
+ * Ring 3 (Inner): Fixed Kastern Numbers (Arabic, opacity 0.45)
  */
 export function generateHoraTaynooSVG(
   result: HoraTaynooResult,
@@ -537,16 +538,16 @@ export function generateHoraTaynooSVG(
   const s    = SIZE / 520  // scale factor
 
   // ── Radii ──────────────────────────────────────────────────────────────────
-  const R1   = SIZE * 0.44              // Outer zodiac ring   (100%)
-  const R2   = R1 * 0.82               // House ring boundary (82%)
-  const R3   = R1 * 0.65               // Planet ring boundary(65%)
-  const R4   = R1 * 0.37               // Core boundary       (~37%)
+  const R_OUTER = SIZE * 0.45           // Ring 1 boundary (Zodiac/Time)
+  const R_MID   = R_OUTER * 0.76        // Ring 2 boundary (Planets)
+  const R_INNER = R_OUTER * 0.50        // Ring 3 boundary (Fixed Kastern)
+  const R_CORE  = R_OUTER * 0.30        // Core Grid boundary
 
-  const R_ZOD   = (R1 + R2) / 2         // zodiac label midpoint
-  const R_HOU   = (R2 + R3) / 2         // house label midpoint
-  const R_PLN   = (R3 + R4) / 2         // planet label midpoint
-  const R_FIXED = R3 - 10 * s           // Fixed kastern inside planet ring
-  const R_TIME  = Math.min(R1 + 22 * s, SIZE / 2 - 4 * s)
+  const R_ZOD_LBL  = (R_OUTER + R_MID) / 2 + 10 * s
+  const R_HOU_LBL  = (R_OUTER + R_MID) / 2 - 10 * s
+  const R_PLN_LBL  = (R_MID + R_INNER) / 2
+  const R_FIX_LBL  = (R_INNER + R_CORE) / 2
+  const R_TIME_LBL = R_OUTER + 22 * s
 
   // ── Colors ─────────────────────────────────────────────────────────────────
   const GOLD      = '#C9A96E'
@@ -569,19 +570,6 @@ export function generateHoraTaynooSVG(
     return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) }
   }
 
-  /** วาด sector ระหว่าง rInner–rOuter ที่มุมกลาง angleMid ±15° */
-  function sectorPath(angleMid: number, rInner: number, rOuter: number): string {
-    const a1 = angleMid + 15  // CCW boundary (higher angle)
-    const a2 = angleMid - 15  // CW boundary  (lower angle)
-    const o1 = polar(a1, rOuter), o2 = polar(a2, rOuter)
-    const i2 = polar(a2, rInner), i1 = polar(a1, rInner)
-    const ro = rOuter.toFixed(1), ri = rInner.toFixed(1)
-    return `M${o1.x.toFixed(1)} ${o1.y.toFixed(1)} ` +
-           `A${ro} ${ro} 0 0 0 ${o2.x.toFixed(1)} ${o2.y.toFixed(1)} ` +
-           `L${i2.x.toFixed(1)} ${i2.y.toFixed(1)} ` +
-           `A${ri} ${ri} 0 0 1 ${i1.x.toFixed(1)} ${i1.y.toFixed(1)} Z`
-  }
-
   // ── Build planet-by-zodiac map ──────────────────────────────────────────────
   const byZodiac: Record<number, PlanetEntry[]> = {}
   for (const e of result.planetEntries) {
@@ -594,69 +582,53 @@ export function generateHoraTaynooSVG(
     const isLagna    = z.index === result.lagnaZodiacIndex
     const hasPlanets = (byZodiac[z.index] ?? []).length > 0
     if (!isLagna && !hasPlanets) continue
-    highlights += `<path d="${sectorPath(z.sectorAngle, R4, R1)}" fill="${isLagna ? LAGNA_BG : PLN_BG}" stroke="none"/>`
+    
+    const a1 = z.sectorAngle + 14.8, a2 = z.sectorAngle - 14.8
+    const o1 = polar(a1, R_OUTER), o2 = polar(a2, R_OUTER)
+    const i2 = polar(a2, R_CORE), i1 = polar(a1, R_CORE)
+    const d = `M${o1.x} ${o1.y} A${R_OUTER} ${R_OUTER} 0 0 0 ${o2.x} ${o2.y} L${i2.x} ${i2.y} A${R_CORE} ${R_CORE} 0 0 1 ${i1.x} ${i1.y} Z`
+    highlights += `<path d="${d}" fill="${isLagna ? LAGNA_BG : PLN_BG}" stroke="none"/>`
   }
 
-  // ── Circles ─────────────────────────────────────────────────────────────────
+  // ── Circles & Dividers ─────────────────────────────────────────────────────
   const circles = [
-    `<circle cx="${CX}" cy="${CY}" r="${R1.toFixed(1)}" fill="none" stroke="${GOLD}" stroke-width="1.5"/>`,
-    `<circle cx="${CX}" cy="${CY}" r="${R2.toFixed(1)}" fill="none" stroke="${GOLD}" stroke-width="1"/>`,
-    `<circle cx="${CX}" cy="${CY}" r="${R3.toFixed(1)}" fill="none" stroke="${GOLD_MED}" stroke-width="0.7"/>`,
-    `<circle cx="${CX}" cy="${CY}" r="${R4.toFixed(1)}" fill="none" stroke="${GOLD}" stroke-width="1"/>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R_OUTER.toFixed(1)}" fill="none" stroke="${GOLD}" stroke-width="1.5"/>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R_MID.toFixed(1)}" fill="none" stroke="${GOLD_MED}" stroke-width="0.8"/>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R_INNER.toFixed(1)}" fill="none" stroke="${GOLD_DIM}" stroke-width="0.7"/>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R_CORE.toFixed(1)}" fill="none" stroke="${GOLD}" stroke-width="1"/>`,
   ].join('\n')
 
-  // ── 12 radial dividers (zodiac sector boundaries) ───────────────────────────
   let dividers = ''
   for (let i = 0; i < 12; i++) {
     const angle = 345 - 30 * i
-    const inner = polar(angle, R4)
-    const outer = polar(angle, R1)
+    const inner = polar(angle, R_CORE)
+    const outer = polar(angle, R_OUTER)
     dividers += `<line x1="${inner.x.toFixed(1)}" y1="${inner.y.toFixed(1)}" x2="${outer.x.toFixed(1)}" y2="${outer.y.toFixed(1)}" stroke="${GOLD}" stroke-width="0.8"/>`
   }
 
-  // ── Layer 1: Zodiac names ────────────────────────────────────────────────────
+  // ── Layer 1: Zodiac & House Names ────────────────────────────────────────────
   let zodiacLabels = ''
   for (const z of ZODIAC_ORDER) {
-    const pos   = polar(z.sectorAngle, R_ZOD)
+    const pZod = polar(z.sectorAngle, R_ZOD_LBL)
     const isLagna = z.index === result.lagnaZodiacIndex
-    const color = isLagna ? '#6EB0F5' : TXT
-    zodiacLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${10.5*s}" font-family="sans-serif" fill="${color}" font-weight="${isLagna ? '700' : '500'}">${z.name}</text>`
-  }
+    zodiacLabels += `<text x="${pZod.x.toFixed(1)}" y="${pZod.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${11*s}" font-family="sans-serif" fill="${isLagna ? '#6EB0F5' : TXT}" font-weight="${isLagna ? '700' : '500'}">${z.name}</text>`
 
-  // ── Layer 2: House names ─────────────────────────────────────────────────────
-  let houseLabels = ''
-  for (const z of ZODIAC_ORDER) {
     const bhava = result.bhavaMap[z.index]
-    if (!bhava) continue
-    const pos   = polar(z.sectorAngle, R_HOU)
-    const color = BAD_BHAVA.has(bhava) ? BAD_CLR : GOOD_BHAVA.has(bhava) ? GOOD_CLR : MED_CLR
-    houseLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${8.5*s}" font-family="sans-serif" fill="${color}">${bhava}</text>`
+    if (bhava) {
+      const pHou = polar(z.sectorAngle, R_HOU_LBL)
+      const color = BAD_BHAVA.has(bhava) ? BAD_CLR : GOOD_BHAVA.has(bhava) ? GOOD_CLR : MED_CLR
+      zodiacLabels += `<text x="${pHou.x.toFixed(1)}" y="${pHou.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${9*s}" font-family="sans-serif" fill="${color}">${bhava}</text>`
+    }
   }
 
-  // ── Layer 3: Planet labels (Layer B) + status overlay ────────────────────────
-  const STATUS_COLORS: Record<Exclude<PlanetStatus, null>, string> = {
-    'maha-uccj': '#22C55E',
-    'kaset': '#C9A96E',
-    'racha-chok': '#3B82F6',
-    'maha-chakr': '#EAB308',
-    'pra': '#EF4444',
-    'nij': '#EF4444',
-  }
-
-  const STATUS_GLYPHS: Record<Exclude<PlanetStatus, null>, string> = {
-    'maha-uccj': '○',
-    'kaset': '△',
-    'racha-chok': '⬡',
-    'maha-chakr': '□',
-    'pra': '⋮',
-    'nij': '✳',
-  }
-
-  function statusSymbol(x: number, y: number, status: PlanetStatus): string {
-    if (!status || !SHOW_STATUS) return ''
-    const color = STATUS_COLORS[status]
-    const glyph = STATUS_GLYPHS[status]
-    return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${9.5*s}" font-family="sans-serif" fill="${color}" font-weight="700">${glyph}</text>`
+  // ── Layer 2: Floating Planets + Status ───────────────────────────────────────
+  const STATUS_GLYPHS: Record<Exclude<PlanetStatus, null>, { char: string; color: string }> = {
+    'maha-uccj': { char: '✿', color: '#22C55E' }, // Green Flower
+    'kaset':     { char: '△', color: '#EF4444' }, // Red Triangle
+    'racha-chok':{ char: '⬡', color: '#3B82F6' }, // Blue Hexagon
+    'maha-chakr':{ char: '□', color: '#EAB308' }, // Yellow Square
+    'pra':       { char: '○', color: '#EF4444' }, // Red Circle
+    'nij':       { char: '✳', color: '#EF4444' }, // Red Asterisk
   }
 
   let planetLabels = ''
@@ -664,58 +636,64 @@ export function generateHoraTaynooSVG(
     for (const z of ZODIAC_ORDER) {
       const entries = byZodiac[z.index] ?? []
       if (entries.length === 0) continue
-      const pos = polar(z.sectorAngle, R_PLN)
-      const baseX = pos.x
-      const baseY = pos.y
-      const gap = 16 * s
+      const pos = polar(z.sectorAngle, R_PLN_LBL)
+      const gap = 18 * s
       const totalWidth = (entries.length - 1) * gap
       entries.forEach((entry, idx) => {
-        const x = baseX - totalWidth / 2 + idx * gap
-        const y = baseY
-        const pInfo = entry.planetNum ? PLANET_INFO[entry.planetNum] : null
-        const color = pInfo?.color ?? (entry.isLagna ? '#6EB0F5' : GOLD)
-        const symbol = entry.status ? statusSymbol(x, y - 12 * s, entry.status) : ''
-        planetLabels += `${symbol}<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${14*s}" font-family="serif" fill="${color}" font-weight="900">${entry.labelThai}</text>`
+        const x = pos.x - totalWidth / 2 + idx * gap
+        const y = pos.y
+        const color = entry.planetNum ? (PLANET_INFO[entry.planetNum]?.color ?? GOLD) : (entry.isLagna ? '#6EB0F5' : GOLD)
+        
+        // Status symbol overlay
+        if (entry.status && SHOW_STATUS) {
+          const st = STATUS_GLYPHS[entry.status]
+          planetLabels += `<text x="${x.toFixed(1)}" y="${(y - 13 * s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${10*s}" font-family="sans-serif" fill="${st.color}" font-weight="900">${st.char}</text>`
+        }
+        
+        planetLabels += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${16*s}" font-family="serif" fill="${color}" font-weight="900">${entry.labelThai}</text>`
       })
     }
   }
 
-  // ── Layer A: Fixed Kastern numbers ──────────────────────────────────────────
+  // ── Layer 3: Fixed Kastern numbers ──────────────────────────────────────────
   let kasternFixedLabels = ''
   if (SHOW_FIXED) {
     for (const z of ZODIAC_ORDER) {
-      const pos = polar(z.sectorAngle, R_FIXED)
+      const pos = polar(z.sectorAngle, R_FIX_LBL)
       const fixedNum = KASTERN_FIXED[z.index]
-      kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${13*s}" font-family="sans-serif" fill="${GOLD}" opacity="0.45">${fixedNum}</text>`
+      kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${14*s}" font-family="sans-serif" fill="${GOLD}" opacity="0.45">${fixedNum}</text>`
     }
   }
 
-  // ── Layer 4: Core grid ────────────────────────────────────────────────────────
+  // ── Layer 4: Core Grid ────────────────────────────────────────────────────────
   let coreLines = ''
   for (const angle of [0, 45, 90, 135]) {
-    const p1 = polar(angle, R4), p2 = polar(angle + 180, R4)
+    const p1 = polar(angle, R_CORE), p2 = polar(angle + 180, R_CORE)
     coreLines += `<line x1="${p1.x.toFixed(1)}" y1="${p1.y.toFixed(1)}" x2="${p2.x.toFixed(1)}" y2="${p2.y.toFixed(1)}" stroke="${GOLD}" stroke-width="0.8"/>`
   }
 
-  // Anchor Numbers 1-8 (ตำแหน่ง Fixed ตามตำรา)
   const ANCHORS: Record<number, [number, number]> = {
-    1: [-35, 40], 2: [-60, 0],  3: [0, -65], 4: [-65, -25],
-    5: [60, -25], 6: [35, 40],  7: [0, 10],  8: [35, -65],
+    1: [-28, 32], 2: [-48, 0],  3: [0, -52], 4: [-52, -20],
+    5: [48, -20], 6: [28, 32],  7: [0, 8],  8: [28, -52],
   }
   let anchorLabels = ''
   for (const [num, [dx, dy]] of Object.entries(ANCHORS)) {
     const x = (CX + Number(dx) * s).toFixed(1)
     const y = (CY + Number(dy) * s).toFixed(1)
-    anchorLabels += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${11*s}" font-family="sans-serif" fill="${GOLD}" font-weight="700" opacity="0.6">${num}</text>`
+    anchorLabels += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${9*s}" font-family="sans-serif" fill="${GOLD}" font-weight="700" opacity="0.5">${num}</text>`
   }
 
-  // Sub time labels (outermost ring)
+  // ── Outermost Ring: Time Wheel (Bhava + Time) ────────────────────────────────
   let timeLabels = ''
   if (SHOW_TIME) {
     for (const slot of result.subTimeSlots) {
       const angle = ZODIAC_ORDER[slot.zodiacIndex].sectorAngle
-      const pos = polar(angle, R_TIME)
-      timeLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${7.5*s}" font-family="sans-serif" fill="${TXT_DIM}" opacity="0.9">${slot.bhavaTimeLabel}</text>`
+      const pos = polar(angle, R_TIME_LBL)
+      // Paired display like original manuscripts
+      const label = `${slot.bhavaName}\n${slot.startStr}`
+      const lines = label.split('\n')
+      timeLabels += `<text x="${pos.x.toFixed(1)}" y="${(pos.y - 4*s).toFixed(1)}" text-anchor="middle" font-size="${7.5*s}" font-family="sans-serif" fill="${TXT_DIM}" opacity="0.9" font-weight="700">${lines[0]}</text>`
+      timeLabels += `<text x="${pos.x.toFixed(1)}" y="${(pos.y + 6*s).toFixed(1)}" text-anchor="middle" font-size="${7*s}" font-family="mono" fill="${GOLD_MED}" opacity="0.8">${lines[1]}</text>`
     }
   }
 
@@ -723,12 +701,11 @@ export function generateHoraTaynooSVG(
   let startMarker = ''
   if (SHOW_START) {
     const startAngle = ZODIAC_ORDER[result.timeStartZodiacIndex].sectorAngle
-    const pos = polar(startAngle, R1 + 8 * s)
-    startMarker = `<circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${4*s}" fill="#6EB0F5" stroke="white" stroke-width="1"/>`
+    const pos = polar(startAngle, R_OUTER + 8 * s)
+    startMarker = `<circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${4.5*s}" fill="#6EB0F5" stroke="white" stroke-width="1" opacity="0.8"/>`
   }
 
-  // Day planet in center
-  const centerLabel = `<text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="central" font-size="${16*s}" font-family="sans-serif" fill="${GOLD}" font-weight="700">${result.dayPlanet}</text>`
+  const centerLabel = `<text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="central" font-size="${18*s}" font-family="sans-serif" fill="${GOLD}" font-weight="900">${result.dayPlanet}</text>`
 
   return `<svg viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg">
 ${highlights}
@@ -736,7 +713,6 @@ ${circles}
 ${dividers}
  ${kasternFixedLabels}
  ${zodiacLabels}
- ${houseLabels}
  ${planetLabels}
  ${coreLines}
  ${anchorLabels}
