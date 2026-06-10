@@ -567,11 +567,13 @@ export default function KarnchataPage() {
         {[
           { id: "daily",  label: "รายวัน",      icon: "📅" },
           { id: "hourly", label: "รายชั่วโมง",   icon: "⏱" },
-          { id: "minute", label: "รายนาที 3.45", icon: "🎯" },
+          { id: "minute", label: "รายนาที 3.45", shortLabel: "นาที", icon: "🎯" },
         ].map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
-            className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === tab.id ? "bg-[#C6A96B] text-[#020617]" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}>
-            <span>{tab.icon}</span><span>{tab.label}</span>
+            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === tab.id ? "bg-[#C6A96B] text-[#020617]" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}>
+            <span>{tab.icon}</span>
+            <span className="hidden sm:inline">{tab.label}</span>
+            <span className="sm:hidden">{"shortLabel" in tab ? tab.shortLabel : tab.label}</span>
           </button>
         ))}
       </div>
@@ -664,11 +666,15 @@ export default function KarnchataPage() {
                         <div key={yamKey} className="flex flex-col">
                           <button onClick={() => setSelectedYamKey(isEx ? null : yamKey)}
                             className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs transition-all ${y.isCurrentYam ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "bg-rose-500/5 border-rose-500/20" : "bg-[#020617] border-white/5 hover:border-white/15"}`}>
-                            <span className="w-20 font-mono text-[#8A8070]">{y.timeStr}</span>
-                            <span className={`w-16 font-bold ${y.isCurrentYam ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span>
-                            <span className={`w-14 font-bold text-[10px] ${adv?.level === 3 ? "text-emerald-400" : adv?.level === 0 ? "text-rose-400" : "text-[#8A8070]"}`}>{y.quality}</span>
-                            <span className="flex-1 text-[#8A8070] truncate text-left">{adv?.th}</span>
-                            <span className="text-[#8A8070]/50">{isEx ? "▲" : "▼"}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono text-[#8A8070] shrink-0 text-[11px]">{y.timeStr}</span>
+                                <span className={`font-bold truncate ${y.isCurrentYam ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span>
+                                <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-emerald-400" : adv?.level === 0 ? "text-rose-400" : "text-[#8A8070]"}`}>{y.quality}</span>
+                              </div>
+                              {adv?.th && <p className="text-[10px] text-[#8A8070] truncate mt-0.5">{adv.th}</p>}
+                            </div>
+                            <span className="text-[#8A8070]/50 shrink-0">{isEx ? "▲" : "▼"}</span>
                           </button>
                           {isEx && (
                             <div className="px-4 py-4 bg-[#020617]/60 border-x border-b border-white/5 rounded-b-xl">
@@ -745,11 +751,15 @@ export default function KarnchataPage() {
                     <button onClick={() => setSelectedYamKey(isEx ? null : yamKey)}
                       className={`flex items-center gap-2 p-3 rounded-xl border text-xs transition-all ${y.isCurrentYam ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "bg-rose-500/5 border-rose-500/20" : "bg-[#020617] border-white/5 hover:border-white/15"}`}>
                       <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${y.isCurrentYam ? "bg-[#C6A96B] text-[#020617]" : "bg-white/5 text-[#8A8070]"}`}>{y.yamNum}</span>
-                      <span className="w-22 font-mono text-[#8A8070] text-[11px]">{y.timeStr}</span>
-                      <span className={`w-16 font-bold ${y.isCurrentYam ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span>
-                      <span className={`w-14 font-bold text-[10px] ${adv?.level === 3 ? "text-emerald-400" : adv?.level === 0 ? "text-rose-400" : "text-[#8A8070]"}`}>{y.quality} {adv?.emoji}</span>
-                      <span className="flex-1 text-[#8A8070] truncate text-left text-[10px]">{adv?.th}</span>
-                      <span className="text-[#8A8070]/50 text-xs">{isEx ? "▲" : "▼"}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[#8A8070] text-[11px] shrink-0">{y.timeStr}</span>
+                          <span className={`font-bold truncate ${y.isCurrentYam ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span>
+                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-emerald-400" : adv?.level === 0 ? "text-rose-400" : "text-[#8A8070]"}`}>{y.quality} {adv?.emoji}</span>
+                        </div>
+                        {adv?.th && <p className="text-[10px] text-[#8A8070] truncate mt-0.5">{adv.th}</p>}
+                      </div>
+                      <span className="text-[#8A8070]/50 text-xs shrink-0">{isEx ? "▲" : "▼"}</span>
                     </button>
                     {isEx && (
                       <div className="px-4 py-4 bg-[#020617]/60 border-x border-b border-white/5 rounded-b-xl">
@@ -821,11 +831,15 @@ export default function KarnchataPage() {
                     <button onClick={() => setSelectedYamKey(isEx ? null : soyKey)}
                       className={`flex items-center gap-2 p-3 rounded-xl border text-xs transition-all ${soy.isCurrent ? "bg-sky-500/10 border-sky-500/40" : adv?.level === 0 ? "bg-rose-500/5 border-rose-500/20" : "bg-[#020617] border-white/5 hover:border-white/15"}`}>
                       <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${soy.isCurrent ? "bg-sky-500 text-white" : "bg-white/5 text-[#8A8070]"}`}>{soy.slot}</span>
-                      <span className="w-24 font-mono text-[#8A8070] text-[11px]">{soy.timeStr}</span>
-                      <span className={`w-16 font-bold ${soy.isCurrent ? "text-sky-300" : "text-[#F8F6F1]"}`}>{STAR_NAMES[soy.planet as keyof typeof STAR_NAMES]}</span>
-                      <span className={`w-14 font-bold text-[10px] ${adv?.level === 3 ? "text-emerald-400" : adv?.level === 0 ? "text-rose-400" : "text-[#8A8070]"}`}>{soy.quality} {adv?.emoji}</span>
-                      <span className="flex-1 text-[#8A8070] truncate text-left text-[10px]">{adv?.th}</span>
-                      <span className="text-[#8A8070]/50">{isEx ? "▲" : "▼"}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-[#8A8070] text-[11px] shrink-0">{soy.timeStr}</span>
+                          <span className={`font-bold truncate ${soy.isCurrent ? "text-sky-300" : "text-[#F8F6F1]"}`}>{STAR_NAMES[soy.planet as keyof typeof STAR_NAMES]}</span>
+                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-emerald-400" : adv?.level === 0 ? "text-rose-400" : "text-[#8A8070]"}`}>{soy.quality} {adv?.emoji}</span>
+                        </div>
+                        {adv?.th && <p className="text-[10px] text-[#8A8070] truncate mt-0.5">{adv.th}</p>}
+                      </div>
+                      <span className="text-[#8A8070]/50 shrink-0">{isEx ? "▲" : "▼"}</span>
                     </button>
                     {isEx && (
                       <div className="px-4 py-4 bg-[#020617]/60 border-x border-b border-white/5 rounded-b-xl">

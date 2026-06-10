@@ -337,12 +337,12 @@ function CustomTimeForm() {
   return (
     <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-5">
       <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold mb-4">ตั้งเวลาเอง</p>
-      <Form method="post" className="flex flex-wrap items-end gap-3">
+      <Form method="post" className="grid grid-cols-2 sm:flex sm:flex-wrap items-end gap-3">
         <input type="hidden" name="mode" value="custom" />
         {[
-          { name: "day",   label: "วัน",     placeholder: String(now.getDate()),          w: "w-16" },
-          { name: "month", label: "เดือน",    placeholder: String(now.getMonth() + 1),    w: "w-16" },
-          { name: "year",  label: "ปี พ.ศ.", placeholder: String(now.getFullYear() + 543), w: "w-24" },
+          { name: "day",   label: "วัน",     placeholder: String(now.getDate()),           w: "w-full sm:w-16" },
+          { name: "month", label: "เดือน",    placeholder: String(now.getMonth() + 1),     w: "w-full sm:w-16" },
+          { name: "year",  label: "ปี พ.ศ.", placeholder: String(now.getFullYear() + 543),  w: "w-full sm:w-24" },
         ].map(f => (
           <div key={f.name}>
             <label className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1 block">{f.label}</label>
@@ -354,7 +354,7 @@ function CustomTimeForm() {
           <label className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1 block">เวลา</label>
           <input name="time" type="time"
             defaultValue={`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`}
-            className="w-32 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
+            className="w-full sm:w-32 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
         </div>
         <Button type="submit" className="self-end">คำนวณ</Button>
       </Form>
@@ -401,7 +401,7 @@ export default function HoraNuPage() {
     <div className="space-y-5 pb-10">
 
       {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
@@ -411,7 +411,7 @@ export default function HoraNuPage() {
           <p className="text-[#8A8070] text-sm mt-1">ผังดวงโหรทายหนู — ยามอัฐกาล + ดาวลอย 11 + ภพ 12</p>
         </div>
         {isLive && (
-          <div className="flex flex-col items-end gap-2 shrink-0">
+          <div className="flex items-center sm:flex-col sm:items-end gap-2 shrink-0">
             <LiveClock serverTime={loaderData.serverTime} />
             <button onClick={() => setShowCustom(v => !v)}
               className={`text-[11px] font-bold px-3 py-1.5 rounded-full border transition-all ${
@@ -432,7 +432,7 @@ export default function HoraNuPage() {
                 ? "bg-[#C9A96E]/15 text-[#C9A96E]"
                 : "text-[#8A8070] hover:text-[#F8F6F1]"
             }`}>
-            {t === "live" ? "⚡ คำนวณสด" : "📚 ดวงยามสำเร็จ (112 ผัง)"}
+            {t === "live" ? "⚡ คำนวณสด" : <><span className="hidden sm:inline">📚 ดวงยามสำเร็จ (112 ผัง)</span><span className="sm:hidden">📚 ดวงยามสำเร็จ</span></>}
           </button>
         ))}
       </div>
