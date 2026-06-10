@@ -77,9 +77,9 @@ export const RAHU_TIME_BLOCKS: RahuTimeBlock[] = [
 
 export const RAHU_SUB_BLOCKS: RahuSubBlock[] = [
   { id: 1, name: 'ทาษา',      minute_start: 0,  minute_end: 10, is_good: false, phase_indicator: 'ยามต้น'   },
-  { id: 2, name: 'คหบดี',     minute_start: 10, minute_end: 20, is_good: true,  phase_indicator: null       },
-  { id: 3, name: 'โจร',       minute_start: 20, minute_end: 30, is_good: false, phase_indicator: null       },
-  { id: 4, name: 'เสนาบดี',   minute_start: 30, minute_end: 40, is_good: true,  phase_indicator: 'ยามกลาง' },
+  { id: 2, name: 'คหปติ',     minute_start: 10, minute_end: 20, is_good: true,  phase_indicator: null       },
+  { id: 3, name: 'โจโร',      minute_start: 20, minute_end: 30, is_good: false, phase_indicator: null       },
+  { id: 4, name: 'เสนาปติ',   minute_start: 30, minute_end: 40, is_good: true,  phase_indicator: 'ยามกลาง' },
   { id: 5, name: 'กาลทัณฑ์',  minute_start: 40, minute_end: 50, is_good: false, phase_indicator: null       },
   { id: 6, name: 'กัลยาณ์',   minute_start: 50, minute_end: 60, is_good: true,  phase_indicator: null       },
   { id: 7, name: 'มหายักษ์',  minute_start: 60, minute_end: 70, is_good: false, phase_indicator: 'ยามปลาย' },
@@ -94,8 +94,8 @@ export const RAHU_YAM_RULES: RahuYamRule[] = [
     traibhum_result: 'ดียามกลาง',
     huajai_truth: 'พูดจริง เชื่อถือได้',
     huajai_lost_item: 'ของหายได้คืน',
-    huajai_health: 'ถามป่วย/จะหาย',
-    good_phase_desc: 'ดีช่วงยามกลาง เสนาบดี+กัลยาณ์ (นาที 30-40 และ 50-60)'
+    huajai_health: 'ถามป่วย/ตาย',
+    good_phase_desc: 'ดีช่วงยามกลาง เสนาปติ+กัลยาณ์ (นาที 30-40 และ 50-60)'
   },
   {
     // จันทร์ — ดาวแห่งความแปรปรวน ๕๐/๕๐
@@ -104,7 +104,7 @@ export const RAHU_YAM_RULES: RahuYamRule[] = [
     huajai_truth: 'ทุกเรื่อง ๕๐/๕๐',
     huajai_lost_item: 'ได้คืน ๕๐/๕๐',
     huajai_health: 'ถามป่วย/ควรเปลี่ยนหมอ',
-    good_phase_desc: 'ดีช่วงยามกลาง เสนาบดี+กัลยาณ์ (นาที 30-40 และ 50-60)'
+    good_phase_desc: 'ดีช่วงยามกลาง เสนาปติ+กัลยาณ์ (นาที 30-40 และ 50-60)'
   },
   {
     // อังคาร — ดาวนักรบ พลังขับเคลื่อน ดียามปลาย
@@ -112,7 +112,7 @@ export const RAHU_YAM_RULES: RahuYamRule[] = [
     traibhum_result: 'ดียามปลาย',
     huajai_truth: 'พูดเท็จ เชื่อถือไม่ได้',
     huajai_lost_item: 'ของหายไม่ได้คืน',
-    huajai_health: 'ถามป่วย/จะหาย',
+    huajai_health: 'ถามป่วย/หาย',
     good_phase_desc: 'ดีช่วงยามปลาย ธนบดินทร์+นักพรต (นาที 70-90)'
   },
   {
@@ -121,17 +121,17 @@ export const RAHU_YAM_RULES: RahuYamRule[] = [
     traibhum_result: 'ดียามกลาง+ยามปลาย',
     huajai_truth: 'พูดจริง เชื่อถือได้',
     huajai_lost_item: 'ของหายได้คืน',
-    huajai_health: 'ถามป่วย/ควรรักษาต่อ',
+    huajai_health: 'ถามป่วย/ตาย',
     good_phase_desc: 'ดียามกลาง+ปลาย (นาที 30-40, 50-60, 70-90)'
   },
   {
-    // พฤหัสบดี — ดาวครู ดาวมงคล ดียามต้น (คหบดี)
+    // พฤหัสบดี — ดาวครู ดาวมงคล ดียามต้น (คหปติ)
     yam_number: 5, yam_name: 'ยามพฤหัสบดี',
     traibhum_result: 'ดียามต้น',
     huajai_truth: 'ทุกเรื่อง ๕๐/๕๐',
     huajai_lost_item: 'ได้คืน ๕๐/๕๐',
     huajai_health: 'ถามป่วย/ควรเปลี่ยนหมอ',
-    good_phase_desc: 'ดีช่วงยามต้น เฉพาะคหบดี (นาที 10-20)'
+    good_phase_desc: 'ดีช่วงยามต้น เฉพาะคหปติ (นาที 10-20)'
   },
   {
     // ศุกร์ — ดาวความงาม สุขภาพดี
@@ -139,7 +139,7 @@ export const RAHU_YAM_RULES: RahuYamRule[] = [
     traibhum_result: 'ดียามปลาย',
     huajai_truth: 'พูดเท็จ เชื่อถือไม่ได้',
     huajai_lost_item: 'ของหายไม่ได้คืน',
-    huajai_health: 'ถามป่วย/จะหาย',
+    huajai_health: 'ถามป่วย/หาย',
     good_phase_desc: 'ดีช่วงยามปลาย ธนบดินทร์+นักพรต (นาที 70-90)'
   },
   {
@@ -148,7 +148,7 @@ export const RAHU_YAM_RULES: RahuYamRule[] = [
     traibhum_result: 'ดียามกลาง+ยามปลาย',
     huajai_truth: 'พูดจริง เชื่อถือได้',
     huajai_lost_item: 'ของหายได้คืน',
-    huajai_health: 'ถามป่วย/อาการหนัก',
+    huajai_health: 'ถามป่วย/ตาย',
     good_phase_desc: 'ดียามกลาง+ปลาย (นาที 30-40, 50-60, 70-90)'
   },
 ];

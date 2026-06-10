@@ -31,7 +31,7 @@ const RAHU_WATCHES: Omit<SystematicRahuResult, "minutesRange">[] = [
   { id: 6, name: "กัลยาณ์", quality: "good" },
   { id: 7, name: "มหายักษ์", quality: "bad" },
   { id: 8, name: "ธนบดินทร์", quality: "good" },
-  { id: 9, name: "นักพรต", quality: "neutral" },
+  { id: 9, name: "นักพรต", quality: "good" },
 ];
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
