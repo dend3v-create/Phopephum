@@ -16,7 +16,7 @@ import {
   ZODIAC_ORDER,
   BHAVA_NAMES,
 } from "@phopephum/engine";
-import type { HoraTaynooResult, SuccessYamMeta } from "@phopephum/engine";
+import type { HoraTaynooResult, SuccessYamMeta, ChartConfig } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import type { Env } from "~/env.server";
@@ -159,7 +159,7 @@ function PlanetTable({ result }: { result: HoraTaynooResult }) {
                 : "border-white/5 bg-slate-950/20 hover:border-[#C9A96E]/20"
             }`}>
               <div className="font-display text-xl font-bold mb-0.5" style={{ color }}>
-                {entry.label}
+                {entry.labelThai}
               </div>
               <div className="text-[10px] text-[#8A8070] leading-tight">{zodiac?.name}</div>
               {bhava && (
@@ -207,7 +207,7 @@ function BhavaTable({ result }: { result: HoraTaynooResult }) {
                 }`}>{i + 1}. {b.bhava}</span>
                 {b.planets.length > 0 && (
                   <span className="text-[9px] text-[#C9A96E] font-bold">
-                    {b.planets.map(p => p.label).join(",")}
+                    {b.planets.map(p => p.labelThai).join(",")}
                   </span>
                 )}
               </div>
@@ -386,11 +386,28 @@ export default function HoraNuPage() {
 
   const activeMode  = (actionData as any)?.mode ?? "live";
   const result: HoraTaynooResult = (actionData as any)?.result ?? loaderData.result;
-  const svgStr      = (actionData as any)?.svg    ?? loaderData.svg;
+  const initialSvg  = (actionData as any)?.svg    ?? loaderData.svg;
   const isLive      = activeMode !== "success-yam";
 
   const [tab,       setTab]       = useState<"live"|"library">("live");
   const [showCustom,setShowCustom] = useState(false);
+
+  // Chart Options State
+  const [options, setOptions] = useState<ChartConfig>({
+    showKasternFixed: true,
+    showFloatingPlanets: true,
+    showPlanetStatus: true,
+    showTimeRing: true,
+    showLagnaRulerMarker: true,
+  });
+
+  const [svgStr, setSvgStr] = useState(initialSvg);
+
+  // Re-generate SVG when options or result change
+  useEffect(() => {
+    const newSvg = generateHoraTaynooSVG(result, { ...options, size: 520, theme: "dark" });
+    setSvgStr(newSvg);
+  }, [result, options]);
 
   // switch to library tab when success-yam result arrives
   useEffect(() => {
@@ -413,12 +430,14 @@ export default function HoraNuPage() {
         {isLive && (
           <div className="flex items-center sm:flex-col sm:items-end gap-2 shrink-0">
             <LiveClock serverTime={loaderData.serverTime} />
-            <button onClick={() => setShowCustom(v => !v)}
-              className={`text-[11px] font-bold px-3 py-1.5 rounded-full border transition-all ${
-                showCustom
-                  ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#C9A96E]"
-                  : "border-white/10 text-[#8A8070] hover:border-[#C9A96E]/30 hover:text-[#C9A96E]"
-              }`}>{showCustom ? "✕ ปิด" : "⚙ ตั้งเวลา"}</button>
+            <div className="flex gap-2">
+              <button onClick={() => setShowCustom(v => !v)}
+                className={`text-[11px] font-bold px-3 py-1.5 rounded-full border transition-all ${
+                  showCustom
+                    ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#C9A96E]"
+                    : "border-white/10 text-[#8A8070] hover:border-[#C9A96E]/30 hover:text-[#C9A96E]"
+                }`}>{showCustom ? "✕ ปิด" : "⚙ ตั้งเวลา"}</button>
+            </div>
           </div>
         )}
       </div>
@@ -468,8 +487,30 @@ export default function HoraNuPage() {
                 <p>ดาวยาม: <span className="text-[#C9A96E] font-bold">{PLANET_INFO[result.yamPlanet]?.thai}</span></p>
               </div>
             </div>
+            
             <div className="w-full max-w-[480px] mx-auto"
               dangerouslySetInnerHTML={{ __html: svgStr }} />
+
+            {/* Display Toggles */}
+            <div className="mt-6 pt-6 border-t border-[#C9A96E]/10 flex flex-wrap gap-x-4 gap-y-2 justify-center">
+              {[
+                { key: 'showKasternFixed', label: 'ดาวเกษตรคงที่' },
+                { key: 'showFloatingPlanets', label: 'ดาวลอย' },
+                { key: 'showPlanetStatus', label: 'มาตรฐานดาว' },
+                { key: 'showTimeRing', label: 'เวลารอบผัง' },
+                { key: 'showLagnaRulerMarker', label: 'จุดลงเวลา' },
+              ].map(opt => (
+                <label key={opt.key} className="flex items-center gap-2 cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    checked={(options as any)[opt.key]}
+                    onChange={(e) => setOptions(prev => ({ ...prev, [opt.key]: e.target.checked }))}
+                    className="w-3.5 h-3.5 rounded border-[#C9A96E]/30 bg-slate-900 text-[#C9A96E] focus:ring-[#C9A96E]/50"
+                  />
+                  <span className="text-[11px] text-[#8A8070] group-hover:text-[#C9A96E] transition-colors">{opt.label}</span>
+                </label>
+              ))}
+            </div>
           </Card>
 
           <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">

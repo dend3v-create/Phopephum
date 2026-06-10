@@ -65,72 +65,45 @@ export const KASTERN_FIXED: Record<number, number> = {
 
 /**
  * สถานะมาตรฐานดาว 6 ประเภท
- * เกษตร(kaset) / ประ(pra) / มหาอุจจ์(maha-uccj) / นิจ(nij) / ราชาโชค(racha-chok) / มหาจักร(maha-chakr)
+ * มหาอุจจ์(maha-uccj) / เกษตร(kaset) / ราชาโชค(racha-chok) / มหาจักร(maha-chakr) / ประ(pra) / นิจ(nij)
  */
 export type PlanetStatus = 'kaset' | 'pra' | 'maha-uccj' | 'nij' | 'racha-chok' | 'maha-chakr' | null
 
-/** Priority order: เกษตร > มหาอุจจ์ > ราชาโชค > มหาจักร > ประ > นิจ */
+/** Priority order: มหาอุจจ์ > เกษตร > ราชาโชค > มหาจักร > ประ > นิจ */
 export const PLANET_STATUS_PRIORITY: PlanetStatus[] = [
-  'kaset', 'maha-uccj', 'racha-chok', 'maha-chakr', 'pra', 'nij'
+  'maha-uccj', 'kaset', 'racha-chok', 'maha-chakr', 'pra', 'nij'
 ]
 
 /**
- * ตารางมาตรฐานดาว: planetNum → zodiacIndex → PlanetStatus
+ * คำนวณสถานะมาตรฐานดาวตามลำดับความสำคัญ (Version 2.0)
  * อ้างอิง: ตำราพรายกระซิบ (นดา พยากรณ์)
- *
- * เกษตร = ดาวเป็นเจ้าเรือนราศีนั้น (อยู่บ้านตัวเอง)
- * ประ = ดาวอยู่ในตำแหน่งตรงข้ามเกษตร (อ่อนกำลัง)
- * มหาอุจจ์ = ดาวมีกำลังสูงสุด (exaltation)
- * นิจ = ดาวตกต่ำสุด (debilitation, ตรงข้ามมหาอุจจ์)
- * ราชาโชค = ดาวมีโชคพิเศษ
- * มหาจักร = ดาวมีอำนาจพิเศษ
  */
-const PLANET_STATUS_RAW: Record<number, Array<[number, PlanetStatus]>> = {
-  // ดาว 1 (อาทิตย์): เกษตร=สิงห์(3), ประ=กุมภ์(9), มหาอุจจ์=เมษ(11), นิจ=ตุลย์(5), ราชาโชค=พิจิก(6), มหาจักร=ธนู(7)
-  1: [[3,'kaset'], [9,'pra'], [11,'maha-uccj'], [5,'nij'], [6,'racha-chok'], [7,'maha-chakr']],
-  // ดาว 2 (จันทร์): เกษตร=กรกฎ(2), ประ=มังกร(8), มหาอุจจ์=พฤษภ(0), นิจ=พิจิก(6), ราชาโชค=มีน(10), มหาจักร=ธนู(7)
-  2: [[2,'kaset'], [8,'pra'], [0,'maha-uccj'], [6,'nij'], [10,'racha-chok'], [7,'maha-chakr']],
-  // ดาว 3 (อังคาร): เกษตร=เมษ(11)+พิจิก(6), ประ=พฤษภ(0)+ตุลย์(5), มหาอุจจ์=มังกร(8), นิจ=กรกฎ(2), ราชาโชค=กันย์(4), มหาจักร=สิงห์(3)
-  3: [[11,'kaset'], [6,'kaset'], [0,'pra'], [5,'pra'], [8,'maha-uccj'], [2,'nij'], [4,'racha-chok'], [3,'maha-chakr']],
-  // ดาว 4 (พุธ): เกษตร=เมถุน(1)+กันย์(4), ประ=ธนู(7)+มีน(10), มหาอุจจ์=กันย์(4*), นิจ=มีน(10*), ราชาโชค=ตุลย์(5), มหาจักร=พฤษภ(0)
-  4: [[1,'kaset'], [4,'kaset'], [4,'maha-uccj'], [7,'pra'], [10,'pra'], [10,'nij'], [5,'racha-chok'], [0,'maha-chakr']],
-  // ดาว 5 (พฤหัส): เกษตร=ธนู(7)+มีน(10), ประ=เมถุน(1)+กันย์(4), มหาอุจจ์=กรกฎ(2), นิจ=มังกร(8), ราชาโชค=พฤษภ(0), มหาจักร=ตุลย์(5)
-  5: [[7,'kaset'], [10,'kaset'], [1,'pra'], [4,'pra'], [2,'maha-uccj'], [8,'nij'], [0,'racha-chok'], [5,'maha-chakr']],
-  // ดาว 6 (ศุกร์): เกษตร=พฤษภ(0)+ตุลย์(5), ประ=เมษ(11)+พิจิก(6), มหาอุจจ์=มีน(10), นิจ=กันย์(4), ราชาโชค=สิงห์(3), มหาจักร=กรกฎ(2)
-  6: [[0,'kaset'], [5,'kaset'], [11,'pra'], [6,'pra'], [10,'maha-uccj'], [4,'nij'], [3,'racha-chok'], [2,'maha-chakr']],
-  // ดาว 7 (เสาร์): เกษตร=มังกร(8)+กุมภ์(9), ประ=กรกฎ(2)+สิงห์(3), มหาอุจจ์=ตุลย์(5), นิจ=เมษ(11), ราชาโชค=เมถุน(1), มหาจักร=มีน(10)
-  7: [[8,'kaset'], [9,'kaset'], [2,'pra'], [3,'pra'], [5,'maha-uccj'], [11,'nij'], [1,'racha-chok'], [10,'maha-chakr']],
-  // ดาว 8 (ราหู): เกษตร=กุมภ์(9), ประ=สิงห์(3), มหาอุจจ์=พฤษภ(0), นิจ=พิจิก(6)
-  8: [[9,'kaset'], [3,'pra'], [0,'maha-uccj'], [6,'nij']],
-}
+export function getPlanetStatus(planetNum: number, zodiacIndex: number): PlanetStatus {
+  // 1. มหาอุจจ์ (Maha-Uch)
+  const MAHA_UCH: Record<number, number> = { 1: 11, 2: 0, 3: 8, 4: 4, 5: 2, 6: 10, 7: 5, 8: 6 };
+  if (MAHA_UCH[planetNum] === zodiacIndex) return 'maha-uccj';
 
-function buildPlanetStatusMap(
-  raw: Record<number, Array<[number, PlanetStatus]>>,
-  priority: PlanetStatus[]
-): Record<number, Partial<Record<number, PlanetStatus>>> {
-  const priorityRank = new Map<PlanetStatus, number>()
-  priority.forEach((status, idx) => priorityRank.set(status, idx))
-  const map: Record<number, Partial<Record<number, PlanetStatus>>> = {}
-  for (const [planetKey, entries] of Object.entries(raw)) {
-    const planetNum = Number(planetKey)
-    const planetMap: Partial<Record<number, PlanetStatus>> = {}
-    for (const [zodiacIndex, status] of entries) {
-      const current = planetMap[zodiacIndex]
-      if (!current) {
-        planetMap[zodiacIndex] = status
-        continue
-      }
-      const currentRank = priorityRank.get(current) ?? Number.POSITIVE_INFINITY
-      const nextRank = priorityRank.get(status) ?? Number.POSITIVE_INFINITY
-      if (nextRank < currentRank) planetMap[zodiacIndex] = status
-    }
-    map[planetNum] = planetMap
-  }
-  return map
-}
+  // 2. เกษตร (Kaset)
+  if (KASTERN_FIXED[zodiacIndex] === planetNum) return 'kaset';
 
-export const PLANET_STATUS_MAP: Record<number, Partial<Record<number, PlanetStatus>>> =
-  buildPlanetStatusMap(PLANET_STATUS_RAW, PLANET_STATUS_PRIORITY)
+  // 3. ราชาโชค (Raja-Chok)
+  const RAJA_CHOK: Record<number, number> = { 1: 6, 2: 11, 3: 0, 4: 0, 5: 8, 6: 2, 7: 1, 8: 10 };
+  if (RAJA_CHOK[planetNum] === zodiacIndex) return 'racha-chok';
+
+  // 4. มหาจักร (Maha-Chak)
+  const MAHA_CHAK: Record<number, number> = { 1: 3, 2: 10, 3: 1, 4: 3, 5: 1, 6: 3, 7: 6, 8: 11 };
+  if (MAHA_CHAK[planetNum] === zodiacIndex) return 'maha-chakr';
+
+  // 5. ประ (Pra) - ตรงข้ามเกษตร
+  const oppositeZodiac = (zodiacIndex + 6) % 12;
+  if (KASTERN_FIXED[oppositeZodiac] === planetNum) return 'pra';
+
+  // 6. นิจ (Nid) - ตรงข้ามมหาอุจจ์
+  const NID: Record<number, number> = { 1: 5, 2: 6, 3: 2, 4: 10, 5: 8, 6: 4, 7: 11, 8: 0 };
+  if (NID[planetNum] === zodiacIndex) return 'nij';
+
+  return null;
+}
 
 /** Label ตัวอักษรไทย สำหรับดาวลอย 11 ดวง [1,2,3,4,5,6,7,8,ลั,9,0] */
 export const THAI_LABELS: string[] = ['๑','๒','๓','๔','๕','๖','๗','๘','ลั','๙','๐']
@@ -417,7 +390,8 @@ export function buildSubTimeSlots(
   const DURATION = 7.5 // นาที
 
   for (let i = 0; i < 12; i++) {
-    const zIdx = (startZodiacIndex - i + 12) % 12
+    // วนขวา (Clockwise) = ตามลำดับราศี (index 0 -> 1 -> 2)
+    const zIdx = (startZodiacIndex + i) % 12
     const startMin = yamStartMin + i * DURATION
     const endMin = startMin + DURATION
     const bhava = bhavaMap[zIdx] ?? ''
@@ -474,12 +448,9 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   const planetEntries: PlanetEntry[] = LABELS.map((label, i) => {
     const pNum = PLANET_NUMS[i]
     const zIdx = positions[i]
-    // หา status: ดูว่าดาว pNum อยู่ที่ราศี zIdx มี status อะไร
-    let status: PlanetStatus = null
-    if (pNum != null && PLANET_STATUS_MAP[pNum]) {
-      const statusLookup = PLANET_STATUS_MAP[pNum][zIdx]
-      if (statusLookup) status = statusLookup
-    }
+    // หา status: คำนวณแบบ Dynamic ตาม Version 2.0
+    const status = pNum != null ? getPlanetStatus(pNum, zIdx) : null
+
     return {
       label,
       labelThai: THAI_LABELS[i],
@@ -531,27 +502,33 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
 // SVG CHART GENERATOR
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface ChartConfig {
-  size?: number     // default 680
+export interface ChartConfig {
+  size?: number     // default 520
   theme?: 'dark' | 'light'
-  showLabels?: boolean
+  showKasternFixed?: boolean
+  showFloatingPlanets?: boolean
+  showPlanetStatus?: boolean
+  showTimeRing?: boolean
+  showLagnaRulerMarker?: boolean
   highlightLagna?: boolean
 }
 
 /**
- * generateHoraTaynooSVG — สร้าง SVG ผังโหรทายหนู Canonical 4-Layer
+ * generateHoraTaynooSVG — สร้าง SVG ผังโหรทายหนู Canonical 4-Layer (Version 2.0)
  *
- * Layer 1: Outer Zodiac Ring   R1 = 100%  (ชื่อราศี 12 ช่อง)
- * Layer 2: House Ring          R2 = 82%   (ชื่อภพ 12 หลัง)
- * Layer 3: Planet Ring         R3 = 65%   (ดาวลอย 11 ดวง)
- * Layer 4: Core Grid           R4 = 37%   (แกนกลาง 8 ภาค + Anchor 1-8)
- *
- * พฤษภ อยู่ที่ 330° เรียง CCW (ตาม อ.กานดา)
+ * Layer A: Fixed Kastern Numbers (Arabic, opacity 0.45)
+ * Layer B: Floating Planets (Thai Numerals)
  */
 export function generateHoraTaynooSVG(
   result: HoraTaynooResult,
   config: ChartConfig = {}
 ): string {
+  const SHOW_FIXED  = config.showKasternFixed !== false
+  const SHOW_FLOAT  = config.showFloatingPlanets !== false
+  const SHOW_STATUS = config.showPlanetStatus !== false
+  const SHOW_TIME   = config.showTimeRing !== false
+  const SHOW_START  = config.showLagnaRulerMarker !== false
+
   const SIZE = config.size ?? 520
   const CX   = SIZE / 2
   const CY   = SIZE / 2
@@ -563,10 +540,10 @@ export function generateHoraTaynooSVG(
   const R3   = R1 * 0.65               // Planet ring boundary(65%)
   const R4   = R1 * 0.37               // Core boundary       (~37%)
 
-  const R_ZOD = (R1 + R2) / 2          // zodiac label midpoint
-  const R_HOU = (R2 + R3) / 2          // house label midpoint
-  const R_PLN = (R3 + R4) / 2          // planet label midpoint
-  const R_FIXED = Math.min(R1 + 12 * s, SIZE / 2 - 6 * s)
+  const R_ZOD   = (R1 + R2) / 2         // zodiac label midpoint
+  const R_HOU   = (R2 + R3) / 2         // house label midpoint
+  const R_PLN   = (R3 + R4) / 2         // planet label midpoint
+  const R_FIXED = R3 - 10 * s           // Fixed kastern inside planet ring
   const R_TIME  = Math.min(R1 + 22 * s, SIZE / 2 - 4 * s)
 
   // ── Colors ─────────────────────────────────────────────────────────────────
@@ -597,8 +574,6 @@ export function generateHoraTaynooSVG(
     const o1 = polar(a1, rOuter), o2 = polar(a2, rOuter)
     const i2 = polar(a2, rInner), i1 = polar(a1, rInner)
     const ro = rOuter.toFixed(1), ri = rInner.toFixed(1)
-    // outer arc CCW (sweep=0): from a1→a2 via angleMid (decreasing angle)
-    // inner arc CW  (sweep=1): from a2→a1
     return `M${o1.x.toFixed(1)} ${o1.y.toFixed(1)} ` +
            `A${ro} ${ro} 0 0 0 ${o2.x.toFixed(1)} ${o2.y.toFixed(1)} ` +
            `L${i2.x.toFixed(1)} ${i2.y.toFixed(1)} ` +
@@ -629,7 +604,6 @@ export function generateHoraTaynooSVG(
   ].join('\n')
 
   // ── 12 radial dividers (zodiac sector boundaries) ───────────────────────────
-  // Boundaries at 345°, 315°, 285°, … (= 345° − 30°*i)
   let dividers = ''
   for (let i = 0; i < 12; i++) {
     const angle = 345 - 30 * i
@@ -657,54 +631,64 @@ export function generateHoraTaynooSVG(
     houseLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${8.5*s}" font-family="sans-serif" fill="${color}">${bhava}</text>`
   }
 
-  // ── Layer 3: Planet labels + status overlay ───────────────────────────────────
+  // ── Layer 3: Planet labels (Layer B) + status overlay ────────────────────────
   const STATUS_COLORS: Record<Exclude<PlanetStatus, null>, string> = {
-    'kaset': '#EF4444',
-    'pra': '#EF4444',
     'maha-uccj': '#22C55E',
-    'nij': '#EF4444',
+    'kaset': '#C9A96E',
     'racha-chok': '#3B82F6',
     'maha-chakr': '#EAB308',
+    'pra': '#EF4444',
+    'nij': '#EF4444',
   }
 
   const STATUS_GLYPHS: Record<Exclude<PlanetStatus, null>, string> = {
+    'maha-uccj': '○',
     'kaset': '△',
-    'pra': '○',
-    'maha-uccj': '✿',
-    'nij': '✳',
     'racha-chok': '⬡',
     'maha-chakr': '□',
+    'pra': '⋮',
+    'nij': '✳',
   }
 
   function statusSymbol(x: number, y: number, status: PlanetStatus): string {
-    if (!status) return ''
+    if (!status || !SHOW_STATUS) return ''
     const color = STATUS_COLORS[status]
     const glyph = STATUS_GLYPHS[status]
-    const fontSize = 9.5 * s
-    return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${fontSize}" font-family="sans-serif" fill="${color}" font-weight="700">${glyph}</text>`
+    return `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${9.5*s}" font-family="sans-serif" fill="${color}" font-weight="700">${glyph}</text>`
   }
 
   let planetLabels = ''
-  for (const z of ZODIAC_ORDER) {
-    const entries = byZodiac[z.index] ?? []
-    if (entries.length === 0) continue
-    const pos = polar(z.sectorAngle, R_PLN)
-    const baseX = pos.x
-    const baseY = pos.y
-    const gap = 14 * s
-    const totalWidth = (entries.length - 1) * gap
-    const first = entries.find(e => e.planetNum != null && e.planetNum <= 7)
-    const color = first ? (PLANET_INFO[first.planetNum!]?.color ?? GOLD) : GOLD
-    entries.forEach((entry, idx) => {
-      const x = baseX - totalWidth / 2 + idx * gap
-      const y = baseY
-      const symbol = entry.status ? statusSymbol(x, y - 10 * s, entry.status) : ''
-      planetLabels += `${symbol}<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${13*s}" font-family="sans-serif" fill="${color}" font-weight="700">${entry.labelThai}</text>`
-    })
+  if (SHOW_FLOAT) {
+    for (const z of ZODIAC_ORDER) {
+      const entries = byZodiac[z.index] ?? []
+      if (entries.length === 0) continue
+      const pos = polar(z.sectorAngle, R_PLN)
+      const baseX = pos.x
+      const baseY = pos.y
+      const gap = 16 * s
+      const totalWidth = (entries.length - 1) * gap
+      entries.forEach((entry, idx) => {
+        const x = baseX - totalWidth / 2 + idx * gap
+        const y = baseY
+        const pInfo = entry.planetNum ? PLANET_INFO[entry.planetNum] : null
+        const color = pInfo?.color ?? (entry.isLagna ? '#6EB0F5' : GOLD)
+        const symbol = entry.status ? statusSymbol(x, y - 12 * s, entry.status) : ''
+        planetLabels += `${symbol}<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${14*s}" font-family="serif" fill="${color}" font-weight="900">${entry.labelThai}</text>`
+      })
+    }
+  }
+
+  // ── Layer A: Fixed Kastern numbers ──────────────────────────────────────────
+  let kasternFixedLabels = ''
+  if (SHOW_FIXED) {
+    for (const z of ZODIAC_ORDER) {
+      const pos = polar(z.sectorAngle, R_FIXED)
+      const fixedNum = KASTERN_FIXED[z.index]
+      kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${13*s}" font-family="sans-serif" fill="${GOLD}" opacity="0.45">${fixedNum}</text>`
+    }
   }
 
   // ── Layer 4: Core grid ────────────────────────────────────────────────────────
-  // 6 เส้นหลัก: แกนตั้ง (90/270) + แกนนอน (0/180) + ทแยง 4 ทิศ (45/225, 135/315)
   let coreLines = ''
   for (const angle of [0, 45, 90, 135]) {
     const p1 = polar(angle, R4), p2 = polar(angle + 180, R4)
@@ -723,20 +707,22 @@ export function generateHoraTaynooSVG(
     anchorLabels += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${11*s}" font-family="sans-serif" fill="${GOLD}" font-weight="700" opacity="0.6">${num}</text>`
   }
 
-  // Fixed kastern numbers (outer subtle ring)
-  let kasternFixedLabels = ''
-  for (const z of ZODIAC_ORDER) {
-    const pos = polar(z.sectorAngle, R_FIXED)
-    const fixedNum = KASTERN_FIXED[z.index]
-    kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${8.5*s}" font-family="sans-serif" fill="${GOLD}" opacity="0.35">${fixedNum}</text>`
-  }
-
   // Sub time labels (outermost ring)
   let timeLabels = ''
-  for (const slot of result.subTimeSlots) {
-    const angle = ZODIAC_ORDER[slot.zodiacIndex].sectorAngle
-    const pos = polar(angle, R_TIME)
-    timeLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${7*s}" font-family="sans-serif" fill="${TXT_DIM}" opacity="0.85">${slot.bhavaTimeLabel}</text>`
+  if (SHOW_TIME) {
+    for (const slot of result.subTimeSlots) {
+      const angle = ZODIAC_ORDER[slot.zodiacIndex].sectorAngle
+      const pos = polar(angle, R_TIME)
+      timeLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${7.5*s}" font-family="sans-serif" fill="${TXT_DIM}" opacity="0.9">${slot.bhavaTimeLabel}</text>`
+    }
+  }
+
+  // Lagna Ruler Start Marker
+  let startMarker = ''
+  if (SHOW_START) {
+    const startAngle = ZODIAC_ORDER[result.timeStartZodiacIndex].sectorAngle
+    const pos = polar(startAngle, R1 + 8 * s)
+    startMarker = `<circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${4*s}" fill="#6EB0F5" stroke="white" stroke-width="1"/>`
   }
 
   // Day planet in center
@@ -753,6 +739,7 @@ ${dividers}
  ${coreLines}
  ${anchorLabels}
  ${timeLabels}
+ ${startMarker}
  ${centerLabel}
 </svg>`
 }
