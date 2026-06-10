@@ -76,73 +76,80 @@ export const RAHU_TIME_BLOCKS: RahuTimeBlock[] = [
 ];
 
 export const RAHU_SUB_BLOCKS: RahuSubBlock[] = [
-  { id: 1, name: 'ทาษา',       minute_start: 0,  minute_end: 10, is_good: false, phase_indicator: 'ยามต้น' },
-  { id: 2, name: 'คหปติ',     minute_start: 10, minute_end: 20, is_good: true,  phase_indicator: null },
-  { id: 3, name: 'โจโร',      minute_start: 20, minute_end: 30, is_good: false, phase_indicator: null },
-  { id: 4, name: 'เสนาปติ',   minute_start: 30, minute_end: 40, is_good: true,  phase_indicator: 'ยามกลาง' },
-  { id: 5, name: 'กาลทัณฑ์',  minute_start: 40, minute_end: 50, is_good: false, phase_indicator: null },
-  { id: 6, name: 'กัลยาณ์',   minute_start: 50, minute_end: 60, is_good: true,  phase_indicator: null },
+  { id: 1, name: 'ทาษา',      minute_start: 0,  minute_end: 10, is_good: false, phase_indicator: 'ยามต้น'   },
+  { id: 2, name: 'คหบดี',     minute_start: 10, minute_end: 20, is_good: true,  phase_indicator: null       },
+  { id: 3, name: 'โจร',       minute_start: 20, minute_end: 30, is_good: false, phase_indicator: null       },
+  { id: 4, name: 'เสนาบดี',   minute_start: 30, minute_end: 40, is_good: true,  phase_indicator: 'ยามกลาง' },
+  { id: 5, name: 'กาลทัณฑ์',  minute_start: 40, minute_end: 50, is_good: false, phase_indicator: null       },
+  { id: 6, name: 'กัลยาณ์',   minute_start: 50, minute_end: 60, is_good: true,  phase_indicator: null       },
   { id: 7, name: 'มหายักษ์',  minute_start: 60, minute_end: 70, is_good: false, phase_indicator: 'ยามปลาย' },
-  { id: 8, name: 'ธนบดินทร์', minute_start: 70, minute_end: 80, is_good: true,  phase_indicator: null },
-  { id: 9, name: 'นักพรต',    minute_start: 80, minute_end: 90, is_good: true,  phase_indicator: null },
+  { id: 8, name: 'ธนบดินทร์', minute_start: 70, minute_end: 80, is_good: true,  phase_indicator: null       },
+  { id: 9, name: 'นักพรต',    minute_start: 80, minute_end: 90, is_good: true,  phase_indicator: null       },
 ];
 
 export const RAHU_YAM_RULES: RahuYamRule[] = [
   {
-    yam_number: 1, yam_name: 'ยามที่ ๑',
+    // อาทิตย์ — ดาวแห่งชีวิต พลังงานสูงสุด
+    yam_number: 1, yam_name: 'ยามอาทิตย์',
     traibhum_result: 'ดียามกลาง',
     huajai_truth: 'พูดจริง เชื่อถือได้',
     huajai_lost_item: 'ของหายได้คืน',
-    huajai_health: 'ถามป่วย/ตาย',
-    good_phase_desc: 'ดีช่วงยามกลาง (นาที 30-40)'
+    huajai_health: 'ถามป่วย/จะหาย',
+    good_phase_desc: 'ดีช่วงยามกลาง เสนาบดี+กัลยาณ์ (นาที 30-40 และ 50-60)'
   },
   {
-    yam_number: 2, yam_name: 'ยามที่ ๒',
+    // จันทร์ — ดาวแห่งความแปรปรวน ๕๐/๕๐
+    yam_number: 2, yam_name: 'ยามจันทร์',
     traibhum_result: 'ดียามกลาง',
     huajai_truth: 'ทุกเรื่อง ๕๐/๕๐',
     huajai_lost_item: 'ได้คืน ๕๐/๕๐',
     huajai_health: 'ถามป่วย/ควรเปลี่ยนหมอ',
-    good_phase_desc: 'ดีช่วงยามกลาง (นาที 30-40)'
+    good_phase_desc: 'ดีช่วงยามกลาง เสนาบดี+กัลยาณ์ (นาที 30-40 และ 50-60)'
   },
   {
-    yam_number: 3, yam_name: 'ยามที่ ๓',
+    // อังคาร — ดาวนักรบ พลังขับเคลื่อน ดียามปลาย
+    yam_number: 3, yam_name: 'ยามอังคาร',
     traibhum_result: 'ดียามปลาย',
     huajai_truth: 'พูดเท็จ เชื่อถือไม่ได้',
     huajai_lost_item: 'ของหายไม่ได้คืน',
-    huajai_health: 'ถามป่วย/หาย',
-    good_phase_desc: 'ดีช่วงยามปลาย (นาที 60-90)'
+    huajai_health: 'ถามป่วย/จะหาย',
+    good_phase_desc: 'ดีช่วงยามปลาย ธนบดินทร์+นักพรต (นาที 70-90)'
   },
   {
-    yam_number: 4, yam_name: 'ยามที่ ๔',
+    // พุธ — ดาวปัญญา การสื่อสาร ดีกลาง+ปลาย
+    yam_number: 4, yam_name: 'ยามพุธ',
     traibhum_result: 'ดียามกลาง+ยามปลาย',
     huajai_truth: 'พูดจริง เชื่อถือได้',
     huajai_lost_item: 'ของหายได้คืน',
-    huajai_health: 'ถามป่วย/ตาย',
-    good_phase_desc: 'ดีช่วงยามกลาง+ปลาย (นาที 30-40, 50-60, 70-90)'
+    huajai_health: 'ถามป่วย/ควรรักษาต่อ',
+    good_phase_desc: 'ดียามกลาง+ปลาย (นาที 30-40, 50-60, 70-90)'
   },
   {
-    yam_number: 5, yam_name: 'ยามที่ ๕',
+    // พฤหัสบดี — ดาวครู ดาวมงคล ดียามต้น (คหบดี)
+    yam_number: 5, yam_name: 'ยามพฤหัสบดี',
     traibhum_result: 'ดียามต้น',
     huajai_truth: 'ทุกเรื่อง ๕๐/๕๐',
     huajai_lost_item: 'ได้คืน ๕๐/๕๐',
     huajai_health: 'ถามป่วย/ควรเปลี่ยนหมอ',
-    good_phase_desc: 'ดีช่วงยามต้น (นาที 0-10 เท่านั้น)'
+    good_phase_desc: 'ดีช่วงยามต้น เฉพาะคหบดี (นาที 10-20)'
   },
   {
-    yam_number: 6, yam_name: 'ยามที่ ๖',
+    // ศุกร์ — ดาวความงาม สุขภาพดี
+    yam_number: 6, yam_name: 'ยามศุกร์',
     traibhum_result: 'ดียามปลาย',
     huajai_truth: 'พูดเท็จ เชื่อถือไม่ได้',
     huajai_lost_item: 'ของหายไม่ได้คืน',
-    huajai_health: 'ถามป่วย/หาย',
-    good_phase_desc: 'ดีช่วงยามปลาย (นาที 60-90)'
+    huajai_health: 'ถามป่วย/จะหาย',
+    good_phase_desc: 'ดีช่วงยามปลาย ธนบดินทร์+นักพรต (นาที 70-90)'
   },
   {
-    yam_number: 7, yam_name: 'ยามที่ ๗',
+    // เสาร์ — ดาวกรรม โชคชะตา ดียามกลาง+ปลาย
+    yam_number: 7, yam_name: 'ยามเสาร์',
     traibhum_result: 'ดียามกลาง+ยามปลาย',
     huajai_truth: 'พูดจริง เชื่อถือได้',
     huajai_lost_item: 'ของหายได้คืน',
-    huajai_health: 'ถามป่วย/ตาย',
-    good_phase_desc: 'ดีช่วงยามกลาง+ปลาย (นาที 30-40, 50-60, 70-90)'
+    huajai_health: 'ถามป่วย/อาการหนัก',
+    good_phase_desc: 'ดียามกลาง+ปลาย (นาที 30-40, 50-60, 70-90)'
   },
 ];
 
@@ -208,9 +215,15 @@ function findTimeBlock(totalMinutes: number): RahuTimeBlock | null {
 }
 
 export function calculateRahu(date: Date): RahuResult | null {
-  const dayOfWeek = date.getDay() + 1;
   const hours   = date.getHours();
   const minutes = date.getMinutes();
+
+  // ระบบยามราหูนับวันตั้งแต่ 06:00 น. — ช่วง 00:00-05:59 ยังอยู่ในยามกลางคืนของวันก่อนหน้า
+  let jsDay = date.getDay(); // 0=อาทิตย์ … 6=เสาร์
+  if (hours < 6) {
+    jsDay = (jsDay + 6) % 7; // ถอยหลัง 1 วัน
+  }
+  const dayOfWeek = jsDay + 1; // 1=อาทิตย์ … 7=เสาร์
   const totalMinutes = hours * 60 + minutes;
 
   const mainBlock = findTimeBlock(totalMinutes);

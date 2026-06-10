@@ -81,7 +81,8 @@ export default function RahuDashboard() {
   const revalidator = useRevalidator();
 
   const [currentTime, setCurrentTime] = useState(new Date(serverTime));
-  const [selectedDay, setSelectedDay] = useState<number>(new Date(serverTime).getDay() + 1); // 1-7
+  // ใช้ rahuResult.day_of_week แทน getDay() เพื่อรองรับช่วง 00:00-05:59 (ยังเป็นยามวันก่อนหน้า)
+  const [selectedDay, setSelectedDay] = useState<number>(rahuResult?.day_of_week ?? (new Date(serverTime).getDay() + 1));
   const [expandedBlock, setExpandedBlock] = useState<number | null>(null);
   
   // การแจ้งเตือน & เสียง
@@ -419,7 +420,7 @@ export default function RahuDashboard() {
               { id: 7, label: "ส.", name: "เสาร์" },
             ].map((day) => {
               const isActive = selectedDay === day.id;
-              const isToday = new Date(serverTime).getDay() + 1 === day.id;
+              const isToday = rahuResult.day_of_week === day.id;
               
               // สีปุ่มตามวันไทย
               const baseTheme = DAY_COLOR_THEMES[day.id]!;
@@ -457,7 +458,7 @@ export default function RahuDashboard() {
             </h4>
             <div className="space-y-3">
               {dailyTimelineBlocks.slice(0, 8).map((item, index) => {
-                const isCurrentBlock = new Date(serverTime).getDay() + 1 === selectedDay && rahuResult.main_block.id === item.block.id;
+                const isCurrentBlock = rahuResult.day_of_week === selectedDay && rahuResult.main_block.id === item.block.id;
                 return (
                   <TimelineBlockCard
                     key={item.block.id}
@@ -478,7 +479,7 @@ export default function RahuDashboard() {
             </h4>
             <div className="space-y-3">
               {dailyTimelineBlocks.slice(8, 16).map((item, index) => {
-                const isCurrentBlock = new Date(serverTime).getDay() + 1 === selectedDay && rahuResult.main_block.id === item.block.id;
+                const isCurrentBlock = rahuResult.day_of_week === selectedDay && rahuResult.main_block.id === item.block.id;
                 return (
                   <TimelineBlockCard
                     key={item.block.id}
