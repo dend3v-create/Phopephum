@@ -33,6 +33,19 @@ export type {
   PlanetEntry,
   SubTimeSlot as HoraTaynooSubSlot,
 } from './hora-taynoo-engine.js';
+
+// Phase 10-12 Exports
+export {
+  BHAVA_KNOWLEDGE,
+  PLANET_KNOWLEDGE,
+  STATUS_KNOWLEDGE,
+  interpretChart,
+} from './interpretation-engine.js';
+export type {
+  PlanetInterpretation,
+  ChartInterpretation,
+} from './interpretation-engine.js';
+
 export type { HoraNuChartData, HoraNuHouseEntry, HoraNuYamPeriod } from './types/horaNu.types.js';
 export {
   PlanetStatus,
@@ -49,3 +62,4 @@ export {
   COMPASS_8,
   PREDICTIONS,
 } from './datasets/tables.js';
+
