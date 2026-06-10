@@ -74,12 +74,15 @@ export interface ChartInterpretation {
  * วิเคราะห์ดาว 1 ดวง (ภพ 40% + ดาว 30% + มาตรฐาน 30%)
  */
 function interpretPlanet(entry: PlanetEntry, bhavaMap: Record<number, string>): PlanetInterpretation | null {
-  if (entry.planetNum === null) return null; // ข้าม ลัคนา, 9, 0
+  if (entry.planetNum === null) return null;
 
   const bhavaName = bhavaMap[entry.zodiacIndex];
-  const bhavaInfo = BHAVA_KNOWLEDGE[bhavaName] ?? { score: 50, type: 'test', meaning: '' };
+  const bhavaInfo = BHAVA_KNOWLEDGE[bhavaName];
   const pInfo = PLANET_KNOWLEDGE[entry.planetNum];
   const sInfo = STATUS_KNOWLEDGE[entry.status ?? 'neutral'];
+
+  // ข้ามดาวที่ไม่มีข้อมูลใน Knowledge Base (เช่น 9, 0)
+  if (!bhavaInfo || !pInfo) return null;
 
   // Weighted Score
   const totalScore = (bhavaInfo.score * 0.4) + (pInfo.score * 0.3) + (sInfo.score * 0.3);
@@ -128,11 +131,18 @@ export function interpretChart(chart: HoraTaynooResult): ChartInterpretation {
   const goodPlanets = interpretations.filter(p => p.totalScore >= 65).sort((a, b) => b.totalScore - a.totalScore);
   const badPlanets = interpretations.filter(p => p.totalScore < 50).sort((a, b) => a.totalScore - b.totalScore);
 
-  const lagnaRuler = interpretations.find(p => p.entry.planetNum === chart.lagnaRulerPlanet)!;
-  const yamPlanet = interpretations.find(p => p.entry.planetNum === chart.yamPlanet)!;
+  const lagnaRuler = interpretations.find(p => p.entry.planetNum === chart.lagnaRulerPlanet);
+  const yamPlanet = interpretations.find(p => p.entry.planetNum === chart.yamPlanet);
 
   // ภาพรวม (ให้น้ำหนักดาวเจ้ายามและดาวตนุลัคน์เป็นหลัก)
-  const overallScore = Math.round((lagnaRuler.totalScore * 0.4) + (yamPlanet.totalScore * 0.4) + ((interpretations.reduce((acc, p) => acc + p.totalScore, 0) / interpretations.length) * 0.2));
+  // หากหาดาวหลักไม่เจอ ให้ใช้คะแนนเฉลี่ยแทน
+  const rulerScore = lagnaRuler?.totalScore ?? 50;
+  const yamScore = yamPlanet?.totalScore ?? 50;
+  const avgScore = interpretations.length > 0 
+    ? (interpretations.reduce((acc, p) => acc + p.totalScore, 0) / interpretations.length)
+    : 50;
+
+  const overallScore = Math.round((rulerScore * 0.4) + (yamScore * 0.4) + (avgScore * 0.2));
 
   // Category Analysis based on Bhava intersections
   const getCategoryScore = (bhavas: string[]) => {
@@ -150,8 +160,8 @@ export function interpretChart(chart: HoraTaynooResult): ChartInterpretation {
   return {
     overallScore,
     grade: getGrade(overallScore),
-    lagnaRuler,
-    yamPlanet,
+    lagnaRuler: lagnaRuler ?? ({} as any), // Fallback
+    yamPlanet: yamPlanet ?? ({} as any),
     goodPlanets,
     badPlanets,
     categories: {
