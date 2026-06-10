@@ -313,7 +313,8 @@ export default function HoroscopePage() {
   const [showDailyJorn, setShowDailyJorn] = useState(false);
   const [showAgeRange, setShowAgeRange] = useState(false);
   const [showHouseNames, setShowHouseNames] = useState(true);
-  const [showTaksaMahaBadges, setShowTaksaMahaBadges] = useState(false);
+  const [showTaksaJorn, setShowTaksaJorn] = useState(false);
+  const [showMahaJorn, setShowMahaJorn] = useState(false);
 
   // ดึงค่าระบบจรจาก activeResult เพื่อนำมาหาดาวเป้าหมาย
   const taksaTransit = activeResult?.taksaMaha?.taksaTransit || activeResult?.phopephumResult?.taksaTransit;
@@ -900,16 +901,29 @@ export default function HoroscopePage() {
               </button>
               <button
                 type="button"
-                onClick={() => setShowTaksaMahaBadges(!showTaksaMahaBadges)}
+                onClick={() => setShowTaksaJorn(!showTaksaJorn)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showTaksaMahaBadges ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                  showTaksaJorn ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-bold text-[#C9A96E] bg-white/5 px-1 py-[0.5px] rounded border border-white/10 leading-none">ท/ม</span>
+                  <span className="text-[13px] font-bold text-[#C9A96E] bg-white/5 px-1.5 py-[0.5px] rounded border border-white/10 leading-none">ท</span>
                   <span>ทักษาจร</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showTaksaMahaBadges ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showTaksaJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowMahaJorn(!showMahaJorn)}
+                className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
+                  showMahaJorn ? "bg-[#4B6FAE]/10 border-[#4B6FAE]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <span className="text-[13px] font-bold text-[#4B6FAE] bg-white/5 px-1.5 py-[0.5px] rounded border border-white/10 leading-none">ม</span>
+                  <span>มหาภูติจร</span>
+                </span>
+                <span className={`w-2 h-2 rounded-full transition-all ${showMahaJorn ? "bg-[#4B6FAE] shadow-[0_0_8px_#4B6FAE]" : "bg-white/10"}`} />
               </button>
               <button
                 type="button"
@@ -1019,7 +1033,8 @@ export default function HoroscopePage() {
             showDailyJorn={showDailyJorn}
             showAgeRange={showAgeRange}
             showHouseNames={showHouseNames}
-            showTaksaMahaBadges={showTaksaMahaBadges}
+            showTaksaJorn={showTaksaJorn}
+            showMahaJorn={showMahaJorn}
           />
 
           {/* ── [ใหม่!] พื้นที่แชทตรวจดวงชะตาสดตาม Filter ── */}
@@ -1905,7 +1920,8 @@ function FateMatrixPanel({
   showDailyJorn = true,
   showAgeRange = false,
   showHouseNames = true,
-  showTaksaMahaBadges = false,
+  showTaksaJorn = false,
+  showMahaJorn = false,
 }: {
   matrix: number[][];
   activeNum: number | null;
@@ -1922,7 +1938,8 @@ function FateMatrixPanel({
   showDailyJorn?: boolean;
   showAgeRange?: boolean;
   showHouseNames?: boolean;
-  showTaksaMahaBadges?: boolean;
+  showTaksaJorn?: boolean;
+  showMahaJorn?: boolean;
 }) {
   // ฟังก์ชันคำนวณช่วงอายุสะสมของทุกช่องใน 3 แถวแรก (วัยจร Mod-7 ระบบคัมภีร์ดวงไทย)
   const getCellAgeRange = (row: number, col: number, mat: number[][]) => {
@@ -2056,7 +2073,7 @@ function FateMatrixPanel({
                             </div>
                             
                             {/* Taksa Transit Badge (Top-Right) */}
-                            {showTaksaMahaBadges && taksaInd && (
+                            {showTaksaJorn && taksaInd && (
                               <span 
                                 title={taksaInd.fullName}
                                 className={`absolute -top-1.5 -right-2 text-[10px] font-bold px-1 py-[1px] rounded-md border leading-none shadow-sm transition-all group-hover/cell:scale-105 ${taksaInd.color}`}
@@ -2066,7 +2083,7 @@ function FateMatrixPanel({
                             )}
                             
                             {/* Maha Transit Badge (Top-Left) */}
-                            {showTaksaMahaBadges && mahaInd && (
+                            {showMahaJorn && mahaInd && (
                               <span 
                                 title={mahaInd.fullName}
                                 className={`absolute -top-1.5 -left-2 text-[10px] font-bold px-1 py-[1px] rounded-md border leading-none shadow-sm transition-all group-hover/cell:scale-105 ${mahaInd.color}`}
