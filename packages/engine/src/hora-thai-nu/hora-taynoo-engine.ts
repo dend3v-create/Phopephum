@@ -443,7 +443,7 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   // พับย้ำลงจักรราศี
   const positions = calculatePositions(planetSteps)
 
-  // Labels: [1,2,3,4,5,6,7,8,ล,9,0]
+  // Labels: [1,2,3,4,5,6,7,8,ลั,9,0]
   const LABELS = ['1','2','3','4','5','6','7','8','ล','9','0']
   const PLANET_NUMS: (number|null)[] = [1,2,3,4,5,6,7,8,null,9,null] // null = ล, 0
 
@@ -678,7 +678,7 @@ export function generateHoraTaynooSVG(
     }
   }
 
-  // ── Core Design & Lagna Ruler bullseye ──────────────────────────────────────
+  // ── Core Design (Grid + Anchors) ─────────────────────────────────────────────
   let coreLines = ''
   for (const angle of [0, 45, 90, 135]) {
     const p1 = polar(angle, R_CORE), p2 = polar(angle + 180, R_CORE)
@@ -704,9 +704,17 @@ export function generateHoraTaynooSVG(
     startMarker += `<circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${3.5*s}" fill="#6EB0F5" opacity="1" />`
   }
 
-  // Center Label: "Day Yam" (e.g. "4 2")
-  const centerText = `${result.dayPlanet} ${result.yamAsked}`
-  const centerLabel = `<text x="${CX}" y="${CY}" text-anchor="middle" dominant-baseline="central" font-size="${26*s}" font-family="sans-serif" fill="${GOLD}" font-weight="900" letter-spacing="0.1em">${centerText}</text>`
+  // ── FINAL MASKING CENTER DESIGN ─────────────────────────────────────────────
+  // This circle masks ALL inner grid lines and small Arabic anchor numbers
+  const centerMask = `<circle cx="${CX}" cy="${CY}" r="${(R_CORE + 12*s).toFixed(1)}" fill="#020617" stroke="${GOLD}" stroke-width="3"/>`
+
+  // Diagonal Labels: Day (Top-Left 225°), Yam (Bottom-Right 45°)
+  // Positioned along the Taurus-Gemini (225) and Scorpio-Sagittarius (45) divider lines
+  const pDay = polar(225, 20 * s)
+  const pYam = polar(45, 20 * s)
+  
+  const dayLabel = `<text x="${pDay.x.toFixed(1)}" y="${pDay.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD}" font-weight="900" filter="drop-shadow(0 0 5px rgba(201,169,110,0.4))">${result.dayPlanet}</text>`
+  const yamLabel = `<text x="${pYam.x.toFixed(1)}" y="${pYam.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD}" font-weight="900" filter="drop-shadow(0 0 5px rgba(201,169,110,0.4))">${result.yamAsked}</text>`
 
   return `<svg viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg" style="background:#020617; border-radius:1.5rem;">
   <defs>
@@ -726,7 +734,9 @@ ${dividers}
  ${anchorLabels}
  ${timeLabels}
  ${startMarker}
- ${centerLabel}
+ ${centerMask}
+ ${dayLabel}
+ ${yamLabel}
 </svg>`
 }
 
