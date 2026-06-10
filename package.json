@@ -12,7 +12,8 @@
     "dev:web": "turbo run dev --filter=@phopephum/web",
     "dev:mobile": "turbo run dev --filter=@phopephum/mobile",
     "deploy:web": "turbo run deploy --filter=@phopephum/web",
-    "deploy:workers": "turbo run deploy --filter=@phopephum/workers-ai-proxy"
+    "deploy:workers": "turbo run deploy --filter=@phopephum/workers-ai-proxy",
+    "deploy": "bash deploy.sh"
   },
   "workspaces": [
     "apps/*",

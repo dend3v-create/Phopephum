@@ -1167,34 +1167,41 @@ export default function HoroscopePage() {
             </div>
 
             {/* หมวดหมู่แนะนำเป็น Premium Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
               {[
                 {
                   value: "general_prediction",
-                  label: "ภาพรวมชะตาชีวิต",
-                  icon: "🪐",
-                  desc: "เส้นทางชีวิตหลัก",
+                  label: "พยากรณ์ปัญญาชีวิต",
+                  icon: "🧘",
+                  desc: "แนวทางบำบัดชะตา",
                   color: "from-violet-950/40 to-purple-900/10 border-violet-500/20 hover:border-violet-500/55",
                 },
                 {
+                  value: "personal_branding",
+                  label: "ตัวตน & อัตลักษณ์",
+                  icon: "🎭",
+                  desc: "เสน่ห์และแบรนด์บุคคล",
+                  color: "from-amber-950/40 to-orange-900/10 border-amber-500/20 hover:border-amber-500/55",
+                },
+                {
                   value: "career",
-                  label: "การงาน & ธุรกิจ",
-                  icon: "💼",
-                  desc: "โอกาสและความสำเร็จ",
+                  label: "ภารกิจ & ความสำเร็จ",
+                  icon: "🚀",
+                  desc: "โอกาสและเป้าหมาย",
                   color: "from-sky-950/40 to-blue-900/10 border-sky-500/20 hover:border-sky-500/55",
                 },
                 {
                   value: "relationship",
-                  label: "ความรัก & คู่ครอง",
-                  icon: "💖",
-                  desc: "เนื้อคู่และเสน่ห์เมตตา",
+                  label: "เสน่ห์ & สัมพันธ์",
+                  icon: "✨",
+                  desc: "สายใยและเมตตา",
                   color: "from-rose-950/40 to-pink-900/10 border-rose-500/20 hover:border-rose-500/55",
                 },
                 {
                   value: "wealth",
-                  label: "โชคลาภ & การเงิน",
-                  icon: "💎",
-                  desc: "คลังสมบัติประจำดวง",
+                  label: "กระแสทรัพย์ & มั่งคั่ง",
+                  icon: "💰",
+                  desc: "คลังสมบัติและ Flow",
                   color: "from-emerald-950/40 to-green-900/10 border-emerald-500/20 hover:border-emerald-500/55",
                 },
                 {
@@ -1220,7 +1227,7 @@ export default function HoroscopePage() {
                     </p>
                   </div>
                   <span className="absolute bottom-2.5 right-3 text-[13px] text-[#C9A96E] opacity-0 group-hover:opacity-100 transition-opacity">
-                    ตรวจดวง ➔
+                    ถอดรหัส ➔
                   </span>
                 </a>
               ))}
@@ -1241,12 +1248,13 @@ export default function HoroscopePage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {reports.map((rep: any) => {
                     const typeLabels: Record<string, string> = {
-                      general_prediction: "ภาพรวมชะตาชีวิต",
-                      life_overview: "ภาพรวมชีวิตเชิงลึก",
-                      career: "การงาน & ธุรกิจ",
-                      relationship: "ความรัก & คู่ครอง",
-                      wealth: "โชคลาภ & การเงิน",
-                      annual_forecast: "พยากรณ์รายปีจร",
+                      general_prediction: "พยากรณ์ปัญญาชีวิต (Therapy)",
+                      life_overview: "โครงสร้างชีวิตเชิงลึก",
+                      personal_branding: "ตัวตน & อัตลักษณ์",
+                      career: "ภารกิจ & ความสำเร็จ",
+                      relationship: "เสน่ห์ & ความสัมพันธ์",
+                      wealth: "กระแสทรัพย์ & มั่งคั่ง",
+                      annual_forecast: "จังหวะชะตารายปี",
                     };
                     return (
                       <a

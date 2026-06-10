@@ -11,14 +11,15 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
 ];
 
 const REPORT_LABELS: Record<string, string> = {
-  general_prediction: "พยากรณ์ทั่วไป",
-  life_overview:      "ภาพรวมชีวิต",
-  career:             "การงาน",
-  relationship:       "ความสัมพันธ์",
-  health:             "สุขภาพ",
-  wealth:             "การเงิน",
-  daily_insight:      "Insight วันนี้",
-  annual_forecast:    "พยากรณ์รายปี",
+  general_prediction: "พยากรณ์ปัญญาชีวิต (Therapy)",
+  life_overview:      "โครงสร้างชีวิตเชิงลึก",
+  personal_branding:  "ตัวตน & อัตลักษณ์",
+  career:             "ภารกิจ & ความสำเร็จ",
+  relationship:       "เสน่ห์ & ความสัมพันธ์",
+  health:             "สุขภาพ & พลังชีวิต",
+  wealth:             "กระแสทรัพย์ & มั่งคั่ง",
+  daily_insight:      "ปัญญาญาณรายวัน",
+  annual_forecast:    "จังหวะชะตารายปี",
   horoscope:          "ดวงชะตา",
   numerology:         "ตัวเลขโชคชะตา",
   yearly:             "พยากรณ์รายปี",

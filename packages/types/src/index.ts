@@ -254,7 +254,8 @@ export type AIReportType =
   | "health"
   | "wealth"
   | "daily_insight"
-  | "annual_forecast";
+  | "annual_forecast"
+  | "personal_branding";
 
 export interface AIReportRecord {
   id: string;
