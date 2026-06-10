@@ -170,13 +170,13 @@ export const PLANET_INFO: Record<number, {
   day: string; night: string; thai: string
   color: string; isMalefic: boolean
 }> = {
-  1: { day:'สุริชะ',  night:'ระวิ',   thai:'พระอาทิตย์', color:'#E8920A', isMalefic:false },
-  2: { day:'จันเทา',  night:'ศะศิ',   thai:'พระจันทร์',  color:'#7B8FA1', isMalefic:false },
-  3: { day:'ภุมมะ',   night:'ภุมโม',  thai:'พระอังคาร',  color:'#C0392B', isMalefic:true  },
-  4: { day:'พุธะ',    night:'พุโธ',   thai:'พระพุธ',     color:'#27AE60', isMalefic:false },
-  5: { day:'ครู',     night:'ชีโว',   thai:'พระพฤหัส',   color:'#B8860B', isMalefic:false },
-  6: { day:'ศุกระ',   night:'ศุโกร',  thai:'พระศุกร์',   color:'#9B59B6', isMalefic:false },
-  7: { day:'เสารี',   night:'โสโร',   thai:'พระเสาร์',   color:'#546E7A', isMalefic:true  },
+  1: { day:'สุริชะ',  night:'ระวิ',   thai:'พระอาทิตย์', color:'#F59E0B', isMalefic:false },
+  2: { day:'จันเทา',  night:'ศะศิ',   thai:'พระจันทร์',  color:'#CBD5E1', isMalefic:false },
+  3: { day:'ภุมมะ',   night:'ภุมโม',  thai:'พระอังคาร',  color:'#EF4444', isMalefic:true  },
+  4: { day:'พุธะ',    night:'พุโธ',   thai:'พระพุธ',     color:'#10B981', isMalefic:false },
+  5: { day:'ครู',     night:'ชีโว',   thai:'พระพฤหัส',   color:'#EAB308', isMalefic:false },
+  6: { day:'ศุกระ',   night:'ศุโกร',  thai:'พระศุกร์',   color:'#A855F7', isMalefic:false },
+  7: { day:'เสารี',   night:'โสโร',   thai:'พระเสาร์',   color:'#94A3B8', isMalefic:true  },
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -554,6 +554,7 @@ export function generateHoraTaynooSVG(
   const GOLD      = '#C9A96E'
   const GOLD_MED  = '#C9A96E60'
   const GOLD_DIM  = '#C9A96E28'
+  const GOLD_TXT  = '#F2D49B'           // Bright Imperial Gold-Yellow for Text
   const TXT       = '#F8F6F1'           // Intense White
   const TXT_TIME  = '#FDE047'           // Bright Yellow (Visibility)
   const TXT_DIM   = '#8B7E6E'
@@ -561,7 +562,7 @@ export function generateHoraTaynooSVG(
   const PLN_BG    = '#C9A96E1A'
   const GOOD_CLR  = '#6EE7B7'
   const BAD_CLR   = '#FDA4AF'
-  const MED_CLR   = '#A89880'
+  const MED_CLR   = '#C5BCAE'           // Light Warm Sand for better contrast
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   const GOOD_BHAVA = new Set(['ตนุ','กฎุมภะ','ปุตตะ','ปัตนิ','ศุภะ','กัมมะ','ลาภะ'])
@@ -663,7 +664,7 @@ export function generateHoraTaynooSVG(
     for (const z of ZODIAC_ORDER) {
       const pos = polar(z.sectorAngle, R_FIX_LBL)
       const fixedNum = KASTERN_FIXED[z.index]
-      kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${17*s}" font-family="sans-serif" fill="${GOLD}" opacity="0.45" font-weight="800">${fixedNum}</text>`
+      kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${17*s}" font-family="sans-serif" fill="${GOLD_TXT}" opacity="0.65" font-weight="800">${fixedNum}</text>`
     }
   }
 
@@ -693,7 +694,7 @@ export function generateHoraTaynooSVG(
   for (const [num, [dx, dy]] of Object.entries(ANCHORS)) {
     const x = (CX + Number(dx) * s).toFixed(1)
     const y = (CY + Number(dy) * s).toFixed(1)
-    anchorLabels += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${9*s}" font-family="sans-serif" fill="${GOLD}" font-weight="800" opacity="0.6">${num}</text>`
+    anchorLabels += `<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-size="${9*s}" font-family="sans-serif" fill="${GOLD_TXT}" font-weight="900" opacity="0.85">${num}</text>`
   }
 
   let startMarker = ''
@@ -713,8 +714,8 @@ export function generateHoraTaynooSVG(
   const pDay = polar(225, 20 * s)
   const pYam = polar(45, 20 * s)
   
-  const dayLabel = `<text x="${pDay.x.toFixed(1)}" y="${pDay.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD}" font-weight="900" filter="drop-shadow(0 0 5px rgba(201,169,110,0.4))">${result.dayPlanet}</text>`
-  const yamLabel = `<text x="${pYam.x.toFixed(1)}" y="${pYam.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD}" font-weight="900" filter="drop-shadow(0 0 5px rgba(201,169,110,0.4))">${result.yamAsked}</text>`
+  const dayLabel = `<text x="${pDay.x.toFixed(1)}" y="${pDay.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD_TXT}" font-weight="900" filter="drop-shadow(0 0 5px rgba(242,212,155,0.4))">${result.dayPlanet}</text>`
+  const yamLabel = `<text x="${pYam.x.toFixed(1)}" y="${pYam.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD_TXT}" font-weight="900" filter="drop-shadow(0 0 5px rgba(242,212,155,0.4))">${result.yamAsked}</text>`
 
   return `<svg viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg" style="background:#020617; border-radius:1.5rem;">
   <defs>

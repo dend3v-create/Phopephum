@@ -139,7 +139,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 // ─── Display helpers ──────────────────────────────────────────────────────────
 
 const DAY_NAMES_TH = ["อาทิตย์","จันทร์","อังคาร","พุธ","พฤหัส","ศุกร์","เสาร์"];
-const DAY_COLORS   = ["#E8920A","#7B8FA1","#C0392B","#27AE60","#B8860B","#9B59B6","#546E7A"];
+const DAY_COLORS   = ["#F59E0B","#CBD5E1","#EF4444","#10B981","#EAB308","#A855F7","#94A3B8"];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -156,7 +156,7 @@ function ChartInterpretationPanel({ interpretation }: { interpretation: ChartInt
         </div>
         <div className="text-right flex items-end gap-2">
           <span className={`font-display text-2xl font-bold leading-none ${gradeColor}`}>{grade}</span>
-          <span className="text-[#8A8070] text-[10px]">Score: {overallScore}/100</span>
+          <span className="text-[#D9CDB7] text-[10px]">Score: {overallScore}/100</span>
         </div>
       </div>
       
@@ -187,18 +187,18 @@ function YamBadge({ result }: { result: HoraTaynooResult }) {
   return (
     <div className="grid grid-cols-3 gap-3 text-center">
       <div className="bg-[#C9A96E]/10 border border-[#C9A96E]/25 rounded-2xl p-3">
-        <p className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1">วัน</p>
+        <p className="text-[10px] text-[#D9CDB7] uppercase tracking-wider mb-1">วัน</p>
         <p className="font-display text-lg font-bold text-[#F8F6F1]">{DAY_NAMES_TH[result.dayOfWeek]}</p>
       </div>
       <div className="bg-[#C9A96E]/10 border border-[#C9A96E]/25 rounded-2xl p-3">
-        <p className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1">ยามที่</p>
+        <p className="text-[10px] text-[#D9CDB7] uppercase tracking-wider mb-1">ยามที่</p>
         <p className="font-display text-3xl font-bold text-[#C9A96E]">{result.yamAsked}</p>
-        <p className="text-[10px] text-[#8A8070]">{result.period === "day" ? "กลางวัน" : "กลางคืน"}</p>
+        <p className="text-[10px] text-[#D9CDB7]">{result.period === "day" ? "กลางวัน" : "กลางคืน"}</p>
       </div>
       <div className="bg-[#C9A96E]/10 border border-[#C9A96E]/25 rounded-2xl p-3">
-        <p className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1">เวลายาม</p>
+        <p className="text-[10px] text-[#D9CDB7] uppercase tracking-wider mb-1">เวลายาม</p>
         <p className="text-sm font-bold text-[#F8F6F1]">{result.yamStartStr}</p>
-        <p className="text-[10px] text-[#8A8070]">— {result.yamEndStr}</p>
+        <p className="text-[10px] text-[#D9CDB7]">— {result.yamEndStr}</p>
       </div>
     </div>
   );
@@ -210,7 +210,7 @@ function PlanetSummary({ result }: { result: HoraTaynooResult }) {
   return (
     <div className="grid grid-cols-2 gap-3">
       <div className="border border-white/8 bg-slate-900/30 rounded-2xl p-4">
-        <p className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-2">ดาวประจำวัน</p>
+        <p className="text-[10px] text-[#D9CDB7] uppercase tracking-wider mb-2">ดาวประจำวัน</p>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center font-display text-lg font-bold shrink-0"
             style={{ background: `${dayP?.color}20`, border: `1px solid ${dayP?.color}50`, color: dayP?.color }}>
@@ -218,12 +218,12 @@ function PlanetSummary({ result }: { result: HoraTaynooResult }) {
           </div>
           <div>
             <p className="text-sm font-bold text-[#F8F6F1]">{dayP?.thai}</p>
-            <p className="text-[10px] text-[#8A8070]">{result.period === "day" ? dayP?.day : dayP?.night}</p>
+            <p className="text-[10px] text-[#D9CDB7]">{result.period === "day" ? dayP?.day : dayP?.night}</p>
           </div>
         </div>
       </div>
       <div className="border border-white/8 bg-slate-900/30 rounded-2xl p-4">
-        <p className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-2">ดาวเจ้ายาม</p>
+        <p className="text-[10px] text-[#D9CDB7] uppercase tracking-wider mb-2">ดาวเจ้ายาม</p>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center font-display text-lg font-bold shrink-0"
             style={{ background: `${yamP?.color}20`, border: `1px solid ${yamP?.color}50`, color: yamP?.color }}>
@@ -231,7 +231,7 @@ function PlanetSummary({ result }: { result: HoraTaynooResult }) {
           </div>
           <div>
             <p className="text-sm font-bold text-[#F8F6F1]">{yamP?.thai}</p>
-            <p className="text-[10px] text-[#8A8070]">เกษตร: {ZODIAC_ORDER[result.kasternZodiacIndex]?.name}</p>
+            <p className="text-[10px] text-[#D9CDB7]">เกษตร: {ZODIAC_ORDER[result.kasternZodiacIndex]?.name}</p>
           </div>
         </div>
       </div>
@@ -245,12 +245,12 @@ function PlanetTable({ result }: { result: HoraTaynooResult }) {
       <div className="flex items-center gap-2 mb-3">
         <div className="w-2 h-2 bg-[#C9A96E] rounded-full" />
         <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">ดาวลอย 11 ดวง</p>
-        <span className="ml-auto text-[10px] text-[#8A8070]">ลัคนา: {ZODIAC_ORDER[result.lagnaZodiacIndex]?.name}</span>
+        <span className="ml-auto text-[10px] text-[#D9CDB7]">ลัคนา: {ZODIAC_ORDER[result.lagnaZodiacIndex]?.name}</span>
       </div>
       <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
         {result.planetEntries.map((entry, i) => {
           const pInfo = entry.planetNum ? PLANET_INFO[entry.planetNum] : null;
-          const color = pInfo?.color ?? (entry.isLagna ? "#4B6FAE" : "#5A5148");
+          const color = pInfo?.color ?? (entry.isLagna ? "#6D8FC7" : "#F2D49B");
           const zodiac = ZODIAC_ORDER[entry.zodiacIndex];
           const bhava  = result.bhavaMap[entry.zodiacIndex] ?? "";
           return (
@@ -262,7 +262,7 @@ function PlanetTable({ result }: { result: HoraTaynooResult }) {
               <div className="font-display text-xl font-bold mb-0.5" style={{ color }}>
                 {entry.labelThai}
               </div>
-              <div className="text-[10px] text-[#8A8070] leading-tight">{zodiac?.name}</div>
+              <div className="text-[10px] text-[#D9CDB7] leading-tight">{zodiac?.name}</div>
               {bhava && (
                 <div className="text-[9px] mt-0.5 font-medium" style={{ color: `${color}cc` }}>{bhava}</div>
               )}
@@ -304,7 +304,7 @@ function BhavaTable({ result }: { result: HoraTaynooResult }) {
             }`}>
               <div className="flex items-center justify-between mb-0.5">
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${
-                  isBad ? "text-rose-400" : isGood ? "text-emerald-400" : "text-[#8A8070]"
+                  isBad ? "text-rose-400" : isGood ? "text-emerald-400" : "text-[#D9CDB7]"
                 }`}>{i + 1}. {b.bhava}</span>
                 {b.planets.length > 0 && (
                   <span className="text-[9px] text-[#C9A96E] font-bold">
@@ -344,12 +344,12 @@ function SubTimePanel({ result, isLive }: { result: HoraTaynooResult; isLive: bo
                 ? <span className="w-1.5 h-1.5 rounded-full bg-[#C9A96E] animate-pulse shrink-0" />
                 : <span className="w-1.5 h-1.5 shrink-0" />
               }
-              <span className="w-14 font-mono text-[11px] text-[#8A8070]">{slot.startStr}</span>
+              <span className="w-14 font-mono text-[11px] text-[#D9CDB7]">{slot.startStr}</span>
               <span className="flex-1 font-medium text-[#F8F6F1]">{slot.zodiacName}</span>
               <span className={`text-[10px] font-bold ${
                 ["ตนุ","ลาภะ","กัมมะ","ศุภะ"].includes(slot.bhavaName) ? "text-emerald-400" :
                 ["อริ","มรณะ","วินาศ"].includes(slot.bhavaName)         ? "text-rose-400"    :
-                "text-[#8A8070]"
+                "text-[#D9CDB7]"
               }`}>{slot.bhavaName}</span>
             </div>
           );
@@ -377,7 +377,7 @@ function PlanetStatusLegend() {
         <div key={s.char} className="flex items-center gap-1.5">
           <span className="text-lg font-bold" style={{ color: s.color }}>{s.glyph}</span>
           <span className="text-[10px] text-[#F8F6F1] font-bold whitespace-nowrap">{s.char}</span>
-          <span className="text-[9px] text-[#8A8070] hidden sm:inline">({s.desc})</span>
+          <span className="text-[9px] text-[#D9CDB7] hidden sm:inline">({s.desc})</span>
         </div>
       ))}
     </div>
@@ -458,7 +458,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
                 className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border transition-all ${
                   filterGrade === g
                     ? GRADE_COLOR[g]
-                    : "border-white/10 text-[#8A8070] hover:border-white/20"
+                    : "border-white/10 text-[#D9CDB7] hover:border-white/20"
                 }`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${GRADE_DOT[g]}`} />
                 {g} ({gradeCounts[g] ?? 0})
@@ -474,7 +474,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
             className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
               filterDay === null
                 ? "border-[#C9A96E]/50 bg-[#C9A96E]/10 text-[#C9A96E]"
-                : "border-white/10 text-[#8A8070] hover:border-white/20"
+                : "border-white/10 text-[#D9CDB7] hover:border-white/20"
             }`}>ทั้งหมด</button>
           {DAY_NAMES_TH.map((name, i) => (
             <button key={i} type="button"
@@ -482,7 +482,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
               className={`px-3 py-1 rounded-full text-xs font-bold border transition-all ${
                 filterDay === i
                   ? "border-[#C9A96E]/50 text-[#C9A96E]"
-                  : "border-white/10 text-[#8A8070] hover:border-white/20 hover:text-[#F8F6F1]"
+                  : "border-white/10 text-[#D9CDB7] hover:border-white/20 hover:text-[#F8F6F1]"
               }`}
               style={filterDay === i ? { background: `${DAY_COLORS[i]}20` } : {}}>
               {name}
@@ -498,7 +498,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
               className={`flex-1 py-1.5 rounded-xl text-xs font-bold border transition-all ${
                 filterPeriod === p
                   ? "bg-[#4B6FAE]/15 border-[#4B6FAE]/40 text-[#4B6FAE]"
-                  : "border-white/8 text-[#8A8070] hover:border-white/15"
+                  : "border-white/8 text-[#D9CDB7] hover:border-white/15"
               }`}>
               {p === null ? "ทั้งวัน" : p === "day" ? "☀ กลางวัน" : "☽ กลางคืน"}
             </button>
@@ -507,7 +507,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
 
         {/* Grid */}
         {library.length === 0 ? (
-          <div className="text-center py-10 text-[#8A8070] text-sm">
+          <div className="text-center py-10 text-[#D9CDB7] text-sm">
             ไม่พบข้อมูล — กรุณา Seed ที่ /admin/seed-yam ก่อน
           </div>
         ) : (
@@ -526,9 +526,9 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
                   {/* Grade badge */}
                   <div className="flex items-center justify-between mb-1.5">
                     <span className={`text-xs font-display font-bold ${
-                      isSelected ? "" : (GRADE_COLOR[row.grade]?.split(" ")[0] ?? "text-[#8A8070]")
+                      isSelected ? "" : (GRADE_COLOR[row.grade]?.split(" ")[0] ?? "text-[#D9CDB7]")
                     }`}>{row.grade}</span>
-                    <span className="text-[9px] text-[#5A5148] font-mono">
+                    <span className="text-[10px] text-[#D9CDB7]/80 font-mono">
                       {row.period === "day" ? "☀" : "☽"}{row.yam_no}
                     </span>
                   </div>
@@ -537,7 +537,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
                     {row.weekday_name_th}
                   </p>
                   {/* Time */}
-                  <p className="text-[9px] text-[#8A8070] font-mono mt-0.5 leading-tight">
+                  <p className="text-[9px] text-[#D9CDB7] font-mono mt-0.5 leading-tight">
                     {row.start_time}
                   </p>
                   {/* Lagna */}
@@ -553,7 +553,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
                       style={{ width: `${row.overall_score ?? 0}%` }}
                     />
                   </div>
-                  <p className="text-[8px] text-[#5A5148] mt-0.5 text-right">{row.overall_score}</p>
+                  <p className="text-[10px] text-[#D9CDB7]/80 mt-0.5 text-right font-medium">{row.overall_score}</p>
                 </button>
               );
             })}
@@ -561,7 +561,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
         )}
 
         {filtered.length === 0 && library.length > 0 && (
-          <p className="text-center text-[#8A8070] text-sm py-8">ไม่มีผังที่ตรงกับ filter</p>
+          <p className="text-center text-[#D9CDB7] text-sm py-8">ไม่มีผังที่ตรงกับ filter</p>
         )}
       </Card>
     </div>
@@ -581,13 +581,13 @@ function CustomTimeForm() {
           { name: "year",  label: "ปี พ.ศ.", placeholder: String(now.getFullYear() + 543),  w: "w-full sm:w-24" },
         ].map(f => (
           <div key={f.name}>
-            <label className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1 block">{f.label}</label>
+            <label className="text-[10px] text-[#D9CDB7] uppercase tracking-wider mb-1 block">{f.label}</label>
             <input name={f.name} type="number" placeholder={f.placeholder}
               className={`${f.w} bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40`} />
           </div>
         ))}
         <div>
-          <label className="text-[10px] text-[#8A8070] uppercase tracking-wider mb-1 block">เวลา</label>
+          <label className="text-[10px] text-[#D9CDB7] uppercase tracking-wider mb-1 block">เวลา</label>
           <input name="time" type="time"
             defaultValue={`${String(now.getHours()).padStart(2,"0")}:${String(now.getMinutes()).padStart(2,"0")}`}
             className="w-full sm:w-32 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
@@ -695,9 +695,9 @@ function HoranuChatPanel() {
       <div className="flex items-center gap-2 mb-4">
         <div className={`w-2 h-2 rounded-full ${isLoading ? "bg-[#C9A96E] animate-pulse" : "bg-[#C9A96E]"}`} />
         <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">ถามโหรพรายกระซิบ</p>
-        <span className="ml-1 text-[10px] text-[#5A5148]">— ตีความตามดวงยาม ณ เวลาที่กดถาม</span>
+        <span className="ml-2 text-[11px] text-[#D9CDB7]/80 font-medium">— ตีความตามดวงยาม ณ เวลาที่กดถาม</span>
         {lockedTime && (
-          <span className="ml-auto text-[9px] text-[#8A8070] font-mono shrink-0">
+          <span className="ml-auto text-[9px] text-[#D9CDB7] font-mono shrink-0">
             ล็อกเวลา {fmtTime(lockedTime)} น.
           </span>
         )}
@@ -711,7 +711,7 @@ function HoranuChatPanel() {
             type="button"
             onClick={() => setQuestion(q)}
             disabled={isLoading}
-            className="text-[10px] px-2.5 py-1 rounded-full border border-white/10 text-[#8A8070] hover:border-[#C9A96E]/30 hover:text-[#C9A96E] disabled:opacity-40 transition-all"
+            className="text-[10px] px-2.5 py-1 rounded-full border border-white/10 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E] disabled:opacity-40 transition-all"
           >
             {q}
           </button>
@@ -727,7 +727,7 @@ function HoranuChatPanel() {
           onKeyDown={e => e.key === "Enter" && handleAsk()}
           placeholder="พิมพ์คำถามของคุณ... (กด Enter หรือปุ่ม ถามยาม)"
           disabled={isLoading}
-          className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1] placeholder:text-[#5A5148] focus:outline-none focus:border-[#C9A96E]/40 disabled:opacity-60"
+          className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1] placeholder:text-[#D9CDB7]/40 focus:outline-none focus:border-[#C9A96E]/40 disabled:opacity-60"
         />
         <button
           type="button"
@@ -751,7 +751,7 @@ function HoranuChatPanel() {
           className="mt-4 p-4 rounded-xl bg-[#020617]/80 border border-[#C9A96E]/10 text-sm text-[#F8F6F1] leading-relaxed whitespace-pre-wrap"
         >
           {isLoading && !answer ? (
-            <span className="inline-flex items-center gap-2 text-[#8A8070]">
+            <span className="inline-flex items-center gap-2 text-[#D9CDB7]">
               <span className="w-1.5 h-1.5 bg-[#C9A96E] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
               <span className="w-1.5 h-1.5 bg-[#C9A96E] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
               <span className="w-1.5 h-1.5 bg-[#C9A96E] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
@@ -828,7 +828,7 @@ export default function HoraNuPage() {
             <p className="text-[#C9A96E] text-[11px] tracking-[0.3em] uppercase font-bold">Hora Taynoo System</p>
           </div>
           <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">ยามพรายกระซิบ</h1>
-          <p className="text-[#8A8070] text-sm mt-1">ผังดวงยามพรายกระซิบ — ยามอัฐกาล + ดาวลอย 11 + ภพ 12</p>
+          <p className="text-[#D9CDB7] text-sm mt-1">ผังดวงยามพรายกระซิบ — ยามอัฐกาล + ดาวลอย 11 + ภพ 12</p>
         </div>
         {isLive && (
           <div className="flex items-center sm:flex-col sm:items-end gap-2 shrink-0">
@@ -838,7 +838,7 @@ export default function HoraNuPage() {
                 className={`text-[11px] font-bold px-3 py-1.5 rounded-full border transition-all ${
                   showCustom
                     ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#C9A96E]"
-                    : "border-white/10 text-[#8A8070] hover:border-[#C9A96E]/30 hover:text-[#C9A96E]"
+                    : "border-white/10 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E]"
                 }`}>{showCustom ? "✕ ปิด" : "⚙ ตั้งเวลา"}</button>
             </div>
           </div>
@@ -852,7 +852,7 @@ export default function HoraNuPage() {
             className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
               tab === t
                 ? "bg-[#C9A96E]/15 text-[#C9A96E]"
-                : "text-[#8A8070] hover:text-[#F8F6F1]"
+                : "text-[#D9CDB7] hover:text-[#F8F6F1]"
             }`}>
             {t === "live" ? "⚡ คำนวณสด" : <><span className="hidden sm:inline">📚 ดวงยามสำเร็จ (112 ผัง)</span><span className="sm:hidden">📚 ดวงยามสำเร็จ</span></>}
           </button>
@@ -881,11 +881,11 @@ export default function HoraNuPage() {
                     </span>
                   )}
                 </div>
-                <p className="text-[10px] text-[#8A8070] mt-0.5">
+                <p className="text-[10px] text-[#D9CDB7] mt-0.5">
                   ยาม {result.yamAsked} · {result.period === "day" ? "กลางวัน" : "กลางคืน"} · ลัคนา {ZODIAC_ORDER[result.lagnaZodiacIndex]?.name}
                 </p>
               </div>
-              <div className="text-right text-[10px] text-[#8A8070]">
+              <div className="text-right text-[10px] text-[#D9CDB7]">
                 <p>เกษตร: <span className="text-[#C9A96E] font-bold">{ZODIAC_ORDER[result.kasternZodiacIndex]?.name}</span></p>
                 <p>ดาวยาม: <span className="text-[#C9A96E] font-bold">{PLANET_INFO[result.yamPlanet]?.thai}</span></p>
               </div>
@@ -910,7 +910,7 @@ export default function HoraNuPage() {
                     onChange={(e) => setOptions(prev => ({ ...prev, [opt.key]: e.target.checked }))}
                     className="w-3.5 h-3.5 rounded border-[#C9A96E]/30 bg-slate-900 text-[#C9A96E] focus:ring-[#C9A96E]/50"
                   />
-                  <span className="text-[11px] text-[#8A8070] group-hover:text-[#C9A96E] transition-colors">{opt.label}</span>
+                  <span className="text-[11px] text-[#D9CDB7] group-hover:text-[#C9A96E] transition-colors">{opt.label}</span>
                 </label>
               ))}
             </div>

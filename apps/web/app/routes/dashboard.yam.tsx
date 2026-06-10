@@ -4,15 +4,17 @@ import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useEffect, useState } from "react";
 import { requireMinPlan } from "~/services/auth.server";
 import { canAccess } from "~/services/permissions.server";
-import { 
-  getCurrentYam, 
-  calculateMoonPhase, 
-  getSunTimes, 
+import {
+  getCurrentYam,
+  calculateMoonPhase,
+  getSunTimes,
   getYamPrediction,
   yamDayTable,
   yamDayTicksTable,
+  yamDaySubTable,
   yamNightTable,
-  yamNightTicksTable
+  yamNightTicksTable,
+  yamNightSubTable,
 } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import type { Env } from "~/env.server";
@@ -1612,6 +1614,7 @@ export default function YamPage() {
                     const dayNameEn = DAY_NAMES_EN[dIdx]!;
                     const table = gridPeriod === "day" ? yamDayTable[dayNameEn] : yamNightTable[dayNameEn];
                     const ticksTable = gridPeriod === "day" ? yamDayTicksTable[dayNameEn] : yamNightTicksTable[dayNameEn];
+                    const subTable = gridPeriod === "day" ? yamDaySubTable[dayNameEn] : yamNightSubTable[dayNameEn];
 
                     return (
                       <tr key={dIdx} className="border-b border-white/5 hover:bg-white/[0.01]">
@@ -1646,22 +1649,8 @@ export default function YamPage() {
                                 {/* ยามต้น / ยามกลาง / ยามปลาย */}
                                 <div className="flex flex-col gap-0.5 w-full mt-0.5 border-t border-white/10 pt-1">
                                   {(["ต้น","กลาง","ปลาย"] as const).map((phase, pIdx) => {
-                                    // 1=อาทิตย์ [F, F, T], 2=จันทร์ [F, T, F], 3=อังคาร [F, F, T], 4=พุธ [F, T, T]
-                                    // 5=พฤหัส [F, F, F], 6=ศุกร์ [F, F, T], 7=เสาร์ [F, T, T]
-                                    const isGood = (() => {
-                                      const map: Record<string, boolean[]> = {
-                                        "สุริยะ": [false, false, true], "ระวิ": [false, false, true],
-                                        "จันเทา": [false, true, false], "คะศิ": [false, true, false],
-                                        "ภุมมะ": [false, false, true], "ภุมโม": [false, false, true],
-                                        "พุทธะ": [false, true, true], "พุทโธ": [false, true, true],
-                                        "ครู": [false, false, false], "ชีโว": [false, false, false],
-                                        "ศุกระ": [false, false, true], "ศุโกร": [false, false, true],
-                                        "เสารี": [false, true, true], "โสโร": [false, true, true],
-                                        // เผื่อชื่อสะกดต่างกัน
-                                        "สุริชะ": [false, false, true], "พุธะ": [false, true, true],
-                                      };
-                                      return (map[yamName] || [false, false, false])[pIdx];
-                                    })();
+                                    // ใช้ข้อมูลจาก yamDaySubTable / yamNightSubTable ตาม day+yam+subperiod
+                                    const isGood = subTable[yIdx]?.[pIdx] ?? false;
 
                                     return (
                                       <div key={phase} className={`flex items-center justify-between text-[12px] px-1 rounded-sm ${

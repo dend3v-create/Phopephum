@@ -26,8 +26,8 @@ export type {
 
 export { DAY_INDEX_MAP, DAY_NAMES_THAI } from "./constants/dayMap.js";
 export const dummy = 1; // Unused but makes diff clear if needed
-export { yamDayTable, yamDayTicksTable }       from "./constants/yamDayTable.js";
-export { yamNightTable, yamNightTicksTable }   from "./constants/yamNightTable.js";
+export { yamDayTable, yamDayTicksTable, yamDaySubTable }       from "./constants/yamDayTable.js";
+export { yamNightTable, yamNightTicksTable, yamNightSubTable } from "./constants/yamNightTable.js";
 
 export { yamMeaning }                    from "./constants/yamMeaning.js";
 export { phaseMeaning }                  from "./constants/phaseMeaning.js";
