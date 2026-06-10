@@ -1646,7 +1646,23 @@ export default function YamPage() {
                                 {/* ยามต้น / ยามกลาง / ยามปลาย */}
                                 <div className="flex flex-col gap-0.5 w-full mt-0.5 border-t border-white/10 pt-1">
                                   {(["ต้น","กลาง","ปลาย"] as const).map((phase, pIdx) => {
-                                    const isGood = ticks >= (pIdx + 1);
+                                    // 1=อาทิตย์ [F, F, T], 2=จันทร์ [F, T, F], 3=อังคาร [F, F, T], 4=พุธ [F, T, T]
+                                    // 5=พฤหัส [F, F, F], 6=ศุกร์ [F, F, T], 7=เสาร์ [F, T, T]
+                                    const isGood = (() => {
+                                      const map: Record<string, boolean[]> = {
+                                        "สุริยะ": [false, false, true], "ระวิ": [false, false, true],
+                                        "จันเทา": [false, true, false], "คะศิ": [false, true, false],
+                                        "ภุมมะ": [false, false, true], "ภุมโม": [false, false, true],
+                                        "พุทธะ": [false, true, true], "พุทโธ": [false, true, true],
+                                        "ครู": [false, false, false], "ชีโว": [false, false, false],
+                                        "ศุกระ": [false, false, true], "ศุโกร": [false, false, true],
+                                        "เสารี": [false, true, true], "โสโร": [false, true, true],
+                                        // เผื่อชื่อสะกดต่างกัน
+                                        "สุริชะ": [false, false, true], "พุธะ": [false, true, true],
+                                      };
+                                      return (map[yamName] || [false, false, false])[pIdx];
+                                    })();
+
                                     return (
                                       <div key={phase} className={`flex items-center justify-between text-[12px] px-1 rounded-sm ${
                                         isSelected
