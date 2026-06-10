@@ -31,7 +31,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 // ── Single source of truth for main nav (5 items) ────────────────────────────
 const NAV_ITEMS = [
   { to: "/dashboard",            label: "วันนี้",           icon: "today",   exact: true  },
-  { to: "/dashboard/chat",       label: "Wisdom AI",        icon: "ai",      exact: false },
+  { to: "/dashboard/check-yam",  label: "เช็คฤกษ์ยาม",     icon: "yam",     exact: false },
   { to: "/dashboard/horoscope",  label: "ตั้งดวงชะตา",     icon: "journey", exact: false },
   { to: "/dashboard/planner",    label: "บันทึก",           icon: "journal", exact: false },
   { to: "/dashboard/settings",   label: "โปรไฟล์",         icon: "profile", exact: false },
