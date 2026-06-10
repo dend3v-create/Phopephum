@@ -1,6 +1,6 @@
 /**
  * dashboard.check-yam.tsx — เช็คฤกษ์ยาม
- * Hub รวมทางลัด: ยามอัฐกาล · กาลชะตา · โหรทายหนู · ราหูค้นทรัพย์ · ดวงชะตา
+ * Hub รวมทางลัด: ยามอัฐกาล · กาลชะตา · ยามพรายกระซิบ · ราหูค้นทรัพย์ · ดวงชะตา
  */
 import { json } from "@remix-run/cloudflare";
 import { useLoaderData, Link, useRevalidator } from "@remix-run/react";
@@ -21,7 +21,7 @@ import { useState, useEffect } from "react";
 
 export const meta: MetaFunction = () => [
   { title: "เช็คฤกษ์ยาม — PhopePhum" },
-  { name: "description", content: "ทางลัดรวมเครื่องมือพยากรณ์: ยามอัฐกาล กาลชะตา โหรทายหนู ราหูค้นทรัพย์" },
+  { name: "description", content: "ทางลัดรวมเครื่องมือพยากรณ์: ยามอัฐกาล กาลชะตา ยามพรายกระซิบ ราหูค้นทรัพย์" },
 ];
 
 // ─── Loader ───────────────────────────────────────────────────────────────────
@@ -267,9 +267,9 @@ export default function CheckYamPage() {
           </p>
         </div>
 
-        {/* โหรทายหนู */}
+        {/* ยามพรายกระซิบ */}
         <div className="bg-[#020617] border border-white/5 rounded-2xl p-4 flex flex-col gap-2">
-          <p className="text-[10px] text-[#8A8070] uppercase tracking-widest font-bold">โหรทายหนู</p>
+          <p className="text-[10px] text-[#8A8070] uppercase tracking-widest font-bold">ยามพรายกระซิบ</p>
           <p className="text-lg font-display font-bold leading-tight" style={{ color: horaP?.color ?? "#F8F6F1" }}>
             {horaP?.thai ?? `ดาว ${hora.yamPlanet}`}
           </p>
@@ -333,7 +333,7 @@ export default function CheckYamPage() {
             badgeColor="text-[#4B6FAE] border-[#4B6FAE]/40 bg-[#4B6FAE]/8"
             lines={[
               `ดาวเจ้ายาม: ${horaP?.thai ?? hora.yamPlanet} · ลัคนา ${hora.lagnaName}`,
-              "ผังดวงโหรทายหนู ดาวลอย 11 ภพ 12 + ยามย่อย",
+              "ผังดวงยามพรายกระซิบ ดาวลอย 11 ภพ 12 + ยามย่อย",
             ]}
           />
 

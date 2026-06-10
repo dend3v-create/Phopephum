@@ -209,7 +209,7 @@ export default function DashboardIndex() {
             </div>
           </Link>
 
-          {/* โหรทายหนู */}
+          {/* ยามพรายกระซิบ */}
           <Link to="/dashboard/horanu" className="group flex flex-col gap-2 p-4 rounded-2xl border border-white/5 bg-[#0A1628]/60 hover:border-[#4B6FAE]/40 transition-all active:scale-[0.97]">
             <div className="flex items-center justify-between">
               <span className="text-[#4B6FAE]/70 group-hover:text-[#4B6FAE] transition-colors"><IcoStarCross /></span>

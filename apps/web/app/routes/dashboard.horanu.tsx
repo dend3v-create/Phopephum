@@ -1,6 +1,6 @@
 /**
  * dashboard.horanu.tsx — ยามพรายกระซิบ
- * ผังดวงโหรทายหนู V2 — 2 Modes: คำนวณสด + ดวงยามสำเร็จ 112 ผัง
+ * ผังดวงยามพรายกระซิบ V2 — 2 Modes: คำนวณสด + ดวงยามสำเร็จ 112 ผัง
  */
 import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
@@ -24,7 +24,7 @@ import { useState, useEffect } from "react";
 
 export const meta: MetaFunction = () => [
   { title: "ยามพรายกระซิบ — PhopePhum" },
-  { name: "description", content: "ผังดวงโหรทายหนู ระบบยามอัฐกาลและดาวลอยโบราณ 11 ดวง ภพ 12 หลัง" },
+  { name: "description", content: "ผังดวงยามพรายกระซิบ ระบบยามอัฐกาลและดาวลอยโบราณ 11 ดวง ภพ 12 หลัง" },
 ];
 
 // ─── Loader ───────────────────────────────────────────────────────────────────
@@ -425,7 +425,7 @@ export default function HoraNuPage() {
             <p className="text-[#C9A96E] text-[11px] tracking-[0.3em] uppercase font-bold">Hora Taynoo System</p>
           </div>
           <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">ยามพรายกระซิบ</h1>
-          <p className="text-[#8A8070] text-sm mt-1">ผังดวงโหรทายหนู — ยามอัฐกาล + ดาวลอย 11 + ภพ 12</p>
+          <p className="text-[#8A8070] text-sm mt-1">ผังดวงยามพรายกระซิบ — ยามอัฐกาล + ดาวลอย 11 + ภพ 12</p>
         </div>
         {isLive && (
           <div className="flex items-center sm:flex-col sm:items-end gap-2 shrink-0">
@@ -471,7 +471,7 @@ export default function HoraNuPage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <p className="text-[11px] font-bold text-[#C9A96E] uppercase tracking-widest">ผังดวงโหรทายหนู</p>
+                  <p className="text-[11px] font-bold text-[#C9A96E] uppercase tracking-widest">ผังดวงยามพรายกระซิบ</p>
                   {!isLive && (
                     <span className="text-[9px] px-2 py-0.5 rounded-full border border-[#4B6FAE]/40 bg-[#4B6FAE]/10 text-[#4B6FAE] font-bold">
                       ยามสำเร็จ

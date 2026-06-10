@@ -1,5 +1,5 @@
 /**
- * HoraNuChart.tsx — SVG Circular Wheel Chart for โหรทายหนู
+ * HoraNuChart.tsx — SVG Circular Wheel Chart for ยามพรายกระซิบ
  *
  * Blueprint spec: 800×800 viewBox, CCW zodiac layout (Taurus at 315°),
  * chained-folding planet walk algorithm (inclusive counting),
@@ -264,7 +264,7 @@ export function HoraNuChart({
       height={size}
       className={`select-none ${className}`}
       style={{ display: "block" }}
-      aria-label={`ผังโหรทายหนู ${weekday} ยามที่ ${yama}`}
+      aria-label={`ผังยามพรายกระซิบ ${weekday} ยามที่ ${yama}`}
     >
       <defs>
         {/* Gold glow filter */}

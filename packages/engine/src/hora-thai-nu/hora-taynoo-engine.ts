@@ -1,6 +1,6 @@
 /**
  * hora-taynoo-engine.ts
- * โหรทายหนู — Engine หลัก (Production Grade)
+ * ยามพรายกระซิบ — Engine หลัก (Production Grade)
  * อ้างอิง: อ.กานดา เอกสาร 1–8 + เอกสารประกอบ 3 ฉบับ
  *
  * อัลกอริทึม:
@@ -75,30 +75,32 @@ export const PLANET_STATUS_PRIORITY: PlanetStatus[] = [
 ]
 
 /**
- * คำนวณสถานะมาตรฐานดาวตามลำดับความสำคัญ (Version 2.0)
+ * คำนวณสถานะมาตรฐานดาวตามลำดับความสำคัญ (Version 2.0 - Final Spec)
  * อ้างอิง: ตำราพรายกระซิบ (นดา พยากรณ์)
  */
 export function getPlanetStatus(planetNum: number, zodiacIndex: number): PlanetStatus {
-  // 1. มหาอุจจ์ (Maha-Uch)
+  // 1. มหาอุจจ์ (Maha-Uccj) - ดอกไม้สีเขียว
   const MAHA_UCH: Record<number, number> = { 1: 11, 2: 0, 3: 8, 4: 4, 5: 2, 6: 10, 7: 5, 8: 6 };
   if (MAHA_UCH[planetNum] === zodiacIndex) return 'maha-uccj';
 
-  // 2. เกษตร (Kaset)
+  // 2. เกษตร (Kaset) - สามเหลี่ยมสีแดง
   if (KASTERN_FIXED[zodiacIndex] === planetNum) return 'kaset';
 
-  // 3. ราชาโชค (Raja-Chok)
-  const RAJA_CHOK: Record<number, number> = { 1: 6, 2: 11, 3: 0, 4: 0, 5: 8, 6: 2, 7: 1, 8: 10 };
+  // 3. ราชาโชค (Racha-Chok) - หกเหลี่ยมสีน้ำเงิน
+  // 1:เมถุน(1), 2:กันย์(4), 3:พฤษภ(0), 4:สิงห์(3), 5:เมษ(11), 6:มังกร(8), 7:พิจิก(6), 8:ตุลย์(5)
+  const RAJA_CHOK: Record<number, number> = { 1: 1, 2: 4, 3: 0, 4: 3, 5: 11, 6: 8, 7: 6, 8: 5 };
   if (RAJA_CHOK[planetNum] === zodiacIndex) return 'racha-chok';
 
-  // 4. มหาจักร (Maha-Chak)
-  const MAHA_CHAK: Record<number, number> = { 1: 3, 2: 10, 3: 1, 4: 3, 5: 1, 6: 3, 7: 6, 8: 11 };
+  // 4. มหาจักร (Maha-Chakr) - สี่เหลี่ยมสีเหลือง
+  // 1:พิจิก(6), 2:เมษ(11), 3:กันย์(4), 4:สิงห์(3), 5:พิจิก(6), 6:ธนู(7), 7:พฤษภ(0), 8:มังกร(8)
+  const MAHA_CHAK: Record<number, number> = { 1: 6, 2: 11, 3: 4, 4: 3, 5: 6, 6: 7, 7: 0, 8: 8 };
   if (MAHA_CHAK[planetNum] === zodiacIndex) return 'maha-chakr';
 
-  // 5. ประ (Pra) - ตรงข้ามเกษตร
+  // 5. ประ (Pra) - วงกลมสีแดง (ตรงข้ามเกษตร)
   const oppositeZodiac = (zodiacIndex + 6) % 12;
   if (KASTERN_FIXED[oppositeZodiac] === planetNum) return 'pra';
 
-  // 6. นิจ (Nid) - ตรงข้ามมหาอุจจ์
+  // 6. นิจ (Nid) - ดอกจันสีแดง (ตรงข้ามมหาอุจจ์)
   const NID: Record<number, number> = { 1: 5, 2: 6, 3: 2, 4: 10, 5: 8, 6: 4, 7: 11, 8: 0 };
   if (NID[planetNum] === zodiacIndex) return 'nij';
 
@@ -416,7 +418,7 @@ export function buildSubTimeSlots(
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * calculateHoraTaynoo — คำนวณผังดวงโหรทายหนูสมบูรณ์
+ * calculateHoraTaynoo — คำนวณผังดวงยามพรายกระซิบสมบูรณ์
  *
  * @param input HoraTaynooInput
  * @returns HoraTaynooResult
@@ -514,7 +516,7 @@ export interface ChartConfig {
 }
 
 /**
- * generateHoraTaynooSVG — สร้าง SVG ผังโหรทายหนู Canonical 4-Layer (Version 2.0)
+ * generateHoraTaynooSVG — สร้าง SVG ผังยามพรายกระซิบ Canonical 4-Layer (Version 2.0)
  *
  * Layer A: Fixed Kastern Numbers (Arabic, opacity 0.45)
  * Layer B: Floating Planets (Thai Numerals)
