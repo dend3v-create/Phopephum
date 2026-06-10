@@ -26,7 +26,7 @@ export interface YamMeaning {
 const yamData: YamMeaning[] = [
   {
     yamNumber: 1,
-    dayName:   "สุริยะ",
+    dayName:   "สุริชะ",
     nightName: "ระวิ",
     news:      "เชื่อถือได้ เป็นเรื่องจริง ทำจริง มีเรื่องร้อนใจ",
     sickness:  "จะตาย",
@@ -45,7 +45,7 @@ const yamData: YamMeaning[] = [
   {
     yamNumber: 2,
     dayName:   "จันเทา",
-    nightName: "คะศิ",
+    nightName: "ศะศิ",
     news:      "จริงครึ่ง เท็จครึ่ง พูดด้วยอารมณ์อ่อนไหว มีจริตมารยา พูดกลับไปกลับมา",
     sickness:  "รักษานาน เป็นๆ หายๆ รักษาไม่หายขาดเป็นตายเท่ากัน",
     lostItem:  "อยู่ในน้ำ หรือที่ชื้นแฉะ อาจได้คืนช้า หรือไม่ได้คืน",
@@ -80,8 +80,8 @@ const yamData: YamMeaning[] = [
   },
   {
     yamNumber: 4,
-    dayName:   "พุทธะ",
-    nightName: "พุทโธ",
+    dayName:   "พุธะ",
+    nightName: "พุโธ",
     news:      "เป็นเรื่องจริง เชื่อถือได้",
     sickness:  "จะตาย (หากรักษาด้วยยาสมุนไพรหรือของที่หาได้จากธรรมชาติ มีโอกาสรอดบ้าง)",
     lostItem:  "จะได้คืน อยู่แถวเสื้อผ้า กองกระดาษ เครื่องมือสื่อสาร ในครัว หรือต้องถามหาจากคนในบ้าน อาจมีผู้เก็บรักษาไว้ให้",
@@ -159,6 +159,27 @@ export const yamMeaning: Record<string, YamMeaning> = {}
 for (const y of yamData) {
   yamMeaning[y.dayName]   = y
   yamMeaning[y.nightName] = y
+}
+
+// ผูกมิตรกับคำสะกดที่เป็นทางเลือก (Alternative/Alias Spellings)
+const aliases: Record<string, string> = {
+  "สุริยะ": "สุริชะ",
+  "สุริชะ": "สุริยะ",
+  "คะศิ": "ศะศิ",
+  "ศะศิ": "คะศิ",
+  "จันทรา": "จันเทา",
+  "พุทธะ": "พุธะ",
+  "พุธะ": "พุทธะ",
+  "พุทโธ": "พุโธ",
+  "พุโธ": "พุทโธ",
+  "ศุกโร": "ศุโกร",
+  "ศุโกร": "ศุกโร",
+};
+
+for (const [alias, target] of Object.entries(aliases)) {
+  if (yamMeaning[target] && !yamMeaning[alias]) {
+    yamMeaning[alias] = yamMeaning[target];
+  }
 }
 
 /** lookup ด้วยหมายเลขยาม 1–7 */

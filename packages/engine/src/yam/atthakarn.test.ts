@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getAtthakarnAt } from './services/yamService.js'
+import { getAtthakarnAt, getYamPrediction } from './services/yamService.js'
 
 describe('Atthakarn Engine Logic - Astrological Day Verification', () => {
   
@@ -41,5 +41,36 @@ describe('Atthakarn Engine Logic - Astrological Day Verification', () => {
     expect(result.day).toBe('saturday')
     expect(result.period).toBe('night')
     expect(result.yamNumber).toBe(8)
+  })
+
+  it('should return valid prediction and travel description for all primary and alias yams', () => {
+    // 1. สุริชะ (ยาม 1 กลางวัน อาทิตย์)
+    const sunDate = new Date('2026-05-31T07:00:00+07:00')
+    const resSun = getYamPrediction(sunDate)
+    expect(resSun.yamName).toBe('สุริชะ')
+    expect(resSun.prediction).toBeDefined()
+    expect(resSun.travelAuspiciousness.description).not.toBe('ไม่พบคำพยากรณ์การเดินทาง')
+
+    // 2. ศะศิ (ยาม 3 กลางคืน อาทิตย์)
+    const sasiDate = new Date('2026-05-31T21:30:00+07:00')
+    const resSasi = getYamPrediction(sasiDate)
+    expect(resSasi.yamName).toBe('ศะศิ')
+    expect(resSasi.prediction).toBeDefined()
+    expect(resSasi.travelAuspiciousness.description).not.toBe('ไม่พบคำพยากรณ์การเดินทาง')
+
+    // 3. พุธะ (ยาม 3 กลางวัน อาทิตย์)
+    const putDate = new Date('2026-05-31T10:00:00+07:00')
+    const resPut = getYamPrediction(putDate)
+    expect(resPut.yamName).toBe('พุธะ')
+    expect(resPut.prediction).toBeDefined()
+    expect(resPut.travelAuspiciousness.description).not.toBe('ไม่พบคำพยากรณ์การเดินทาง')
+
+    // 4. พุโธ (ยาม 7 กลางคืน อาทิตย์)
+    // 03:30 น. ของเช้าวันจันทร์ตามปฏิทิน (1 มิถุนายน) = ยาม 7 คืนวันอาทิตย์
+    const puthoDate = new Date('2026-06-01T03:30:00+07:00')
+    const resPutho = getYamPrediction(puthoDate)
+    expect(resPutho.yamName).toBe('พุโธ')
+    expect(resPutho.prediction).toBeDefined()
+    expect(resPutho.travelAuspiciousness.description).not.toBe('ไม่พบคำพยากรณ์การเดินทาง')
   })
 })
