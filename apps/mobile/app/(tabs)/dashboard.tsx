@@ -2,50 +2,43 @@ import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView,
   SafeAreaView, ActivityIndicator, RefreshControl,
+  TouchableOpacity,
 } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
+import {
+  getCurrentYam,
+  calculateMoonPhase,
+  calculateKarnchata,
+  calculateRahu,
+  calculateHoraTaynoo,
+  PLANET_INFO,
+} from '@phopephum/engine';
+import { useRouter } from 'expo-router';
 
-// ─── ยามอัฏฐกาล (8 ยาม) ──────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const YAM_NAMES = ['ยามกลางคืน','ยามอรุณ','ยามเช้า','ยามสาย','ยามเที่ยง','ยามบ่าย','ยามเย็น','ยามค่ำ'];
-const YAM_COLORS = ['#4B6FAE','#E8A44A','#C6A96B','#38BDF8','#F59E0B','#818CF8','#F97316','#6366F1'];
+const LEVEL_STYLE: Record<string, { color: string; bg: string; border: string }> = {
+  excellent: { color: '#34D399', bg: 'rgba(52, 211, 153, 0.1)', border: 'rgba(52, 211, 153, 0.3)' },
+  very_good: { color: '#38BDF8', bg: 'rgba(56, 189, 248, 0.1)', border: 'rgba(56, 189, 248, 0.3)' },
+  good:      { color: '#FBBF24', bg: 'rgba(251, 191, 36, 0.1)', border: 'rgba(251, 191, 36, 0.3)' },
+  bad:       { color: '#FB7185', bg: 'rgba(251, 113, 133, 0.1)', border: 'rgba(251, 113, 133, 0.3)' },
+};
 
-function getCurrentYam() {
-  const now = new Date();
-  const hour = now.getHours();
-  const minute = now.getMinutes();
-  const totalMinutes = hour * 60 + minute;
-  // แต่ละยาม = 3 ชั่วโมง (180 นาที) เริ่ม 06:00
-  const startMinutes = 6 * 60;
-  const yamIndex = Math.floor(((totalMinutes - startMinutes + 1440) % 1440) / 180) % 8;
-  const yamStart = ((startMinutes + yamIndex * 180) % 1440);
-  const yamEnd = (yamStart + 180) % 1440;
-  const remaining = (yamEnd - totalMinutes + 1440) % 1440;
-  const remH = Math.floor(remaining / 60);
-  const remM = remaining % 60;
-  return {
-    index: yamIndex,
-    name: YAM_NAMES[yamIndex],
-    color: YAM_COLORS[yamIndex],
-    remaining: `${remH}ชม. ${remM}นาที`,
-  };
-}
+const STAR_TH: Record<number, string> = { 1: "อาทิตย์", 2: "จันทร์", 3: "อังคาร", 4: "พุธ", 5: "พฤหัส", 6: "ศุกร์", 7: "เสาร์" };
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function DashboardScreen() {
   const [profile, setProfile] = useState<any>(null);
-  const [reports, setReports] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [yam, setYam] = useState(getCurrentYam());
   const [now, setNow] = useState(new Date());
+  const router = useRouter();
 
   useEffect(() => {
     fetchData();
     const timer = setInterval(() => {
-      setYam(getCurrentYam());
       setNow(new Date());
     }, 60000);
     return () => clearInterval(timer);
@@ -55,28 +48,37 @@ export default function DashboardScreen() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
 
-    const [{ data: profileData }, { data: reportData }] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', user.id).single(),
-      supabase.from('ai_reports').select('id, report_type, created_at').eq('user_id', user.id)
-        .order('created_at', { ascending: false }).limit(3),
-    ]);
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
 
     setProfile(profileData);
-    setReports(reportData ?? []);
     setLoading(false);
     setRefreshing(false);
   }
 
-  const birthYear = profile?.birth_date ? new Date(profile.birth_date).getFullYear() : null;
-  const birthYearBE = birthYear ? birthYear + 543 : null;
+  const yam = getCurrentYam();
+  const moon = calculateMoonPhase();
+  const karnchata = calculateKarnchata(now);
+  const rahu = calculateRahu(now);
+  const hora = calculateHoraTaynoo({ dateAsked: now });
+
   const dateStr = now.toLocaleDateString('th-TH', {
     weekday: 'long', day: 'numeric', month: 'long',
   });
 
+  const timeStr = now.toLocaleTimeString('th-TH', {
+    hour: '2-digit', minute: '2-digit',
+  });
+
+  const ls = LEVEL_STYLE[yam.travelAuspiciousness.level] ?? LEVEL_STYLE.good;
+
   if (loading) {
     return (
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#C9A96E" style={{ marginTop: 80 }} />
+        <ActivityIndicator size="large" color="#C6A96B" style={{ marginTop: 80 }} />
       </SafeAreaView>
     );
   }
@@ -85,159 +87,203 @@ export default function DashboardScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor="#C9A96E" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor="#C6A96B" />}
       >
-        {/* Date Header */}
-        <Text style={styles.dateText}>{dateStr}</Text>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.dateText}>{dateStr}</Text>
+            <Text style={styles.welcomeText}>สวัสดี, {profile?.display_name || 'คุณ'}</Text>
+          </View>
+          <View style={styles.timeBadge}>
+             <View style={styles.pulseDot} />
+             <Text style={styles.timeText}>{timeStr}</Text>
+          </View>
+        </View>
 
-        {/* ยามปัจจุบัน */}
-        <View style={[styles.yamCard, { borderColor: yam.color + '40' }]}>
-          <View style={styles.yamHeader}>
-            <Text style={styles.yamLabel}>ยามอัฏฐกาลขณะนี้</Text>
-            <View style={[styles.yamBadge, { backgroundColor: yam.color + '20' }]}>
-              <Text style={[styles.yamBadgeText, { color: yam.color }]}>
-                ยามที่ {yam.index + 1}
-              </Text>
+        {/* ฤกษ์ยาม Hero Card */}
+        <TouchableOpacity 
+          style={styles.heroCard}
+          onPress={() => router.push('/check-yam' as any)}
+        >
+          <View style={styles.heroHeader}>
+            <Text style={styles.heroLabel}>✦ ฤกษ์ยามขณะนี้</Text>
+            <View style={[styles.badge, { backgroundColor: ls.bg, borderColor: ls.border }]}>
+               <Text style={[styles.badgeText, { color: ls.color }]}>{yam.travelAuspiciousness.label}</Text>
             </View>
           </View>
-          <Text style={[styles.yamName, { color: yam.color }]}>{yam.name}</Text>
-          <Text style={styles.yamRemaining}>⏳ เหลืออีก {yam.remaining}</Text>
-        </View>
-
-        {/* ข้อมูลชาตา */}
-        <Text style={styles.sectionTitle}>✦ ข้อมูลชาตา</Text>
-        <View style={styles.infoCard}>
-          <InfoRow icon="person-outline" label="ชื่อ" value={profile?.display_name || '-'} />
-          <InfoRow icon="calendar-outline" label="วันเกิด" value={
-            profile?.birth_date
-              ? new Date(profile.birth_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'long', year: 'numeric' })
-              : '-'
-          } />
-          <InfoRow icon="star-outline" label="ปีเกิด (พ.ศ.)" value={birthYearBE ? String(birthYearBE) : '-'} />
-          <InfoRow icon="time-outline" label="เวลาเกิด" value={profile?.birth_time || '-'} />
-          <InfoRow icon="location-outline" label="จังหวัดเกิด" value={profile?.birth_place || '-'} />
-        </View>
-
-        {/* แพ็กเกจ */}
-        <View style={styles.planRow}>
-          <View style={[styles.planBadge, { backgroundColor: getPlanColor(profile?.plan) + '20', borderColor: getPlanColor(profile?.plan) + '40' }]}>
-            <Text style={[styles.planText, { color: getPlanColor(profile?.plan) }]}>
-              ✦ {(profile?.plan || 'basic').toUpperCase()}
-            </Text>
-          </View>
-          <Text style={styles.planStatus}>
-            {profile?.membership_status === 'active' ? '● Active' : '⏳ Pending'}
+          <Text style={styles.heroTitle}>{yam.yamName}</Text>
+          <Text style={styles.heroSub}>
+            ยาม {yam.yamNumber} · {yam.period === 'day' ? 'กลางวัน' : 'กลางคืน'}
+            {moon.isWanPhra ? ' · 🔆 วันพระ' : ` · จันทร์ ${Math.round(moon.illumination)}%`}
           </Text>
+          {yam.prediction?.shouldDo && (
+            <Text style={styles.heroDesc} numberOfLines={2}>{yam.prediction.shouldDo}</Text>
+          )}
+          <View style={styles.heroFooter}>
+            <Text style={styles.heroFooterText}>เช็คทุกฤกษ์ยาม</Text>
+            <Ionicons name="arrow-forward" size={14} color="#C6A96B" />
+          </View>
+        </TouchableOpacity>
+
+        {/* Grid Tools */}
+        <Text style={styles.sectionTitle}>✦ เครื่องมือพยากรณ์</Text>
+        <View style={styles.grid}>
+          <ToolCard 
+            title="ยามอัฐกาล"
+            sub={yam.yamName}
+            info={`ยาม ${yam.yamNumber}`}
+            icon="sunny-outline"
+            color="#C6A96B"
+            onPress={() => router.push('/check-yam' as any)}
+          />
+          <ToolCard 
+            title="กาลชะตา"
+            sub={karnchata.yamYaiName}
+            info={`ดาว ${STAR_TH[karnchata.dayStarNumber] || karnchata.dayStarNumber}`}
+            icon="hourglass-outline"
+            color="#38BDF8"
+            onPress={() => router.push('/check-yam' as any)}
+          />
+          <ToolCard 
+            title="พรายกระซิบ"
+            sub={PLANET_INFO[hora.yamPlanet]?.thai || String(hora.yamPlanet)}
+            info={`ยาม ${hora.yamAsked}`}
+            icon="sparkles-outline"
+            color="#818CF8"
+            onPress={() => router.push('/check-yam' as any)}
+          />
+          <ToolCard 
+            title="ราหูค้นทรัพย์"
+            sub={rahu?.summary.overall_verdict || 'ระวัง'}
+            info={rahu ? `${rahu.main_block.start_time}-${rahu.main_block.end_time}` : '-'}
+            icon="moon-outline"
+            color={rahu?.is_current_moment_good ? '#34D399' : '#FB7185'}
+            onPress={() => router.push('/check-yam' as any)}
+          />
         </View>
 
-        {/* รายงาน AI ล่าสุด */}
-        {reports.length > 0 && (
-          <>
-            <Text style={styles.sectionTitle}>◈ รายงาน AI ล่าสุด</Text>
-            <View style={styles.infoCard}>
-              {reports.map((r) => (
-                <View key={r.id} style={styles.reportRow}>
-                  <Text style={styles.reportType}>{REPORT_LABELS[r.report_type] || r.report_type}</Text>
-                  <Text style={styles.reportDate}>
-                    {new Date(r.created_at).toLocaleDateString('th-TH')}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </>
-        )}
+        {/* Analysis Tools */}
+        <Text style={styles.sectionTitle}>✦ วิเคราะห์ดวงชะตา</Text>
+        <View style={styles.list}>
+          <AnalysisRow 
+            title="ตั้งดวงชะตา"
+            sub="เลข ๗ ตัว ผังจักรพรรดิ"
+            icon="compass-outline"
+            color="#4B6FAE"
+          />
+          <AnalysisRow 
+            title="มหาทักษา / มหาภูติ"
+            sub="พยากรณ์ชีวิตและธาตุกำเนิด"
+            icon="star-half-outline"
+            color="#C6A96B"
+          />
+        </View>
 
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const REPORT_LABELS: Record<string, string> = {
-  life_overview: '☽ ภาพรวมชีวิต',
-  yearly_forecast: '⟁ พยากรณ์รายปี',
-  relationship: '♡ ความสัมพันธ์',
-  career: '✦ การงาน-การเงิน',
-  health: '◈ สุขภาพ',
-  monthly_forecast: '◐ พยากรณ์รายเดือน',
-};
-
-function getPlanColor(plan?: string) {
-  if (plan === 'imperial') return '#C6A96B';
-  if (plan === 'pro') return '#6D8FC7';
-  return '#34D399';
+function ToolCard({ title, sub, info, icon, color, onPress }: any) {
+  return (
+    <TouchableOpacity style={styles.card} onPress={onPress}>
+      <Ionicons name={icon} size={20} color={color} style={{ marginBottom: 8 }} />
+      <Text style={styles.cardTitle}>{title}</Text>
+      <Text style={[styles.cardSub, { color }]}>{sub}</Text>
+      <Text style={styles.cardInfo}>{info}</Text>
+    </TouchableOpacity>
+  );
 }
 
-function InfoRow({ icon, label, value }: { icon: any; label: string; value: string }) {
+function AnalysisRow({ title, sub, icon, color }: any) {
   return (
-    <View style={styles.infoRow}>
-      <View style={styles.infoLeft}>
-        <Ionicons name={icon} size={18} color="#8A8070" />
-        <Text style={styles.infoLabel}>{label}</Text>
+    <TouchableOpacity style={styles.row}>
+      <View style={[styles.rowIcon, { backgroundColor: color + '20', borderColor: color + '40' }]}>
+        <Ionicons name={icon} size={20} color={color} />
       </View>
-      <Text style={styles.infoValue} numberOfLines={1}>{value}</Text>
-    </View>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.rowTitle}>{title}</Text>
+        <Text style={styles.rowSub}>{sub}</Text>
+      </View>
+      <Ionicons name="chevron-forward" size={16} color="#4A5568" />
+    </TouchableOpacity>
   );
 }
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0806' },
+  container: { flex: 1, backgroundColor: '#020617' },
   scrollContent: { padding: 20, paddingBottom: 40 },
-  dateText: { color: '#8A8070', fontSize: 13, marginBottom: 16, textAlign: 'center' },
-  yamCard: {
-    backgroundColor: '#15120F',
-    borderWidth: 1,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 24,
+  },
+  dateText: { color: '#94A3B8', fontSize: 12, marginBottom: 4 },
+  welcomeText: { color: '#F8F6F1', fontSize: 20, fontWeight: 'bold' },
+  timeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(77, 184, 160, 0.1)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 20,
-    padding: 20,
-    marginBottom: 24,
-  },
-  yamHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  yamLabel: { color: '#8A8070', fontSize: 11, textTransform: 'uppercase', letterSpacing: 1 },
-  yamBadge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20 },
-  yamBadgeText: { fontSize: 11, fontWeight: 'bold' },
-  yamName: { fontSize: 28, fontWeight: 'bold', marginBottom: 6 },
-  yamRemaining: { color: '#8A8070', fontSize: 12 },
-  sectionTitle: { color: '#F8F6F1', fontSize: 15, fontWeight: 'bold', marginBottom: 12, marginTop: 4 },
-  infoCard: {
-    backgroundColor: '#15120F',
-    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#2A2018',
-    overflow: 'hidden',
-    marginBottom: 20,
+    borderColor: 'rgba(77, 184, 160, 0.3)',
   },
-  infoRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2A2018',
+  pulseDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#4DB8A0',
+    marginRight: 8,
   },
-  infoLeft: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  infoLabel: { color: '#8A8070', fontSize: 13 },
-  infoValue: { color: '#F8F6F1', fontSize: 13, fontWeight: '500', maxWidth: '55%', textAlign: 'right' },
-  planRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  timeText: { color: '#4DB8A0', fontSize: 13, fontWeight: 'bold' },
+  heroCard: {
+    backgroundColor: 'rgba(10, 22, 40, 0.8)',
+    borderRadius: 24,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(198, 169, 107, 0.2)',
     marginBottom: 24,
   },
-  planBadge: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
-  planText: { fontSize: 12, fontWeight: 'bold', letterSpacing: 1 },
-  planStatus: { color: '#34D399', fontSize: 12 },
-  reportRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: '#2A2018',
+  heroHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
+  heroLabel: { color: '#C6A96B', fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 },
+  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, borderWidth: 1 },
+  badgeText: { fontSize: 10, fontWeight: 'bold' },
+  heroTitle: { color: '#F8F6F1', fontSize: 28, fontWeight: 'bold', marginBottom: 4 },
+  heroSub: { color: '#8A8070', fontSize: 12, marginBottom: 12 },
+  heroDesc: { color: '#94A3B8', fontSize: 13, lineHeight: 20, marginBottom: 16 },
+  heroFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  heroFooterText: { color: '#C6A96B', fontSize: 12, fontWeight: 'bold' },
+  sectionTitle: { color: '#C6A96B', fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 16, marginTop: 8 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24 },
+  card: {
+    backgroundColor: 'rgba(10, 22, 40, 0.5)',
+    width: '48%',
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
-  reportType: { color: '#D9CDB7', fontSize: 13 },
-  reportDate: { color: '#8A8070', fontSize: 12 },
+  cardTitle: { color: '#F8F6F1', fontSize: 13, fontWeight: 'bold', marginBottom: 4 },
+  cardSub: { fontSize: 12, fontWeight: 'bold', marginBottom: 2 },
+  cardInfo: { color: '#8A8070', fontSize: 10 },
+  list: { gap: 10 },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(10, 22, 40, 0.5)',
+    padding: 14,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
+    gap: 12,
+  },
+  rowIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
+  rowTitle: { color: '#F8F6F1', fontSize: 14, fontWeight: 'bold' },
+  rowSub: { color: '#8A8070', fontSize: 11, marginTop: 2 },
 });

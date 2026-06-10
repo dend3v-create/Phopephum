@@ -107,8 +107,8 @@ export function getPlanetStatus(planetNum: number, zodiacIndex: number): PlanetS
   return null;
 }
 
-/** Label ตัวอักษรไทย สำหรับดาวลอย 11 ดวง [1,2,3,4,5,6,7,8,ลั,9,0] */
-export const THAI_LABELS: string[] = ['๑','๒','๓','๔','๕','๖','๗','๘','ลั','๙','๐']
+/** Label ตัวอักษรไทย สำหรับดาวลอย 11 ดวง [1,2,3,4,5,6,7,ลั,8,9,0] */
+export const THAI_LABELS: string[] = ['๑','๒','๓','๔','๕','๖','๗','ลั','๘','๙','๐']
 
 /** ชื่อสถานะดาวภาษาไทย */
 export const PLANET_STATUS_NAMES: Record<string, string> = {
@@ -134,7 +134,7 @@ export const DAY_PLANET: Record<number, number> = {
 /** ตารางยามอัฐกาลกลางวัน [day 0-6][yam 1-8] */
 export const DAY_YAM: number[][] = [
   [1,6,4,2,7,5,3,1], // อาทิตย์
-  [2,6,4,2,5,3,1,6], // จันทร์
+  [2,7,5,3,1,6,4,2], // จันทร์
   [3,1,6,4,2,7,5,3], // อังคาร
   [4,2,7,5,3,1,6,4], // พุธ
   [5,3,1,6,4,2,7,5], // พฤหัส
@@ -443,9 +443,9 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   // พับย้ำลงจักรราศี
   const positions = calculatePositions(planetSteps)
 
-  // Labels: [1,2,3,4,5,6,7,8,ลั,9,0]
-  const LABELS = ['1','2','3','4','5','6','7','8','ล','9','0']
-  const PLANET_NUMS: (number|null)[] = [1,2,3,4,5,6,7,8,null,9,null] // null = ล, 0
+  // Labels: [1,2,3,4,5,6,7,ลั,8,9,0] — index 7 = ลัคนา (lagna), index 8 = ดาว 8
+  const LABELS = ['1','2','3','4','5','6','7','ล','8','9','0']
+  const PLANET_NUMS: (number|null)[] = [1,2,3,4,5,6,7,null,8,9,null] // null = ล, 0
 
   const planetEntries: PlanetEntry[] = LABELS.map((label, i) => {
     const pNum = PLANET_NUMS[i]
@@ -465,7 +465,7 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
     }
   })
 
-  const lagnaEntry = planetEntries[8] // index 8 = ล
+  const lagnaEntry = planetEntries[7] // index 7 = ล (lagna)
   const lagnaZodiacIndex = lagnaEntry.zodiacIndex
   const bhavaMap = buildBhavaMap(lagnaZodiacIndex)
   const lagnaRulerPlanet = findLagnaRuler(lagnaZodiacIndex)
