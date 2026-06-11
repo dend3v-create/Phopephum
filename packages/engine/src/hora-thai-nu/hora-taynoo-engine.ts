@@ -11,6 +11,8 @@
  * 5. หาจุดลงเวลา → คำนวณยามย่อย 7.5 นาที × 12 ช่อง
  */
 
+import { SUCCESS_YAM_DATA } from './datasets/success-yam-data.js'
+
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
@@ -188,6 +190,8 @@ export interface HoraTaynooInput {
   hour?: number    // override เฉพาะ demo/test
   minute?: number
   dayOverride?: number // 0-6 override เฉพาะ test
+  overridePlanets?: Record<string, number>
+  overrideLagnaIdx?: number
 }
 
 export interface SubTimeSlot {
@@ -208,7 +212,7 @@ export interface PlanetEntry {
   planetNum: number | null  // 1-7 หรือ null สำหรับ ล,8,9,0
   zodiacIndex: number
   zodiacName: string
-  steps: number
+  steps: number | null   // null ถ้าใช้ override
   isLagna: boolean
   status: PlanetStatus   // เกษตร/ประ/มหาอุจจ์/นิจ/ราชาโชค/มหาจักร
 }
@@ -302,7 +306,10 @@ function minToStr(minutes: number): string {
 
 /**
  * getPlanetSteps — คำนวณ "จำนวนก้าว" ของดาวลอย 11 ดวง
- * ระบบ: เดินหน้า yamAsked→8, พับย้ำที่ 8, ถอยหลัง 8→
+ * ระบบ "พับยาม" (Folded Forward-Backward) ตามตำรา อ.กานดา:
+ * 1. เริ่มที่ yamAsked เดินหน้าไปจนถึง 8
+ * 2. จากนั้นไปที่ยาม 1 (นับเป็นก้าวของดาวดวงถัดไป)
+ * 3. จากนั้นเดินถอยหลังจากยาม 7 ย้อนกลับมา
  *
  * Return: number[11] สำหรับดาว [1,2,3,4,5,6,7,8,ล,9,0]
  */
@@ -314,15 +321,27 @@ export function getPlanetSteps(
   const row = period === 'day' ? DAY_YAM[day] : NIGHT_YAM[day]
   const steps: number[] = []
 
-  // yamAsked อยู่ที่ index yamAsked-1 (0-based)
-  let idx = yamAsked - 1
-
-  for (let p = 0; p < 11; p++) {
-    steps.push(row[idx])
-    idx = (idx + 1) % 8 // เดินหน้าวนลูป 8 ยามปกติ
+  // 1. เดินหน้าจาก Yam Asked -> 8
+  for (let y = yamAsked; y <= 8; y++) {
+    steps.push(row[y - 1])
+    if (steps.length === 11) return steps
   }
+
+  // 2. ไปที่ยาม 1
+  steps.push(row[0])
+  if (steps.length === 11) return steps
+
+  // 3. เดินถอยหลังจากยาม 7 -> ...
+  for (let y = 7; y >= 1; y--) {
+    steps.push(row[y - 1])
+    if (steps.length === 11) return steps
+  }
+
+  // Fallback (should not reach here if logic is correct)
+  while (steps.length < 11) steps.push(row[0])
   return steps
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CORE: พับย้ำลงจักรราศี (Chained Counting)
@@ -392,8 +411,8 @@ export function buildSubTimeSlots(
   const DURATION = 7.5 // นาที
 
   for (let i = 0; i < 12; i++) {
-    // วนขวา (Clockwise) = ตามลำดับราศี (index 0 -> 1 -> 2)
-    const zIdx = (startZodiacIndex + i) % 12
+    // วนขวา (Clockwise) = ถอยหลังลำดับราศี (index 0 -> 11 -> 10)
+    const zIdx = (startZodiacIndex - i + 12) % 12
     const startMin = yamStartMin + i * DURATION
     const endMin = startMin + DURATION
     const bhava = bhavaMap[zIdx] ?? ''
@@ -412,6 +431,7 @@ export function buildSubTimeSlots(
   }
   return slots
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // MAIN EXPORT
@@ -443,13 +463,27 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   // พับย้ำลงจักรราศี
   const positions = calculatePositions(planetSteps)
 
-  // Labels: [1,2,3,4,5,6,7,ลั,8,9,0] — index 7 = ลัคนา (lagna), index 8 = ดาว 8
-  const LABELS = ['1','2','3','4','5','6','7','ล','8','9','0']
-  const PLANET_NUMS: (number|null)[] = [1,2,3,4,5,6,7,null,8,9,null] // null = ล, 0
+  // Labels: [1,2,3,4,5,6,7,8,ลั,9,0] — ลัคนา (lagna) อยู่ลำดับที่ 9 (index 8)
+  const LABELS = ['1','2','3','4','5','6','7','8','ล','9','0']
+  const KEYS   = ['1','2','3','4','5','6','7','8','la','9','0']
+  const PLANET_NUMS: (number|null)[] = [1,2,3,4,5,6,7,8,null,9,null] // null = ล, 0
 
   const planetEntries: PlanetEntry[] = LABELS.map((label, i) => {
     const pNum = PLANET_NUMS[i]
-    const zIdx = positions[i]
+    const key  = KEYS[i]
+    
+    // ใช้ override ถ้ามี (สำหรับดวงยามสำเร็จ)
+    let zIdx = positions[i]
+    let steps: number | null = planetSteps[i]
+    
+    if (input.overridePlanets && input.overridePlanets[key] !== undefined) {
+      zIdx = input.overridePlanets[key]
+      steps = null // ไม่ทราบ steps จาก override
+    } else if (label === 'ล' && input.overrideLagnaIdx !== undefined) {
+      zIdx = input.overrideLagnaIdx
+      steps = null
+    }
+
     // หา status: คำนวณแบบ Dynamic ตาม Version 2.0
     const status = pNum != null ? getPlanetStatus(pNum, zIdx) : null
 
@@ -459,13 +493,14 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
       planetNum: pNum,
       zodiacIndex: zIdx,
       zodiacName: ZODIAC_ORDER[zIdx].name,
-      steps: planetSteps[i],
+      steps,
       isLagna: label === 'ล',
       status,
     }
   })
 
-  const lagnaEntry = planetEntries[7] // index 7 = ล (lagna)
+  const lagnaEntry = planetEntries[8] // index 8 = ล (lagna)
+
   const lagnaZodiacIndex = lagnaEntry.zodiacIndex
   const bhavaMap = buildBhavaMap(lagnaZodiacIndex)
   const lagnaRulerPlanet = findLagnaRuler(lagnaZodiacIndex)
@@ -866,5 +901,15 @@ export function loadSuccessYam(
   const safeMin  = ((startMin % 1440) + 1440) % 1440
   const hour     = Math.floor(safeMin / 60)
   const minute   = safeMin % 60
-  return calculateHoraTaynoo({ dayOverride: weekday, hour, minute })
+  
+  const id = `${WEEKDAY_ID[weekday]}-${period}-${yamNo}`
+  const fixed = SUCCESS_YAM_DATA[id]
+
+  return calculateHoraTaynoo({ 
+    dayOverride: weekday, 
+    hour, 
+    minute,
+    overridePlanets: fixed?.planets,
+    overrideLagnaIdx: fixed?.lagnaZodiacIndex
+  })
 }

@@ -87,12 +87,23 @@ function interpretPlanet(entry: PlanetEntry, bhavaMap: Record<number, string>): 
   // Weighted Score
   const totalScore = (bhavaInfo.score * 0.4) + (pInfo.score * 0.3) + (sInfo.score * 0.3);
 
-  // กฎสำคัญ (Matrix)
+  // กฎสำคัญ (Matrix) ตามตำรา อ.กานดา
   let summary = '';
-  if (bhavaInfo.type === 'good' && pInfo.score >= 70) summary = 'ดาวดีอยู่ภพดี = ดีมาก ส่งเสริมความสำเร็จสุดกำลัง';
-  else if (bhavaInfo.type === 'test' && pInfo.score >= 70) summary = 'ดาวดีอยู่ภพเสีย = มีศักยภาพแต่ติดอุปสรรค ต้องแก้ไขจึงสำเร็จ';
-  else if (bhavaInfo.type === 'good' && pInfo.score < 70) summary = 'ดาวเสียอยู่ภพดี = มีโอกาสดีเข้ามาแต่การบริหารจัดการยังบกพร่อง';
-  else summary = 'ดาวเสียอยู่ภพเสีย = ระวังความเสียหาย อุปสรรคหนัก ควรชะลอการตัดสินใจ';
+  const isBadHouse = bhavaInfo.type === 'test'; // อริ, มรณะ, วินาศ
+  const isStrongPlanet = pInfo.score >= 70 || (entry.status && ['maha-uccj', 'kaset', 'racha-chok'].includes(entry.status));
+  const isWeakPlanet = pInfo.score < 50 || (entry.status && ['nij', 'pra'].includes(entry.status));
+
+  if (!isBadHouse) {
+    if (isStrongPlanet) summary = 'ดาวดีอยู่ภพดี = ดีมาก ส่งเสริมความสำเร็จและโอกาสอย่างมั่นคง';
+    else if (isWeakPlanet) summary = 'ดาวอ่อนกำลังอยู่ภพดี = มีโอกาสดีเข้ามาแต่ต้องใช้ความพยายามสูงหรือมีคนช่วยจึงจะสำเร็จ';
+    else summary = 'ดาวมีกำลังปานกลางในภพดี = มีความก้าวหน้าตามลำดับขั้นตอน';
+  } else {
+    // กฎ: ในภพที่เสีย หากดาวมีมาตรฐานเข้มแข็ง = ปัญหาเข้มแข็ง
+    if (isStrongPlanet) summary = `ปัญหาในภพ${bhavaName}ค่อนข้างรุนแรงหรือแก้ไขยาก เนื่องจากดาวมีกำลังมาก (อุปสรรคเข้มแข็ง)`;
+    else if (isWeakPlanet) summary = `ปัญหาในภพ${bhavaName}จะคลี่คลายได้ง่ายหรือเบาบางลง เนื่องจากดาวอ่อนกำลัง (อุปสรรคอ่อนแรง)`;
+    else summary = `ระวังอุปสรรคในด้าน${bhavaName} ควรวางแผนรับมืออย่างรอบคอบ`;
+  }
+
 
   if (entry.status) {
     summary += ` (เสริมด้วยกำลัง${sInfo.meaning})`;
