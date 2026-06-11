@@ -332,7 +332,19 @@ export function loadSuccessYam(weekday: number, period: 'day' | 'night', yamNo: 
   return calculateHoraTaynoo({ dayOverride: weekday, hour: Math.floor(safeMin / 60), minute: safeMin % 60 });
 }
 
+/**
+ * getYamTimeRange — ดึงช่วงเวลาของยาม
+ */
+export function getYamTimeRange(
+  period: 'day' | 'night',
+  yamNo: number,
+): { start: string; end: string } {
+  const s = YAM_START[period][yamNo - 1]
+  return { start: minToStr(s), end: minToStr(s + 90) }
+}
+
 export function getSuccessYamMeta() {
+
   const list = [];
   const WEEKDAY_NAMES = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
   const WEEKDAY_ID    = ['sun','mon','tue','wed','thu','fri','sat'];
