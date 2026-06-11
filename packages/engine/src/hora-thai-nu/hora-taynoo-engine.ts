@@ -169,12 +169,30 @@ function minToStr(minutes: number): string {
 
 export function getPlanetSteps(day: number, yamAsked: number, period: 'day' | 'night'): number[] {
   const row = period === 'day' ? DAY_YAM[day] : NIGHT_YAM[day];
-  const steps: number[] = [];
-  for (let y = yamAsked; y <= 8; y++) { steps.push(row[y - 1]); if (steps.length === 11) return steps; }
-  steps.push(row[0]); if (steps.length === 11) return steps;
-  for (let y = 7; y >= 1; y--) { steps.push(row[y - 1]); if (steps.length === 11) return steps; }
-  while (steps.length < 11) steps.push(row[0]);
-  return steps;
+  
+  function foldYam(y: number): number {
+    let val = y;
+    while (val < 1) val += 8;
+    while (val > 15) val -= 8;
+    if (val <= 8) return val;
+    return 16 - val;
+  }
+
+  const targetYams = [
+    yamAsked,     // 1
+    yamAsked + 1, // 2
+    yamAsked + 2, // 3
+    yamAsked + 3, // 4
+    yamAsked + 4, // 5
+    yamAsked + 4, // 6
+    yamAsked + 3, // 7
+    yamAsked + 2, // 8
+    yamAsked + 1, // ล
+    yamAsked,     // 9
+    yamAsked - 1  // 0
+  ];
+
+  return targetYams.map(y => row[foldYam(y) - 1]);
 }
 
 export function calculatePositions(steps: number[]): number[] {

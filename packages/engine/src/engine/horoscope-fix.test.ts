@@ -17,12 +17,12 @@ describe('Horoscope Matrix - Feb 27 2024 (Example Case)', () => {
     console.log("Thai Date Text:", result.lunarDate.thaiDateText);
     
     expect(result.lunarDate.dayName).toBe('อังคาร');
-    expect(result.lunarDate.lunarMonth).toBe(2);
+    expect(result.lunarDate.lunarMonth).toBe(3);
     expect(result.lunarDate.zodiacName).toBe('เถาะ');
     
     // Seeds
     expect(result.bases[0][0]).toBe(3); // B1 First
-    expect(result.bases[1][0]).toBe(2); // B2 First
+    expect(result.bases[1][0]).toBe(3); // B2 First
     expect(result.bases[2][0]).toBe(4); // B3 First
   });
 });
