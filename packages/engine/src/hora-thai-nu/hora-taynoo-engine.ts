@@ -177,21 +177,23 @@ export function getPlanetSteps(day: number, yamAsked: number, period: 'day' | 'n
     return 16 - val;
   }
 
-  const targetYams = [
-    yamAsked,     // 1
-    yamAsked + 1, // 2
-    yamAsked + 2, // 3
-    yamAsked + 3, // 4
-    yamAsked + 4, // 5
-    yamAsked + 4, // 6
-    yamAsked + 3, // 7
-    yamAsked + 2, // 8
-    yamAsked + 1, // ล
-    yamAsked,     // 9
-    yamAsked - 1  // 0
-  ];
+  // Correct bounce: walk DOWN to yam 8, bounce once, walk back UP (11 positions)
+  const bouncePath: number[] = [];
+  let cur = yamAsked;
+  let going: 'down' | 'up' = 'down';
+  for (let i = 0; i < 11; i++) {
+    bouncePath.push(cur);
+    if (i < 10) {
+      if (going === 'down') {
+        if (cur < 8) { cur++; }
+        else { going = 'up'; } // bounce at yam 8, stay at 8 one more step
+      } else {
+        cur = Math.max(1, cur - 1);
+      }
+    }
+  }
 
-  return targetYams.map(y => row[foldYam(y) - 1]);
+  return bouncePath.map(y => row[foldYam(y) - 1]);
 }
 
 export function calculatePositions(steps: number[]): number[] {
