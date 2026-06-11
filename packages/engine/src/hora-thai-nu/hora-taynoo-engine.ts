@@ -214,11 +214,11 @@ export function buildSubTimeSlots(yamStartMin: number, startZodiacIndex: number,
     const startMin = yamStartMin + i * DURATION;
     const endMin = startMin + DURATION;
     const bhava = bhavaMap[zIdx] ?? '';
-    const startStrVal = minToStr(startMin);
+    const endStrVal = minToStr(endMin);
     slots.push({
       slotIndex: i, zodiacIndex: zIdx, zodiacName: ZODIAC_ORDER[zIdx].name,
-      bhavaName: bhava, startMin, endMin, startStr: startStrVal, endStr: minToStr(endMin),
-      bhavaTimeLabel: bhava ? `${bhava} ${startStrVal}` : startStrVal,
+      bhavaName: bhava, startMin, endMin, startStr: endStrVal, endStr: endStrVal,
+      bhavaTimeLabel: bhava ? `${bhava} ${endStrVal}` : endStrVal,
     });
   }
   return slots;
@@ -251,19 +251,7 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   const rowForStart = period === 'day' ? DAY_YAM[day] : NIGHT_YAM[day];
   const start_slot = rowForStart.indexOf(2) + 1;
 
-  const positions: number[] = [
-    (2 * start_slot - yamAsked + 4 + 24) % 12, // 1
-    (thaiWeekday - yamAsked + 8 + 24) % 12, // 2
-    (2 * start_slot - yamAsked + 9 + 24) % 12, // 3
-    (5 * start_slot - 2 * yamAsked + 8 + 24) % 12, // 4
-    (2 * start_slot + 3 * thaiWeekday - yamAsked + 11 + 24) % 12, // 5
-    (thaiWeekday - yamAsked + 6 + 24) % 12, // 6
-    2, // 7 (Cancer)
-    2, // 8 (Cancer)
-    2, // la (Cancer)
-    0, // 9 (Taurus)
-    (2 * start_slot + 3 * thaiWeekday - yamAsked + 11 + 24) % 12 // 0
-  ];
+  const positions = calculatePositions(planetSteps);
 
   const LABELS = ['1','2','3','4','5','6','7','8','ล','9','0'];
   const KEYS   = ['1','2','3','4','5','6','7','8','la','9','0'];
@@ -293,7 +281,7 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   const lagnaZodiacIndex = lagnaEntry.zodiacIndex;
   const bhavaMap = buildBhavaMap(lagnaZodiacIndex);
   const lagnaRulerPlanet = findLagnaRuler(lagnaZodiacIndex);
-  const timeStartZodiacIndex = (findPlanetPosition(lagnaRulerPlanet, planetEntries) - 1 + 12) % 12;
+  const timeStartZodiacIndex = findPlanetPosition(lagnaRulerPlanet, planetEntries);
   const subTimeSlots = buildSubTimeSlots(yamStartMin, timeStartZodiacIndex, bhavaMap);
 
   const DAY_NAMES = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
