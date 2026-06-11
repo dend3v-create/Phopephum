@@ -125,11 +125,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const year  = Number(formData.get("year")  ?? 0);
     const time  = String(formData.get("time")  ?? "12:00");
     const [h, m] = time.split(":").map(Number);
+    
     if (day && month && year) {
-      targetDate = new Date(year - 543, month - 1, day, h, m, 0);
+      // ใช้ ISO Format พร้อม Timezone Offset (+07:00) เพื่อความแม่นยำ
+      const iso = `${year - 543}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00+07:00`;
+      targetDate = new Date(iso);
     }
+    
     result = calculateHoraTaynoo({ dateAsked: targetDate });
   }
+
 
   const interpretation = interpretChart(result);
   const svg = generateHoraTaynooSVG(result, { size: 520, theme: "dark" });

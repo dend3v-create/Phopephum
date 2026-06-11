@@ -445,10 +445,27 @@ export function buildSubTimeSlots(
  */
 export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResult {
   const now = new Date()
-  const date = input.dateAsked ?? now
-  const h = input.hour ?? date.getHours()
-  const m = input.minute ?? date.getMinutes()
-  const day = input.dayOverride ?? getAstroDay(date)
+  const dateAsked = input.dateAsked ?? now
+
+  // ดึงค่า components ของเวลาใน Asia/Bangkok
+  const thaiParts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Bangkok',
+    hour12: false,
+    weekday: 'short',
+    year: 'numeric', month: 'numeric', day: 'numeric',
+    hour: 'numeric', minute: 'numeric'
+  }).formatToParts(dateAsked)
+
+  const getPart = (type: string) => thaiParts.find(p => p.type === type)?.value
+  
+  const h = input.hour   ?? Number(getPart('hour'))
+  const m = input.minute ?? Number(getPart('minute'))
+  
+  // วันทางโหราศาสตร์ต้องใช้เวลาไทย
+  // สร้าง Date object จำลองสำหรับคำนวณ Astro Day โดยเฉพาะ
+  const thaiSim = new Date(dateAsked.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }))
+  const day = input.dayOverride ?? getAstroDay(thaiSim)
+  
   const period = getPeriod(h)
   const yamAsked = getYamNumber(h, m, period)
   const yamStartMin = getYamStartMin(period, yamAsked)
@@ -456,6 +473,8 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   const dayPlanet = DAY_PLANET[day]
   const yamPlanet = (period === 'day' ? DAY_YAM : NIGHT_YAM)[day][yamAsked - 1]
   const kasternZodiacIndex = PLANET_KASTERN[dayPlanet][0]
+
+
 
   // พับยาม → จำนวนก้าว
   const planetSteps = getPlanetSteps(day, yamAsked, period)
