@@ -1,6 +1,8 @@
+
 /**
  * success-yam-data.ts
  * ฐานข้อมูลดวงยามสำเร็จ 112 ผัง (คำนวณจากสูตรตรงตามเอกสารอ้างอิง)
+ * อ้างอิง: วิธีการลงดาวลอยแบบละเอียด V.2.md + การระวังในการวาง มฤตยู(๐).md
  */
 
 export const SUCCESS_YAM_DATA: Record<string, {
@@ -98,94 +100,92 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "sun-day-5": {
     "planets": {
-      "0": 5,
+      "0": 1,
       "1": 6,
       "2": 10,
       "3": 0,
       "4": 0,
-      "5": 2,
-      "6": 4,
-      "7": 4,
-      "8": 6,
-      "9": 4,
-      "la": 10
+      "5": 0,
+      "6": 0,
+      "7": 0,
+      "8": 2,
+      "9": 0,
+      "la": 6
     },
-    "lagnaZodiacIndex": 10,
+    "lagnaZodiacIndex": 6,
     "statuses": {
       "1": "maha-chakr",
       "3": "racha-chok",
-      "5": "maha-uccj",
-      "6": "nij",
-      "8": "maha-uccj"
+      "6": "kaset",
+      "7": "maha-chakr"
     }
   },
   "sun-day-6": {
     "planets": {
-      "0": 6,
+      "0": 4,
       "1": 4,
       "2": 6,
       "3": 6,
-      "4": 8,
-      "5": 0,
+      "4": 6,
+      "5": 11,
       "6": 4,
-      "7": 6,
-      "8": 6,
-      "9": 0,
-      "la": 8
+      "7": 4,
+      "8": 4,
+      "9": 10,
+      "la": 6
     },
-    "lagnaZodiacIndex": 8,
+    "lagnaZodiacIndex": 6,
     "statuses": {
       "2": "nij",
       "3": "kaset",
-      "6": "nij",
-      "7": "racha-chok",
-      "8": "maha-uccj"
+      "5": "racha-chok",
+      "6": "nij"
     }
   },
   "sun-day-7": {
     "planets": {
-      "0": 8,
+      "0": 0,
       "1": 2,
       "2": 2,
-      "3": 4,
-      "4": 8,
-      "5": 2,
-      "6": 8,
-      "7": 0,
-      "8": 2,
-      "9": 4,
-      "la": 2
+      "3": 2,
+      "4": 7,
+      "5": 10,
+      "6": 1,
+      "7": 6,
+      "8": 6,
+      "9": 8,
+      "la": 6
     },
-    "lagnaZodiacIndex": 2,
+    "lagnaZodiacIndex": 6,
     "statuses": {
       "2": "kaset",
-      "3": "maha-chakr",
-      "5": "maha-uccj",
-      "6": "racha-chok",
-      "7": "maha-chakr"
+      "3": "nij",
+      "4": "pra",
+      "5": "kaset",
+      "7": "racha-chok",
+      "8": "maha-uccj"
     }
   },
   "sun-day-8": {
     "planets": {
-      "0": 4,
+      "0": 8,
       "1": 0,
-      "2": 2,
-      "3": 6,
-      "4": 0,
-      "5": 1,
-      "6": 2,
-      "7": 8,
-      "8": 0,
-      "9": 2,
-      "la": 2
+      "2": 0,
+      "3": 5,
+      "4": 8,
+      "5": 9,
+      "6": 10,
+      "7": 1,
+      "8": 6,
+      "9": 6,
+      "la": 6
     },
-    "lagnaZodiacIndex": 2,
+    "lagnaZodiacIndex": 6,
     "statuses": {
-      "2": "kaset",
-      "3": "kaset",
-      "5": "pra",
-      "7": "kaset",
-      "8": "nij"
+      "2": "maha-uccj",
+      "3": "pra",
+      "6": "maha-uccj",
+      "8": "maha-uccj"
     }
   },
   "sun-night-1": {
@@ -278,48 +278,48 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "sun-night-5": {
     "planets": {
-      "0": 9,
+      "0": 3,
       "1": 2,
       "2": 8,
       "3": 11,
       "4": 11,
-      "5": 2,
-      "6": 5,
-      "7": 5,
-      "8": 8,
-      "9": 4,
-      "la": 2
+      "5": 11,
+      "6": 11,
+      "7": 11,
+      "8": 2,
+      "9": 10,
+      "la": 8
     },
-    "lagnaZodiacIndex": 2,
+    "lagnaZodiacIndex": 8,
     "statuses": {
       "2": "pra",
       "3": "kaset",
-      "5": "maha-uccj",
-      "6": "kaset",
-      "7": "maha-uccj",
-      "8": "maha-chakr"
+      "5": "racha-chok",
+      "6": "pra",
+      "7": "nij"
     }
   },
   "sun-night-6": {
     "planets": {
-      "0": 2,
+      "0": 4,
       "1": 6,
       "2": 9,
       "3": 9,
-      "4": 0,
-      "5": 6,
-      "6": 0,
-      "7": 3,
-      "8": 3,
-      "9": 0,
-      "la": 6
+      "4": 9,
+      "5": 1,
+      "6": 5,
+      "7": 5,
+      "8": 5,
+      "9": 2,
+      "la": 8
     },
-    "lagnaZodiacIndex": 6,
+    "lagnaZodiacIndex": 8,
     "statuses": {
       "1": "maha-chakr",
-      "5": "maha-chakr",
+      "5": "pra",
       "6": "kaset",
-      "8": "pra"
+      "7": "maha-uccj",
+      "8": "racha-chok"
     }
   },
   "sun-night-7": {
@@ -327,11 +327,11 @@ export const SUCCESS_YAM_DATA: Record<string, {
       "0": 10,
       "1": 3,
       "2": 3,
-      "3": 6,
-      "4": 0,
-      "5": 2,
-      "6": 4,
-      "7": 10,
+      "3": 3,
+      "4": 7,
+      "5": 8,
+      "6": 9,
+      "7": 1,
       "8": 1,
       "9": 4,
       "la": 1
@@ -339,30 +339,30 @@ export const SUCCESS_YAM_DATA: Record<string, {
     "lagnaZodiacIndex": 1,
     "statuses": {
       "1": "kaset",
-      "3": "kaset",
-      "5": "maha-uccj",
-      "6": "nij"
+      "4": "pra",
+      "5": "nij"
     }
   },
   "sun-night-8": {
     "planets": {
       "0": 11,
       "1": 0,
-      "2": 3,
-      "3": 9,
-      "4": 11,
-      "5": 4,
-      "6": 9,
-      "7": 11,
-      "8": 5,
+      "2": 0,
+      "3": 4,
+      "4": 5,
+      "5": 10,
+      "6": 3,
+      "7": 4,
+      "8": 8,
       "9": 8,
       "la": 8
     },
     "lagnaZodiacIndex": 8,
     "statuses": {
-      "5": "pra",
-      "7": "nij",
-      "8": "racha-chok"
+      "2": "maha-uccj",
+      "3": "maha-chakr",
+      "5": "kaset",
+      "8": "maha-chakr"
     }
   },
   "mon-day-1": {
@@ -456,87 +456,96 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "mon-day-5": {
     "planets": {
-      "0": 2,
+      "0": 10,
       "1": 0,
       "2": 5,
       "3": 8,
       "4": 9,
-      "5": 0,
-      "6": 3,
-      "7": 4,
-      "8": 7,
-      "9": 0,
-      "la": 0
+      "5": 10,
+      "6": 11,
+      "7": 0,
+      "8": 3,
+      "9": 8,
+      "la": 8
     },
-    "lagnaZodiacIndex": 0,
+    "lagnaZodiacIndex": 8,
     "statuses": {
-      "3": "maha-uccj"
+      "3": "maha-uccj",
+      "5": "kaset",
+      "6": "pra",
+      "7": "maha-chakr",
+      "8": "pra"
     }
   },
   "mon-day-6": {
     "planets": {
-      "0": 10,
+      "0": 8,
       "1": 5,
       "2": 8,
       "3": 9,
-      "4": 0,
-      "5": 5,
+      "4": 10,
+      "5": 4,
       "6": 10,
-      "7": 1,
-      "8": 2,
-      "9": 10,
-      "la": 5
+      "7": 11,
+      "8": 0,
+      "9": 8,
+      "la": 3
     },
-    "lagnaZodiacIndex": 5,
+    "lagnaZodiacIndex": 3,
     "statuses": {
       "1": "nij",
       "2": "pra",
-      "6": "maha-uccj"
+      "4": "pra",
+      "5": "pra",
+      "6": "maha-uccj",
+      "7": "nij",
+      "8": "nij"
     }
   },
   "mon-day-7": {
     "planets": {
-      "0": 5,
+      "0": 11,
       "1": 3,
       "2": 4,
-      "3": 7,
-      "4": 0,
-      "5": 0,
-      "6": 0,
-      "7": 5,
-      "8": 8,
-      "9": 0,
-      "la": 9
+      "3": 5,
+      "4": 11,
+      "5": 3,
+      "6": 7,
+      "7": 1,
+      "8": 2,
+      "9": 6,
+      "la": 3
     },
-    "lagnaZodiacIndex": 9,
+    "lagnaZodiacIndex": 3,
     "statuses": {
       "1": "kaset",
       "2": "racha-chok",
-      "6": "kaset",
-      "7": "maha-uccj",
-      "8": "maha-chakr"
+      "3": "pra",
+      "6": "maha-chakr"
     }
   },
   "mon-day-8": {
     "planets": {
-      "0": 1,
+      "0": 7,
       "1": 1,
-      "2": 4,
-      "3": 9,
-      "4": 9,
-      "5": 11,
-      "6": 1,
-      "7": 1,
-      "8": 6,
-      "9": 10,
-      "la": 9
+      "2": 2,
+      "3": 8,
+      "4": 0,
+      "5": 2,
+      "6": 4,
+      "7": 8,
+      "8": 2,
+      "9": 4,
+      "la": 3
     },
-    "lagnaZodiacIndex": 9,
+    "lagnaZodiacIndex": 3,
     "statuses": {
       "1": "racha-chok",
-      "2": "racha-chok",
-      "5": "racha-chok",
-      "8": "maha-uccj"
+      "2": "kaset",
+      "3": "maha-uccj",
+      "5": "maha-uccj",
+      "6": "nij",
+      "7": "kaset"
     }
   },
   "mon-night-1": {
@@ -628,83 +637,90 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "mon-night-5": {
     "planets": {
-      "0": 6,
+      "0": 0,
       "1": 3,
       "2": 3,
       "3": 7,
       "4": 8,
-      "5": 0,
-      "6": 4,
-      "7": 5,
-      "8": 9,
-      "9": 0,
-      "la": 9
-    },
-    "lagnaZodiacIndex": 9,
-    "statuses": {
-      "1": "kaset",
-      "6": "nij",
-      "7": "maha-uccj",
-      "8": "kaset"
-    }
-  },
-  "mon-night-6": {
-    "planets": {
-      "0": 9,
-      "1": 0,
-      "2": 4,
-      "3": 5,
-      "4": 9,
       "5": 9,
-      "6": 9,
-      "7": 1,
-      "8": 2,
-      "9": 6,
-      "la": 6
-    },
-    "lagnaZodiacIndex": 6,
-    "statuses": {
-      "2": "racha-chok",
-      "3": "pra"
-    }
-  },
-  "mon-night-7": {
-    "planets": {
-      "0": 0,
-      "1": 4,
-      "2": 5,
-      "3": 9,
-      "4": 9,
-      "5": 0,
-      "6": 3,
-      "7": 3,
-      "8": 7,
-      "9": 0,
-      "la": 8
-    },
-    "lagnaZodiacIndex": 8,
-    "statuses": {}
-  },
-  "mon-night-8": {
-    "planets": {
-      "0": 8,
-      "1": 1,
-      "2": 5,
-      "3": 5,
-      "4": 8,
-      "5": 2,
-      "6": 8,
+      "6": 10,
       "7": 11,
-      "8": 11,
-      "9": 4,
+      "8": 3,
+      "9": 6,
       "la": 3
     },
     "lagnaZodiacIndex": 3,
     "statuses": {
-      "1": "racha-chok",
+      "1": "kaset",
+      "6": "maha-uccj",
+      "7": "nij",
+      "8": "pra"
+    }
+  },
+  "mon-night-6": {
+    "planets": {
+      "0": 1,
+      "1": 0,
+      "2": 4,
+      "3": 5,
+      "4": 6,
+      "5": 11,
+      "6": 4,
+      "7": 5,
+      "8": 6,
+      "9": 10,
+      "la": 10
+    },
+    "lagnaZodiacIndex": 10,
+    "statuses": {
+      "2": "racha-chok",
       "3": "pra",
-      "5": "maha-uccj",
-      "6": "racha-chok",
+      "5": "racha-chok",
+      "6": "nij",
+      "7": "maha-uccj",
+      "8": "maha-uccj"
+    }
+  },
+  "mon-night-7": {
+    "planets": {
+      "0": 2,
+      "1": 4,
+      "2": 5,
+      "3": 6,
+      "4": 11,
+      "5": 1,
+      "6": 3,
+      "7": 8,
+      "8": 9,
+      "9": 2,
+      "la": 10
+    },
+    "lagnaZodiacIndex": 10,
+    "statuses": {
+      "3": "kaset",
+      "5": "pra",
+      "7": "kaset",
+      "8": "kaset"
+    }
+  },
+  "mon-night-8": {
+    "planets": {
+      "0": 10,
+      "1": 1,
+      "2": 2,
+      "3": 7,
+      "4": 9,
+      "5": 3,
+      "6": 9,
+      "7": 11,
+      "8": 4,
+      "9": 6,
+      "la": 5
+    },
+    "lagnaZodiacIndex": 5,
+    "statuses": {
+      "1": "racha-chok",
+      "2": "kaset",
       "7": "nij"
     }
   },
@@ -799,95 +815,92 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "tue-day-5": {
     "planets": {
-      "0": 1,
+      "0": 9,
       "1": 1,
       "2": 7,
       "3": 11,
       "4": 1,
-      "5": 5,
-      "6": 9,
-      "7": 11,
-      "8": 3,
-      "9": 10,
-      "la": 9
+      "5": 3,
+      "6": 5,
+      "7": 7,
+      "8": 11,
+      "9": 6,
+      "la": 5
     },
-    "lagnaZodiacIndex": 9,
+    "lagnaZodiacIndex": 5,
     "statuses": {
       "1": "racha-chok",
       "3": "kaset",
       "4": "kaset",
-      "7": "nij",
-      "8": "pra"
+      "6": "kaset"
     }
   },
   "tue-day-6": {
     "planets": {
-      "0": 9,
+      "0": 5,
       "1": 6,
       "2": 10,
       "3": 0,
-      "4": 4,
-      "5": 10,
-      "6": 4,
-      "7": 8,
-      "8": 10,
-      "9": 8,
-      "la": 2
+      "4": 2,
+      "5": 2,
+      "6": 2,
+      "7": 4,
+      "8": 6,
+      "9": 4,
+      "la": 10
     },
-    "lagnaZodiacIndex": 2,
+    "lagnaZodiacIndex": 10,
     "statuses": {
       "1": "maha-chakr",
       "3": "racha-chok",
-      "4": "maha-uccj",
-      "5": "kaset",
-      "6": "nij",
-      "7": "kaset"
+      "5": "maha-uccj",
+      "8": "maha-uccj"
     }
   },
   "tue-day-7": {
     "planets": {
-      "0": 4,
+      "0": 8,
       "1": 4,
       "2": 6,
-      "3": 10,
-      "4": 4,
-      "5": 5,
+      "3": 8,
+      "4": 8,
+      "5": 1,
       "6": 6,
-      "7": 0,
-      "8": 4,
-      "9": 10,
-      "la": 6
+      "7": 6,
+      "8": 8,
+      "9": 2,
+      "la": 10
     },
-    "lagnaZodiacIndex": 6,
+    "lagnaZodiacIndex": 10,
     "statuses": {
       "2": "nij",
-      "4": "maha-uccj",
+      "3": "maha-uccj",
+      "5": "pra",
       "6": "pra",
-      "7": "maha-chakr"
+      "7": "racha-chok",
+      "8": "maha-chakr"
     }
   },
   "tue-day-8": {
     "planets": {
-      "0": 0,
+      "0": 4,
       "1": 2,
-      "2": 6,
-      "3": 0,
-      "4": 1,
-      "5": 4,
-      "6": 7,
+      "2": 4,
+      "3": 4,
+      "4": 9,
+      "5": 0,
+      "6": 3,
       "7": 8,
-      "8": 2,
-      "9": 8,
-      "la": 6
+      "8": 8,
+      "9": 0,
+      "la": 10
     },
-    "lagnaZodiacIndex": 6,
+    "lagnaZodiacIndex": 10,
     "statuses": {
-      "2": "nij",
-      "3": "racha-chok",
-      "4": "kaset",
-      "5": "pra",
-      "6": "maha-chakr",
-      "7": "kaset"
+      "2": "racha-chok",
+      "3": "maha-chakr",
+      "7": "kaset",
+      "8": "maha-chakr"
     }
   },
   "tue-night-1": {
@@ -977,90 +990,91 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "tue-night-5": {
     "planets": {
-      "0": 10,
+      "0": 4,
       "1": 4,
       "2": 5,
       "3": 10,
       "4": 0,
-      "5": 5,
-      "6": 10,
-      "7": 0,
-      "8": 5,
-      "9": 10,
-      "la": 6
+      "5": 2,
+      "6": 4,
+      "7": 6,
+      "8": 11,
+      "9": 4,
+      "la": 0
     },
-    "lagnaZodiacIndex": 6,
+    "lagnaZodiacIndex": 0,
     "statuses": {
-      "6": "maha-uccj",
-      "7": "maha-chakr",
-      "8": "racha-chok"
+      "5": "maha-uccj",
+      "6": "nij",
+      "7": "racha-chok"
     }
   },
   "tue-night-6": {
     "planets": {
-      "0": 8,
+      "0": 0,
       "1": 1,
       "2": 6,
       "3": 8,
-      "4": 1,
-      "5": 2,
-      "6": 3,
-      "7": 8,
-      "8": 10,
-      "9": 4,
-      "la": 3
+      "4": 10,
+      "5": 4,
+      "6": 10,
+      "7": 0,
+      "8": 2,
+      "9": 8,
+      "la": 7
     },
-    "lagnaZodiacIndex": 3,
+    "lagnaZodiacIndex": 7,
     "statuses": {
       "1": "racha-chok",
       "2": "nij",
       "3": "maha-uccj",
-      "4": "kaset",
-      "5": "maha-uccj",
-      "7": "kaset"
+      "4": "pra",
+      "5": "pra",
+      "6": "maha-uccj",
+      "7": "maha-chakr"
     }
   },
   "tue-night-7": {
     "planets": {
-      "0": 11,
+      "0": 1,
       "1": 5,
       "2": 7,
-      "3": 0,
-      "4": 1,
-      "5": 5,
+      "3": 9,
+      "4": 3,
+      "5": 6,
       "6": 9,
-      "7": 10,
-      "8": 3,
-      "9": 10,
-      "la": 5
+      "7": 3,
+      "8": 5,
+      "9": 0,
+      "la": 7
     },
-    "lagnaZodiacIndex": 5,
+    "lagnaZodiacIndex": 7,
     "statuses": {
       "1": "nij",
-      "3": "racha-chok",
-      "4": "kaset",
-      "8": "pra"
+      "4": "racha-chok",
+      "5": "maha-chakr",
+      "8": "racha-chok"
     }
   },
   "tue-night-8": {
     "planets": {
-      "0": 5,
+      "0": 7,
       "1": 2,
-      "2": 7,
-      "3": 8,
-      "4": 0,
-      "5": 0,
-      "6": 0,
+      "2": 4,
+      "3": 10,
+      "4": 1,
+      "5": 1,
+      "6": 1,
       "7": 4,
-      "8": 5,
-      "9": 0,
-      "la": 10
+      "8": 10,
+      "9": 2,
+      "la": 0
     },
-    "lagnaZodiacIndex": 10,
+    "lagnaZodiacIndex": 0,
     "statuses": {
-      "3": "maha-uccj",
-      "6": "kaset",
-      "8": "racha-chok"
+      "2": "racha-chok",
+      "4": "kaset",
+      "5": "pra"
     }
   },
   "wed-day-1": {
@@ -1153,96 +1167,88 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "wed-day-5": {
     "planets": {
-      "0": 10,
+      "0": 6,
       "1": 2,
       "2": 2,
       "3": 7,
       "4": 10,
-      "5": 3,
-      "6": 8,
-      "7": 11,
-      "8": 4,
-      "9": 6,
-      "la": 4
+      "5": 1,
+      "6": 4,
+      "7": 7,
+      "8": 0,
+      "9": 2,
+      "la": 0
     },
-    "lagnaZodiacIndex": 4,
+    "lagnaZodiacIndex": 0,
     "statuses": {
       "2": "kaset",
       "4": "pra",
-      "6": "racha-chok",
-      "7": "nij"
+      "5": "pra",
+      "6": "nij",
+      "8": "nij"
     }
   },
   "wed-day-6": {
     "planets": {
-      "0": 4,
+      "0": 2,
       "1": 0,
       "2": 5,
       "3": 8,
-      "4": 1,
-      "5": 1,
+      "4": 11,
+      "5": 0,
       "6": 1,
-      "7": 6,
-      "8": 9,
-      "9": 2,
-      "la": 2
+      "7": 4,
+      "8": 7,
+      "9": 0,
+      "la": 0
     },
-    "lagnaZodiacIndex": 2,
+    "lagnaZodiacIndex": 0,
     "statuses": {
-      "3": "maha-uccj",
-      "4": "kaset",
-      "5": "pra",
-      "7": "racha-chok",
-      "8": "kaset"
+      "3": "maha-uccj"
     }
   },
   "wed-day-7": {
     "planets": {
-      "0": 6,
+      "0": 0,
       "1": 5,
       "2": 8,
-      "3": 1,
-      "4": 1,
-      "5": 3,
-      "6": 5,
-      "7": 5,
-      "8": 10,
-      "9": 6,
-      "la": 1
+      "3": 11,
+      "4": 0,
+      "5": 6,
+      "6": 0,
+      "7": 1,
+      "8": 4,
+      "9": 0,
+      "la": 7
     },
-    "lagnaZodiacIndex": 1,
+    "lagnaZodiacIndex": 7,
     "statuses": {
       "1": "nij",
       "2": "pra",
-      "4": "kaset",
-      "6": "kaset",
-      "7": "maha-uccj"
+      "3": "kaset",
+      "5": "maha-chakr",
+      "6": "kaset"
     }
   },
   "wed-day-8": {
     "planets": {
-      "0": 9,
+      "0": 3,
       "1": 3,
-      "2": 8,
-      "3": 8,
-      "4": 10,
-      "5": 2,
-      "6": 6,
-      "7": 8,
-      "8": 8,
-      "9": 4,
-      "la": 1
+      "2": 6,
+      "3": 7,
+      "4": 1,
+      "5": 5,
+      "6": 9,
+      "7": 3,
+      "8": 4,
+      "9": 10,
+      "la": 7
     },
-    "lagnaZodiacIndex": 1,
+    "lagnaZodiacIndex": 7,
     "statuses": {
       "1": "kaset",
-      "2": "pra",
-      "3": "maha-uccj",
-      "4": "pra",
-      "5": "maha-uccj",
-      "6": "pra",
-      "7": "kaset",
-      "8": "maha-chakr"
+      "2": "nij",
+      "4": "kaset"
     }
   },
   "wed-night-1": {
@@ -1334,46 +1340,47 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "wed-night-5": {
     "planets": {
-      "0": 9,
+      "0": 3,
       "1": 5,
       "2": 7,
       "3": 1,
       "4": 4,
-      "5": 10,
-      "6": 4,
-      "7": 7,
-      "8": 1,
-      "9": 8,
-      "la": 3
+      "5": 7,
+      "6": 10,
+      "7": 1,
+      "8": 7,
+      "9": 2,
+      "la": 9
     },
-    "lagnaZodiacIndex": 3,
+    "lagnaZodiacIndex": 9,
     "statuses": {
       "1": "nij",
       "4": "maha-uccj",
       "5": "kaset",
-      "6": "nij"
+      "6": "maha-uccj"
     }
   },
   "wed-night-6": {
     "planets": {
-      "0": 7,
+      "0": 9,
       "1": 2,
       "2": 8,
       "3": 11,
-      "4": 5,
-      "5": 7,
-      "6": 9,
-      "7": 3,
-      "8": 6,
-      "9": 2,
-      "la": 0
+      "4": 2,
+      "5": 2,
+      "6": 2,
+      "7": 5,
+      "8": 8,
+      "9": 4,
+      "la": 2
     },
-    "lagnaZodiacIndex": 0,
+    "lagnaZodiacIndex": 2,
     "statuses": {
       "2": "pra",
       "3": "kaset",
-      "5": "kaset",
-      "8": "maha-uccj"
+      "5": "maha-uccj",
+      "7": "maha-uccj",
+      "8": "maha-chakr"
     }
   },
   "wed-night-7": {
@@ -1381,11 +1388,11 @@ export const SUCCESS_YAM_DATA: Record<string, {
       "0": 10,
       "1": 6,
       "2": 9,
-      "3": 3,
-      "4": 5,
-      "5": 10,
-      "6": 3,
-      "7": 5,
+      "3": 0,
+      "4": 0,
+      "5": 4,
+      "6": 8,
+      "7": 8,
       "8": 11,
       "9": 8,
       "la": 2
@@ -1393,31 +1400,34 @@ export const SUCCESS_YAM_DATA: Record<string, {
     "lagnaZodiacIndex": 2,
     "statuses": {
       "1": "maha-chakr",
-      "5": "kaset",
-      "7": "maha-uccj"
+      "3": "racha-chok",
+      "5": "pra",
+      "6": "racha-chok",
+      "7": "kaset"
     }
   },
   "wed-night-8": {
     "planets": {
       "0": 4,
       "1": 3,
-      "2": 9,
-      "3": 11,
-      "4": 4,
-      "5": 5,
-      "6": 6,
-      "7": 11,
-      "8": 1,
+      "2": 6,
+      "3": 6,
+      "4": 10,
+      "5": 11,
+      "6": 0,
+      "7": 4,
+      "8": 4,
       "9": 10,
       "la": 7
     },
     "lagnaZodiacIndex": 7,
     "statuses": {
       "1": "kaset",
+      "2": "nij",
       "3": "kaset",
-      "4": "maha-uccj",
-      "6": "pra",
-      "7": "nij"
+      "4": "pra",
+      "5": "racha-chok",
+      "6": "kaset"
     }
   },
   "thu-day-1": {
@@ -1511,93 +1521,96 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "thu-day-5": {
     "planets": {
-      "0": 9,
+      "0": 5,
       "1": 3,
       "2": 4,
       "3": 10,
       "4": 2,
-      "5": 8,
-      "6": 2,
-      "7": 6,
-      "8": 0,
-      "9": 4,
-      "la": 1
+      "5": 6,
+      "6": 10,
+      "7": 2,
+      "8": 8,
+      "9": 0,
+      "la": 9
     },
-    "lagnaZodiacIndex": 1,
+    "lagnaZodiacIndex": 9,
     "statuses": {
       "1": "kaset",
       "2": "racha-chok",
-      "5": "nij",
-      "7": "racha-chok",
-      "8": "nij"
+      "5": "maha-chakr",
+      "6": "maha-uccj",
+      "7": "pra",
+      "8": "maha-chakr"
     }
   },
   "thu-day-6": {
     "planets": {
-      "0": 3,
+      "0": 1,
       "1": 1,
       "2": 7,
       "3": 11,
-      "4": 5,
-      "5": 6,
+      "4": 3,
+      "5": 5,
       "6": 7,
-      "7": 1,
-      "8": 5,
-      "9": 0,
-      "la": 11
+      "7": 11,
+      "8": 3,
+      "9": 10,
+      "la": 9
     },
-    "lagnaZodiacIndex": 11,
+    "lagnaZodiacIndex": 9,
     "statuses": {
       "1": "racha-chok",
       "3": "kaset",
-      "5": "maha-chakr",
+      "4": "racha-chok",
       "6": "maha-chakr",
-      "8": "racha-chok"
+      "7": "nij",
+      "8": "pra"
     }
   },
   "thu-day-7": {
     "planets": {
-      "0": 5,
+      "0": 9,
       "1": 6,
       "2": 10,
-      "3": 4,
-      "4": 5,
-      "5": 8,
-      "6": 11,
-      "7": 0,
-      "8": 6,
-      "9": 4,
-      "la": 10
+      "3": 2,
+      "4": 4,
+      "5": 4,
+      "6": 4,
+      "7": 6,
+      "8": 10,
+      "9": 8,
+      "la": 2
     },
-    "lagnaZodiacIndex": 10,
+    "lagnaZodiacIndex": 2,
     "statuses": {
       "1": "maha-chakr",
-      "3": "maha-chakr",
-      "5": "nij",
-      "6": "pra",
-      "7": "maha-chakr",
-      "8": "maha-uccj"
+      "3": "nij",
+      "4": "maha-uccj",
+      "5": "pra",
+      "6": "nij",
+      "7": "racha-chok"
     }
   },
   "thu-day-8": {
     "planets": {
-      "0": 8,
+      "0": 0,
       "1": 4,
-      "2": 10,
-      "3": 11,
-      "4": 2,
-      "5": 7,
-      "6": 0,
-      "7": 3,
-      "8": 4,
-      "9": 2,
-      "la": 10
+      "2": 8,
+      "3": 10,
+      "4": 10,
+      "5": 3,
+      "6": 8,
+      "7": 8,
+      "8": 10,
+      "9": 6,
+      "la": 2
     },
-    "lagnaZodiacIndex": 10,
+    "lagnaZodiacIndex": 2,
     "statuses": {
-      "3": "kaset",
-      "5": "kaset",
-      "6": "kaset"
+      "2": "pra",
+      "4": "pra",
+      "6": "racha-chok",
+      "7": "kaset"
     }
   },
   "thu-night-1": {
@@ -1689,92 +1702,90 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "thu-night-5": {
     "planets": {
-      "0": 4,
+      "0": 0,
       "1": 6,
       "2": 9,
       "3": 9,
       "4": 1,
-      "5": 1,
-      "6": 1,
-      "7": 5,
-      "8": 5,
-      "9": 2,
-      "la": 8
+      "5": 5,
+      "6": 9,
+      "7": 1,
+      "8": 1,
+      "9": 10,
+      "la": 4
     },
-    "lagnaZodiacIndex": 8,
+    "lagnaZodiacIndex": 4,
     "statuses": {
       "1": "maha-chakr",
-      "4": "kaset",
-      "5": "pra",
-      "7": "maha-uccj",
-      "8": "racha-chok"
+      "4": "kaset"
     }
   },
   "thu-night-6": {
     "planets": {
-      "0": 2,
+      "0": 6,
       "1": 3,
       "2": 3,
       "3": 7,
-      "4": 7,
-      "5": 10,
+      "4": 11,
+      "5": 0,
       "6": 1,
-      "7": 1,
-      "8": 5,
-      "9": 8,
-      "la": 5
+      "7": 5,
+      "8": 9,
+      "9": 0,
+      "la": 9
     },
-    "lagnaZodiacIndex": 5,
+    "lagnaZodiacIndex": 9,
     "statuses": {
       "1": "kaset",
-      "4": "pra",
-      "5": "kaset",
-      "8": "racha-chok"
+      "7": "maha-uccj",
+      "8": "kaset"
     }
   },
   "thu-night-7": {
     "planets": {
-      "0": 5,
+      "0": 7,
       "1": 0,
       "2": 4,
-      "3": 4,
-      "4": 7,
-      "5": 1,
+      "3": 8,
+      "4": 9,
+      "5": 2,
       "6": 7,
-      "7": 10,
-      "8": 10,
-      "9": 2,
-      "la": 2
+      "7": 8,
+      "8": 0,
+      "9": 4,
+      "la": 4
     },
-    "lagnaZodiacIndex": 2,
+    "lagnaZodiacIndex": 4,
     "statuses": {
       "2": "racha-chok",
-      "3": "maha-chakr",
-      "4": "pra",
-      "5": "pra",
-      "6": "maha-chakr"
+      "3": "maha-uccj",
+      "5": "maha-uccj",
+      "6": "maha-chakr",
+      "7": "kaset",
+      "8": "nij"
     }
   },
   "thu-night-8": {
     "planets": {
-      "0": 6,
+      "0": 8,
       "1": 4,
-      "2": 4,
-      "3": 7,
-      "4": 1,
-      "5": 3,
-      "6": 5,
+      "2": 8,
+      "3": 9,
+      "4": 2,
+      "5": 4,
+      "6": 6,
       "7": 11,
-      "8": 2,
-      "9": 6,
-      "la": 2
+      "8": 0,
+      "9": 8,
+      "la": 4
     },
-    "lagnaZodiacIndex": 2,
+    "lagnaZodiacIndex": 4,
     "statuses": {
-      "2": "racha-chok",
-      "4": "kaset",
-      "6": "kaset",
-      "7": "nij"
+      "2": "pra",
+      "5": "pra",
+      "6": "pra",
+      "7": "nij",
+      "8": "nij"
     }
   },
   "fri-day-1": {
@@ -1870,24 +1881,24 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "fri-day-5": {
     "planets": {
-      "0": 4,
+      "0": 2,
       "1": 4,
       "2": 6,
       "3": 6,
       "4": 11,
-      "5": 11,
-      "6": 11,
-      "7": 4,
-      "8": 4,
-      "9": 10,
-      "la": 6
+      "5": 4,
+      "6": 9,
+      "7": 2,
+      "8": 2,
+      "9": 8,
+      "la": 4
     },
-    "lagnaZodiacIndex": 6,
+    "lagnaZodiacIndex": 4,
     "statuses": {
       "2": "nij",
       "3": "kaset",
-      "5": "racha-chok",
-      "6": "pra"
+      "5": "pra",
+      "7": "pra"
     }
   },
   "fri-day-6": {
@@ -1896,9 +1907,9 @@ export const SUCCESS_YAM_DATA: Record<string, {
       "1": 2,
       "2": 2,
       "3": 7,
-      "4": 7,
-      "5": 9,
-      "6": 11,
+      "4": 0,
+      "5": 3,
+      "6": 6,
       "7": 11,
       "8": 4,
       "9": 6,
@@ -1907,53 +1918,50 @@ export const SUCCESS_YAM_DATA: Record<string, {
     "lagnaZodiacIndex": 4,
     "statuses": {
       "2": "kaset",
-      "4": "pra",
       "6": "pra",
       "7": "nij"
     }
   },
   "fri-day-7": {
     "planets": {
-      "0": 0,
+      "0": 6,
       "1": 0,
       "2": 5,
-      "3": 5,
-      "4": 7,
-      "5": 11,
+      "3": 10,
+      "4": 1,
+      "5": 2,
       "6": 3,
-      "7": 5,
-      "8": 5,
-      "9": 10,
-      "la": 10
+      "7": 6,
+      "8": 11,
+      "9": 4,
+      "la": 4
     },
-    "lagnaZodiacIndex": 10,
+    "lagnaZodiacIndex": 4,
     "statuses": {
-      "3": "pra",
-      "4": "pra",
-      "5": "racha-chok",
-      "7": "maha-uccj",
-      "8": "racha-chok"
+      "4": "kaset",
+      "5": "maha-uccj",
+      "7": "racha-chok"
     }
   },
   "fri-day-8": {
     "planets": {
-      "0": 10,
+      "0": 4,
       "1": 5,
-      "2": 5,
-      "3": 7,
-      "4": 11,
-      "5": 5,
-      "6": 11,
+      "2": 10,
+      "3": 1,
+      "4": 2,
+      "5": 8,
+      "6": 2,
       "7": 3,
-      "8": 5,
-      "9": 10,
-      "la": 5
+      "8": 6,
+      "9": 4,
+      "la": 11
     },
-    "lagnaZodiacIndex": 5,
+    "lagnaZodiacIndex": 11,
     "statuses": {
       "1": "nij",
-      "6": "pra",
-      "8": "racha-chok"
+      "5": "nij",
+      "8": "maha-uccj"
     }
   },
   "fri-night-1": {
@@ -2043,92 +2051,92 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "fri-night-5": {
     "planets": {
-      "0": 1,
+      "0": 9,
       "1": 0,
       "2": 4,
       "3": 5,
       "4": 10,
-      "5": 11,
-      "6": 0,
-      "7": 5,
-      "8": 6,
-      "9": 10,
-      "la": 10
+      "5": 3,
+      "6": 8,
+      "7": 1,
+      "8": 2,
+      "9": 6,
+      "la": 6
     },
-    "lagnaZodiacIndex": 10,
+    "lagnaZodiacIndex": 6,
     "statuses": {
       "2": "racha-chok",
       "3": "pra",
       "4": "pra",
-      "5": "racha-chok",
-      "6": "kaset",
-      "7": "maha-uccj",
-      "8": "maha-uccj"
+      "6": "racha-chok"
     }
   },
   "fri-night-6": {
     "planets": {
-      "0": 6,
+      "0": 10,
       "1": 4,
       "2": 5,
       "3": 10,
-      "4": 11,
-      "5": 3,
+      "4": 3,
+      "5": 5,
       "6": 7,
-      "7": 8,
-      "8": 1,
-      "9": 6,
-      "la": 2
+      "7": 0,
+      "8": 5,
+      "9": 10,
+      "la": 6
     },
-    "lagnaZodiacIndex": 2,
+    "lagnaZodiacIndex": 6,
     "statuses": {
+      "4": "racha-chok",
       "6": "maha-chakr",
-      "7": "kaset"
+      "7": "maha-chakr",
+      "8": "racha-chok"
     }
   },
   "fri-night-7": {
     "planets": {
-      "0": 2,
+      "0": 6,
       "1": 1,
       "2": 6,
-      "3": 7,
-      "4": 11,
-      "5": 11,
-      "6": 11,
+      "3": 11,
+      "4": 1,
+      "5": 7,
+      "6": 1,
       "7": 3,
-      "8": 4,
-      "9": 10,
-      "la": 9
+      "8": 8,
+      "9": 2,
+      "la": 1
     },
-    "lagnaZodiacIndex": 9,
+    "lagnaZodiacIndex": 1,
     "statuses": {
       "1": "racha-chok",
       "2": "nij",
-      "5": "racha-chok",
-      "6": "pra"
+      "3": "kaset",
+      "4": "kaset",
+      "5": "kaset",
+      "8": "maha-chakr"
     }
   },
   "fri-night-8": {
     "planets": {
-      "0": 3,
+      "0": 7,
       "1": 5,
-      "2": 6,
-      "3": 10,
-      "4": 10,
-      "5": 1,
-      "6": 4,
-      "7": 4,
+      "2": 10,
+      "3": 0,
+      "4": 6,
+      "5": 9,
+      "6": 0,
+      "7": 6,
       "8": 8,
-      "9": 2,
-      "la": 9
+      "9": 6,
+      "la": 1
     },
-    "lagnaZodiacIndex": 9,
+    "lagnaZodiacIndex": 1,
     "statuses": {
       "1": "nij",
-      "2": "nij",
-      "4": "pra",
-      "5": "pra",
-      "6": "nij",
+      "3": "racha-chok",
+      "6": "kaset",
+      "7": "racha-chok",
       "8": "maha-chakr"
     }
   },
@@ -2220,27 +2228,23 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "sat-day-5": {
     "planets": {
-      "0": 8,
+      "0": 6,
       "1": 5,
       "2": 8,
       "3": 9,
       "4": 3,
-      "5": 4,
-      "6": 5,
-      "7": 11,
-      "8": 0,
-      "9": 8,
-      "la": 3
+      "5": 9,
+      "6": 3,
+      "7": 9,
+      "8": 10,
+      "9": 6,
+      "la": 1
     },
-    "lagnaZodiacIndex": 3,
+    "lagnaZodiacIndex": 1,
     "statuses": {
       "1": "nij",
       "2": "pra",
-      "4": "racha-chok",
-      "5": "pra",
-      "6": "kaset",
-      "7": "nij",
-      "8": "nij"
+      "4": "racha-chok"
     }
   },
   "sat-day-6": {
@@ -2249,9 +2253,9 @@ export const SUCCESS_YAM_DATA: Record<string, {
       "1": 3,
       "2": 4,
       "3": 10,
-      "4": 11,
-      "5": 2,
-      "6": 5,
+      "4": 4,
+      "5": 8,
+      "6": 0,
       "7": 6,
       "8": 0,
       "9": 4,
@@ -2261,7 +2265,8 @@ export const SUCCESS_YAM_DATA: Record<string, {
     "statuses": {
       "1": "kaset",
       "2": "racha-chok",
-      "5": "maha-uccj",
+      "4": "maha-uccj",
+      "5": "nij",
       "6": "kaset",
       "7": "racha-chok",
       "8": "nij"
@@ -2269,45 +2274,47 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "sat-day-7": {
     "planets": {
-      "0": 11,
+      "0": 5,
       "1": 1,
       "2": 7,
-      "3": 8,
-      "4": 11,
-      "5": 4,
+      "3": 1,
+      "4": 5,
+      "5": 7,
       "6": 9,
-      "7": 0,
-      "8": 1,
-      "9": 8,
-      "la": 7
+      "7": 1,
+      "8": 7,
+      "9": 2,
+      "la": 1
     },
-    "lagnaZodiacIndex": 7,
+    "lagnaZodiacIndex": 1,
     "statuses": {
       "1": "racha-chok",
-      "3": "maha-uccj",
-      "5": "pra",
-      "7": "maha-chakr"
+      "5": "kaset"
     }
   },
   "sat-day-8": {
     "planets": {
-      "0": 7,
+      "0": 1,
       "1": 6,
-      "2": 7,
-      "3": 10,
-      "4": 3,
-      "5": 3,
-      "6": 3,
+      "2": 0,
+      "3": 4,
+      "4": 6,
+      "5": 6,
+      "6": 6,
       "7": 8,
-      "8": 11,
-      "9": 6,
-      "la": 0
+      "8": 0,
+      "9": 0,
+      "la": 6
     },
-    "lagnaZodiacIndex": 0,
+    "lagnaZodiacIndex": 6,
     "statuses": {
       "1": "maha-chakr",
-      "4": "racha-chok",
-      "7": "kaset"
+      "2": "maha-uccj",
+      "3": "maha-chakr",
+      "5": "maha-chakr",
+      "6": "pra",
+      "7": "kaset",
+      "8": "nij"
     }
   },
   "sat-night-1": {
@@ -2397,93 +2404,91 @@ export const SUCCESS_YAM_DATA: Record<string, {
   },
   "sat-night-5": {
     "planets": {
-      "0": 0,
+      "0": 8,
       "1": 1,
       "2": 6,
       "3": 8,
       "4": 2,
-      "5": 4,
-      "6": 6,
-      "7": 0,
-      "8": 2,
-      "9": 8,
-      "la": 7
+      "5": 8,
+      "6": 2,
+      "7": 8,
+      "8": 10,
+      "9": 4,
+      "la": 3
     },
-    "lagnaZodiacIndex": 7,
+    "lagnaZodiacIndex": 3,
     "statuses": {
       "1": "racha-chok",
       "2": "nij",
       "3": "maha-uccj",
-      "5": "pra",
-      "6": "pra",
-      "7": "maha-chakr"
+      "5": "nij",
+      "7": "kaset"
     }
   },
   "sat-night-6": {
     "planets": {
-      "0": 5,
+      "0": 9,
       "1": 5,
       "2": 7,
       "3": 1,
-      "4": 3,
-      "5": 8,
+      "4": 7,
+      "5": 10,
       "6": 1,
-      "7": 3,
-      "8": 9,
-      "9": 4,
-      "la": 11
+      "7": 7,
+      "8": 1,
+      "9": 8,
+      "la": 3
     },
-    "lagnaZodiacIndex": 11,
+    "lagnaZodiacIndex": 3,
     "statuses": {
       "1": "nij",
-      "4": "racha-chok",
-      "5": "nij",
-      "8": "kaset"
+      "4": "pra",
+      "5": "kaset"
     }
   },
   "sat-night-7": {
     "planets": {
-      "0": 1,
+      "0": 3,
       "1": 2,
       "2": 8,
-      "3": 10,
-      "4": 3,
-      "5": 4,
+      "3": 2,
+      "4": 5,
+      "5": 5,
       "6": 5,
-      "7": 10,
-      "8": 0,
-      "9": 8,
-      "la": 6
+      "7": 8,
+      "8": 2,
+      "9": 10,
+      "la": 8
     },
-    "lagnaZodiacIndex": 6,
+    "lagnaZodiacIndex": 8,
     "statuses": {
       "2": "pra",
-      "4": "racha-chok",
-      "5": "pra",
+      "3": "nij",
       "6": "kaset",
-      "8": "nij"
+      "7": "kaset"
     }
   },
   "sat-night-8": {
     "planets": {
-      "0": 2,
+      "0": 4,
       "1": 6,
-      "2": 8,
-      "3": 1,
-      "4": 2,
-      "5": 6,
-      "6": 10,
+      "2": 0,
+      "3": 3,
+      "4": 3,
+      "5": 7,
+      "6": 11,
       "7": 11,
-      "8": 4,
-      "9": 0,
-      "la": 6
+      "8": 2,
+      "9": 2,
+      "la": 8
     },
-    "lagnaZodiacIndex": 6,
+    "lagnaZodiacIndex": 8,
     "statuses": {
       "1": "maha-chakr",
-      "2": "pra",
-      "5": "maha-chakr",
-      "6": "maha-uccj",
+      "2": "maha-uccj",
+      "4": "racha-chok",
+      "5": "kaset",
+      "6": "pra",
       "7": "nij"
     }
   }

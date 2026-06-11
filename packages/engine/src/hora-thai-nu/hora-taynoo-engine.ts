@@ -153,58 +153,95 @@ function getYamStartMin(period: 'day'|'night', yam: number): number {
   return YAM_START[period][yam - 1];
 }
 
+/** แปลง นาที (ทศนิยม) → วินาที (integer) */
+function minToSeconds(minutes: number): number {
+  return Math.round(minutes * 60);
+}
+
+/** แปลง วินาทีรวม → string ตามรูปแบบผังดวงยาม: HH.mmน. หรือ HH.mm.5น. */
+function secsToStr(totalSeconds: number): string {
+  // ป้องกันเวลาเกิน 24 ชั่วโมง
+  const safe = ((totalSeconds % 86400) + 86400) % 86400;
+  const h = Math.floor(safe / 3600);
+  const m = Math.floor((safe % 3600) / 60);
+  const s = safe % 60;
+  const strH = String(h).padStart(2, '0');
+  const strM = String(m).padStart(2, '0');
+  const strS = s === 30 ? '.5' : '';
+  return `${strH}.${strM}${strS}น.`;
+}
+
+/** แปลง นาที (ทศนิยม) → string ตามรูปแบบผังดวงยาม (ใช้สำหรับ yamStart/End display) */
 function minToStr(minutes: number): string {
-  const safeMin = ((minutes % 1440) + 1440) % 1440;
-  const h = Math.floor(safeMin / 60);
-  const m = safeMin % 60;
-  const mInt = Math.floor(m);
-  const mFrac = Math.round((m - mInt) * 60);
-  if (mFrac === 0) return `${String(h).padStart(2,'0')}:${String(mInt).padStart(2,'0')}`;
-  return `${String(h).padStart(2,'0')}:${String(mInt).padStart(2,'0')}.${String(mFrac).padStart(2,'0')}`;
+  return secsToStr(minToSeconds(minutes));
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CORE
 // ─────────────────────────────────────────────────────────────────────────────
 
+/**
+ * getPlanetSteps — คำนวณจำนวนก้าว (step) ของดาวลอยแต่ละดวง
+ * อ้างอิง: วิธีการลงดาวลอยแบบละเอียด V.2.md
+ * 
+ * U-Turn pattern:
+ *   ดาว ๑, ๙  = ก้าวของยามปัจจุบัน (yamAsked)
+ *   ดาว ๒, ลั = ก้าวของยาม +1
+ *   ดาว ๓, ๘  = ก้าวของยาม +2
+ *   ดาว ๔, ๗  = ก้าวของยาม +3
+ *   ดาว ๕, ๖  = ก้าวของยาม +4
+ *   ดาว ๐      = ก้าวของยาม -1 (ยามก่อนหน้า, edge case yam1→yam8)
+ */
 export function getPlanetSteps(day: number, yamAsked: number, period: 'day' | 'night'): number[] {
   const row = period === 'day' ? DAY_YAM[day] : NIGHT_YAM[day];
-  
-  function foldYam(y: number): number {
-    let val = y;
-    while (val < 1) val += 8;
-    while (val > 15) val -= 8;
-    if (val <= 8) return val;
-    return 16 - val;
+
+  // ดึงค่าก้าวจาก row โดย index ยาม 1-8 (warp ด้วย modulo)
+  function rowAt(yam: number): number {
+    // yam 1-8, wrap: ยาม 0 → 8, ยาม 9 → 1
+    const y = ((yam - 1 + 8) % 8) + 1;
+    return row[y - 1];
   }
 
-  const targetYams = [
-    yamAsked,     // 1
-    yamAsked + 1, // 2
-    yamAsked + 2, // 3
-    yamAsked + 3, // 4
-    yamAsked + 4, // 5
-    yamAsked + 4, // 6
-    yamAsked + 3, // 7
-    yamAsked + 2, // 8
-    yamAsked + 1, // ล
-    yamAsked,     // 9
-    yamAsked - 1  // 0
-  ];
+  const y = yamAsked; // ยามที่ถาม
 
-  return targetYams.map(y => row[foldYam(y) - 1]);
+  return [
+    rowAt(y),       // ดาว ๑
+    rowAt(y + 1),   // ดาว ๒
+    rowAt(y + 2),   // ดาว ๓
+    rowAt(y + 3),   // ดาว ๔
+    rowAt(y + 4),   // ดาว ๕
+    rowAt(y + 4),   // ดาว ๖
+    rowAt(y + 3),   // ดาว ๗
+    rowAt(y + 2),   // ดาว ๘
+    rowAt(y + 1),   // ดาว ลั (ลัคนา)
+    rowAt(y),       // ดาว ๙
+    rowAt(y - 1),   // ดาว ๐ (ยามก่อนหน้า)
+  ];
 }
 
+/**
+ * calculatePositions — วางดาวลอยทีละดวงตามหลักนับย้ำช่องเดิม
+ * อ้างอิง: วิธีการลงดาวลอยแบบละเอียด V.2.md
+ * 
+ * - ดาวดวงแรก (๑) เริ่มที่ index 0 = ราศีพฤษภ เสมอ (ระบบ CCW ของ ZODIAC_ORDER)
+ * - ดาวแต่ละดวง: currentPos = (currentPos + (step - 1)) % 12
+ * - ZODIAC index (CCW ตาม ZODIAC_ORDER):
+ *   0=พฤษภ, 1=เมถุน, 2=กรกฎ, 3=สิงห์, 4=กันย์, 5=ตุลย์,
+ *   6=พิจิก, 7=ธนู, 8=มังกร, 9=กุมภ์, 10=มีน, 11=เมษ
+ */
 export function calculatePositions(steps: number[]): number[] {
   const positions: number[] = [];
-  let cur = 0;
+  // เริ่มที่ราศีพฤษภ = index 0 (ระบบ CCW ของ ZODIAC_ORDER)
+  let cur = 0; // พฤษภ
   for (let p = 0; p < steps.length; p++) {
-    const land = (cur + steps[p] - 1) % 12;
+    // นับย้ำช่องเดิม: (step - 1) + currentPos
+    const land = (cur + (steps[p] - 1)) % 12;
     positions.push(land);
     cur = land;
   }
   return positions;
 }
+
 
 export function buildBhavaMap(lagnaZodiacIndex: number): Record<number, string> {
   const map: Record<number, string> = {};
@@ -224,18 +261,49 @@ export function findPlanetPosition(planetNum: number, entries: PlanetEntry[]): n
   return found ? found.zodiacIndex : 0;
 }
 
-export function buildSubTimeSlots(yamStartMin: number, startZodiacIndex: number, bhavaMap: Record<number, string>): SubTimeSlot[] {
+/**
+ * buildSubTimeSlots — ลงเวลา 7.5 นาทีต่อช่อง ครบ 12 ช่อง (90 นาที = 1 ยาม)
+ * อ้างอิง: วิธีแปลงเวลาเป็นวินาทีเพื่อลงเวลา 7.5 นาทีให้แม่นยำ.md
+ * 
+ * - ใช้วินาทีในการคำนวณเพื่อป้องกัน floating-point error
+ * - เวลาเดินตามเข็มนาฬิกา (CW): slot i = startZodiacIndex + i
+ * - แสดงผลแบบไทย: HH.mmน. หรือ HH.mm.5น.
+ */
+export function buildSubTimeSlots(
+  yamStartMin: number,
+  startZodiacIndex: number,
+  bhavaMap: Record<number, string>
+): SubTimeSlot[] {
   const slots: SubTimeSlot[] = [];
-  const DURATION = 7.5;
+  const SLOT_SECONDS = 450; // 7.5 นาที × 60 = 450 วินาที
+  const yamStartSec = minToSeconds(yamStartMin);
+  
   for (let i = 0; i < 12; i++) {
+    // ราศีเดิน CW: เพิ่มทีละช่อง วนโดย % 12
     const zIdx = (startZodiacIndex + i) % 12;
-    const startMin = yamStartMin + i * DURATION;
-    const endMin = startMin + DURATION;
+    
+    // คำนวณเวลาเป็นวินาที (แม่นยำ 100%)
+    const slotStartSec = yamStartSec + (i * SLOT_SECONDS);
+    const slotEndSec   = slotStartSec + SLOT_SECONDS;
+    
+    // แปลงกลับเป็นนาที (สำหรับ interface compatibility)
+    const startMin = slotStartSec / 60;
+    const endMin   = slotEndSec / 60;
+    
     const bhava = bhavaMap[zIdx] ?? '';
-    const endStrVal = minToStr(endMin);
+    // แสดงเวลาท้ายช่อง (end of slot) ตามผังดวง
+    const endStrVal   = secsToStr(slotEndSec);
+    const startStrVal = secsToStr(slotStartSec);
+    
     slots.push({
-      slotIndex: i, zodiacIndex: zIdx, zodiacName: ZODIAC_ORDER[zIdx].name,
-      bhavaName: bhava, startMin, endMin, startStr: endStrVal, endStr: endStrVal,
+      slotIndex: i,
+      zodiacIndex: zIdx,
+      zodiacName: ZODIAC_ORDER[zIdx].name,
+      bhavaName: bhava,
+      startMin,
+      endMin,
+      startStr: startStrVal,
+      endStr: endStrVal,
       bhavaTimeLabel: bhava ? `${bhava} ${endStrVal}` : endStrVal,
     });
   }
