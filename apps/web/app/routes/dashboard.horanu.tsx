@@ -563,12 +563,73 @@ function LiveClock({ serverTime }: { serverTime: string }) {
 
 // ─── Chat Panel ───────────────────────────────────────────────────────────────
 
-const SUGGESTED_QUESTIONS = [
-  "การเงินช่วงนี้เป็นอย่างไร?",
-  "งานที่ทำอยู่จะสำเร็จไหม?",
-  "ความรักจะพัฒนาไปได้ไหม?",
-  "ปัญหาที่มีจะคลี่คลายไหม?",
-  "โชคลาภช่วงนี้เป็นอย่างไร?",
+const QUESTION_CATEGORIES = [
+  {
+    key: "work",
+    label: "💼 งาน",
+    questions: [
+      "งานที่ทำอยู่จะสำเร็จลุล่วงไหม?",
+      "วันนี้เหมาะกับการเจรจาธุรกิจไหม?",
+      "ควรนำเสนองานตอนนี้หรือรอก่อน?",
+      "โปรเจกต์ที่รอผลอยู่จะได้รับการอนุมัติไหม?",
+      "การเปลี่ยนงานตอนนี้เป็นทางที่ดีไหม?",
+    ],
+  },
+  {
+    key: "money",
+    label: "💰 การเงิน",
+    questions: [
+      "การเงินช่วงนี้ไหลเข้าหรือไหลออก?",
+      "วันนี้เหมาะกับการลงทุนไหม?",
+      "ควรจ่ายเงินก้อนใหญ่ตอนนี้หรือเปล่า?",
+      "โชคลาภจากภายนอกจะเข้ามาไหม?",
+      "หนี้สินหรือปัญหาการเงินจะคลี่คลายไหม?",
+    ],
+  },
+  {
+    key: "love",
+    label: "💛 ความรัก",
+    questions: [
+      "ความสัมพันธ์ที่มีอยู่จะพัฒนาต่อไปได้ไหม?",
+      "คนที่รอผลอยู่จะตอบรับไหม?",
+      "ช่วงนี้เหมาะกับการพูดคุยเรื่องสำคัญในความรักไหม?",
+      "ความขัดแย้งในครอบครัวจะคลี่คลายได้ไหม?",
+      "มีคนดีเข้ามาในชีวิตช่วงนี้ไหม?",
+    ],
+  },
+  {
+    key: "health",
+    label: "🌿 สุขภาพ",
+    questions: [
+      "พลังงานวันนี้เป็นอย่างไร ควรพักหรือลุย?",
+      "อาการที่เป็นอยู่จะดีขึ้นเร็วไหม?",
+      "ช่วงนี้ควรระวังสุขภาพด้านไหน?",
+      "การรักษาที่วางแผนไว้เหมาะกับช่วงนี้ไหม?",
+      "จิตใจช่วงนี้จะผ่อนคลายขึ้นไหม?",
+    ],
+  },
+  {
+    key: "travel",
+    label: "🕐 เดินทาง",
+    questions: [
+      "ตอนนี้เหมาะกับการออกเดินทางไหม?",
+      "ทิศทางไหนเป็นมงคลสำหรับวันนี้?",
+      "ควรออกจากบ้านตอนนี้หรือรอยามหน้า?",
+      "การนัดหมายที่กำหนดไว้จะราบรื่นไหม?",
+      "เดินทางกลับบ้านช่วงนี้ปลอดภัยไหม?",
+    ],
+  },
+  {
+    key: "decide",
+    label: "⚖️ ตัดสินใจ",
+    questions: [
+      "ปัญหาที่กำลังเผชิญจะคลี่คลายไหม?",
+      "สิ่งที่รอคำตอบอยู่จะมีข่าวดีไหม?",
+      "ควรลงมือทำเดี๋ยวนี้หรือรอก่อน?",
+      "อุปสรรคที่มีจะผ่านพ้นได้ไหม?",
+      "ความพยายามที่ทำอยู่จะเห็นผลเร็วไหม?",
+    ],
+  },
 ];
 
 function HoranuChatPanel() {
@@ -577,6 +638,7 @@ function HoranuChatPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [lockedTime, setLockedTime] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState("work");
   const answerRef = useRef<HTMLDivElement>(null);
 
   const handleAsk = async () => {
@@ -652,15 +714,34 @@ function HoranuChatPanel() {
         )}
       </div>
 
-      {/* Suggested questions */}
+      {/* Category tabs */}
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {QUESTION_CATEGORIES.map(cat => (
+          <button
+            key={cat.key}
+            type="button"
+            onClick={() => setActiveCategory(cat.key)}
+            disabled={isLoading}
+            className={`text-[10px] px-2.5 py-1 rounded-full border transition-all disabled:opacity-40 ${
+              activeCategory === cat.key
+                ? "border-[#C9A96E]/60 bg-[#C9A96E]/15 text-[#C9A96E] font-bold"
+                : "border-white/10 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E]"
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Suggested questions for active category */}
       <div className="flex flex-wrap gap-1.5 mb-3">
-        {SUGGESTED_QUESTIONS.map(q => (
+        {(QUESTION_CATEGORIES.find(c => c.key === activeCategory)?.questions ?? []).map(q => (
           <button
             key={q}
             type="button"
             onClick={() => setQuestion(q)}
             disabled={isLoading}
-            className="text-[10px] px-2.5 py-1 rounded-full border border-white/10 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E] disabled:opacity-40 transition-all"
+            className="text-[10px] px-2.5 py-1 rounded-full border border-white/8 bg-white/3 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E] disabled:opacity-40 transition-all"
           >
             {q}
           </button>
