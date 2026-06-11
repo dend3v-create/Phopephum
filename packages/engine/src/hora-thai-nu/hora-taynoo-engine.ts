@@ -4,7 +4,6 @@
  * อ้างอิง: อ.กานดา + ชุดผังดวงสำเร็จ 112 ผัง
  */
 
-import { SUCCESS_YAM_DATA } from './datasets/success-yam-data.js'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -260,14 +259,7 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   const dayPlanet = DAY_PLANET[day];
   const yamPlanet = (period === 'day' ? DAY_YAM : NIGHT_YAM)[day][yamAsked - 1];
 
-  const WEEKDAY_ID = ['sun','mon','tue','wed','thu','fri','sat'];
-  const fixedId = `${WEEKDAY_ID[day]}-${period}-${yamAsked}`;
-  const fixedData = SUCCESS_YAM_DATA[fixedId];
-
   const planetSteps = getPlanetSteps(day, yamAsked, period);
-  const thaiWeekday = day === 0 ? 1 : day + 1;
-  const rowForStart = period === 'day' ? DAY_YAM[day] : NIGHT_YAM[day];
-  const start_slot = rowForStart.indexOf(2) + 1;
 
   const positions = calculatePositions(planetSteps);
 

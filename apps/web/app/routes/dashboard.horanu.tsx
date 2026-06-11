@@ -11,21 +11,16 @@ import {
   generateHoraTaynooSVG,
   loadSuccessYam,
   getSuccessYamMeta,
-  getYamTimeRange,
   interpretChart,
-  getPlanetStatus,
-  buildBhavaMap,
-  findLagnaRuler,
-  buildSubTimeSlots,
   PLANET_INFO,
   ZODIAC_ORDER,
   BHAVA_NAMES,
 } from "@phopephum/engine";
-import type { HoraTaynooResult, SuccessYamMeta, ChartConfig, ChartInterpretation } from "@phopephum/engine";
+import type { HoraTaynooResult, ChartConfig, ChartInterpretation } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import type { Env } from "~/env.server";
-import { getYamLibrary, getYamRow } from "~/services/yam-library.server";
+import { getYamLibrary } from "~/services/yam-library.server";
 import type { YamLibraryRow } from "~/services/yam-library.server";
 import { useState, useEffect, useRef } from "react";
 
@@ -65,58 +60,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const weekday = Number(formData.get("weekday") ?? 0);
     const period  = (formData.get("period") ?? "day") as "day" | "night";
     const yamNo   = Number(formData.get("yamNo") ?? 1);
-    const rowId   = String(formData.get("rowId") ?? "");
 
-    // Base result (timing, yamPlanet, dayPlanet, etc.)
     result = loadSuccessYam(weekday, period, yamNo);
-
-    // Override with manually-entered Supabase planet positions (if available)
-    if (rowId) {
-      const row = await getYamRow(env, rowId);
-      if (row && Object.keys(row.planets).length > 0) {
-        const planets       = row.planets;
-        const lagnaZodiacIndex = row.lagna_zodiac_index;
-
-        // Rebuild planet entries from Supabase data (same order as engine)
-        const LABELS      = ['1','2','3','4','5','6','7','8','ล','9','0'];
-        const THAI_LABELS = ['๑','๒','๓','๔','๕','๖','๗','๘','ลั','๙','๐'];
-        const KEYS        = ['1','2','3','4','5','6','7','8','la','9','0'];
-        const PLANET_NUMS = [1,2,3,4,5,6,7,8,null,9,null] as (number|null)[];
-
-        const planetEntries = LABELS.map((label, i) => {
-          const pNum  = PLANET_NUMS[i];
-          const key   = KEYS[i];
-          const zIdx  = planets[key] ?? 0;
-          const status = pNum != null ? getPlanetStatus(pNum, zIdx) : null;
-          return {
-            label,
-            labelThai:   THAI_LABELS[i],
-            planetNum:   pNum,
-            zodiacIndex: zIdx,
-            zodiacName:  ZODIAC_ORDER[zIdx]?.name ?? '',
-            steps:       result.planetSteps[i],
-            isLagna:     label === 'ล',
-            status,
-          };
-        });
-
-        const bhavaMap             = buildBhavaMap(lagnaZodiacIndex);
-        const lagnaRulerPlanet     = findLagnaRuler(lagnaZodiacIndex);
-        const timeStartZodiacIndex = planetEntries.find(e => e.planetNum === lagnaRulerPlanet)?.zodiacIndex ?? 0;
-        const subTimeSlots         = buildSubTimeSlots(result.yamStartMin, timeStartZodiacIndex, bhavaMap);
-
-        result = {
-          ...result,
-          lagnaZodiacIndex,
-          lagnaZodiacName:       ZODIAC_ORDER[lagnaZodiacIndex]?.name ?? '',
-          planetEntries,
-          bhavaMap,
-          lagnaRulerPlanet,
-          timeStartZodiacIndex,
-          subTimeSlots,
-        };
-      }
-    }
   } else {
     // custom time
     let targetDate = new Date();
@@ -414,7 +359,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
   const [filterGrade,  setFilterGrade]  = useState<string | null>(null);
   const [selectedId,   setSelectedId]   = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const [formVals, setFormVals] = useState({ weekday: 0, period: "day" as "day"|"night", yamNo: 1, rowId: "" });
+  const [formVals, setFormVals] = useState({ weekday: 0, period: "day" as "day"|"night", yamNo: 1 });
 
   const filtered = library.filter(row => {
     if (filterDay    !== null && row.weekday_num !== filterDay)    return false;
@@ -425,7 +370,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
 
   const handleSelect = (row: YamLibraryRow) => {
     setSelectedId(row.id);
-    setFormVals({ weekday: row.weekday_num, period: row.period, yamNo: row.yam_no, rowId: row.id });
+    setFormVals({ weekday: row.weekday_num, period: row.period, yamNo: row.yam_no });
     setTimeout(() => formRef.current?.requestSubmit(), 50);
   };
 
@@ -443,7 +388,6 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
         <input type="hidden" name="weekday" value={formVals.weekday} />
         <input type="hidden" name="period"  value={formVals.period} />
         <input type="hidden" name="yamNo"   value={formVals.yamNo} />
-        <input type="hidden" name="rowId"   value={formVals.rowId} />
       </Form>
 
       <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
