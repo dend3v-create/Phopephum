@@ -243,16 +243,21 @@ function TaksaGrid({ taksaMaha }: { taksaMaha: any }) {
               const bhopTransit = taksaTransit.map[star] as string;
               const isKalaTransit = bhopTransit === "กาลกิณี";
               const isBariTransit = bhopTransit === "บริวาร";
+              const directionName = STAR_DIRECTIONS[star];
               return (
-                <div key={`star-${star}`} className="aspect-square flex flex-col items-center justify-between rounded-2xl border border-white/5 bg-slate-900/35 p-2 hover:border-[#C9A96E]/30 transition-all">
-                  <span className="text-xs font-semibold text-[#8A8070]">{bhopNatal ?? "—"}</span>
+                <div key={`star-${star}`} className="aspect-square flex flex-col items-center justify-between rounded-2xl border border-white/5 bg-slate-900/35 p-1.5 hover:border-[#C9A96E]/30 transition-all relative overflow-hidden">
+                  {/* Direction Label (Tiny) */}
+                  <span className="text-[9px] text-[#8A8070] font-bold uppercase tracking-tighter text-center leading-none">
+                    {directionName}
+                  </span>
+                  <span className="text-xs font-semibold text-[#8A8070] leading-none">{bhopNatal ?? "—"}</span>
                   <div className="flex flex-col items-center my-0.5">
-                    <span className="font-display text-3xl font-bold text-[#F8F6F1]">{star}</span>
-                    <span className="text-xs text-[#8A8070]">{STAR_NAMES[star as StarNumber]}</span>
+                    <span className="font-display text-2xl font-bold text-[#F8F6F1] leading-none">{star}</span>
+                    <span className="text-[10px] text-[#8A8070] mt-0.5 leading-none">{STAR_NAMES[star as StarNumber]}</span>
                   </div>
-                  <span className={`text-xs font-bold ${
-                    isKalaTransit ? "text-rose-400 bg-red-950/40 border border-red-500/25 px-2 py-0.5 rounded-md"
-                    : isBariTransit ? "text-[#C9A96E] bg-[#C9A96E]/10 border border-[#C9A96E]/20 px-2 py-0.5 rounded-md"
+                  <span className={`text-[10px] font-bold leading-none ${
+                    isKalaTransit ? "text-rose-400 bg-red-950/40 border border-red-500/25 px-1 py-0.5 rounded-md"
+                    : isBariTransit ? "text-[#C9A96E] bg-[#C9A96E]/10 border border-[#C9A96E]/20 px-1 py-0.5 rounded-md"
                     : "text-[#C9A96E]"
                   }`}>
                     {bhopTransit ? `${bhopTransit}จร` : "—"}
@@ -261,6 +266,124 @@ function TaksaGrid({ taksaMaha }: { taksaMaha: any }) {
               );
             })
           )}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function TransitDirectionsCard({ taksaMaha }: { taksaMaha: any }) {
+  const { taksaTransit } = taksaMaha;
+  if (!taksaTransit?.map) return null;
+
+  // Map each direction to its quality
+  const directionsWithQuality = Object.entries(STAR_DIRECTIONS).map(([starStr, dirName]) => {
+    const star = Number(starStr);
+    const quality = taksaTransit.map[star] as string;
+    return {
+      star,
+      dirName,
+      quality,
+    };
+  });
+
+  // Sort order: ศรี, เดช, มนตรี, มูละ, บริวาร, อายุ, อุตสาหะ, กาลกิณี
+  const qualityOrder = ["ศรี", "เดช", "มนตรี", "มูละ", "บริวาร", "อายุ", "อุตสาหะ", "กาลกิณี"];
+  directionsWithQuality.sort((a, b) => {
+    const indexA = qualityOrder.indexOf(a.quality);
+    const indexB = qualityOrder.indexOf(b.quality);
+    return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
+  });
+
+  const qualityColor: Record<string, string> = {
+    ศรี: "text-emerald-400 bg-emerald-950/30 border-emerald-500/30",
+    เดช: "text-amber-400 bg-amber-950/30 border-amber-500/30",
+    มนตรี: "text-sky-400 bg-sky-950/30 border-sky-500/30",
+    มูละ: "text-orange-400 bg-orange-950/30 border-orange-500/30",
+    บริวาร: "text-slate-300 bg-slate-800/30 border-slate-500/20",
+    อายุ: "text-teal-400 bg-teal-950/30 border-teal-500/30",
+    อุตสาหะ: "text-yellow-400 bg-yellow-950/30 border-yellow-500/30",
+    กาลกิณี: "text-rose-400 bg-red-950/40 border-red-500/30",
+  };
+
+  return (
+    <Card className="border-[#C9A96E]/20 bg-gradient-to-br from-[#0A2240]/40 to-[#020617]/90 backdrop-blur-xl p-5 shadow-2xl">
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
+        <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold">วิเคราะห์ทิศทักษาจรประจำปี (Yearly Transit Directions)</p>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* ทิศมงคลเด่น */}
+        <div className="space-y-3">
+          <p className="text-xs text-[#C9A96E] font-bold uppercase tracking-wider border-b border-white/5 pb-1 flex items-center gap-1.5">
+            <span>✨</span> ทิศมงคลและนำโชค (เสริมสิริมงคล การเดินทาง ค้าขาย)
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {directionsWithQuality
+              .filter(d => ["ศรี", "เดช", "มนตรี", "มูละ"].includes(d.quality))
+              .map(d => (
+                <div key={d.star} className={`flex flex-col justify-between p-3 rounded-xl border ${qualityColor[d.quality] || 'border-white/5 bg-white/2'}`}>
+                  <div>
+                    <p className="font-bold text-sm text-[#F8F6F1]">{d.dirName}</p>
+                    <p className="text-[11px] text-[#8A8070] mt-0.5">ดาว {STAR_NAMES[d.star as StarNumber]} ({d.star})</p>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between border-t border-white/5 pt-1.5">
+                    <span className="text-[10px] text-[#8A8070] italic">
+                      {d.quality === "ศรี" ? "โชคลาภ เงินทอง"
+                        : d.quality === "เดช" ? "อำนาจ เกียรติยศ"
+                        : d.quality === "มนตรี" ? "ผู้ใหญ่อุปถัมภ์"
+                        : "รากฐาน มั่นคง"}
+                    </span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-current bg-black/20 shrink-0">
+                      ทิศ{d.quality}จร
+                    </span>
+                  </div>
+                </div>
+              ))}
+          </div>
+        </div>
+
+        {/* ทิศที่ควรระวัง / ทิศทั่วไป */}
+        <div className="space-y-3">
+          <p className="text-xs text-[#8A8070] font-bold uppercase tracking-wider border-b border-white/5 pb-1 flex items-center gap-1.5">
+            <span>⚠️</span> ทิศควรหลีกเลี่ยง & ทิศทั่วไป
+          </p>
+          <div className="space-y-2">
+            {/* กาลกิณี */}
+            {directionsWithQuality
+              .filter(d => ["กาลกิณี"].includes(d.quality))
+              .map(d => (
+                <div key={d.star} className={`flex items-center justify-between p-3.5 rounded-xl border ${qualityColor[d.quality]}`}>
+                  <div>
+                    <p className="font-bold text-sm text-[#F8F6F1]">{d.dirName}</p>
+                    <p className="text-[11px] text-rose-300/80 mt-0.5">หลีกเลี่ยงการทำพิธี ตั้งโต๊ะทำงาน หรือเดินทางไปทิศนี้เพื่อป้องกันอุปสรรค</p>
+                  </div>
+                  <span className="text-xs font-bold px-2 py-0.5 rounded-md border border-rose-400 bg-red-950/50 text-rose-400 animate-pulse shrink-0">
+                    ทิศ{d.quality}จร
+                  </span>
+                </div>
+              ))}
+            
+            {/* อื่นๆ: อุตสาหะ, บริวาร, อายุ */}
+            <div className="grid grid-cols-3 gap-2">
+              {directionsWithQuality
+                .filter(d => ["บริวาร", "อายุ", "อุตสาหะ"].includes(d.quality))
+                .map(d => (
+                  <div key={d.star} className="flex flex-col justify-between p-2 rounded-xl border border-white/5 bg-slate-900/40">
+                    <div>
+                      <p className="font-bold text-xs text-[#F8F6F1] truncate">{d.dirName}</p>
+                      <p className="text-[9px] text-[#8A8070] mt-0.5">ดาว {STAR_NAMES[d.star as StarNumber]}</p>
+                    </div>
+                    <div className="mt-2.5">
+                      <span className={`text-[9px] font-bold px-1 py-0.5 rounded border ${qualityColor[d.quality]}`}>
+                        {d.quality}จร
+                      </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
         </div>
       </div>
     </Card>
@@ -569,6 +692,9 @@ export default function MahaThaksaPage() {
             <TaksaGrid taksaMaha={taksaMaha} />
             <SawaiCard sawai={sawai} />
           </div>
+
+          {/* Transit Directions Card */}
+          <TransitDirectionsCard taksaMaha={taksaMaha} />
 
           {/* Element Pairs */}
           <ElementPairsCard taksaMaha={taksaMaha} />

@@ -3,7 +3,6 @@ export {
   calculateHoraTaynoo,
   generateHoraTaynooSVG,
   calculateNow as calculateHoraTaynooNow,
-  calculateAt as calculateHoraTaynooAt,
   getPlanetSteps,
   getPlanetStatus,
   calculatePositions,
@@ -22,12 +21,13 @@ export {
   YAM_START,
   DAY_PLANET,
 } from './hora-taynoo-engine.js';
-export type { SuccessYamMeta, ChartConfig } from './hora-taynoo-engine.js';
+export type { ChartConfig } from './hora-taynoo-engine.js';
+export type { SuccessYamMeta } from './types/horaNu.types.js';
 export {
   getSuccessYamDatabase,
   findSuccessYam,
 } from './charts/success-yam-database.js';
-export type { SuccessYamChart } from './hora-taynoo-engine.js';
+export type { SuccessYamChart } from './types/horaNu.types.js';
 export type {
   HoraTaynooInput,
   HoraTaynooResult,
