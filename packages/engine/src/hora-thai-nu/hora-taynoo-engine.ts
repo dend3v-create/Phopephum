@@ -120,26 +120,15 @@ export interface HoraTaynooResult {
 // HELPERS
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * getThaiLocalTime — แปลงเวลาใดๆ ให้เป็น Thailand Local Time (UTC+7)
- */
 function getThaiLocalTime(date: Date): { hour: number, minute: number, day: number, raw: Date } {
-  // สร้าง Date object ใหม่ที่มี offset +7 เสมอ
   const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
   const thai = new Date(utc + (3600000 * 7));
-  return {
-    hour: thai.getHours(),
-    minute: thai.getMinutes(),
-    day: thai.getDay(),
-    raw: thai
-  };
+  return { hour: thai.getHours(), minute: thai.getMinutes(), day: thai.getDay(), raw: thai };
 }
 
 function getAstroDay(thaiTime: { hour: number, minute: number, day: number }): number {
   const mins = thaiTime.hour * 60 + thaiTime.minute;
-  if (mins < 360) {
-    return (thaiTime.day + 6) % 7; // ย้อนกลับไปวันก่อนหน้า
-  }
+  if (mins < 360) return (thaiTime.day + 6) % 7;
   return thaiTime.day;
 }
 
@@ -217,15 +206,10 @@ export function findPlanetPosition(planetNum: number, entries: PlanetEntry[]): n
   return found ? found.zodiacIndex : 0;
 }
 
-/**
- * buildSubTimeSlots — คำนวณเวลายามย่อย
- * **อ้างอิงจากรูปผังสำเร็จ: ทวนเข็มนาฬิกา (CCW ในระบบ index 0->1->2)**
- */
 export function buildSubTimeSlots(yamStartMin: number, startZodiacIndex: number, bhavaMap: Record<number, string>): SubTimeSlot[] {
   const slots: SubTimeSlot[] = [];
   const DURATION = 7.5;
   for (let i = 0; i < 12; i++) {
-    // เดินทวนเข็มนาฬิกาตามลำดับราศี 0 -> 1 -> 2
     const zIdx = (startZodiacIndex + i) % 12;
     const startMin = yamStartMin + i * DURATION;
     const endMin = startMin + DURATION;
@@ -247,13 +231,10 @@ export function buildSubTimeSlots(yamStartMin: number, startZodiacIndex: number,
 export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResult {
   const now = new Date();
   const dateAsked = input.dateAsked ?? now;
-
-  // บังคับให้เป็นเวลาไทย
   const thai = getThaiLocalTime(dateAsked);
-  const h = input.hour   ?? thai.hour;
+  const h = input.hour ?? thai.hour;
   const m = input.minute ?? thai.minute;
   const day = input.dayOverride ?? getAstroDay(thai);
-  
   const period = getPeriod(h);
   const yamAsked = getYamNumber(h, m, period);
   const yamStartMin = getYamStartMin(period, yamAsked);
@@ -261,12 +242,10 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   const dayPlanet = DAY_PLANET[day];
   const yamPlanet = (period === 'day' ? DAY_YAM : NIGHT_YAM)[day][yamAsked - 1];
 
-  // ค้นหาข้อมูลจากผังสำเร็จ 112 ผัง เพื่อความแม่นยำ 100% ตามรูปอ้างอิง
   const WEEKDAY_ID = ['sun','mon','tue','wed','thu','fri','sat'];
   const fixedId = `${WEEKDAY_ID[day]}-${period}-${yamAsked}`;
   const fixedData = SUCCESS_YAM_DATA[fixedId];
 
-  // พับยามแบบดั้งเดิม (เผื่อไว้กรณีไม่มี fixed data)
   const planetSteps = getPlanetSteps(day, yamAsked, period);
   const positions = calculatePositions(planetSteps);
 
@@ -277,12 +256,8 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   const planetEntries: PlanetEntry[] = LABELS.map((label, i) => {
     const pNum = PLANET_NUMS[i];
     const key  = KEYS[i];
-    
-    // ใช้ Fixed Data (ลำดับความสำคัญสูงสุด)
     let zIdx = (fixedData?.planets as any)?.[key] ?? positions[i];
     let steps = (fixedData ? null : planetSteps[i]);
-
-    // ใช้ Manual Input Override (ลำดับรองลงมา)
     if (input.overridePlanets && input.overridePlanets[key] !== undefined) {
       zIdx = input.overridePlanets[key];
       steps = null;
@@ -290,7 +265,6 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
       zIdx = input.overrideLagnaIdx;
       steps = null;
     }
-
     return {
       label, labelThai: THAI_LABELS[i], planetNum: pNum,
       zodiacIndex: zIdx, zodiacName: ZODIAC_ORDER[zIdx].name,
@@ -299,7 +273,7 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
     };
   });
 
-  const lagnaEntry = planetEntries[8]; // ลัคนา
+  const lagnaEntry = planetEntries[8];
   const lagnaZodiacIndex = lagnaEntry.zodiacIndex;
   const bhavaMap = buildBhavaMap(lagnaZodiacIndex);
   const lagnaRulerPlanet = findLagnaRuler(lagnaZodiacIndex);
@@ -311,10 +285,150 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
   return {
     dayOfWeek: day, dayName: DAY_NAMES[day], period, yamAsked,
     yamStartMin, yamEndMin, yamStartStr: minToStr(yamStartMin), yamEndStr: minToStr(yamEndMin),
-    dayPlanet, yamPlanet, kasternZodiacIndex: 0, kasternZodiacName: '', // Placeholder
+    dayPlanet, yamPlanet, kasternZodiacIndex: PLANET_KASTERN[dayPlanet][0], kasternZodiacName: ZODIAC_ORDER[PLANET_KASTERN[dayPlanet][0]].name,
     planetSteps, planetEntries, lagnaZodiacIndex, lagnaZodiacName: ZODIAC_ORDER[lagnaZodiacIndex].name,
     bhavaMap, lagnaRulerPlanet, timeStartZodiacIndex, subTimeSlots,
   };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SVG GENERATOR
+// ─────────────────────────────────────────────────────────────────────────────
+
+export interface ChartConfig {
+  size?: number; theme?: 'dark' | 'light';
+  showKasternFixed?: boolean; showFloatingPlanets?: boolean;
+  showPlanetStatus?: boolean; showTimeRing?: boolean;
+  showLagnaRulerMarker?: boolean; highlightLagna?: boolean;
+}
+
+export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartConfig = {}): string {
+  const SHOW_FIXED  = config.showKasternFixed !== false;
+  const SHOW_FLOAT  = config.showFloatingPlanets !== false;
+  const SHOW_STATUS = config.showPlanetStatus !== false;
+  const SHOW_TIME   = config.showTimeRing !== false;
+  const SHOW_START  = config.showLagnaRulerMarker !== false;
+
+  const SIZE = config.size ?? 520;
+  const CX = SIZE / 2; const CY = SIZE / 2; const s = SIZE / 520;
+
+  const R_RING1 = SIZE * 0.38; const R_RING2 = SIZE * 0.28; const R_RING3 = SIZE * 0.21;
+  const R_CORE  = SIZE * 0.13; const R_TIME  = SIZE * 0.455; const R_LIMIT = SIZE * 0.49;
+  const R_ZOD_BHAVA = (R_RING1 + R_RING2) / 2 + 3 * s;
+  const R_PLN_LBL   = (R_RING2 + R_RING3) / 2;
+  const R_FIX_LBL   = (R_RING3 + R_CORE) / 2;
+
+  const GOLD = '#C9A96E'; const GOLD_TXT = '#F2D49B'; const TXT = '#F8F6F1'; const TXT_TIME = '#FDE047';
+  const LAGNA_BG = '#1A4E9A35'; const PLN_BG = '#C9A96E1A'; const GOOD_CLR = '#6EE7B7';
+  const BAD_CLR = '#FDA4AF'; const MED_CLR = '#C5BCAE';
+
+  function polar(deg: number, r: number) {
+    const rad = (deg * Math.PI) / 180;
+    return { x: CX + r * Math.cos(rad), y: CY + r * Math.sin(rad) };
+  }
+
+  const byZodiac: Record<number, PlanetEntry[]> = {};
+  for (const e of result.planetEntries) { (byZodiac[e.zodiacIndex] ??= []).push(e); }
+
+  let highlights = '';
+  for (const z of ZODIAC_ORDER) {
+    const isLagna = z.index === result.lagnaZodiacIndex;
+    const hasPlanets = (byZodiac[z.index] ?? []).length > 0;
+    if (!isLagna && !hasPlanets) continue;
+    const a1 = z.sectorAngle + 14.85, a2 = z.sectorAngle - 14.85;
+    const o1 = polar(a1, R_RING1), o2 = polar(a2, R_RING1);
+    const i2 = polar(a2, R_CORE), i1 = polar(a1, R_CORE);
+    const d = `M${o1.x} ${o1.y} A${R_RING1} ${R_RING1} 0 0 0 ${o2.x} ${o2.y} L${i2.x} ${i2.y} A${R_CORE} ${R_CORE} 0 0 1 ${i1.x} ${i1.y} Z`;
+    highlights += `<path d="${d}" fill="${isLagna ? LAGNA_BG : PLN_BG}" stroke="none"/>`;
+  }
+
+  const circles = [
+    `<circle cx="${CX}" cy="${CY}" r="${R_RING1.toFixed(1)}" fill="none" stroke="${GOLD}" stroke-width="2.2"/>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R_RING2.toFixed(1)}" fill="none" stroke="${GOLD}60" stroke-width="1.2"/>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R_RING3.toFixed(1)}" fill="none" stroke="${GOLD}28" stroke-width="1"/>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R_CORE.toFixed(1)}" fill="#020617" stroke="${GOLD}" stroke-width="1.8"/>`,
+  ].join('\n');
+
+  let dividers = '';
+  for (let i = 0; i < 12; i++) {
+    const angle = 345 - 30 * i;
+    const inner = polar(angle, R_CORE); const outer = polar(angle, R_RING1);
+    dividers += `<line x1="${inner.x.toFixed(1)}" y1="${inner.y.toFixed(1)}" x2="${outer.x.toFixed(1)}" y2="${outer.y.toFixed(1)}" stroke="${GOLD}" stroke-width="0.8"/>`;
+  }
+
+  let ring1Labels = '';
+  for (const z of ZODIAC_ORDER) {
+    const isLagna = z.index === result.lagnaZodiacIndex;
+    const bhava = result.bhavaMap[z.index];
+    const pCenter = polar(z.sectorAngle, R_ZOD_BHAVA);
+    ring1Labels += `<text x="${pCenter.x.toFixed(1)}" y="${(pCenter.y - 8*s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${12.5*s}" font-family="sans-serif" fill="${isLagna ? '#6EB0F5' : TXT}" font-weight="900">${z.name}</text>`;
+    if (bhava) {
+      const isBad = ['อริ','มรณะ','วินาศ'].includes(bhava);
+      const isGood = ['ตนุ','กฎุมภะ','ปุตตะ','ปัตนิ','ศุภะ','กัมมะ','ลาภะ'].includes(bhava);
+      const color = isBad ? BAD_CLR : isGood ? GOOD_CLR : MED_CLR;
+      ring1Labels += `<text x="${pCenter.x.toFixed(1)}" y="${(pCenter.y + 10*s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${10.5*s}" font-family="sans-serif" fill="${color}" font-weight="800">${bhava}</text>`;
+    }
+  }
+
+  const STATUS_GLYPHS: Record<Exclude<PlanetStatus, null>, { char: string; color: string }> = {
+    'maha-uccj': { char: '✿', color: '#22C55E' }, 'kaset': { char: '△', color: '#EF4444' },
+    'racha-chok':{ char: '⬡', color: '#3B82F6' }, 'maha-chakr':{ char: '□', color: '#EAB308' },
+    'pra': { char: '○', color: '#EF4444' }, 'nij': { char: '✳', color: '#EF4444' },
+  };
+
+  let planetLabels = '';
+  if (SHOW_FLOAT) {
+    for (const z of ZODIAC_ORDER) {
+      const entries = byZodiac[z.index] ?? [];
+      if (entries.length === 0) continue;
+      const pos = polar(z.sectorAngle, R_PLN_LBL);
+      const gap = 22 * s; const totalWidth = (entries.length - 1) * gap;
+      entries.forEach((entry, idx) => {
+        const x = pos.x - totalWidth / 2 + idx * gap; const y = pos.y;
+        const color = entry.planetNum ? (PLANET_INFO[entry.planetNum]?.color ?? GOLD) : (entry.isLagna ? '#6EB0F5' : GOLD);
+        if (entry.status && SHOW_STATUS) {
+          const st = STATUS_GLYPHS[entry.status];
+          planetLabels += `<text x="${x.toFixed(1)}" y="${(y - 15 * s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${11*s}" font-family="sans-serif" fill="${st.color}" font-weight="900">${st.char}</text>`;
+        }
+        planetLabels += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${22*s}" font-family="serif" fill="${color}" font-weight="900">${entry.labelThai}</text>`;
+      });
+    }
+  }
+
+  let kasternFixedLabels = '';
+  if (SHOW_FIXED) {
+    for (const z of ZODIAC_ORDER) {
+      const pos = polar(z.sectorAngle, R_FIX_LBL);
+      kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${17*s}" font-family="sans-serif" fill="${GOLD_TXT}" opacity="0.65" font-weight="800">${KASTERN_FIXED[z.index]}</text>`;
+    }
+  }
+
+  let timeLabels = '';
+  if (SHOW_TIME) {
+    for (const slot of result.subTimeSlots) {
+      const angle = ZODIAC_ORDER[slot.zodiacIndex].sectorAngle;
+      const pos = polar(angle, R_TIME);
+      timeLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${10.5*s}" font-family="mono" fill="${TXT_TIME}" font-weight="900">${slot.startStr.replace(/:/g, '.')}</text>`;
+    }
+  }
+
+  const centerMask = `<circle cx="${CX}" cy="${CY}" r="${(R_CORE + 12*s).toFixed(1)}" fill="#020617" stroke="${GOLD}" stroke-width="3"/>`;
+  const pDay = polar(225, 20 * s); const pYam = polar(45, 20 * s);
+  const dayLabel = `<text x="${pDay.x.toFixed(1)}" y="${pDay.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD_TXT}" font-weight="900">${result.dayPlanet}</text>`;
+  const yamLabel = `<text x="${pYam.x.toFixed(1)}" y="${pYam.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD_TXT}" font-weight="900">${result.yamAsked}</text>`;
+
+  let startMarker = '';
+  if (SHOW_START) {
+    const startAngle = ZODIAC_ORDER[result.timeStartZodiacIndex].sectorAngle;
+    const pos = polar(startAngle, R_RING1);
+    startMarker = `<circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${7.5*s}" fill="none" stroke="#6EB0F5" stroke-width="3" opacity="0.9" />`;
+    startMarker += `<circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${3.5*s}" fill="#6EB0F5" opacity="1" />`;
+  }
+
+  return `<svg viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg" style="background:#020617; border-radius:1.5rem;">
+  <circle cx="${CX}" cy="${CY}" r="${R_LIMIT.toFixed(1)}" fill="#020617" stroke="none" />
+${highlights} ${circles} ${dividers} ${kasternFixedLabels} ${ring1Labels} ${planetLabels} ${timeLabels} ${startMarker} ${centerMask} ${dayLabel} ${yamLabel}
+</svg>`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -323,7 +437,8 @@ export function calculateHoraTaynoo(input: HoraTaynooInput = {}): HoraTaynooResu
 
 export function calculateNow(theme: 'dark'|'light' = 'dark') {
   const result = calculateHoraTaynoo();
-  return { result };
+  const svg = generateHoraTaynooSVG(result, { theme });
+  return { result, svg };
 }
 
 export function loadSuccessYam(weekday: number, period: 'day' | 'night', yamNo: number): HoraTaynooResult {
@@ -332,19 +447,12 @@ export function loadSuccessYam(weekday: number, period: 'day' | 'night', yamNo: 
   return calculateHoraTaynoo({ dayOverride: weekday, hour: Math.floor(safeMin / 60), minute: safeMin % 60 });
 }
 
-/**
- * getYamTimeRange — ดึงช่วงเวลาของยาม
- */
-export function getYamTimeRange(
-  period: 'day' | 'night',
-  yamNo: number,
-): { start: string; end: string } {
-  const s = YAM_START[period][yamNo - 1]
-  return { start: minToStr(s), end: minToStr(s + 90) }
+export function getYamTimeRange(period: 'day' | 'night', yamNo: number): { start: string; end: string } {
+  const s = YAM_START[period][yamNo - 1];
+  return { start: minToStr(s), end: minToStr(s + 90) };
 }
 
 export function getSuccessYamMeta() {
-
   const list = [];
   const WEEKDAY_NAMES = ['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัส','ศุกร์','เสาร์'];
   const WEEKDAY_ID    = ['sun','mon','tue','wed','thu','fri','sat'];

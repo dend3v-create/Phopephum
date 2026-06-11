@@ -58,6 +58,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const { createSupabaseClient } = await import("~/services/supabase.server");
   const { supabase } = createSupabaseClient(request, env);
+
+  const url = new URL(request.url);
+  const customerId = url.searchParams.get("customerId");
   
   // 1. ดึงรายงานล่าสุด
   const { data: reports } = await supabase
@@ -82,19 +85,35 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  // 3. คำนวณผลลัพธ์เริ่มต้นหากมีข้อมูลวันเกิดในโปรไฟล์
+  // เลือกบุคคลเป้าหมายที่จะนำมาคำนวณเริ่มต้น
+  let targetPerson = profile;
+  let selectedCust = null;
+  if (customerId && customers) {
+    selectedCust = customers.find(c => c.id === customerId);
+    if (selectedCust) {
+      targetPerson = {
+        id: selectedCust.id,
+        birth_date: selectedCust.birth_date,
+        birth_time: selectedCust.birth_time,
+        birth_place: selectedCust.birth_place,
+        display_name: selectedCust.name,
+      } as any;
+    }
+  }
+
+  // 3. คำนวณผลลัพธ์เริ่มต้นหากมีข้อมูลวันเกิด
   let initialResult = null;
-  if (profile?.birth_date) {
+  if (targetPerson?.birth_date) {
     try {
-      const birthDateObj = new Date(profile.birth_date);
-      const [bh, bm] = (profile.birth_time || "12:00").split(":");
+      const birthDateObj = new Date(targetPerson.birth_date);
+      const [bh, bm] = (targetPerson.birth_time || "12:00").split(":");
       birthDateObj.setHours(parseInt(bh, 10), parseInt(bm, 10), 0);
       const birthYamResult = getYamPrediction(birthDateObj);
 
       const phopephumResult = await calculatePhopephum({
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time || "12:00",
-        birthPlace: profile.birth_place || "กรุงเทพมหานคร",
+        birthDate: targetPerson.birth_date,
+        birthTime: targetPerson.birth_time || "12:00",
+        birthPlace: targetPerson.birth_place || "กรุงเทพมหานคร",
       }, new Date());
 
       initialResult = {
@@ -108,12 +127,14 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           elementPairFlags: phopephumResult.crossCheck.elementPairFlags,
           alerts: phopephumResult.crossCheck.alerts,
         },
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time || "",
+        birthDate: targetPerson.birth_date,
+        birthTime: targetPerson.birth_time || "",
         transitDate: new Date().toISOString().split("T")[0],
         transitTime: "12:00",
-        lagnaNakshatra: calculateLagnaNakshatra(profile.birth_date, profile.birth_time || "12:00"),
+        lagnaNakshatra: calculateLagnaNakshatra(targetPerson.birth_date, targetPerson.birth_time || "12:00"),
         birthYamResult,
+        customerId: customerId || undefined,
+        customerName: selectedCust ? selectedCust.name : undefined,
       };
     } catch (e) {
       console.error("Initial load calculation error:", e);
@@ -518,7 +539,7 @@ export default function HoroscopePage() {
       {/* ── เมนูหลัก (Page Header) ── */}
       <div>
         <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-1 font-bold">
-          ดวงดีมีชัย · ตรวจดวงชะตา
+          ดวงดีมีชัย · ตรวจดวงชะตา {activeResult?.customerName ? `(ดวงชะตาของ ${activeResult.customerName})` : ""}
         </p>
         <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">
           เส้นทางชีวิต

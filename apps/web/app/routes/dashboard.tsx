@@ -100,6 +100,14 @@ function NavIcon({ name, size = 5 }: { name: IconKey | string; size?: number }) 
       <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
+  if (name === "people") return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={cls}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
   if (name === "operator") return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={cls}>
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
@@ -219,6 +227,7 @@ export default function DashboardLayout() {
               <NavLink to="/dashboard/rahu"         exact={false} icon={<NavIcon name="rahu" />}       label="ยามราหูค้นทรัพย์" />
               <NavLink to="/dashboard/mahathaksa"   exact={false} icon={<NavIcon name="taksa" />}     label="มหาทักษาพยากรณ์" />
               <NavLink to="/dashboard/mahaphuti"    exact={false} icon={<NavIcon name="phuti" />}     label="มหาภูติกำเนิด" />
+              <NavLink to="/dashboard/people"       exact={false} icon={<NavIcon name="people" />}    label="โปรไฟล์บุคคล" />
               <NavLink to="/dashboard/calendar"     exact={false} icon={<NavIcon name="list" />}       label="ปฏิทิน 100 ปี" />
             </div>
           )}

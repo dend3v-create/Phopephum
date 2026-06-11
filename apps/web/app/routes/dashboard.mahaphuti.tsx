@@ -27,21 +27,50 @@ export const meta: MetaFunction = () => [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const { profile } = await requireMinPlan("basic", request, env);
+  const user = await requireAuth(request, env);
+  const { getProfile } = await import("~/services/auth.server");
+  const profile = await getProfile(user.id, request, env);
+
+  const url = new URL(request.url);
+  const customerId = url.searchParams.get("customerId");
+
+  const { createSupabaseClient } = await import("~/services/supabase.server");
+  const { supabase } = createSupabaseClient(request, env);
+
+  // ดึงรายชื่อลูกค้าที่บันทึกไว้ เพื่อใช้หาข้อมูลตาม customerId
+  const { data: customers } = await supabase
+    .from("customers")
+    .select("*")
+    .eq("user_id", user.id);
+
+  let targetPerson = profile;
+  let selectedCust = null;
+  if (customerId && customers) {
+    selectedCust = customers.find(c => c.id === customerId);
+    if (selectedCust) {
+      targetPerson = {
+        id: selectedCust.id,
+        birth_date: selectedCust.birth_date,
+        birth_time: selectedCust.birth_time,
+        birth_place: selectedCust.birth_place,
+        display_name: selectedCust.name,
+      } as any;
+    }
+  }
 
   let initialResult: any = null;
-  if (profile?.birth_date) {
+  if (targetPerson?.birth_date) {
     try {
       const checkDate = new Date();
-      const birthCE = new Date(profile.birth_date).getFullYear();
+      const birthCE = new Date(targetPerson.birth_date).getFullYear();
       const phopephumResult = await calculatePhopephum({
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time || "12:00",
-        birthPlace: profile.birth_place || "กรุงเทพมหานคร",
+        birthDate: targetPerson.birth_date,
+        birthTime: targetPerson.birth_time || "12:00",
+        birthPlace: targetPerson.birth_place || "กรุงเทพมหานคร",
       }, checkDate);
 
       const taksaMahaFull = calcTaksaMaha({
-        birthDate: new Date(profile.birth_date + "T12:00:00"),
+        birthDate: new Date(targetPerson.birth_date + "T12:00:00"),
         checkDate,
         csNatal:   buddhToCS(birthCE + 543),
         csTransit: buddhToCS(checkDate.getFullYear() + 543),
@@ -57,10 +86,12 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           alerts: phopephumResult.crossCheck.alerts,
         },
         sawai: taksaMahaFull.sawai,
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time || "",
+        birthDate: targetPerson.birth_date,
+        birthTime: targetPerson.birth_time || "",
         birthYearThai: birthCE + 543,
         currentYearThai: checkDate.getFullYear() + 543,
+        customerId: customerId || undefined,
+        customerName: selectedCust ? selectedCust.name : undefined,
       };
     } catch (e) {
       console.error("mahaphuti loader error:", e);
@@ -423,7 +454,9 @@ export default function MahaPhuti() {
             <div className="w-2 h-2 bg-[#4B6FAE] rounded-full animate-pulse" />
             <p className="text-[#4B6FAE] text-[11px] tracking-[0.3em] uppercase font-bold">Mahabhuti System</p>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">มหาภูติกำเนิด</h1>
+          <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">
+            มหาภูติกำเนิด {activeResult?.customerName ? `(${activeResult.customerName})` : ""}
+          </h1>
           <p className="text-[#8A8070] text-sm mt-1">ระบบมหาภูติ 7 ภพ — พลังงานวิถีจิตใจ กำเนิด/จร</p>
         </div>
         {natal && (
