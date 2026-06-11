@@ -157,9 +157,9 @@ function minToStr(minutes: number): string {
   const h = Math.floor(safeMin / 60);
   const m = safeMin % 60;
   const mInt = Math.floor(m);
-  const mFrac = Math.round((m - mInt) * 60);
-  if (mFrac === 0) return `${String(h).padStart(2,'0')}:${String(mInt).padStart(2,'0')}`;
-  return `${String(h).padStart(2,'0')}:${String(mInt).padStart(2,'0')}.${String(mFrac).padStart(2,'0')}`;
+  const hasFrac = (m - mInt) >= 0.4; // 0.5 min = 30 sec (Thai notation: .5)
+  if (!hasFrac) return `${String(h).padStart(2,'0')}:${String(mInt).padStart(2,'0')}`;
+  return `${String(h).padStart(2,'0')}:${String(mInt).padStart(2,'0')}.5`;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
