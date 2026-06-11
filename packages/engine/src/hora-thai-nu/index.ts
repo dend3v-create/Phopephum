@@ -77,7 +77,7 @@ export type {
   PhraKrasibChart,
   ZodiacCell,
   ThreeAxisRow,
-  YamResult,
+  YamResult as PhraiKrasibYamResult,
   FloatingStar,
   RasiIndex,
   DayOfWeek,

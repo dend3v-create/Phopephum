@@ -1596,10 +1596,10 @@ export default function YamPage() {
                       return (
                         <th key={i} className="p-2 text-[13px] font-bold uppercase tracking-wider text-center text-[#94A3B8]">
                           ยามที่ {num}
-                          <span className="block text-[11px] font-medium text-[#4A5568] tracking-normal mt-0.5">{label} น.</span>
+                          <span className="block text-[11px] font-medium text-[#94A3B8] tracking-normal mt-0.5">{label} น.</span>
                           <div className="flex justify-center gap-px mt-1.5">
                             {["ต้น","กลาง","ปลาย"].map(p => (
-                              <span key={p} className="text-[10px] font-normal text-[#4A5568] bg-white/[0.04] px-1 py-px rounded">
+                              <span key={p} className="text-[10px] font-normal text-[#94A3B8] bg-white/[0.04] px-1 py-px rounded">
                                 {p}
                               </span>
                             ))}

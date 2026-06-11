@@ -203,7 +203,7 @@ export default function DashboardLayout() {
 
         {/* ── Main Nav — exactly 5 items ── */}
         <nav className="flex flex-col gap-0.5 flex-1 overflow-y-auto">
-          <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#4A5568] px-3 mb-1.5">เมนูหลัก</p>
+          <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] px-3 mb-1.5 opacity-70">เมนูหลัก</p>
 
           {NAV_ITEMS.map(item => (
             <NavLink
@@ -359,7 +359,7 @@ function MobileBottomBar({ currentPath }: { currentPath: string }) {
             key={tab.to}
             to={tab.to}
             className="relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
-            style={{ color: isActive ? "#C6A96B" : "#4A5568" }}
+            style={{ color: isActive ? "#C6A96B" : "#94A3B8" }}
           >
             {/* Active top-edge indicator */}
             {isActive && (

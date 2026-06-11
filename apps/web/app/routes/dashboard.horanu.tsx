@@ -216,7 +216,7 @@ function PlanetTable({ result }: { result: HoraTaynooResult }) {
               {bhava && (
                 <div className="text-[9px] mt-0.5 font-medium" style={{ color: `${color}cc` }}>{bhava}</div>
               )}
-              <div className="text-[9px] text-[#4A5568] mt-0.5">{entry.steps}ก้าว</div>
+              <div className="text-[9px] text-[#94A3B8] mt-0.5">{entry.steps}ก้าว</div>
             </div>
           );
         })}
@@ -799,7 +799,7 @@ function HoranuChatPanel() {
       )}
 
       {/* Hint */}
-      <p className="text-[9px] text-[#4A5568] mt-3 text-center">
+      <p className="text-[9px] text-[#94A3B8] mt-3 text-center">
         เวลาที่กดปุ่มถามคือเวลาที่ใช้คำนวณผังดวง — ผลลัพธ์จะเปลี่ยนทุก 7.5 นาที
       </p>
     </Card>

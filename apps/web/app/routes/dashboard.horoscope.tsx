@@ -2189,13 +2189,13 @@ function FateMatrixPanel({
                               <span className={`text-[12px] sm:text-[14px] font-bold leading-tight mb-0.5 transition-colors text-center ${
                                 isHighlighted
                                   ? "text-[#C9A96E] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
-                                  : "text-[#B4A790] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]"
+                                  : "text-[#D9CDB7] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]"
                               }`}>
                                 {houseName}
                               </span>
                             )}
                             {showAgeRange && rIdx < 3 && (
-                              <span className="text-[13px] text-[#8A8070]/70 mt-1 leading-none font-sans font-semibold">
+                              <span className="text-[13px] text-[#94A3B8] mt-1 leading-none font-sans font-semibold">
                                 {getCellAgeRange(rIdx, cIdx, matrix)} ปี
                               </span>
                             )}

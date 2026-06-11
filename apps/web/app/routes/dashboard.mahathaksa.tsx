@@ -475,7 +475,7 @@ function ElementPairsCard({ taksaMaha }: { taksaMaha: any }) {
             <p className="text-[10px] text-[#8A8070] mt-0.5">{flag.stars[0]} + {flag.stars[1]}</p>
             {flag.isPermanent && <span className="text-[10px] text-[#C9A96E] font-bold">ถาวร</span>}
             {!flag.isPermanent && flag.inTransit && <span className="text-[10px] text-sky-400 font-bold">จรปีนี้</span>}
-            {!flag.isPermanent && !flag.inTransit && <span className="text-[10px] text-[#4A5568]">ไม่เกิด</span>}
+            {!flag.isPermanent && !flag.inTransit && <span className="text-[10px] text-[#94A3B8]">ไม่เกิด</span>}
           </div>
         ))}
       </div>
@@ -717,7 +717,7 @@ export default function MahaThaksaPage() {
                 className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
                   selectedStar === null
                     ? "bg-[#C9A96E] text-[#020617] border-[#C9A96E]"
-                    : "bg-white/5 text-[#8A8070] border-white/10 hover:border-[#C9A96E]/30"
+                    : "bg-white/5 text-[#94A3B8] border-white/10 hover:border-[#C9A96E]/30"
                 }`}
               >
                 ทั้งหมด
@@ -734,7 +734,7 @@ export default function MahaThaksaPage() {
                         ? tone === "good" ? "bg-emerald-500 text-white border-emerald-500"
                           : tone === "bad" ? "bg-rose-500 text-white border-rose-500"
                           : "bg-[#C9A96E] text-[#020617] border-[#C9A96E]"
-                        : "bg-white/5 text-[#8A8070] border-white/10 hover:border-[#C9A96E]/30"
+                        : "bg-white/5 text-[#94A3B8] border-white/10 hover:border-[#C9A96E]/30"
                     }`}
                   >
                     {s} {STAR_NAMES[s as StarNumber]}

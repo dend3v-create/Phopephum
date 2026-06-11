@@ -171,12 +171,14 @@ export default function DashboardScreen() {
             sub="เลข ๗ ตัว ผังจักรพรรดิ"
             icon="compass-outline"
             color="#4B6FAE"
+            onPress={() => router.push('/horoscope' as any)}
           />
           <AnalysisRow 
             title="มหาทักษา / มหาภูติ"
             sub="พยากรณ์ชีวิตและธาตุกำเนิด"
             icon="star-half-outline"
             color="#C6A96B"
+            onPress={() => router.push('/mahathaksa' as any)}
           />
         </View>
 
@@ -196,9 +198,9 @@ function ToolCard({ title, sub, info, icon, color, onPress }: any) {
   );
 }
 
-function AnalysisRow({ title, sub, icon, color }: any) {
+function AnalysisRow({ title, sub, icon, color, onPress }: any) {
   return (
-    <TouchableOpacity style={styles.row}>
+    <TouchableOpacity style={styles.row} onPress={onPress}>
       <View style={[styles.rowIcon, { backgroundColor: color + '20', borderColor: color + '40' }]}>
         <Ionicons name={icon} size={20} color={color} />
       </View>
@@ -206,7 +208,7 @@ function AnalysisRow({ title, sub, icon, color }: any) {
         <Text style={styles.rowTitle}>{title}</Text>
         <Text style={styles.rowSub}>{sub}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={16} color="#4A5568" />
+      <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
     </TouchableOpacity>
   );
 }

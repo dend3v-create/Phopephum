@@ -264,7 +264,7 @@ export default function PlannerPage() {
                         defaultValue={(plan?.hora_activities as any)?.[i] ?? ""}
                         placeholder="ยังไม่มีการบันทึกแผนงาน..."
                         onFocus={() => setActiveSlot(i)}
-                        className="w-full bg-transparent text-sm text-[#D9CDB7] placeholder-[#4A5568] border-b border-[#D9BC82]/10 py-1.5 focus:border-[#D9BC82]/40 outline-none transition-all"
+                        className="w-full bg-transparent text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 border-b border-[#D9BC82]/10 py-1.5 focus:border-[#D9BC82]/40 outline-none transition-all"
                       />
                       {!(plan?.hora_activities as any)?.[i] && (
                         <button type="button" className="absolute right-0 top-1/2 -translate-y-1/2 text-[#D9BC82]/40 hover:text-[#D9BC82]">
@@ -312,7 +312,7 @@ export default function PlannerPage() {
                     </label>
                   ))}
                 </div>
-                <div className="flex justify-between text-[11px] text-[#4A5568] font-bold uppercase tracking-widest px-1">
+                <div className="flex justify-between text-[11px] text-[#94A3B8] font-bold uppercase tracking-widest px-1">
                   <span>น้อยที่สุด</span>
                   <span>ยอดเยี่ยมที่สุด</span>
                 </div>
@@ -327,7 +327,7 @@ export default function PlannerPage() {
                   defaultValue={plan?.success_notes ?? ""}
                   placeholder="วันนี้ได้สัจจะบารมีเรื่องใดบ้าง? หรือมีสิ่งใดให้เรียนรู้เพิ่มเติม..."
                   rows={4}
-                  className="w-full bg-[#1E293B]/30 border border-white/5 rounded-xl p-4 text-sm text-[#D9CDB7] placeholder-[#4A5568] focus:border-[#D9BC82]/20 outline-none transition-all resize-none"
+                  className="w-full bg-[#1E293B]/30 border border-white/5 rounded-xl p-4 text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 focus:border-[#D9BC82]/20 outline-none transition-all resize-none"
                 />
               </div>
 
@@ -339,7 +339,7 @@ export default function PlannerPage() {
                   name="dharma_teaching"
                   defaultValue={plan?.dharma_teaching ?? "ความอดทนในวันลำบาก คือความสำเร็จในวันหน้า..."}
                   rows={2}
-                  className="w-full bg-[#D9BC82]/5 border border-[#D9BC82]/10 rounded-xl p-4 text-sm italic text-[#D9BC82] placeholder-[#4A5568] focus:border-[#D9BC82]/20 outline-none transition-all resize-none"
+                  className="w-full bg-[#D9BC82]/5 border border-[#D9BC82]/10 rounded-xl p-4 text-sm italic text-[#D9BC82] placeholder-[#94A3B8]/40 focus:border-[#D9BC82]/20 outline-none transition-all resize-none"
                 />
               </div>
             </div>
@@ -347,7 +347,7 @@ export default function PlannerPage() {
         </section>
 
         {/* Footer Actions */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0A1628] via-[#0A1628] to-transparent pointer-events-none">
+        <div className="fixed bottom-[64px] md:bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#020617] via-[#020617] to-transparent pointer-events-none z-10">
           <div className="max-w-2xl mx-auto pointer-events-auto">
             <Button type="submit" loading={isSaving} className="w-full h-12 btn-gold-shine border-0 text-base font-bold flex items-center justify-center gap-2 shadow-2xl">
               <Save className="w-5 h-5" />
