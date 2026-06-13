@@ -110,89 +110,17 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const user = await requireAuth(request, env);
-  const formData = await request.formData();
-  const formType = String(formData.get("formType") ?? "");
-
-  const { supabase } = createSupabaseClient(request, env);
-
-  if (formType === "withdrawal_request") {
-    const amount = Number(formData.get("amount") ?? 0);
-    const bankName = String(formData.get("bankName") ?? "").trim();
-    const accountName = String(formData.get("accountName") ?? "").trim();
-    const accountNumber = String(formData.get("accountNumber") ?? "").trim();
-
-    if (amount < 100) {
-      return json({ error: "ยอดถอนขั้นต่ำคือ 100 บาท" }, { status: 400 });
-    }
-
-    if (!bankName || !accountName || !accountNumber) {
-      return json({ error: "กรุณากรอกข้อมูลธนาคารให้ครบถ้วน" }, { status: 400 });
-    }
-
-    const profile = await getProfile(user.id, request, env);
-    const currentBalance = Number(profile?.wallet_balance || 0);
-
-    if (currentBalance < amount) {
-      return json({ error: "ยอดเงินในกระเป๋าของคุณไม่เพียงพอสำหรับการถอน" }, { status: 400 });
-    }
-
-    // 1. สร้างคำขอถอนเงิน
-    const { error: withdrawError } = await supabase
-      .from("withdrawal_requests")
-      .insert({
-        user_id: user.id,
-        amount,
-        bank_name: bankName,
-        account_name: accountName,
-        account_number: accountNumber,
-        status: "pending",
-      });
-
-    if (withdrawError) {
-      return json({ error: `ไม่สามารถส่งคำขอถอนเงินได้: ${withdrawError.message}` }, { status: 500 });
-    }
-
-    // 1.1 ส่ง LINE แจ้งเตือนแอดมิน
-    await notifyWithdrawalRequest(env, {
-      userId: user.id,
-      displayName: profile?.display_name || user.email || "ผู้ใช้งานนิรนาม",
-      amount,
-      bankName,
-      accountName,
-      accountNumber,
-    }).catch(err => console.error("[Community] LINE notify failed:", err));
-
-    // 2. หักเงินจากกระเป๋าเงินสด
-    await supabase
-      .from("profiles")
-      .update({ wallet_balance: currentBalance - amount })
-      .eq("id", user.id);
-
-    // 3. บันทึกประวัติ Wallet Transaction
-    await supabase
-      .from("wallet_transactions")
-      .insert({
-        user_id: user.id,
-        amount: -amount,
-        type: "withdrawal",
-        description: `ส่งคำขอถอนเงินเข้าบัญชีธนาคาร ${bankName} (${accountNumber})`,
-      });
-
-    return redirect("/dashboard/community?saved=withdraw");
-  }
-
+  await requireAuth(request, env);
   return json({ error: "การกระทำที่ไม่สนับสนุน" }, { status: 400 });
 }
 
 export default function CommunityPage() {
-  const { profile, referralsCount, referralsList, walletHistory, withdrawals } = useLoaderData<typeof loader>();
+  const { profile, referralsCount, referralsList, walletHistory } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
   const [copied, setCopied] = useState(false);
-  const [showWithdrawForm, setShowWithdrawForm] = useState(false);
 
   const referralCode = profile?.referral_code || "";
   const referralLink = referralCode 
@@ -296,14 +224,11 @@ export default function CommunityPage() {
             </div>
             <div>
               <h2 className="text-4xl font-display font-bold text-[#F8F6F1]">{walletBalance.toLocaleString("th-TH")} <span className="text-sm text-[#94A3B8] font-sans font-normal">บาท</span></h2>
-              <p className="text-xs text-[#94A3B8] mt-1">รายได้ถอนได้ (หักภาษี ณ ที่จ่ายตามกฎหมาย)</p>
+              <p className="text-xs text-[#94A3B8] mt-1">สะสมสำหรับแลกรับบริการในแอป</p>
             </div>
-            <button
-              onClick={() => setShowWithdrawForm(!showWithdrawForm)}
-              className="w-full py-2 bg-[#C6A96B]/10 hover:bg-[#C6A96B]/20 text-[#C6A96B] font-bold text-xs rounded-xl border border-[#C6A96B]/30 transition-all flex items-center justify-center gap-1.5 uppercase tracking-wider"
-            >
-              <Coins className="w-3.5 h-3.5" /> เบิกถอนรายได้
-            </button>
+            <div className="w-full py-2 bg-[#C6A96B]/5 text-[#C6A96B] border border-[#C6A96B]/20 rounded-xl text-center text-xs font-bold flex items-center justify-center gap-1.5 uppercase tracking-wider">
+              ⏳ แลกรับบริการภายในแอป
+            </div>
           </div>
         </Card>
       </div>
@@ -330,7 +255,7 @@ export default function CommunityPage() {
         </Card>
       )}
 
-      {/* Referral Link & Withdraw Form Section */}
+      {/* Referral Link & Redeem Info Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
         {/* Left: Invite & Referral Details */}
@@ -378,77 +303,46 @@ export default function CommunityPage() {
               </p>
               <p className="flex items-start gap-2">
                 <span className="text-[#C6A96B] font-bold">✦</span>
-                <span>หากผู้สมัครนั้นทำการอัปเกรดเป็นแผนแบบพรีเมียม (Premium Subscription) คุณจะได้รับส่วนแบ่งเงินสดรายเดือนทันทีตามอัตรา Rank ของคุณ</span>
+                <span>หากผู้สมัครนั้นทำการอัปเกรดเป็นแผนแบบพรีเมียม (Premium Subscription) คุณจะได้รับส่วนแบ่งรายเดือนเพื่อสะสมแลกรับบริการ</span>
               </p>
             </div>
           </Card>
         </div>
 
-        {/* Right: Withdraw Box */}
+        {/* Right: Redeem Info Box */}
         <div className="space-y-6">
           <h3 className="font-display text-xl font-bold text-[#F8F6F1] flex items-center gap-2">
-            <Coins className="w-5 h-5 text-[#C6A96B]" /> คำขอเบิกเงินสด (E-Wallet Withdraw)
+            <Coins className="w-5 h-5 text-[#C6A96B]" /> การแลกเปลี่ยนกาลเวลา (Time Sands & Service Redeem)
           </h3>
 
           <Card className="bg-[#0A1628]/30 border-[#C6A96B]/10 p-6 space-y-5">
             <div className="flex justify-between items-center text-sm border-b border-[#C6A96B]/10 pb-3">
-              <span className="text-[#94A3B8]">ยอดเงินถอนได้ในบัญชี</span>
+              <span className="text-[#94A3B8]">ยอดเงินสะสมในกระเป๋าพันธมิตร</span>
               <span className="text-lg font-bold text-[#C6A96B]">{walletBalance.toLocaleString("th-TH")} บาท</span>
             </div>
 
-            {actionData?.error && (
-              <div className="p-3.5 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-xs font-bold">
-                ⚠️ {actionData.error}
+            <div className="space-y-4 text-xs text-[#D9CDB7] leading-relaxed">
+              <p className="font-bold text-[#F8F6F1] text-sm">⏳ กาลเวลาแลกรับบริการในระบบภพภูมิ</p>
+              <p>
+                ระบบภพภูมิเปลี่ยนมาใช้โครงสร้างการแลกรับบริการภายในแอปพลิเคชันอย่างเป็นทางการ เพื่อความสอดคล้องกับแนวคิด **"Sands of Time" (ทรายกาลเวลา ⏳)**
+              </p>
+              <ul className="space-y-2.5 pl-2">
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C6A96B] font-bold">✓</span>
+                  <span><strong>แลกเปลี่ยนเป็นเม็ดทรายกาลเวลา</strong>: นำยอดเงินสะสมไปแลกเป็นทรายกาลเวลาสำหรับสร้างแผนและรายงานระดับสูงได้โดยตรง</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C6A96B] font-bold">✓</span>
+                  <span><strong>แลกรับรายงานพิเศษ</strong>: นำยอดสะสมไปปลดล็อกผังดวงจักรพรรดิ (Emperor Chart) หรือรับการวิเคราะห์พิเศษจากพระราหูและศาสตร์ยามสด</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[#C6A96B] font-bold">✓</span>
+                  <span><strong>ไม่มีขั้นต่ำในการแลกรับ</strong>: สามารถเลือกใช้มูลค่าเพื่อรับพลังพลังงานทรายได้ตามความเหมาะสมของสัจจะบารมีของท่าน</span>
+                </li>
+              </ul>
+              <div className="p-3 bg-[#C6A96B]/5 border border-[#C6A96B]/10 rounded-xl text-center font-bold text-[#C6A96B] text-[11px]">
+                ⚙️ ระบบแลกทรายกาลเวลาและบริการจะเปิดใช้งานเร็วๆ นี้
               </div>
-            )}
-
-            <Form method="post" className="space-y-4">
-              <input type="hidden" name="formType" value="withdrawal_request" />
-              
-              <Input
-                name="amount"
-                type="number"
-                label="จำนวนเงินที่ต้องการถอน (บาท)"
-                placeholder="ยอดขั้นต่ำ 100 บาท"
-                min="100"
-                max={walletBalance}
-                required
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  name="bankName"
-                  label="ธนาคารผู้รับเงิน"
-                  placeholder="เช่น กสิกรไทย, ไทยพาณิชย์"
-                  required
-                />
-                <Input
-                  name="accountNumber"
-                  label="เลขที่บัญชีธนาคาร"
-                  placeholder="เช่น 123-4-56789-0"
-                  required
-                />
-              </div>
-
-              <Input
-                name="accountName"
-                label="ชื่อบัญชี (ภาษาไทย/อังกฤษ ตรงกับหน้าสมุด)"
-                placeholder="เช่น นายบุญดวง นามดี"
-                required
-              />
-
-              <Button
-                type="submit"
-                disabled={isSubmitting || walletBalance < 100}
-                className="w-full bg-[#C6A96B] text-slate-950 hover:bg-[#E2C98A] h-11 font-bold text-sm rounded-xl flex items-center justify-center gap-1.5 shadow-lg"
-              >
-                <Send className="w-4 h-4" />
-                {isSubmitting ? "กำลังส่งคำร้อง..." : "ส่งคำขอถอนเงิน"}
-              </Button>
-            </Form>
-
-            <div className="text-[11px] text-[#94A3B8] leading-relaxed italic bg-white/5 p-3 rounded-xl">
-              * ข้อมูลเบิกถอนจะได้รับการตรวจสอบและดำเนินการโอนภายใน 1-3 วันทำการ และจะมีระบบ LINE แจ้งเตือนแอดมินโดยอัตโนมัติ
             </div>
           </Card>
         </div>
@@ -511,45 +405,8 @@ export default function CommunityPage() {
             )}
           </Card>
 
-          {/* Right: Wallet Transaction History & Withdraw History */}
+          {/* Right: Wallet Transaction History */}
           <div className="space-y-6">
-            {/* Withdraw Requests */}
-            <Card className="bg-[#0A1628]/35 border-[#C6A96B]/10 p-5 space-y-4">
-              <h4 className="text-sm font-bold text-[#C6A96B] uppercase tracking-wider flex items-center gap-1.5">
-                <History className="w-4 h-4 text-[#C6A96B]" /> ประวัติคำขอถอนเงิน
-              </h4>
-
-              {withdrawals.length === 0 ? (
-                <div className="text-center py-10 text-[#94A3B8]/60 text-xs">
-                  ยังไม่มีประวัติการส่งคำขอถอนเงินสด
-                </div>
-              ) : (
-                <div className="space-y-2 max-h-[250px] overflow-y-auto">
-                  {withdrawals.map((withdraw: any, idx: number) => (
-                    <div key={idx} className="flex justify-between items-center p-3 bg-white/5 border border-white/5 rounded-xl text-xs">
-                      <div>
-                        <div className="font-bold text-[#F8F6F1]">{withdraw.amount.toLocaleString("th-TH")} บาท</div>
-                        <div className="text-[10px] text-[#94A3B8] mt-0.5">
-                          {withdraw.bank_name} ({withdraw.account_number})
-                        </div>
-                        <div className="text-[9px] text-[#94A3B8]/80 mt-0.5">
-                          {new Date(withdraw.created_at).toLocaleString("th-TH")}
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        {getStatusBadge(withdraw.status)}
-                        {withdraw.admin_note && (
-                          <div className="text-[9px] text-red-400 mt-1 italic max-w-[150px] text-ellipsis overflow-hidden whitespace-nowrap">
-                            * {withdraw.admin_note}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </Card>
-
             {/* Wallet Transactions */}
             <Card className="bg-[#0A1628]/35 border-[#C6A96B]/10 p-5 space-y-4">
               <h4 className="text-sm font-bold text-[#C6A96B] uppercase tracking-wider flex items-center gap-1.5">
@@ -565,7 +422,7 @@ export default function CommunityPage() {
                   {walletHistory.map((tx: any, idx: number) => (
                     <div key={idx} className="flex justify-between items-center p-3 bg-white/5 border border-white/5 rounded-xl text-xs">
                       <div className="flex-1 pr-4">
-                        <div className="font-bold text-[#F8F6F1]">{tx.description || (tx.type === "commission" ? "ค่าแนะนำพันธมิตร" : "การถอนเงิน")}</div>
+                        <div className="font-bold text-[#F8F6F1]">{tx.description || (tx.type === "commission" ? "ค่าแนะนำพันธมิตร" : "การโอนคะแนน")}</div>
                         <div className="text-[9px] text-[#94A3B8] mt-0.5">
                           {new Date(tx.created_at).toLocaleString("th-TH")}
                         </div>
