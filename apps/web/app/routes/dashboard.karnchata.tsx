@@ -195,7 +195,7 @@ function NineBaseChart({
   }, [hoverNum, chart]);
 
   return (
-    <Card className="border-[#4B6FAE]/30 bg-[#0A1628] p-6 sm:p-8 relative">
+    <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8 relative">
       <div className="flex items-center gap-3 mb-5">
         <div className="flex-1">
           <h3 className="text-base font-bold text-[#F8F6F1]">{title}</h3>
@@ -207,14 +207,14 @@ function NineBaseChart({
       </div>
 
       {hoverNum !== null && (
-        <div className="mb-4 bg-[#020617] border border-[#C6A96B]/30 rounded-xl p-3 animate-in fade-in">
+        <div className="mb-4 bg-[#071427]/75 border border-[#C6A96B]/30 rounded-xl p-3 animate-in fade-in">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold ring-2 ring-[#C6A96B]" style={{ color: PLANET_COLORS_BY_NUM[hoverNum] }}>{hoverNum}</div>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center font-display font-bold ring-2 ring-[#C6A96B] text-[#F8F6F1]">{hoverNum}</div>
             <p className="text-sm font-bold text-[#C6A96B]">ดาว {STAR_NAMES[hoverNum as keyof typeof STAR_NAMES]}</p>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {connectionItems.map((occ, i) => (
-              <div key={i} className="bg-[#0A1628] border border-white/5 rounded px-2 py-1 text-[10px] text-[#F8F6F1]">
+              <div key={i} className="bg-[#071427]/75 border border-[#C6A96B]/12 rounded px-2 py-1 text-[10px] text-[#F8F6F1]">
                 <span className="text-[#C6A96B] font-bold">ฐาน{occ.baseThai}</span> {occ.bhopName}
               </div>
             ))}
@@ -228,19 +228,19 @@ function NineBaseChart({
             const rowData = chart[rIdx] ?? [];
             if (rowData.length === 0) return null;
             const label = rIdx === 0 ? base1Label : `ฐาน${THAI_NUMS[rIdx]}`;
-            const isBase4 = rIdx === 3; // กำลังเทวดา — สีฟ้า
+            const isBase4 = rIdx === 3;
 
             if (isBase4) {
               return (
-                <div key={rIdx} className="flex items-stretch gap-2 bg-[#0B1E36]/50 border border-sky-500/20 rounded-xl py-1 px-1">
+                <div key={rIdx} className="flex items-stretch gap-2 bg-[#0A2240]/25 border border-[#6D8FC7]/15 rounded-xl py-1 px-1">
                   <div className="w-14 shrink-0 flex items-center justify-end">
-                    <span className="text-[12px] font-black text-sky-400">{label}</span>
+                    <span className="text-[12px] font-black text-[#6D8FC7]">{label}</span>
                   </div>
                   <div className="flex-1 grid grid-cols-7 gap-1">
                     {rowData.map((s, cIdx) => (
-                      <div key={cIdx} className="rounded-lg py-1.5 flex flex-col items-center bg-[#020617] border border-sky-500/20">
-                        <span className="text-sm font-black text-sky-300">{s}</span>
-                        <span className="text-[9px] text-sky-400/70 truncate w-full text-center px-1">{BASE4_POWER_NAMES[s]}</span>
+                      <div key={cIdx} className="relative flex flex-col items-center justify-center rounded-lg border py-1.5 px-0.5 min-h-[50px] sm:min-h-[64px] bg-[#071E3D]/75 border-[#6D8FC7]/22 hover:border-[#C6A96B]/30 transition-all">
+                        <span className="font-display text-[17px] sm:text-[22px] text-[#F8F6F1] font-bold leading-none">{s}</span>
+                        <span className="text-[8px] text-[#F8F6F1]/32 truncate w-full text-center px-1 mt-0.5">{BASE4_POWER_NAMES[s]}</span>
                       </div>
                     ))}
                   </div>
@@ -256,11 +256,16 @@ function NineBaseChart({
                 <div className="flex-1 grid grid-cols-7 gap-1">
                   {rowData.map((s, cIdx) => {
                     const bhopName = rIdx < 3 ? (BHOP_NATAL_NAMES[rIdx]?.[cIdx] ?? "") : rIdx === 7 ? BHOP_8_NAMES[cIdx] : rIdx === 8 ? BHOP_9_NAMES[cIdx] : "";
+                    const isActive = hoverNum === s;
                     return (
-                      <button key={cIdx} onClick={() => setHoverNum(hoverNum === s ? null : s)}
-                        className={`rounded-xl py-2 flex flex-col items-center border transition-all ${hoverNum === s ? "bg-[#C6A96B]/20 border-[#C6A96B] ring-1 ring-[#C6A96B]/30" : "bg-[#020617] border-white/5 hover:border-white/20"}`}>
-                        <span className="text-base font-display font-black" style={{ color: hoverNum === s ? PLANET_COLORS_BY_NUM[s] : (PLANET_COLORS_BY_NUM[s] + "cc") }}>{s}</span>
-                        <span className="text-[9px] text-[#8A8070] truncate w-full text-center px-1">{bhopName}</span>
+                      <button key={cIdx} onClick={() => setHoverNum(isActive ? null : s)}
+                        className={`relative flex flex-col items-center justify-center rounded-lg border py-1.5 px-0.5 min-h-[50px] sm:min-h-[64px] transition-all duration-200 ${
+                          isActive
+                            ? "bg-[#0A1A30]/90 border-[#C6A96B]/60 shadow-[0_0_16px_rgba(198,169,107,0.22),inset_0_1px_0_rgba(198,169,107,0.10)] scale-[1.06] z-10"
+                            : "bg-[#071427]/75 border-[#C6A96B]/18 hover:border-[#C6A96B]/32"
+                        }`}>
+                        <span className={`font-display text-[17px] sm:text-[22px] leading-none text-[#F8F6F1] ${isActive ? "font-black" : "font-bold"}`}>{s}</span>
+                        {bhopName && <span className="text-[8px] text-[#F8F6F1]/32 truncate w-full text-center px-1 mt-0.5">{bhopName}</span>}
                       </button>
                     );
                   })}
@@ -310,7 +315,7 @@ function SummaryCard({
   extraInfo?: React.ReactNode;
 }) {
   const advice = TAKSA_PLAN_ADVICE[quality];
-  const levelColor = advice?.level === 3 ? "text-emerald-400 border-emerald-500/40" : advice?.level === 0 ? "text-rose-400 border-rose-500/40" : "text-amber-400 border-amber-500/40";
+  const levelColor = advice?.level === 3 ? "text-[#C6A96B] border-[#C6A96B]/40" : advice?.level === 0 ? "text-[#6D8FC7] border-[#6D8FC7]/40" : "text-[#D9BC82] border-[#D9BC82]/40";
 
   return (
     <Card className="border-[#C6A96B]/20 bg-[#020617] p-6 sm:p-8 relative overflow-hidden">
@@ -355,9 +360,9 @@ function SummaryCard({
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <ScoreBar label="การค้า"  value={scores.trade}  colorClass="text-[#C6A96B]" />
-          <ScoreBar label="ความรัก" value={scores.love}   colorClass="text-pink-400" />
-          <ScoreBar label="โชคลาภ" value={scores.wealth}  colorClass="text-emerald-400" />
-          <ScoreBar label="ภัยอันตราย" value={scores.danger} colorClass="text-rose-400" />
+          <ScoreBar label="ความรัก" value={scores.love}   colorClass="text-[#D9BC82]" />
+          <ScoreBar label="โชคลาภ" value={scores.wealth}  colorClass="text-[#C6A96B]" />
+          <ScoreBar label="ภัยอันตราย" value={scores.danger} colorClass="text-[#6D8FC7]" />
         </div>
       </div>
     </Card>
@@ -592,22 +597,22 @@ export default function KarnchataPage() {
             scores={dailyScores}
             extraInfo={
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-[#020617] border border-emerald-500/20 rounded-xl p-4">
-                  <p className="text-xs font-bold text-emerald-400 mb-2">✨ ยามดีเด่นวันนี้ (ระดับ 3)</p>
+                <div className="bg-[#071427]/75 border border-[#C6A96B]/18 rounded-xl p-4">
+                  <p className="text-xs font-bold text-[#C6A96B] mb-2">✨ ยามดีเด่นวันนี้ (ระดับ 3)</p>
                   {bestDayYams.length > 0 ? bestDayYams.map(y => (
                     <div key={y.timeStr} className="flex justify-between text-xs py-1 border-b border-white/5 last:border-0">
                       <span className="text-[#8A8070] font-mono">{y.timeStr}</span>
-                      <span className="text-emerald-400 font-bold">{y.quality} {TAKSA_PLAN_ADVICE[y.quality]?.emoji}</span>
+                      <span className="text-[#C6A96B] font-bold">{y.quality} {TAKSA_PLAN_ADVICE[y.quality]?.emoji}</span>
                     </div>
                   )) : <p className="text-xs text-[#8A8070]">ไม่มีในช่วงนี้</p>}
                 </div>
-                <div className="bg-[#020617] border border-rose-500/20 rounded-xl p-4">
-                  <p className="text-xs font-bold text-rose-400 mb-2">⚠️ ยามกาลกิณี (ควรหลีกเลี่ยง)</p>
+                <div className="bg-[#071E3D]/75 border border-[#6D8FC7]/22 rounded-xl p-4">
+                  <p className="text-xs font-bold text-[#6D8FC7] mb-2">⚠️ ยามกาลกิณี (ควรหลีกเลี่ยง)</p>
                   {worstDayYam ? (
                     <div>
-                      <p className="text-sm font-bold text-rose-300">{worstDayYam.timeStr}</p>
+                      <p className="text-sm font-bold text-[#4B6FAE]">{worstDayYam.timeStr}</p>
                       <p className="text-xs text-[#8A8070] mt-1">{worstDayYam.isDay ? "☀️ กลางวัน" : "🌙 กลางคืน"} — ยามที่ {worstDayYam.yamNum}</p>
-                      <p className="text-xs text-rose-400/70 mt-1">หลีกเลี่ยงการตัดสินใจสำคัญ การลงนามสัญญา หรือการเดินทางไกล</p>
+                      <p className="text-xs text-[#6D8FC7]/70 mt-1">หลีกเลี่ยงการตัดสินใจสำคัญ การลงนามสัญญา หรือการเดินทางไกล</p>
                     </div>
                   ) : <p className="text-xs text-[#8A8070]">ไม่พบ</p>}
                 </div>
@@ -639,8 +644,8 @@ export default function KarnchataPage() {
                   const isNow = s === yaiN;
                   const adv = TAKSA_PLAN_ADVICE[bhop];
                   return (
-                    <div key={bhop} className={`rounded-xl p-2 border text-center transition-colors ${isNow ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "border-rose-500/30 bg-rose-500/5" : "border-white/5 bg-[#0A1628]"}`}>
-                      <p className={`text-[10px] font-bold ${isNow ? "text-[#C6A96B]" : adv?.level === 0 ? "text-rose-400" : "text-[#8A8070]"}`}>{bhop}</p>
+                    <div key={bhop} className={`rounded-xl p-2 border text-center transition-colors ${isNow ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "border-[#6D8FC7]/30 bg-[#4B6FAE]/5" : "border-white/5 bg-[#071427]/75"}`}>
+                      <p className={`text-[10px] font-bold ${isNow ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#8A8070]"}`}>{bhop}</p>
                       <p className={`text-sm font-display font-black ${isNow ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{s}</p>
                       <p className="text-[10px]">{adv?.emoji}</p>
                     </div>
@@ -665,12 +670,12 @@ export default function KarnchataPage() {
                       return (
                         <div key={yamKey} className="flex flex-col">
                           <button onClick={() => setSelectedYamKey(isEx ? null : yamKey)}
-                            className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs transition-all ${y.isCurrentYam ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "bg-rose-500/5 border-rose-500/20" : "bg-[#020617] border-white/5 hover:border-white/15"}`}>
+                            className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs transition-all ${y.isCurrentYam ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20" : "bg-[#071427]/75 border-[#C6A96B]/10 hover:border-[#C6A96B]/25"}`}>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
                                 <span className="font-mono text-[#8A8070] shrink-0 text-[11px]">{y.timeStr}</span>
                                 <span className={`font-bold truncate ${y.isCurrentYam ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span>
-                                <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-emerald-400" : adv?.level === 0 ? "text-rose-400" : "text-[#8A8070]"}`}>{y.quality}</span>
+                                <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#8A8070]"}`}>{y.quality}</span>
                               </div>
                               {adv?.th && <p className="text-[10px] text-[#8A8070] truncate mt-0.5">{adv.th}</p>}
                             </div>
@@ -749,13 +754,13 @@ export default function KarnchataPage() {
                 return (
                   <div key={yamKey} className="flex flex-col">
                     <button onClick={() => setSelectedYamKey(isEx ? null : yamKey)}
-                      className={`flex items-center gap-2 p-3 rounded-xl border text-xs transition-all ${y.isCurrentYam ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "bg-rose-500/5 border-rose-500/20" : "bg-[#020617] border-white/5 hover:border-white/15"}`}>
+                      className={`flex items-center gap-2 p-3 rounded-xl border text-xs transition-all ${y.isCurrentYam ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20" : "bg-[#071427]/75 border-[#C6A96B]/10 hover:border-[#C6A96B]/25"}`}>
                       <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${y.isCurrentYam ? "bg-[#C6A96B] text-[#020617]" : "bg-white/5 text-[#8A8070]"}`}>{y.yamNum}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-[#8A8070] text-[11px] shrink-0">{y.timeStr}</span>
                           <span className={`font-bold truncate ${y.isCurrentYam ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span>
-                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-emerald-400" : adv?.level === 0 ? "text-rose-400" : "text-[#8A8070]"}`}>{y.quality} {adv?.emoji}</span>
+                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#8A8070]"}`}>{y.quality} {adv?.emoji}</span>
                         </div>
                         {adv?.th && <p className="text-[10px] text-[#8A8070] truncate mt-0.5">{adv.th}</p>}
                       </div>
@@ -792,8 +797,8 @@ export default function KarnchataPage() {
             scores={soyScores}
             extraInfo={
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-[#0B1E36] border border-sky-500/20 rounded-xl p-4">
-                  <p className="text-xs text-sky-400 font-bold mb-1">ยามใหญ่ (ตนุ)</p>
+                <div className="bg-[#071E3D]/75 border border-[#6D8FC7]/22 rounded-xl p-4">
+                  <p className="text-xs text-[#6D8FC7] font-bold mb-1">ยามใหญ่ (ตนุ)</p>
                   <p className="text-xl font-bold text-[#F8F6F1]">{activeResult.yamYaiName} ({yaiN})</p>
                   <p className="text-xs text-[#8A8070] mt-1">{currentYamQuality}</p>
                 </div>
@@ -817,7 +822,7 @@ export default function KarnchataPage() {
           />
 
           {/* Section 3: ตารางยามซอย 8 ช่วง */}
-          <Card className="border-sky-500/30 bg-[#0A1628] p-6 sm:p-8">
+          <Card className="border-[#6D8FC7]/30 bg-[#0A1628] p-6 sm:p-8">
             <h3 className="text-base font-bold text-[#F8F6F1] mb-1">ตารางยามซอย 8 ช่วง — ยามใหญ่ {activeResult.yamYaiName}</h3>
             <p className="text-xs text-[#8A8070] mb-5">แต่ละซอยกินเวลา 3 นาที 45 วินาที (225 วินาที) — ไฮไลต์คือซอยปัจจุบัน</p>
             <div className="space-y-1.5">
@@ -829,13 +834,13 @@ export default function KarnchataPage() {
                 return (
                   <div key={soy.slot} className="flex flex-col">
                     <button onClick={() => setSelectedYamKey(isEx ? null : soyKey)}
-                      className={`flex items-center gap-2 p-3 rounded-xl border text-xs transition-all ${soy.isCurrent ? "bg-sky-500/10 border-sky-500/40" : adv?.level === 0 ? "bg-rose-500/5 border-rose-500/20" : "bg-[#020617] border-white/5 hover:border-white/15"}`}>
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${soy.isCurrent ? "bg-sky-500 text-white" : "bg-white/5 text-[#8A8070]"}`}>{soy.slot}</span>
+                      className={`flex items-center gap-2 p-3 rounded-xl border text-xs transition-all ${soy.isCurrent ? "bg-[#4B6FAE]/10 border-[#4B6FAE]/40" : adv?.level === 0 ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20" : "bg-[#071427]/75 border-[#C6A96B]/10 hover:border-[#C6A96B]/25"}`}>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${soy.isCurrent ? "bg-[#4B6FAE] text-white" : "bg-white/5 text-[#8A8070]"}`}>{soy.slot}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
                           <span className="font-mono text-[#8A8070] text-[11px] shrink-0">{soy.timeStr}</span>
-                          <span className={`font-bold truncate ${soy.isCurrent ? "text-sky-300" : "text-[#F8F6F1]"}`}>{STAR_NAMES[soy.planet as keyof typeof STAR_NAMES]}</span>
-                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-emerald-400" : adv?.level === 0 ? "text-rose-400" : "text-[#8A8070]"}`}>{soy.quality} {adv?.emoji}</span>
+                          <span className={`font-bold truncate ${soy.isCurrent ? "text-[#6D8FC7]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[soy.planet as keyof typeof STAR_NAMES]}</span>
+                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#8A8070]"}`}>{soy.quality} {adv?.emoji}</span>
                         </div>
                         {adv?.th && <p className="text-[10px] text-[#8A8070] truncate mt-0.5">{adv.th}</p>}
                       </div>
@@ -845,7 +850,7 @@ export default function KarnchataPage() {
                       <div className="px-4 py-4 bg-[#020617]/60 border-x border-b border-white/5 rounded-b-xl">
                         <p className="text-xs text-[#D9CDB7] leading-relaxed mb-2">{desc.desc}</p>
                         <div className="bg-[#0A1628] rounded-xl p-3 border border-white/5">
-                          <p className="text-xs text-sky-400 font-bold mb-1">🎯 แนวทางการตัดสินใจในซอยนี้</p>
+                          <p className="text-xs text-[#6D8FC7] font-bold mb-1">🎯 แนวทางการตัดสินใจในซอยนี้</p>
                           <p className="text-xs text-[#F8F6F1] leading-relaxed">{desc.decision}</p>
                         </div>
                       </div>
@@ -861,9 +866,9 @@ export default function KarnchataPage() {
               <div className="grid grid-cols-3 gap-2 mb-5">
                 {CATEGORIES.map(cat => (
                   <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
-                    className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all ${selectedCategory === cat.id ? "bg-[#0B1E36] border-sky-500/50" : "bg-[#020617] border-white/5"}`}>
+                    className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all ${selectedCategory === cat.id ? "bg-[#071E3D]/75 border-[#6D8FC7]/40" : "bg-[#071427]/75 border-white/5"}`}>
                     <span className="text-base">{cat.icon}</span>
-                    <span className={`text-[10px] font-bold ${selectedCategory === cat.id ? "text-sky-400" : "text-[#8A8070]"}`}>{cat.label.split(" ")[0]}</span>
+                    <span className={`text-[10px] font-bold ${selectedCategory === cat.id ? "text-[#6D8FC7]" : "text-[#8A8070]"}`}>{cat.label.split(" ")[0]}</span>
                   </button>
                 ))}
               </div>
