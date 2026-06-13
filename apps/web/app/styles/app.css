@@ -356,6 +356,45 @@ body {
 [data-theme="light"] ::-webkit-scrollbar-track { background: var(--bg-base); }
 [data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(61, 83, 97, 0.25); }
 
+/* ── Slate bg overrides (bg-slate-950/40 etc.) — พื้นหลังเข้มที่ยังไม่ override ── */
+[data-theme="light"] .bg-slate-950     { background-color: rgba(255,255,255,0.90) !important; }
+[data-theme="light"] .bg-slate-950\/15 { background-color: rgba(255,255,255,0.40) !important; }
+[data-theme="light"] .bg-slate-950\/20 { background-color: rgba(255,255,255,0.50) !important; }
+[data-theme="light"] .bg-slate-950\/30 { background-color: rgba(255,255,255,0.55) !important; }
+[data-theme="light"] .bg-slate-950\/40 { background-color: rgba(255,255,255,0.62) !important; }
+[data-theme="light"] .bg-slate-950\/45 { background-color: rgba(255,255,255,0.66) !important; }
+[data-theme="light"] .bg-slate-950\/50 { background-color: rgba(255,255,255,0.70) !important; }
+[data-theme="light"] .bg-slate-950\/60 { background-color: rgba(255,255,255,0.76) !important; }
+[data-theme="light"] .bg-slate-950\/80 { background-color: rgba(255,255,255,0.86) !important; }
+
+[data-theme="light"] .bg-slate-900     { background-color: rgba(249,247,243,0.90) !important; }
+[data-theme="light"] .bg-slate-900\/30 { background-color: rgba(249,247,243,0.55) !important; }
+[data-theme="light"] .bg-slate-900\/35 { background-color: rgba(249,247,243,0.60) !important; }
+[data-theme="light"] .bg-slate-900\/40 { background-color: rgba(249,247,243,0.65) !important; }
+[data-theme="light"] .bg-slate-900\/60 { background-color: rgba(249,247,243,0.78) !important; }
+[data-theme="light"] .bg-slate-900\/80 { background-color: rgba(249,247,243,0.88) !important; }
+
+[data-theme="light"] .bg-slate-800     { background-color: rgba(245,240,237,0.88) !important; }
+[data-theme="light"] .bg-slate-800\/30 { background-color: rgba(245,240,237,0.55) !important; }
+[data-theme="light"] .bg-slate-800\/50 { background-color: rgba(245,240,237,0.68) !important; }
+[data-theme="light"] .bg-slate-800\/80 { background-color: rgba(245,240,237,0.85) !important; }
+
+[data-theme="light"] .bg-slate-500\/10 { background-color: rgba(61,83,97,0.06) !important; }
+
+/* ── Slate text overrides ── */
+[data-theme="light"] .text-slate-300   { color: #475467 !important; }
+[data-theme="light"] .text-slate-400   { color: #475467 !important; }
+[data-theme="light"] .text-slate-500   { color: #98A2B3 !important; }
+[data-theme="light"] .text-slate-950   { color: #1D2939 !important; }
+
+/* ── Slate border overrides ── */
+[data-theme="light"] .border-slate-500\/20 { border-color: rgba(61,83,97,0.14) !important; }
+[data-theme="light"] .border-slate-500\/30 { border-color: rgba(61,83,97,0.20) !important; }
+[data-theme="light"] .border-slate-500\/50 { border-color: rgba(61,83,97,0.28) !important; }
+[data-theme="light"] .border-slate-700     { border-color: rgba(61,83,97,0.22) !important; }
+[data-theme="light"] .border-slate-700\/50 { border-color: rgba(61,83,97,0.16) !important; }
+[data-theme="light"] .border-slate-800     { border-color: rgba(61,83,97,0.16) !important; }
+
 /* ── Liquid Gold Overlay ── */
 .liquid-gold-overlay {
   background: linear-gradient(
