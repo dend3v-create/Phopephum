@@ -122,7 +122,7 @@ export default function Index() {
           <LogoSymbol />
         </div>
 
-        <p className="text-[#D9BC82] text-[9px] tracking-[0.4em] uppercase mb-4 animate-fade-up"
+        <p className="text-[#D9BC82] text-[11px] sm:text-xs tracking-[0.4em] uppercase mb-4 font-bold animate-fade-up"
           style={{ animationDelay: "0.1s" }}>
           Wisdom Guidance Operating System
         </p>
@@ -163,7 +163,7 @@ export default function Index() {
           </Link>
         </div>
 
-        <p className="text-[#94A3B8]/50 text-xs mt-5 animate-fade-up" style={{ animationDelay: "0.52s" }}>
+        <p className="text-[#94A3B8]/75 text-xs sm:text-sm mt-5 animate-fade-up" style={{ animationDelay: "0.52s" }}>
           {t("landing.hero.footer_note")}
         </p>
       </section>
@@ -171,11 +171,11 @@ export default function Index() {
       {/* ── Features ── */}
       <section id="features" className="relative z-10 max-w-6xl mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">{t("landing.features.label")}</p>
+          <p className="text-[#C6A96B] text-[11px] sm:text-xs tracking-[0.35em] uppercase mb-3 font-bold">{t("landing.features.label")}</p>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] mb-3">
             {t("landing.features.title")}
           </h2>
-          <p className="text-[#94A3B8] text-base max-w-md mx-auto">
+          <p className="text-[#94A3B8] text-base sm:text-lg max-w-md mx-auto">
             {t("landing.features.subtitle")}
           </p>
         </div>
@@ -189,7 +189,7 @@ export default function Index() {
                 {featureIcons[i]}
               </div>
               <h3 className="font-display text-[#F8F6F1] font-semibold text-lg mb-2">{f.title}</h3>
-              <p className="text-[#94A3B8] text-sm leading-relaxed">{f.desc}</p>
+              <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -198,7 +198,7 @@ export default function Index() {
       {/* ── How it works ── */}
       <section id="how" className="relative z-10 max-w-4xl mx-auto px-4 py-20">
         <div className="text-center mb-12">
-          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">{t("landing.how.label")}</p>
+          <p className="text-[#C6A96B] text-[11px] sm:text-xs tracking-[0.35em] uppercase mb-3 font-bold">{t("landing.how.label")}</p>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1]">
             {t("landing.how.title")}
           </h2>
@@ -212,7 +212,7 @@ export default function Index() {
                 <span className="text-[#D9BC82] font-display font-bold">{step.num}</span>
               </div>
               <h3 className="font-display text-[#F8F6F1] font-semibold mb-2">{step.title}</h3>
-              <p className="text-[#94A3B8] text-sm leading-relaxed">{step.desc}</p>
+              <p className="text-[#94A3B8] text-sm sm:text-base leading-relaxed">{step.desc}</p>
             </div>
           ))}
         </div>

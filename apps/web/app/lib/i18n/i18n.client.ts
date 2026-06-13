@@ -38,6 +38,6 @@ i18n
     },
     // Prevent initialization until we have detection result
     initImmediate: false,
-  });
+  } as any);
 
 export default i18n;
