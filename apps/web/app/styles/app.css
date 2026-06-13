@@ -928,3 +928,13 @@ body {
 html {
   color-scheme: dark light;
 }
+
+/* ── Light mode: hover dark bg overrides ── */
+[data-theme="light"] .hover\:bg-\[\#0A1628\]:hover     { background-color: rgba(249,247,243,0.85) !important; }
+[data-theme="light"] .hover\:bg-\[\#0A1628\]\/80:hover { background-color: rgba(249,247,243,0.85) !important; }
+[data-theme="light"] .hover\:bg-\[\#0a2240\]\/70:hover { background-color: rgba(249,247,243,0.80) !important; }
+[data-theme="light"] .hover\:bg-\[\#0a2240\]\/85:hover { background-color: rgba(249,247,243,0.92) !important; }
+[data-theme="light"] .hover\:bg-slate-800:hover         { background-color: rgba(245,240,237,0.88) !important; }
+[data-theme="light"] .hover\:bg-slate-800\/30:hover     { background-color: rgba(245,240,237,0.55) !important; }
+[data-theme="light"] .hover\:bg-slate-950\/45:hover     { background-color: rgba(255,255,255,0.66) !important; }
+[data-theme="light"] .hover\:bg-cosmic-800\/70:hover    { background-color: rgba(241,236,232,0.80) !important; }

@@ -311,7 +311,7 @@ export default function DashboardLayout() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm text-[#F8F6F1] truncate font-medium leading-tight">{displayName}</p>
-              <p className="text-[11px] text-[#94A3B8]/60 truncate leading-tight">{user.email}</p>
+              <p className="text-[11px] text-[#94A3B8]/60 truncate leading-tight" title={user.email}>{user.email}</p>
             </div>
           </div>
           <Form method="post" action="/logout">
