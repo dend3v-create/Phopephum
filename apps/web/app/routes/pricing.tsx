@@ -136,7 +136,7 @@ export default function PricingPage() {
     : false;
 
   return (
-    <main className="relative min-h-screen overflow-hidden pb-24" style={{ background: "#020617" }}>
+    <main className="relative min-h-screen overflow-hidden pb-24" style={{ background: "var(--bg-base)" }}>
 
       {/* ── Cosmic atmosphere ── */}
       <div className="absolute inset-0 pointer-events-none">
@@ -196,7 +196,7 @@ export default function PricingPage() {
           </div>
 
           <div className="rounded-2xl overflow-hidden border border-white/5 overflow-x-auto"
-            style={{ backdropFilter: "blur(24px)", background: "rgba(10,34,64,0.4)" }}>
+            style={{ backdropFilter: "blur(24px)", background: "var(--card-dark-bg)" }}>
             <div className="min-w-[700px]">
               <div className="grid grid-cols-5 text-xs font-bold uppercase tracking-widest border-b border-white/5 px-5 py-3 text-center">
                 <div className="text-left text-[#94A3B8]">ฟีเจอร์</div>
@@ -227,7 +227,7 @@ export default function PricingPage() {
             { icon: "✦", title: "ภูมิปัญญาแท้ดั้งเดิม", desc: "ขับเคลื่อนด้วยศาสตร์โบราณที่ถูกพิสูจน์มาหลายศตวรรษ" },
           ].map(({ icon, title, desc }) => (
             <div key={title} className="text-center p-5 rounded-2xl border border-white/5"
-              style={{ backdropFilter: "blur(12px)", background: "rgba(10,34,64,0.3)" }}>
+              style={{ backdropFilter: "blur(12px)", background: "var(--card-dark-bg)" }}>
               <div className="text-2xl mb-2">{icon}</div>
               <p className="text-[#F8F6F1] font-semibold text-sm mb-1">{title}</p>
               <p className="text-[#94A3B8] text-xs leading-relaxed">{desc}</p>
@@ -249,7 +249,7 @@ export default function PricingPage() {
               { q: "มีทรายกาลเวลา (Sands of Time) ให้ใช้เท่าไรในแต่ละแผน?", a: "ผู้ใช้ทุกคนจะได้รับแต้มทรายกาลเวลาในการใช้งานแตกต่างกัน โดยระดับ Imperial และ Pro จะได้รับโควตาขนาดใหญ่ที่สุด" },
             ].map(({ q, a }) => (
               <div key={q} className="rounded-xl border border-white/5 px-5 py-4"
-                style={{ background: "rgba(10,34,64,0.3)" }}>
+                style={{ background: "var(--card-dark-bg)" }}>
                 <p className="text-[#F8F6F1] font-semibold text-sm mb-1">{q}</p>
                 <p className="text-[#94A3B8] text-sm leading-relaxed">{a}</p>
               </div>
@@ -297,11 +297,11 @@ function PricingCard({
     ? "rgba(75,111,174,0.40)" 
     : "rgba(255,255,255,0.08)";
     
-  const bg = isPro 
-    ? "rgba(198,169,107,0.06)" 
-    : isImperial 
-    ? "rgba(75,111,174,0.06)" 
-    : "rgba(10,34,64,0.45)";
+  const bg = isPro
+    ? "rgba(198,169,107,0.06)"
+    : isImperial
+    ? "rgba(75,111,174,0.06)"
+    : "var(--card-dark-bg)";
     
   const glow = isPro 
     ? "0 0 60px rgba(198,169,107,0.12)" 

@@ -211,7 +211,7 @@ export default function WisdomChatPage() {
               className="flex items-center justify-center gap-1 py-1.5 rounded-xl font-medium transition-all"
               style={active
                 ? { background: "linear-gradient(135deg,#C6A96B,#D9BC82)", color: "#020617", fontSize: "13px" }
-                : { background: "rgba(10,34,64,0.5)", border: "1px solid rgba(255,255,255,0.08)", color: "#94A3B8", fontSize: "13px" }
+                : { background: "var(--card-dark-bg)", border: "1px solid rgba(255,255,255,0.08)", color: "var(--text-muted)", fontSize: "13px" }
               }
             >
               <span style={{ fontSize: "13px" }}>{cat.emoji}</span>
@@ -229,7 +229,7 @@ export default function WisdomChatPage() {
 
       {/* ── Wisdom Journal History Slide-over Panel ───────────────── */}
       {showHistory && (
-        <div className="absolute inset-0 bg-[#020617]/95 backdrop-blur-md z-20 flex flex-col p-4 animate-fade-up">
+        <div className="absolute inset-0 backdrop-blur-md z-20 flex flex-col p-4 animate-fade-up" style={{ background: "var(--overlay-bg)" }}>
           <div className="flex justify-between items-center pb-3 border-b border-[#C6A96B]/15">
             <h3 className="font-display text-[#C6A96B] font-bold text-base flex items-center gap-2">
               <span>📜</span> Wisdom Journal (คลังบันทึกปัญญา)
@@ -286,9 +286,9 @@ export default function WisdomChatPage() {
               disabled={isStreaming}
               className="w-full text-left px-3 py-2 rounded-xl border transition-all disabled:opacity-40"
               style={{
-                background: "rgba(10,34,64,0.4)",
+                background: "var(--card-dark-bg)",
                 border: "1px solid rgba(255,255,255,0.08)",
-                color: "#D9CDB7",
+                color: "var(--text-secondary)",
                 fontSize: "13px",
               }}
             >
@@ -306,8 +306,8 @@ export default function WisdomChatPage() {
         <div
           className="flex items-end gap-2 rounded-2xl px-3 py-2.5"
           style={{
-            background: "rgba(10,34,64,0.7)",
-            border: "1px solid rgba(217,188,130,0.18)",
+            background: "var(--input-bg)",
+            border: "1px solid var(--border-gold)",
             backdropFilter: "blur(12px)",
           }}
         >
@@ -404,9 +404,9 @@ function MessageBubble({ msg }: { msg: Message }) {
         className="rounded-2xl rounded-tl-sm px-4 py-2.5 leading-relaxed font-sans-thai text-sm"
         style={{
           maxWidth: "83%",
-          background: "rgba(10,34,64,0.65)",
+          background: "var(--card-dark-bg)",
           border: "1px solid rgba(255,255,255,0.06)",
-          color: "#D9CDB7",
+          color: "var(--text-secondary)",
           fontSize: "14px",
         }}
       >

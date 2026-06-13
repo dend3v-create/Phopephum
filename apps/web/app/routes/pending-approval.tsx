@@ -13,14 +13,14 @@ export default function PendingApprovalPage() {
   return (
     <div
       className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: "#020617" }}
+      style={{ background: "var(--bg-base)" }}
     >
       <div
         className="max-w-md w-full rounded-3xl border p-8 text-center"
         style={{
-          background: "rgba(10,22,40,0.80)",
+          background: "var(--overlay-bg)",
           backdropFilter: "blur(24px)",
-          borderColor: "rgba(198,169,107,0.20)",
+          borderColor: "var(--border-gold)",
         }}
       >
         {/* Icon */}

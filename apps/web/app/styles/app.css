@@ -503,6 +503,15 @@ body {
 [data-theme="light"] .border-slate-700\/50 { border-color: rgba(61,83,97,0.16) !important; }
 [data-theme="light"] .border-slate-800     { border-color: rgba(61,83,97,0.16) !important; }
 
+/* ── Tailwind Gradient from/to dark color → ivory in light mode ── */
+[data-theme="light"] .from-\[\#0B1528\] { --tw-gradient-from: #F9F7F3 !important; }
+[data-theme="light"] .from-\[\#0A1628\] { --tw-gradient-from: #F5F0ED !important; }
+[data-theme="light"] .from-\[\#071427\] { --tw-gradient-from: #F5F0ED !important; }
+[data-theme="light"] .from-\[\#0A2240\] { --tw-gradient-from: #F5F0ED !important; }
+[data-theme="light"] .to-\[\#020617\]   { --tw-gradient-to: #ECE5DF !important; }
+[data-theme="light"] .to-\[\#071427\]   { --tw-gradient-to: #F0EBE7 !important; }
+[data-theme="light"] .via-\[\#0A2240\]  { --tw-gradient-via: rgba(245,240,237,0.80) !important; }
+
 /* ── Liquid Gold Overlay ── */
 .liquid-gold-overlay {
   background: linear-gradient(

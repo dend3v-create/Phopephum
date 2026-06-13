@@ -147,7 +147,7 @@ const SCHEMA_MARKUP = {
 
 export default function Index() {
   return (
-    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "#020617" }}>
+    <div className="relative min-h-screen overflow-x-hidden" style={{ background: "var(--bg-base)" }}>
 
       {/* ── Stars background ── */}
       <div className="fixed inset-0 pointer-events-none">
@@ -273,7 +273,7 @@ export default function Index() {
           {FEATURES.map((f) => (
             <div key={f.title}
               className="rounded-2xl border border-white/5 p-6 transition-all duration-300 hover:border-[#C6A96B]/20 group"
-              style={{ backdropFilter: "blur(20px)", background: "rgba(10,34,64,0.45)" }}>
+              style={{ backdropFilter: "blur(20px)", background: "var(--card-dark-bg)" }}>
               <div className="text-[#C6A96B] text-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
                 {f.icon}
               </div>
@@ -318,7 +318,7 @@ export default function Index() {
           {TESTIMONIALS.map((t) => (
             <div key={t.name}
               className="rounded-2xl border border-white/5 p-6"
-              style={{ backdropFilter: "blur(20px)", background: "rgba(10,34,64,0.4)" }}>
+              style={{ backdropFilter: "blur(20px)", background: "var(--card-dark-bg)" }}>
               <p className="text-[#C6A96B] text-lg mb-3">"</p>
               <p className="text-[#D9CDB7] text-sm leading-relaxed mb-4">{t.text}</p>
               <div className="border-t border-white/5 pt-3">
