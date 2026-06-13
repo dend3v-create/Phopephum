@@ -1,35 +1,36 @@
-import { useFetcher } from "@remix-run/react";
-import { useLocale } from "~/i18n/context";
-import { LOCALES, LOCALE_LABELS } from "~/i18n/translations";
-import type { Locale } from "~/i18n/translations";
+import { useTranslation } from "react-i18next";
 
 export function LanguageSwitcher() {
-  const fetcher = useFetcher();
-  const locale = useLocale();
+  const { i18n } = useTranslation();
 
-  function handleSwitch(next: Locale) {
-    if (next === locale) return;
-    fetcher.submit(
-      { locale: next },
-      { method: "post", action: "/action/preferences" }
-    );
-  }
+  const changeLanguage = (lng: string) => {
+    i18n.changeLanguage(lng);
+    // Persistence: Set cookie for the server to pick up
+    document.cookie = `locale=${lng}; path=/; max-age=31536000; SameSite=Lax`;
+    // Optional: reload to ensure server-side translations are consistent (or just let Remix re-fetch)
+    window.location.reload();
+  };
+
+  const languages = [
+    { code: "th", label: "ไทย", flag: "🇹🇭" },
+    { code: "en", label: "EN", flag: "🇺🇸" },
+    { code: "zh", label: "中文", flag: "🇨🇳" },
+  ];
 
   return (
-    <div className="flex items-center gap-0.5">
-      {LOCALES.map((l) => (
+    <div className="flex items-center gap-1.5 p-1 rounded-full bg-slate-900/50 border border-slate-700/50 backdrop-blur-sm">
+      {languages.map((lang) => (
         <button
-          key={l}
-          type="button"
-          onClick={() => handleSwitch(l)}
-          className={`px-2 py-1 text-[11px] font-bold tracking-wider rounded transition-all duration-200 ${
-            l === locale
-              ? "text-[var(--accent-gold)] bg-[var(--accent-gold)]/10 border border-[var(--accent-gold)]/30"
-              : "text-[var(--text-muted)] hover:text-[var(--text-body)] border border-transparent"
+          key={lang.code}
+          onClick={() => changeLanguage(lang.code)}
+          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+            i18n.language === lang.code
+              ? "bg-theme-accent text-white shadow-lg shadow-theme-accent/20"
+              : "text-slate-400 hover:text-white hover:bg-slate-800"
           }`}
-          aria-label={`Switch to ${l}`}
         >
-          {LOCALE_LABELS[l]}
+          <span className="mr-1.5">{lang.flag}</span>
+          {lang.label}
         </button>
       ))}
     </div>

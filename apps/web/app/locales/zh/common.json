@@ -1,0 +1,49 @@
+{
+  "title": "当前时辰",
+  "subtitle": "当下的能量",
+  "current": "当前时辰",
+  "next": "下一时辰",
+  "countdown": "还有",
+  "auspicious": "吉",
+  "inauspicious": "凶"
+}
+: "欢迎来到 Phopephum",
+  "nav": {
+    "dashboard": "今日",
+    "horoscope": "命盘",
+    "yam": "吉时查询",
+    "reports": "报告",
+    "planner": "日记",
+    "settings": "个人资料"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出",
+    "email": "电子邮件",
+    "password": "密码",
+    "name": "姓名"
+  },
+  "theme": {
+    "dark": "深色",
+    "light": "浅色"
+  },
+  "language": {
+    "label": "语言",
+    "th": "泰语",
+    "en": "英语",
+    "zh": "中文"
+  },
+  "action": {
+    "calculate": "计算",
+    "save": "保存",
+    "cancel": "取消",
+    "generate": "生成报告",
+    "back": "返回",
+    "more": "查看更多"
+  },
+  "brand": {
+    "name": "PhopePhum",
+    "tagline": "解码生命能量"
+  }
+}

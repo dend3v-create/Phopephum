@@ -84,6 +84,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           birthPlace: profile.birth_place || null,
           displayName: profile.display_name || "ผู้ใช้งาน",
         },
+        locale: (profile.language as any) || "th",
       },
       env
     );

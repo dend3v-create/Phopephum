@@ -1,0 +1,31 @@
+{
+  "planets": {
+    "1": "Sun",
+    "2": "Moon",
+    "3": "Mars",
+    "4": "Mercury",
+    "5": "Jupiter",
+    "6": "Venus",
+    "7": "Saturn",
+    "8": "Rahu",
+    "9": "Ketu"
+  },
+  "bases": {
+    "1": "Base 1 · Birth Day",
+    "2": "Base 2 · Birth Month",
+    "3": "Base 3 · Birth Year",
+    "4": "Base 4 · Grand Cycle",
+    "5": "Base 5 · Elemental",
+    "6": "Base 6 · Power",
+    "7": "Base 7 · Power",
+    "8": "Base 8 · Ātma",
+    "9": "Base 9 · Spouse"
+  },
+  "chart": {
+    "title": "7-Star 9-Base Fate Chart",
+    "subtitle": "35 Complete Celestial Houses",
+    "tap_hint": "Tap a number to see connections",
+    "natal": "Natal",
+    "transit": "Transit"
+  }
+}

@@ -1,6 +1,6 @@
-import { createContext, useContext } from "react";
+import { createContext, useContext, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { Locale, Namespace } from "./translations";
-import { t as tFn } from "./translations";
 
 interface LocaleContextValue {
   locale: Locale;
@@ -22,6 +22,26 @@ export function useTheme() {
 
 /** useT — returns a translation function scoped to a namespace */
 export function useT(ns: Namespace) {
-  const locale = useLocale();
-  return (key: string) => tFn(ns, locale, key);
+  const { t } = useTranslation(ns);
+  return t;
+}
+
+export function LocaleProvider({ 
+  locale, 
+  theme, 
+  children 
+}: LocaleContextValue & { children: React.ReactNode }) {
+  const { i18n } = useTranslation();
+
+  useEffect(() => {
+    if (i18n.language !== locale) {
+      i18n.changeLanguage(locale);
+    }
+  }, [locale, i18n]);
+
+  return (
+    <LocaleContext.Provider value={{ locale, theme }}>
+      {children}
+    </LocaleContext.Provider>
+  );
 }

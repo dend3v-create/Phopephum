@@ -1,0 +1,48 @@
+{
+  "home": "หน้าแรก",
+  "dashboard": "แดชบอร์ด",
+  "horoscope": "พยากรณ์ดวง",
+  "daily": "ดวงรายวัน",
+  "subscription": "สมาชิก",
+  "login": "เข้าสู่ระบบ",
+  "register": "สมัครสมาชิก",
+  "welcome": "ยินดีต้อนรับสู่ Phopephum",
+  "nav": {
+    "dashboard": "วันนี้",
+    "horoscope": "ตั้งดวงชะตา",
+    "yam": "เช็คฤกษ์ยาม",
+    "reports": "รายงาน",
+    "planner": "บันทึก",
+    "settings": "โปรไฟล์"
+  },
+  "auth": {
+    "login": "เข้าสู่ระบบ",
+    "register": "สมัครสมาชิก",
+    "logout": "ออกจากระบบ",
+    "email": "อีเมล",
+    "password": "รหัสผ่าน",
+    "name": "ชื่อ"
+  },
+  "theme": {
+    "dark": "ธีมมืด",
+    "light": "ธีมสว่าง"
+  },
+  "language": {
+    "label": "ภาษา",
+    "th": "ไทย",
+    "en": "English",
+    "zh": "中文"
+  },
+  "action": {
+    "calculate": "คำนวณ",
+    "save": "บันทึก",
+    "cancel": "ยกเลิก",
+    "generate": "สร้างรายงาน",
+    "back": "กลับ",
+    "more": "ดูเพิ่มเติม"
+  },
+  "brand": {
+    "name": "PhopePhum",
+    "tagline": "ถอดรหัสพลังงานชีวิต"
+  }
+}

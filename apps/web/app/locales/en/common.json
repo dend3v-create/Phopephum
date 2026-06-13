@@ -1,0 +1,47 @@
+{
+  "title": "Current Auspicious Time",
+  "subtitle": "Energy of the Moment",
+  "current": "Current Yam",
+  "next": "Next Yam",
+  "countdown": "in",
+  "auspicious": "Auspicious",
+  "inauspicious": "Caution",
+  "nav": {
+    "dashboard": "Today",
+    "horoscope": "Fate Chart",
+    "yam": "Auspicious Time",
+    "reports": "Reports",
+    "planner": "Journal",
+    "settings": "Profile"
+  },
+  "auth": {
+    "login": "Sign In",
+    "register": "Sign Up",
+    "logout": "Sign Out",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name"
+  },
+  "theme": {
+    "dark": "Dark",
+    "light": "Light"
+  },
+  "language": {
+    "label": "Language",
+    "th": "Thai",
+    "en": "English",
+    "zh": "Chinese"
+  },
+  "action": {
+    "calculate": "Calculate",
+    "save": "Save",
+    "cancel": "Cancel",
+    "generate": "Generate Report",
+    "back": "Back",
+    "more": "See More"
+  },
+  "brand": {
+    "name": "PhopePhum",
+    "tagline": "Decode the Energy of Life"
+  }
+}

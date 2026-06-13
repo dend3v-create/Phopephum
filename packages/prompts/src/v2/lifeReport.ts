@@ -1,272 +1,327 @@
-import type { PhopephumResult, AIReportType, StarNumber, TaksaBhop, MahaBhop } from "@phopephum/types";
+import type { PhopephumResult, AIReportType, StarNumber, Locale } from "@phopephum/types";
 import { buildAtthakarnContext, ATTHAKARN_CORE_PRINCIPLES, type AtthakarnBirthYamContext } from "../knowledge/atthakarn-kb.js";
 
-export const PROMPT_VERSION = "v6.0.0"; // Star Tracing Wisdom Guidance Architecture
+export const PROMPT_VERSION = "v7.0.0"; // Tri-lingual Wisdom Guidance Architecture
 
-const HOUSE_ROWS = [
-  ["อัตตะ", "หินะ", "ธนัง", "ปิตา", "มาตา", "โภคา", "มัชฌิมา"],
-  ["ตนุ", "กฎุมภะ", "สหัชชะ", "พันธุ", "ปุตตะ", "อริ", "ปัตนิ"],
-  ["มรณะ", "ศุภะ", "กัมมะ", "ลาภะ", "พยายะ", "ทาสา", "ทาสี"],
-];
-
-const PLANET_NAMES_MAP: Record<number, string> = {
-  1: "อาทิตย์ (1)",
-  2: "จันทร์ (2)",
-  3: "อังคาร (3)",
-  4: "พุธ (4)",
-  5: "พฤหัสบดี (5)",
-  6: "ศุกร์ (6)",
-  7: "เสาร์ (7)",
-  8: "ราหู (8)"
+const HOUSE_NAMES: Record<Locale, string[][]> = {
+  th: [
+    ["อัตตะ", "หินะ", "ธนัง", "ปิตา", "มาตา", "โภคา", "มัชฌิมา"],
+    ["ตนุ", "กฎุมภะ", "สหัชชะ", "พันธุ", "ปุตตะ", "อริ", "ปัตนิ"],
+    ["มรณะ", "ศุภะ", "กัมมะ", "ลาภะ", "พยายะ", "ทาสา", "ทาสี"],
+  ],
+  en: [
+    ["Atta (Self)", "Hina (Loss)", "Thanang (Wealth)", "Pita (Father)", "Mata (Mother)", "Phoka (Property)", "Matchima (Middle)"],
+    ["Tanu (Body)", "Kadumbha (Finance)", "Sahatcha (Friends)", "Phanthu (Family)", "Putta (Children)", "Ari (Obstacle)", "Patni (Partner)"],
+    ["Marana (Death/Change)", "Supha (Success)", "Kamma (Work)", "Lapha (Fortune)", "Phayaya (Hidden)", "Thasa (Support 1)", "Thasi (Support 2)"],
+  ],
+  zh: [
+    ["自我 (อัตตะ)", "损耗 (หินะ)", "财富 (ธนัง)", "父亲 (ปิตา)", "母亲 (มาตา)", "房产 (โภคา)", "中道 (มัชฌิมา)"],
+    ["身体 (ตนุ)", "财帛 (กฎุมภะ)", "兄弟 (สหัชชะ)", "家庭 (พันธุ)", "子女 (ปุตตะ)", "疾病 (อริ)", "配偶 (ปัตนิ)"],
+    ["疾厄 (มรณะ)", "迁移 (ศุภะ)", "官禄 (กัมมะ)", "福德 (ลาภะ)", "相貌 (พยายะ)", "奴仆1 (ทาสา)", "奴仆2 (ทาสี)"],
+  ],
 };
 
-// ─── Report-type specific instructions ────────────────────────────────────────
+const PLANET_NAMES_MAP: Record<Locale, Record<number, string>> = {
+  th: {
+    1: "อาทิตย์ (1)", 2: "จันทร์ (2)", 3: "อังคาร (3)", 4: "พุธ (4)",
+    5: "พฤหัสบดี (5)", 6: "ศุกร์ (6)", 7: "เสาร์ (7)", 8: "ราหู (8)"
+  },
+  en: {
+    1: "Sun (1)", 2: "Moon (2)", 3: "Mars (3)", 4: "Mercury (4)",
+    5: "Jupiter (5)", 6: "Venus (6)", 7: "Saturn (7)", 8: "Rahu (8)"
+  },
+  zh: {
+    1: "太阳 (1)", 2: "月亮 (2)", 3: "火星 (3)", 4: "水星 (4)",
+    5: "木星 (5)", 6: "金星 (6)", 7: "土星 (7)", 8: "罗睺 (8)"
+  }
+};
 
-const REPORT_TYPE_INSTRUCTIONS: Record<AIReportType, string> = {
-  general_prediction: `
-วิเคราะห์พยากรณ์เพื่อการบำบัดและไกด์เส้นทางชีวิต (Life Therapy & Guidance):
+const REPORT_TYPE_LABEL: Record<Locale, Record<AIReportType, string>> = {
+  th: {
+    general_prediction: "พยากรณ์ปัญญาชีวิต (Therapy)",
+    life_overview: "โครงสร้างชีวิตเชิงลึก",
+    career: "ภารกิจ & ความสำเร็จ",
+    relationship: "เสน่ห์ & ความสัมพันธ์",
+    health: "สุขภาพ & พลังชีวิต",
+    wealth: "กระแสทรัพย์ & มั่งคั่ง",
+    daily_insight: "ปัญญาญาณรายวัน",
+    annual_forecast: "จังหวะชะตารายปี",
+    personal_branding: "ตัวตน & อัตลักษณ์",
+  },
+  en: {
+    general_prediction: "Life Wisdom Guidance (Therapy)",
+    life_overview: "Deep Life Structure",
+    career: "Mission & Success",
+    relationship: "Charisma & Relationships",
+    health: "Health & Vitality",
+    wealth: "Wealth Flow",
+    daily_insight: "Daily Intuition",
+    annual_forecast: "Annual Destiny Rhythm",
+    personal_branding: "Identity & Branding",
+  },
+  zh: {
+    general_prediction: "生命智慧指南 (疗愈)",
+    life_overview: "深度生命结构",
+    career: "使命与成功",
+    relationship: "魅力与关系",
+    health: "健康与活力",
+    wealth: "财富流",
+    daily_insight: "每日直觉",
+    annual_forecast: "年度命运节奏",
+    personal_branding: "身份与品牌",
+  }
+};
+
+const REPORT_TYPE_INSTRUCTIONS: Record<Locale, Record<AIReportType, string>> = {
+  th: {
+    general_prediction: `วิเคราะห์พยากรณ์เพื่อการบำบัดและไกด์เส้นทางชีวิต (Life Therapy & Guidance):
 1. **สถานการณ์ชีวิตโดยทั่วไป** — วิเคราะห์ปัจจัยภายนอก (ทักษาจร) ที่เข้ามากระทบในช่วงนี้
 2. **โอกาสในการเริ่มต้นทำอะไรใหม่ๆ** — เจาะลึกภพปุตตะ/ลาภะ/โภคา/ศุภะ/ธะนัง เพื่อหาจังหวะการเริ่มต้นที่ทรงพลัง
 3. **ชีวิตครอบครัวและสายสัมพันธ์** — วิเคราะห์ภพโภคา/พันธุ/ทาสา/ทาสี/ปิตา/มาตา เพื่อจัดสมดุลความสัมพันธ์ในบ้าน
-4. **สรุปภาพรวมปัญญาชีวิต** — อธิบายพลังจากฐานที่ 4 (กำลังเทวดา) เพื่อให้เห็น Mindset ที่ต้องปรับปรุงหรือเสริมพลัง
-`.trim(),
-
-  life_overview: `
-วิเคราะห์โครงสร้างชีวิตเชิงลึกเพื่อการเติบโตทางจิตวิญญาณและพัฒนาศักยภาพ:
+4. **สรุปภาพรวมปัญญาชีวิต** — อธิบายพลังจากฐานที่ 4 (กำลังเทวดา) เพื่อให้เห็น Mindset ที่ต้องปรับปรุงหรือเสริมพลัง`,
+    life_overview: `วิเคราะห์โครงสร้างชีวิตเชิงลึกเพื่อการเติบโตทางจิตวิญญาณและพัฒนาศักยภาพ:
 1. **แก่นแท้และจุดมุ่งหมายชีวิต** — ถอดรหัสผ่านรหัสดวงดาวจากภพตนุ/อัตตา เพื่อเข้าใจอุปนิสัยเดิมและแรงขับเคลื่อนในจิตใต้สำนึก
 2. **พลังแห่งการหลอมรวม (กำลังเทวดา ฐานที่ 4)** — อธิบายคุณภาพของพลังงานภายในและมายด์เซ็ทที่สั่งสมมา ที่จะช่วยเกื้อหนุนหรือขับเคลื่อนชีวิต
-3. **การประสานจังหวะภายนอกและภายใน** — การผสานทักษาจร (ปัจจัยสภาพแวดล้อมชั่วคราว) และมหาภูติจร (ความพร้อมของใจในการรับมือ)
-4. **Action Plan สู่ความสงบนิ่งและปัญญา** — แนวทางปฏิบัติเพื่อค้นพบปัญญาญาณและการใช้พลังงานดวงดาวนำชีวิต
-`.trim(),
-
-  career: `
-วิเคราะห์ดวงการงาน หน้าที่ความรับผิดชอบ และภารกิจชีวิต (Mission & Success):
+3. **การประสานจังหวะภายนอกและภายใน** — การผสานทักษาจร และมหาภูติจร
+4. **Action Plan สู่ความสงบนิ่งและปัญญา** — แนวทางปฏิบัติเพื่อค้นพบปัญญาญาณและการใช้พลังงานดวงดาวนำชีวิต`,
+    career: `วิเคราะห์ดวงการงาน หน้าที่ความรับผิดชอบ และภารกิจชีวิต (Mission & Success):
 1. **การงานที่โดดเด่นและเหมาะสม** — เจาะลึกภพกัมมะ/ศุภะ/ลาภะ เพื่อหาแนวทางการทำงานที่ตรงกับศักยภาพสูงสุด
 2. **บทเรียนชีวิตในวิชาชีพ** — ถอดรหัสพลังงานดวงดาวที่สถิตในภพการงาน เพื่อเข้าใจหน้าที่และสายใยบทเรียนที่ต้องเรียนรู้
 3. **สภาวะใจต่อการทำงาน (มหาภูติจร)** — ความพร้อมภายใน พลังสร้างสรรค์ หรือจุดติดขัดที่ต้องก้าวข้ามในเรื่องงาน
-4. **กลยุทธ์ขับเคลื่อนความสำเร็จ** — ดึงพลังดวงดาวตัวช่วยมาแก้เกมการงานและสร้างความก้าวหน้าอย่างยั่งยืน
-`.trim(),
-
-  relationship: `
-วิเคราะห์ความสัมพันธ์ สายใยบทเรียน และการเกื้อกูลเพื่อเติบโตไปด้วยกัน:
-1. **สายใยและบทเรียนความสัมพันธ์** — ถอดรหัสดวงดาวที่สถิตภพปัตนิ/โภคา/มาตา เข้าใจอุปนิสัยเดิมในอดีตชาติที่ยังส่งผลถึงปัจจุบัน
+4. **กลยุทธ์ขับเคลื่อนความสำเร็จ** — ดึงพลังดวงดาวตัวช่วยมาแก้เกมการงานและสร้างความก้าวหน้าอย่างยั่งยืน`,
+    relationship: `วิเคราะห์ความสัมพันธ์ สายใยบทเรียน และการเกื้อกูลเพื่อเติบโตไปด้วยกัน:
+1. **สายใยและบทเรียนความสัมพันธ์** — ถอดรหัสดวงดาวที่สถิตภพปัตนิ/โภคา/มาตา เข้าใจอุปนิสัยเดิมที่ส่งผลถึงปัจจุบัน
 2. **สภาวะใจในความสัมพันธ์ (มหาภูติจร)** — ความต้องการภายใน ความสงบ หรือสภาวะอารมณ์ที่ต้องเยียวยาดูแล
 3. **ปัจจัยเกื้อหนุนและบทเรียนภายนอก (ทักษาจร)** — สภาพแวดล้อมรอบตัวและการเชื่อมโยงที่เข้ามาทดสอบความสัมพันธ์
-4. **ปัญญาชีวิตเพื่อรักที่สงบและยั่งยืน** — การจัดสมดุลพลังงานปัจจุบันกรรมเพื่อเกื้อกูลและเติบโตด้วยความเข้าใจ
-`.trim(),
-
-  wealth: `
-วิเคราะห์กระแสทรัพย์ ความมั่งคั่ง และคลังสมบัติประจำดวง (Wealth Flow):
+4. **ปัญญาชีวิตเพื่อรักที่สงบและยั่งยืน** — การจัดสมดุลพลังงานปัจจุบันกรรมเพื่อเกื้อกูลและเติบโตด้วยความเข้าใจ`,
+    wealth: `วิเคราะห์กระแสทรัพย์ ความมั่งคั่ง และคลังสมบัติประจำดวง (Wealth Flow):
 1. **รูปแบบการเงินและความมั่งคั่ง** — เจาะลึกภพธะนัง/กฏุมภะ/โภคา เพื่อเข้าใจสายใยการสร้างคุณค่าและทางเดินแห่งทรัพย์
 2. **ใจกับการดึงดูดทรัพย์ (มหาภูติจร)** — ความสอดคล้องของสภาวะจิตใจ และความพร้อมภายในในการดึงดูดกระแสพลังงานการเงิน
 3. **โอกาสและสภาพแวดล้อมการเงิน (ทักษาจร)** — จังหวะการงอกเงยของทรัพย์สิน หรือจุดรั่วไหลที่ต้องบริหารจัดการด้วยสติ
-4. **กลยุทธ์จัด Flow พลังงานทรัพย์** — นำปัญญาภายในและดาวตัวช่วยมาปลดล็อกความอุดมสมบูรณ์ในชีวิต
-`.trim(),
-
-  annual_forecast: `
-วิเคราะห์จังหวะชีวิตรายปีและแผนที่ปัญญาเพื่อก้าวต่อไปใน 12 เดือนข้างหน้า:
+4. **กลยุทธ์จัด Flow พลังงานทรัพย์** — นำปัญญาภายในและดาวตัวช่วยมาปลดล็อกความอุดมสมบูรณ์ในชีวิต`,
+    annual_forecast: `วิเคราะห์จังหวะชีวิตรายปีและแผนที่ปัญญาเพื่อก้าวต่อไปใน 12 เดือนข้างหน้า:
 1. **แก่นหลักพลังงานปีปัจจุบัน** — ความหมายเชิงคุณภาพของดวงดาวในปีนี้ต่อชะตาชีวิต
 2. **บทเรียนและโอกาสในแต่ละมิติ** — การเข้าใจสภาวะจิตใต้สำนึกและอารมณ์จากรหัสดาวจร
 3. **ความพร้อมและโอกาสรายปี** — สรุปความพร้อมภายใน (มหาภูติจร) และโอกาสภายนอก (ทักษาจร) ประจำปีนี้
-4. **แผนชีวิตและ Action Plan รายปี** — การกำหนดเป้าหมายกรรมปัจจุบันด้วยสติปัญญาอย่างสอดคล้องกับธรรมชาติ
-`.trim(),
-
-  health: `
-วิเคราะห์ความสมดุลของธาตุ พลังชีวิต และสุขภาวะ (Health & Vitality):
+4. **แผนชีวิตและ Action Plan รายปี** — การกำหนดเป้าหมายกรรมปัจจุบันด้วยสติปัญญาอย่างสอดคล้องกับธรรมชาติ`,
+    health: `วิเคราะห์ความสมดุลของธาตุ พลังชีวิต และสุขภาวะ (Health & Vitality):
 1. **แก่นแท้พลังชีวิตและจุดเปราะบาง** — เจาะลึกภพมรณะ/หินะ/พยายะ/ตนุ เพื่อเข้าใจความสมดุลของกายและจิต
 2. **กายใจที่สัมพันธ์กัน (มหาภูติจร)** — สภาวะอารมณ์ที่สะท้อนออกมาเป็นความตึงเครียดหรือความลื่นไหลของสุขภาพกาย
 3. **ปัจจัยกระทบสุขภาพภายนอก (ทักษาจร)** — อิทธิพลจากสิ่งแวดล้อมและช่วงเวลาที่ส่งผลต่อระบบพลังงานในร่างกาย
-4. **การบำบัดรักษาและคืนสู่สมดุล** — วิธีฟื้นฟูกายและจิตด้วยสติปัญญา ปรับปัจจุบันกรรมเพื่อคืนสู่สุขภาวะที่สมบูรณ์
-`.trim(),
-
-  daily_insight: `
-แนวทางปฏิบัติและการเจริญสติในการดำเนินชีวิตวันนี้:
+4. **การบำบัดรักษาและคืนสู่สมดุล** — วิธีฟื้นฟูกายและจิตด้วยสติปัญญา ปรับปัจจุบันกรรมเพื่อคืนสู่สุขภาวะที่สมบูรณ์`,
+    daily_insight: `แนวทางปฏิบัติและการเจริญสติในการดำเนินชีวิตวันนี้:
 1. **พลังงานประจำวันและปัญญาญาณ** — คุณลักษณะและการแสดงออกของดวงดาวเจ้ายามอัฏฐกาลปัจจุบัน
 2. **สภาวะใจภายในวันนี้ (มหาภูติจร)** — การรู้เท่าทันความพร้อม อารมณ์ และ Mindset ของตัวเองในวันนี้
 3. **ปัจจัยภายนอกและการรับมือ (ทักษาจร)** — สิ่งที่จะผ่านเข้ามาให้คุณได้เรียนรู้และมีสติตอบสนองในวันนี้
-4. **บทสรุปนำทางปัจจุบันกรรม** — Action Plan เล็กๆ 1 ข้อเพื่อสร้างพลังบวกและความตระหนักรู้วันนี้
-`.trim(),
-
-  personal_branding: `
-วิเคราะห์เสน่ห์จากพื้นดวงและการสร้างอัตลักษณ์ตนเอง (Personal Identity & Branding):
+4. **บทสรุปนำทางปัจจุบันกรรม** — Action Plan เล็กๆ 1 ข้อเพื่อสร้างพลังบวกและความตระหนักรู้วันนี้`,
+    personal_branding: `วิเคราะห์เสน่ห์จากพื้นดวงและการสร้างอัตลักษณ์ตนเอง (Personal Identity & Branding):
 1. **เสน่ห์และบุคลิกภาพที่โดดเด่น** — วิเคราะห์จากภพอัตตะ (ตัวตน), พันธุ (จิตใจภายใน), และตนุ (อัธยาศัยที่แสดงออก)
-2. **ชื่อเสียงและพลังดึงดูด** — เจาะลึกภพศุภะ และการสื่อสารที่โดดเด่น (ภพปิตา และตำแหน่งดาวพุธ ๔)
-3. **รูปแบบการสื่อสารสร้างเสน่ห์** — การใช้จุดเด่นจากการทำงาน (กัมมะ) และโอกาสสร้างรายได้ (ลาภะ) มาสรุปเป็นเอกลักษณ์เฉพาะตัว
-4. **Personal Identity Branding Planner** — สรุปภาพลักษณ์สร้างเสน่ห์ที่เหมาะสม แนวทางการพัฒนาตนเอง และกิจกรรมเสริมเสน่ห์ที่เป็นรูปธรรม
-`.trim(),
+2. **ชื่อเสียงและพลังดึงดูด** — เจาะลึกภพศุภะ และการสื่อสารที่โดดเด่น
+3. **รูปแบบการสื่อสารสร้างเสน่ห์** — การใช้จุดเด่นจากการทำงาน (กัมมะ) และโอกาสสร้างรายได้ (ลาภะ)
+4. **Personal Identity Branding Planner** — สรุปภาพลักษณ์สร้างเสน่ห์ที่เหมาะสม แนวทางการพัฒนาตนเอง`,
+  },
+  en: {
+    general_prediction: `Analyze predictions for therapy and life guidance:
+1. **General Life Situation** - Analyze external factors (Taksa Transit) affecting this period.
+2. **Opportunities for New Beginnings** - Deep dive into houses of Putta/Lapha/Phoka/Supha/Thanang.
+3. **Family and Relationships** - Analyze Phoka/Phanthu/Thasa/Thasi/Pita/Mata for balance.
+4. **Overall Life Wisdom Summary** - Explain power from Base 4 (Divine Power) for Mindset shifts.`,
+    life_overview: `Analyze deep life structure for spiritual growth and potential development:
+1. **Essence and Life Purpose** - Decode planetary codes from Tanu/Atta houses to understand innate traits.
+2. **Unification Power (Base 4 Divine Power)** - Explain the quality of internal energy and mindset.
+3. **Internal and External Harmony** - Integration of Taksa Transit and MahaBhuti Transit.
+4. **Action Plan for Stillness and Wisdom** - Guidelines for discovering intuition and using planetary energy.`,
+    career: `Analyze career, responsibilities, and life mission (Mission & Success):
+1. **Outstanding and Suitable Careers** - Focus on Kamma/Supha/Lapha for maximum potential.
+2. **Professional Life Lessons** - Decode planetary energy in career houses for learning paths.
+3. **Work Mindset (MahaBhuti Transit)** - Internal readiness, creativity, or obstacles to overcome.
+4. **Success Strategies** - Use planetary helpers to enhance career games and sustainable progress.`,
+    relationship: `Analyze relationships, connection lessons, and mutual growth:
+1. **Relationship Connections and Lessons** - Decode planets in Patni/Phoka/Mata houses.
+2. **Mindset in Relationships (MahaBhuti Transit)** - Internal needs, peace, or emotional healing.
+3. **External Factors and Lessons (Taksa Transit)** - Environment and connections testing the relationship.
+4. **Wisdom for Peaceful and Sustainable Love** - Balance energy of present actions for growth.`,
+    wealth: `Analyze wealth flow, prosperity, and birth chart treasures:
+1. **Finance and Wealth Patterns** - Deep dive into Thanang/Kadumbha/Phoka for value creation paths.
+2. **Mindset for Attracting Wealth (MahaBhuti Transit)** - Alignment of mental state and readiness.
+3. **Finance Opportunities and Environment (Taksa Transit)** - Asset growth timing or leakage points.
+4. **Wealth Energy Flow Strategy** - Bring internal wisdom and planetary helpers to unlock abundance.`,
+    annual_forecast: `Analyze annual life rhythm and wisdom map for the next 12 months:
+1. **Core Energy of Current Year** - Qualitative meaning of planets this year for destiny.
+2. **Lessons and Opportunities in Each Dimension** - Understanding subconscious and emotions from transits.
+3. **Annual Readiness and Opportunities** - Summary of internal readiness and external opportunities.
+4. **Annual Life Plan and Action Plan** - Set present action goals aligned with nature.`,
+    health: `Analyze element balance, vital energy, and well-being (Health & Vitality):
+1. **Vital Energy Essence and Vulnerabilities** - Focus on Marana/Hina/Phayaya/Tanu for body-mind balance.
+2. **Body-Mind Relationship (MahaBhuti Transit)** - Emotional states reflected in physical health.
+3. **External Health Factors (Taksa Transit)** - Environmental influences on the body's energy system.
+4. **Healing and Balance Restoration** - Methods for restoring body and mind with wisdom.`,
+    daily_insight: `Practices and mindfulness for living today:
+1. **Daily Energy and Intuition** - Characteristics of current Atthakarn ruling planets.
+2. **Internal State Today (MahaBhuti Transit)** - Awareness of your own readiness and mindset today.
+3. **External Factors and Response (Taksa Transit)** - Things to learn and respond to mindfully today.
+4. **Present Action Plan Conclusion** - One small action plan for positive energy and awareness.`,
+    personal_branding: `Analyze charm and identity building (Personal Identity & Branding):
+1. **Outstanding Charm and Personality** - Analysis of Atta (Self), Phanthu (Internal Mind), and Tanu (Expression).
+2. **Reputation and Attraction Power** - Deep dive into Supha and prominent communication.
+3. **Communication Style for Charm** - Using strengths from work (Kamma) and income opportunities (Lapha).
+4. **Personal Identity Branding Planner** - Summary of suitable charm imagery and development.`,
+  },
+  zh: {
+    general_prediction: `分析疗愈和生活指导的预测：
+1. **总体生活状况** - 分析影响这一时期的外部因素 (ทักษาจร)。
+2. **新开始的机会** - 深入研究 Putta/Lapha/Phoka/Supha/Thanang 宫位以寻找契机。
+3. **家庭与人际关系** - 分析 Phoka/Phanthu/Thasa/Thasi/Pita/Mata 宫位以平衡家庭关系。
+4. **整体生命智慧总结** - 解释来自第 4 宫 (กำลังเทวดา) 的力量，以识别需要改进的心态。`,
+    life_overview: `分析深度生命结构以实现灵性成长和潜力开发：
+1. **本质与生命目的** - 通过 Tanu/Atta 宫位的行星代码解码，了解先天特质。
+2. **融合力量 (第 4 宫กำลังเทวดา)** - 解释内在能量的质量和积累的心态。
+3. **内在与外在的和谐** - 结合外在因素 (ทักษาจร) 和内在心态 (มหาภูติจร)。
+4. **通往宁静与智慧的行动计划** - 发现直觉和利用行星能量的生活指南。`,
+    career: `分析事业、职责和生命使命 (使命与成功)：
+1. **杰出且适合的事业** - 重点关注 Kamma/Supha/Lapha 以发掘最大潜力。
+2. **职业生涯中的生命教训** - 解码事业宫位中的行星能量，了解职责和学习路径。
+3. **工作心态 (มหาภูติจร)** - 内在准备情况、创造力或需要克服的障碍。
+4. **推动成功的策略** - 利用行星助力器来提升事业表现并取得可持续进步。`,
+    relationship: `分析关系、连接教训和共同成长：
+1. **关系的连接与教训** - 解码 Patni/Phoka/Mata 宫位中的行星，了解影响。
+2. **关系中的心态 (มหาภูติจร)** - 内在需求、宁静或需要疗愈的情绪状态。
+3. **外部支持因素与教训 (ทักษาจร)** - 周围环境和测试关系的连接。
+4. **通往宁静而持久爱情的智慧** - 平衡当下行为的能量，实现理解与成长。`,
+    wealth: `分析财富流、繁荣和命盘宝藏：
+1. **财务与财富模式** - 深入研究 Thanang/Kadumbha/Phoka 以了解价值创造路径。
+2. **吸引财富的心态 (มหาภูติจร)** - 心理状态的契合度以及吸引财富能量的准备情况。
+3. **财务机会与环境 (ทักษาจร)** - 资产增长的时机或需要谨慎管理的流失点。
+4. **财富能量流策略** - 利用内在智慧和行星助手开启生活中的丰盈。`,
+    annual_forecast: `分析年度生命节奏和未来 12 个月的智慧地图：
+1. **当年核心能量** - 今年行星对命运的定性意义。
+2. **各维度的教训与机会** - 通过流年星曜代码了解潜意识和情绪。
+3. **年度准备情况与机会** - 总结内在准备情况 (มหาภูติจร) 和外部机会 (ทักษาจร)。
+4. **年度生活计划与行动计划** - 设定与自然相契合的当下行为目标。`,
+    health: `分析元素平衡、生命能量和健康状况 (健康与活力)：
+1. **生命能量本质与脆弱点** - 关注 Marana/Hina/Phayaya/Tanu 以了解身心平衡。
+2. **身心关联 (มหาภูติจร)** - 反映为身体健康压力或顺畅的情绪状态。
+3. **外部健康影响因素 (ทักษาจร)** - 环境和时间对身体能量系统的影响。
+4. **疗愈与恢复平衡** - 用智慧修复身心的方法，调整当下行为以恢复健康。`,
+    daily_insight: `当下的生活实践与正念引导：
+1. **每日能量与直觉** - 当前时辰统治星的特质和表现。
+2. **今日内在状态 (มหาภูติจร)** - 察觉自己今日的准备情况、情绪和心态。
+3. **外部因素与应对 (ทักษาจร)** - 今日将经历的学习事物以及正念回应。
+4. **当下行动计划总结** - 一个简单的行动计划，用于创造正能量和觉知。`,
+    personal_branding: `分析魅力与身份构建 (个人身份与品牌)：
+1. **突出的魅力与个性** - 分析 Atta (自我), Phanthu (内在心灵), 和 Tanu (表达)。
+2. **声誉与吸引力** - 深入研究 Supha 宫位和突出的沟通能力。
+3. **魅力的沟通方式** - 利用工作 (Kamma) 和收入机会 (Lapha) 的优势。
+4. **个人身份品牌策划师** - 总结适合的魅力形象、发展方向和具体的提升活动。`,
+  }
 };
 
-// ─── Report type label ────────────────────────────────────────────────────────
-
-const REPORT_TYPE_LABEL: Record<AIReportType, string> = {
-  general_prediction: "พยากรณ์ปัญญาชีวิต (Therapy)",
-  life_overview: "โครงสร้างชีวิตเชิงลึก",
-  career: "ภารกิจ & ความสำเร็จ",
-  relationship: "เสน่ห์ & ความสัมพันธ์",
-  health: "สุขภาพ & พลังชีวิต",
-  wealth: "กระแสทรัพย์ & มั่งคั่ง",
-  daily_insight: "ปัญญาญาณรายวัน",
-  annual_forecast: "จังหวะชะตารายปี",
-  personal_branding: "ตัวตน & อัตลักษณ์",
+const SYSTEM_ROLE: Record<Locale, string> = {
+  th: `คุณคือ Spiritual Wisdom Guidance ผู้นำทางจิตวิญญาณและปัญญาญาณเพื่อช่วยให้ผู้คนตระหนักรู้ เติบโต และจัดสมดุลพลังงานในตนเอง ผ่านการอ่านรหัสดวงดาวตามหลักเลข 7 ตัว 9 ฐาน`,
+  en: `You are Spiritual Wisdom Guidance, a spiritual and intuitive guide helping people achieve awareness, growth, and energy balance through reading planetary codes based on the 7-Star 9-Base system.`,
+  zh: `你是灵性智慧指南 (Spiritual Wisdom Guidance)，一位灵性和直觉导师，通过解读基于七星九宫系统的行星代码，帮助人们实现觉知、成长和能量平衡。`
 };
 
-// ─── Main Prompt Builder ───────────────────────────────────────────────────────
+const INTRO_TEXT: Record<Locale, string> = {
+  th: `สวัสดีครับ ยินดีต้อนรับสู่พื้นที่แห่งปัญญาญาณและการเติบโตภายใน ผมคือ Wisdom Guidance ครับ`,
+  en: `Greetings, welcome to the space of intuition and internal growth. I am Wisdom Guidance.`,
+  zh: `您好，欢迎来到直觉与内在成长的空间。我是智慧指南。`
+};
 
 export function buildLifeReportPrompt(
   result: PhopephumResult,
   reportType: AIReportType,
   userName: string,
-  birthYam?: AtthakarnBirthYamContext | null
+  birthYam: AtthakarnBirthYamContext | null = null,
+  locale: Locale = "th"
 ): string {
   const { nineBase, taksaTransit, mahaTransit, crossCheck, atthakarn, rahu } = result;
   const matrix = nineBase.bases;
+  const houses = HOUSE_NAMES[locale];
+  const planets = PLANET_NAMES_MAP[locale];
 
-  // สร้างผัง 7 ตัว 9 ฐานแบบ Markdown
-  let matrixTable = "| ฐานที่ | ภพ 1 (อาทิตย์) | ภพ 2 (จันทร์) | ภพ 3 (อังคาร) | ภพ 4 (พุธ) | ภพ 5 (พฤหัส) | ภพ 6 (ศุกร์) | ภพ 7 (เสาร์) |\n";
+  // Matrix Markdown Table
+  const baseLabels = {
+    th: ["วันเกิด", "เดือนเกิด", "ปีเกิด", "กำลังเทวดา", "เศษโสฬส", "กำลัง 1", "กำลัง 2", "อาตมะ", "ภริยัง"],
+    en: ["Birth Day", "Birth Month", "Birth Year", "Divine Power", "Solos Remainder", "Power 1", "Power 2", "Atma", "Phariyang"],
+    zh: ["生日", "生月", "生年", "神力", "索洛斯余数", "力量 1", "力量 2", "自我", "配偶"]
+  };
+  const labels = baseLabels[locale];
+
+  let matrixTable = locale === "zh" ? "| 宫位 | 行星 1 (日) | 行星 2 (月) | 行星 3 (火) | 行星 4 (水) | 行星 5 (木) | 行星 6 (金) | 行星 7 (土) |\n" : 
+                    locale === "en" ? "| Base | House 1 (Sun) | House 2 (Moon) | House 3 (Mars) | House 4 (Mercury) | House 5 (Jupiter) | House 6 (Venus) | House 7 (Saturn) |\n" :
+                                     "| ฐานที่ | ภพ 1 (อาทิตย์) | ภพ 2 (จันทร์) | ภพ 3 (อังคาร) | ภพ 4 (พุธ) | ภพ 5 (พฤหัส) | ภพ 6 (ศุกร์) | ภพ 7 (เสาร์) |\n";
   matrixTable += "| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |\n";
-  matrixTable += `| **ฐาน 1 (วันเกิด)** | ${matrix[0]?.map((v, i) => `${v} (${HOUSE_ROWS[0]?.[i]})`).join(" | ")} |\n`;
-  matrixTable += `| **ฐาน 2 (เดือนเกิด)** | ${matrix[1]?.map((v, i) => `${v} (${HOUSE_ROWS[1]?.[i]})`).join(" | ")} |\n`;
-  matrixTable += `| **ฐาน 3 (ปีเกิด)** | ${matrix[2]?.map((v, i) => `${v} (${HOUSE_ROWS[2]?.[i]})`).join(" | ")} |\n`;
-  matrixTable += `| **ฐาน 4 (กำลังเทวดา)** | ${matrix[3]?.join(" | ")} |\n`;
-  matrixTable += `| **ฐาน 5 (เศษโสฬส)** | ${matrix[4]?.join(" | ")} |\n`;
-  matrixTable += `| **ฐาน 6 (กำลัง 1)** | ${matrix[5]?.join(" | ")} |\n`;
-  matrixTable += `| **ฐาน 7 (กำลัง 2)** | ${matrix[6]?.join(" | ")} |\n`;
-  matrixTable += `| **ฐาน 8 (อาตมะ)** | ${matrix[7]?.join(" | ")} |\n`;
-  matrixTable += `| **ฐาน 9 (ภริยัง)** | ${matrix[8]?.join(" | ")} |\n`;
+  
+  for (let i = 0; i < 3; i++) {
+    matrixTable += `| **${labels[i]}** | ${matrix[i]?.map((v, idx) => `${v} (${houses[i]?.[idx]})`).join(" | ")} |\n`;
+  }
+  for (let i = 3; i < 9; i++) {
+    matrixTable += `| **${labels[i]}** | ${matrix[i]?.join(" | ")} |\n`;
+  }
 
-  // สร้างความหมายทักษาจร
+  // Taksa Info
   let taksaInfo = "";
   for (let star = 1; star <= 8; star++) {
-    const role = taksaTransit.map[star as StarNumber] || "ไม่มีบทบาท";
-    taksaInfo += `- ดาว ${PLANET_NAMES_MAP[star]}: ทำหน้าที่เป็น **"${role}"** (สภาพภายนอก/โอกาส)\n`;
+    const role = taksaTransit.map[star as StarNumber] || (locale === "th" ? "ไม่มีบทบาท" : locale === "zh" ? "无角色" : "No Role");
+    taksaInfo += `- ${planets[star]}: ${role}\n`;
   }
 
-  // สร้างความหมายมหาภูติจร
+  // Maha Info
   let mahaInfo = "";
   for (let star = 1; star <= 7; star++) {
-    const state = Object.entries(mahaTransit.map).find(([, v]) => v === star)?.[0] || "ไม่มีบทบาท";
-    mahaInfo += `- ดาว ${PLANET_NAMES_MAP[star]}: ตกตำแหน่ง **"${state}"** (สภาวะใจภายใน)\n`;
+    const state = Object.entries(mahaTransit.map).find(([, v]) => v === star)?.[0] || (locale === "th" ? "ไม่มีบทบาท" : locale === "zh" ? "无角色" : "No Role");
+    mahaInfo += `- ${planets[star]}: ${state}\n`;
   }
 
-  // สร้าง Alerts
-  let alertsInfo = "";
-  crossCheck.alerts.forEach(a => {
-    alertsInfo += `- [${a.level.toUpperCase()}] ดาว${a.star}: ${a.message}\n`;
-  });
+  const reportInstructions = REPORT_TYPE_INSTRUCTIONS[locale][reportType] ?? REPORT_TYPE_INSTRUCTIONS[locale].general_prediction;
+  const reportLabel = REPORT_TYPE_LABEL[locale][reportType] ?? reportType;
 
-  // ── RAG Context: Atthakarn Birth Yam ──
-  const atthakarnSection = birthYam
-    ? `\n${ATTHAKARN_CORE_PRINCIPLES}\n\n${buildAtthakarnContext(birthYam)}\n`
-    : `\n**หมายเหตุ:** ไม่มีข้อมูลเวลาเกิดที่ละเอียด — วิเคราะห์จากเลขชะตาและวัยจรเป็นหลัก\n`;
-
-  const reportInstructions = REPORT_TYPE_INSTRUCTIONS[reportType] ?? REPORT_TYPE_INSTRUCTIONS.general_prediction;
-  const reportLabel = REPORT_TYPE_LABEL[reportType] ?? reportType;
+  const outputLangInstruction = {
+    th: "โปรดเขียนรายงานเป็นภาษาไทยที่สละสลวย",
+    en: "Please write the report in elegant and professional English.",
+    zh: "请用优美、专业的中文撰写报告。"
+  }[locale];
 
   return `# Role: spiritual wisdom guidance
 
-คุณคือ Spiritual Wisdom Guidance ผู้นำทางจิตวิญญาณและปัญญาญาณเพื่อช่วยให้ผู้คนตระหนักรู้ เติบโต และจัดสมดุลพลังงานในตนเอง ผ่านการอ่านรหัสดวงดาวตามหลักเลข 7 ตัว 9 ฐาน
+${SYSTEM_ROLE[locale]}
 
-## 📣 การแนะนำตัวและการสร้างความน่าเชื่อถือ
-- ให้เริ่มต้นคำพยากรณ์ด้วยการแนะนำตัวว่า: **"สวัสดีครับ ยินดีต้อนรับสู่พื้นที่แห่งปัญญาญาณและการเติบโตภายใน ผมคือ Wisdom Guidance ครับ"**
-- **ห้ามใช้** คำว่า "ครูเด่นพยากรณ์" หรือ "ครูเด่นพยากรณ์บำบัด" ในการแนะนำตัวและตลอดการพยากรณ์
-- **ห้ามใช้** คำว่า "ถอดรหัสลายนิ้วมือ" หรือคำที่เกี่ยวข้องกับ "ลายนิ้วมือ" เป็นอันขาด ให้ใช้คำว่า "ถอดรหัสชะตาชีวิตผ่านแผนผังดวงดาว" หรือ "ศาสตร์เลข 7 ตัว 9 ฐาน" เท่านั้น
+## 📣 Introduction
+- Start with: **"${INTRO_TEXT[locale]}"**
+- Never use "Kru Den" or "Fingerprint" terms.
 
----
+## 🔮 Destiny Decoding Data: ${userName}
 
-## 🚨 กฎเหล็กเรื่องความกระชับและการสรุปความ (Core Conciseness Rule)
-- **ห้ามสรุปทฤษฎีหรือนำขั้นตอน Star Tracing หรือตัวเลขโยงเส้น ไปอธิบายซ้ำซากในทุกหัวข้อพยากรณ์** 
-- การถอดรหัส 3 Steps (Star Tracing Method) และ 4 Steps Core Algorithm คือ **"ตรรกะเบื้องหลังสำหรับการวิเคราะห์เงียบๆ"** เพื่อให้เกิดความเข้าใจบริบทชะตาชีวิตและสภาวะภายในที่แท้จริง
-- **เมื่อเขียนคำพยากรณ์ ให้สรุปความกระชับมากขึ้น ตรงประเด็น ทรงพลัง** ชี้แนะแนวทางพัฒนาตนเอง เสริมพลังบวก และให้แง่คิดในการเปลี่ยน Mindset ทันทีโดยไม่ต้องอธิบายว่าตัวเลขโยงไปช่องไหน
+### 1. 7-Star 9-Base Chart
+${matrixTable}
 
----
+### 2. External Factors (Taksa Transit)
+${taksaInfo}
 
-## 🔮 ตรรกะการถอดรหัสรหัสชีวิตเงียบๆ (Destiny Decoding Logic - Behind the Scenes)
+### 3. Internal Mindset (Maha Transit)
+${mahaInfo}
 
-ในการคำนวณและหาเรื่องราว ให้ใช้หลัก **"Star Tracing Method" (3 Steps)** ต่อไปนี้ในใจ:
-1. **Step 1 (Inquiry):** ตั้งโจทย์ด้วยภพในฐานที่ 1 ที่เกี่ยวข้อง (เช่น เรื่องการเงิน/งาน/รัก) แล้วระบุ "เลขดาว" (1-7) ที่สถิตในภพนั้น
-2. **Step 2 (Tracing the Path):** **ห้ามอ่านแนวดิ่ง (Column) เสมอไป** แต่ให้ใช้ "ตัวเลขดาวเดิม" ค้นหาว่าในฐานที่ 2 สถิตภพอะไร และในฐานที่ 3 สถิตภพอะไร (สามารถย้าย Column เพื่อตามดาวดวงเดิม) เพื่อเชื่อมโยงเรื่องราวจริง (เช่น ธะนัง(6) -> สหัชชะ(6) -> มรณะ(6))
-3. **Step 3 (Confirmation):** ตรวจสอบ "ฐานกำลังเทวดา" (ฐานที่ 4) ใน Column เดียวกันกับตำแหน่งสุดท้ายที่ดาวไปตกในฐานที่ 3 เพื่อตัดสินคุณภาพ ทิศทาง และจุดสำเร็จ/จุดเตือน
+### 4. Current Time Context
+- Current Yam: ${atthakarn.planetName} (${atthakarn.startTime}–${atthakarn.endTime})
 
-### 🌌 การถอดรหัสสภาพแวดล้อมและจิตใจ (The Decoding)
-- **External Factors (ทักษาจร):** วิเคราะห์ว่าสิ่งแวดล้อมรอบตัวส่งผลบวกหรือลบ (โอกาส/อุปสรรค)
-  - *ศรี* = ความสมบูรณ์ โชคลาภ โอกาสที่ดี
-  - *เดช* = อำนาจ บารมี เกียรติยศ
-  - *มนตรี* = การเกื้อหนุน การช่วยเหลือจากผู้ใหญ่
-  - *กาลกิณี* = ความบกพร่อง อุปสรรคที่ต้องระวัง
-- **Internal State (มหาภูติจร):** สะท้อนสภาวะใจและ Mindset ของเจ้าชะตาในช่วงนี้ (Passion/Fear)
-  - *ราชา* = คิดใหญ่ ใจมุ่งมั่น พร้อมบุกเบิก
-  - *ธงชัย* = มีความมั่นใจ มุ่งสู่ความสำเร็จ
-  - *มรณะ* = กังวล นิ่ง หรือใจที่ต้องการความสงบเพื่อการปรับเปลี่ยนครั้งใหญ่
-  - *โลกาวินาศ* = วุ่นวาย มีเรื่องรบกวนใจมาก
-
-### 🌟 ออกแบบแผนที่ดวงดาว (Step 4: The Astral Blueprint)
-นำสภาวะจากข้อมูลมาร้อยเรียงให้เกิดการ Visualization ในจินตนาการของผู้ใช้ตามหลัก: **"Planet (What) + Sign (How) + House (Where)"**
-1. **Planets (What):** ดาวเด่น/ดาวตัวช่วยที่ทำงานในเรื่องนั้นๆ
-   - *เทียบค่าดวงดาว:* 1=Sun (ตัวตน), 2=Moon (อารมณ์/ความรู้สึก), 3=Mars (การลงมือทำ/แรงขับ), 4=Mercury (การเจรจา/สื่อสาร), 5=Jupiter (ปัญญา/คุณธรรม), 6=Venus (ความรัก/เงิน/สุขนิยม), 7=Saturn (โครงสร้าง/ระเบียบ/ความอดทน), 8=Rahu (ความหลงใหล/ความกล้าเปลี่ยน)
-2. **Signs (How):** แปลงความรู้สึก (ทักษา/มหาภูติ) เป็นบุคลิกราศี:
-   - *ธาตุไฟ (Aries, Leo, Sagittarius):* มั่นใจ รวดเร็ว ร้อนแรง ผู้นำ (เทียบเท่า เดช, ราชา, ธงชัย)
-   - *ธาตุดิน (Taurus, Virgo, Capricorn):* มั่นคง สม่ำเสมอ ช้าแต่ชัวร์ เน้นผลลัพธ์ (เทียบเท่า มูลละ, อธิบดี, ขุมทรัพย์)
-   - *ธาตุลม (Gemini, Libra, Aquarius):* เจรจา เชื่อมโยง ไอเดียสร้างสรรค์ คล่องตัว (เทียบเท่า ศรี, มนตรี)
-   - *ธาตุน้ำ (Cancer, Scorpio, Pisces):* อารมณ์ ความลึกซึ้ง ลึกลับ ปรับตัว นุ่มนวล (เทียบเท่า อุตสาหะ, มรณะ)
-3. **Houses (Where):** แปลงภพเรือนไทยเป็น House สากลที่เกิดเรื่องราว:
-   - *ตนุ (1st), กระดุมภะ (2nd), สหัชชะ (3rd), พันธุ (4th), ปุตตะ (5th), อริ (6th), ปัตนิ (7th), มรณะ (8th), ศุภะ (9th), กรรมะ (10th), ลาภะ (11th), วินาศ (12th)*
+${birthYam ? buildAtthakarnContext(birthYam) : ""}
 
 ---
 
-## 🎨 Tone & Style
-- **Empowering & Visionary:** สุภาพ อบอุ่น แฝงด้วยพลังอำนาจและปัญญา ให้ผู้ใช้ตระหนักรู้และตื่นรู้ในตนเอง
-- **Language:** ใช้ภาษาไทยที่สละสลวย ทรงพลัง งดงาม มีระดับชั้นสูง (ใช้คำศัพท์เช่น จักรพรรดิ, โสฬสมงคล, วาจาสิทธิ์, Energy Flow)
-- **Clean Structure:** เว้นบรรทัดสวยงาม หลีกเลี่ยงสัญลักษณ์แปลกๆ หรือรุงรัง เช่น \`->\`, \`-->\`, \`—>\` เพื่อให้ผู้ใช้อ่านแล้วรู้สึกสงบ ผ่อนคลาย และเป็นระเบียบ
+## 📝 Report Assignment: ${reportLabel}
+
+${reportInstructions}
 
 ---
 
-## 📊 ข้อมูลชะตาชีวิตของเจ้าชะตา: \${userName}
+## 💬 Response Language
+${outputLangInstruction}
 
-### 1. ผังเลข 7 ตัว 9 ฐานสมบูรณ์
-\${matrixTable}
-
-### 2. ทักษาจร (ปัจจัยสภาพแวดล้อมภายนอก)
-\${taksaInfo}
-
-### 3. มหาภูติจร (สภาวะจิตใจภายใน)
-\${mahaInfo}
-
-### 4. จุดที่ควรระวังหรือโอกาสสำคัญ
-\${alertsInfo}
-
-### 5. เวลาและยามในปัจจุบัน (Time Context)
-- ยามอัฏฐกาลปัจจุบัน: ยาม\${atthakarn.majorSlot} ดาว\${atthakarn.planetName} | ยามย่อยดาว\${atthakarn.subPlanetName} (\${atthakarn.startTime}–\${atthakarn.endTime})
-- ยามราหูค้นทรัพย์: \${rahu.name} (คุณภาพ: \${rahu.quality})
-
-\${atthakarnSection}
-
----
-
-## 📝 คำสั่งสร้างรายงาน: \${reportLabel}
-
-\${reportInstructions}
-
----
-
-## 💬 Response Structure (โครงสร้างคำตอบ)
-
-ให้เขียนคำพยากรณ์ออกมาโดยแบ่งเป็นหัวข้อหลักๆ ดังนี้ เพื่อความงดงามและเป็นสถาปัตยกรรมล้ำยุค:
-
-1. **บทนำ (The Awakening):**
-   ทักทายคุณ \${userName} ในฐานะ **"Wisdom Guidance"** ด้วยคำพูดที่อบอุ่นและมีพลังสร้างปัญญาธรรมนำทางชีวิตทันที (ห้ามใช้คำว่าลายนิ้วมือหรือครูเด่นพยากรณ์)
-
-2. **การพยากรณ์วิเคราะห์เจาะลึก (The Decoding):**
-   วิเคราะห์ดวงชะตาตามคำสั่งสร้างรายงาน (\${reportLabel}) โดยใช้ตรรกะ Star Tracing เบื้องหลังวิเคราะห์เชื่อมโยงเงียบๆ
-   - **ห้ามบ่นทฤษฎีตัวเลขหรือเขียนสูตรคำนวณ**
-   - **ให้สรุปความกระชับลึกซึ้งทันที** อธิบายถึงต้นเหตุของปัญหา มายด์เซ็ทการกระทำของจิตใต้สำนึก (สภาวะมหาภูติจร) และโอกาสจากสิ่งรอบตัว (ทักษาจร)
-
-3. **ออกแบบแผนที่ดวงดาว (The Astral Blueprint):**
-   บรรยายแผนที่ดวงดาวจำลองเพื่อให้ผู้ใช้เห็นการทำงานของพลังงาน (Energy Flow) ในจิตใจและชีวิตปัจจุบัน
-   - *ใช้ประโยคว่า: "หากเปรียบดวงชะตาของคุณตอนนี้เป็นแผนที่ดวงดาว (Birth Chart)..."*
-   - *อธิบายเชื่อมโยงดวงดาวที่โดดเด่นตามสูตร: Planet (ดาวอะไรทำงาน) + Sign (ทำงานด้วยพลังธาตุ/อารมณ์แบบไหน) + House (ในพื้นที่ชีวิตด้านใด)*
-
-4. **บทสรุปปัญญาญาณและ Action Plan (Final Wisdom):**
-   - เสนอแนวปฏิบัติเชิงกรรมปัจจุบัน 1 ข้อ ที่เรียบง่าย ทรงพลัง เพื่อให้เข้าถึงความสงบ in จิตใจและดึงพลังบวกของดวงดาวมาใช้ได้จริง
-   - ลงท้ายด้วยข้อคิดปัญญาญาณที่สงบและสร้างพลังเชิงบวก (สามารถแนบลิงก์ Line OA: @denmasterfa หรือเว็บไซต์ phopephum.com เพื่อการติดตามการเรียนรู้ได้อย่างเป็นกัลยาณมิตร)
+Write in 4 sections:
+1. The Awakening (Intro)
+2. The Decoding (Analysis)
+3. The Astral Blueprint (Metaphor)
+4. Final Wisdom & Action Plan
 `;
 }

@@ -9,12 +9,14 @@ import {
 import { json } from "@remix-run/cloudflare";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import stylesheet from "~/styles/app.css?url";
-import { getLocaleFromRequest, getThemeFromRequest } from "~/i18n/locale.server";
-import { LocaleContext } from "~/i18n/context";
+import { getThemeFromRequest } from "~/i18n/locale.server";
+import i18next from "~/lib/i18n/i18n.server";
+import { LocaleProvider } from "~/i18n/context";
 import { LOCALE_LANG } from "~/i18n/translations";
+import "~/lib/i18n/i18n.client";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const locale = getLocaleFromRequest(request);
+  const locale = await i18next.getLocale(request);
   const theme = getThemeFromRequest(request);
   return json({ locale, theme });
 };
@@ -64,9 +66,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body className="cosmic-ocean-bg text-theme-body font-sarabun antialiased">
-        <LocaleContext.Provider value={{ locale, theme }}>
+        <LocaleProvider locale={locale} theme={theme}>
           {children}
-        </LocaleContext.Provider>
+        </LocaleProvider>
         <ScrollRestoration />
         <Scripts />
       </body>

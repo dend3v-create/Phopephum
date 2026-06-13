@@ -145,6 +145,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           birthPlace: birthPlace || null,
           displayName: displayName || "ผู้ใช้งาน",
         },
+        locale: (profile.language as any) || "th",
       },
       env
     );

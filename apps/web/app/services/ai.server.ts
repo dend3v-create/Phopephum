@@ -3,7 +3,7 @@ import { calculatePhopephum, getBirthYamResult } from "@phopephum/engine";
 import { buildLifeReportPrompt } from "@phopephum/prompts";
 import { buildHoraContext } from "~/lib/claude";
 import type { AtthakarnBirthYamContext } from "@phopephum/prompts";
-import type { AIReportType } from "@phopephum/types";
+import type { AIReportType, Locale } from "@phopephum/types";
 import { sendAdminAlert } from "~/services/alert.server";
 
 // All AI calls go through Cloudflare Worker Proxy — NEVER call AI APIs directly from here
@@ -12,12 +12,14 @@ export async function generateAIReport(
     userId: string;
     reportType: string;
     context: Record<string, unknown>;
+    locale?: Locale;
   },
   env: Env
 ): Promise<ReadableStream> {
 
   const birthDate = String(payload.context.birthDate || "");
   const birthTime = payload.context.birthTime ? String(payload.context.birthTime) : null;
+  const locale = payload.locale || "th";
 
   // 1. Calculate Integrated Phopephum Result (v2.0 Systematic)
   const result = await calculatePhopephum({
@@ -33,9 +35,9 @@ export async function generateAIReport(
   const birthYamRaw = getBirthYamResult(birthDate, birthTime);
   const birthYam = birthYamRaw as unknown as AtthakarnBirthYamContext | null;
 
-  // 4. Build the final prompt (v4.0.0)
+  // 4. Build the final prompt (v7.0.0 Tri-lingual)
   const displayName = String(payload.context.displayName || "ผู้ใช้งาน");
-  const prompt = buildLifeReportPrompt(result, payload.reportType as AIReportType, displayName, birthYam);
+  const prompt = buildLifeReportPrompt(result, payload.reportType as AIReportType, displayName, birthYam, locale);
 
   // 5. Send to AI proxy
   const response = await fetch(`${env.AI_WORKER_URL}/generate`, {
