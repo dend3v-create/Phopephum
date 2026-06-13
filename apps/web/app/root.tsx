@@ -20,11 +20,6 @@ import i18nInstance from "~/lib/i18n/i18n.shared";
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const locale = await i18next.getLocale(request);
   const theme = getThemeFromRequest(request);
-  
-  if (i18nInstance.language !== locale) {
-    await i18nInstance.changeLanguage(locale);
-  }
-  
   return json({ locale, theme });
 };
 
@@ -52,7 +47,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const theme = data?.theme ?? "dark";
   const locale = (data?.locale ?? "th") as Locale;
 
-  if (i18nInstance.language !== locale) {
+  if (typeof window !== "undefined" && i18nInstance.language !== locale) {
     i18nInstance.changeLanguage(locale);
   }
 
