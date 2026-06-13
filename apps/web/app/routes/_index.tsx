@@ -192,15 +192,8 @@ export default function Index() {
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           <ThemeToggle />
-          <Link to="/login" className="hidden sm:block text-sm text-[#94A3B8] hover:text-[#F8F6F1] transition-colors px-2">
+          <Link to="/login" className="text-sm text-[#94A3B8] hover:text-[#F8F6F1] transition-colors px-2">
             เข้าสู่ระบบ
-          </Link>
-          <Link
-            to="/register"
-            className="text-sm font-bold px-4 py-2 rounded-full transition-all hover:scale-105 active:scale-95"
-            style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)", color: "#020617" }}
-          >
-            เริ่มฟรี
           </Link>
         </div>
       </nav>
