@@ -210,22 +210,22 @@ export default function PlannerPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <span className="text-[13px] text-green-400 uppercase font-bold flex items-center gap-1">
+                  <span className="text-[13px] text-[#C6A96B] uppercase font-bold flex items-center gap-1">
                     <CheckCircle className="w-3 h-3" /> เกื้อหนุนเป็นพิเศษ
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {currentRuler?.promotes.map(p => (
-                      <span key={p} className="px-2 py-0.5 bg-green-400/10 text-green-400 text-[13px] rounded-full border border-green-400/20">{p}</span>
+                      <span key={p} className="px-2 py-0.5 bg-[#C6A96B]/10 text-[#C6A96B] text-[13px] rounded-full border border-[#C6A96B]/20">{p}</span>
                     ))}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[13px] text-red-400 uppercase font-bold flex items-center gap-1">
+                  <span className="text-[13px] text-[#F8F6F1]/50 uppercase font-bold flex items-center gap-1">
                     <Zap className="w-3 h-3" /> พึงระวัง
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {currentRuler?.warns.map(w => (
-                      <span key={w} className="px-2 py-0.5 bg-red-400/10 text-red-400 text-[13px] rounded-full border border-red-400/20">{w}</span>
+                      <span key={w} className="px-2 py-0.5 bg-white/5 text-[#F8F6F1]/50 text-[13px] rounded-full border border-white/10">{w}</span>
                     ))}
                   </div>
                 </div>

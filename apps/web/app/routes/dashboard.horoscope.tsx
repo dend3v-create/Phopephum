@@ -977,27 +977,27 @@ export default function HoroscopePage() {
                 type="button"
                 onClick={() => setShowMonthlyJorn(!showMonthlyJorn)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showMonthlyJorn ? "bg-pink-500/10 border-pink-500/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                  showMonthlyJorn ? "bg-[#4B6FAE]/12 border-[#6D8FC7]/35 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-pink-500" />
+                  <span className="w-2 h-2 rounded-full bg-[#6D8FC7]" />
                   <span>เดือนจร</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showMonthlyJorn ? "bg-pink-500 shadow-[0_0_8px_#ec4899]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showMonthlyJorn ? "bg-[#6D8FC7] shadow-[0_0_8px_rgba(109,143,199,0.6)]" : "bg-white/10"}`} />
               </button>
               <button
                 type="button"
                 onClick={() => setShowDailyJorn(!showDailyJorn)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showDailyJorn ? "bg-emerald-500/10 border-emerald-500/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
+                  showDailyJorn ? "bg-white/6 border-white/18 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#8A8070]"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <span className="w-2 h-2 rounded-full bg-[#9AB3D9]" />
                   <span>วันจร</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showDailyJorn ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showDailyJorn ? "bg-[#9AB3D9]" : "bg-white/10"}`} />
               </button>
               <button
                 type="button"
@@ -1007,10 +1007,10 @@ export default function HoroscopePage() {
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-rose-500/50" />
+                  <span className="w-2 h-2 rounded-full bg-[#C6A96B]/50" />
                   <span>ช่วงอายุ (วัยจร)</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showAgeRange ? "bg-rose-500 shadow-[0_0_8px_#f43f5e]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showAgeRange ? "bg-[#C6A96B]/70" : "bg-white/10"}`} />
               </button>
               <button
                 type="button"
@@ -2344,7 +2344,7 @@ function FateMatrixPanel({
             const b4name = BASE4_MEANINGS[b4val] ?? "—";
             return (
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-1 border-t border-white/5">
-                <span className="w-2 h-2 rounded-full bg-pink-500 shrink-0" />
+                <span className="w-2 h-2 rounded-full bg-[#6D8FC7] shrink-0" />
                 <span className="text-pink-400 font-semibold shrink-0">เดือนจร</span>
                 <span className="text-[#8A8070]">เดือน</span>
                 <span className="text-[#F8F6F1] font-bold">
@@ -2462,7 +2462,7 @@ function FateMatrixPanel({
             )}
             {showMonthlyJorn && (
               <div className="flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-pink-500" />
+                <span className="w-1.5 h-1.5 rounded-full bg-[#6D8FC7]" />
                 <span>เดือนจร</span>
               </div>
             )}
