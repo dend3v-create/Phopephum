@@ -1881,19 +1881,42 @@ const NUM_COLORS: Record<number, { bg: string; text: string; border: string }> =
   8: { bg: "bg-indigo-500/20", text: "text-indigo-300", border: "border-indigo-500/30" },
 };
 
-function numColor(n: number, isActive: boolean = false) {
-  if (isActive) {
-    return {
-      bg: "bg-[#C9A96E]",
-      text: "text-[#020617] font-black",
-      border: "border-[#F8F6F1] shadow-[0_0_15px_rgba(201,169,110,0.8)]",
-    };
+// ── 2-Color Rule: Gold = กำเนิด/กำลัง, Blue = จร/เคลื่อนไหว ──
+// ฐาน ๔ special: 11=ราชาโชค 13=มหาอุจ 14=จักรพรรดิ 18=มหาจักรพรรดิ์ → Gold
+//                9=เกตุ 10=เสาร์ 12=ราหู → Blue
+const BASE4_GOLD = new Set([11, 13, 14, 18]);
+const BASE4_BLUE = new Set([9, 10, 12]);
+
+function numColor(
+  n: number,
+  opts: {
+    isActive?: boolean;
+    isHighlighted?: boolean;
+    isDimmed?: boolean;
+    natalStar?: number | null;
+    transitStar?: number | null;
+    isBase4?: boolean;
+  } = {}
+) {
+  const { isActive, isHighlighted, isDimmed, natalStar, transitStar, isBase4 } = opts;
+
+  if (isBase4) {
+    if (BASE4_GOLD.has(n))
+      return { text: "text-[#C6A96B]", weight: "font-black", glow: "drop-shadow-[0_0_8px_rgba(198,169,107,0.7)]" };
+    if (BASE4_BLUE.has(n))
+      return { text: "text-[#6D8FC7]", weight: "font-bold",  glow: "drop-shadow-[0_0_6px_rgba(109,143,199,0.5)]" };
+    return { text: "text-[#F8F6F1]/80", weight: "font-bold", glow: "" };
   }
-  return {
-    bg: "bg-slate-900/80",
-    text: "text-[#F8F6F1] font-black drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.9)]",
-    border: "border-[#C9A96E]/50 shadow-[inset_0_1px_2px_rgba(255,255,255,0.05)]",
-  };
+
+  if (isActive || isHighlighted)
+    return { text: "text-[#C6A96B]", weight: "font-black", glow: "drop-shadow-[0_0_12px_rgba(198,169,107,0.9)]" };
+  if (natalStar != null && n === natalStar)
+    return { text: "text-[#C6A96B]", weight: "font-black", glow: "drop-shadow-[0_0_8px_rgba(198,169,107,0.6)]" };
+  if (transitStar != null && n === transitStar)
+    return { text: "text-[#6D8FC7]", weight: "font-bold",  glow: "drop-shadow-[0_0_8px_rgba(109,143,199,0.55)]" };
+  if (isDimmed)
+    return { text: "text-[#F8F6F1]/25", weight: "font-semibold", glow: "" };
+  return { text: "text-[#F8F6F1]/65", weight: "font-semibold", glow: "" };
 }
 
 function HoroscopeResultDisplay({ result, phopephumResult }: { result: any; phopephumResult?: any }) {
@@ -1995,17 +2018,44 @@ function FateMatrixPanel({
     return "";
   };
 
+  // ── extract natal & transit star for 2-color rule ──
+  const natalStar: number | null = (() => {
+    if (phopephumResult?.lagna?.row && phopephumResult?.lagna?.col) {
+      return matrix[phopephumResult.lagna.row - 1]?.[phopephumResult.lagna.col - 1] ?? matrix[0]?.[0] ?? null;
+    }
+    return matrix[0]?.[0] ?? null;
+  })();
+
+  const transitStar: number | null = (() => {
+    if (phopephumResult?.lagnaTransit?.row && phopephumResult?.lagnaTransit?.col) {
+      return matrix[phopephumResult.lagnaTransit.row - 1]?.[phopephumResult.lagnaTransit.col - 1] ?? null;
+    }
+    if (phopephumResult?.vayaJorn?.row && phopephumResult?.vayaJorn?.col) {
+      return matrix[phopephumResult.vayaJorn.row - 1]?.[phopephumResult.vayaJorn.col - 1] ?? null;
+    }
+    return null;
+  })();
+
   return (
     <div onClick={() => onNumClick(null)} className="w-full">
-      <Card className="p-0 overflow-hidden border-[#D9BC82]/20 shadow-2xl cursor-default">
-      <div 
-        onClick={(e) => e.stopPropagation()} 
-        className="bg-[#D9BC82]/10 p-4 border-b border-[#D9BC82]/20 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1"
+      <Card className="p-0 overflow-hidden border-[#C6A96B]/15 shadow-2xl cursor-default">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="px-4 py-3 border-b border-[#C6A96B]/12 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1"
       >
-        <p className="text-[#D9BC82] text-sm sm:text-lg font-bold uppercase tracking-widest">ผังดวงเลข 7 ตัว 9 ฐาน (35 ภพเรือนสมบูรณ์)</p>
-        <span className="text-xs sm:text-sm text-[#8A8070]">แตะตัวเลขเพื่อดูความเชื่อมโยง</span>
+        <div className="flex items-center gap-3">
+          <div className="w-px h-5 bg-[#C6A96B]/60" />
+          <p className="text-[#C6A96B] text-xs sm:text-sm font-bold uppercase tracking-[0.18em]">ผังดวง ๗ ตัว ๙ ฐาน</p>
+          <span className="hidden sm:inline text-[#F8F6F1]/20 text-xs">·</span>
+          <span className="hidden sm:inline text-[#F8F6F1]/35 text-xs tracking-wide">35 ภพเรือนสมบูรณ์</span>
+        </div>
+        <div className="flex items-center gap-3 text-[10px] text-[#F8F6F1]/30 tracking-wider">
+          <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B] inline-block" />กำเนิด</span>
+          <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#6D8FC7] inline-block" />จร</span>
+          <span className="text-[#F8F6F1]/20">แตะเพื่อดูความเชื่อมโยง</span>
+        </div>
       </div>
-      <div className="overflow-x-auto p-1 sm:p-6 bg-slate-900/30">
+      <div className="overflow-x-auto p-1 sm:p-5 bg-transparent">
         <table className="w-full border-collapse table-fixed">
           <tbody>
             {matrix.map((row, rIdx) => {
@@ -2015,13 +2065,13 @@ function FateMatrixPanel({
                 <tr 
                   key={rIdx} 
                   className={`group transition-all ${
-                    isBase4 
-                      ? "bg-[#4B6FAE]/15 border-y border-[#4B6FAE]/45 shadow-[inset_0_1px_3px_rgba(75,110,174,0.15)]" 
-                      : "hover:bg-white/5"
+                    isBase4
+                      ? "border-y border-[#6D8FC7]/12"
+                      : "hover:bg-white/[0.02]"
                   }`}
                 >
-                  <td className="py-1 pr-1 sm:pr-4 text-left whitespace-nowrap w-[32px] sm:w-[80px]">
-                    <p className={`text-xs sm:text-sm font-bold ${isBase4 ? "text-[#8AA7DF]" : "text-[#F8F6F1]"}`}>{ROW_META[rIdx].label}</p>
+                  <td className="py-1 pr-1 sm:pr-3 text-left whitespace-nowrap w-[30px] sm:w-[72px]">
+                    <p className={`text-[10px] sm:text-xs font-bold tracking-wider ${isBase4 ? "text-[#6D8FC7]/80" : "text-[#F8F6F1]/40"}`}>{ROW_META[rIdx].label}</p>
                   </td>
                   {row.map((num, cIdx) => {
                     const isBase4 = rIdx === 3;
@@ -2056,8 +2106,14 @@ function FateMatrixPanel({
                     const isGlowFiltered = isFiltering && (isTargetRow || isBase4) && highlightedStars.has(isBase4 ? matrix[2]?.[cIdx] : actualNum);
                     const isHighlighted = isBaseHighlight || isGlowFiltered;
                     const isDimmed = isFiltering && !isGlowFiltered;
-                    
-                    const c = numColor(num, isHighlighted);
+
+                    const c = numColor(num, {
+                      isActive: isHighlighted,
+                      isDimmed,
+                      natalStar,
+                      transitStar,
+                      isBase4,
+                    });
                     const houseName = isBase4 ? BASE4_MEANINGS[num] : ROW_META[rIdx].phopNames?.[cIdx];
                     
                     const skipIndicators = [3, 4, 5, 6].includes(rIdx);
@@ -2101,14 +2157,18 @@ function FateMatrixPanel({
                           type="button"
                           className="flex flex-col items-center gap-1 sm:gap-1.5 w-full focus:outline-none relative group/cell"
                         >
-                          <div className="relative">
-                            <div className={`w-8 h-8 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-sans text-[16px] sm:text-[22px] border transition-all duration-300 transform
-                              ${isHighlighted ? "scale-125 z-10 shadow-[0_0_15px_rgba(201,169,110,0.6)] border-[#C9A96E]" : ""}
-                              ${isDimmed ? "opacity-40 scale-90 border-white/5 saturate-50" : ""}
-                              ${isGlowFiltered ? "animate-pulse ring-2 ring-[#C9A96E] ring-offset-2 ring-offset-slate-950" : ""}
-                              ${c.bg} ${c.text} ${c.border}`}>
+                          <div className="relative flex items-center justify-center">
+                            {/* Highlight ring — ไม่มี bg circle, แค่ ring เบาๆ */}
+                            {isHighlighted && (
+                              <span className="absolute inset-0 rounded-full ring-1 ring-[#C6A96B]/50 scale-110 animate-pulse" />
+                            )}
+                            <span className={`font-display text-[20px] sm:text-[28px] leading-none select-none transition-all duration-200
+                              ${isHighlighted ? "scale-125 z-10" : ""}
+                              ${isDimmed ? "opacity-25 scale-90" : ""}
+                              ${isGlowFiltered ? "animate-pulse" : ""}
+                              ${c.text} ${c.weight} ${c.glow}`}>
                               {num}
-                            </div>
+                            </span>
                             
                             {/* Taksa Transit Badge (Top-Right) */}
                             {showTaksaJorn && taksaInd && (
@@ -2169,15 +2229,15 @@ function FateMatrixPanel({
                                   />
                                 )}
                                 {showMonthlyJorn && isMonthlyJorn && (
-                                  <span 
+                                  <span
                                     title="เดือนจร"
-                                    className="w-1.5 h-1.5 rounded-full bg-pink-500"
+                                    className="w-1.5 h-1.5 rounded-full bg-[#6D8FC7]"
                                   />
                                 )}
                                 {showDailyJorn && isDailyJorn && (
-                                  <span 
+                                  <span
                                     title="วันจร"
-                                    className="w-1.5 h-1.5 rounded-full bg-emerald-500"
+                                    className="w-1.5 h-1.5 rounded-full bg-[#9AB3D9]"
                                   />
                                 )}
                               </div>
@@ -2186,10 +2246,10 @@ function FateMatrixPanel({
                           
                           <div className="flex flex-col items-center mt-1">
                             {showHouseNames && houseName && (
-                              <span className={`text-[12px] sm:text-[14px] font-bold leading-tight mb-0.5 transition-colors text-center ${
+                              <span className={`text-[10px] sm:text-[11px] font-medium leading-tight mb-0.5 transition-colors text-center tracking-wide ${
                                 isHighlighted
-                                  ? "text-[#C9A96E] drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]"
-                                  : "text-[#D9CDB7] drop-shadow-[0_1px_1px_rgba(0,0,0,0.4)]"
+                                  ? "text-[#C6A96B]/90"
+                                  : "text-[#F8F6F1]/30"
                               }`}>
                                 {houseName}
                               </span>

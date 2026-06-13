@@ -27,6 +27,15 @@ export default {
 
     const url = new URL(request.url);
 
+    if (url.pathname === "/health") {
+      return corsResponse(
+        new Response(JSON.stringify({ status: "healthy" }), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+    }
+
     if (url.pathname === "/generate" && request.method === "POST") {
       return handleGenerate(request, env);
     }
