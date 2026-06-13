@@ -1,3 +1,4 @@
+import { createCookie } from "@remix-run/cloudflare";
 import { RemixI18Next } from "remix-i18next/server";
 import { supportedLngs, fallbackLng } from "./language";
 
@@ -13,10 +14,21 @@ import zhCommon from "../../locales/zh/common.json";
 import zhHoroscope from "../../locales/zh/horoscope.json";
 import zhYam from "../../locales/zh/yam.json";
 
+export const localeCookie = createCookie("locale", {
+  path: "/",
+  sameSite: "lax",
+  secure: false, 
+  httpOnly: false,
+  maxAge: 31536000,
+});
+
 const i18next = new RemixI18Next({
   detection: {
     supportedLanguages: supportedLngs,
     fallbackLanguage: fallbackLng,
+    cookie: localeCookie,
+    // Add other detectors as fallback
+    order: ["searchParams", "cookie", "header"],
   },
   i18next: {
     supportedLngs,

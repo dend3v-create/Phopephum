@@ -7,6 +7,10 @@
   "login": "เข้าสู่ระบบ",
   "register": "สมัครสมาชิก",
   "welcome": "ยินดีต้อนรับสู่ Phopephum",
+  "pricing": "ราคา",
+  "features": "ฟีเจอร์",
+  "how_to_use": "วิธีใช้",
+  "get_started_free": "เริ่มต้นใช้งาน ฟรี →",
   "nav": {
     "dashboard": "วันนี้",
     "horoscope": "ตั้งดวงชะตา",

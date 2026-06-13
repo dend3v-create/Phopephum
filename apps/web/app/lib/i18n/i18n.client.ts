@@ -1,5 +1,6 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import LanguageDetector from "i18next-browser-languagedetector";
 import { supportedLngs, fallbackLng } from "./language";
 
 import thCommon from "../../locales/th/common.json";
@@ -15,6 +16,7 @@ import zhHoroscope from "../../locales/zh/horoscope.json";
 import zhYam from "../../locales/zh/yam.json";
 
 i18n
+  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
     fallbackLng,
@@ -24,6 +26,11 @@ i18n
       th: { common: thCommon, horoscope: thHoroscope, yam: thYam },
       en: { common: enCommon, horoscope: enHoroscope, yam: enYam },
       zh: { common: zhCommon, horoscope: zhHoroscope, yam: zhYam }
+    },
+    detection: {
+      order: ["cookie", "htmlTag", "localStorage", "navigator"],
+      caches: ["cookie"],
+      lookupCookie: "locale",
     },
     interpolation: {
       escapeValue: false
