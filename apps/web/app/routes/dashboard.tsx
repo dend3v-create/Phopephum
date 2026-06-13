@@ -221,6 +221,13 @@ export default function DashboardLayout() {
             />
           ))}
 
+          <NavLink
+            to="/dashboard/community"
+            exact={false}
+            icon={<NavIcon name="people" />}
+            label="ชะตาพันธมิตร"
+          />
+
           {/* ── Pro Astrologer Tools ── */}
           {isPro && (
             <div className="mt-5 pt-4 border-t" style={{ borderColor: "rgba(217,188,130,0.08)" }}>
