@@ -15,10 +15,14 @@ import zhCommon from "../../locales/zh/common.json";
 import zhHoroscope from "../../locales/zh/horoscope.json";
 import zhYam from "../../locales/zh/yam.json";
 
+if (typeof window !== "undefined") {
+  i18n.use(LanguageDetector);
+}
+
 i18n
-  .use(LanguageDetector)
   .use(initReactI18next)
   .init({
+    lng: "th",
     fallbackLng,
     supportedLngs,
     defaultNS: "common",
@@ -27,12 +31,12 @@ i18n
       en: { common: enCommon, horoscope: enHoroscope, yam: enYam },
       zh: { common: zhCommon, horoscope: zhHoroscope, yam: zhYam }
     },
-    detection: {
+    detection: typeof window !== "undefined" ? {
       // Order is critical for hydration sync
       order: ["cookie", "htmlTag", "localStorage", "navigator"],
       lookupCookie: "locale",
       caches: ["cookie"],
-    },
+    } : undefined,
     interpolation: {
       escapeValue: false
     },

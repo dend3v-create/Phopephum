@@ -15,11 +15,16 @@ import i18next from "~/lib/i18n/i18n.server";
 import { LocaleProvider } from "~/i18n/context";
 import { LOCALE_LANG } from "~/i18n/translations";
 import type { Locale } from "~/i18n/translations";
-import i18nInstance from "~/lib/i18n/i18n.client";
+import i18nInstance from "~/lib/i18n/i18n.shared";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const locale = await i18next.getLocale(request);
   const theme = getThemeFromRequest(request);
+  
+  if (i18nInstance.language !== locale) {
+    await i18nInstance.changeLanguage(locale);
+  }
+  
   return json({ locale, theme });
 };
 
@@ -47,9 +52,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const theme = data?.theme ?? "dark";
   const locale = (data?.locale ?? "th") as Locale;
 
-  // CRITICAL: Synchronously sync i18n instance with loader locale before render
-  // This prevents hydration mismatch #418/#423
-  if (typeof window !== "undefined" && i18nInstance.language !== locale) {
+  if (i18nInstance.language !== locale) {
     i18nInstance.changeLanguage(locale);
   }
 
