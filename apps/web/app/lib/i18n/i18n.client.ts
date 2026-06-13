@@ -28,13 +28,16 @@ i18n
       zh: { common: zhCommon, horoscope: zhHoroscope, yam: zhYam }
     },
     detection: {
+      // Order is critical for hydration sync
       order: ["cookie", "htmlTag", "localStorage", "navigator"],
-      caches: ["cookie"],
       lookupCookie: "locale",
+      caches: ["cookie"],
     },
     interpolation: {
       escapeValue: false
-    }
+    },
+    // Prevent initialization until we have detection result
+    initImmediate: false,
   });
 
 export default i18n;
