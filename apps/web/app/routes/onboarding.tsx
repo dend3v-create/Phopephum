@@ -63,6 +63,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       gender,
       // แถมเครดิตต้อนรับ หรือเปิดสถานะเริ่มต้น
       membership_status: "active",
+      soul_ink: 15, // มอบแต้มต้อนรับ 15 Soul Ink
     })
     .eq("id", user.id);
 

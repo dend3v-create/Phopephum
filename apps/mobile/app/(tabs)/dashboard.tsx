@@ -91,13 +91,18 @@ export default function DashboardScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View style={{ flex: 1, marginRight: 8 }}>
             <Text style={styles.dateText}>{dateStr}</Text>
-            <Text style={styles.welcomeText}>สวัสดี, {profile?.display_name || 'คุณ'}</Text>
+            <Text style={styles.welcomeText} numberOfLines={1}>สวัสดี, {profile?.display_name || 'คุณ'}</Text>
           </View>
-          <View style={styles.timeBadge}>
-             <View style={styles.pulseDot} />
-             <Text style={styles.timeText}>{timeStr}</Text>
+          <View style={styles.headerBadges}>
+            <View style={styles.inkBadge}>
+              <Text style={styles.inkBadgeText}>🖋️ {profile?.plan === 'imperial' ? '♾️' : (profile?.soul_ink ?? 0)}</Text>
+            </View>
+            <View style={styles.timeBadge}>
+               <View style={styles.pulseDot} />
+               <Text style={styles.timeText}>{timeStr}</Text>
+            </View>
           </View>
         </View>
 
@@ -226,6 +231,24 @@ const styles = StyleSheet.create({
   },
   dateText: { color: '#94A3B8', fontSize: 12, marginBottom: 4 },
   welcomeText: { color: '#F8F6F1', fontSize: 20, fontWeight: 'bold' },
+  headerBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  inkBadge: {
+    backgroundColor: 'rgba(198, 169, 107, 0.1)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(198, 169, 107, 0.3)',
+  },
+  inkBadgeText: {
+    color: '#C6A96B',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   timeBadge: {
     flexDirection: 'row',
     alignItems: 'center',

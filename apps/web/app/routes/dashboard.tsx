@@ -271,6 +271,26 @@ export default function DashboardLayout() {
               Admin Dashboard
             </a>
           )}
+          {/* ── Soul Ink Token Progress Bar ── */}
+          <div className="px-3 py-2 rounded-xl mb-1.5" style={{ background: "rgba(198,169,107,0.05)", border: "1px solid rgba(198,169,107,0.15)" }}>
+            <div className="flex justify-between items-center text-[10px] font-bold text-[#C6A96B] mb-1">
+              <span className="tracking-wider">🖋️ SOUL INK BALANCE</span>
+              {isPro ? (
+                <span className="text-xs">♾️ Unlimited</span>
+              ) : (
+                <span>{profile?.soul_ink ?? 0} / 15</span>
+              )}
+            </div>
+            {!isPro && (
+              <div className="w-full bg-[#020617] h-1.5 rounded-full overflow-hidden border border-white/5">
+                <div
+                  className="bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] h-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, (((profile?.soul_ink ?? 0) / 15) * 100))}%` }}
+                />
+              </div>
+            )}
+          </div>
+
           {/* ── Preference controls ── */}
           <div className="flex items-center justify-between pb-2">
             <LanguageSwitcher />

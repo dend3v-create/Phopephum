@@ -108,19 +108,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const { supabase } = createSupabaseClient(request, env);
     const profile = await getProfile(user.id, request, env);
 
-    // ── 1. Quota Check — enforce per-plan monthly limit ──
+    // ── 1. Quota Check — enforce soul_ink balance for non-imperial plans ──
     const userPlan = getUserPlan(profile);
-    const monthlyLimit = getAiReportLimit(profile);
+    const isPremium = userPlan === "imperial" || profile?.role === "admin" || profile?.role === "operator";
+    const currentInk = profile?.soul_ink ?? 0;
 
-    if (monthlyLimit < 9_999) {
-      const { data: usageCount, error: usageError } = await supabase
-        .rpc("get_ai_usage_month", { p_user: user.id });
-
-      if (usageError) {
-        console.error("Quota check error:", usageError);
-      } else if (typeof usageCount === 'number' && usageCount >= monthlyLimit) {
-        const planLabel = userPlan === "basic" ? "BASIC (1 ครั้ง/เดือน)" : `PRO (${monthlyLimit} ครั้ง/เดือน)`;
-        return json({ error: `ท่านใช้สิทธิ์สร้างรายงานครบ ${monthlyLimit} ครั้งในเดือนนี้แล้ว (แผน ${planLabel}) กรุณาอัปเกรดเพื่อใช้งานเพิ่มเติม` });
+    if (!isPremium) {
+      if (currentInk <= 0) {
+        return json({ error: "ขออภัย ท่านไม่มีหมึกวิญญาณ (Soul Ink) คงเหลือในระบบ กรุณาอัปเกรดแผนสมาชิกหรือซื้อสิทธิ์เพิ่มเติมเพื่อสร้างรายงานใหม่" });
       }
     }
 
@@ -204,6 +199,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
       console.error("Report save error:", insertError);
       alertDatabaseError(env, "insert ai_reports", insertError, user.id).catch(console.error);
       return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` });
+    }
+
+    // ── 5.1 Decrement Soul Ink if not premium ──
+    if (!isPremium) {
+      const { error: decrementError } = await supabase
+        .from("profiles")
+        .update({ soul_ink: currentInk - 1 })
+        .eq("id", user.id);
+      
+      if (decrementError) {
+        console.error("Failed to decrement soul_ink:", decrementError);
+      }
     }
 
     // ── 6. Record Usage (Non-blocking) ──
