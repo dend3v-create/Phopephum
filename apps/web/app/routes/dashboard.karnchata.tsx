@@ -199,10 +199,10 @@ function NineBaseChart({
       <div className="flex items-center gap-3 mb-5">
         <div className="flex-1">
           <h3 className="text-base font-bold text-[#F8F6F1]">{title}</h3>
-          <p className="text-xs text-[#8A8070] mt-0.5">{subtitle}</p>
+          <p className="text-xs text-[#C6B79F] mt-0.5">{subtitle}</p>
         </div>
         {hoverNum !== null && (
-          <button type="button" onClick={() => setHoverNum(null)} className="shrink-0 text-xs text-[#8A8070] hover:text-[#F8F6F1] border border-white/10 px-3 py-1 rounded-lg">✕ ล้าง</button>
+          <button type="button" onClick={() => setHoverNum(null)} className="shrink-0 text-xs text-[#C6B79F] hover:text-[#F8F6F1] border border-white/10 px-3 py-1 rounded-lg">✕ ล้าง</button>
         )}
       </div>
 
@@ -233,14 +233,14 @@ function NineBaseChart({
             if (isBase4) {
               return (
                 <div key={rIdx} className="flex items-stretch gap-2 bg-[#0A2240]/25 border border-[#6D8FC7]/15 rounded-xl py-1 px-1">
-                  <div className="w-14 shrink-0 flex items-center justify-end">
-                    <span className="text-[12px] font-black text-[#6D8FC7]">{label}</span>
+                  <div className="w-16 shrink-0 flex items-center justify-end">
+                    <span className="text-[13px] sm:text-[14px] font-extrabold text-[#6D8FC7]">{label}</span>
                   </div>
                   <div className="flex-1 grid grid-cols-7 gap-1">
                     {rowData.map((s, cIdx) => (
                       <div key={cIdx} className="relative flex flex-col items-center justify-center rounded-lg border py-1.5 px-0.5 min-h-[50px] sm:min-h-[64px] bg-[#071E3D]/75 border-[#6D8FC7]/22 hover:border-[#C6A96B]/30 transition-all">
-                        <span className="font-display text-[17px] sm:text-[22px] text-[#F8F6F1] font-bold leading-none">{s}</span>
-                        <span className="text-[8px] text-[#F8F6F1]/32 truncate w-full text-center px-1 mt-0.5">{BASE4_POWER_NAMES[s]}</span>
+                        <span className="font-display text-[19px] sm:text-[24px] text-[#F8F6F1] font-bold leading-none">{s}</span>
+                        <span className="text-[9.5px] sm:text-[11px] text-[#F8F6F1]/70 truncate w-full text-center px-1 mt-0.5 font-bold">{BASE4_POWER_NAMES[s]}</span>
                       </div>
                     ))}
                   </div>
@@ -250,8 +250,8 @@ function NineBaseChart({
 
             return (
               <div key={rIdx} className="flex items-stretch gap-2">
-                <div className="w-14 shrink-0 flex items-center justify-end">
-                  <span className="text-[12px] font-black text-[#C6A96B]">{label}</span>
+                <div className="w-16 shrink-0 flex items-center justify-end">
+                  <span className="text-[13px] sm:text-[14px] font-extrabold text-[#C6A96B]">{label}</span>
                 </div>
                 <div className="flex-1 grid grid-cols-7 gap-1">
                   {rowData.map((s, cIdx) => {
@@ -264,8 +264,8 @@ function NineBaseChart({
                             ? "bg-[#0A1A30]/90 border-[#C6A96B]/60 shadow-[0_0_16px_rgba(198,169,107,0.22),inset_0_1px_0_rgba(198,169,107,0.10)] scale-[1.06] z-10"
                             : "bg-[#071427]/75 border-[#C6A96B]/18 hover:border-[#C6A96B]/32"
                         }`}>
-                        <span className={`font-display text-[17px] sm:text-[22px] leading-none text-[#F8F6F1] ${isActive ? "font-black" : "font-bold"}`}>{s}</span>
-                        {bhopName && <span className="text-[8px] text-[#F8F6F1]/32 truncate w-full text-center px-1 mt-0.5">{bhopName}</span>}
+                        <span className={`font-display text-[19px] sm:text-[24px] leading-none text-[#F8F6F1] ${isActive ? "font-black" : "font-bold"}`}>{s}</span>
+                        {bhopName && <span className="text-[9.5px] sm:text-[11px] text-[#F8F6F1]/70 truncate w-full text-center px-1 mt-1 leading-tight font-bold">{bhopName}</span>}
                       </button>
                     );
                   })}
@@ -284,7 +284,7 @@ function NineBaseChart({
 function ScoreBar({ label, value, colorClass }: { label: string; value: number; colorClass: string }) {
   return (
     <div className="flex flex-col items-center bg-[#020617] border border-white/5 rounded-2xl p-4">
-      <span className="text-xs text-[#8A8070] font-bold mb-1">{label}</span>
+      <span className="text-xs text-[#C6B79F] font-bold mb-1">{label}</span>
       <span className={`text-2xl font-display font-bold ${colorClass}`}>{value}%</span>
       <div className="w-full mt-2 h-1.5 bg-white/5 rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${colorClass.replace("text-", "bg-")}`} style={{ width: `${value}%` }} />
@@ -326,9 +326,9 @@ function SummaryCard({
             <span className="text-[#C6A96B] text-xs tracking-widest uppercase font-bold block mb-1">✦ {title}</span>
             <h2 className="text-3xl sm:text-4xl font-display font-black text-[#F8F6F1] leading-none">
               {starName}
-              <span className="text-lg ml-3 text-[#8A8070]">({starNum})</span>
+              <span className="text-lg ml-3 text-[#C6B79F]">({starNum})</span>
             </h2>
-            <p className="text-sm text-[#8A8070] mt-1">{yamDesc.subtitle}</p>
+            <p className="text-sm text-[#C6B79F] mt-1">{yamDesc.subtitle}</p>
           </div>
           {advice && (
             <div className={`shrink-0 border rounded-2xl px-4 py-2 text-center ${levelColor}`}>
@@ -347,12 +347,12 @@ function SummaryCard({
           </div>
           {advice && (
             <div className="border-t border-white/5 pt-3 mt-3">
-              <p className="text-xs text-[#8A8070] font-bold mb-1">✦ กิจกรรมเหมาะสม</p>
+              <p className="text-xs text-[#C6B79F] font-bold mb-1">✦ กิจกรรมเหมาะสม</p>
               <p className="text-sm text-[#D9CDB7]">{advice.th}</p>
             </div>
           )}
           {omen && (
-            <p className="text-xs text-[#8A8070] italic mt-3 border-t border-white/5 pt-3">"{omen}"</p>
+            <p className="text-xs text-[#C6B79F] italic mt-3 border-t border-white/5 pt-3">"{omen}"</p>
           )}
         </div>
 
@@ -555,15 +555,15 @@ export default function KarnchataPage() {
         <div className="bg-[#C6A96B]/8 border border-[#C6A96B]/20 px-5 py-3 rounded-2xl self-start shrink-0">
           <p className="text-xs text-[#C6A96B] uppercase font-bold">วันกาลชะตา</p>
           <p className="text-sm font-bold text-[#F8F6F1]">{thaiDateLabel}</p>
-          {activeLunar && <p className="text-xs text-[#8A8070] mt-0.5">{activeLunar.moonPhaseText} เดือน{activeLunar.thaiMonthName}</p>}
+          {activeLunar && <p className="text-xs text-[#C6B79F] mt-0.5">{activeLunar.moonPhaseText} เดือน{activeLunar.thaiMonthName}</p>}
         </div>
       </div>
 
       {/* Time mode toggle */}
       <div className="bg-[#0A1628]/80 border border-white/5 rounded-2xl p-2">
         <div className="flex bg-[#020617] rounded-xl p-1 border border-white/5">
-          <button onClick={() => setTimeMode("live")} className={`flex-1 px-4 py-2.5 text-sm font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#1E1730] text-[#F8F6F1]" : "text-[#8A8070]"}`}>⏱ เรียลไทม์</button>
-          <button onClick={() => setTimeMode("custom")} className={`flex-1 px-4 py-2.5 text-sm font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[#C6A96B] text-[#020617]" : "text-[#8A8070]"}`}>📅 เลือกวัน/เวลา</button>
+          <button onClick={() => setTimeMode("live")} className={`flex-1 px-4 py-2.5 text-sm font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#1E1730] text-[#F8F6F1]" : "text-[#C6B79F]"}`}>⏱ เรียลไทม์</button>
+          <button onClick={() => setTimeMode("custom")} className={`flex-1 px-4 py-2.5 text-sm font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[#C6A96B] text-[#020617]" : "text-[#C6B79F]"}`}>📅 เลือกวัน/เวลา</button>
         </div>
       </div>
 
@@ -575,7 +575,7 @@ export default function KarnchataPage() {
           { id: "minute", label: "รายนาที 3.45", shortLabel: "นาที", icon: "🎯" },
         ].map((tab) => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === tab.id ? "bg-[#C6A96B] text-[#020617]" : "text-[#8A8070] hover:text-[#F8F6F1]"}`}>
+            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === tab.id ? "bg-[#C6A96B] text-[#020617]" : "text-[#C6B79F] hover:text-[#F8F6F1]"}`}>
             <span>{tab.icon}</span>
             <span className="hidden sm:inline">{tab.label}</span>
             <span className="sm:hidden">{"shortLabel" in tab ? tab.shortLabel : tab.label}</span>
@@ -601,20 +601,20 @@ export default function KarnchataPage() {
                   <p className="text-xs font-bold text-[#C6A96B] mb-2">✨ ยามดีเด่นวันนี้ (ระดับ 3)</p>
                   {bestDayYams.length > 0 ? bestDayYams.map(y => (
                     <div key={y.timeStr} className="flex justify-between text-xs py-1 border-b border-white/5 last:border-0">
-                      <span className="text-[#8A8070] font-mono">{y.timeStr}</span>
+                      <span className="text-[#C6B79F] font-mono">{y.timeStr}</span>
                       <span className="text-[#C6A96B] font-bold">{y.quality} {TAKSA_PLAN_ADVICE[y.quality]?.emoji}</span>
                     </div>
-                  )) : <p className="text-xs text-[#8A8070]">ไม่มีในช่วงนี้</p>}
+                  )) : <p className="text-xs text-[#C6B79F]">ไม่มีในช่วงนี้</p>}
                 </div>
                 <div className="bg-[#071E3D]/75 border border-[#6D8FC7]/22 rounded-xl p-4">
                   <p className="text-xs font-bold text-[#6D8FC7] mb-2">⚠️ ยามกาลกิณี (ควรหลีกเลี่ยง)</p>
                   {worstDayYam ? (
                     <div>
                       <p className="text-sm font-bold text-[#4B6FAE]">{worstDayYam.timeStr}</p>
-                      <p className="text-xs text-[#8A8070] mt-1">{worstDayYam.isDay ? "☀️ กลางวัน" : "🌙 กลางคืน"} — ยามที่ {worstDayYam.yamNum}</p>
+                      <p className="text-xs text-[#C6B79F] mt-1">{worstDayYam.isDay ? "☀️ กลางวัน" : "🌙 กลางคืน"} — ยามที่ {worstDayYam.yamNum}</p>
                       <p className="text-xs text-[#6D8FC7]/70 mt-1">หลีกเลี่ยงการตัดสินใจสำคัญ การลงนามสัญญา หรือการเดินทางไกล</p>
                     </div>
-                  ) : <p className="text-xs text-[#8A8070]">ไม่พบ</p>}
+                  ) : <p className="text-xs text-[#C6B79F]">ไม่พบ</p>}
                 </div>
               </div>
             }
@@ -633,7 +633,7 @@ export default function KarnchataPage() {
           {/* Section 3: ตารางยาม 16 ยาม */}
           <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8">
             <h3 className="text-base font-bold text-[#F8F6F1] mb-2">ตารางกาลชะตา 16 ยาม พร้อมคำอธิบาย</h3>
-            <p className="text-xs text-[#8A8070] mb-5">กดที่ยามเพื่อดูคำอธิบายและแนวทางการตัดสินใจ — ยามที่ไฮไลต์คือปัจจุบัน</p>
+            <p className="text-xs text-[#C6B79F] mb-5">กดที่ยามเพื่อดูคำอธิบายและแนวทางการตัดสินใจ — ยามที่ไฮไลต์คือปัจจุบัน</p>
 
             {/* ทักษา 8 ตำแหน่ง */}
             <div className="bg-[#020617] border border-[#C6A96B]/12 rounded-2xl p-4 mb-6">
@@ -645,7 +645,7 @@ export default function KarnchataPage() {
                   const adv = TAKSA_PLAN_ADVICE[bhop];
                   return (
                     <div key={bhop} className={`rounded-xl p-2 border text-center transition-colors ${isNow ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "border-[#6D8FC7]/30 bg-[#4B6FAE]/5" : "border-white/5 bg-[#071427]/75"}`}>
-                      <p className={`text-[10px] font-bold ${isNow ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#8A8070]"}`}>{bhop}</p>
+                      <p className={`text-[10px] font-bold ${isNow ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#C6B79F]"}`}>{bhop}</p>
                       <p className={`text-sm font-display font-black ${isNow ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{s}</p>
                       <p className="text-[10px]">{adv?.emoji}</p>
                     </div>
@@ -673,13 +673,13 @@ export default function KarnchataPage() {
                             className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs transition-all ${y.isCurrentYam ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20" : "bg-[#071427]/75 border-[#C6A96B]/10 hover:border-[#C6A96B]/25"}`}>
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
-                                <span className="font-mono text-[#8A8070] shrink-0 text-[11px]">{y.timeStr}</span>
+                                <span className="font-mono text-[#C6B79F] shrink-0 text-[11px]">{y.timeStr}</span>
                                 <span className={`font-bold truncate ${y.isCurrentYam ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span>
-                                <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#8A8070]"}`}>{y.quality}</span>
+                                <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#C6B79F]"}`}>{y.quality}</span>
                               </div>
-                              {adv?.th && <p className="text-[10px] text-[#8A8070] truncate mt-0.5">{adv.th}</p>}
+                              {adv?.th && <p className="text-[10px] text-[#C6B79F] truncate mt-0.5">{adv.th}</p>}
                             </div>
-                            <span className="text-[#8A8070]/50 shrink-0">{isEx ? "▲" : "▼"}</span>
+                            <span className="text-[#C6B79F]/50 shrink-0">{isEx ? "▲" : "▼"}</span>
                           </button>
                           {isEx && (
                             <div className="px-4 py-4 bg-[#020617]/60 border-x border-b border-white/5 rounded-b-xl">
@@ -692,7 +692,7 @@ export default function KarnchataPage() {
                                 <p className="text-xs text-[#C6A96B] font-bold mb-1">🎯 แนวทางการตัดสินใจในยามนี้</p>
                                 <p className="text-xs text-[#F8F6F1] leading-relaxed">{desc.decision}</p>
                               </div>
-                              <p className="text-[10px] text-[#8A8070] italic mt-3">"{YAM_OMEN[y.star] || ""}"</p>
+                              <p className="text-[10px] text-[#C6B79F] italic mt-3">"{YAM_OMEN[y.star] || ""}"</p>
                             </div>
                           )}
                         </div>
@@ -721,7 +721,7 @@ export default function KarnchataPage() {
             extraInfo={
               <div className="flex items-center gap-4">
                 <div className="flex-1">
-                  <p className="text-xs text-[#8A8070] uppercase font-bold mb-1">เวลาปัจจุบัน</p>
+                  <p className="text-xs text-[#C6B79F] uppercase font-bold mb-1">เวลาปัจจุบัน</p>
                   <p className="text-4xl font-display font-black text-[#F8F6F1]">{formatTime(time)}</p>
                 </div>
                 <div className={`border font-bold text-xs px-3 py-1.5 rounded-full ${isDaytime ? "bg-amber-500/10 border-amber-500/30 text-amber-400" : "bg-indigo-500/10 border-indigo-500/30 text-indigo-300"}`}>
@@ -744,7 +744,7 @@ export default function KarnchataPage() {
           {/* Section 3: ตารางยาม 8 ยาม ช่วงปัจจุบัน */}
           <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8">
             <h3 className="text-base font-bold text-[#F8F6F1] mb-1">ตารางยาม{isDaytime ? "กลางวัน" : "กลางคืน"} 8 ยาม</h3>
-            <p className="text-xs text-[#8A8070] mb-5">กดที่ยามเพื่อดูคำอธิบาย — ยามไฮไลต์คือยามปัจจุบัน</p>
+            <p className="text-xs text-[#C6B79F] mb-5">กดที่ยามเพื่อดูคำอธิบาย — ยามไฮไลต์คือยามปัจจุบัน</p>
             <div className="space-y-1.5">
               {dayYamTable.filter(y => y.isDay === isDaytime).map(y => {
                 const yamKey = `hourly-${y.isDay ? "d" : "n"}-${y.yamNum}`;
@@ -755,16 +755,16 @@ export default function KarnchataPage() {
                   <div key={yamKey} className="flex flex-col">
                     <button onClick={() => setSelectedYamKey(isEx ? null : yamKey)}
                       className={`flex items-center gap-2 p-3 rounded-xl border text-xs transition-all ${y.isCurrentYam ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20" : "bg-[#071427]/75 border-[#C6A96B]/10 hover:border-[#C6A96B]/25"}`}>
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${y.isCurrentYam ? "bg-[#C6A96B] text-[#020617]" : "bg-white/5 text-[#8A8070]"}`}>{y.yamNum}</span>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${y.isCurrentYam ? "bg-[#C6A96B] text-[#020617]" : "bg-white/5 text-[#C6B79F]"}`}>{y.yamNum}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[#8A8070] text-[11px] shrink-0">{y.timeStr}</span>
+                          <span className="font-mono text-[#C6B79F] text-[11px] shrink-0">{y.timeStr}</span>
                           <span className={`font-bold truncate ${y.isCurrentYam ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span>
-                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#8A8070]"}`}>{y.quality} {adv?.emoji}</span>
+                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#C6B79F]"}`}>{y.quality} {adv?.emoji}</span>
                         </div>
-                        {adv?.th && <p className="text-[10px] text-[#8A8070] truncate mt-0.5">{adv.th}</p>}
+                        {adv?.th && <p className="text-[10px] text-[#C6B79F] truncate mt-0.5">{adv.th}</p>}
                       </div>
-                      <span className="text-[#8A8070]/50 text-xs shrink-0">{isEx ? "▲" : "▼"}</span>
+                      <span className="text-[#C6B79F]/50 text-xs shrink-0">{isEx ? "▲" : "▼"}</span>
                     </button>
                     {isEx && (
                       <div className="px-4 py-4 bg-[#020617]/60 border-x border-b border-white/5 rounded-b-xl">
@@ -773,7 +773,7 @@ export default function KarnchataPage() {
                           <p className="text-xs text-[#C6A96B] font-bold mb-1">🎯 แนวทางการตัดสินใจ</p>
                           <p className="text-xs text-[#F8F6F1] leading-relaxed">{desc.decision}</p>
                         </div>
-                        <p className="text-[10px] text-[#8A8070] italic mt-2">"{YAM_OMEN[y.star] || ""}"</p>
+                        <p className="text-[10px] text-[#C6B79F] italic mt-2">"{YAM_OMEN[y.star] || ""}"</p>
                       </div>
                     )}
                   </div>
@@ -800,12 +800,12 @@ export default function KarnchataPage() {
                 <div className="bg-[#071E3D]/75 border border-[#6D8FC7]/22 rounded-xl p-4">
                   <p className="text-xs text-[#6D8FC7] font-bold mb-1">ยามใหญ่ (ตนุ)</p>
                   <p className="text-xl font-bold text-[#F8F6F1]">{activeResult.yamYaiName} ({yaiN})</p>
-                  <p className="text-xs text-[#8A8070] mt-1">{currentYamQuality}</p>
+                  <p className="text-xs text-[#C6B79F] mt-1">{currentYamQuality}</p>
                 </div>
                 <div className="bg-[#020617] border border-white/5 rounded-xl p-4">
-                  <p className="text-xs text-[#8A8070] font-bold mb-1">เวลาปัจจุบัน</p>
+                  <p className="text-xs text-[#C6B79F] font-bold mb-1">เวลาปัจจุบัน</p>
                   <p className="text-xl font-bold text-[#F8F6F1]">{formatTime(time)}</p>
-                  <p className="text-xs text-[#8A8070] mt-1">{isDaytime ? "☀️ กลางวัน" : "🌙 กลางคืน"}</p>
+                  <p className="text-xs text-[#C6B79F] mt-1">{isDaytime ? "☀️ กลางวัน" : "🌙 กลางคืน"}</p>
                 </div>
               </div>
             }
@@ -824,7 +824,7 @@ export default function KarnchataPage() {
           {/* Section 3: ตารางยามซอย 8 ช่วง */}
           <Card className="border-[#6D8FC7]/30 bg-[#0A1628] p-6 sm:p-8">
             <h3 className="text-base font-bold text-[#F8F6F1] mb-1">ตารางยามซอย 8 ช่วง — ยามใหญ่ {activeResult.yamYaiName}</h3>
-            <p className="text-xs text-[#8A8070] mb-5">แต่ละซอยกินเวลา 3 นาที 45 วินาที (225 วินาที) — ไฮไลต์คือซอยปัจจุบัน</p>
+            <p className="text-xs text-[#C6B79F] mb-5">แต่ละซอยกินเวลา 3 นาที 45 วินาที (225 วินาที) — ไฮไลต์คือซอยปัจจุบัน</p>
             <div className="space-y-1.5">
               {yamSoyTable.map(soy => {
                 const adv = TAKSA_PLAN_ADVICE[soy.quality];
@@ -835,16 +835,16 @@ export default function KarnchataPage() {
                   <div key={soy.slot} className="flex flex-col">
                     <button onClick={() => setSelectedYamKey(isEx ? null : soyKey)}
                       className={`flex items-center gap-2 p-3 rounded-xl border text-xs transition-all ${soy.isCurrent ? "bg-[#4B6FAE]/10 border-[#4B6FAE]/40" : adv?.level === 0 ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20" : "bg-[#071427]/75 border-[#C6A96B]/10 hover:border-[#C6A96B]/25"}`}>
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${soy.isCurrent ? "bg-[#4B6FAE] text-white" : "bg-white/5 text-[#8A8070]"}`}>{soy.slot}</span>
+                      <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${soy.isCurrent ? "bg-[#4B6FAE] text-white" : "bg-white/5 text-[#C6B79F]"}`}>{soy.slot}</span>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-[#8A8070] text-[11px] shrink-0">{soy.timeStr}</span>
+                          <span className="font-mono text-[#C6B79F] text-[11px] shrink-0">{soy.timeStr}</span>
                           <span className={`font-bold truncate ${soy.isCurrent ? "text-[#6D8FC7]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[soy.planet as keyof typeof STAR_NAMES]}</span>
-                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#8A8070]"}`}>{soy.quality} {adv?.emoji}</span>
+                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#C6B79F]"}`}>{soy.quality} {adv?.emoji}</span>
                         </div>
-                        {adv?.th && <p className="text-[10px] text-[#8A8070] truncate mt-0.5">{adv.th}</p>}
+                        {adv?.th && <p className="text-[10px] text-[#C6B79F] truncate mt-0.5">{adv.th}</p>}
                       </div>
-                      <span className="text-[#8A8070]/50 shrink-0">{isEx ? "▲" : "▼"}</span>
+                      <span className="text-[#C6B79F]/50 shrink-0">{isEx ? "▲" : "▼"}</span>
                     </button>
                     {isEx && (
                       <div className="px-4 py-4 bg-[#020617]/60 border-x border-b border-white/5 rounded-b-xl">
@@ -868,7 +868,7 @@ export default function KarnchataPage() {
                   <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
                     className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all ${selectedCategory === cat.id ? "bg-[#071E3D]/75 border-[#6D8FC7]/40" : "bg-[#071427]/75 border-white/5"}`}>
                     <span className="text-base">{cat.icon}</span>
-                    <span className={`text-[10px] font-bold ${selectedCategory === cat.id ? "text-[#6D8FC7]" : "text-[#8A8070]"}`}>{cat.label.split(" ")[0]}</span>
+                    <span className={`text-[10px] font-bold ${selectedCategory === cat.id ? "text-[#6D8FC7]" : "text-[#C6B79F]"}`}>{cat.label.split(" ")[0]}</span>
                   </button>
                 ))}
               </div>
@@ -887,7 +887,7 @@ export default function KarnchataPage() {
                 <div className="p-3 flex items-center gap-2 border-b border-white/5 bg-[#020617]/40">
                   <div className="w-2 h-2 rounded-full bg-[#C6A96B] shadow-[0_0_8px_rgba(198,169,107,0.6)] animate-pulse" />
                   <span className="text-xs font-bold text-[#F8F6F1]">WISDOM GUIDANCE</span>
-                  <button onClick={() => setChatMessages([])} className="ml-auto text-xs text-[#8A8070] hover:text-[#F8F6F1]">ล้างแชท</button>
+                  <button onClick={() => setChatMessages([])} className="ml-auto text-xs text-[#C6B79F] hover:text-[#F8F6F1]">ล้างแชท</button>
                 </div>
                 <div className="overflow-y-auto p-4 space-y-3 h-56">
                   {chatMessages.map((msg, i) => (
@@ -900,7 +900,7 @@ export default function KarnchataPage() {
                 </div>
                 <form onSubmit={handleSendChat} className="p-3 border-t border-white/5 flex gap-2">
                   <input type="text" autoComplete="off" value={userInput} onChange={e => setUserInput(e.target.value)} placeholder="พิมพ์คำถาม..." className="flex-1 bg-[#0A1628] border border-white/5 rounded-xl px-3 py-2 text-xs text-[#F8F6F1] outline-none" />
-                  <Button type="submit" disabled={!userInput.trim()} className="px-3 py-2 rounded-xl bg-[#8A8070] text-[#020617] font-bold hover:bg-[#C6A96B] text-xs">ส่ง</Button>
+                  <Button type="submit" disabled={!userInput.trim()} className="px-3 py-2 rounded-xl bg-[#C6B79F] text-[#020617] font-bold hover:bg-[#C6A96B] text-xs">ส่ง</Button>
                 </form>
               </div>
             </div>

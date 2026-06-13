@@ -19,7 +19,7 @@ export function Button({
       "bg-[#C9A96E] text-[#0A0806] hover:bg-[#E8D4A8] active:scale-[0.98]",
     outline:
       "border border-[#C9A96E] text-[#C9A96E] hover:bg-[#C9A96E]/10 active:scale-[0.98]",
-    ghost: "text-[#8A8070] hover:text-[#F3EFE8] hover:bg-[#15120F]",
+    ghost: "text-[#C6B79F] hover:text-[#F3EFE8] hover:bg-[#15120F]",
   };
 
   return (

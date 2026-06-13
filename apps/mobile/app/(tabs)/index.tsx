@@ -227,7 +227,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   planLabel: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   inkText: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 12,
     fontWeight: '600',
   },
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   cardDesc: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 11,
     marginTop: 4,
   },

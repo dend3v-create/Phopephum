@@ -181,7 +181,7 @@ export default function DashboardCalendar() {
           <h1 className="font-display text-3xl font-bold text-[#F8F6F1] glow-gold">
             ปฏิทินสำเร็จ & ฤกษ์มงคล
           </h1>
-          <p className="text-[#8A8070] text-sm">
+          <p className="text-[#C6B79F] text-sm">
             วางแผนนัดหมายสำคัญให้ตรงกับยามมงคลและทักษาจรส่วนบุคคลของคุณ
           </p>
         </div>
@@ -272,7 +272,7 @@ export default function DashboardCalendar() {
                 <input type="hidden" name="year" value={year} />
 
                 <div className="space-y-1">
-                  <label className="text-[11px] text-[#8A8070] uppercase font-bold tracking-wider">ชื่องานนัดหมาย</label>
+                  <label className="text-[11px] text-[#C6B79F] uppercase font-bold tracking-wider">ชื่องานนัดหมาย</label>
                   <input
                     type="text"
                     placeholder="เช่น นัดเซ็นสัญญากับลูกค้า"
@@ -281,7 +281,7 @@ export default function DashboardCalendar() {
                 </div>
 
                 <div className="space-y-1">
-                  <label className="text-[11px] text-[#8A8070] uppercase font-bold tracking-wider">ประเภทกิจกรรม</label>
+                  <label className="text-[11px] text-[#C6B79F] uppercase font-bold tracking-wider">ประเภทกิจกรรม</label>
                   <select
                     name="eventType"
                     defaultValue={eventType}
@@ -295,7 +295,7 @@ export default function DashboardCalendar() {
 
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
-                    <label className="text-[11px] text-[#8A8070] uppercase font-bold tracking-wider">วันที่ทำนัด</label>
+                    <label className="text-[11px] text-[#C6B79F] uppercase font-bold tracking-wider">วันที่ทำนัด</label>
                     <input
                       name="eventDate"
                       type="date"
@@ -305,7 +305,7 @@ export default function DashboardCalendar() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[11px] text-[#8A8070] uppercase font-bold tracking-wider">เวลาที่เริ่มนัด</label>
+                    <label className="text-[11px] text-[#C6B79F] uppercase font-bold tracking-wider">เวลาที่เริ่มนัด</label>
                     <input
                       name="eventTime"
                       type="time"
@@ -324,7 +324,7 @@ export default function DashboardCalendar() {
               </Form>
             ) : (
               <div className="text-center py-6 space-y-3">
-                <p className="text-xs text-[#8A8070]">กรุณาตั้งค่าข้อมูลวันเกิดในโปรไฟล์ก่อนใช้งานฤกษ์สำเร็จเฉพาะบุคคล</p>
+                <p className="text-xs text-[#C6B79F]">กรุณาตั้งค่าข้อมูลวันเกิดในโปรไฟล์ก่อนใช้งานฤกษ์สำเร็จเฉพาะบุคคล</p>
                 <Link to="/dashboard/settings" className="inline-block text-xs font-black text-[#C9A96E] hover:underline">
                   ไปที่ตั้งค่าดวงเกิด →
                 </Link>

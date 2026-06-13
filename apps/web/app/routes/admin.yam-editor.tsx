@@ -247,9 +247,9 @@ export default function YamEditorPage() {
       <div className="flex items-center gap-3 flex-wrap">
         <div>
           <h1 className="font-display text-xl font-bold text-[#C9A96E]">กรอกข้อมูลดวงยาม</h1>
-          <p className="text-[#8A8070] text-xs mt-0.5">วัน{WEEKDAY_THAI[weekdayNum]} — 16 ยาม (8 กลางวัน + 8 กลางคืน)</p>
+          <p className="text-[#C6B79F] text-xs mt-0.5">วัน{WEEKDAY_THAI[weekdayNum]} — 16 ยาม (8 กลางวัน + 8 กลางคืน)</p>
         </div>
-        <a href="/admin/seed-yam" className="ml-auto text-xs text-[#8A8070] hover:text-[#C9A96E] border border-white/10 px-3 py-1.5 rounded-xl">
+        <a href="/admin/seed-yam" className="ml-auto text-xs text-[#C6B79F] hover:text-[#C9A96E] border border-white/10 px-3 py-1.5 rounded-xl">
           ← Seed อัตโนมัติ
         </a>
       </div>
@@ -266,7 +266,7 @@ export default function YamEditorPage() {
             className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
               weekdayNum === i
                 ? "border-[#C9A96E]/50 text-[#C9A96E]"
-                : "border-white/10 text-[#8A8070] hover:border-white/20 hover:text-[#F8F6F1]"
+                : "border-white/10 text-[#C6B79F] hover:border-white/20 hover:text-[#F8F6F1]"
             }`}
             style={weekdayNum === i ? { background: `${DAY_COLORS[i]}20` } : {}}>
             {name}
@@ -315,7 +315,7 @@ export default function YamEditorPage() {
                     {/* Yam header */}
                     <div className="flex items-center gap-2 mb-3">
                       <span className="font-display text-lg font-bold text-[#C9A96E] w-6 text-center">{yamNo}</span>
-                      <span className="text-xs text-[#8A8070] font-mono">{start}–{end}</span>
+                      <span className="text-xs text-[#C6B79F] font-mono">{start}–{end}</span>
                       {hasData && (
                         <span className={`ml-auto text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                           existing.grade === "A" ? "text-emerald-400 border-emerald-500/40 bg-emerald-950/30" :
@@ -354,7 +354,7 @@ export default function YamEditorPage() {
 
                     {/* Preview existing bhava if saved */}
                     {hasData && ZODIAC_ORDER[existingLagna] && (
-                      <p className="text-[9px] text-[#8A8070]">
+                      <p className="text-[9px] text-[#C6B79F]">
                         ลัคนา: <span className="text-[#C9A96E]">{ZODIAC_ORDER[existingLagna]?.name}</span>
                         {" · "}ภพตนุ = {ZODIAC_ORDER[existingLagna]?.name}
                       </p>

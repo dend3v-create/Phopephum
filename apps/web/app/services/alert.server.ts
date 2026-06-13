@@ -128,7 +128,7 @@ function buildAlertFlexMessage(payload: AlertPayload, appUrl: string): object {
       type: "box",
       layout: "horizontal",
       contents: [
-        { type: "text", text: "⏰ เวลา:", color: "#8A8070", size: "xs", flex: 2 },
+        { type: "text", text: "⏰ เวลา:", color: "#C6B79F", size: "xs", flex: 2 },
         { type: "text", text: thaiTime, color: "#F8F6F1", size: "xs", flex: 5, wrap: true },
       ],
     },
@@ -136,7 +136,7 @@ function buildAlertFlexMessage(payload: AlertPayload, appUrl: string): object {
       type: "box",
       layout: "horizontal",
       contents: [
-        { type: "text", text: "🚨 ประเภท:", color: "#8A8070", size: "xs", flex: 2 },
+        { type: "text", text: "🚨 ประเภท:", color: "#C6B79F", size: "xs", flex: 2 },
         { type: "text", text: typeLabel, color: "#F8F6F1", size: "xs", flex: 5, wrap: true, weight: "bold" },
       ],
     },
@@ -170,7 +170,7 @@ function buildAlertFlexMessage(payload: AlertPayload, appUrl: string): object {
       type: "box",
       layout: "horizontal",
       contents: [
-        { type: "text", text: "👤 User:", color: "#8A8070", size: "xs", flex: 2 },
+        { type: "text", text: "👤 User:", color: "#C6B79F", size: "xs", flex: 2 },
         {
           type: "text",
           text: payload.userEmail || payload.userId?.substring(0, 12) + "..." || "-",

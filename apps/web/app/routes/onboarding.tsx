@@ -130,7 +130,7 @@ export default function Onboarding() {
 
           {/* 1. ชื่อ */}
           <div className="space-y-1.5">
-            <label className="text-[#8A8070] text-[11px] uppercase tracking-wider block font-bold">
+            <label className="text-[#C6B79F] text-[11px] uppercase tracking-wider block font-bold">
               ✦ ชื่อดวงชะตา (ใช้แสดงในระบบ)
             </label>
             <div className="relative">
@@ -147,7 +147,7 @@ export default function Onboarding() {
 
           {/* 2. เลือกเพศ (เหมือนปุ่มกดของมือถือ) */}
           <div className="space-y-1.5">
-            <label className="text-[#8A8070] text-[11px] uppercase tracking-wider block font-bold">
+            <label className="text-[#C6B79F] text-[11px] uppercase tracking-wider block font-bold">
               ✦ เพศกำเนิด (สำหรับทักษาจรชะตา)
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -157,7 +157,7 @@ export default function Onboarding() {
                 className={`py-2 rounded-xl text-xs font-bold transition-all border
                   ${gender === "male"
                     ? "bg-gold-500 text-cosmic-950 border-gold-liquid shadow-[0_0_15px_rgba(232,196,106,0.25)]"
-                    : "bg-[#020617]/40 border-white/5 text-[#8A8070] hover:text-text-primary hover:border-gold-500/30"}`}
+                    : "bg-[#020617]/40 border-white/5 text-[#C6B79F] hover:text-text-primary hover:border-gold-500/30"}`}
               >
                 ♂ ชาย
               </button>
@@ -167,7 +167,7 @@ export default function Onboarding() {
                 className={`py-2 rounded-xl text-xs font-bold transition-all border
                   ${gender === "female"
                     ? "bg-gold-500 text-cosmic-950 border-gold-liquid shadow-[0_0_15px_rgba(232,196,106,0.25)]"
-                    : "bg-[#020617]/40 border-white/5 text-[#8A8070] hover:text-text-primary hover:border-gold-500/30"}`}
+                    : "bg-[#020617]/40 border-white/5 text-[#C6B79F] hover:text-text-primary hover:border-gold-500/30"}`}
               >
                 ♀ หญิง
               </button>
@@ -177,7 +177,7 @@ export default function Onboarding() {
                 className={`py-2 rounded-xl text-xs font-bold transition-all border
                   ${gender === "other"
                     ? "bg-mystic-500 text-text-primary border-mystic-400 shadow-[0_0_15px_rgba(109,143,199,0.25)]"
-                    : "bg-[#020617]/40 border-white/5 text-[#8A8070] hover:text-text-primary hover:border-gold-500/30"}`}
+                    : "bg-[#020617]/40 border-white/5 text-[#C6B79F] hover:text-text-primary hover:border-gold-500/30"}`}
               >
                 ⚧ อื่นๆ
               </button>
@@ -186,7 +186,7 @@ export default function Onboarding() {
 
           {/* 3. วันเกิด (วัน / เดือน / ปี) */}
           <div className="space-y-1.5">
-            <label className="text-[#8A8070] text-[11px] uppercase tracking-wider block font-bold">
+            <label className="text-[#C6B79F] text-[11px] uppercase tracking-wider block font-bold">
               ✦ วัน เดือน ปีเกิด (พ.ศ.)
             </label>
             <div className="grid grid-cols-12 gap-2">
@@ -233,7 +233,7 @@ export default function Onboarding() {
           {/* 4. เวลาเกิด */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <label className="text-[#8A8070] text-[11px] uppercase tracking-wider block font-bold">
+              <label className="text-[#C6B79F] text-[11px] uppercase tracking-wider block font-bold">
                 ✦ เวลาเกิด
               </label>
               <input
@@ -245,7 +245,7 @@ export default function Onboarding() {
             </div>
             
             <div className="space-y-1.5">
-              <label className="text-[#8A8070] text-[11px] uppercase tracking-wider block font-bold">
+              <label className="text-[#C6B79F] text-[11px] uppercase tracking-wider block font-bold">
                 ✦ จังหวัดเกิด
               </label>
               <input

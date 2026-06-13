@@ -329,6 +329,6 @@ const styles = StyleSheet.create({
   highlightedCell: {
     backgroundColor: 'rgba(198,169,107,0.05)',
   },
-  tinyAge: { color: '#8A8070', fontSize: 8, marginTop: 2, textAlign: 'center' },
+  tinyAge: { color: '#C6B79F', fontSize: 8, marginTop: 2, textAlign: 'center' },
   helpText: { color: '#94A3B8', fontSize: 11, textAlign: 'center', marginTop: 8, opacity: 0.8 },
 });

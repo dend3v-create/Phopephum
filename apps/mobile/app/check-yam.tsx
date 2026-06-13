@@ -129,6 +129,6 @@ const styles = StyleSheet.create({
   yamName: { color: '#F8F6F1', fontSize: 24, fontWeight: 'bold' },
   badge: { paddingHorizontal: 8, paddingVertical: 2, borderRadius: 12, borderWidth: 1 },
   badgeText: { fontSize: 10, fontWeight: 'bold' },
-  infoText: { color: '#8A8070', fontSize: 13, marginBottom: 8 },
+  infoText: { color: '#C6B79F', fontSize: 13, marginBottom: 8 },
   descText: { color: '#94A3B8', fontSize: 13, lineHeight: 20 },
 });

@@ -251,7 +251,7 @@ export default function RahuDashboard() {
               className={`p-2.5 rounded-xl border transition-all ${
                 notificationsEnabled
                   ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                  : "bg-slate-950/40 border-white/5 text-[#8A8070] hover:text-[#F8F6F1]"
+                  : "bg-slate-950/40 border-white/5 text-[#C6B79F] hover:text-[#F8F6F1]"
               }`}
               title={notificationsEnabled ? "ปิดการแจ้งเตือนฤกษ์มงคล" : "เปิดการแจ้งเตือนฤกษ์มงคล"}
             >
@@ -262,7 +262,7 @@ export default function RahuDashboard() {
               className={`p-2.5 rounded-xl border transition-all ${
                 soundEnabled
                   ? "bg-[#C6A96B]/10 border-[#C6A96B]/25 text-[#C6A96B]"
-                  : "bg-slate-950/40 border-white/5 text-[#8A8070]"
+                  : "bg-slate-950/40 border-white/5 text-[#C6B79F]"
               }`}
               title={soundEnabled ? "ปิดเสียงเตือน" : "เปิดเสียงเตือน"}
             >
@@ -359,7 +359,7 @@ export default function RahuDashboard() {
               }`}>
                 
                 <Target className={`w-6 h-6 mb-2 transition-colors ${
-                  rahuResult.is_current_moment_good ? "text-emerald-400 animate-pulse" : "text-[#8A8070]"
+                  rahuResult.is_current_moment_good ? "text-emerald-400 animate-pulse" : "text-[#C6B79F]"
                 }`} />
 
                 {/* ตัวเลขเวลาถอยหลังถ้วนนาทีสด */}
@@ -403,7 +403,7 @@ export default function RahuDashboard() {
             <h3 className="font-display text-2xl font-bold text-[#F8F6F1] flex items-center gap-2">
               <CalendarDays className="w-5 h-5 text-[#C6A96B]" /> ตารางยามราหูประจำวัน
             </h3>
-            <p className="text-xs text-[#8A8070] italic">
+            <p className="text-xs text-[#C6B79F] italic">
               เลือกวันในสัปดาห์เพื่อถอดรหัสฤกษ์มงคลยามราหูทั้ง 16 ช่วงเวลา
             </p>
           </div>
@@ -435,7 +435,7 @@ export default function RahuDashboard() {
                   className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
                     isActive
                       ? `${baseTheme.bg} ${baseTheme.text} ${baseTheme.border} border shadow-lg`
-                      : "text-[#8A8070] hover:text-[#F8F6F1] hover:bg-white/5"
+                      : "text-[#C6B79F] hover:text-[#F8F6F1] hover:bg-white/5"
                   } relative`}
                 >
                   {day.label}
@@ -510,7 +510,7 @@ function PredictionBox({ title, value, icon }: { title: string; value: string; i
     <Card className="p-4 rounded-2xl bg-slate-950/40 border-white/5 hover:border-[#C6A96B]/25 transition-all duration-300">
       <div className="flex items-center gap-2 mb-2">
         <span className="text-sm">{icon}</span>
-        <p className="text-[12px] text-[#8A8070] uppercase tracking-[0.15em] font-bold">{title}</p>
+        <p className="text-[12px] text-[#C6B79F] uppercase tracking-[0.15em] font-bold">{title}</p>
       </div>
       <p className="text-[#F8F6F1] text-base font-semibold leading-snug">{value}</p>
     </Card>
@@ -548,7 +548,7 @@ function TimelineBlockCard({
           {/* ขอบเขตเวลา */}
           <div className="space-y-0.5">
             <p className="text-xs font-mono font-bold text-[#F8F6F1]">{block.start_time} - {block.end_time}</p>
-            <p className="text-[12px] text-[#8A8070] uppercase">รอบที่ {block.slot_number}</p>
+            <p className="text-[12px] text-[#C6B79F] uppercase">รอบที่ {block.slot_number}</p>
           </div>
           
           <div className="w-px h-7 bg-white/5" />
@@ -561,7 +561,7 @@ function TimelineBlockCard({
                 <span className="bg-[#C6A96B]/15 text-[#C6A96B] px-1.5 py-0.5 rounded text-[11px] font-bold">ปัจจุบัน</span>
               )}
             </p>
-            <p className="text-[13px] text-[#8A8070] mt-0.5 leading-none">
+            <p className="text-[13px] text-[#C6B79F] mt-0.5 leading-none">
               ผล: {yamRule.traibhum_result}
             </p>
           </div>
@@ -569,10 +569,10 @@ function TimelineBlockCard({
 
         {/* ฝั่งขวา: สรุปฤกษ์ย่อ & Expander */}
         <div className="flex items-center gap-3">
-          <span className="text-[13px] bg-slate-900 px-2.5 py-1 rounded-lg border border-white/5 text-[#8A8070] font-mono leading-none">
+          <span className="text-[13px] bg-slate-900 px-2.5 py-1 rounded-lg border border-white/5 text-[#C6B79F] font-mono leading-none">
             {yamRule.good_phase_desc.split(" (")[0]}
           </span>
-          {isExpanded ? <ChevronUp className="w-4 h-4 text-[#8A8070]" /> : <ChevronDown className="w-4 h-4 text-[#8A8070]" />}
+          {isExpanded ? <ChevronUp className="w-4 h-4 text-[#C6B79F]" /> : <ChevronDown className="w-4 h-4 text-[#C6B79F]" />}
         </div>
       </div>
 
@@ -582,22 +582,22 @@ function TimelineBlockCard({
           {/* รายละเอียดคำทำนายยามหลัก */}
           <div className="grid grid-cols-3 gap-2.5 text-[13px] bg-white/2.5 p-3 rounded-xl border border-white/5">
             <div>
-              <p className="text-[#8A8070] mb-0.5">📢 คำสัตย์</p>
+              <p className="text-[#C6B79F] mb-0.5">📢 คำสัตย์</p>
               <p className="text-[#F8F6F1] font-semibold">{yamRule.huajai_truth}</p>
             </div>
             <div>
-              <p className="text-[#8A8070] mb-0.5">🔑 ของหาย</p>
+              <p className="text-[#C6B79F] mb-0.5">🔑 ของหาย</p>
               <p className="text-[#F8F6F1] font-semibold">{yamRule.huajai_lost_item}</p>
             </div>
             <div>
-              <p className="text-[#8A8070] mb-0.5">🩺 สุขภาพ</p>
+              <p className="text-[#C6B79F] mb-0.5">🩺 สุขภาพ</p>
               <p className="text-[#F8F6F1] font-semibold">{yamRule.huajai_health}</p>
             </div>
           </div>
 
           {/* รายการยามย่อย 9 ช่วง */}
           <div className="space-y-1.5">
-            <p className="text-[12px] uppercase tracking-wider text-[#8A8070] font-bold">
+            <p className="text-[12px] uppercase tracking-wider text-[#C6B79F] font-bold">
               🔍 วิถียามย่อย 9 ช่วง (10 นาทีต่อช่วง)
             </p>
             <div className="grid grid-cols-3 gap-1.5">

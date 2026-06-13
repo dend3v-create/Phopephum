@@ -220,7 +220,7 @@ function TaksaGrid({ taksaMaha }: { taksaMaha: any }) {
     <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
       <div className="p-4 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
         <p className="text-[14px] font-bold uppercase tracking-widest text-[#C9A96E]">ตารางทักษาคู่ (ทักษากำเนิด / ทักษาจร)</p>
-        <p className="text-[#8A8070] text-sm mt-0.5">
+        <p className="text-[#C6B79F] text-sm mt-0.5">
           บริวารเกิด: {STAR_NAMES[taksaNatal.bariStar as StarNumber]} ({taksaNatal.bariStar})
           &nbsp;·&nbsp;
           บริวารจร: {STAR_NAMES[taksaTransit.bariStar as StarNumber]} ({taksaTransit.bariStar})
@@ -235,7 +235,7 @@ function TaksaGrid({ taksaMaha }: { taksaMaha: any }) {
                   <div key="center" className="aspect-square flex flex-col items-center justify-center rounded-2xl border border-[#C9A96E]/20 bg-[#C9A96E]/10 p-2 text-center">
                     <span className="text-[#C9A96E] text-xs font-bold">อายุย่าง</span>
                     <span className="font-display text-3xl font-bold text-[#F8F6F1] my-1">{taksaTransit.ageYang}</span>
-                    <span className="text-[#8A8070] text-xs">ปี</span>
+                    <span className="text-[#C6B79F] text-xs">ปี</span>
                   </div>
                 );
               }
@@ -247,13 +247,13 @@ function TaksaGrid({ taksaMaha }: { taksaMaha: any }) {
               return (
                 <div key={`star-${star}`} className="aspect-square flex flex-col items-center justify-between rounded-2xl border border-white/5 bg-slate-900/35 p-1.5 hover:border-[#C9A96E]/30 transition-all relative overflow-hidden">
                   {/* Direction Label (Tiny) */}
-                  <span className="text-[9px] text-[#8A8070] font-bold uppercase tracking-tighter text-center leading-none">
+                  <span className="text-[9px] text-[#C6B79F] font-bold uppercase tracking-tighter text-center leading-none">
                     {directionName}
                   </span>
-                  <span className="text-xs font-semibold text-[#8A8070] leading-none">{bhopNatal ?? "—"}</span>
+                  <span className="text-xs font-semibold text-[#C6B79F] leading-none">{bhopNatal ?? "—"}</span>
                   <div className="flex flex-col items-center my-0.5">
                     <span className="font-display text-2xl font-bold text-[#F8F6F1] leading-none">{star}</span>
-                    <span className="text-[10px] text-[#8A8070] mt-0.5 leading-none">{STAR_NAMES[star as StarNumber]}</span>
+                    <span className="text-[10px] text-[#C6B79F] mt-0.5 leading-none">{STAR_NAMES[star as StarNumber]}</span>
                   </div>
                   <span className={`text-[10px] font-bold leading-none ${
                     isKalaTransit ? "text-rose-400 bg-red-950/40 border border-red-500/25 px-1 py-0.5 rounded-md"
@@ -326,10 +326,10 @@ function TransitDirectionsCard({ taksaMaha }: { taksaMaha: any }) {
                 <div key={d.star} className={`flex flex-col justify-between p-3 rounded-xl border ${qualityColor[d.quality] || 'border-white/5 bg-white/2'}`}>
                   <div>
                     <p className="font-bold text-sm text-[#F8F6F1]">{d.dirName}</p>
-                    <p className="text-[11px] text-[#8A8070] mt-0.5">ดาว {STAR_NAMES[d.star as StarNumber]} ({d.star})</p>
+                    <p className="text-[11px] text-[#C6B79F] mt-0.5">ดาว {STAR_NAMES[d.star as StarNumber]} ({d.star})</p>
                   </div>
                   <div className="mt-2 flex items-center justify-between border-t border-white/5 pt-1.5">
-                    <span className="text-[10px] text-[#8A8070] italic">
+                    <span className="text-[10px] text-[#C6B79F] italic">
                       {d.quality === "ศรี" ? "โชคลาภ เงินทอง"
                         : d.quality === "เดช" ? "อำนาจ เกียรติยศ"
                         : d.quality === "มนตรี" ? "ผู้ใหญ่อุปถัมภ์"
@@ -346,7 +346,7 @@ function TransitDirectionsCard({ taksaMaha }: { taksaMaha: any }) {
 
         {/* ทิศที่ควรระวัง / ทิศทั่วไป */}
         <div className="space-y-3">
-          <p className="text-xs text-[#8A8070] font-bold uppercase tracking-wider border-b border-white/5 pb-1 flex items-center gap-1.5">
+          <p className="text-xs text-[#C6B79F] font-bold uppercase tracking-wider border-b border-white/5 pb-1 flex items-center gap-1.5">
             <span>⚠️</span> ทิศควรหลีกเลี่ยง & ทิศทั่วไป
           </p>
           <div className="space-y-2">
@@ -373,7 +373,7 @@ function TransitDirectionsCard({ taksaMaha }: { taksaMaha: any }) {
                   <div key={d.star} className="flex flex-col justify-between p-2 rounded-xl border border-white/5 bg-slate-900/40">
                     <div>
                       <p className="font-bold text-xs text-[#F8F6F1] truncate">{d.dirName}</p>
-                      <p className="text-[9px] text-[#8A8070] mt-0.5">ดาว {STAR_NAMES[d.star as StarNumber]}</p>
+                      <p className="text-[9px] text-[#C6B79F] mt-0.5">ดาว {STAR_NAMES[d.star as StarNumber]}</p>
                     </div>
                     <div className="mt-2.5">
                       <span className={`text-[9px] font-bold px-1 py-0.5 rounded border ${qualityColor[d.quality]}`}>
@@ -412,36 +412,36 @@ function SawaiCard({ sawai }: { sawai: any }) {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-[#C9A96E]/5 border border-[#C9A96E]/20 rounded-2xl p-4">
-          <p className="text-xs text-[#8A8070] uppercase tracking-wider mb-1">ดาวเสวยอายุหลัก</p>
+          <p className="text-xs text-[#C6B79F] uppercase tracking-wider mb-1">ดาวเสวยอายุหลัก</p>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-[#C9A96E]/15 border border-[#C9A96E]/35 flex items-center justify-center font-display text-2xl font-bold text-[#C9A96E]">
               {sawai.sawaiStar}
             </div>
             <div>
               <p className="text-[#F8F6F1] font-bold text-lg">{sawai.sawaiStarName}</p>
-              <p className="text-xs text-[#8A8070]">อายุ {sawai.sawaiAgeStart}–{sawai.sawaiAgeEnd} ปี</p>
+              <p className="text-xs text-[#C6B79F]">อายุ {sawai.sawaiAgeStart}–{sawai.sawaiAgeEnd} ปี</p>
             </div>
           </div>
-          <p className="text-xs text-[#8A8070] mt-3">{fmt(startDate)} — {fmt(endDate)}</p>
+          <p className="text-xs text-[#C6B79F] mt-3">{fmt(startDate)} — {fmt(endDate)}</p>
           <div className="mt-2">
             <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
               <div className="h-full rounded-full bg-gradient-to-r from-[#C9A96E] to-[#D9BC82]" style={{ width: `${pct}%` }} />
             </div>
-            <p className="text-[10px] text-[#8A8070] mt-1 text-right">{pct}% ผ่านไปแล้ว</p>
+            <p className="text-[10px] text-[#C6B79F] mt-1 text-right">{pct}% ผ่านไปแล้ว</p>
           </div>
         </div>
         <div className="bg-[#4B6FAE]/5 border border-[#4B6FAE]/20 rounded-2xl p-4">
-          <p className="text-xs text-[#8A8070] uppercase tracking-wider mb-1">ดาวแทรก (Sub-period)</p>
+          <p className="text-xs text-[#C6B79F] uppercase tracking-wider mb-1">ดาวแทรก (Sub-period)</p>
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 rounded-xl bg-[#4B6FAE]/15 border border-[#4B6FAE]/35 flex items-center justify-center font-display text-2xl font-bold text-[#4B6FAE]">
               {sawai.subStar}
             </div>
             <div>
               <p className="text-[#F8F6F1] font-bold text-lg">{sawai.subStarName}</p>
-              <p className="text-xs text-[#8A8070]">{sawai.subDurationDays} วัน</p>
+              <p className="text-xs text-[#C6B79F]">{sawai.subDurationDays} วัน</p>
             </div>
           </div>
-          <p className="text-xs text-[#8A8070] mt-3">{fmt(subStart)} — {fmt(subEnd)}</p>
+          <p className="text-xs text-[#C6B79F] mt-3">{fmt(subStart)} — {fmt(subEnd)}</p>
         </div>
       </div>
     </Card>
@@ -472,7 +472,7 @@ function ElementPairsCard({ taksaMaha }: { taksaMaha: any }) {
           >
             <p className="text-2xl mb-1">{ELEMENT_ICONS[flag.element]}</p>
             <p className="text-xs font-bold text-[#F8F6F1]">ธาตุ{flag.element}</p>
-            <p className="text-[10px] text-[#8A8070] mt-0.5">{flag.stars[0]} + {flag.stars[1]}</p>
+            <p className="text-[10px] text-[#C6B79F] mt-0.5">{flag.stars[0]} + {flag.stars[1]}</p>
             {flag.isPermanent && <span className="text-[10px] text-[#C9A96E] font-bold">ถาวร</span>}
             {!flag.isPermanent && flag.inTransit && <span className="text-[10px] text-sky-400 font-bold">จรปีนี้</span>}
             {!flag.isPermanent && !flag.inTransit && <span className="text-[10px] text-[#94A3B8]">ไม่เกิด</span>}
@@ -519,7 +519,7 @@ function StarPredictionPanel({ star, taksaMaha }: { star: number; taksaMaha: any
           }`}>{star}</div>
           <div>
             <p className="text-[#F8F6F1] font-bold text-sm">{starInfo.title}</p>
-            <p className="text-[#8A8070] text-xs">ธาตุ{starInfo.element} {ELEMENT_ICONS[starInfo.element]}</p>
+            <p className="text-[#C6B79F] text-xs">ธาตุ{starInfo.element} {ELEMENT_ICONS[starInfo.element]}</p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1.5 shrink-0">
@@ -541,7 +541,7 @@ function StarPredictionPanel({ star, taksaMaha }: { star: number; taksaMaha: any
         </div>
       </div>
 
-      <p className="text-[11px] text-[#8A8070] italic mb-2 leading-relaxed">{starInfo.desc}</p>
+      <p className="text-[11px] text-[#C6B79F] italic mb-2 leading-relaxed">{starInfo.desc}</p>
 
       {quality && (
         <div className={`rounded-xl p-3 text-xs border ${
@@ -553,7 +553,7 @@ function StarPredictionPanel({ star, taksaMaha }: { star: number; taksaMaha: any
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-2 mt-3 text-[11px] text-[#8A8070]">
+      <div className="grid grid-cols-2 gap-2 mt-3 text-[11px] text-[#C6B79F]">
         <div className="bg-slate-950/20 p-2 rounded-xl border border-white/5">
           <span>ทักษากำเนิด: </span>
           <span className="font-bold text-[#F8F6F1]">{bhopNatal || "—"}</span>
@@ -603,22 +603,22 @@ function BirthForm() {
       <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold mb-4">ป้อนวันเดือนปีเกิด</p>
       <Form method="post" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <label className="text-xs text-[#8A8070] mb-1 block">วัน</label>
+          <label className="text-xs text-[#C6B79F] mb-1 block">วัน</label>
           <input name="birthDay" type="number" min={1} max={31} placeholder="15"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
         </div>
         <div>
-          <label className="text-xs text-[#8A8070] mb-1 block">เดือน</label>
+          <label className="text-xs text-[#C6B79F] mb-1 block">เดือน</label>
           <input name="birthMonth" type="number" min={1} max={12} placeholder="6"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
         </div>
         <div>
-          <label className="text-xs text-[#8A8070] mb-1 block">ปี พ.ศ.</label>
+          <label className="text-xs text-[#C6B79F] mb-1 block">ปี พ.ศ.</label>
           <input name="birthYear" type="number" min={2400} max={2600} placeholder="2500"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
         </div>
         <div>
-          <label className="text-xs text-[#8A8070] mb-1 block">เวลาเกิด</label>
+          <label className="text-xs text-[#C6B79F] mb-1 block">เวลาเกิด</label>
           <input name="birthTime" type="time" defaultValue="06:00"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
         </div>
@@ -663,10 +663,10 @@ export default function MahaThaksaPage() {
           <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">
             มหาทักษาพยากรณ์ {activeResult?.customerName ? `(${activeResult.customerName})` : ""}
           </h1>
-          <p className="text-[#8A8070] text-sm mt-1">วิเคราะห์ระบบทักษาดาว 8 ดวง ทักษากำเนิด + ทักษาจร</p>
+          <p className="text-[#C6B79F] text-sm mt-1">วิเคราะห์ระบบทักษาดาว 8 ดวง ทักษากำเนิด + ทักษาจร</p>
         </div>
         {taksaMaha && (
-          <div className="text-right text-xs text-[#8A8070] shrink-0">
+          <div className="text-right text-xs text-[#C6B79F] shrink-0">
             <p>อายุย่าง</p>
             <p className="font-display text-3xl text-[#C9A96E] font-bold leading-none">{taksaMaha.taksaTransit?.ageYang}</p>
             <p>ปี</p>

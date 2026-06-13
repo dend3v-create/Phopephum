@@ -747,7 +747,7 @@ export default function YamPage() {
           <p className="text-lg font-display font-black text-[#F8F6F1] leading-none tabular-nums">
             {data.moon.illumination}%
           </p>
-          <span className="text-[11px] text-[#8A8070] uppercase font-bold tracking-widest block mt-0.5">
+          <span className="text-[11px] text-[#C6B79F] uppercase font-bold tracking-widest block mt-0.5">
             ความสว่าง
           </span>
         </div>
@@ -908,7 +908,7 @@ export default function YamPage() {
                     />
                   </div>
                   
-                  <p className="text-[12px] text-[#8A8070] italic leading-relaxed pt-0.5">
+                  <p className="text-[12px] text-[#C6B79F] italic leading-relaxed pt-0.5">
                     *ข้อมูลเวลาสากลคำนวณแบบพลวัตแบบเรียลไทม์ อัปเดตเสถียรทุก ๆ 1 นาที
                   </p>
                 </div>
@@ -1909,7 +1909,7 @@ export default function YamPage() {
                 <p className="text-sm text-[#F8F6F1] font-medium leading-relaxed max-w-2xl mx-auto py-2 border-y border-white/5 my-2">
                   {compareResult.verdict}
                 </p>
-                <p className="text-[13px] text-[#8A8070] italic">
+                <p className="text-[13px] text-[#C6B79F] italic">
                   *การตรวจวิเคราะห์อ้างอิงจากฐานความมงคลยามอัฏฐกาลร่วมกับกำลังของเจ้าดารายามอย่างสมบูรณ์
                 </p>
               </Card>

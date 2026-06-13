@@ -344,7 +344,7 @@ export default function DashboardIndex() {
       {/* ── 1. Header ── */}
       <div className="flex items-start justify-between pt-2 gap-3 animate-fade-up">
         <div>
-          <p className="text-[#8A8070] text-sm sm:text-base font-bold tracking-wide">{greeting} · {dateLabel}</p>
+          <p className="text-[#C6B79F] text-sm sm:text-base font-bold tracking-wide">{greeting} · {dateLabel}</p>
           <h1 className="font-display text-3xl sm:text-4xl font-extrabold mt-1 text-[#F8F6F1]">
             สวัสดี, <span className="text-[#C6A96B] glow-gold font-black">{displayName}</span>
           </h1>
@@ -379,7 +379,7 @@ export default function DashboardIndex() {
               </div>
 
               <div className="space-y-1">
-                <p className="text-[11px] text-[#8A8070] font-black tracking-widest uppercase">บุคลิกลักษณะชีวิต</p>
+                <p className="text-[11px] text-[#C6B79F] font-black tracking-widest uppercase">บุคลิกลักษณะชีวิต</p>
                 <h3 className="font-display font-black text-lg text-[#F8F6F1] flex items-center gap-2">
                   {identity.archetypeTitle}
                   <span className="text-xs text-[#C6A96B] font-mono">({identity.archetypeLabel})</span>
@@ -450,7 +450,7 @@ export default function DashboardIndex() {
             </div>
             <div>
               <p className="text-[#F8F6F1] font-bold text-sm">จับไพ่ประจำวันเพื่อหยั่งรู้วงโคจรชีวิต</p>
-              <p className="text-xs text-[#8A8070] mt-1">พร้อมรับสิทธิ์เคลมภารกิจประจำวัน +1 ทรายกาลเวลา</p>
+              <p className="text-xs text-[#C6B79F] mt-1">พร้อมรับสิทธิ์เคลมภารกิจประจำวัน +1 ทรายกาลเวลา</p>
             </div>
             <button
               type="button"
@@ -473,7 +473,7 @@ export default function DashboardIndex() {
             {/* Work */}
             <div className="card-glass p-4 border border-white/5 bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-[#8A8070] font-black uppercase tracking-wider flex items-center gap-1">💼 การงาน</span>
+                <span className="text-[10px] text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💼 การงาน</span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
                   dailyAdvice.work.status === "excellent" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5" :
                   dailyAdvice.work.status === "warning" ? "text-rose-400 border-rose-500/20 bg-rose-500/5" :
@@ -487,7 +487,7 @@ export default function DashboardIndex() {
             {/* Wealth */}
             <div className="card-glass p-4 border border-white/5 bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-[#8A8070] font-black uppercase tracking-wider flex items-center gap-1">💰 การเงิน</span>
+                <span className="text-[10px] text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💰 การเงิน</span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
                   dailyAdvice.wealth.status === "excellent" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5" :
                   dailyAdvice.wealth.status === "warning" ? "text-rose-400 border-rose-500/20 bg-rose-500/5" :
@@ -501,7 +501,7 @@ export default function DashboardIndex() {
             {/* Love */}
             <div className="card-glass p-4 border border-white/5 bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-[#8A8070] font-black uppercase tracking-wider flex items-center gap-1">💖 ความรัก</span>
+                <span className="text-[10px] text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💖 ความรัก</span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
                   dailyAdvice.love.status === "excellent" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5" :
                   dailyAdvice.love.status === "warning" ? "text-rose-400 border-rose-500/20 bg-rose-500/5" :
@@ -515,7 +515,7 @@ export default function DashboardIndex() {
             {/* Health */}
             <div className="card-glass p-4 border border-white/5 bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-[#8A8070] font-black uppercase tracking-wider flex items-center gap-1">🌿 สุขภาพ</span>
+                <span className="text-[10px] text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">🌿 สุขภาพ</span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
                   dailyAdvice.health.status === "excellent" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5" :
                   dailyAdvice.health.status === "warning" ? "text-rose-400 border-rose-500/20 bg-rose-500/5" :

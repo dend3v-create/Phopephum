@@ -243,7 +243,7 @@ export default function WisdomChatPage() {
           </div>
           <div className="flex-1 overflow-y-auto py-2 space-y-2.5">
             {journals.length === 0 ? (
-              <p className="text-center py-10 text-[#8A8070] text-xs italic">ไม่มีบันทึกประวัติการปรึกษาในขณะนี้</p>
+              <p className="text-center py-10 text-[#C6B79F] text-xs italic">ไม่มีบันทึกประวัติการปรึกษาในขณะนี้</p>
             ) : (
               journals.map((j: any) => (
                 <button
@@ -258,7 +258,7 @@ export default function WisdomChatPage() {
                   }}
                   className="w-full text-left p-3.5 rounded-xl border border-[#C6A96B]/10 bg-[#0a2240]/40 hover:border-[#C6A96B]/40 hover:bg-[#0a2240]/85 transition-all block group"
                 >
-                  <span className="text-[10px] text-[#8A8070] font-bold block mb-1">
+                  <span className="text-[10px] text-[#C6B79F] font-bold block mb-1">
                     {new Date(j.created_at).toLocaleString("th-TH", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                   </span>
                   <p className="text-[#C6A96B] text-xs font-bold line-clamp-1 group-hover:text-gold-liquid">Q: {j.affirmation_received}</p>

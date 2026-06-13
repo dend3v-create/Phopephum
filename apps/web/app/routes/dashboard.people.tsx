@@ -239,7 +239,7 @@ export default function PeopleProfilesPage() {
             <p className="text-[#C6A96B] text-[11px] tracking-[0.3em] uppercase font-bold">Personal Profiles</p>
           </div>
           <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">โปรไฟล์บุคคล</h1>
-          <p className="text-[#8A8070] text-sm mt-1">สมุดบันทึกรายชื่อบุคคล เพื่อการตั้งดวงชะตาและวิเคราะห์อย่างรวดเร็ว</p>
+          <p className="text-[#C6B79F] text-sm mt-1">สมุดบันทึกรายชื่อบุคคล เพื่อการตั้งดวงชะตาและวิเคราะห์อย่างรวดเร็ว</p>
         </div>
         
         {formMode === "idle" && (
@@ -305,7 +305,7 @@ export default function PeopleProfilesPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Dropdown วันเกิด พ.ศ. */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs text-[#8A8070] font-bold uppercase tracking-wider">วันเดือนปีเกิด (พ.ศ.) *</label>
+                <label className="text-xs text-[#C6B79F] font-bold uppercase tracking-wider">วันเดือนปีเกิด (พ.ศ.) *</label>
                 <div className="grid grid-cols-3 gap-2">
                   <select name="birthDay" defaultValue={defaults.day} className="bg-slate-950/50 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-2.5 text-xs focus:border-[#C6A96B]/50 outline-none">
                     {Array.from({ length: 31 }).map((_, i) => (
@@ -338,7 +338,7 @@ export default function PeopleProfilesPage() {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="px-4 py-2 rounded-xl text-xs font-bold text-[#8A8070] hover:text-[#F8F6F1] transition-colors"
+                className="px-4 py-2 rounded-xl text-xs font-bold text-[#C6B79F] hover:text-[#F8F6F1] transition-colors"
               >
                 ยกเลิก
               </button>
@@ -355,7 +355,7 @@ export default function PeopleProfilesPage() {
         <Card className="border-[#C6A96B]/20 bg-gradient-to-r from-amber-500/5 to-yellow-600/5 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <p className="text-[#C6A96B] font-bold text-sm">✦ คุณใช้โควตาโปรไฟล์บุคคลครบแล้ว ({currentCount}/{personLimit} คน)</p>
-            <p className="text-[#8A8070] text-xs mt-1">อัปเกรดเป็นแผนพรีเมียม เพื่อบันทึกข้อมูลดวงบุคคลได้แบบไม่จำกัด พร้อมปลดล็อกระบบจรชั้นสูง</p>
+            <p className="text-[#C6B79F] text-xs mt-1">อัปเกรดเป็นแผนพรีเมียม เพื่อบันทึกข้อมูลดวงบุคคลได้แบบไม่จำกัด พร้อมปลดล็อกระบบจรชั้นสูง</p>
           </div>
           <Link
             to="/dashboard/upgrade"
@@ -375,7 +375,7 @@ export default function PeopleProfilesPage() {
             </svg>
           </div>
           <p className="text-[#F8F6F1] font-bold text-sm">ยังไม่มีรายชื่อโปรไฟล์บุคคล</p>
-          <p className="text-[#8A8070] text-xs mt-1 max-w-sm mx-auto">เริ่มต้นโดยการกดปุ่ม "เพิ่มบุคคลใหม่" ด้านบน เพื่อเก็บประวัติวันเกิดลูกค้า ญาติพี่น้อง หรือผู้ที่พยากรณ์ประจำ</p>
+          <p className="text-[#C6B79F] text-xs mt-1 max-w-sm mx-auto">เริ่มต้นโดยการกดปุ่ม "เพิ่มบุคคลใหม่" ด้านบน เพื่อเก็บประวัติวันเกิดลูกค้า ญาติพี่น้อง หรือผู้ที่พยากรณ์ประจำ</p>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -404,7 +404,7 @@ export default function PeopleProfilesPage() {
                           </span>
                         )}
                       </h3>
-                      <p className="text-xs text-[#8A8070] mt-1.5 flex items-center gap-1.5">
+                      <p className="text-xs text-[#C6B79F] mt-1.5 flex items-center gap-1.5">
                         <span>📍 {person.birth_place || "กรุงเทพมหานคร"}</span>
                         <span className="text-white/10">•</span>
                         <span>⏰ {person.birth_time || "12:00"} น.</span>
@@ -414,7 +414,7 @@ export default function PeopleProfilesPage() {
                     <div className="flex items-center gap-1">
                       <button
                         onClick={() => handleEditClick(person)}
-                        className="p-1.5 rounded-lg text-[#8A8070] hover:text-[#C6A96B] hover:bg-white/5 transition-all"
+                        className="p-1.5 rounded-lg text-[#C6B79F] hover:text-[#C6A96B] hover:bg-white/5 transition-all"
                         title="แก้ไขข้อมูล"
                       >
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
@@ -431,7 +431,7 @@ export default function PeopleProfilesPage() {
                         <input type="hidden" name="id" value={person.id} />
                         <button
                           type="submit"
-                          className="p-1.5 rounded-lg text-[#8A8070] hover:text-rose-400 hover:bg-white/5 transition-all"
+                          className="p-1.5 rounded-lg text-[#C6B79F] hover:text-rose-400 hover:bg-white/5 transition-all"
                           title="ลบโปรไฟล์"
                         >
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-4 h-4">
@@ -443,7 +443,7 @@ export default function PeopleProfilesPage() {
                   </div>
 
                   <div className="border-t border-white/5 pt-2.5">
-                    <p className="text-[12px] text-[#8A8070] leading-none">วันพระราชสมภพ / วันเกิดทางจันทรคติ:</p>
+                    <p className="text-[12px] text-[#C6B79F] leading-none">วันพระราชสมภพ / วันเกิดทางจันทรคติ:</p>
                     <p className="text-xs text-[#D9BC82] font-semibold mt-1 flex items-center gap-1.5">
                       📅 {dateInfo.text}
                     </p>

@@ -123,7 +123,7 @@ export default function RegisterPage() {
         <h2 className="font-display text-2xl font-bold text-[#F3EFE8] mb-2">
           ลงทะเบียนวิเคราะห์ชะตาชีวิต
         </h2>
-        <p className="text-[#8A8070] text-sm">
+        <p className="text-[#C6B79F] text-sm">
           ปัญญาศาสตร์ เลข 7 ตัว 9 ฐาน + ยามอัฏฐกาลเฉพาะบุคคล
         </p>
       </div>
@@ -138,7 +138,7 @@ export default function RegisterPage() {
             required
           />
           <div className="flex flex-col gap-1.5">
-             <label className="text-xs font-semibold text-[#8A8070] uppercase tracking-wider ml-1">เพศ</label>
+             <label className="text-xs font-semibold text-[#C6B79F] uppercase tracking-wider ml-1">เพศ</label>
              <select name="gender" className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#D9BC82]/50">
                 <option value="ชาย">ชาย</option>
                 <option value="หญิง">หญิง</option>
@@ -148,7 +148,7 @@ export default function RegisterPage() {
 
         {/* วันเกิด พ.ศ. — แยก 3 ช่อง */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-xs font-semibold text-[#8A8070] uppercase tracking-wider ml-1">
+          <label className="text-xs font-semibold text-[#C6B79F] uppercase tracking-wider ml-1">
             วันเกิด (พ.ศ.) <span className="text-red-400">*</span>
           </label>
           <div className="grid grid-cols-3 gap-2">
@@ -241,7 +241,7 @@ export default function RegisterPage() {
         </Button>
       </Form>
 
-      <p className="text-center text-[#8A8070] text-sm mt-8">
+      <p className="text-center text-[#C6B79F] text-sm mt-8">
         มีบัญชีวิเคราะห์อยู่แล้ว?{" "}
         <Link
           to="/login"

@@ -135,14 +135,14 @@ function ToolCard({
           <span className="text-sm font-bold text-[#F8F6F1]">{title}</span>
         </div>
         {badge && (
-          <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor ?? "text-[#8A8070] border-white/10"}`}>
+          <span className={`shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-full border ${badgeColor ?? "text-[#C6B79F] border-white/10"}`}>
             {badge}
           </span>
         )}
       </div>
       <div className="space-y-1">
         {lines.map((line, i) => (
-          <p key={i} className="text-xs text-[#8A8070] leading-relaxed">{line}</p>
+          <p key={i} className="text-xs text-[#C6B79F] leading-relaxed">{line}</p>
         ))}
       </div>
       <div className="flex items-center justify-end gap-1 text-[10px] text-[#C6A96B]/50 group-hover:text-[#C6A96B] transition-colors font-bold">
@@ -167,9 +167,9 @@ function StatusWidget({
 }) {
   return (
     <div className="bg-[#020617] border border-white/5 rounded-2xl p-4 flex flex-col gap-1">
-      <p className="text-[10px] text-[#8A8070] uppercase tracking-widest font-bold">{label}</p>
+      <p className="text-[10px] text-[#C6B79F] uppercase tracking-widest font-bold">{label}</p>
       <p className={`text-lg font-display font-bold leading-tight ${colorClass ?? "text-[#F8F6F1]"}`}>{value}</p>
-      {sub && <p className="text-[10px] text-[#8A8070] leading-tight">{sub}</p>}
+      {sub && <p className="text-[10px] text-[#C6B79F] leading-tight">{sub}</p>}
     </div>
   );
 }
@@ -216,7 +216,7 @@ export default function CheckYamPage() {
   }, [revalidate]);
 
   const { yam, karnchata, hora, rahu } = data;
-  const yamLevelColor = LEVEL_COLOR[yam.level] ?? "text-[#8A8070] border-white/10";
+  const yamLevelColor = LEVEL_COLOR[yam.level] ?? "text-[#C6B79F] border-white/10";
   const horaP = PLANET_INFO[hora.yamPlanet];
 
   return (
@@ -229,11 +229,11 @@ export default function CheckYamPage() {
             ✦ ศูนย์รวมฤกษ์ยาม
           </span>
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#F8F6F1]">เช็คฤกษ์ยาม</h1>
-          <p className="text-[#8A8070] text-sm mt-1">{data.thaiDate}</p>
+          <p className="text-[#C6B79F] text-sm mt-1">{data.thaiDate}</p>
         </div>
         <div className="flex flex-col items-start sm:items-end gap-1">
           <LiveClock />
-          <p className="text-[10px] text-[#8A8070]">อัปเดตทุก 60 วินาที</p>
+          <p className="text-[10px] text-[#C6B79F]">อัปเดตทุก 60 วินาที</p>
         </div>
       </div>
 
@@ -242,7 +242,7 @@ export default function CheckYamPage() {
 
         {/* ยามอัฐกาล */}
         <div className="bg-[#020617] border border-white/5 rounded-2xl p-4 flex flex-col gap-2">
-          <p className="text-[10px] text-[#8A8070] uppercase tracking-widest font-bold">ยามอัฐกาล</p>
+          <p className="text-[10px] text-[#C6B79F] uppercase tracking-widest font-bold">ยามอัฐกาล</p>
           <p className="text-lg font-display font-bold text-[#F8F6F1] leading-tight">{yam.yamName}</p>
           <div className="flex items-center gap-2 flex-wrap">
             <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${yamLevelColor}`}>
@@ -250,45 +250,45 @@ export default function CheckYamPage() {
             </span>
             <Ticks ticks={yam.ticks} />
           </div>
-          <p className="text-[10px] text-[#8A8070]">
+          <p className="text-[10px] text-[#C6B79F]">
             ยามที่ {yam.yamNumber} · {PERIOD_TH[yam.period]} · {PHASE_TH[yam.phase]}
           </p>
         </div>
 
         {/* กาลชะตา */}
         <div className="bg-[#020617] border border-white/5 rounded-2xl p-4 flex flex-col gap-2">
-          <p className="text-[10px] text-[#8A8070] uppercase tracking-widest font-bold">กาลชะตา</p>
+          <p className="text-[10px] text-[#C6B79F] uppercase tracking-widest font-bold">กาลชะตา</p>
           <p className="text-lg font-display font-bold text-[#F8F6F1] leading-tight">{karnchata.yamYaiName}</p>
-          <p className="text-[11px] text-[#8A8070]">
+          <p className="text-[11px] text-[#C6B79F]">
             ดาวประจำวัน: <span className="text-[#C6A96B] font-bold">{STAR_NAMES_TH[karnchata.dayStarNumber] ?? karnchata.dayStarNumber}</span>
           </p>
-          <p className="text-[10px] text-[#8A8070]">
+          <p className="text-[10px] text-[#C6B79F]">
             ยามซอย: {karnchata.yamSoyName} · เดือน{karnchata.lunarMonthName}
           </p>
         </div>
 
         {/* ยามพรายกระซิบ */}
         <div className="bg-[#020617] border border-white/5 rounded-2xl p-4 flex flex-col gap-2">
-          <p className="text-[10px] text-[#8A8070] uppercase tracking-widest font-bold">ยามพรายกระซิบ</p>
+          <p className="text-[10px] text-[#C6B79F] uppercase tracking-widest font-bold">ยามพรายกระซิบ</p>
           <p className="text-lg font-display font-bold leading-tight" style={{ color: horaP?.color ?? "#F8F6F1" }}>
             {horaP?.thai ?? `ดาว ${hora.yamPlanet}`}
           </p>
-          <p className="text-[11px] text-[#8A8070]">
+          <p className="text-[11px] text-[#C6B79F]">
             ยาม {hora.yamAsked} · {PERIOD_TH[hora.period]}
           </p>
-          <p className="text-[10px] text-[#8A8070]">{hora.yamStartStr}–{hora.yamEndStr} · ลัคนา {hora.lagnaName}</p>
+          <p className="text-[10px] text-[#C6B79F]">{hora.yamStartStr}–{hora.yamEndStr} · ลัคนา {hora.lagnaName}</p>
         </div>
 
         {/* ราหูค้นทรัพย์ */}
         <div className={`rounded-2xl p-4 flex flex-col gap-2 border ${rahu?.isGood ? "bg-[#C6A96B]/8 border-[#C6A96B]/20" : "bg-[#4B6FAE]/8 border-[#4B6FAE]/20"}`}>
-          <p className="text-[10px] text-[#8A8070] uppercase tracking-widest font-bold">ราหูค้นทรัพย์</p>
+          <p className="text-[10px] text-[#C6B79F] uppercase tracking-widest font-bold">ราหูค้นทรัพย์</p>
           <p className={`text-lg font-display font-bold leading-tight ${rahu?.isGood ? "text-[#C6A96B]" : "text-[#6D8FC7]"}`}>
             {rahu?.isGood ? "✓ ฤกษ์ดี" : "✕ ระวัง"}
           </p>
           {rahu && (
             <>
-              <p className="text-[11px] text-[#8A8070] truncate">{rahu.verdict}</p>
-              <p className="text-[10px] text-[#8A8070]">{rahu.startTime}–{rahu.endTime}</p>
+              <p className="text-[11px] text-[#C6B79F] truncate">{rahu.verdict}</p>
+              <p className="text-[10px] text-[#C6B79F]">{rahu.startTime}–{rahu.endTime}</p>
             </>
           )}
         </div>
@@ -373,8 +373,8 @@ export default function CheckYamPage() {
           <p className="text-base text-yellow-100 font-bold leading-relaxed">{yam.shouldDo}</p>
           {rahu?.advice && (
             <div className="mt-3 pt-3 border-t border-white/5">
-              <p className="text-[10px] text-[#8A8070] font-bold mb-1">ราหู: {rahu.verdict}</p>
-              <p className="text-xs text-[#8A8070] leading-relaxed">{rahu.advice}</p>
+              <p className="text-[10px] text-[#C6B79F] font-bold mb-1">ราหู: {rahu.verdict}</p>
+              <p className="text-xs text-[#C6B79F] leading-relaxed">{rahu.advice}</p>
             </div>
           )}
         </Card>

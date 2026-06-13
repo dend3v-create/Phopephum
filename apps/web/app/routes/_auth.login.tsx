@@ -46,7 +46,7 @@ export default function LoginPage() {
       <h2 className="font-display text-2xl font-semibold text-[#F3EFE8] mb-1">
         เข้าสู่ระบบ
       </h2>
-      <p className="text-[#8A8070] text-sm mb-8">
+      <p className="text-[#C6B79F] text-sm mb-8">
         ยินดีต้อนรับกลับมา
       </p>
 
@@ -79,7 +79,7 @@ export default function LoginPage() {
         </Button>
       </Form>
 
-      <p className="text-center text-[#8A8070] text-sm mt-6">
+      <p className="text-center text-[#C6B79F] text-sm mt-6">
         ยังไม่มีบัญชี?{" "}
         <Link
           to="/register"

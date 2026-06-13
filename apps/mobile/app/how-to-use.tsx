@@ -94,7 +94,7 @@ function AccordionItem({ question, answer }: { question: string, answer: string 
         <Ionicons 
           name={expanded ? "chevron-up" : "chevron-down"} 
           size={20} 
-          color="#8A8070" 
+          color="#C6B79F" 
         />
       </TouchableOpacity>
       {expanded && (
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   introText: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 14,
     textAlign: 'center',
     lineHeight: 20,
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(42, 32, 24, 0.5)',
   },
   answerText: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 14,
     lineHeight: 22,
     marginTop: 12,

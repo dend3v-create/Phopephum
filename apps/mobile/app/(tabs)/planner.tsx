@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   headerTitle: { color: '#F8F6F1', fontSize: 22, fontWeight: 'bold' },
-  headerDate: { color: '#8A8070', fontSize: 12, marginTop: 2 },
+  headerDate: { color: '#C6B79F', fontSize: 12, marginTop: 2 },
   statusBadge: {
     backgroundColor: 'rgba(201,169,110,0.12)',
     borderWidth: 1,
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   statusText: { color: '#C9A96E', fontSize: 11, fontWeight: 'bold' },
 
   fieldLabel: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(201,169,110,0.15)',
     borderColor: '#C9A96E',
   },
-  energyNum: { color: '#8A8070', fontSize: 16, fontWeight: 'bold' },
+  energyNum: { color: '#C6B79F', fontSize: 16, fontWeight: 'bold' },
   energyNumActive: { color: '#C9A96E' },
   energyLabel: { color: '#C9A96E', fontSize: 12, textAlign: 'center', marginTop: 4 },
 

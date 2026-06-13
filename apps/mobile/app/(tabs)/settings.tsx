@@ -58,7 +58,7 @@ export default function SettingsScreen() {
               <Ionicons name="help-circle-outline" size={22} color="#C9A96E" />
               <Text style={styles.menuText}>วิธีการใช้งาน</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#8A8070" />
+            <Ionicons name="chevron-forward" size={20} color="#C6B79F" />
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.menuItem} onPress={() => router.push('/edit-profile')}>
@@ -66,7 +66,7 @@ export default function SettingsScreen() {
               <Ionicons name="person-circle-outline" size={22} color="#C9A96E" />
               <Text style={styles.menuText}>ตั้งค่าโปรไฟล์</Text>
             </View>
-            <Ionicons name="chevron-forward" size={20} color="#8A8070" />
+            <Ionicons name="chevron-forward" size={20} color="#C6B79F" />
           </TouchableOpacity>
         </View>
 
@@ -97,7 +97,7 @@ function InfoRow({ label, value, icon }: { label: string, value: string, icon: a
   return (
     <View style={styles.infoRow}>
       <View style={styles.infoLeft}>
-        <Ionicons name={icon} size={20} color="#8A8070" />
+        <Ionicons name={icon} size={20} color="#C6B79F" />
         <Text style={styles.infoLabel}>{label}</Text>
       </View>
       <Text style={styles.infoValue}>{value}</Text>
@@ -139,12 +139,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   emailText: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 14,
     marginTop: 4,
   },
   groupTitle: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 12,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   infoLabel: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 14,
   },
   infoValue: {

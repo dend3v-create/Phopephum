@@ -42,7 +42,7 @@ export default function LoginScreen() {
             onChangeText={(text) => setEmail(text)}
             value={email}
             placeholder="name@example.com"
-            placeholderTextColor="#8A8070"
+            placeholderTextColor="#C6B79F"
             autoCapitalize={'none'}
           />
 
@@ -53,7 +53,7 @@ export default function LoginScreen() {
             value={password}
             secureTextEntry={true}
             placeholder="••••••••"
-            placeholderTextColor="#8A8070"
+            placeholderTextColor="#C6B79F"
             autoCapitalize={'none'}
           />
 
@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   label: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 12,
     fontWeight: '600',
     textTransform: 'uppercase',
