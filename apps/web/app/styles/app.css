@@ -383,6 +383,73 @@ body {
 [data-theme="light"] ::-webkit-scrollbar-track { background: var(--bg-base); }
 [data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(61, 83, 97, 0.25); }
 
+/* ── Gold/accent text → darker readable gold in light mode ── */
+/* #C9A96E (75 uses) + #C6A96B (119 uses) → dark warm gold #7A5C2E */
+[data-theme="light"] .text-\[\#C9A96E\]   { color: #7A5C2E !important; }
+[data-theme="light"] .text-\[\#C6A96B\]   { color: #7A5C2E !important; }
+/* #D9BC82 (68 uses) → slightly lighter dark gold */
+[data-theme="light"] .text-\[\#D9BC82\]   { color: #8C6030 !important; }
+/* Very light golds → dark gold */
+[data-theme="light"] .text-\[\#F3D68B\]   { color: #7A5C2E !important; }
+[data-theme="light"] .text-\[\#F2D49B\]   { color: #7A5C2E !important; }
+[data-theme="light"] .text-\[\#E8D4A8\]   { color: #8C6030 !important; }
+[data-theme="light"] .text-\[\#E8C46A\]   { color: #7A5C2E !important; }
+[data-theme="light"] .text-\[\#9AB3D9\]   { color: #3D5361 !important; }
+[data-theme="light"] .text-\[\#5A5148\]   { color: #3D5361 !important; }
+[data-theme="light"] .text-\[\#4A5568\]   { color: #3D5361 !important; }
+
+/* Gold opacity variants */
+[data-theme="light"] .text-\[\#C9A96E\]\/50 { color: rgba(122,92,46,0.60) !important; }
+[data-theme="light"] .text-\[\#C9A96E\]\/70 { color: rgba(122,92,46,0.78) !important; }
+[data-theme="light"] .text-\[\#C6A96B\]\/50 { color: rgba(122,92,46,0.60) !important; }
+[data-theme="light"] .text-\[\#C6A96B\]\/80 { color: rgba(122,92,46,0.85) !important; }
+[data-theme="light"] .text-\[\#D9BC82\]\/30 { color: rgba(140,96,48,0.45) !important; }
+[data-theme="light"] .text-\[\#D9BC82\]\/60 { color: rgba(140,96,48,0.68) !important; }
+
+/* bg-gold → dark gold bg in light mode */
+[data-theme="light"] .bg-\[\#C9A96E\]     { background-color: #7A5C2E !important; }
+[data-theme="light"] .bg-\[\#C6A96B\]     { background-color: #7A5C2E !important; }
+[data-theme="light"] .bg-\[\#D9BC82\]     { background-color: #8C6030 !important; }
+[data-theme="light"] .bg-\[\#E2C98A\]     { background-color: rgba(122,92,46,0.15) !important; }
+
+/* ── Semantic amber/yellow text → dark amber ── */
+[data-theme="light"] .text-amber-300  { color: #92640A !important; }
+[data-theme="light"] .text-amber-400  { color: #7A5200 !important; }
+[data-theme="light"] .text-yellow-100 { color: #7A5200 !important; }
+[data-theme="light"] .text-yellow-400 { color: #7A5200 !important; }
+
+/* ── Semantic rose/pink text → dark rose ── */
+[data-theme="light"] .text-rose-200   { color: #B42A3D !important; }
+[data-theme="light"] .text-rose-300   { color: #B42A3D !important; }
+[data-theme="light"] .text-rose-400   { color: #9B2335 !important; }
+[data-theme="light"] .text-pink-300   { color: #9B2355 !important; }
+
+/* ── Semantic emerald/green text → dark emerald ── */
+[data-theme="light"] .text-emerald-300 { color: #1E7E53 !important; }
+[data-theme="light"] .text-emerald-400 { color: #1A6B45 !important; }
+[data-theme="light"] .text-green-400   { color: #1A6B3D !important; }
+
+/* ── Semantic sky text → dark blue ── */
+[data-theme="light"] .text-sky-300     { color: #2E74B5 !important; }
+[data-theme="light"] .text-sky-400     { color: #2563A8 !important; }
+
+/* ── Dark semantic bg → light tinted surfaces ── */
+[data-theme="light"] .bg-emerald-950    { background-color: rgba(220,240,232,0.90) !important; }
+[data-theme="light"] .bg-emerald-950\/10 { background-color: rgba(220,240,232,0.25) !important; }
+[data-theme="light"] .bg-emerald-950\/20 { background-color: rgba(220,240,232,0.35) !important; }
+[data-theme="light"] .bg-emerald-950\/30 { background-color: rgba(220,240,232,0.50) !important; }
+[data-theme="light"] .bg-emerald-950\/80 { background-color: rgba(220,240,232,0.85) !important; }
+
+[data-theme="light"] .bg-rose-950      { background-color: rgba(255,228,230,0.90) !important; }
+[data-theme="light"] .bg-rose-950\/10  { background-color: rgba(255,228,230,0.25) !important; }
+[data-theme="light"] .bg-rose-950\/20  { background-color: rgba(255,228,230,0.35) !important; }
+[data-theme="light"] .bg-rose-950\/30  { background-color: rgba(255,228,230,0.50) !important; }
+[data-theme="light"] .bg-rose-950\/80  { background-color: rgba(255,228,230,0.85) !important; }
+
+[data-theme="light"] .bg-amber-950     { background-color: rgba(255,235,200,0.90) !important; }
+[data-theme="light"] .bg-amber-950\/20 { background-color: rgba(255,235,200,0.35) !important; }
+[data-theme="light"] .bg-amber-950\/30 { background-color: rgba(255,235,200,0.50) !important; }
+
 /* ── Slate bg overrides (bg-slate-950/40 etc.) — พื้นหลังเข้มที่ยังไม่ override ── */
 [data-theme="light"] .bg-slate-950     { background-color: rgba(255,255,255,0.90) !important; }
 [data-theme="light"] .bg-slate-950\/15 { background-color: rgba(255,255,255,0.40) !important; }
