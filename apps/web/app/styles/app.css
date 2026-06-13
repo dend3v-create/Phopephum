@@ -280,7 +280,10 @@ body {
 [data-theme="light"] .bg-\[\#1E1730\]     { background-color: rgba(198, 169, 107, 0.12) !important; }
 
 /* #0f172a */
-[data-theme="light"] .bg-\[\#0f172a\]     { background-color: rgba(255, 255, 255, 0.72) !important; }
+[data-theme="light"] .bg-\[\#0f172a\]     { background-color: rgba(255, 255, 255, 0.88) !important; }
+[data-theme="light"] .bg-\[\#0f172a\]\/50 { background-color: rgba(255, 255, 255, 0.85) !important; }
+[data-theme="light"] .bg-\[\#0f172a\]\/60 { background-color: rgba(255, 255, 255, 0.88) !important; }
+[data-theme="light"] .bg-\[\#0f172a\]\/80 { background-color: rgba(255, 255, 255, 0.92) !important; }
 
 /* ── White opacity backgrounds → keep as subtle white ── */
 [data-theme="light"] .bg-white\/5         { background-color: rgba(255, 255, 255, 0.50) !important; }
@@ -443,6 +446,18 @@ body {
 [data-theme="light"] .text-emerald-400 { color: #1A6B45 !important; }
 [data-theme="light"] .text-green-400   { color: #1A6B3D !important; }
 
+/* ── Teal text → dark teal ── */
+[data-theme="light"] .text-teal-300    { color: #0F766E !important; }
+[data-theme="light"] .text-teal-400    { color: #0D9488 !important; }
+
+/* ── Red text → dark red ── */
+[data-theme="light"] .text-red-300     { color: #B91C1C !important; }
+[data-theme="light"] .text-red-400     { color: #991B1B !important; }
+
+/* ── Lime text → dark lime/olive ── */
+[data-theme="light"] .text-lime-300    { color: #3F6212 !important; }
+[data-theme="light"] .text-lime-400    { color: #365314 !important; }
+
 /* ── Semantic sky text → dark blue ── */
 [data-theme="light"] .text-sky-300     { color: #2E74B5 !important; }
 [data-theme="light"] .text-sky-400     { color: #2563A8 !important; }
@@ -475,6 +490,20 @@ body {
 [data-theme="light"] .bg-amber-950\/20 { background-color: rgba(255,235,200,0.35) !important; }
 [data-theme="light"] .bg-amber-950\/30 { background-color: rgba(255,235,200,0.50) !important; }
 [data-theme="light"] .bg-amber-950\/80 { background-color: rgba(255,235,200,0.88) !important; }
+
+[data-theme="light"] .bg-teal-950\/80  { background-color: rgba(204,251,241,0.88) !important; }
+[data-theme="light"] .bg-teal-950\/60  { background-color: rgba(204,251,241,0.72) !important; }
+[data-theme="light"] .bg-teal-950\/30  { background-color: rgba(204,251,241,0.50) !important; }
+[data-theme="light"] .bg-yellow-950\/80 { background-color: rgba(254,252,232,0.92) !important; }
+[data-theme="light"] .bg-yellow-950\/60 { background-color: rgba(254,252,232,0.75) !important; }
+[data-theme="light"] .bg-yellow-950\/30 { background-color: rgba(254,252,232,0.50) !important; }
+[data-theme="light"] .bg-lime-950\/80  { background-color: rgba(236,252,203,0.92) !important; }
+[data-theme="light"] .bg-lime-950\/60  { background-color: rgba(236,252,203,0.75) !important; }
+[data-theme="light"] .bg-lime-950\/30  { background-color: rgba(236,252,203,0.50) !important; }
+[data-theme="light"] .bg-red-950\/80   { background-color: rgba(255,228,230,0.88) !important; }
+[data-theme="light"] .bg-red-950\/60   { background-color: rgba(255,228,230,0.72) !important; }
+[data-theme="light"] .bg-red-950\/40   { background-color: rgba(255,228,230,0.55) !important; }
+[data-theme="light"] .bg-red-950\/30   { background-color: rgba(255,228,230,0.45) !important; }
 
 /* ── Low-opacity colored accent bgs (dark-mode glow tints) → light tinted surfaces ── */
 [data-theme="light"] .bg-blue-500\/10   { background-color: rgba(219,234,254,0.55) !important; }
