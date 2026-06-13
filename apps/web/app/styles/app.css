@@ -281,6 +281,26 @@ body {
 [data-theme="light"] .text-\[\#F8F6F1\]   { color: var(--text-body) !important; }
 [data-theme="light"] .text-\[\#F3EFE8\]   { color: var(--text-body) !important; }
 
+/* #F8F6F1 opacity variants — ชื่อภพเรือน, ฐาน labels, hint text */
+[data-theme="light"] .text-\[\#F8F6F1\]\/10 { color: rgba(29, 41, 57, 0.15) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/15 { color: rgba(29, 41, 57, 0.20) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/25 { color: rgba(29, 41, 57, 0.30) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/32 { color: rgba(29, 41, 57, 0.38) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/40 { color: rgba(29, 41, 57, 0.45) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/50 { color: rgba(29, 41, 57, 0.55) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/60 { color: rgba(29, 41, 57, 0.65) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/65 { color: rgba(29, 41, 57, 0.72) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/70 { color: rgba(29, 41, 57, 0.78) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/75 { color: rgba(29, 41, 57, 0.84) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/80 { color: rgba(29, 41, 57, 0.88) !important; }
+[data-theme="light"] .text-\[\#F8F6F1\]\/90 { color: rgba(29, 41, 57, 0.94) !important; }
+
+/* bg/border #F8F6F1 opacity variants */
+[data-theme="light"] .bg-\[\#F8F6F1\]\/25   { background-color: rgba(29, 41, 57, 0.12) !important; }
+[data-theme="light"] .bg-\[\#F8F6F1\]\/40   { background-color: rgba(29, 41, 57, 0.20) !important; }
+[data-theme="light"] .border-\[\#F8F6F1\]\/10 { border-color: rgba(29, 41, 57, 0.10) !important; }
+[data-theme="light"] .border-\[\#F8F6F1\]\/20 { border-color: rgba(29, 41, 57, 0.18) !important; }
+
 /* Warm muted → secondary #475467 */
 [data-theme="light"] .text-\[\#C6B79F\]   { color: #475467 !important; }
 [data-theme="light"] .text-\[\#D9CDB7\]   { color: #475467 !important; }
@@ -288,6 +308,16 @@ body {
 /* Cool muted → muted #98A2B3 */
 [data-theme="light"] .text-\[\#94A3B8\]   { color: #98A2B3 !important; }
 [data-theme="light"] .text-\[\#8A8070\]   { color: #98A2B3 !important; }
+
+/* #C6B79F / #D9CDB7 opacity variants */
+[data-theme="light"] .text-\[\#C6B79F\]\/50 { color: rgba(71, 84, 103, 0.55) !important; }
+[data-theme="light"] .text-\[\#C6B79F\]\/70 { color: rgba(71, 84, 103, 0.75) !important; }
+[data-theme="light"] .text-\[\#D9CDB7\]\/50 { color: rgba(71, 84, 103, 0.55) !important; }
+[data-theme="light"] .text-\[\#D9CDB7\]\/70 { color: rgba(71, 84, 103, 0.75) !important; }
+
+/* #6D8FC7 / #4B6FAE opacity variants → keep mystic blue but slightly darken */
+[data-theme="light"] .text-\[\#6D8FC7\]\/90 { color: rgba(61, 83, 97, 0.92) !important; }
+[data-theme="light"] .text-\[\#4B6FAE\]\/80 { color: rgba(61, 83, 97, 0.85) !important; }
 
 /* Sky blue → mystic */
 [data-theme="light"] .text-\[\#38BDF8\]   { color: var(--accent-blue-hi) !important; }
