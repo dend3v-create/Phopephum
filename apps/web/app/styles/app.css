@@ -447,6 +447,17 @@ body {
 [data-theme="light"] .text-sky-300     { color: #2E74B5 !important; }
 [data-theme="light"] .text-sky-400     { color: #2563A8 !important; }
 
+/* ── Blue / indigo / violet / purple / orange text → readable dark variants ── */
+[data-theme="light"] .text-blue-300    { color: #1D58A6 !important; }
+[data-theme="light"] .text-blue-400    { color: #1A4F9C !important; }
+[data-theme="light"] .text-indigo-300  { color: #3730A3 !important; }
+[data-theme="light"] .text-indigo-400  { color: #312E81 !important; }
+[data-theme="light"] .text-violet-300  { color: #5B21B6 !important; }
+[data-theme="light"] .text-violet-400  { color: #4C1D95 !important; }
+[data-theme="light"] .text-purple-400  { color: #6B21A8 !important; }
+[data-theme="light"] .text-orange-300  { color: #92400E !important; }
+[data-theme="light"] .text-orange-400  { color: #7C2D12 !important; }
+
 /* ── Dark semantic bg → light tinted surfaces ── */
 [data-theme="light"] .bg-emerald-950    { background-color: rgba(220,240,232,0.90) !important; }
 [data-theme="light"] .bg-emerald-950\/10 { background-color: rgba(220,240,232,0.25) !important; }
@@ -463,6 +474,26 @@ body {
 [data-theme="light"] .bg-amber-950     { background-color: rgba(255,235,200,0.90) !important; }
 [data-theme="light"] .bg-amber-950\/20 { background-color: rgba(255,235,200,0.35) !important; }
 [data-theme="light"] .bg-amber-950\/30 { background-color: rgba(255,235,200,0.50) !important; }
+[data-theme="light"] .bg-amber-950\/80 { background-color: rgba(255,235,200,0.88) !important; }
+
+/* ── Low-opacity colored accent bgs (dark-mode glow tints) → light tinted surfaces ── */
+[data-theme="light"] .bg-blue-500\/10   { background-color: rgba(219,234,254,0.55) !important; }
+[data-theme="light"] .bg-blue-500\/20   { background-color: rgba(219,234,254,0.70) !important; }
+[data-theme="light"] .bg-indigo-500\/15 { background-color: rgba(224,231,255,0.60) !important; }
+[data-theme="light"] .bg-indigo-500\/20 { background-color: rgba(224,231,255,0.72) !important; }
+[data-theme="light"] .bg-sky-500\/10    { background-color: rgba(224,242,254,0.55) !important; }
+[data-theme="light"] .bg-sky-500\/15    { background-color: rgba(224,242,254,0.65) !important; }
+[data-theme="light"] .bg-sky-500\/20    { background-color: rgba(224,242,254,0.72) !important; }
+[data-theme="light"] .bg-sky-950\/80    { background-color: rgba(224,242,254,0.88) !important; }
+[data-theme="light"] .bg-violet-500\/15 { background-color: rgba(237,233,254,0.60) !important; }
+[data-theme="light"] .bg-violet-500\/20 { background-color: rgba(237,233,254,0.72) !important; }
+[data-theme="light"] .bg-violet-950\/80 { background-color: rgba(237,233,254,0.88) !important; }
+[data-theme="light"] .bg-orange-500\/10 { background-color: rgba(255,237,213,0.55) !important; }
+[data-theme="light"] .bg-orange-950\/80 { background-color: rgba(255,237,213,0.88) !important; }
+[data-theme="light"] .bg-green-500\/10  { background-color: rgba(220,252,231,0.55) !important; }
+[data-theme="light"] .bg-amber-500\/10  { background-color: rgba(254,243,199,0.55) !important; }
+[data-theme="light"] .bg-amber-500\/15  { background-color: rgba(254,243,199,0.65) !important; }
+[data-theme="light"] .bg-amber-500\/20  { background-color: rgba(254,243,199,0.72) !important; }
 
 /* ── Slate bg overrides (bg-slate-950/40 etc.) — พื้นหลังเข้มที่ยังไม่ override ── */
 [data-theme="light"] .bg-slate-950     { background-color: rgba(255,255,255,0.90) !important; }
@@ -547,14 +578,27 @@ body {
 [data-theme="light"] .bg-\[\#0A1628\]\/85 { background-color: rgba(255,255,255,0.88) !important; }
 [data-theme="light"] .bg-\[\#0A1628\]\/95 { background-color: rgba(255,255,255,0.97) !important; }
 
-/* ── Missing #0a2240 opacity variants ── */
+/* ── Missing #0A2240 uppercase opacity variants (dashboard.horoscope) ── */
+[data-theme="light"] .bg-\[\#0A2240\]\/45 { background-color: rgba(249,247,243,0.55) !important; }
+[data-theme="light"] .bg-\[\#0A2240\]\/60 { background-color: rgba(255,255,255,0.62) !important; }
+
+/* ── Missing #0a2240 lowercase opacity variants ── */
+[data-theme="light"] .bg-\[\#0a2240\]\/45 { background-color: rgba(249,247,243,0.55) !important; }
 [data-theme="light"] .bg-\[\#0a2240\]\/85 { background-color: rgba(249,247,243,0.90) !important; }
+
+/* ── Missing slate-900 opacity variants ── */
+[data-theme="light"] .bg-slate-900\/35 { background-color: rgba(249,247,243,0.58) !important; }
 
 /* ── #020617 opacity variants (bg) ── */
 [data-theme="light"] .bg-\[\#020617\]\/50 { background-color: rgba(249,247,243,0.55) !important; }
 [data-theme="light"] .bg-\[\#020617\]\/60 { background-color: rgba(249,247,243,0.65) !important; }
 [data-theme="light"] .bg-\[\#020617\]\/70 { background-color: rgba(249,247,243,0.75) !important; }
 [data-theme="light"] .bg-\[\#020617\]\/80 { background-color: rgba(249,247,243,0.85) !important; }
+
+/* ── bg-white very-low opacity → subtle ivory on light bg ── */
+[data-theme="light"] .bg-white\/2  { background-color: rgba(255,255,255,0.25) !important; }
+[data-theme="light"] .bg-white\/3  { background-color: rgba(255,255,255,0.30) !important; }
+[data-theme="light"] .bg-white\/6  { background-color: rgba(255,255,255,0.50) !important; }
 
 /* ── Yellow / amber low opacity → readable dark amber ── */
 [data-theme="light"] .text-yellow-100     { color: #7A5200 !important; }
