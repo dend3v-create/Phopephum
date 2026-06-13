@@ -51,11 +51,18 @@
   --border-gold:    rgba(217, 188, 130, 0.18);
   --border-dim:     rgba(75, 111, 174, 0.12);
   --scrollbar-bg:   #020617;
+  /* Layout-specific tokens */
+  --sidebar-bg:     rgba(2, 6, 23, 0.98);
+  --sidebar-border: rgba(217, 188, 130, 0.12);
+  --card-dark-bg:   rgba(10, 34, 64, 0.40);
+  --card-dark-border: rgba(217, 188, 130, 0.15);
+  --overlay-bg:     rgba(7, 20, 39, 0.72);
+  --input-bg:       rgba(2, 6, 23, 0.40);
 }
 
 [data-theme="light"] {
   /* Astral Ivory Flow — Sacred Paper palette */
-  --bg-base:        #F5F0ED;
+  --bg-base:        #F9F7F3;
   --bg-surface:     rgba(255, 255, 255, 0.72);
   --bg-elevated:    rgba(255, 255, 255, 0.95);
   --text-body:      #1D2939;
@@ -69,6 +76,13 @@
   --border-gold:    rgba(198, 169, 107, 0.18);
   --border-dim:     rgba(61, 83, 97, 0.12);
   --scrollbar-bg:   #F5F0ED;
+  /* Layout-specific tokens — light overrides */
+  --sidebar-bg:     rgba(255, 255, 255, 0.97);
+  --sidebar-border: rgba(198, 169, 107, 0.20);
+  --card-dark-bg:   rgba(255, 255, 255, 0.72);
+  --card-dark-border: rgba(198, 169, 107, 0.15);
+  --overlay-bg:     rgba(255, 255, 255, 0.85);
+  --input-bg:       rgba(255, 255, 255, 0.70);
 }
 
 /* ── Base ── */

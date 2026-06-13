@@ -181,9 +181,9 @@ export default function DashboardLayout() {
         }`}
         onClick={() => isMobileMenuOpen && setIsMobileMenuOpen(false)}
         style={{
-          background: "rgba(2,6,23,0.98)",
+          background: "var(--sidebar-bg)",
           backdropFilter: "blur(20px)",
-          borderColor: "rgba(217,188,130,0.12)",
+          borderColor: "var(--sidebar-border)",
         }}
       >
         {/* Logo */}
@@ -325,7 +325,7 @@ export default function DashboardLayout() {
       {/* ── Mobile Top Bar ─────────────────────────────────────────────────── */}
       <div
         className="md:hidden fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-4 h-12 border-b"
-        style={{ background: "rgba(2,6,23,0.98)", backdropFilter: "blur(16px)", borderColor: "rgba(217,188,130,0.12)" }}
+        style={{ background: "var(--sidebar-bg)", backdropFilter: "blur(16px)", borderColor: "var(--sidebar-border)" }}
       >
         <Link to="/dashboard" className="flex items-center gap-2">
           <span className="font-display text-base font-bold text-[#F8F6F1]">PhopePhum</span>
