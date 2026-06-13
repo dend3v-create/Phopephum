@@ -319,9 +319,9 @@ body {
 [data-theme="light"] .text-\[\#C6B79F\]   { color: #475467 !important; }
 [data-theme="light"] .text-\[\#D9CDB7\]   { color: #475467 !important; }
 
-/* Cool muted → muted #98A2B3 */
-[data-theme="light"] .text-\[\#94A3B8\]   { color: #98A2B3 !important; }
-[data-theme="light"] .text-\[\#8A8070\]   { color: #98A2B3 !important; }
+/* Cool muted → darker slate for contrast on white bg */
+[data-theme="light"] .text-\[\#94A3B8\]   { color: #64748B !important; }
+[data-theme="light"] .text-\[\#8A8070\]   { color: #64748B !important; }
 
 /* #C6B79F / #D9CDB7 opacity variants */
 [data-theme="light"] .text-\[\#C6B79F\]\/50 { color: rgba(71, 84, 103, 0.55) !important; }
@@ -339,10 +339,10 @@ body {
 [data-theme="light"] .text-\[\#D9CDB7\]\/70 { color: rgba(71, 84, 103, 0.76) !important; }
 [data-theme="light"] .text-\[\#D9CDB7\]\/80 { color: rgba(71, 84, 103, 0.85) !important; }
 
-/* #94A3B8 opacity variants — muted */
-[data-theme="light"] .text-\[\#94A3B8\]\/40 { color: rgba(152, 162, 179, 0.60) !important; }
-[data-theme="light"] .text-\[\#94A3B8\]\/50 { color: rgba(152, 162, 179, 0.68) !important; }
-[data-theme="light"] .text-\[\#94A3B8\]\/60 { color: rgba(152, 162, 179, 0.75) !important; }
+/* #94A3B8 opacity variants — muted (use darker slate base #64748B) */
+[data-theme="light"] .text-\[\#94A3B8\]\/40 { color: rgba(100, 116, 139, 0.65) !important; }
+[data-theme="light"] .text-\[\#94A3B8\]\/50 { color: rgba(100, 116, 139, 0.75) !important; }
+[data-theme="light"] .text-\[\#94A3B8\]\/60 { color: rgba(100, 116, 139, 0.82) !important; }
 
 /* #C6B79F opacity variants */
 [data-theme="light"] .text-\[\#C6B79F\]\/50 { color: rgba(71, 84, 103, 0.55) !important; }
@@ -508,9 +508,79 @@ body {
 [data-theme="light"] .from-\[\#0A1628\] { --tw-gradient-from: #F5F0ED !important; }
 [data-theme="light"] .from-\[\#071427\] { --tw-gradient-from: #F5F0ED !important; }
 [data-theme="light"] .from-\[\#0A2240\] { --tw-gradient-from: #F5F0ED !important; }
+[data-theme="light"] .from-\[\#0c2240\] { --tw-gradient-from: #F9F7F3 !important; }
+[data-theme="light"] .from-\[\#0C2240\] { --tw-gradient-from: #F9F7F3 !important; }
 [data-theme="light"] .to-\[\#020617\]   { --tw-gradient-to: #ECE5DF !important; }
 [data-theme="light"] .to-\[\#071427\]   { --tw-gradient-to: #F0EBE7 !important; }
 [data-theme="light"] .via-\[\#0A2240\]  { --tw-gradient-via: rgba(245,240,237,0.80) !important; }
+
+/* ══════════════════════════════════════════════════════════════
+   LIGHT MODE — Tailwind @theme token overrides
+   @theme tokens (--color-*) generate CSS custom properties NOT in :root
+   so they do NOT inherit from [data-theme="light"] :root overrides.
+   Must be overridden explicitly here.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── text-text-* semantic tokens (--color-text-*) ── */
+[data-theme="light"] .text-text-primary   { color: var(--text-body) !important; }
+[data-theme="light"] .text-text-secondary { color: var(--text-secondary) !important; }
+[data-theme="light"] .text-text-muted     { color: #64748B !important; }
+
+/* ── text-gold-* (--color-gold-*) → dark warm gold ── */
+[data-theme="light"] .text-gold-300       { color: #7A5C2E !important; }
+[data-theme="light"] .text-gold-400       { color: #8C6030 !important; }
+[data-theme="light"] .text-gold-500       { color: #7A5C2E !important; }
+[data-theme="light"] .text-gold-liquid    { color: #7A5C2E !important; }
+
+/* ── bg-cosmic-* (--color-cosmic-*) → ivory surfaces ── */
+[data-theme="light"] .bg-cosmic-950       { background-color: var(--bg-base) !important; }
+[data-theme="light"] .bg-cosmic-950\/80   { background-color: rgba(249,247,243,0.88) !important; }
+[data-theme="light"] .bg-cosmic-800       { background-color: rgba(245,240,237,0.80) !important; }
+[data-theme="light"] .bg-cosmic-700       { background-color: rgba(241,236,232,0.80) !important; }
+
+/* ── border-border-gold / border-border-dim → light borders ── */
+[data-theme="light"] .border-border-gold  { border-color: rgba(198,169,107,0.22) !important; }
+[data-theme="light"] .border-border-dim   { border-color: rgba(61,83,97,0.12) !important; }
+
+/* ── Missing #0A1628 opacity variants ── */
+[data-theme="light"] .bg-\[\#0A1628\]\/60 { background-color: rgba(255,255,255,0.52) !important; }
+[data-theme="light"] .bg-\[\#0A1628\]\/85 { background-color: rgba(255,255,255,0.88) !important; }
+[data-theme="light"] .bg-\[\#0A1628\]\/95 { background-color: rgba(255,255,255,0.97) !important; }
+
+/* ── Missing #0a2240 opacity variants ── */
+[data-theme="light"] .bg-\[\#0a2240\]\/85 { background-color: rgba(249,247,243,0.90) !important; }
+
+/* ── #020617 opacity variants (bg) ── */
+[data-theme="light"] .bg-\[\#020617\]\/50 { background-color: rgba(249,247,243,0.55) !important; }
+[data-theme="light"] .bg-\[\#020617\]\/60 { background-color: rgba(249,247,243,0.65) !important; }
+[data-theme="light"] .bg-\[\#020617\]\/70 { background-color: rgba(249,247,243,0.75) !important; }
+[data-theme="light"] .bg-\[\#020617\]\/80 { background-color: rgba(249,247,243,0.85) !important; }
+
+/* ── Yellow / amber low opacity → readable dark amber ── */
+[data-theme="light"] .text-yellow-100     { color: #7A5200 !important; }
+[data-theme="light"] .text-yellow-200     { color: #7A5200 !important; }
+[data-theme="light"] .text-yellow-300     { color: #7A5200 !important; }
+
+/* ── Muted text: #94A3B8 → darker slate for WCAG AA on white ── */
+[data-theme="light"] .text-\[\#94A3B8\]   { color: #64748B !important; }
+
+/* ── Remove glow effects in light mode — prevents blurry text ── */
+[data-theme="light"] .glow-gold   { text-shadow: none !important; }
+[data-theme="light"] .glow-mystic { text-shadow: none !important; }
+[data-theme="light"] .text-shadow-gold { text-shadow: none !important; }
+
+/* ── Star field: hide white sparkle dots on ivory background ── */
+[data-theme="light"] .star-field::before,
+[data-theme="light"] .star-field::after { opacity: 0; }
+
+/* ── Font smoothing for crisp text on light background ── */
+[data-theme="light"] body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Horanu loading overlay ── */
+[data-theme="light"] .bg-black\/50 { background-color: rgba(29,41,57,0.45) !important; }
 
 /* ── Liquid Gold Overlay ── */
 .liquid-gold-overlay {
