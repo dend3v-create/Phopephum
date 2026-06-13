@@ -316,8 +316,35 @@ body {
 [data-theme="light"] .text-\[\#D9CDB7\]\/70 { color: rgba(71, 84, 103, 0.75) !important; }
 
 /* #6D8FC7 / #4B6FAE opacity variants → keep mystic blue but slightly darken */
+[data-theme="light"] .text-\[\#6D8FC7\]\/70 { color: rgba(61, 83, 97, 0.76) !important; }
 [data-theme="light"] .text-\[\#6D8FC7\]\/90 { color: rgba(61, 83, 97, 0.92) !important; }
 [data-theme="light"] .text-\[\#4B6FAE\]\/80 { color: rgba(61, 83, 97, 0.85) !important; }
+
+/* #D9CDB7 opacity variants */
+[data-theme="light"] .text-\[\#D9CDB7\]\/40 { color: rgba(71, 84, 103, 0.45) !important; }
+[data-theme="light"] .text-\[\#D9CDB7\]\/70 { color: rgba(71, 84, 103, 0.76) !important; }
+[data-theme="light"] .text-\[\#D9CDB7\]\/80 { color: rgba(71, 84, 103, 0.85) !important; }
+
+/* #94A3B8 opacity variants — muted */
+[data-theme="light"] .text-\[\#94A3B8\]\/40 { color: rgba(152, 162, 179, 0.60) !important; }
+[data-theme="light"] .text-\[\#94A3B8\]\/50 { color: rgba(152, 162, 179, 0.68) !important; }
+[data-theme="light"] .text-\[\#94A3B8\]\/60 { color: rgba(152, 162, 179, 0.75) !important; }
+
+/* #C6B79F opacity variants */
+[data-theme="light"] .text-\[\#C6B79F\]\/50 { color: rgba(71, 84, 103, 0.55) !important; }
+
+/* text-white opacity variants */
+[data-theme="light"] .text-white\/10 { color: rgba(29, 41, 57, 0.15) !important; }
+[data-theme="light"] .text-white\/20 { color: rgba(29, 41, 57, 0.22) !important; }
+[data-theme="light"] .text-white\/50 { color: rgba(29, 41, 57, 0.55) !important; }
+
+/* #020617 opacity variants (ตัวเลขเข้มบน bg ปกติ) */
+[data-theme="light"] .text-\[\#020617\]\/70 { color: rgba(29, 41, 57, 0.78) !important; }
+
+/* Rose/amber/sky semantic — ให้อ่านได้ชัดบน bg ขาว */
+[data-theme="light"] .text-rose-300\/80   { color: rgba(190, 60, 60, 0.85) !important; }
+[data-theme="light"] .text-rose-400\/80   { color: rgba(190, 60, 60, 0.85) !important; }
+[data-theme="light"] .text-amber-400\/80  { color: rgba(160, 100, 0, 0.88) !important; }
 
 /* Sky blue → mystic */
 [data-theme="light"] .text-\[\#38BDF8\]   { color: var(--accent-blue-hi) !important; }
