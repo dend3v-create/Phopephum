@@ -110,13 +110,76 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  await requireAuth(request, env);
+  const user = await requireAuth(request, env);
+  const { supabase } = createSupabaseClient(request, env);
+
+  const formData = await request.formData();
+  const actionType = formData.get("actionType") as string;
+
+  if (actionType === "redeem_sands") {
+    const amountStr = formData.get("amount") as string;
+    const amount = Number(amountStr);
+
+    if (isNaN(amount) || amount <= 0) {
+      return json({ error: "กรุณาระบุจำนวนเงินที่ถูกต้อง" }, { status: 400 });
+    }
+
+    // ดึงโปรไฟล์มาตรวจสอบยอดเงินคงเหลือปัจจุบัน
+    const { data: profile, error: profileError } = await supabase
+      .from("profiles")
+      .select("wallet_balance, time_sands")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile) {
+      return json({ error: "ไม่พบข้อมูลโปรไฟล์ผู้ใช้" }, { status: 404 });
+    }
+
+    const currentBalance = Number(profile.wallet_balance || 0);
+    if (amount > currentBalance) {
+      return json({ error: "ยอดเงินสะสมของคุณไม่เพียงพอสำหรับการแลกเปลี่ยน" }, { status: 400 });
+    }
+
+    // ดำเนินการหักเงินสะสมและเพิ่มทรายกาลเวลา
+    // 1. หักยอดเงิน และเพิ่มทรายกาลเวลาใน profiles
+    const newWalletBalance = currentBalance - amount;
+    const newTimeSands = Number(profile.time_sands || 0) + amount; // 1 บาท = 1 ทรายกาลเวลา
+
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        wallet_balance: newWalletBalance,
+        time_sands: newTimeSands
+      })
+      .eq("id", user.id);
+
+    if (updateError) {
+      return json({ error: "เกิดข้อผิดพลาดในการอัปเดตระบบฐานข้อมูล: " + updateError.message }, { status: 500 });
+    }
+
+    // 2. บันทึกประวัติลงใน wallet_transactions (amount เป็นลบเพื่อระบุการแลก/เบิกออก)
+    const { error: txError } = await supabase
+      .from("wallet_transactions")
+      .insert({
+        user_id: user.id,
+        amount: -amount,
+        type: "withdrawal",
+        description: `แลกรับทรายกาลเวลา +${amount} เม็ดทราย ⏳`
+      });
+
+    if (txError) {
+      console.error("[Redeem Sands] Error creating wallet transaction:", txError.message);
+    }
+
+    return json({ success: true, message: `แลกเปลี่ยนสำเร็จ! ได้รับทรายกาลเวลา +${amount} เม็ดทรายเรียบร้อยแล้ว` });
+  }
+
   return json({ error: "การกระทำที่ไม่สนับสนุน" }, { status: 400 });
 }
 
 export default function CommunityPage() {
   const { profile, referralsCount, referralsList, walletHistory } = useLoaderData<typeof loader>();
-  const actionData = useActionData<typeof action>();
+  const actionData = useActionData<typeof action>() as { success?: boolean; message?: string; error?: string } | undefined;
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
 
@@ -340,9 +403,50 @@ export default function CommunityPage() {
                   <span><strong>ไม่มีขั้นต่ำในการแลกรับ</strong>: สามารถเลือกใช้มูลค่าเพื่อรับพลังพลังงานทรายได้ตามความเหมาะสมของสัจจะบารมีของท่าน</span>
                 </li>
               </ul>
-              <div className="p-3 bg-[#C6A96B]/5 border border-[#C6A96B]/10 rounded-xl text-center font-bold text-[#C6A96B] text-[11px]">
-                ⚙️ ระบบแลกทรายกาลเวลาและบริการจะเปิดใช้งานเร็วๆ นี้
-              </div>
+              <Form method="post" className="space-y-4 pt-3 border-t border-[#C6A96B]/10">
+                <input type="hidden" name="actionType" value="redeem_sands" />
+                
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider block">
+                    ระบุยอดเงินที่ต้องการแลกเปลี่ยน (บาท)
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="number"
+                      name="amount"
+                      min={1}
+                      max={walletBalance}
+                      required
+                      placeholder="ระบุจำนวนเงิน..."
+                      className="flex-1 bg-[#1E293B]/50 border border-[#D9BC82]/10 rounded-xl px-4 py-2 text-xs text-[#F8F6F1] outline-none focus:border-[#C6A96B]/50"
+                    />
+                    <Button 
+                      type="submit"
+                      disabled={isSubmitting || walletBalance <= 0}
+                      className="bg-[#C6A96B] text-slate-950 hover:bg-[#E2C98A] px-5 font-bold text-xs rounded-xl shrink-0 transition-all"
+                    >
+                      {isSubmitting ? "กำลังทำรายการ..." : "แลกรับทราย ⏳"}
+                    </Button>
+                  </div>
+                </div>
+
+                {actionData?.success && actionData?.message && (
+                  <p className="text-xs text-green-400 bg-green-400/10 border border-green-500/20 rounded-lg px-3 py-2 text-left">
+                    ✦ {actionData.message}
+                  </p>
+                )}
+
+                {actionData?.error && (
+                  <p className="text-xs text-red-400 bg-red-400/10 border border-red-500/20 rounded-lg px-3 py-2 text-left">
+                    ✕ {actionData.error}
+                  </p>
+                )}
+                
+                <div className="text-[10px] text-[#94A3B8] text-center leading-relaxed">
+                  * แลกเปลี่ยนทันทีแบบ Real-time: <strong>1 บาท = 1 ทรายกาลเวลา ⏳</strong><br />
+                  ทรายที่ได้สามารถใช้เป็นโควตาในการทำนายและรับบริการวิเคราะห์ชะตาชีวิตได้
+                </div>
+              </Form>
             </div>
           </Card>
         </div>
