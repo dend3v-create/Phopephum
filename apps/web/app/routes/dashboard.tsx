@@ -5,6 +5,8 @@ import { requireAuth, getProfile } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import { NavLink } from "~/components/ui/NavLink";
 import { ProtectedContent } from "~/components/ui/ProtectedContent";
+import { ThemeToggle } from "~/components/ThemeToggle";
+import { LanguageSwitcher } from "~/components/LanguageSwitcher";
 import type { Env } from "~/env.server";
 import { useState } from "react";
 
@@ -294,8 +296,13 @@ export default function DashboardLayout() {
       >
         <Link to="/dashboard" className="flex items-center gap-2">
           <span className="font-display text-base font-bold text-[#F8F6F1]">PhopePhum</span>
-          <span className="text-[9px] text-[#C6A96B]/50 font-medium tracking-widest uppercase">Wisdom OS</span>
+          <span className="text-[9px] text-[#C6A96B]/50 font-medium tracking-widest uppercase hidden xs:inline">Wisdom OS</span>
         </Link>
+
+        {/* Controls: Language + Theme + Menu */}
+        <div className="flex items-center gap-1">
+          <LanguageSwitcher />
+          <ThemeToggle />
 
         {isPro ? (
           /* Pro: hamburger opens sidebar for Pro tools */
@@ -317,6 +324,7 @@ export default function DashboardLayout() {
             ✦ Upgrade
           </Link>
         )}
+        </div>
       </div>
 
       {/* ── Mobile Bottom Tab Bar (5 tabs — matches sidebar) ─────────────────── */}

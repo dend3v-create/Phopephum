@@ -35,6 +35,41 @@
   --font-family-sarabun:   "IBM Plex Sans Thai", "Sarabun", sans-serif;
 }
 
+/* ── Semantic Theme Tokens (Dark = default, Light = override) ── */
+:root {
+  --bg-base:        #020617;
+  --bg-surface:     rgba(10, 34, 64, 0.58);
+  --bg-elevated:    rgba(7, 20, 39, 0.72);
+  --text-body:      #F8F6F1;
+  --text-secondary: #D9CDB7;
+  --text-muted:     #94A3B8;
+  --text-faint:     rgba(248, 246, 241, 0.30);
+  --accent-gold:    #C6A96B;
+  --accent-gold-hi: #D9BC82;
+  --accent-blue:    #4B6FAE;
+  --accent-blue-hi: #6D8FC7;
+  --border-gold:    rgba(217, 188, 130, 0.18);
+  --border-dim:     rgba(75, 111, 174, 0.12);
+  --scrollbar-bg:   #020617;
+}
+
+[data-theme="light"] {
+  --bg-base:        #F5F0E8;
+  --bg-surface:     rgba(253, 251, 247, 0.90);
+  --bg-elevated:    rgba(255, 253, 250, 0.96);
+  --text-body:      #1C1710;
+  --text-secondary: #3D3020;
+  --text-muted:     #6B5E4A;
+  --text-faint:     rgba(28, 23, 16, 0.30);
+  --accent-gold:    #9A6F2A;
+  --accent-gold-hi: #7A5518;
+  --accent-blue:    #2B4A8A;
+  --accent-blue-hi: #3D62A8;
+  --border-gold:    rgba(154, 111, 42, 0.22);
+  --border-dim:     rgba(43, 74, 138, 0.12);
+  --scrollbar-bg:   #F5F0E8;
+}
+
 /* ── Base ── */
 html {
   scroll-behavior: smooth;
@@ -43,10 +78,10 @@ html {
 
 body {
   font-family: var(--font-family-sarabun);
-  color: var(--color-text-primary);
-  background:
-    linear-gradient(180deg, #020617 0%, #071427 45%, #0A2240 100%);
+  color: var(--text-body);
+  background: var(--bg-base);
   min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 .font-display   { font-family: var(--font-family-display); }
@@ -54,7 +89,7 @@ body {
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar       { width: 4px; }
-::-webkit-scrollbar-track { background: #020617; }
+::-webkit-scrollbar-track { background: var(--scrollbar-bg); }
 ::-webkit-scrollbar-thumb { background: rgba(198,169,107,0.3); border-radius: 2px; }
 
 /* ── Glow utilities ── */
@@ -119,6 +154,43 @@ body {
     0 0   50px rgba(232, 196, 106, 0.10),
     inset 0 1px 0 rgba(232, 196, 106, 0.15),
     inset 0 -1px 0 rgba(232, 196, 106, 0.05);
+}
+
+/* ── Light mode glass cards ── */
+[data-theme="light"] .card-glass {
+  background: var(--bg-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-color: var(--border-gold);
+  box-shadow: 0 8px 40px rgba(28,23,16,0.10), 0 0 20px rgba(154,111,42,0.05);
+}
+
+[data-theme="light"] .card-glass-premium,
+[data-theme="light"] .card-glass-gold {
+  background: var(--bg-elevated);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-color: var(--border-gold);
+  box-shadow: 0 12px 60px rgba(28,23,16,0.12), 0 0 30px rgba(154,111,42,0.06);
+}
+
+[data-theme="light"] .cosmic-ocean-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(154,111,42,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(43,74,138,0.05) 0%, transparent 60%),
+    linear-gradient(180deg, #F5F0E8 0%, #EDE6D8 50%, #E8DFC8 100%);
+}
+
+[data-theme="light"] .glow-gold {
+  text-shadow:
+    0 0 20px rgba(154,111,42,0.40),
+    0 0 50px rgba(154,111,42,0.15);
+}
+
+[data-theme="light"] .glow-mystic {
+  text-shadow:
+    0 0 20px rgba(43,74,138,0.35),
+    0 0 40px rgba(43,74,138,0.12);
 }
 
 /* ── Liquid Gold Overlay ── */
@@ -378,4 +450,19 @@ body {
     radial-gradient(1.5px 1.5px at 50% 80%, rgba(198,169,107,0.25) 0%, transparent 100%),
     radial-gradient(1px 1px at 80% 70%, rgba(248,246,241,0.15) 0%, transparent 100%),
     radial-gradient(1px 1px at 20% 90%, rgba(109,143,199,0.2) 0%, transparent 100%);
+}
+
+/* ── Theme-aware text utilities ── */
+.text-theme-body    { color: var(--text-body); }
+.text-theme-muted   { color: var(--text-muted); }
+.text-theme-faint   { color: var(--text-faint); }
+.text-theme-gold    { color: var(--accent-gold); }
+.text-theme-blue    { color: var(--accent-blue); }
+.bg-theme-base      { background-color: var(--bg-base); }
+.bg-theme-surface   { background: var(--bg-surface); }
+.border-theme-gold  { border-color: var(--border-gold); }
+
+/* ── Theme toggle transition (prevent flash) ── */
+html {
+  color-scheme: dark light;
 }
