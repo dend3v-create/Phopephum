@@ -4,7 +4,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useLoaderData,
+  useRouteLoaderData,
 } from "@remix-run/react";
 import { json } from "@remix-run/cloudflare";
 import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
@@ -14,6 +14,7 @@ import { getThemeFromRequest } from "~/i18n/locale.server";
 import i18next from "~/lib/i18n/i18n.server";
 import { LocaleProvider } from "~/i18n/context";
 import { LOCALE_LANG } from "~/i18n/translations";
+import type { Locale } from "~/i18n/translations";
 import i18nInstance from "~/lib/i18n/i18n.client";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -39,9 +40,12 @@ export const links: LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const data = useLoaderData<typeof loader>();
+  // useRouteLoaderData returns undefined (instead of throwing) when called in
+  // error boundary context — safe to use in the Layout export which wraps
+  // both normal renders AND ErrorBoundary renders.
+  const data = useRouteLoaderData<typeof loader>("root");
   const theme = data?.theme ?? "dark";
-  const locale = data?.locale ?? "th";
+  const locale = (data?.locale ?? "th") as Locale;
 
   // CRITICAL: Synchronously sync i18n instance with loader locale before render
   // This prevents hydration mismatch #418/#423
