@@ -3,7 +3,6 @@ export {
   calculateHoraTaynoo,
   generateHoraTaynooSVG,
   calculateNow as calculateHoraTaynooNow,
-  calculateAt as calculateHoraTaynooAt,
   getPlanetSteps,
   getPlanetStatus,
   calculatePositions,
@@ -22,12 +21,13 @@ export {
   YAM_START,
   DAY_PLANET,
 } from './hora-taynoo-engine.js';
-export type { SuccessYamMeta, ChartConfig } from './hora-taynoo-engine.js';
+export type { ChartConfig } from './hora-taynoo-engine.js';
+export type { SuccessYamMeta } from './types/horaNu.types.js';
 export {
   getSuccessYamDatabase,
   findSuccessYam,
 } from './charts/success-yam-database.js';
-export type { SuccessYamChart } from './hora-taynoo-engine.js';
+export type { SuccessYamChart } from './types/horaNu.types.js';
 export type {
   HoraTaynooInput,
   HoraTaynooResult,
@@ -54,6 +54,37 @@ export {
   PLANET_STATUS_LABEL,
   PLANET_STATUS_COLOR,
 } from './types/horaNu.types.js';
+// PhraKrasib Engine — 6-step clean implementation
+export {
+  calculatePhraKrasib,
+  buildBouncePath,
+  buildThreeAxisTable,
+  buildFloatingStarMap,
+  placeStarsInZodiac,
+  assignHouses,
+  assignTimes,
+  getYam,
+  chartToText,
+  RASI_NAMES,
+  RASI_CCW_FROM_TAURUS,
+  HOUSE_NAMES,
+  KASETCH_FIXED_BY_RASI,
+  ATTHAKARN_DAY,
+  ATTHAKARN_NIGHT,
+  FLOATING_STARS,
+} from './phrai-krasib-engine.js';
+export type {
+  PhraKrasibChart,
+  ZodiacCell,
+  ThreeAxisRow,
+  YamResult as PhraiKrasibYamResult,
+  FloatingStar,
+  RasiIndex,
+  DayOfWeek,
+  YamNumber,
+  DayPeriod,
+} from './phrai-krasib-engine.js';
+
 export {
   HORA_NU_SIGNS,
   HORA_NU_HOUSES,

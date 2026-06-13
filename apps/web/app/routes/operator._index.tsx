@@ -111,11 +111,11 @@ export default function OperatorDashboard() {
         <table className="w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-slate-700/50">
-              <th className="py-3 px-4 font-semibold text-[#8A8070] text-sm uppercase">User</th>
-              <th className="py-3 px-4 font-semibold text-[#8A8070] text-sm uppercase">Role</th>
-              <th className="py-3 px-4 font-semibold text-[#8A8070] text-sm uppercase">Level</th>
-              <th className="py-3 px-4 font-semibold text-[#8A8070] text-sm uppercase">Status</th>
-              <th className="py-3 px-4 font-semibold text-[#8A8070] text-sm uppercase">Actions</th>
+              <th className="py-3 px-4 font-semibold text-[#C6B79F] text-sm uppercase">User</th>
+              <th className="py-3 px-4 font-semibold text-[#C6B79F] text-sm uppercase">Role</th>
+              <th className="py-3 px-4 font-semibold text-[#C6B79F] text-sm uppercase">Level</th>
+              <th className="py-3 px-4 font-semibold text-[#C6B79F] text-sm uppercase">Status</th>
+              <th className="py-3 px-4 font-semibold text-[#C6B79F] text-sm uppercase">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-700/30">

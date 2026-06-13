@@ -1,0 +1,4 @@
+  File "<stdin>", line 75
+    cat result.txt
+        ^^^^^^
+SyntaxError: invalid syntax

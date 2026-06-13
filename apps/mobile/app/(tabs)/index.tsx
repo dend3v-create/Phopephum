@@ -72,6 +72,20 @@ export default function HomeScreen() {
             </View>
           </View>
           <Text style={styles.planTitle}>{isPro ? 'สมาชิกพรีเมียม' : 'สมาชิกทั่วไป'}</Text>
+          
+          {/* Sands of Time Token Display */}
+          <View style={styles.inkContainer}>
+            <View style={styles.inkHeader}>
+              <Text style={styles.inkText}>⏳ ทรายกาลเวลา (Sands of Time)</Text>
+              <Text style={styles.inkValue}>{isPro ? '♾️ ไม่จำกัด' : `${profile?.time_sands ?? 0} / 15`}</Text>
+            </View>
+            {!isPro && (
+              <View style={styles.progressBarBg}>
+                <View style={[styles.progressBarFill, { width: `${Math.min(100, (((profile?.time_sands ?? 0) / 15) * 100))}%` }]} />
+              </View>
+            )}
+          </View>
+
           {!isPro && (
             <Text style={styles.upgradeText}>ปลดล็อกเครื่องมือพยากรณ์ขั้นสูง →</Text>
           )}
@@ -213,7 +227,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   planLabel: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 11,
     textTransform: 'uppercase',
     letterSpacing: 1,
@@ -235,8 +249,42 @@ const styles = StyleSheet.create({
   upgradeText: {
     color: '#C6A96B',
     fontSize: 12,
-    marginTop: 12,
+    marginTop: 16,
     fontWeight: '600',
+  },
+  inkContainer: {
+    marginTop: 16,
+    paddingTop: 14,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  inkHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  inkText: {
+    color: '#C6B79F',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  inkValue: {
+    color: '#C6A96B',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
+  progressBarBg: {
+    width: '100%',
+    height: 4,
+    backgroundColor: '#020617',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    backgroundColor: '#C6A96B',
+    borderRadius: 2,
   },
   sectionTitle: {
     color: '#C6A96B',
@@ -273,7 +321,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   cardDesc: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 11,
     marginTop: 4,
   },

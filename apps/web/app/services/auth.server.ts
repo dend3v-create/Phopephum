@@ -3,6 +3,7 @@ import { createSupabaseClient } from "./supabase.server";
 import { createClient } from "@supabase/supabase-js"; // เพิ่มการ import client ปกติ
 import type { Env } from "~/env.server";
 import { getUserPlan, canAccess, type Plan } from "./permissions.server";
+import { awardReferralSignupReward } from "./rewards.server";
 
 export { canAccess, type Plan };
 
@@ -137,6 +138,10 @@ export async function signUp(
 
   if (profileError) {
     console.error("Profile creation error:", profileError);
+  } else if (metadata?.referred_by) {
+    await awardReferralSignupReward(metadata.referred_by, data.user.id, env).catch(err =>
+      console.error("[signUp] awardReferralSignupReward failed:", err)
+    );
   }
   
   return { user: data.user, session: data.session, error: null, headers };

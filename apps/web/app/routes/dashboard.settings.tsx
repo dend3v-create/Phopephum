@@ -43,12 +43,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  // 2. ดึงข้อมูลคำขอถอนเงิน (Withdrawal Requests)
-  const { data: withdrawals } = await supabase
-    .from("withdrawal_requests")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
+  // 2. ดึงข้อมูลคำขอถอนเงิน (ถอนเงินสดปิดใช้งานแล้ว)
+  const withdrawals: any[] = [];
 
   // 3. นับจำนวนคนที่แนะนำมา
   const { count: referralsCount } = await supabase
@@ -128,73 +124,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return redirect("/dashboard/settings?saved=personal");
   }
 
-  if (formType === "withdrawal_request") {
-    const amount = Number(formData.get("amount") ?? 0);
-    const bankName = String(formData.get("bankName") ?? "");
-    const accountName = String(formData.get("accountName") ?? "");
-    const accountNumber = String(formData.get("accountNumber") ?? "");
-
-    if (amount < 100) {
-      return json({ error: "ยอดถอนขั้นต่ำคือ 100 บาท" }, { status: 400 });
-    }
-
-    if (!bankName || !accountName || !accountNumber) {
-      return json({ error: "กรุณากรอกข้อมูลธนาคารให้ครบถ้วน" }, { status: 400 });
-    }
-
-    // ตรวจสอบยอดเงินคงเหลือ
-    const profile = await getProfile(user.id, request, env);
-    const currentBalance = Number(profile?.wallet_balance || 0);
-
-    if (currentBalance < amount) {
-      return json({ error: "ยอดเงินในกระเป๋าไม่เพียงพอ" }, { status: 400 });
-    }
-
-    // 1. สร้างคำขอถอนเงิน
-    const { error: withdrawError } = await supabase
-      .from("withdrawal_requests")
-      .insert({
-        user_id: user.id,
-        amount,
-        bank_name: bankName,
-        account_name: accountName,
-        account_number: accountNumber,
-        status: "pending",
-      });
-
-    if (withdrawError) {
-      return json({ error: `ไม่สามารถส่งคำขอถอนเงินได้: ${withdrawError.message}` }, { status: 500 });
-    }
-
-    // 1.1 ส่ง LINE แจ้งเตือนแอดมิน
-    await notifyWithdrawalRequest(env, {
-      userId: user.id,
-      displayName: profile?.display_name || user.email,
-      amount,
-      bankName,
-      accountName,
-      accountNumber,
-    }).catch(err => console.error("[Settings] LINE notify failed:", err));
-
-    // 2. หักเงินจากกระเป๋า
-    await supabase
-      .from("profiles")
-      .update({ wallet_balance: currentBalance - amount })
-      .eq("id", user.id);
-
-    // 3. บันทึก Transaction
-    await supabase
-      .from("wallet_transactions")
-      .insert({
-        user_id: user.id,
-        amount: -amount,
-        type: "withdrawal",
-        description: `ถอนเงินเข้าบัญชี ${bankName} (${accountNumber})`,
-      });
-
-    return redirect("/dashboard/settings?saved=withdraw&tab=affiliate");
-  }
-
   return json({ error: "รูปแบบการทำงานไม่ถูกต้อง" }, { status: 400 });
 }
 
@@ -206,7 +135,6 @@ export default function SettingsPage() {
 
   // จัดการแท็บ
   const [activeTab, setActiveTab] = useState("personal");
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
 
   // แปลงวันเกิดจากฐานข้อมูล (ค.ศ.) → พ.ศ. สำหรับแสดงในฟอร์ม
   const birthDateBE = (() => {
@@ -259,7 +187,7 @@ export default function SettingsPage() {
           className={`py-2.5 px-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
             activeTab === "personal"
               ? "border-[#C6A96B] text-[#C6A96B] bg-white/5"
-              : "border-transparent text-[#8A8070] hover:text-[#F8F6F1]"
+              : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
           }`}
         >
           ข้อมูลโปรไฟล์
@@ -269,7 +197,7 @@ export default function SettingsPage() {
           className={`py-2.5 px-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
             activeTab === "affiliate"
               ? "border-[#C6A96B] text-[#C6A96B] bg-white/5"
-              : "border-transparent text-[#8A8070] hover:text-[#F8F6F1]"
+              : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
           }`}
         >
           พันธมิตร & รายได้
@@ -298,7 +226,7 @@ export default function SettingsPage() {
                   />
 
                   <div className="flex flex-col">
-                    <label className="text-[#8A8070] text-[14px] uppercase tracking-widest block mb-2 font-bold">เพศกำเนิด (สำหรับโหราจร)</label>
+                    <label className="text-[#C6B79F] text-[14px] uppercase tracking-widest block mb-2 font-bold">เพศกำเนิด (สำหรับโหราจร)</label>
                     <select
                       name="gender"
                       defaultValue={profile?.gender ?? ""}
@@ -315,7 +243,7 @@ export default function SettingsPage() {
                 {/* วัน / เดือน / ปี พ.ศ. */}
                 <div className="grid grid-cols-3 gap-3">
                   <div className="flex flex-col">
-                    <label className="text-[#8A8070] text-[14px] uppercase tracking-widest block mb-2 font-bold">
+                    <label className="text-[#C6B79F] text-[14px] uppercase tracking-widest block mb-2 font-bold">
                       วันเกิด
                     </label>
                     <input
@@ -330,7 +258,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="flex flex-col">
-                    <label className="text-[#8A8070] text-[14px] uppercase tracking-widest block mb-2 font-bold">
+                    <label className="text-[#C6B79F] text-[14px] uppercase tracking-widest block mb-2 font-bold">
                       เดือนเกิด
                     </label>
                     <select
@@ -355,7 +283,7 @@ export default function SettingsPage() {
                   </div>
 
                   <div className="flex flex-col">
-                    <label className="text-[#8A8070] text-[14px] uppercase tracking-widest block mb-2 font-bold">
+                    <label className="text-[#C6B79F] text-[14px] uppercase tracking-widest block mb-2 font-bold">
                       ปีเกิด (พ.ศ.)
                     </label>
                     <input
@@ -427,7 +355,7 @@ export default function SettingsPage() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
                   <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
-                    <p className="text-[13px] text-[#8A8070] uppercase font-bold mb-1">สมาชิกทั่วไป/Basic</p>
+                    <p className="text-[13px] text-[#C6B79F] uppercase font-bold mb-1">สมาชิกทั่วไป/Basic</p>
                     <p className="text-xl font-black text-[#F8F6F1]">3%</p>
                   </div>
                   <div className="bg-[#C6A96B]/10 border border-[#C6A96B]/30 rounded-2xl p-3 text-center relative overflow-hidden">
@@ -487,21 +415,16 @@ export default function SettingsPage() {
           <div className="grid grid-cols-1 gap-4">
             <Card className="relative overflow-hidden border-[#C6A96B]/30 p-6 bg-gradient-to-br from-[#0B1528] to-[#020617] shadow-xl">
               <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">💰</div>
-              <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-1">ยอดเงินคงเหลือในกระเป๋า</p>
+              <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">ยอดเงินสะสมในกระเป๋าพันธมิตร</p>
               <h3 className="text-3xl font-black font-display text-[#F8F6F1]">฿{wallet.balance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</h3>
-              <button
-                onClick={() => setShowWithdrawModal(true)}
-                disabled={wallet.balance < 100}
-                className="mt-4 w-full py-2 rounded-xl text-xs font-bold bg-[#C6A96B] text-[#020617] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
-                title={wallet.balance < 100 ? "ต้องมียอดอย่างน้อย 100฿ จึงจะถอนได้" : undefined}
-              >
-                ถอนเงินเข้าบัญชี {wallet.balance < 100 ? `(ขาดอีก ฿${(100 - wallet.balance).toFixed(0)})` : "(ขั้นต่ำ 100฿)"}
-              </button>
+              <div className="mt-4 w-full py-2 bg-[#C6A96B]/5 text-[#C6A96B] border border-[#C6A96B]/20 rounded-xl text-center text-xs font-bold flex items-center justify-center gap-1.5 uppercase tracking-wider">
+                ⏳ แลกรับบริการภายในแอป
+              </div>
             </Card>
 
             <Card className="border-white/5 p-6 bg-slate-900/40">
-              <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-1">แนะนำเพื่อนสำเร็จ</p>
-              <h3 className="text-3xl font-black font-display text-[#F8F6F1]">{wallet.referralsCount} <span className="text-sm font-normal text-[#8A8070]">ท่าน</span></h3>
+              <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">แนะนำเพื่อนสำเร็จ</p>
+              <h3 className="text-3xl font-black font-display text-[#F8F6F1]">{wallet.referralsCount} <span className="text-sm font-normal text-[#C6B79F]">ท่าน</span></h3>
               <p className="text-[13px] text-[#C6A96B] mt-2 font-bold uppercase tracking-tighter">
                 คอมมิชชั่นปัจจุบัน {wallet.commissionRate}%
                 {isFreetier && <span className="text-[#4A5568] ml-1">(อัปเกรดเพื่อเพิ่ม)</span>}
@@ -509,7 +432,7 @@ export default function SettingsPage() {
             </Card>
 
             <Card className="border-white/5 p-6 bg-slate-900/40">
-              <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-1">รหัสแนะนำของคุณ</p>
+              <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">รหัสแนะนำของคุณ</p>
               {affiliateCode ? (
                 <>
                   <h3 className="text-3xl font-black font-display text-[#C6A96B] tracking-widest">{affiliateCode}</h3>
@@ -536,7 +459,7 @@ export default function SettingsPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs border-collapse">
                     <thead>
-                      <tr className="bg-slate-950/60 text-[#8A8070] uppercase font-bold tracking-widest text-[12px]">
+                      <tr className="bg-slate-950/60 text-[#C6B79F] uppercase font-bold tracking-widest text-[12px]">
                         <th className="px-6 py-3">วัน/เวลา</th>
                         <th className="px-6 py-3">รายการ</th>
                         <th className="px-6 py-3 text-right">จำนวนเงิน</th>
@@ -556,7 +479,7 @@ export default function SettingsPage() {
                           </tr>
                         ))
                       ) : (
-                        <tr><td colSpan={3} className="px-6 py-10 text-center text-[#8A8070] italic">ยังไม่มีรายการในขณะนี้</td></tr>
+                        <tr><td colSpan={3} className="px-6 py-10 text-center text-[#C6B79F] italic">ยังไม่มีรายการในขณะนี้</td></tr>
                       )}
                     </tbody>
                   </table>
@@ -564,82 +487,6 @@ export default function SettingsPage() {
               </Card>
             </div>
 
-            {/* Withdrawal Status */}
-            <Card className="border-white/5 p-0 overflow-hidden bg-slate-900/40">
-              <div className="px-5 py-4 border-b border-white/5 bg-white/5">
-                <h3 className="text-[#F8F6F1] font-display text-sm font-bold">สถานะการถอนเงิน</h3>
-              </div>
-              <div className="p-4 space-y-3">
-                {wallet.withdrawals.length > 0 ? (
-                  wallet.withdrawals.map((w: any) => (
-                    <div key={w.id} className="p-3 rounded-xl bg-black/20 border border-white/5 text-xs flex justify-between items-center">
-                      <div className="space-y-1">
-                        <p className="text-[#F8F6F1] font-bold">ถอน ฿{w.amount.toLocaleString()}</p>
-                        <p className="text-[12px] text-[#8A8070]">{new Date(w.created_at).toLocaleDateString("th-TH")}</p>
-                      </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold uppercase ${
-                        w.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                        w.status === 'rejected' ? 'bg-red-500/20 text-red-400' :
-                        'bg-yellow-500/20 text-yellow-400'
-                      }`}>
-                        {w.status === 'completed' ? 'สำเร็จ' : w.status === 'rejected' ? 'ปฏิเสธ' : 'รอดำเนินการ'}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center py-6 text-[#8A8070] italic">ไม่มีคำขอถอนเงิน</p>
-                )}
-              </div>
-            </Card>
-          </div>
-        </div>
-      )}
-
-      {/* Withdrawal Modal */}
-      {showWithdrawModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#020617]/90 backdrop-blur-md">
-          <div className="relative w-full max-w-md bg-[#0a2240] rounded-[2.5rem] border border-white/10 p-8 shadow-2xl">
-            <h3 className="font-display text-2xl font-bold text-[#F8F6F1] mb-6 text-center">ถอนรายได้สะสม</h3>
-            
-            <Form method="post" className="space-y-5" onSubmit={() => setShowWithdrawModal(false)}>
-              <input type="hidden" name="formType" value="withdrawal_request" />
-              
-              <Input 
-                name="amount" 
-                type="number" 
-                label="จำนวนเงินที่ต้องการถอน (฿)" 
-                min={100} 
-                max={wallet.balance} 
-                defaultValue={wallet.balance}
-                required 
-              />
-
-              <div className="space-y-1.5">
-                <label className="text-[#8A8070] text-[13px] uppercase tracking-widest block font-bold">ธนาคาร</label>
-                <select name="bankName" className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1]" required>
-                  <option value="กสิกรไทย">ธนาคารกสิกรไทย (KBANK)</option>
-                  <option value="ไทยพาณิชย์">ธนาคารไทยพาณิชย์ (SCB)</option>
-                  <option value="กรุงเทพ">ธนาคารกรุงเทพ (BBL)</option>
-                  <option value="กรุงไทย">ธนาคารกรุงไทย (KTB)</option>
-                  <option value="กรุงศรีอยุธยา">ธนาคารกรุงศรีอยุธยา (BAY)</option>
-                  <option value="ออมสิน">ธนาคารออมสิน (GSB)</option>
-                </select>
-              </div>
-
-              <Input name="accountNumber" label="เลขที่บัญชี" placeholder="000-0-00000-0" required />
-              <Input name="accountName" label="ชื่อบัญชี (ภาษาไทย/อังกฤษ)" placeholder="ระบุชื่อตามหน้าสมุดบัญชี" required />
-
-              <div className="pt-4 space-y-3">
-                <Button type="submit" className="w-full">ยืนยันการถอนเงิน</Button>
-                <button 
-                  type="button" 
-                  onClick={() => setShowWithdrawModal(false)}
-                  className="w-full py-2 text-[#94A3B8] text-xs hover:text-[#F8F6F1] transition-colors"
-                >
-                  ยกเลิก
-                </button>
-              </div>
-            </Form>
           </div>
         </div>
       )}

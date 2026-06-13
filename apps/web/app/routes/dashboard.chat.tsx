@@ -1,5 +1,10 @@
-import type { MetaFunction } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
+import type { MetaFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useLoaderData, useRevalidator } from "@remix-run/react";
+import { requireAuth } from "~/services/auth.server";
+import { createSupabaseClient } from "~/services/supabase.server";
+import type { Env } from "~/env.server";
 
 export const meta: MetaFunction = () => [
   { title: "Wisdom AI — PhopePhum" },
@@ -30,7 +35,7 @@ const CATEGORIES: Category[] = [
   { id: "health", emoji: "🌿", label: "สุขภาพ",
     questions: ["ควรดูแลสุขภาพอย่างไรช่วงนี้?", "อาการที่เป็นอยู่จะดีขึ้นเร็วไหม?", "ช่วงนี้ควรพักหรือออกแรงได้?"] },
   { id: "life", emoji: "✦", label: "ชีวิต",
-    questions: ["ขอคำแนะนำสำหรับชีวิตตอนนี้หน่อย", "สิ่งที่กังวลอยู่จะคลี่คลายไหม?", "มีอะไรควรทำหรือหลีกเลี่ยงช่วงนี้?"] },
+    questions: ["ขอคำแนะนำสำหรับชีวิตตอนนี้หน่อย", "สิ่งที่กกังวลอยู่จะคลี่คลายไหม?", "มีอะไรควรทำหรือหลีกเลี่ยงช่วงนี้?"] },
 ];
 
 const WELCOME_MSG: Message = {
@@ -40,14 +45,39 @@ const WELCOME_MSG: Message = {
   ts: new Date(),
 };
 
+// ─── Loader ───────────────────────────────────────────────────────────────────
+
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const env = context.cloudflare.env as Env;
+  const user = await requireAuth(request, env);
+  const { supabase } = createSupabaseClient(request, env);
+
+  // ดึงประวัติคำถามเดิมใน Wisdom Journal
+  const { data: journals } = await supabase
+    .from("user_journals")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  return json({
+    journals: journals || [],
+  });
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function WisdomChatPage() {
+  const { journals } = useLoaderData<typeof loader>();
+  const { revalidate } = useRevalidator();
+
   const [messages, setMessages] = useState<Message[]>([WELCOME_MSG]);
   const [input, setInput] = useState("");
-  const [activeCat, setActiveCat] = useState<Category>(CATEGORIES[0]);
+  const [activeCat, setActiveCat] = useState<Category>(CATEGORIES[0]!);
   const [isStreaming, setIsStreaming] = useState(false);
   const [showQuestions, setShowQuestions] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -107,6 +137,25 @@ export default function WisdomChatPage() {
         }
       }
       setMessages(prev => prev.map(m => m.id === wisdomId ? { ...m, streaming: false } : m));
+
+      // ── บันทึกลง Wisdom Journal เมื่อรับคำตอบเสร็จสมบูรณ์ ──────────────────────
+      if (acc.trim()) {
+        const saveFd = new FormData();
+        saveFd.append("question", text.trim());
+        saveFd.append("answer", acc.trim());
+        saveFd.append("energyRating", "3");
+
+        fetch("/api/journal-save", {
+          method: "POST",
+          body: saveFd
+        })
+        .then(() => {
+          // รีเฟรชข้อมูลหน้าเว็บเพื่อให้ประวัติล่าสุดอัปเดต
+          revalidate();
+        })
+        .catch(err => console.error("Failed to save Wisdom Journal:", err));
+      }
+
     } catch {
       setMessages(prev => prev.map(m => m.id === wisdomId
         ? { ...m, text: "ขาดการเชื่อมต่อ กรุณาลองใหม่ ✦", streaming: false } : m));
@@ -114,7 +163,7 @@ export default function WisdomChatPage() {
       setIsStreaming(false);
       inputRef.current?.focus();
     }
-  }, [activeCat, isStreaming]);
+  }, [activeCat, isStreaming, revalidate]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(input); }
@@ -127,13 +176,27 @@ export default function WisdomChatPage() {
      * height = 100dvh − topbar(48px) − bottombar(64px)
      */
     <div
-      className="-mx-4 -mt-6 -mb-6 flex flex-col"
+      className="-mx-4 -mt-6 -mb-6 flex flex-col relative"
       style={{
         height: "calc(100dvh - 48px - 64px)",
         overflow: "hidden",
         maxWidth: "100vw",
       }}
     >
+      {/* ── Header ── */}
+      <div className="flex justify-between items-center px-4 py-3 border-b border-[#C6A96B]/15 bg-[#0a2240]/45 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-[#C6A96B] text-lg font-bold">✦</span>
+          <h2 className="font-display text-sm sm:text-base font-bold text-[#F8F6F1]">ปัญญาพยากรณ์ Wisdom Oracle</h2>
+        </div>
+        <button
+          onClick={() => setShowHistory(v => !v)}
+          className="flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-bold transition-all border border-[#C6A96B]/20 bg-[#C6A96B]/5 text-[#C6A96B] hover:bg-[#C6A96B]/15"
+        >
+          📜 คลังบันทึกปัญญา ({journals.length})
+        </button>
+      </div>
+
       {/* ── Category tabs: 2-row × 3-col grid ───────────────────── */}
       <div
         className="grid grid-cols-3 gap-1.5 px-3 py-2 shrink-0 border-b"
@@ -148,7 +211,7 @@ export default function WisdomChatPage() {
               className="flex items-center justify-center gap-1 py-1.5 rounded-xl font-medium transition-all"
               style={active
                 ? { background: "linear-gradient(135deg,#C6A96B,#D9BC82)", color: "#020617", fontSize: "13px" }
-                : { background: "rgba(10,34,64,0.5)", border: "1px solid rgba(255,255,255,0.08)", color: "#94A3B8", fontSize: "13px" }
+                : { background: "var(--card-dark-bg)", border: "1px solid rgba(255,255,255,0.08)", color: "var(--text-muted)", fontSize: "13px" }
               }
             >
               <span style={{ fontSize: "13px" }}>{cat.emoji}</span>
@@ -163,6 +226,49 @@ export default function WisdomChatPage() {
         {messages.map(msg => <MessageBubble key={msg.id} msg={msg} />)}
         <div ref={bottomRef} />
       </div>
+
+      {/* ── Wisdom Journal History Slide-over Panel ───────────────── */}
+      {showHistory && (
+        <div className="absolute inset-0 backdrop-blur-md z-20 flex flex-col p-4 animate-fade-up" style={{ background: "var(--overlay-bg)" }}>
+          <div className="flex justify-between items-center pb-3 border-b border-[#C6A96B]/15">
+            <h3 className="font-display text-[#C6A96B] font-bold text-base flex items-center gap-2">
+              <span>📜</span> Wisdom Journal (คลังบันทึกปัญญา)
+            </h3>
+            <button
+              onClick={() => setShowHistory(false)}
+              className="text-xs text-[#94A3B8] hover:text-[#F8F6F1] font-bold border border-white/10 px-3 py-1.5 rounded-xl"
+            >
+              ปิด
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto py-2 space-y-2.5">
+            {journals.length === 0 ? (
+              <p className="text-center py-10 text-[#C6B79F] text-xs italic">ไม่มีบันทึกประวัติการปรึกษาในขณะนี้</p>
+            ) : (
+              journals.map((j: any) => (
+                <button
+                  key={j.id}
+                  onClick={() => {
+                    setMessages([
+                      WELCOME_MSG,
+                      { id: `q-${j.id}`, role: "user", text: j.affirmation_received, ts: new Date(j.created_at) },
+                      { id: `a-${j.id}`, role: "wisdom", text: j.journal_content, ts: new Date(j.created_at) }
+                    ]);
+                    setShowHistory(false);
+                  }}
+                  className="w-full text-left p-3.5 rounded-xl border border-[#C6A96B]/10 bg-[#0a2240]/40 hover:border-[#C6A96B]/40 hover:bg-[#0a2240]/85 transition-all block group"
+                >
+                  <span className="text-[10px] text-[#C6B79F] font-bold block mb-1">
+                    {new Date(j.created_at).toLocaleString("th-TH", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                  <p className="text-[#C6A96B] text-xs font-bold line-clamp-1 group-hover:text-gold-liquid">Q: {j.affirmation_received}</p>
+                  <p className="text-[#D9CDB7] text-[13px] mt-1 line-clamp-2 leading-relaxed">A: {j.journal_content}</p>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── Quick questions slide-up panel ───────────────────────── */}
       <div
@@ -180,9 +286,9 @@ export default function WisdomChatPage() {
               disabled={isStreaming}
               className="w-full text-left px-3 py-2 rounded-xl border transition-all disabled:opacity-40"
               style={{
-                background: "rgba(10,34,64,0.4)",
+                background: "var(--card-dark-bg)",
                 border: "1px solid rgba(255,255,255,0.08)",
-                color: "#D9CDB7",
+                color: "var(--text-secondary)",
                 fontSize: "13px",
               }}
             >
@@ -200,8 +306,8 @@ export default function WisdomChatPage() {
         <div
           className="flex items-end gap-2 rounded-2xl px-3 py-2.5"
           style={{
-            background: "rgba(10,34,64,0.7)",
-            border: "1px solid rgba(217,188,130,0.18)",
+            background: "var(--input-bg)",
+            border: "1px solid var(--border-gold)",
             backdropFilter: "blur(12px)",
           }}
         >
@@ -267,15 +373,15 @@ function MessageBubble({ msg }: { msg: Message }) {
 
   if (isUser) {
     return (
-      <div className="flex justify-end">
+      <div className="flex justify-end animate-fade-up">
         <div
-          className="rounded-2xl rounded-tr-sm px-4 py-2.5 leading-relaxed"
+          className="rounded-2xl rounded-tr-sm px-4 py-2.5 leading-relaxed font-sans-thai font-semibold"
           style={{
             maxWidth: "80%",
             background: "rgba(198,169,107,0.18)",
             border: "1px solid rgba(198,169,107,0.25)",
             color: "#F8F6F1",
-            fontSize: "15px",
+            fontSize: "14px",
           }}
         >
           {msg.text}
@@ -285,7 +391,7 @@ function MessageBubble({ msg }: { msg: Message }) {
   }
 
   return (
-    <div className="flex gap-2">
+    <div className="flex gap-2 animate-fade-up">
       {/* Avatar */}
       <div
         className="shrink-0 w-7 h-7 rounded-full flex items-center justify-center mt-0.5"
@@ -295,13 +401,13 @@ function MessageBubble({ msg }: { msg: Message }) {
       </div>
 
       <div
-        className="rounded-2xl rounded-tl-sm px-4 py-2.5 leading-relaxed"
+        className="rounded-2xl rounded-tl-sm px-4 py-2.5 leading-relaxed font-sans-thai text-sm"
         style={{
           maxWidth: "83%",
-          background: "rgba(10,34,64,0.65)",
+          background: "var(--card-dark-bg)",
           border: "1px solid rgba(255,255,255,0.06)",
-          color: "#D9CDB7",
-          fontSize: "15px",
+          color: "var(--text-secondary)",
+          fontSize: "14px",
         }}
       >
         {msg.text

@@ -91,13 +91,18 @@ export default function DashboardScreen() {
       >
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View style={{ flex: 1, marginRight: 8 }}>
             <Text style={styles.dateText}>{dateStr}</Text>
-            <Text style={styles.welcomeText}>สวัสดี, {profile?.display_name || 'คุณ'}</Text>
+            <Text style={styles.welcomeText} numberOfLines={1}>สวัสดี, {profile?.display_name || 'คุณ'}</Text>
           </View>
-          <View style={styles.timeBadge}>
-             <View style={styles.pulseDot} />
-             <Text style={styles.timeText}>{timeStr}</Text>
+          <View style={styles.headerBadges}>
+            <View style={styles.inkBadge}>
+              <Text style={styles.inkBadgeText}>⏳ {profile?.plan === 'imperial' ? '♾️' : (profile?.time_sands ?? 0)}</Text>
+            </View>
+            <View style={styles.timeBadge}>
+               <View style={styles.pulseDot} />
+               <Text style={styles.timeText}>{timeStr}</Text>
+            </View>
           </View>
         </View>
 
@@ -171,12 +176,14 @@ export default function DashboardScreen() {
             sub="เลข ๗ ตัว ผังจักรพรรดิ"
             icon="compass-outline"
             color="#4B6FAE"
+            onPress={() => router.push('/horoscope' as any)}
           />
           <AnalysisRow 
             title="มหาทักษา / มหาภูติ"
             sub="พยากรณ์ชีวิตและธาตุกำเนิด"
             icon="star-half-outline"
             color="#C6A96B"
+            onPress={() => router.push('/mahathaksa' as any)}
           />
         </View>
 
@@ -196,9 +203,9 @@ function ToolCard({ title, sub, info, icon, color, onPress }: any) {
   );
 }
 
-function AnalysisRow({ title, sub, icon, color }: any) {
+function AnalysisRow({ title, sub, icon, color, onPress }: any) {
   return (
-    <TouchableOpacity style={styles.row}>
+    <TouchableOpacity style={styles.row} onPress={onPress}>
       <View style={[styles.rowIcon, { backgroundColor: color + '20', borderColor: color + '40' }]}>
         <Ionicons name={icon} size={20} color={color} />
       </View>
@@ -206,7 +213,7 @@ function AnalysisRow({ title, sub, icon, color }: any) {
         <Text style={styles.rowTitle}>{title}</Text>
         <Text style={styles.rowSub}>{sub}</Text>
       </View>
-      <Ionicons name="chevron-forward" size={16} color="#4A5568" />
+      <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
     </TouchableOpacity>
   );
 }
@@ -222,8 +229,26 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     marginBottom: 24,
   },
-  dateText: { color: '#94A3B8', fontSize: 12, marginBottom: 4 },
-  welcomeText: { color: '#F8F6F1', fontSize: 20, fontWeight: 'bold' },
+  dateText: { color: '#94A3B8', fontSize: 13, marginBottom: 4 },
+  welcomeText: { color: '#F8F6F1', fontSize: 22, fontWeight: 'bold' },
+  headerBadges: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  inkBadge: {
+    backgroundColor: 'rgba(198, 169, 107, 0.1)',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(198, 169, 107, 0.3)',
+  },
+  inkBadgeText: {
+    color: '#C6A96B',
+    fontSize: 13,
+    fontWeight: 'bold',
+  },
   timeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -241,7 +266,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#4DB8A0',
     marginRight: 8,
   },
-  timeText: { color: '#4DB8A0', fontSize: 13, fontWeight: 'bold' },
+  timeText: { color: '#4DB8A0', fontSize: 14, fontWeight: 'bold' },
   heroCard: {
     backgroundColor: 'rgba(10, 22, 40, 0.8)',
     borderRadius: 24,
@@ -251,15 +276,15 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   heroHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  heroLabel: { color: '#C6A96B', fontSize: 10, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 },
+  heroLabel: { color: '#C6A96B', fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 },
   badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, borderWidth: 1 },
-  badgeText: { fontSize: 10, fontWeight: 'bold' },
-  heroTitle: { color: '#F8F6F1', fontSize: 28, fontWeight: 'bold', marginBottom: 4 },
-  heroSub: { color: '#8A8070', fontSize: 12, marginBottom: 12 },
-  heroDesc: { color: '#94A3B8', fontSize: 13, lineHeight: 20, marginBottom: 16 },
+  badgeText: { fontSize: 11, fontWeight: 'bold' },
+  heroTitle: { color: '#F8F6F1', fontSize: 30, fontWeight: 'bold', marginBottom: 4 },
+  heroSub: { color: '#C6B79F', fontSize: 14, marginBottom: 12 },
+  heroDesc: { color: '#94A3B8', fontSize: 14, lineHeight: 22, marginBottom: 16 },
   heroFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  heroFooterText: { color: '#C6A96B', fontSize: 12, fontWeight: 'bold' },
-  sectionTitle: { color: '#C6A96B', fontSize: 11, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 16, marginTop: 8 },
+  heroFooterText: { color: '#C6A96B', fontSize: 14, fontWeight: 'bold' },
+  sectionTitle: { color: '#C6A96B', fontSize: 13, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 16, marginTop: 8 },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24 },
   card: {
     backgroundColor: 'rgba(10, 22, 40, 0.5)',
@@ -269,9 +294,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
   },
-  cardTitle: { color: '#F8F6F1', fontSize: 13, fontWeight: 'bold', marginBottom: 4 },
-  cardSub: { fontSize: 12, fontWeight: 'bold', marginBottom: 2 },
-  cardInfo: { color: '#8A8070', fontSize: 10 },
+  cardTitle: { color: '#F8F6F1', fontSize: 14, fontWeight: 'bold', marginBottom: 4 },
+  cardSub: { fontSize: 13, fontWeight: 'bold', marginBottom: 2 },
+  cardInfo: { color: '#C6B79F', fontSize: 12 },
   list: { gap: 10 },
   row: {
     flexDirection: 'row',
@@ -284,6 +309,6 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   rowIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
-  rowTitle: { color: '#F8F6F1', fontSize: 14, fontWeight: 'bold' },
-  rowSub: { color: '#8A8070', fontSize: 11, marginTop: 2 },
+  rowTitle: { color: '#F8F6F1', fontSize: 15, fontWeight: 'bold' },
+  rowSub: { color: '#C6B79F', fontSize: 13, marginTop: 2 },
 });

@@ -14,7 +14,7 @@ import {
   getYamTimeRange,
   BHAVA_NAMES,
 } from '../hora-taynoo-engine.js'
-import type { SuccessYamChart } from '../hora-taynoo-engine.js'
+import type { SuccessYamChart } from '../types/horaNu.types.js'
 import type { HoraTaynooResult } from '../hora-taynoo-engine.js'
 
 // ─────────────────────────────────────────────────────────────────────────────

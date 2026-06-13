@@ -8,7 +8,7 @@ interface UpgradePaywallProps {
 export function UpgradePaywall({ featureName, description }: UpgradePaywallProps) {
   return (
     <div className="relative min-h-[500px] flex items-center justify-center rounded-[2.5rem] border border-white/5 overflow-hidden"
-      style={{ background: "rgba(10,34,64,0.3)", backdropFilter: "blur(8px)" }}>
+      style={{ background: "var(--card-dark-bg)", backdropFilter: "blur(8px)" }}>
       
       {/* Blurred background preview effect */}
       <div className="absolute inset-0 opacity-20 pointer-events-none select-none overflow-hidden">

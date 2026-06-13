@@ -1,0 +1,82 @@
+{
+  "home": "首页",
+  "dashboard": "仪表板",
+  "horoscope": "占星预测",
+  "daily": "每日运势",
+  "subscription": "会员",
+  "login": "登录",
+  "register": "注册",
+  "welcome": "欢迎来到 Phopephum",
+  "pricing": "价格",
+  "features": "功能",
+  "how_to_use": "如何使用",
+  "get_started_free": "免费开始 →",
+  "landing": {
+    "hero": {
+      "subtitle": "贤明的伴侣",
+      "title_suffix": "引导你的生活",
+      "desc": "从 Wisdom AI 获得个性化建议，阅读每日能量，并通过 AI 赋予生命的古代智慧了解你的生活道路。",
+      "footer_note": "永久免费 · 无需信用卡 · 随时取消"
+    },
+    "features": {
+      "label": "你会得到什么",
+      "title": "生活所需的一切",
+      "subtitle": "了解你的私人生活顾问，立即可以使用。",
+      "items": [
+        { "title": "更深入地了解自己", "desc": "从你的出生日期了解你的命运密码、个性、优势和适合你的生活方向。" },
+        { "title": "私人 Wisdom AI", "desc": "一位了解你命运的 AI 顾问。询问生活、爱情、工作和决策中的任何事情。" },
+        { "title": "每日能量", "desc": "实时阅读每日能量และ生活节奏，为每件事选择正确的时间。" },
+        { "title": "生命路径", "desc": "详细查看每个年龄段的重要议程、进展时期和生活方向。" },
+        { "title": "记录与计划", "desc": "记录意图，设定目标，并反思日常生活进度。" },
+        { "title": "能量日历", "desc": "提前 7 天查看能量，在正确的时间计划重要的决策。" }
+      ]
+    },
+    "how": {
+      "label": "开始非常简单",
+      "title": "3 个步骤 准备就绪",
+      "steps": [
+        { "num": "01", "title": "1 分钟免费注册", "desc": "输入姓名和电子邮件。无需信用卡即可立即开始。" },
+        { "num": "02", "title": "填写出生日期", "desc": "出生日、月、年和时间（如果有），以获得最高精度。" },
+        { "num": "03", "title": "立即获得建议", "desc": "Wisdom AI 分析你的命运，并准备好实时回答所有问题。" }
+      ]
+    }
+  },
+  "nav": {
+    "dashboard": "今日",
+    "horoscope": "命盘",
+    "yam": "吉时查询",
+    "reports": "报告",
+    "planner": "日记",
+    "settings": "个人资料"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "logout": "退出",
+    "email": "电子邮件",
+    "password": "密码",
+    "name": "姓名"
+  },
+  "theme": {
+    "dark": "深色",
+    "light": "浅色"
+  },
+  "language": {
+    "label": "语言",
+    "th": "泰语",
+    "en": "英语",
+    "zh": "中文"
+  },
+  "action": {
+    "calculate": "计算",
+    "save": "保存",
+    "cancel": "取消",
+    "generate": "生成报告",
+    "back": "返回",
+    "more": "查看更多"
+  },
+  "brand": {
+    "name": "PhopePhum",
+    "tagline": "解码生命能量"
+  }
+}

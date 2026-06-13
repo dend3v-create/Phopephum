@@ -71,7 +71,27 @@
       "Bash(grep -hE \"text-\\\\[?\\(xs|sm|[0-9]+px\\)\\\\]?\" components/**/*.tsx)",
       "Bash(ls dashboard.*.tsx)",
       "Bash(python3 -c ':*)",
-      "Bash(grep -v \"^.*//.*export\")"
+      "Bash(grep -v \"^.*//.*export\")",
+      "Bash(bash deploy.sh)",
+      "Bash(grep -v \":0$\")",
+      "Bash(python3 -c \"import sys; sys.stdout.buffer.write\\(sys.stdin.buffer.read\\(\\)\\)\")",
+      "Bash(python3:*)",
+      "mcp__claude_ai_Supabase__list_tables",
+      "Bash(echo \"Generated $\\(python3 -c \"import json; data=json.load\\(open\\('scratch/seed_output.json'\\)\\); print\\(len\\(data\\)\\)\"\\) rows\")",
+      "Bash(grep -r \"supabase\" apps/web/.env*)",
+      "Bash(rm:*)",
+      "Bash(set PYTHONIOENCODING=utf-8)",
+      "Bash(python validate_all.py)",
+      "Bash(python \"E:/00.1_DenD3v_AI/phopephum-v2/library/horanu_databased/validate_all.py\")",
+      "Bash(python scratch/validate_all.py)",
+      "Bash(pnpm --filter @phopephum/engine exec vitest run --reporter=verbose)",
+      "Bash(pnpm --filter @phopephum/engine exec tsc --noEmit)",
+      "Bash(pnpm --filter @phopephum/engine test --reporter=verbose)",
+      "Bash(pnpm tsx:*)",
+      "Bash(pnpm --filter @phopephum/engine exec tsx scripts/generate-success-yam-data.ts)",
+      "Bash(pnpm --filter @phopephum/engine test generate-success-yam)",
+      "Bash(pnpm --filter @phopephum/engine test verify-thu-yam2)",
+      "Bash(pnpm --filter @phopephum/engine test)"
     ]
   }
 }

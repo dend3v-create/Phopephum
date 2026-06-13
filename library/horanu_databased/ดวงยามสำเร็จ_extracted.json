@@ -1,0 +1,2975 @@
+[
+  {
+    "_note": "=== วันอาทิตย์ (day_num=1, Sun=planet1) ===",
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "day",
+    "yam_no": 1,
+    "time_start": "06:00",
+    "time_end": "07:30",
+    "top_house": "สหัชชะ",
+    "center_day": 1,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "ปุตตะ",
+      "2": "ลาภะ",
+      "3": "กัมมะ",
+      "4": "กัมมะ",
+      "5": "ปัตนิ",
+      "6": "ปัตนิ",
+      "7": "กดุมภะ"
+    },
+    "planet_statuses": {
+      "3": "kaset",
+      "5": "maha_uccj",
+      "6": "racha_chok"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "day",
+    "yam_no": 2,
+    "time_start": "07:30",
+    "time_end": "09:00",
+    "top_house": "ปัตนิ",
+    "center_day": 1,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "ราชาโชค",
+      "2": "อริ",
+      "3": "ศุภะ",
+      "4": "กัมมะ",
+      "5": "กัมมะ",
+      "6": "มรณะ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "1": "racha_chok",
+      "3": "kaset",
+      "5": "kaset"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "night",
+    "yam_no": 1,
+    "time_start": "18:00",
+    "time_end": "19:30",
+    "top_house": "สหัชชะ",
+    "center_day": 1,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "ปุตตะ",
+      "2": "ลาภะ",
+      "3": "กัมมะ",
+      "4": "กัมมะ",
+      "5": "ปัตนิ",
+      "6": "ปัตนิ",
+      "7": "กดุมภะ"
+    },
+    "planet_statuses": {
+      "2": "pra",
+      "3": "kaset",
+      "6": "racha_chok"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "night",
+    "yam_no": 2,
+    "time_start": "19:30",
+    "time_end": "21:00",
+    "top_house": "วินาศ",
+    "center_day": 1,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "พันธุ",
+      "2": "อริ",
+      "3": "กดุมภะ",
+      "4": "ตนุ",
+      "5": "ลาภะ",
+      "6": "ลาภะ",
+      "7": "สหัชชะ"
+    },
+    "planet_statuses": {
+      "5": "racha_chok"
+    }
+  },
+  {
+    "_note": "=== วันอาทิตย์ ยาม3-4 (image 2) ===",
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "day",
+    "yam_no": 3,
+    "time_start": "09:00",
+    "time_end": "10:30",
+    "top_house": "กดุมภะ",
+    "center_day": 1,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "ศุภะ",
+      "2": "ปุตตะ",
+      "3": "ตนุ",
+      "4": "ตนุ",
+      "5": "สหัชชะ",
+      "6": "สหัชชะ",
+      "7": "มรณะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "kaset",
+      "4": "maha_chakr",
+      "5": "maha_uccj"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "day",
+    "yam_no": 4,
+    "time_start": "10:30",
+    "time_end": "12:00",
+    "top_house": "ลากะ",
+    "center_day": 1,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "กัมมะ",
+      "3": "วินาศ",
+      "4": "วินาศ",
+      "5": "ลาภะ",
+      "6": "ปัตนิ",
+      "7": "ศุภะ"
+    },
+    "planet_statuses": {
+      "6": "maha_uccj",
+      "7": "kaset"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "night",
+    "yam_no": 3,
+    "time_start": "21:00",
+    "time_end": "22:30",
+    "top_house": "กัมมะ",
+    "center_day": 1,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "วินาศ",
+      "3": "ศุภะ",
+      "4": "ศุภะ",
+      "5": "มรณะ",
+      "6": "มรณะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "maha_uccj",
+      "3": "maha_uccj",
+      "5": "pra"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "night",
+    "yam_no": 4,
+    "time_start": "22:30",
+    "time_end": "24:00",
+    "top_house": "ศุภะ",
+    "center_day": 1,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "กดุมภะ",
+      "3": "ปัตนิ",
+      "4": "กัมมะ",
+      "5": "กัมมะ",
+      "6": "ลาภะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {}
+  },
+  {
+    "_note": "=== วันอาทิตย์ ยาม5-6 (image 3) ===",
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "day",
+    "yam_no": 5,
+    "time_start": "12:00",
+    "time_end": "13:30",
+    "top_house": "ลากะ",
+    "center_day": 1,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "สหัชชะ",
+      "3": "วินาศ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "กัมมะ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "5": "racha_chok",
+      "6": "maha_chakr"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "day",
+    "yam_no": 6,
+    "time_start": "13:30",
+    "time_end": "15:00",
+    "top_house": "กดุมภะ",
+    "center_day": 1,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "พันธุ",
+      "2": "กดุมภะ",
+      "3": "กัมมะ",
+      "4": "กดุมภะ",
+      "5": "มรณะ",
+      "6": "ปัตนิ",
+      "7": "สหัชชะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "4": "maha_chakr"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "night",
+    "yam_no": 5,
+    "time_start": "24:00",
+    "time_end": "01:30",
+    "top_house": "ศุภะ",
+    "center_day": 1,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กัมมะ",
+      "3": "ปัตนิ",
+      "4": "มรณะ",
+      "5": "ปัตนิ",
+      "6": "สหัชชะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "maha_uccj",
+      "4": "racha_chok",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "night",
+    "yam_no": 6,
+    "time_start": "01:30",
+    "time_end": "03:00",
+    "top_house": "กัมมะ",
+    "center_day": 1,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "ตนุ",
+      "3": "วินาศ",
+      "4": "ปัตนิ",
+      "5": "กัมมะ",
+      "6": "พันธุ",
+      "7": "อริ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "5": "maha_uccj"
+    }
+  },
+  {
+    "_note": "=== วันอาทิตย์ ยาม7-8 (image 4) ===",
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "day",
+    "yam_no": 7,
+    "time_start": "15:00",
+    "time_end": "16:30",
+    "top_house": "ตนุ",
+    "center_day": 1,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "สหัชชะ",
+      "3": "พันธุ",
+      "4": "กดุมภะ",
+      "5": "ปัตนิ",
+      "6": "ตนุ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "maha_chakr",
+      "3": "kaset",
+      "4": "racha_chok",
+      "5": "pra"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "day",
+    "yam_no": 8,
+    "time_start": "16:30",
+    "time_end": "18:00",
+    "top_house": "สหัชชะ",
+    "center_day": 1,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "พันธุ",
+      "3": "ตนุ",
+      "4": "ลาภะ",
+      "5": "ลาภะ",
+      "6": "กัมมะ",
+      "7": "ศุภะ"
+    },
+    "planet_statuses": {
+      "3": "racha_chok",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "night",
+    "yam_no": 7,
+    "time_start": "03:00",
+    "time_end": "04:30",
+    "top_house": "วินาศ",
+    "center_day": 1,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "ลาภะ",
+      "3": "กดุมภะ",
+      "4": "ตนุ",
+      "5": "สหัชชะ",
+      "6": "ปัตนิ",
+      "7": "มรณะ"
+    },
+    "planet_statuses": {
+      "1": "racha_chok",
+      "3": "kaset",
+      "5": "kaset",
+      "6": "maha_chakr"
+    }
+  },
+  {
+    "day": "อาทิตย์",
+    "day_num": 1,
+    "period": "night",
+    "yam_no": 8,
+    "time_start": "04:30",
+    "time_end": "06:00",
+    "top_house": "สหัชชะ",
+    "center_day": 1,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "ตนุ",
+      "4": "ลาภะ",
+      "5": "กัมมะ",
+      "6": "ลาภะ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "1": "maha_uccj",
+      "2": "pra",
+      "5": "kaset",
+      "7": "pra"
+    }
+  },
+  {
+    "_note": "=== วันจันทร์ (day_num=2, Moon=planet2) ===",
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "day",
+    "yam_no": 1,
+    "time_start": "06:00",
+    "time_end": "07:30",
+    "top_house": "ตนุ",
+    "center_day": 2,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "ตนุ",
+      "3": "ตนุ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "ปัตนิ",
+      "7": "ศุภะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "pra",
+      "5": "pra",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "day",
+    "yam_no": 2,
+    "time_start": "07:30",
+    "time_end": "09:00",
+    "top_house": "ปุตตะ",
+    "center_day": 2,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "ปุตตะ",
+      "2": "อริ",
+      "3": "กดุมภะ",
+      "4": "อริ",
+      "5": "สหัชชะ",
+      "6": "ตนุ",
+      "7": "ศุภะ"
+    },
+    "planet_statuses": {
+      "1": "racha_chok",
+      "5": "maha_uccj"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "night",
+    "yam_no": 1,
+    "time_start": "18:00",
+    "time_end": "19:30",
+    "top_house": "ตนุ",
+    "center_day": 2,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "ตนุ",
+      "3": "ตนุ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "ปัตนิ",
+      "7": "ศุภะ"
+    },
+    "planet_statuses": {
+      "2": "racha_chok",
+      "5": "maha_uccj",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "night",
+    "yam_no": 2,
+    "time_start": "19:30",
+    "time_end": "21:00",
+    "top_house": "พันธุ",
+    "center_day": 2,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "กัมมะ",
+      "3": "ปุตตะ",
+      "4": "ปุตตะ",
+      "5": "กดุมภะ",
+      "6": "ตนุ",
+      "7": "มรณะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "4": "pra",
+      "6": "kaset"
+    }
+  },
+  {
+    "_note": "=== วันจันทร์ ยาม3-4 ===",
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "day",
+    "yam_no": 3,
+    "time_start": "09:00",
+    "time_end": "10:30",
+    "top_house": "วินาศ",
+    "center_day": 2,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "ศุภะ",
+      "2": "ปุตตะ",
+      "3": "ปุตตะ",
+      "4": "สหัชชะ",
+      "5": "สหัชชะ",
+      "6": "มรณะ",
+      "7": "อริ"
+    },
+    "planet_statuses": {
+      "1": "maha_uccj",
+      "5": "maha_uccj",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "day",
+    "yam_no": 4,
+    "time_start": "10:30",
+    "time_end": "12:00",
+    "top_house": "พันธุ",
+    "center_day": 2,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "สหัชชะ",
+      "4": "สหัชชะ",
+      "5": "กัมมะ",
+      "6": "ลาภะ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "maha_chakr",
+      "4": "pra",
+      "5": "pra"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "night",
+    "yam_no": 3,
+    "time_start": "21:00",
+    "time_end": "22:30",
+    "top_house": "สหัชชะ",
+    "center_day": 2,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "สหัชชะ",
+      "4": "ตนุ",
+      "5": "อริ",
+      "6": "กัมมะ",
+      "7": "มรณะ"
+    },
+    "planet_statuses": {
+      "2": "pra",
+      "4": "maha_chakr",
+      "5": "maha_uccj",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "night",
+    "yam_no": 4,
+    "time_start": "22:30",
+    "time_end": "24:00",
+    "top_house": "กดุมภะ",
+    "center_day": 2,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "ลาภะ",
+      "3": "ปุตตะ",
+      "4": "สหัชชะ",
+      "5": "อริ",
+      "6": "ปัตนิ",
+      "7": "มรณะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "kaset",
+      "5": "pra",
+      "6": "pra"
+    }
+  },
+  {
+    "_note": "=== วันจันทร์ ยาม5-6 ===",
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "day",
+    "yam_no": 5,
+    "time_start": "12:00",
+    "time_end": "13:30",
+    "top_house": "พันธุ",
+    "center_day": 2,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "อริ",
+      "2": "ศุภะ",
+      "3": "กดุมภะ",
+      "4": "กัมมะ",
+      "5": "กัมมะ",
+      "6": "ลาภะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "4": "kaset",
+      "5": "maha_uccj",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "day",
+    "yam_no": 6,
+    "time_start": "13:30",
+    "time_end": "15:00",
+    "top_house": "วินาศ",
+    "center_day": 2,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "ศุภะ",
+      "2": "ลาภะ",
+      "3": "ลาภะ",
+      "4": "กัมมะ",
+      "5": "ตนุ",
+      "6": "วินาศ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "3": "pra",
+      "4": "pra",
+      "5": "maha_uccj",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "night",
+    "yam_no": 5,
+    "time_start": "24:00",
+    "time_end": "01:30",
+    "top_house": "กดุมภะ",
+    "center_day": 2,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "ปุตตะ",
+      "3": "ปัตนิ",
+      "4": "กัมมะ",
+      "5": "กดุมภะ",
+      "6": "ปัตนิ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "2": "kaset",
+      "5": "racha_chok",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "night",
+    "yam_no": 6,
+    "time_start": "01:30",
+    "time_end": "03:00",
+    "top_house": "สหัชชะ",
+    "center_day": 2,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "ลาภะ",
+      "3": "กัมมะ",
+      "4": "ปุตตะ",
+      "5": "กดุมภะ",
+      "6": "ตนุ",
+      "7": "กดุมภะ"
+    },
+    "planet_statuses": {
+      "2": "kaset",
+      "4": "maha_uccj",
+      "5": "pra"
+    }
+  },
+  {
+    "_note": "=== วันจันทร์ ยาม7-8 ===",
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "day",
+    "yam_no": 7,
+    "time_start": "15:00",
+    "time_end": "16:30",
+    "top_house": "ลากะ",
+    "center_day": 2,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "สหัชชะ",
+      "3": "กดุมภะ",
+      "4": "ตนุ",
+      "5": "ปุตตะ",
+      "6": "มรณะ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "pra",
+      "3": "kaset",
+      "4": "maha_chakr",
+      "5": "pra"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "day",
+    "yam_no": 8,
+    "time_start": "16:30",
+    "time_end": "18:00",
+    "top_house": "ตนุ",
+    "center_day": 2,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "ตนุ",
+      "3": "ลาภะ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "กัมมะ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "kaset",
+      "3": "pra",
+      "5": "maha_uccj",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "night",
+    "yam_no": 7,
+    "time_start": "03:00",
+    "time_end": "04:30",
+    "top_house": "กัมมะ",
+    "center_day": 2,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "มรณะ",
+      "3": "กดุมภะ",
+      "4": "มรณะ",
+      "5": "ปุตตะ",
+      "6": "ปัตนิ",
+      "7": "ศุภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "5": "kaset",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "จันทร์",
+    "day_num": 2,
+    "period": "night",
+    "yam_no": 8,
+    "time_start": "04:30",
+    "time_end": "06:00",
+    "top_house": "ตนุ",
+    "center_day": 2,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "ตนุ",
+      "3": "ลาภะ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "กัมมะ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "pra",
+      "5": "maha_uccj",
+      "6": "pra",
+      "7": "pra"
+    }
+  },
+  {
+    "_note": "=== วันอังคาร (day_num=3, Mars=planet3) ===",
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "day",
+    "yam_no": 1,
+    "time_start": "06:00",
+    "time_end": "07:30",
+    "top_house": "ลากะ",
+    "center_day": 3,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "ตนุ",
+      "4": "สหัชชะ",
+      "5": "ตนุ",
+      "6": "กัมมะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "maha_uccj",
+      "4": "maha_chakr",
+      "5": "kaset"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "day",
+    "yam_no": 2,
+    "time_start": "07:30",
+    "time_end": "09:00",
+    "top_house": "ศุภะ",
+    "center_day": 3,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "กัมมะ",
+      "2": "ตนุ",
+      "3": "สหัชชะ",
+      "4": "กัมมะ",
+      "5": "กัมมะ",
+      "6": "กัมมะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "4": "maha_chakr",
+      "5": "maha_chakr",
+      "6": "racha_chok"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "night",
+    "yam_no": 1,
+    "time_start": "18:00",
+    "time_end": "19:30",
+    "top_house": "ลากะ",
+    "center_day": 3,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "ตนุ",
+      "4": "สหัชชะ",
+      "5": "ตนุ",
+      "6": "กัมมะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "kaset",
+      "4": "pra",
+      "5": "pra"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "night",
+    "yam_no": 2,
+    "time_start": "19:30",
+    "time_end": "21:00",
+    "top_house": "มรณะ",
+    "center_day": 3,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "ปุตตะ",
+      "2": "ลาภะ",
+      "3": "กดุมภะ",
+      "4": "ตนุ",
+      "5": "กดุมภะ",
+      "6": "ลาภะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "4": "maha_chakr",
+      "6": "kaset"
+    }
+  },
+  {
+    "_note": "=== วันอังคาร ยาม3-4 ===",
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "day",
+    "yam_no": 3,
+    "time_start": "09:00",
+    "time_end": "10:30",
+    "top_house": "สหัชชะ",
+    "center_day": 3,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "อริ",
+      "2": "สหัชชะ",
+      "3": "ตนุ",
+      "4": "กดุมภะ",
+      "5": "กดุมภะ",
+      "6": "ปุตตะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "2": "racha_chok",
+      "4": "pra",
+      "5": "kaset"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "day",
+    "yam_no": 4,
+    "time_start": "10:30",
+    "time_end": "12:00",
+    "top_house": "ปัตนิ",
+    "center_day": 3,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "กัมมะ",
+      "2": "ปัตนิ",
+      "3": "วินาศ",
+      "4": "มรณะ",
+      "5": "ปุตตะ",
+      "6": "ปุตตะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "2": "kaset",
+      "3": "pra",
+      "5": "maha_uccj",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "night",
+    "yam_no": 3,
+    "time_start": "21:00",
+    "time_end": "22:30",
+    "top_house": "ตนุ",
+    "center_day": 3,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "สหัชชะ",
+      "3": "กัมมะ",
+      "4": "กดุมภะ",
+      "5": "กดุมภะ",
+      "6": "ลาภะ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "maha_uccj",
+      "4": "pra",
+      "7": "maha_chakr"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "night",
+    "yam_no": 4,
+    "time_start": "22:30",
+    "time_end": "24:00",
+    "top_house": "วินาศ",
+    "center_day": 3,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "วินาศ",
+      "2": "มรณะ",
+      "3": "ปัตนิ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "ตนุ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "racha_chok",
+      "2": "pra",
+      "6": "maha_chakr"
+    }
+  },
+  {
+    "_note": "=== วันอังคาร ยาม5-6 ===",
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "day",
+    "yam_no": 5,
+    "time_start": "12:00",
+    "time_end": "13:30",
+    "top_house": "ปัตนิ",
+    "center_day": 3,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "กัมมะ",
+      "2": "ลาภะ",
+      "3": "ตนุ",
+      "4": "ปัตนิ",
+      "5": "สหัชชะ",
+      "6": "กดุมภะ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "kaset",
+      "4": "pra",
+      "5": "pra"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "day",
+    "yam_no": 6,
+    "time_start": "13:30",
+    "time_end": "15:00",
+    "top_house": "สหัชชะ",
+    "center_day": 3,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "กัมมะ",
+      "3": "กดุมภะ",
+      "4": "ลาภะ",
+      "5": "มรณะ",
+      "6": "กดุมภะ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "pra",
+      "4": "maha_chakr",
+      "5": "pra"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "night",
+    "yam_no": 5,
+    "time_start": "24:00",
+    "time_end": "01:30",
+    "top_house": "อริ",
+    "center_day": 3,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "วินาศ",
+      "2": "ลาภะ",
+      "3": "กดุมภะ",
+      "4": "กัมมะ",
+      "5": "กัมมะ",
+      "6": "ตนุ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "3": "maha_uccj",
+      "5": "kaset",
+      "6": "racha_chok"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "night",
+    "yam_no": 6,
+    "time_start": "01:30",
+    "time_end": "03:00",
+    "top_house": "ปัตนิ",
+    "center_day": 3,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "ปุตตะ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "ลาภะ",
+      "5": "ปุตตะ",
+      "6": "ลาภะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "3": "kaset",
+      "5": "maha_uccj",
+      "6": "maha_chakr"
+    }
+  },
+  {
+    "_note": "=== วันอังคาร ยาม7-8 ===",
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "day",
+    "yam_no": 7,
+    "time_start": "15:00",
+    "time_end": "16:30",
+    "top_house": "ศุภะ",
+    "center_day": 3,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "ลาภะ",
+      "3": "ปัตนิ",
+      "4": "กดุมภะ",
+      "5": "กัมมะ",
+      "6": "กดุมภะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "2": "pra",
+      "3": "maha_uccj",
+      "4": "maha_chakr",
+      "5": "racha_chok"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "day",
+    "yam_no": 8,
+    "time_start": "16:30",
+    "time_end": "18:00",
+    "top_house": "ลากะ",
+    "center_day": 3,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "ลาภะ",
+      "5": "ปุตตะ",
+      "6": "ตนุ",
+      "7": "ศุภะ"
+    },
+    "planet_statuses": {
+      "2": "maha_uccj",
+      "3": "pra",
+      "4": "racha_chok",
+      "5": "pra"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "night",
+    "yam_no": 7,
+    "time_start": "03:00",
+    "time_end": "04:30",
+    "top_house": "มรณะ",
+    "center_day": 3,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "ปุตตะ",
+      "2": "อริ",
+      "3": "กดุมภะ",
+      "4": "ลาภะ",
+      "5": "สหัชชะ",
+      "6": "วินาศ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "3": "maha_uccj",
+      "4": "maha_chakr",
+      "5": "kaset"
+    }
+  },
+  {
+    "day": "อังคาร",
+    "day_num": 3,
+    "period": "night",
+    "yam_no": 8,
+    "time_start": "04:30",
+    "time_end": "06:00",
+    "top_house": "ลากะ",
+    "center_day": 3,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "กดุมภะ",
+      "3": "ตนุ",
+      "4": "ปุตตะ",
+      "5": "กดุมภะ",
+      "6": "ปัตนิ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "maha_uccj",
+      "3": "kaset",
+      "5": "pra",
+      "7": "pra"
+    }
+  },
+  {
+    "_note": "=== วันพุธ (day_num=4, Mercury=planet4) ===",
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "day",
+    "yam_no": 1,
+    "time_start": "06:00",
+    "time_end": "07:30",
+    "top_house": "ศุภะ",
+    "center_day": 4,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "ปัตนิ",
+      "3": "กดุมภะ",
+      "4": "ตนุ",
+      "5": "สหัชชะ",
+      "6": "กดุมภะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "maha_uccj",
+      "4": "pra",
+      "5": "pra",
+      "6": "maha_chakr"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "day",
+    "yam_no": 2,
+    "time_start": "07:30",
+    "time_end": "09:00",
+    "top_house": "ปัตนิ",
+    "center_day": 4,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "กดุมภะ",
+      "3": "ปัตนิ",
+      "4": "ลาภะ",
+      "5": "อริ",
+      "6": "กดุมภะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "kaset",
+      "4": "pra",
+      "5": "maha_uccj",
+      "6": "racha_chok"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "night",
+    "yam_no": 1,
+    "time_start": "18:00",
+    "time_end": "19:30",
+    "top_house": "ศุภะ",
+    "center_day": 4,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "ปัตนิ",
+      "3": "กดุมภะ",
+      "4": "ตนุ",
+      "5": "สหัชชะ",
+      "6": "กดุมภะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "maha_uccj",
+      "3": "kaset",
+      "4": "pra",
+      "6": "racha_chok"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "night",
+    "yam_no": 2,
+    "time_start": "19:30",
+    "time_end": "21:00",
+    "top_house": "อริ",
+    "center_day": 4,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "อริ",
+      "2": "ลาภะ",
+      "3": "มรณะ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "กดุมภะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "racha_chok",
+      "4": "maha_chakr",
+      "5": "pra"
+    }
+  },
+  {
+    "_note": "=== วันพุธ ยาม3-4 ===",
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "day",
+    "yam_no": 3,
+    "time_start": "09:00",
+    "time_end": "10:30",
+    "top_house": "มรณะ",
+    "center_day": 4,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "กัมมะ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "มรณะ",
+      "6": "ตนุ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "3": "pra",
+      "4": "pra",
+      "5": "kaset"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "day",
+    "yam_no": 4,
+    "time_start": "10:30",
+    "time_end": "12:00",
+    "top_house": "วินาศ",
+    "center_day": 4,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "ปุตตะ",
+      "2": "ปุตตะ",
+      "3": "สหัชชะ",
+      "4": "กดุมภะ",
+      "5": "สหัชชะ",
+      "6": "กัมมะ",
+      "7": "อริ"
+    },
+    "planet_statuses": {
+      "2": "pra",
+      "3": "kaset",
+      "5": "racha_chok",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "night",
+    "yam_no": 3,
+    "time_start": "21:00",
+    "time_end": "22:30",
+    "top_house": "พันธุ",
+    "center_day": 4,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "กัมมะ",
+      "2": "พันธุ",
+      "3": "พันธุ",
+      "4": "ตนุ",
+      "5": "สหัชชะ",
+      "6": "ลาภะ",
+      "7": "มรณะ"
+    },
+    "planet_statuses": {
+      "2": "maha_uccj",
+      "3": "kaset",
+      "5": "pra",
+      "6": "maha_chakr"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "night",
+    "yam_no": 4,
+    "time_start": "22:30",
+    "time_end": "24:00",
+    "top_house": "สหัชชะ",
+    "center_day": 4,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "สหัชชะ",
+      "3": "มรณะ",
+      "4": "ลาภะ",
+      "5": "กดุมภะ",
+      "6": "กัมมะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "kaset",
+      "5": "maha_chakr",
+      "6": "racha_chok"
+    }
+  },
+  {
+    "_note": "=== วันพุธ ยาม5-6 ===",
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "day",
+    "yam_no": 5,
+    "time_start": "12:00",
+    "time_end": "13:30",
+    "top_house": "วินาศ",
+    "center_day": 4,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "สหัชชะ",
+      "3": "กัมมะ",
+      "4": "ลาภะ",
+      "5": "กดุมภะ",
+      "6": "ปัตนิ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "maha_chakr",
+      "2": "maha_chakr",
+      "3": "pra",
+      "5": "pra"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "day",
+    "yam_no": 6,
+    "time_start": "13:30",
+    "time_end": "15:00",
+    "top_house": "มรณะ",
+    "center_day": 4,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "มรณะ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "กัมมะ",
+      "5": "ลาภะ",
+      "6": "ตนุ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "pra",
+      "3": "maha_uccj",
+      "5": "maha_chakr",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "night",
+    "yam_no": 5,
+    "time_start": "24:00",
+    "time_end": "01:30",
+    "top_house": "สหัชชะ",
+    "center_day": 4,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กัมมะ",
+      "3": "ตนุ",
+      "4": "กดุมภะ",
+      "5": "ปัตนิ",
+      "6": "ศุภะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "maha_uccj",
+      "4": "pra",
+      "5": "pra",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "night",
+    "yam_no": 6,
+    "time_start": "01:30",
+    "time_end": "03:00",
+    "top_house": "พันธุ",
+    "center_day": 4,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "ปัตนิ",
+      "2": "กดุมภะ",
+      "3": "ตนุ",
+      "4": "วินาศ",
+      "5": "กดุมภะ",
+      "6": "ลาภะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "pra",
+      "4": "maha_chakr",
+      "5": "pra",
+      "6": "kaset"
+    }
+  },
+  {
+    "_note": "=== วันพุธ ยาม7-8 ===",
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "day",
+    "yam_no": 7,
+    "time_start": "15:00",
+    "time_end": "16:30",
+    "top_house": "ปัตนิ",
+    "center_day": 4,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "มรณะ",
+      "3": "ตนุ",
+      "4": "กดุมภะ",
+      "5": "กัมมะ",
+      "6": "ลาภะ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "kaset",
+      "4": "pra",
+      "5": "pra",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "day",
+    "yam_no": 8,
+    "time_start": "16:30",
+    "time_end": "18:00",
+    "top_house": "ศุภะ",
+    "center_day": 4,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "ปุตตะ",
+      "2": "สหัชชะ",
+      "3": "ปัตนิ",
+      "4": "สหัชชะ",
+      "5": "มรณะ",
+      "6": "กัมมะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "3": "kaset",
+      "4": "maha_uccj",
+      "5": "pra",
+      "6": "maha_chakr"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "night",
+    "yam_no": 7,
+    "time_start": "03:00",
+    "time_end": "04:30",
+    "top_house": "อริ",
+    "center_day": 4,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "ปัตนิ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "กัมมะ",
+      "5": "ลาภะ",
+      "6": "สหัชชะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "maha_uccj",
+      "3": "kaset",
+      "4": "pra",
+      "5": "pra",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "พุธ",
+    "day_num": 4,
+    "period": "night",
+    "yam_no": 8,
+    "time_start": "04:30",
+    "time_end": "06:00",
+    "top_house": "ศุภะ",
+    "center_day": 4,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "ปุตตะ",
+      "2": "สหัชชะ",
+      "3": "สหัชชะ",
+      "4": "กัมมะ",
+      "5": "มรณะ",
+      "6": "ตนุ",
+      "7": "อริ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "pra",
+      "3": "pra",
+      "4": "kaset",
+      "5": "maha_uccj"
+    }
+  },
+  {
+    "_note": "=== วันพฤหัสบดี (day_num=5, Jupiter=planet5) ===",
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "day",
+    "yam_no": 1,
+    "time_start": "06:00",
+    "time_end": "07:30",
+    "top_house": "ปัตนิ",
+    "center_day": 5,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "พันธุ",
+      "3": "ปัตนิ",
+      "4": "วินาศ",
+      "5": "สหัชชะ",
+      "6": "ตนุ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "maha_uccj",
+      "3": "kaset",
+      "4": "maha_chakr",
+      "5": "maha_uccj"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "day",
+    "yam_no": 2,
+    "time_start": "07:30",
+    "time_end": "09:00",
+    "top_house": "ปุตตะ",
+    "center_day": 5,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "มรณะ",
+      "2": "ปุตตะ",
+      "3": "ลาภะ",
+      "4": "กดุมภะ",
+      "5": "กดุมภะ",
+      "6": "กดุมภะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "maha_uccj",
+      "3": "kaset",
+      "4": "pra",
+      "5": "racha_chok"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "night",
+    "yam_no": 1,
+    "time_start": "18:00",
+    "time_end": "19:30",
+    "top_house": "ปัตนิ",
+    "center_day": 5,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "พันธุ",
+      "3": "ปัตนิ",
+      "4": "วินาศ",
+      "5": "สหัชชะ",
+      "6": "ตนุ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "2": "maha_uccj",
+      "4": "maha_chakr",
+      "5": "kaset",
+      "7": "pra"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "night",
+    "yam_no": 2,
+    "time_start": "19:30",
+    "time_end": "21:00",
+    "top_house": "ลากะ",
+    "center_day": 5,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "ตนุ",
+      "3": "ปุตตะ",
+      "4": "ปุตตะ",
+      "5": "สหัชชะ",
+      "6": "กดุมภะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "maha_uccj",
+      "2": "maha_chakr",
+      "5": "maha_uccj",
+      "6": "pra"
+    }
+  },
+  {
+    "_note": "=== วันพฤหัสบดี ยาม3-4 ===",
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "day",
+    "yam_no": 3,
+    "time_start": "09:00",
+    "time_end": "10:30",
+    "top_house": "อริ",
+    "center_day": 5,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "ศุภะ",
+      "2": "กดุมภะ",
+      "3": "สหัชชะ",
+      "4": "กัมมะ",
+      "5": "กดุมภะ",
+      "6": "อริ",
+      "7": "กดุมภะ"
+    },
+    "planet_statuses": {
+      "1": "maha_uccj",
+      "3": "pra",
+      "5": "pra",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "day",
+    "yam_no": 4,
+    "time_start": "10:30",
+    "time_end": "12:00",
+    "top_house": "สหัชชะ",
+    "center_day": 5,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "กัมมะ",
+      "3": "ปุตตะ",
+      "4": "สหัชชะ",
+      "5": "สหัชชะ",
+      "6": "ตนุ",
+      "7": "กดุมภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "3": "maha_uccj",
+      "4": "pra",
+      "5": "racha_chok",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "night",
+    "yam_no": 3,
+    "time_start": "21:00",
+    "time_end": "22:30",
+    "top_house": "ศุภะ",
+    "center_day": 5,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "กัมมะ",
+      "4": "ลาภะ",
+      "5": "สหัชชะ",
+      "6": "ตนุ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "4": "kaset",
+      "5": "maha_uccj",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "night",
+    "yam_no": 4,
+    "time_start": "22:30",
+    "time_end": "24:00",
+    "top_house": "กดุมภะ",
+    "center_day": 5,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "ลาภะ",
+      "3": "กดุมภะ",
+      "4": "ปุตตะ",
+      "5": "กดุมภะ",
+      "6": "กัมมะ",
+      "7": "สหัชชะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "3": "maha_uccj",
+      "5": "pra",
+      "6": "pra"
+    }
+  },
+  {
+    "_note": "=== วันพฤหัสบดี ยาม5-6 ===",
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "day",
+    "yam_no": 5,
+    "time_start": "12:00",
+    "time_end": "13:30",
+    "top_house": "สหัชชะ",
+    "center_day": 5,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "พันธุ",
+      "2": "กดุมภะ",
+      "3": "ตนุ",
+      "4": "ปัตนิ",
+      "5": "กัมมะ",
+      "6": "สหัชชะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "3": "kaset",
+      "4": "maha_chakr",
+      "5": "kaset"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "day",
+    "yam_no": 6,
+    "time_start": "13:30",
+    "time_end": "15:00",
+    "top_house": "ปัตนิ",
+    "center_day": 5,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "มรณะ",
+      "2": "มรณะ",
+      "3": "กดุมภะ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "ลาภะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "3": "maha_chakr",
+      "4": "kaset",
+      "5": "racha_chok",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "night",
+    "yam_no": 5,
+    "time_start": "24:00",
+    "time_end": "01:30",
+    "top_house": "มรณะ",
+    "center_day": 5,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "ลาภะ",
+      "3": "กดุมภะ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "กดุมภะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "2": "pra",
+      "3": "kaset",
+      "4": "pra",
+      "5": "racha_chok",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "night",
+    "yam_no": 6,
+    "time_start": "01:30",
+    "time_end": "03:00",
+    "top_house": "ศุภะ",
+    "center_day": 5,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "วินาศ",
+      "2": "กดุมภะ",
+      "3": "กัมมะ",
+      "4": "มรณะ",
+      "5": "กดุมภะ",
+      "6": "ตนุ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "3": "maha_uccj",
+      "4": "maha_chakr",
+      "5": "maha_uccj",
+      "6": "kaset"
+    }
+  },
+  {
+    "_note": "=== วันพฤหัสบดี ยาม7-8 ===",
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "day",
+    "yam_no": 7,
+    "time_start": "15:00",
+    "time_end": "16:30",
+    "top_house": "ปุตตะ",
+    "center_day": 5,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "พันธุ",
+      "2": "ลาภะ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "ตนุ",
+      "6": "ลาภะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "kaset",
+      "3": "maha_uccj",
+      "4": "pra",
+      "7": "pra"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "day",
+    "yam_no": 8,
+    "time_start": "16:30",
+    "time_end": "18:00",
+    "top_house": "ปัตนิ",
+    "center_day": 5,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "พันธุ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "ปุตตะ",
+      "5": "ลาภะ",
+      "6": "สหัชชะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "3": "pra",
+      "4": "maha_chakr",
+      "5": "maha_uccj",
+      "6": "racha_chok"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "night",
+    "yam_no": 7,
+    "time_start": "03:00",
+    "time_end": "04:30",
+    "top_house": "ลากะ",
+    "center_day": 5,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "ลาภะ",
+      "6": "กัมมะ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "2": "racha_chok",
+      "3": "maha_uccj",
+      "4": "racha_chok",
+      "5": "kaset",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "พฤหัสบดี",
+    "day_num": 5,
+    "period": "night",
+    "yam_no": 8,
+    "time_start": "04:30",
+    "time_end": "06:00",
+    "top_house": "ปัตนิ",
+    "center_day": 5,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กัมมะ",
+      "3": "ปุตตะ",
+      "4": "ลาภะ",
+      "5": "กัมมะ",
+      "6": "สหัชชะ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "2": "maha_uccj",
+      "3": "kaset",
+      "4": "maha_chakr",
+      "5": "kaset",
+      "7": "pra"
+    }
+  },
+  {
+    "_note": "=== วันศุกร์ (day_num=6, Venus=planet6) ===",
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "day",
+    "yam_no": 1,
+    "time_start": "06:00",
+    "time_end": "07:30",
+    "top_house": "ปุตตะ",
+    "center_day": 6,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "กัมมะ",
+      "3": "ลาภะ",
+      "4": "กัมมะ",
+      "5": "กดุมภะ",
+      "6": "กดุมภะ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "3": "pra",
+      "5": "racha_chok",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "day",
+    "yam_no": 2,
+    "time_start": "07:30",
+    "time_end": "09:00",
+    "top_house": "กัมมะ",
+    "center_day": 6,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "กัมมะ",
+      "2": "กดุมภะ",
+      "3": "สหัชชะ",
+      "4": "กัมมะ",
+      "5": "กัมมะ",
+      "6": "กัมมะ",
+      "7": "ปัตนิ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "pra",
+      "3": "pra",
+      "4": "kaset",
+      "5": "maha_uccj",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "night",
+    "yam_no": 1,
+    "time_start": "18:00",
+    "time_end": "19:30",
+    "top_house": "ปุตตะ",
+    "center_day": 6,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "กัมมะ",
+      "3": "ลาภะ",
+      "4": "กัมมะ",
+      "5": "กดุมภะ",
+      "6": "กดุมภะ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "2": "pra",
+      "3": "kaset",
+      "4": "pra",
+      "5": "maha_uccj",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "night",
+    "yam_no": 2,
+    "time_start": "19:30",
+    "time_end": "21:00",
+    "top_house": "สหัชชะ",
+    "center_day": 6,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "กัมมะ",
+      "2": "ลาภะ",
+      "3": "กดุมภะ",
+      "4": "ตนุ",
+      "5": "ตนุ",
+      "6": "สหัชชะ",
+      "7": "กดุมภะ"
+    },
+    "planet_statuses": {
+      "1": "maha_chakr",
+      "2": "pra",
+      "5": "pra",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "_note": "=== วันศุกร์ ยาม3-4 ===",
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "day",
+    "yam_no": 3,
+    "time_start": "09:00",
+    "time_end": "10:30",
+    "top_house": "ลากะ",
+    "center_day": 6,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "ปุตตะ",
+      "6": "กดุมภะ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "maha_uccj",
+      "3": "kaset",
+      "4": "pra",
+      "5": "pra",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "day",
+    "yam_no": 4,
+    "time_start": "10:30",
+    "time_end": "12:00",
+    "top_house": "มรณะ",
+    "center_day": 6,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "วินาศ",
+      "2": "กดุมภะ",
+      "3": "ลาภะ",
+      "4": "มรณะ",
+      "5": "กดุมภะ",
+      "6": "ลาภะ",
+      "7": "สหัชชะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "pra",
+      "3": "maha_uccj",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "night",
+    "yam_no": 3,
+    "time_start": "21:00",
+    "time_end": "22:30",
+    "top_house": "ปัตนิ",
+    "center_day": 6,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "กัมมะ",
+      "2": "ปัตนิ",
+      "3": "ลาภะ",
+      "4": "ศุภะ",
+      "5": "กดุมภะ",
+      "6": "ตนุ",
+      "7": "มรณะ"
+    },
+    "planet_statuses": {
+      "2": "kaset",
+      "4": "maha_chakr",
+      "5": "maha_uccj",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "night",
+    "yam_no": 4,
+    "time_start": "22:30",
+    "time_end": "24:00",
+    "top_house": "ตนุ",
+    "center_day": 6,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "สหัชชะ",
+      "3": "ลาภะ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "ปัตนิ",
+      "7": "กัมมะ"
+    },
+    "planet_statuses": {
+      "2": "pra",
+      "3": "pra",
+      "5": "kaset",
+      "6": "maha_uccj",
+      "7": "maha_uccj"
+    }
+  },
+  {
+    "_note": "=== วันศุกร์ ยาม5-6 ===",
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "day",
+    "yam_no": 5,
+    "time_start": "12:00",
+    "time_end": "13:30",
+    "top_house": "มรณะ",
+    "center_day": 6,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "กัมมะ",
+      "4": "ลาภะ",
+      "5": "กดุมภะ",
+      "6": "ตนุ",
+      "7": "มรณะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "maha_uccj",
+      "4": "pra",
+      "5": "maha_uccj"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "day",
+    "yam_no": 6,
+    "time_start": "13:30",
+    "time_end": "15:00",
+    "top_house": "ลากะ",
+    "center_day": 6,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "กัมมะ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "พันธุ",
+      "6": "กดุมภะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "maha_uccj",
+      "3": "kaset",
+      "5": "kaset",
+      "6": "racha_chok"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "night",
+    "yam_no": 5,
+    "time_start": "24:00",
+    "time_end": "01:30",
+    "top_house": "ตนุ",
+    "center_day": 6,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "สหัชชะ",
+      "2": "ตนุ",
+      "3": "กัมมะ",
+      "4": "กัมมะ",
+      "5": "กดุมภะ",
+      "6": "กดุมภะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "kaset",
+      "3": "maha_uccj",
+      "4": "kaset",
+      "5": "pra",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "night",
+    "yam_no": 6,
+    "time_start": "01:30",
+    "time_end": "03:00",
+    "top_house": "ปัตนิ",
+    "center_day": 6,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "ปุตตะ",
+      "4": "ตนุ",
+      "5": "กัมมะ",
+      "6": "กดุมภะ",
+      "7": "มรณะ"
+    },
+    "planet_statuses": {
+      "2": "kaset",
+      "3": "pra",
+      "4": "pra",
+      "5": "maha_uccj",
+      "6": "kaset"
+    }
+  },
+  {
+    "_note": "=== วันศุกร์ ยาม7-8 ===",
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "day",
+    "yam_no": 7,
+    "time_start": "15:00",
+    "time_end": "16:30",
+    "top_house": "กัมมะ",
+    "center_day": 6,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "กัมมะ",
+      "3": "กัมมะ",
+      "4": "กัมมะ",
+      "5": "กดุมภะ",
+      "6": "ตนุ",
+      "7": "สหัชชะ"
+    },
+    "planet_statuses": {
+      "1": "maha_uccj",
+      "2": "pra",
+      "3": "kaset",
+      "4": "kaset",
+      "5": "pra"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "day",
+    "yam_no": 8,
+    "time_start": "16:30",
+    "time_end": "18:00",
+    "top_house": "ปุตตะ",
+    "center_day": 6,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "ตนุ",
+      "2": "กัมมะ",
+      "3": "สหัชชะ",
+      "4": "ปัตนิ",
+      "5": "ลาภะ",
+      "6": "กดุมภะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "kaset",
+      "5": "kaset",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "night",
+    "yam_no": 7,
+    "time_start": "03:00",
+    "time_end": "04:30",
+    "top_house": "สหัชชะ",
+    "center_day": 6,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "ตนุ",
+      "5": "มรณะ",
+      "6": "กดุมภะ",
+      "7": "สหัชชะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "kaset",
+      "4": "maha_uccj",
+      "5": "pra",
+      "7": "maha_uccj"
+    }
+  },
+  {
+    "day": "ศุกร์",
+    "day_num": 6,
+    "period": "night",
+    "yam_no": 8,
+    "time_start": "04:30",
+    "time_end": "06:00",
+    "top_house": "ลากะ",
+    "center_day": 6,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กัมมะ",
+      "3": "ปุตตะ",
+      "4": "กดุมภะ",
+      "5": "ปัตนิ",
+      "6": "กดุมภะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "kaset",
+      "4": "pra",
+      "5": "kaset",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "_note": "=== วันเสาร์ (day_num=7, Saturn=planet7) ===",
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "day",
+    "yam_no": 1,
+    "time_start": "06:00",
+    "time_end": "07:30",
+    "top_house": "สหัชชะ",
+    "center_day": 7,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "ตนุ",
+      "3": "ปุตตะ",
+      "4": "กัมมะ",
+      "5": "กดุมภะ",
+      "6": "ลาภะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "pra",
+      "4": "kaset",
+      "5": "kaset"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "day",
+    "yam_no": 2,
+    "time_start": "07:30",
+    "time_end": "09:00",
+    "top_house": "กดุมภะ",
+    "center_day": 7,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "วินาศ",
+      "2": "ตนุ",
+      "3": "สหัชชะ",
+      "4": "ลาภะ",
+      "5": "ตนุ",
+      "6": "กดุมภะ",
+      "7": "อริ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "pra",
+      "4": "pra",
+      "5": "maha_uccj",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "night",
+    "yam_no": 1,
+    "time_start": "18:00",
+    "time_end": "19:30",
+    "top_house": "สหัชชะ",
+    "center_day": 7,
+    "center_yam": 1,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "ตนุ",
+      "3": "ปุตตะ",
+      "4": "กัมมะ",
+      "5": "กดุมภะ",
+      "6": "ลาภะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "kaset",
+      "3": "maha_uccj",
+      "5": "pra",
+      "7": "maha_chakr"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "night",
+    "yam_no": 2,
+    "time_start": "19:30",
+    "time_end": "21:00",
+    "top_house": "ปัตนิ",
+    "center_day": 7,
+    "center_yam": 2,
+    "planet_positions": {
+      "1": "กัมมะ",
+      "2": "ลาภะ",
+      "3": "กดุมภะ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "ตนุ",
+      "7": "พันธุ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "pra",
+      "3": "maha_uccj",
+      "5": "kaset",
+      "6": "pra"
+    }
+  },
+  {
+    "_note": "=== วันเสาร์ ยาม3-4 ===",
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "day",
+    "yam_no": 3,
+    "time_start": "09:00",
+    "time_end": "10:30",
+    "top_house": "ศุภะ",
+    "center_day": 7,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "วินาศ",
+      "2": "วินาศ",
+      "3": "มรณะ",
+      "4": "สหัชชะ",
+      "5": "กดุมภะ",
+      "6": "ปัตนิ",
+      "7": "กดุมภะ"
+    },
+    "planet_statuses": {
+      "1": "maha_chakr",
+      "2": "maha_chakr",
+      "4": "kaset",
+      "5": "pra",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "day",
+    "yam_no": 4,
+    "time_start": "10:30",
+    "time_end": "12:00",
+    "top_house": "อริ",
+    "center_day": 7,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "ตนุ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "อริ",
+      "6": "กดุมภะ",
+      "7": "ปุตตะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "kaset",
+      "4": "pra",
+      "5": "maha_uccj",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "night",
+    "yam_no": 3,
+    "time_start": "21:00",
+    "time_end": "22:30",
+    "top_house": "ปุตตะ",
+    "center_day": 7,
+    "center_yam": 3,
+    "planet_positions": {
+      "1": "ลาภะ",
+      "2": "กดุมภะ",
+      "3": "กัมมะ",
+      "4": "ตนุ",
+      "5": "กดุมภะ",
+      "6": "ปุตตะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "kaset",
+      "3": "pra",
+      "5": "maha_uccj",
+      "6": "pra"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "night",
+    "yam_no": 4,
+    "time_start": "22:30",
+    "time_end": "24:00",
+    "top_house": "พันธุ",
+    "center_day": 7,
+    "center_yam": 4,
+    "planet_positions": {
+      "1": "มรณะ",
+      "2": "สหัชชะ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "กัมมะ",
+      "6": "ตนุ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "3": "maha_uccj",
+      "5": "kaset",
+      "6": "pra",
+      "7": "maha_chakr"
+    }
+  },
+  {
+    "_note": "=== วันเสาร์ ยาม5-6 ===",
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "day",
+    "yam_no": 5,
+    "time_start": "12:00",
+    "time_end": "13:30",
+    "top_house": "อริ",
+    "center_day": 7,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "มรณะ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "อริ",
+      "6": "กดุมภะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "kaset",
+      "5": "racha_chok",
+      "6": "pra",
+      "7": "kaset"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "day",
+    "yam_no": 6,
+    "time_start": "13:30",
+    "time_end": "15:00",
+    "top_house": "ศุภะ",
+    "center_day": 7,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "ลาภะ",
+      "4": "กดุมภะ",
+      "5": "สหัชชะ",
+      "6": "กดุมภะ",
+      "7": "ตนุ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "kaset",
+      "3": "pra",
+      "4": "pra",
+      "5": "maha_uccj",
+      "6": "kaset",
+      "7": "racha_chok"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "night",
+    "yam_no": 5,
+    "time_start": "24:00",
+    "time_end": "01:30",
+    "top_house": "พันธุ",
+    "center_day": 7,
+    "center_yam": 5,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "สหัชชะ",
+      "4": "ลาภะ",
+      "5": "กดุมภะ",
+      "6": "กดุมภะ",
+      "7": "กดุมภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "kaset",
+      "4": "pra",
+      "5": "maha_uccj",
+      "6": "kaset"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "night",
+    "yam_no": 6,
+    "time_start": "01:30",
+    "time_end": "03:00",
+    "top_house": "ลากะ",
+    "center_day": 7,
+    "center_yam": 6,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "กัมมะ",
+      "6": "ตนุ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "kaset",
+      "4": "pra",
+      "5": "kaset",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "day",
+    "yam_no": 7,
+    "time_start": "15:00",
+    "time_end": "16:30",
+    "top_house": "มรณะ",
+    "center_day": 7,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "ลากะ",
+      "2": "ตนุ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "ลาภะ",
+      "6": "กัมมะ",
+      "7": "กดุมภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "pra",
+      "4": "pra",
+      "5": "kaset",
+      "6": "maha_uccj"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "day",
+    "yam_no": 8,
+    "time_start": "16:30",
+    "time_end": "18:00",
+    "top_house": "สหัชชะ",
+    "center_day": 7,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "กดุมภะ",
+      "6": "ตนุ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "kaset",
+      "2": "kaset",
+      "3": "kaset",
+      "4": "maha_uccj",
+      "5": "kaset",
+      "6": "racha_chok",
+      "7": "pra"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "night",
+    "yam_no": 7,
+    "time_start": "03:00",
+    "time_end": "04:30",
+    "top_house": "ปัตนิ",
+    "center_day": 7,
+    "center_yam": 7,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "กดุมภะ",
+      "4": "กดุมภะ",
+      "5": "กดุมภะ",
+      "6": "กดุมภะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "kaset",
+      "4": "pra",
+      "5": "pra",
+      "6": "pra",
+      "7": "kaset"
+    }
+  },
+  {
+    "day": "เสาร์",
+    "day_num": 7,
+    "period": "night",
+    "yam_no": 8,
+    "time_start": "04:30",
+    "time_end": "06:00",
+    "top_house": "สหัชชะ",
+    "center_day": 7,
+    "center_yam": 8,
+    "planet_positions": {
+      "1": "กดุมภะ",
+      "2": "กดุมภะ",
+      "3": "ตนุ",
+      "4": "กดุมภะ",
+      "5": "กดุมภะ",
+      "6": "กดุมภะ",
+      "7": "ลาภะ"
+    },
+    "planet_statuses": {
+      "1": "pra",
+      "2": "pra",
+      "3": "kaset",
+      "4": "pra",
+      "5": "kaset",
+      "6": "kaset",
+      "7": "pra"
+    }
+  }
+]

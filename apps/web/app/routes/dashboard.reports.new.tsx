@@ -108,19 +108,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const { supabase } = createSupabaseClient(request, env);
     const profile = await getProfile(user.id, request, env);
 
-    // ── 1. Quota Check — enforce per-plan monthly limit ──
+    // ── 1. Quota Check — enforce time_sands balance for non-imperial plans ──
     const userPlan = getUserPlan(profile);
-    const monthlyLimit = getAiReportLimit(profile);
+    const isPremium = userPlan === "imperial" || profile?.role === "admin" || profile?.role === "operator";
+    const currentSands = profile?.time_sands ?? 0;
 
-    if (monthlyLimit < 9_999) {
-      const { data: usageCount, error: usageError } = await supabase
-        .rpc("get_ai_usage_month", { p_user: user.id });
-
-      if (usageError) {
-        console.error("Quota check error:", usageError);
-      } else if (typeof usageCount === 'number' && usageCount >= monthlyLimit) {
-        const planLabel = userPlan === "basic" ? "BASIC (1 ครั้ง/เดือน)" : `PRO (${monthlyLimit} ครั้ง/เดือน)`;
-        return json({ error: `ท่านใช้สิทธิ์สร้างรายงานครบ ${monthlyLimit} ครั้งในเดือนนี้แล้ว (แผน ${planLabel}) กรุณาอัปเกรดเพื่อใช้งานเพิ่มเติม` });
+    if (!isPremium) {
+      if (currentSands <= 0) {
+        return json({ error: "ขออภัย ท่านไม่มีทรายกาลเวลา (Sands of Time) คงเหลือในระบบนาฬิกาทราย กรุณาอัปเกรดแผนสมาชิกหรือเติมเม็ดทรายกาลเวลาเพื่อสร้างรายงานใหม่" });
       }
     }
 
@@ -150,6 +145,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           birthPlace: birthPlace || null,
           displayName: displayName || "ผู้ใช้งาน",
         },
+        locale: (profile.language as any) || "th",
       },
       env
     );
@@ -204,6 +200,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
       console.error("Report save error:", insertError);
       alertDatabaseError(env, "insert ai_reports", insertError, user.id).catch(console.error);
       return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` });
+    }
+
+    // ── 5.1 Decrement Sands of Time if not premium (ไหลลดลง 1 ละอองทราย) ──
+    if (!isPremium) {
+      const { error: decrementError } = await supabase
+        .from("profiles")
+        .update({ time_sands: currentSands - 1 })
+        .eq("id", user.id);
+      
+      if (decrementError) {
+        console.error("Failed to decrement time_sands:", decrementError);
+      }
     }
 
     // ── 6. Record Usage (Non-blocking) ──
@@ -274,7 +282,7 @@ export default function NewReportPage() {
         <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">
           บทวิเคราะห์ชีวิต
         </h1>
-        <p className="text-[#8A8070] text-sm mt-1">
+        <p className="text-[#C6B79F] text-sm mt-1">
           ถอดรหัสชะตาชีวิตด้วยระบบ Living Wisdom Engine · ทักษา · มหาภูติ · เลข 7 ตัว
         </p>
       </div>
@@ -294,7 +302,7 @@ export default function NewReportPage() {
 
         {/* ── Report Type Grid ── */}
         <div>
-          <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-3">
+          <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-3">
             เลือกประเภทรายงาน
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -325,7 +333,7 @@ export default function NewReportPage() {
                     <p className={`text-sm font-bold ${selectedType === type.value ? 'text-[#F8F6F1]' : 'text-[#D9CDB7]'}`}>
                       {type.label}
                     </p>
-                    <p className="text-[13px] text-[#8A8070] mt-0.5 leading-relaxed">
+                    <p className="text-[13px] text-[#C6B79F] mt-0.5 leading-relaxed">
                       {type.desc}
                     </p>
                   </div>
@@ -338,7 +346,7 @@ export default function NewReportPage() {
         {/* ── Profile Info ── */}
         <div className="space-y-6">
           <div>
-            <p className="text-[#8A8070] text-[13px] uppercase tracking-widest font-bold mb-3 flex items-center justify-between">
+            <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-3 flex items-center justify-between">
               <span>ข้อมูลสำหรับผูกดวง</span>
               <span className="font-normal normal-case opacity-60">ดึงจากโปรไฟล์อัตโนมัติ - แก้ไขได้เพื่อใช้ในรายงานนี้</span>
             </p>
@@ -353,7 +361,7 @@ export default function NewReportPage() {
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-[#8A8070] uppercase tracking-wider ml-1">วันเกิด (พ.ศ.)</label>
+                  <label className="text-[13px] font-bold text-[#C6B79F] uppercase tracking-wider ml-1">วันเกิด (พ.ศ.)</label>
                   <div className="grid grid-cols-3 gap-2">
                     <select name="birthDay" defaultValue={defaultBDay} className="bg-black/40 border border-white/10 rounded-xl px-2 py-2.5 text-xs text-[#F8F6F1] focus:border-[#C6A96B] transition-all">
                       {Array.from({ length: 31 }, (_, i) => (
@@ -398,11 +406,11 @@ export default function NewReportPage() {
             <span className="text-3xl flex-shrink-0">{selectedMeta.icon}</span>
             <div className="flex-1 min-w-0">
               <p className="text-[#F8F6F1] font-semibold text-sm">{selectedMeta.label}</p>
-              <p className="text-[#8A8070] text-xs">{selectedMeta.desc}</p>
+              <p className="text-[#C6B79F] text-xs">{selectedMeta.desc}</p>
             </div>
             <div className="text-right flex-shrink-0 hidden sm:block">
               <p className="text-[#C9A96E] text-[13px] font-bold uppercase">Wisdom Guidance</p>
-              <p className="text-[#8A8070] text-[13px]">~30–60 วิ</p>
+              <p className="text-[#C6B79F] text-[13px]">~30–60 วิ</p>
             </div>
           </div>
         )}
@@ -424,7 +432,7 @@ export default function NewReportPage() {
           )}
         </Button>
 
-        <p className="text-center text-[#8A8070] text-[14px]">
+        <p className="text-center text-[#C6B79F] text-[14px]">
           ระบบ Living Wisdom ใช้เฉพาะข้อมูลดวงชะตาของคุณ ไม่เก็บข้อมูลส่วนตัวอื่น
         </p>
       </Form>
@@ -450,7 +458,7 @@ export default function NewReportPage() {
               <p className="text-[#C9A96E] text-sm font-semibold mb-2">
                 {selectedMeta?.label}
               </p>
-              <p className="text-[#8A8070] text-xs leading-relaxed">
+              <p className="text-[#C6B79F] text-xs leading-relaxed">
                 ระบบกำลังวิเคราะห์ทักษา มหาภูติ และเลข 7 ตัว<br />กรุณารอสักครู่...
               </p>
             </div>

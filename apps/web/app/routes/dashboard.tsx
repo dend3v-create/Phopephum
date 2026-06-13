@@ -5,6 +5,8 @@ import { requireAuth, getProfile } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import { NavLink } from "~/components/ui/NavLink";
 import { ProtectedContent } from "~/components/ui/ProtectedContent";
+import { ThemeToggle } from "~/components/ThemeToggle";
+import { LanguageSwitcher } from "~/components/LanguageSwitcher";
 import type { Env } from "~/env.server";
 import { useState } from "react";
 
@@ -17,6 +19,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
     if (profile?.membership_status === "pending" && profile?.role === "user") {
       throw redirect("/pending-approval");
+    }
+
+    if (!profile?.birth_date && profile?.role === "user") {
+      throw redirect("/onboarding");
     }
 
     await logEvent(request, env, EVENTS.DAILY_VISIT, { source: "web" });
@@ -100,6 +106,14 @@ function NavIcon({ name, size = 5 }: { name: IconKey | string; size?: number }) 
       <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
+  if (name === "people") return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={cls}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16 3.13a4 4 0 0 1 0 7.75" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
   if (name === "operator") return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={cls}>
       <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round" />
@@ -167,9 +181,9 @@ export default function DashboardLayout() {
         }`}
         onClick={() => isMobileMenuOpen && setIsMobileMenuOpen(false)}
         style={{
-          background: "rgba(2,6,23,0.98)",
+          background: "var(--sidebar-bg)",
           backdropFilter: "blur(20px)",
-          borderColor: "rgba(217,188,130,0.12)",
+          borderColor: "var(--sidebar-border)",
         }}
       >
         {/* Logo */}
@@ -195,7 +209,7 @@ export default function DashboardLayout() {
 
         {/* ── Main Nav — exactly 5 items ── */}
         <nav className="flex flex-col gap-0.5 flex-1 overflow-y-auto">
-          <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#4A5568] px-3 mb-1.5">เมนูหลัก</p>
+          <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] px-3 mb-1.5 opacity-70">เมนูหลัก</p>
 
           {NAV_ITEMS.map(item => (
             <NavLink
@@ -206,6 +220,13 @@ export default function DashboardLayout() {
               label={item.label}
             />
           ))}
+
+          <NavLink
+            to="/dashboard/community"
+            exact={false}
+            icon={<NavIcon name="people" />}
+            label="ชะตาพันธมิตร"
+          />
 
           {/* ── Pro Astrologer Tools ── */}
           {isPro && (
@@ -219,6 +240,7 @@ export default function DashboardLayout() {
               <NavLink to="/dashboard/rahu"         exact={false} icon={<NavIcon name="rahu" />}       label="ยามราหูค้นทรัพย์" />
               <NavLink to="/dashboard/mahathaksa"   exact={false} icon={<NavIcon name="taksa" />}     label="มหาทักษาพยากรณ์" />
               <NavLink to="/dashboard/mahaphuti"    exact={false} icon={<NavIcon name="phuti" />}     label="มหาภูติกำเนิด" />
+              <NavLink to="/dashboard/people"       exact={false} icon={<NavIcon name="people" />}    label="โปรไฟล์บุคคล" />
               <NavLink to="/dashboard/calendar"     exact={false} icon={<NavIcon name="list" />}       label="ปฏิทิน 100 ปี" />
             </div>
           )}
@@ -256,6 +278,32 @@ export default function DashboardLayout() {
               Admin Dashboard
             </a>
           )}
+          {/* ── Sands of Time Token Progress Bar ── */}
+          <div className="px-3 py-2 rounded-xl mb-1.5" style={{ background: "rgba(198,169,107,0.05)", border: "1px solid rgba(198,169,107,0.15)" }}>
+            <div className="flex justify-between items-center text-[10px] font-bold text-[#C6A96B] mb-1">
+              <span className="tracking-wider">⏳ SANDS OF TIME</span>
+              {isPro ? (
+                <span className="text-xs">♾️ Unlimited</span>
+              ) : (
+                <span>{profile?.time_sands ?? 0} / 15 เม็ด</span>
+              )}
+            </div>
+            {!isPro && (
+              <div className="w-full bg-[#020617] h-1.5 rounded-full overflow-hidden border border-white/5">
+                <div
+                  className="bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] h-full transition-all duration-500"
+                  style={{ width: `${Math.min(100, (((profile?.time_sands ?? 0) / 15) * 100))}%` }}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* ── Preference controls ── */}
+          <div className="flex items-center justify-between pb-2">
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
+
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-[#D9BC82] text-sm font-bold shrink-0"
               style={{ background: "rgba(198,169,107,0.15)", border: "1px solid rgba(217,188,130,0.25)" }}>
@@ -277,12 +325,17 @@ export default function DashboardLayout() {
       {/* ── Mobile Top Bar ─────────────────────────────────────────────────── */}
       <div
         className="md:hidden fixed top-0 left-0 right-0 z-20 flex items-center justify-between px-4 h-12 border-b"
-        style={{ background: "rgba(2,6,23,0.98)", backdropFilter: "blur(16px)", borderColor: "rgba(217,188,130,0.12)" }}
+        style={{ background: "var(--sidebar-bg)", backdropFilter: "blur(16px)", borderColor: "var(--sidebar-border)" }}
       >
         <Link to="/dashboard" className="flex items-center gap-2">
           <span className="font-display text-base font-bold text-[#F8F6F1]">PhopePhum</span>
-          <span className="text-[9px] text-[#C6A96B]/50 font-medium tracking-widest uppercase">Wisdom OS</span>
+          <span className="text-[9px] text-[#C6A96B]/50 font-medium tracking-widest uppercase hidden xs:inline">Wisdom OS</span>
         </Link>
+
+        {/* Controls: Language + Theme + Menu */}
+        <div className="flex items-center gap-1">
+          <LanguageSwitcher />
+          <ThemeToggle />
 
         {isPro ? (
           /* Pro: hamburger opens sidebar for Pro tools */
@@ -304,6 +357,7 @@ export default function DashboardLayout() {
             ✦ Upgrade
           </Link>
         )}
+        </div>
       </div>
 
       {/* ── Mobile Bottom Tab Bar (5 tabs — matches sidebar) ─────────────────── */}
@@ -350,7 +404,7 @@ function MobileBottomBar({ currentPath }: { currentPath: string }) {
             key={tab.to}
             to={tab.to}
             className="relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
-            style={{ color: isActive ? "#C6A96B" : "#4A5568" }}
+            style={{ color: isActive ? "#C6A96B" : "#94A3B8" }}
           >
             {/* Active top-edge indicator */}
             {isActive && (

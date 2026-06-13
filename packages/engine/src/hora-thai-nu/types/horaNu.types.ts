@@ -125,3 +125,39 @@ export interface HoraNuChartData {
   houseChart: HoraNuHouseEntry[];
   yamSchedule: HoraNuYamPeriod[];
 }
+
+export interface SuccessYamChart {
+  id: string;
+  weekday: 'sun' | 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat';
+  period: 'day' | 'night';
+  yamNo: number;
+  startTime: string;
+  endTime: string;
+
+  /** zodiac index (0-11) ที่ดาวลอยแต่ละดวงลงไป */
+  planets: {
+    '1': number; '2': number; '3': number; '4': number; '5': number;
+    '6': number; '7': number; '8': number; '9': number; '0': number;
+    'la': number;
+  };
+
+  /** zodiac index ที่ภพแต่ละภพตั้งอยู่ */
+  houses: {
+    tanu: number;    dhan: number;   saha: number;   bandhu: number;
+    putta: number;   ari: number;    patni: number;  marana: number;
+    subha: number;   karma: number;  labha: number;  vinasa: number;
+  };
+
+  /** เวลาเริ่มต้นของยามย่อย 12 ช่อง (7.5 นาที × 12) */
+  timeSlots: string[];
+}
+
+export interface SuccessYamMeta {
+  id: string;
+  weekday: number;          // 0=อาทิตย์ ... 6=เสาร์
+  weekdayName: string;
+  period: 'day' | 'night';
+  yamNo: number;            // 1-8
+  start: string;            // "HH:MM"
+  end: string;
+}

@@ -40,50 +40,50 @@ describe('Hora Taynoo Engine (ยามอัฐกาล & ดาวลอย)'
     expect(result.planetEntries[5].label).toBe('6')
     expect(result.planetEntries[5].zodiacIndex).toBe(5)
 
-    // ดาว ๗: พิจิก (Scorpio / index 6)
+    // ดาว ๗: มีน (Pisces / index 10)
     expect(result.planetEntries[6].label).toBe('7')
-    expect(result.planetEntries[6].zodiacIndex).toBe(6)
+    expect(result.planetEntries[6].zodiacIndex).toBe(10)
 
-    // ดาว ๘: พฤษภ (Taurus / index 0)
+    // ดาว ๘: มีน (Pisces / index 10)
     expect(result.planetEntries[7].label).toBe('8')
-    expect(result.planetEntries[7].zodiacIndex).toBe(0)
+    expect(result.planetEntries[7].zodiacIndex).toBe(10)
 
-    // ดาว ลั: กันย์ (Virgo / index 4)
+    // ดาว ลั: พฤษภ (Taurus / index 0)
     expect(result.planetEntries[8].label).toBe('ล')
-    expect(result.planetEntries[8].zodiacIndex).toBe(4)
+    expect(result.planetEntries[8].zodiacIndex).toBe(0)
 
-    // ดาว ๙: พิจิก (Scorpio / index 6)
+    // ดาว ๙: กันย์ (Virgo / index 4)
     expect(result.planetEntries[9].label).toBe('9')
-    expect(result.planetEntries[9].zodiacIndex).toBe(6)
+    expect(result.planetEntries[9].zodiacIndex).toBe(4)
 
-    // ดาว ๐: พิจิก (Scorpio / index 6)
+    // ดาว ๐: มีน (Pisces / index 10)
     expect(result.planetEntries[10].label).toBe('0')
-    expect(result.planetEntries[10].zodiacIndex).toBe(6)
+    expect(result.planetEntries[10].zodiacIndex).toBe(10)
 
     // ตรวจสอบลัคนาและดาวเจ้าเรือนลัคนา
-    // ลัคนาอยู่ที่ กันย์ (Virgo / index 4)
-    // ดาวเจ้าเรือนของกันย์คือ 4 (พุธ)
-    expect(result.lagnaZodiacIndex).toBe(4)
-    expect(result.lagnaRulerPlanet).toBe(4)
+    // ลัคนาอยู่ที่ พฤษภ (Taurus / index 0)
+    // ดาวเจ้าเรือนของพฤษภคือ 6 (ศุกร์)
+    expect(result.lagnaZodiacIndex).toBe(0)
+    expect(result.lagnaRulerPlanet).toBe(6)
 
-    // ดาว ๔ สถิตที่ เมษ (Aries / index 11)
-    // ดังนั้นจุดลงเวลายามย่อยเริ่มต้นที่ เมษ
-    expect(result.timeStartZodiacIndex).toBe(11)
+    // ดาว ๖ สถิตที่ ตุลย์ (Libra / index 5)
+    // ดังนั้นจุดลงเวลายามย่อยเริ่มต้นที่ ตุลย์
+    expect(result.timeStartZodiacIndex).toBe(5)
 
     // ตรวจสอบทิศทางการวนยามย่อย (วนตามเข็มนาฬิกา / ตามลำดับราศี)
     const expectedSlots = [
-      { name: 'เมษ', min: '10:30' },
-      { name: 'พฤษภ', min: '10:37.30' },
-      { name: 'เมถุน', min: '10:45' },
-      { name: 'กรกฎ', min: '10:52.30' },
-      { name: 'สิงห์', min: '11:00' },
-      { name: 'กันย์', min: '11:07.30' },
-      { name: 'ตุลย์', min: '11:15' },
-      { name: 'พิจิก', min: '11:22.30' },
-      { name: 'ธนู', min: '11:30' },
-      { name: 'มังกร', min: '11:37.30' },
-      { name: 'กุมภ์', min: '11:45' },
-      { name: 'มีน', min: '11:52.30' }
+      { name: 'ตุลย์', min: '10:37.30' },
+      { name: 'พิจิก', min: '10:45' },
+      { name: 'ธนู', min: '10:52.30' },
+      { name: 'มังกร', min: '11:00' },
+      { name: 'กุมภ์', min: '11:07.30' },
+      { name: 'มีน', min: '11:15' },
+      { name: 'เมษ', min: '11:22.30' },
+      { name: 'พฤษภ', min: '11:30' },
+      { name: 'เมถุน', min: '11:37.30' },
+      { name: 'กรกฎ', min: '11:45' },
+      { name: 'สิงห์', min: '11:52.30' },
+      { name: 'กันย์', min: '12:00' }
     ]
 
     result.subTimeSlots.forEach((slot, index) => {

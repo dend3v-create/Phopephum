@@ -27,21 +27,50 @@ export const meta: MetaFunction = () => [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const { profile } = await requireMinPlan("basic", request, env);
+  const user = await requireAuth(request, env);
+  const { getProfile } = await import("~/services/auth.server");
+  const profile = await getProfile(user.id, request, env);
+
+  const url = new URL(request.url);
+  const customerId = url.searchParams.get("customerId");
+
+  const { createSupabaseClient } = await import("~/services/supabase.server");
+  const { supabase } = createSupabaseClient(request, env);
+
+  // ดึงรายชื่อลูกค้าที่บันทึกไว้ เพื่อใช้หาข้อมูลตาม customerId
+  const { data: customers } = await supabase
+    .from("customers")
+    .select("*")
+    .eq("user_id", user.id);
+
+  let targetPerson = profile;
+  let selectedCust = null;
+  if (customerId && customers) {
+    selectedCust = customers.find(c => c.id === customerId);
+    if (selectedCust) {
+      targetPerson = {
+        id: selectedCust.id,
+        birth_date: selectedCust.birth_date,
+        birth_time: selectedCust.birth_time,
+        birth_place: selectedCust.birth_place,
+        display_name: selectedCust.name,
+      } as any;
+    }
+  }
 
   let initialResult: any = null;
-  if (profile?.birth_date) {
+  if (targetPerson?.birth_date) {
     try {
       const checkDate = new Date();
-      const birthCE = new Date(profile.birth_date).getFullYear();
+      const birthCE = new Date(targetPerson.birth_date).getFullYear();
       const phopephumResult = await calculatePhopephum({
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time || "12:00",
-        birthPlace: profile.birth_place || "กรุงเทพมหานคร",
+        birthDate: targetPerson.birth_date,
+        birthTime: targetPerson.birth_time || "12:00",
+        birthPlace: targetPerson.birth_place || "กรุงเทพมหานคร",
       }, checkDate);
 
       const taksaMahaFull = calcTaksaMaha({
-        birthDate: new Date(profile.birth_date + "T12:00:00"),
+        birthDate: new Date(targetPerson.birth_date + "T12:00:00"),
         checkDate,
         csNatal:   buddhToCS(birthCE + 543),
         csTransit: buddhToCS(checkDate.getFullYear() + 543),
@@ -57,10 +86,12 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           alerts: phopephumResult.crossCheck.alerts,
         },
         sawai: taksaMahaFull.sawai,
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time || "",
+        birthDate: targetPerson.birth_date,
+        birthTime: targetPerson.birth_time || "",
         birthYearThai: birthCE + 543,
         currentYearThai: checkDate.getFullYear() + 543,
+        customerId: customerId || undefined,
+        customerName: selectedCust ? selectedCust.name : undefined,
       };
     } catch (e) {
       console.error("mahaphuti loader error:", e);
@@ -151,7 +182,7 @@ const MAHA_QUALITY: Record<string, { tone: "good" | "neutral" | "bad"; icon: str
 
 const MAHA_TONE_COLOR: Record<string, { border: string; bg: string; text: string; badge: string }> = {
   good:    { border: "border-emerald-500/25", bg: "bg-emerald-950/15", text: "text-emerald-400", badge: "bg-emerald-500/10 border-emerald-500/30 text-emerald-300" },
-  neutral: { border: "border-white/8",        bg: "bg-slate-900/30",   text: "text-[#8A8070]",  badge: "bg-white/5 border-white/10 text-[#8A8070]" },
+  neutral: { border: "border-white/8",        bg: "bg-slate-900/30",   text: "text-[#C6B79F]",  badge: "bg-white/5 border-white/10 text-[#C6B79F]" },
   bad:     { border: "border-rose-500/25",    bg: "bg-rose-950/10",    text: "text-rose-400",   badge: "bg-rose-500/10 border-rose-500/30 text-rose-300" },
 };
 
@@ -176,7 +207,7 @@ function MahaGrid({
         <p className="text-[14px] font-bold uppercase tracking-widest text-[#C9A96E]">
           มหาภูติกำเนิด จ.ศ.{natal.cs} / จร จ.ศ.{transit.cs}
         </p>
-        <p className="text-[#8A8070] text-sm mt-0.5">
+        <p className="text-[#C6B79F] text-sm mt-0.5">
           เศษกำเนิด: {natal.remainder} · เศษจร: {transit.remainder}
         </p>
       </div>
@@ -188,7 +219,7 @@ function MahaGrid({
                 return (
                   <div key={`empty-${rIdx}-${cIdx}`}
                     className="aspect-square flex items-center justify-center rounded-2xl border border-dashed border-white/5 bg-transparent">
-                    <span className="text-[#8A8070] text-xs">—</span>
+                    <span className="text-[#C6B79F] text-xs">—</span>
                   </div>
                 );
               }
@@ -201,10 +232,10 @@ function MahaGrid({
               return (
                 <div key={`maha-${bhop}`}
                   className={`aspect-square flex flex-col items-between justify-between rounded-2xl border p-2 hover:border-[#C9A96E]/30 transition-all ${colors.border} ${colors.bg}`}>
-                  <span className="text-[11px] font-bold text-center leading-tight text-[#8A8070]">{bhop}</span>
+                  <span className="text-[11px] font-bold text-center leading-tight text-[#C6B79F]">{bhop}</span>
                   <div className="flex flex-col items-center my-0.5">
                     <span className="font-display text-3xl font-bold text-[#F8F6F1]">{starNatal}</span>
-                    <span className="text-[11px] text-[#8A8070]">{STAR_NAMES[starNatal as StarNumber]}</span>
+                    <span className="text-[11px] text-[#C6B79F]">{STAR_NAMES[starNatal as StarNumber]}</span>
                   </div>
                   <span className={`text-[11px] font-bold text-center ${colors.text}`}>
                     {starTransit} จร
@@ -214,7 +245,7 @@ function MahaGrid({
             })
           )}
         </div>
-        <div className="flex justify-center gap-6 mt-4 text-xs text-[#8A8070]">
+        <div className="flex justify-center gap-6 mt-4 text-xs text-[#C6B79F]">
           <span className="flex items-center gap-1"><span className="text-[#F8F6F1] font-bold">เลขใหญ่</span> = กำเนิด</span>
           <span className="flex items-center gap-1"><span className="text-emerald-400 font-bold">X จร</span> = จรปีนี้</span>
         </div>
@@ -247,7 +278,7 @@ function MahaPhupPredictionPanel({ bhop, natal, transit }: {
           </div>
           <div>
             <p className="text-[#F8F6F1] font-bold text-sm">{bhop}</p>
-            <p className="text-[#8A8070] text-xs">{quality?.desc}</p>
+            <p className="text-[#C6B79F] text-xs">{quality?.desc}</p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
@@ -337,7 +368,7 @@ function MahaSummaryBar({ natal, transit }: {
         <div className="bg-emerald-950/20 border border-emerald-500/20 rounded-2xl p-4 text-center">
           <p className="text-emerald-400 text-xs uppercase tracking-wider mb-1">ภพมงคล</p>
           <p className="font-display text-4xl font-bold text-emerald-300">{transitGoodScore}</p>
-          <p className="text-xs text-[#8A8070] mt-1">ราชา · อธิบดี · ธงชัย · ขุมทรัพย์</p>
+          <p className="text-xs text-[#C6B79F] mt-1">ราชา · อธิบดี · ธงชัย · ขุมทรัพย์</p>
           <div className="flex flex-wrap gap-1 mt-2 justify-center">
             {goodBhops.map(b => (
               <span key={b} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
@@ -349,7 +380,7 @@ function MahaSummaryBar({ natal, transit }: {
         <div className="bg-rose-950/15 border border-rose-500/20 rounded-2xl p-4 text-center">
           <p className="text-rose-400 text-xs uppercase tracking-wider mb-1">ภพอัปมงคล</p>
           <p className="font-display text-4xl font-bold text-rose-300">{transitBadScore}</p>
-          <p className="text-xs text-[#8A8070] mt-1">มรณะ · อริ · โลกาวินาศ</p>
+          <p className="text-xs text-[#C6B79F] mt-1">มรณะ · อริ · โลกาวินาศ</p>
           <div className="flex flex-wrap gap-1 mt-2 justify-center">
             {badBhops.map(b => (
               <span key={b} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400">
@@ -369,22 +400,22 @@ function BirthForm() {
       <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold mb-4">ป้อนวันเดือนปีเกิด</p>
       <Form method="post" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <label className="text-xs text-[#8A8070] mb-1 block">วัน</label>
+          <label className="text-xs text-[#C6B79F] mb-1 block">วัน</label>
           <input name="birthDay" type="number" min={1} max={31} placeholder="15"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
         </div>
         <div>
-          <label className="text-xs text-[#8A8070] mb-1 block">เดือน</label>
+          <label className="text-xs text-[#C6B79F] mb-1 block">เดือน</label>
           <input name="birthMonth" type="number" min={1} max={12} placeholder="6"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
         </div>
         <div>
-          <label className="text-xs text-[#8A8070] mb-1 block">ปี พ.ศ.</label>
+          <label className="text-xs text-[#C6B79F] mb-1 block">ปี พ.ศ.</label>
           <input name="birthYear" type="number" min={2400} max={2600} placeholder="2500"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
         </div>
         <div>
-          <label className="text-xs text-[#8A8070] mb-1 block">เวลาเกิด</label>
+          <label className="text-xs text-[#C6B79F] mb-1 block">เวลาเกิด</label>
           <input name="birthTime" type="time" defaultValue="06:00"
             className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
         </div>
@@ -423,11 +454,13 @@ export default function MahaPhuti() {
             <div className="w-2 h-2 bg-[#4B6FAE] rounded-full animate-pulse" />
             <p className="text-[#4B6FAE] text-[11px] tracking-[0.3em] uppercase font-bold">Mahabhuti System</p>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">มหาภูติกำเนิด</h1>
-          <p className="text-[#8A8070] text-sm mt-1">ระบบมหาภูติ 7 ภพ — พลังงานวิถีจิตใจ กำเนิด/จร</p>
+          <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">
+            มหาภูติกำเนิด {activeResult?.customerName ? `(${activeResult.customerName})` : ""}
+          </h1>
+          <p className="text-[#C6B79F] text-sm mt-1">ระบบมหาภูติ 7 ภพ — พลังงานวิถีจิตใจ กำเนิด/จร</p>
         </div>
         {natal && (
-          <div className="text-right text-xs text-[#8A8070] shrink-0">
+          <div className="text-right text-xs text-[#C6B79F] shrink-0">
             <p>จ.ศ.กำเนิด</p>
             <p className="font-display text-3xl text-[#4B6FAE] font-bold leading-none">{natal.cs}</p>
             <p>เศษ {natal.remainder}</p>

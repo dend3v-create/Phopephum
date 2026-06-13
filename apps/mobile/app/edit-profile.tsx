@@ -65,7 +65,7 @@ export default function EditProfileScreen() {
             value={displayName}
             onChangeText={setDisplayName}
             placeholder="กรอกชื่อของคุณ"
-            placeholderTextColor="#8A8070"
+            placeholderTextColor="#C6B79F"
           />
         </View>
 
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   label: {
-    color: '#8A8070',
+    color: '#C6B79F',
     fontSize: 14,
     marginBottom: 8,
   },

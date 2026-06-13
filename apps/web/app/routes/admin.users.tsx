@@ -152,7 +152,7 @@ export default function AdminUsersPage() {
       </Form>
 
       {/* Users Table */}
-      <div className="overflow-x-auto rounded-2xl border border-white/10" style={{ background: "rgba(15,23,42,0.6)", backdropFilter: "blur(12px)" }}>
+      <div className="overflow-x-auto rounded-2xl border border-white/10" style={{ background: "var(--card-dark-bg)", backdropFilter: "blur(12px)" }}>
         <div className="min-w-[1000px]">
           <table className="w-full text-left border-collapse">
             <thead>

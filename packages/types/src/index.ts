@@ -17,6 +17,8 @@ export interface UserProfile {
 
 export type SubscriptionTier = "free" | "basic" | "premium" | "lifetime";
 
+export type Locale = "th" | "en" | "zh";
+
 // ─── Core Astrology Primitives ───────────────────────────────────────────────
 
 /** เลขดาว 1–8 (โหราศาสตร์ไทย รวมราหู=8) */

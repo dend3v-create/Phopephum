@@ -245,7 +245,7 @@ export default function AdminApprovals() {
                     </span>
                   </div>
 
-                  <p className="text-[10px] text-[#8A8070]">
+                  <p className="text-[10px] text-[#C6B79F]">
                     ขอเมื่อ: {new Date(req.created_at).toLocaleString("th-TH")}
                   </p>
                 </div>
@@ -279,7 +279,7 @@ export default function AdminApprovals() {
                   )}
                   
                   {req.approved_at && (
-                    <p className="text-[9px] text-[#8A8070] italic">
+                    <p className="text-[9px] text-[#C6B79F] italic">
                       Action at: {new Date(req.approved_at).toLocaleDateString("th-TH")}
                     </p>
                   )}

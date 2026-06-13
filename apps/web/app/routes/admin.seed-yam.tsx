@@ -36,7 +36,7 @@ export default function SeedYamPage() {
     <div className="max-w-lg mx-auto p-8 space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-[#C9A96E] font-display">Seed ดวงยามสำเร็จ</h1>
-        <p className="text-[#8A8070] text-sm mt-1">บันทึก 112 ผัง (7 วัน × 2 ช่วง × 8 ยาม) ลง Supabase</p>
+        <p className="text-[#C6B79F] text-sm mt-1">บันทึก 112 ผัง (7 วัน × 2 ช่วง × 8 ยาม) ลง Supabase</p>
       </div>
 
       <div className="bg-amber-950/30 border border-amber-500/30 rounded-xl p-4 text-sm text-amber-200">

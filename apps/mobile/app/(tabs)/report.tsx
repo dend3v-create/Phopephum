@@ -171,7 +171,7 @@ export default function ReportScreen() {
                       <Ionicons
                         name={isExpanded ? 'chevron-up' : 'chevron-down'}
                         size={18}
-                        color="#8A8070"
+                        color="#C6B79F"
                       />
                     </View>
                     {isExpanded && report.content && (
@@ -224,7 +224,7 @@ const styles = StyleSheet.create({
   },
   generateIcon: { fontSize: 22, color: '#C9A96E' },
   generateLabel: { color: '#F8F6F1', fontSize: 13, fontWeight: 'bold' },
-  generateDesc: { color: '#8A8070', fontSize: 11, lineHeight: 16 },
+  generateDesc: { color: '#C6B79F', fontSize: 11, lineHeight: 16 },
   historyList: { gap: 10 },
   reportCard: {
     backgroundColor: '#15120F',
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   reportCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   reportCardIcon: { fontSize: 20, color: '#C9A96E', width: 28 },
   reportCardLabel: { color: '#F8F6F1', fontSize: 13, fontWeight: '600', marginBottom: 2 },
-  reportCardDate: { color: '#8A8070', fontSize: 11 },
+  reportCardDate: { color: '#C6B79F', fontSize: 11 },
   reportContent: {
     color: '#D9CDB7',
     fontSize: 13,
@@ -255,5 +255,5 @@ const styles = StyleSheet.create({
     paddingVertical: 48,
   },
   emptyIcon: { fontSize: 40, color: '#2A2018', marginBottom: 12 },
-  emptyText: { color: '#8A8070', fontSize: 13, textAlign: 'center', lineHeight: 22 },
+  emptyText: { color: '#C6B79F', fontSize: 13, textAlign: 'center', lineHeight: 22 },
 });

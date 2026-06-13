@@ -11,21 +11,16 @@ import {
   generateHoraTaynooSVG,
   loadSuccessYam,
   getSuccessYamMeta,
-  getYamTimeRange,
   interpretChart,
-  getPlanetStatus,
-  buildBhavaMap,
-  findLagnaRuler,
-  buildSubTimeSlots,
   PLANET_INFO,
   ZODIAC_ORDER,
   BHAVA_NAMES,
 } from "@phopephum/engine";
-import type { HoraTaynooResult, SuccessYamMeta, ChartConfig, ChartInterpretation } from "@phopephum/engine";
+import type { HoraTaynooResult, ChartConfig, ChartInterpretation } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import type { Env } from "~/env.server";
-import { getYamLibrary, getYamRow } from "~/services/yam-library.server";
+import { getYamLibrary } from "~/services/yam-library.server";
 import type { YamLibraryRow } from "~/services/yam-library.server";
 import { useState, useEffect, useRef } from "react";
 
@@ -65,58 +60,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const weekday = Number(formData.get("weekday") ?? 0);
     const period  = (formData.get("period") ?? "day") as "day" | "night";
     const yamNo   = Number(formData.get("yamNo") ?? 1);
-    const rowId   = String(formData.get("rowId") ?? "");
 
-    // Base result (timing, yamPlanet, dayPlanet, etc.)
     result = loadSuccessYam(weekday, period, yamNo);
-
-    // Override with manually-entered Supabase planet positions (if available)
-    if (rowId) {
-      const row = await getYamRow(env, rowId);
-      if (row && Object.keys(row.planets).length > 0) {
-        const planets       = row.planets;
-        const lagnaZodiacIndex = row.lagna_zodiac_index;
-
-        // Rebuild planet entries from Supabase data (same order as engine)
-        const LABELS      = ['1','2','3','4','5','6','7','8','ล','9','0'];
-        const THAI_LABELS = ['๑','๒','๓','๔','๕','๖','๗','๘','ลั','๙','๐'];
-        const KEYS        = ['1','2','3','4','5','6','7','8','la','9','0'];
-        const PLANET_NUMS = [1,2,3,4,5,6,7,8,null,9,null] as (number|null)[];
-
-        const planetEntries = LABELS.map((label, i) => {
-          const pNum  = PLANET_NUMS[i];
-          const key   = KEYS[i];
-          const zIdx  = planets[key] ?? 0;
-          const status = pNum != null ? getPlanetStatus(pNum, zIdx) : null;
-          return {
-            label,
-            labelThai:   THAI_LABELS[i],
-            planetNum:   pNum,
-            zodiacIndex: zIdx,
-            zodiacName:  ZODIAC_ORDER[zIdx]?.name ?? '',
-            steps:       result.planetSteps[i],
-            isLagna:     label === 'ล',
-            status,
-          };
-        });
-
-        const bhavaMap             = buildBhavaMap(lagnaZodiacIndex);
-        const lagnaRulerPlanet     = findLagnaRuler(lagnaZodiacIndex);
-        const timeStartZodiacIndex = planetEntries.find(e => e.planetNum === lagnaRulerPlanet)?.zodiacIndex ?? 0;
-        const subTimeSlots         = buildSubTimeSlots(result.yamStartMin, timeStartZodiacIndex, bhavaMap);
-
-        result = {
-          ...result,
-          lagnaZodiacIndex,
-          lagnaZodiacName:       ZODIAC_ORDER[lagnaZodiacIndex]?.name ?? '',
-          planetEntries,
-          bhavaMap,
-          lagnaRulerPlanet,
-          timeStartZodiacIndex,
-          subTimeSlots,
-        };
-      }
-    }
   } else {
     // custom time
     let targetDate = new Date();
@@ -125,11 +70,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const year  = Number(formData.get("year")  ?? 0);
     const time  = String(formData.get("time")  ?? "12:00");
     const [h, m] = time.split(":").map(Number);
+    
     if (day && month && year) {
-      targetDate = new Date(year - 543, month - 1, day, h, m, 0);
+      // ใช้ ISO Format พร้อม Timezone Offset (+07:00) เพื่อความแม่นยำ
+      const iso = `${year - 543}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:00+07:00`;
+      targetDate = new Date(iso);
     }
+    
     result = calculateHoraTaynoo({ dateAsked: targetDate });
   }
+
 
   const interpretation = interpretChart(result);
   const svg = generateHoraTaynooSVG(result, { size: 520, theme: "dark" });
@@ -266,7 +216,7 @@ function PlanetTable({ result }: { result: HoraTaynooResult }) {
               {bhava && (
                 <div className="text-[9px] mt-0.5 font-medium" style={{ color: `${color}cc` }}>{bhava}</div>
               )}
-              <div className="text-[9px] text-[#4A5568] mt-0.5">{entry.steps}ก้าว</div>
+              <div className="text-[9px] text-[#94A3B8] mt-0.5">{entry.steps}ก้าว</div>
             </div>
           );
         })}
@@ -409,7 +359,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
   const [filterGrade,  setFilterGrade]  = useState<string | null>(null);
   const [selectedId,   setSelectedId]   = useState<string | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const [formVals, setFormVals] = useState({ weekday: 0, period: "day" as "day"|"night", yamNo: 1, rowId: "" });
+  const [formVals, setFormVals] = useState({ weekday: 0, period: "day" as "day"|"night", yamNo: 1 });
 
   const filtered = library.filter(row => {
     if (filterDay    !== null && row.weekday_num !== filterDay)    return false;
@@ -420,7 +370,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
 
   const handleSelect = (row: YamLibraryRow) => {
     setSelectedId(row.id);
-    setFormVals({ weekday: row.weekday_num, period: row.period, yamNo: row.yam_no, rowId: row.id });
+    setFormVals({ weekday: row.weekday_num, period: row.period, yamNo: row.yam_no });
     setTimeout(() => formRef.current?.requestSubmit(), 50);
   };
 
@@ -438,7 +388,6 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
         <input type="hidden" name="weekday" value={formVals.weekday} />
         <input type="hidden" name="period"  value={formVals.period} />
         <input type="hidden" name="yamNo"   value={formVals.yamNo} />
-        <input type="hidden" name="rowId"   value={formVals.rowId} />
       </Form>
 
       <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
@@ -614,12 +563,73 @@ function LiveClock({ serverTime }: { serverTime: string }) {
 
 // ─── Chat Panel ───────────────────────────────────────────────────────────────
 
-const SUGGESTED_QUESTIONS = [
-  "การเงินช่วงนี้เป็นอย่างไร?",
-  "งานที่ทำอยู่จะสำเร็จไหม?",
-  "ความรักจะพัฒนาไปได้ไหม?",
-  "ปัญหาที่มีจะคลี่คลายไหม?",
-  "โชคลาภช่วงนี้เป็นอย่างไร?",
+const QUESTION_CATEGORIES = [
+  {
+    key: "work",
+    label: "💼 งาน",
+    questions: [
+      "งานที่ทำอยู่จะสำเร็จลุล่วงไหม?",
+      "วันนี้เหมาะกับการเจรจาธุรกิจไหม?",
+      "ควรนำเสนองานตอนนี้หรือรอก่อน?",
+      "โปรเจกต์ที่รอผลอยู่จะได้รับการอนุมัติไหม?",
+      "การเปลี่ยนงานตอนนี้เป็นทางที่ดีไหม?",
+    ],
+  },
+  {
+    key: "money",
+    label: "💰 การเงิน",
+    questions: [
+      "การเงินช่วงนี้ไหลเข้าหรือไหลออก?",
+      "วันนี้เหมาะกับการลงทุนไหม?",
+      "ควรจ่ายเงินก้อนใหญ่ตอนนี้หรือเปล่า?",
+      "โชคลาภจากภายนอกจะเข้ามาไหม?",
+      "หนี้สินหรือปัญหาการเงินจะคลี่คลายไหม?",
+    ],
+  },
+  {
+    key: "love",
+    label: "💛 ความรัก",
+    questions: [
+      "ความสัมพันธ์ที่มีอยู่จะพัฒนาต่อไปได้ไหม?",
+      "คนที่รอผลอยู่จะตอบรับไหม?",
+      "ช่วงนี้เหมาะกับการพูดคุยเรื่องสำคัญในความรักไหม?",
+      "ความขัดแย้งในครอบครัวจะคลี่คลายได้ไหม?",
+      "มีคนดีเข้ามาในชีวิตช่วงนี้ไหม?",
+    ],
+  },
+  {
+    key: "health",
+    label: "🌿 สุขภาพ",
+    questions: [
+      "พลังงานวันนี้เป็นอย่างไร ควรพักหรือลุย?",
+      "อาการที่เป็นอยู่จะดีขึ้นเร็วไหม?",
+      "ช่วงนี้ควรระวังสุขภาพด้านไหน?",
+      "การรักษาที่วางแผนไว้เหมาะกับช่วงนี้ไหม?",
+      "จิตใจช่วงนี้จะผ่อนคลายขึ้นไหม?",
+    ],
+  },
+  {
+    key: "travel",
+    label: "🕐 เดินทาง",
+    questions: [
+      "ตอนนี้เหมาะกับการออกเดินทางไหม?",
+      "ทิศทางไหนเป็นมงคลสำหรับวันนี้?",
+      "ควรออกจากบ้านตอนนี้หรือรอยามหน้า?",
+      "การนัดหมายที่กำหนดไว้จะราบรื่นไหม?",
+      "เดินทางกลับบ้านช่วงนี้ปลอดภัยไหม?",
+    ],
+  },
+  {
+    key: "decide",
+    label: "⚖️ ตัดสินใจ",
+    questions: [
+      "ปัญหาที่กำลังเผชิญจะคลี่คลายไหม?",
+      "สิ่งที่รอคำตอบอยู่จะมีข่าวดีไหม?",
+      "ควรลงมือทำเดี๋ยวนี้หรือรอก่อน?",
+      "อุปสรรคที่มีจะผ่านพ้นได้ไหม?",
+      "ความพยายามที่ทำอยู่จะเห็นผลเร็วไหม?",
+    ],
+  },
 ];
 
 function HoranuChatPanel() {
@@ -628,6 +638,7 @@ function HoranuChatPanel() {
   const [isLoading, setIsLoading] = useState(false);
   const [lockedTime, setLockedTime] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState("work");
   const answerRef = useRef<HTMLDivElement>(null);
 
   const handleAsk = async () => {
@@ -703,15 +714,34 @@ function HoranuChatPanel() {
         )}
       </div>
 
-      {/* Suggested questions */}
+      {/* Category tabs */}
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {QUESTION_CATEGORIES.map(cat => (
+          <button
+            key={cat.key}
+            type="button"
+            onClick={() => setActiveCategory(cat.key)}
+            disabled={isLoading}
+            className={`text-[10px] px-2.5 py-1 rounded-full border transition-all disabled:opacity-40 ${
+              activeCategory === cat.key
+                ? "border-[#C9A96E]/60 bg-[#C9A96E]/15 text-[#C9A96E] font-bold"
+                : "border-white/10 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E]"
+            }`}
+          >
+            {cat.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Suggested questions for active category */}
       <div className="flex flex-wrap gap-1.5 mb-3">
-        {SUGGESTED_QUESTIONS.map(q => (
+        {(QUESTION_CATEGORIES.find(c => c.key === activeCategory)?.questions ?? []).map(q => (
           <button
             key={q}
             type="button"
             onClick={() => setQuestion(q)}
             disabled={isLoading}
-            className="text-[10px] px-2.5 py-1 rounded-full border border-white/10 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E] disabled:opacity-40 transition-all"
+            className="text-[10px] px-2.5 py-1 rounded-full border border-white/8 bg-white/3 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E] disabled:opacity-40 transition-all"
           >
             {q}
           </button>
@@ -769,7 +799,7 @@ function HoranuChatPanel() {
       )}
 
       {/* Hint */}
-      <p className="text-[9px] text-[#4A5568] mt-3 text-center">
+      <p className="text-[9px] text-[#94A3B8] mt-3 text-center">
         เวลาที่กดปุ่มถามคือเวลาที่ใช้คำนวณผังดวง — ผลลัพธ์จะเปลี่ยนทุก 7.5 นาที
       </p>
     </Card>

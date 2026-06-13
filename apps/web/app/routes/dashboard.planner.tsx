@@ -1,15 +1,16 @@
-import { json, redirect } from "@remix-run/cloudflare";
-import { Form, useLoaderData, useNavigation, useActionData, useSubmit } from "@remix-run/react";
+import { json } from "@remix-run/cloudflare";
+import { Form, useLoaderData, useNavigation, useActionData } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { requireMinPlan } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
-import { calculateMoonPhase, getCurrentYam, calculateAtthakarn } from "@phopephum/engine";
+import { calculateMoonPhase, calculateAtthakarn } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
-import { Input } from "~/components/ui/Input";
-import { Sparkles, Calendar, BookOpen, Zap, Target, Heart, Plus, Save, CheckCircle, Smile } from "lucide-react";
+import { Calendar, BookOpen, Zap, Target, Heart, Plus, Save, CheckCircle, Smile } from "lucide-react";
 import type { Env } from "~/env.server";
+import { awardIntentionReward, awardReflectionReward } from "~/services/rewards.server";
+
 
 export const meta: MetaFunction = () => [
   { title: "TQM Planner — วางแผนชีวิตตามภูมิปัญญา" },
@@ -127,11 +128,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const todayDate = TODAY();
 
   const formData = await request.formData();
-  const intention = String(formData.get("intention") ?? "");
+  const intention = String(formData.get("intention") ?? "").trim();
   const energyLevel = parseInt(String(formData.get("energy_level") ?? "3"));
-  const successNotes = String(formData.get("success_notes") ?? "");
-  const reflection = String(formData.get("reflection") ?? "");
-  const dharmaTeaching = String(formData.get("dharma_teaching") ?? "");
+  const successNotes = String(formData.get("success_notes") ?? "").trim();
+  const reflection = String(formData.get("reflection") ?? "").trim();
+  const dharmaTeaching = String(formData.get("dharma_teaching") ?? "").trim();
   
   // Extract hora activities from hidden input or parse from prefixed inputs
   const horaActivities: Record<string, string> = {};
@@ -141,7 +142,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
   });
 
   const { supabase } = createSupabaseClient(request, env);
-  await supabase.from("daily_plans").upsert({
+
+  // ดึงข้อมูลแผนของวันนี้ก่อน เพื่อเช็คว่ามีการกรอกความตั้งใจ/สะท้อนคิดก่อนหน้านี้หรือไม่
+  const { data: currentPlan } = await supabase
+    .from("daily_plans")
+    .select("intention, reflection, intention_reward_claimed, reflection_reward_claimed")
+    .eq("user_id", user.id)
+    .eq("date", todayDate)
+    .single();
+
+  const { error: upsertError } = await supabase.from("daily_plans").upsert({
     user_id: user.id,
     date: todayDate,
     intention,
@@ -153,22 +163,53 @@ export async function action({ request, context }: ActionFunctionArgs) {
     updated_at: new Date().toISOString(),
   }, { onConflict: "user_id,date" });
 
-  return redirect("/dashboard/planner?saved=1");
+  if (upsertError) {
+    return json({ success: false, error: upsertError.message, rewardsEarned: 0, rewardMessages: [], saved: false });
+  }
+
+  // ให้รางวัลคะแนนตามเงื่อนไข
+  let rewardsEarned = 0;
+  const rewardMessages: string[] = [];
+
+  // ให้รางวัล Intention (+3 Sands of Time)
+  if (intention && (!currentPlan?.intention || !currentPlan?.intention_reward_claimed)) {
+    const res = await awardIntentionReward(user.id, env);
+    if (res.success) {
+      rewardsEarned += res.earned;
+      rewardMessages.push(res.message);
+    }
+  }
+
+  // ให้รางวัล Reflection (+5 Sands of Time)
+  if (reflection && (!currentPlan?.reflection || !currentPlan?.reflection_reward_claimed)) {
+    const res = await awardReflectionReward(user.id, env);
+    if (res.success) {
+      rewardsEarned += res.earned;
+      rewardMessages.push(res.message);
+    }
+  }
+
+  return json({
+    success: true,
+    rewardsEarned,
+    rewardMessages,
+    saved: true
+  });
 }
 
 import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
 
 export default function PlannerPage() {
   const { plan, moon, dayName, slots } = useLoaderData<typeof loader>();
+  const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
-  const submit = useSubmit();
   const isSaving = navigation.state === "submitting";
   
   const [activeSlot, setActiveSlot] = useState<number | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
 
   const url = typeof window !== "undefined" ? new URL(window.location.href) : null;
-  const saved = url?.searchParams.get("saved") === "1";
+  const saved = actionData?.saved || url?.searchParams.get("saved") === "1";
   const displayDate = new Date().toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" });
 
   const currentRuler = slots[0]?.ruler; // Default to first slot for guide
@@ -184,7 +225,52 @@ export default function PlannerPage() {
         </div>
       </div>
 
+      {/* REWARD TOAST/POPUP */}
+      {actionData?.success && (actionData.rewardsEarned ?? 0) > 0 && (
+        <div className="p-5 bg-gradient-to-r from-[#C6A96B]/20 to-[#4B6FAE]/20 border border-[#C6A96B]/30 rounded-2xl text-center space-y-2 animate-in zoom-in-95 duration-300 relative overflow-hidden backdrop-blur-md">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-yellow-500/10 via-transparent to-transparent pointer-events-none" />
+          <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#C6A96B] to-[#E2C98A] flex items-center justify-center mx-auto text-slate-950 font-bold text-xl shadow-lg shadow-[#C6A96B]/20">
+            ✦
+          </div>
+          <h4 className="font-display font-bold text-[#F8F6F1] text-lg">ได้รับพลังแห่งจิตวิญญาณสำเร็จ!</h4>
+          {actionData.rewardMessages?.map((msg: string, idx: number) => (
+            <p key={idx} className="text-sm text-[#D9CDB7]">{msg}</p>
+          ))}
+          <p className="text-xs text-[#C6A96B] font-bold tracking-widest uppercase">คุณได้รับทรายกาลเวลาสะสม +{actionData.rewardsEarned} Sands of Time!</p>
+        </div>
+      )}
+
       <Form ref={formRef} method="post" className="space-y-8">
+        {/* MORNING INTENTION */}
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 text-[#D9BC82] text-xs font-bold uppercase tracking-widest">
+              <Target className="w-4 h-4" /> 1. ความตั้งใจยามเช้า (Morning Intention)
+            </div>
+            {plan?.intention_reward_claimed ? (
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-bold uppercase">
+                เคลมแล้ว +3 Sands of Time
+              </span>
+            ) : (
+              <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#C6A96B]/10 text-[#C6A96B] border border-[#C6A96B]/20 font-bold uppercase animate-pulse">
+                รับรางวัล +3 Sands of Time
+              </span>
+            )}
+          </div>
+          <Card className="bg-[#0A1628]/40 border-[#D9BC82]/10 p-5 space-y-3">
+            <p className="text-[13px] text-[#94A3B8] font-medium leading-relaxed">
+              เป้าหมายสำคัญที่สุดของวันนี้เพื่อสร้างสัจจะบารมีและการฝึกจิตใจให้ตั้งมั่น
+            </p>
+            <input
+              type="text"
+              name="intention"
+              defaultValue={plan?.intention ?? ""}
+              placeholder="กรอกความตั้งใจของคุณเช้านี้... (เช่น วันนี้จะเคลียร์งานสำคัญ 1 อย่าง หรือแบ่งเวลาทำสมาธิ 15 นาที)"
+              className="w-full bg-[#1E293B]/30 border border-[#D9BC82]/10 focus:border-[#C6A96B]/40 rounded-xl px-4 py-3 text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 outline-none transition-all"
+            />
+          </Card>
+        </section>
+
         {/* DAILY WISDOM GUIDE */}
         <section className="space-y-4">
           <div className="flex items-center gap-2 text-[#D9BC82] text-xs font-bold uppercase tracking-widest">
@@ -210,22 +296,22 @@ export default function PlannerPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <span className="text-[13px] text-green-400 uppercase font-bold flex items-center gap-1">
+                  <span className="text-[13px] text-[#C6A96B] uppercase font-bold flex items-center gap-1">
                     <CheckCircle className="w-3 h-3" /> เกื้อหนุนเป็นพิเศษ
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {currentRuler?.promotes.map(p => (
-                      <span key={p} className="px-2 py-0.5 bg-green-400/10 text-green-400 text-[13px] rounded-full border border-green-400/20">{p}</span>
+                      <span key={p} className="px-2 py-0.5 bg-[#C6A96B]/10 text-[#C6A96B] text-[13px] rounded-full border border-[#C6A96B]/20">{p}</span>
                     ))}
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <span className="text-[13px] text-red-400 uppercase font-bold flex items-center gap-1">
+                  <span className="text-[13px] text-[#F8F6F1]/50 uppercase font-bold flex items-center gap-1">
                     <Zap className="w-3 h-3" /> พึงระวัง
                   </span>
                   <div className="flex flex-wrap gap-1.5">
                     {currentRuler?.warns.map(w => (
-                      <span key={w} className="px-2 py-0.5 bg-red-400/10 text-red-400 text-[13px] rounded-full border border-red-400/20">{w}</span>
+                      <span key={w} className="px-2 py-0.5 bg-white/5 text-[#F8F6F1]/50 text-[13px] rounded-full border border-white/10">{w}</span>
                     ))}
                   </div>
                 </div>
@@ -264,7 +350,7 @@ export default function PlannerPage() {
                         defaultValue={(plan?.hora_activities as any)?.[i] ?? ""}
                         placeholder="ยังไม่มีการบันทึกแผนงาน..."
                         onFocus={() => setActiveSlot(i)}
-                        className="w-full bg-transparent text-sm text-[#D9CDB7] placeholder-[#4A5568] border-b border-[#D9BC82]/10 py-1.5 focus:border-[#D9BC82]/40 outline-none transition-all"
+                        className="w-full bg-transparent text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 border-b border-[#D9BC82]/10 py-1.5 focus:border-[#D9BC82]/40 outline-none transition-all"
                       />
                       {!(plan?.hora_activities as any)?.[i] && (
                         <button type="button" className="absolute right-0 top-1/2 -translate-y-1/2 text-[#D9BC82]/40 hover:text-[#D9BC82]">
@@ -286,7 +372,31 @@ export default function PlannerPage() {
           </div>
           <Card className="bg-[#0A1628]/40 border-[#D9BC82]/10 p-6 space-y-6">
             <div className="space-y-4">
-              <h3 className="text-xl font-bold text-[#F8F6F1]">บันทึกพลังงาน & สะท้อนคิด</h3>
+              <div className="flex justify-between items-center border-b border-[#C6A96B]/10 pb-3">
+                <h3 className="text-xl font-bold text-[#F8F6F1]">บันทึกพลังงาน & สะท้อนคิด</h3>
+                {plan?.reflection_reward_claimed ? (
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-bold uppercase">
+                    เคลมแล้ว +5 Sands of Time
+                  </span>
+                ) : (
+                  <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#C6A96B]/10 text-[#C6A96B] border border-[#C6A96B]/20 font-bold uppercase animate-pulse">
+                    รับรางวัล +5 Sands of Time
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <span className="text-[13px] text-[#94A3B8] uppercase font-bold flex items-center gap-2">
+                  <BookOpen className="w-3 h-3 text-[#D9BC82]" /> สะท้อนคิดทบทวนชีวิตยามเย็น (Evening Reflection)
+                </span>
+                <textarea
+                  name="reflection"
+                  defaultValue={plan?.reflection ?? ""}
+                  placeholder="ทบทวนเหตุการณ์และความรู้สึกของวันนี้... สิ่งที่คุณทำสำเร็จตามความตั้งใจ หรือบทเรียนสัจจะบารมีที่คุณได้รับในวันนี้คืออะไร?"
+                  rows={4}
+                  className="w-full bg-[#1E293B]/30 border border-[#D9BC82]/10 focus:border-[#C6A96B]/40 rounded-xl p-4 text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 outline-none transition-all resize-none"
+                />
+              </div>
               
               <div className="space-y-3">
                 <span className="text-[13px] text-[#94A3B8] uppercase font-bold flex items-center gap-2">
@@ -312,7 +422,7 @@ export default function PlannerPage() {
                     </label>
                   ))}
                 </div>
-                <div className="flex justify-between text-[11px] text-[#4A5568] font-bold uppercase tracking-widest px-1">
+                <div className="flex justify-between text-[11px] text-[#94A3B8] font-bold uppercase tracking-widest px-1">
                   <span>น้อยที่สุด</span>
                   <span>ยอดเยี่ยมที่สุด</span>
                 </div>
@@ -327,7 +437,7 @@ export default function PlannerPage() {
                   defaultValue={plan?.success_notes ?? ""}
                   placeholder="วันนี้ได้สัจจะบารมีเรื่องใดบ้าง? หรือมีสิ่งใดให้เรียนรู้เพิ่มเติม..."
                   rows={4}
-                  className="w-full bg-[#1E293B]/30 border border-white/5 rounded-xl p-4 text-sm text-[#D9CDB7] placeholder-[#4A5568] focus:border-[#D9BC82]/20 outline-none transition-all resize-none"
+                  className="w-full bg-[#1E293B]/30 border border-white/5 rounded-xl p-4 text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 focus:border-[#D9BC82]/20 outline-none transition-all resize-none"
                 />
               </div>
 
@@ -339,7 +449,7 @@ export default function PlannerPage() {
                   name="dharma_teaching"
                   defaultValue={plan?.dharma_teaching ?? "ความอดทนในวันลำบาก คือความสำเร็จในวันหน้า..."}
                   rows={2}
-                  className="w-full bg-[#D9BC82]/5 border border-[#D9BC82]/10 rounded-xl p-4 text-sm italic text-[#D9BC82] placeholder-[#4A5568] focus:border-[#D9BC82]/20 outline-none transition-all resize-none"
+                  className="w-full bg-[#D9BC82]/5 border border-[#D9BC82]/10 rounded-xl p-4 text-sm italic text-[#D9BC82] placeholder-[#94A3B8]/40 focus:border-[#D9BC82]/20 outline-none transition-all resize-none"
                 />
               </div>
             </div>
@@ -347,7 +457,7 @@ export default function PlannerPage() {
         </section>
 
         {/* Footer Actions */}
-        <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0A1628] via-[#0A1628] to-transparent pointer-events-none">
+        <div className="fixed bottom-[64px] md:bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#020617] via-[#020617] to-transparent pointer-events-none z-10">
           <div className="max-w-2xl mx-auto pointer-events-auto">
             <Button type="submit" loading={isSaving} className="w-full h-12 btn-gold-shine border-0 text-base font-bold flex items-center justify-center gap-2 shadow-2xl">
               <Save className="w-5 h-5" />

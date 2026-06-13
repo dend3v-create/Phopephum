@@ -1,0 +1,151 @@
+ แผนพัฒนา phopephum.com — Tri-Lingual + Dual Mode                                                   
+                                                                                                    
+  1. Design System: 2-Color Accent Rule (กฎเหล็กด้านสี)                                                
+                                                                                                    
+  ปัญหาปัจจุบัน: มีสีหลายเฉด ทำให้ตัวเลขในผังดวงดูรก และหลุดธีม luxury                                          
+                                                                                                    
+  Two-Accent Rule สำหรับ Dark Mode
+
+  สี 1: Imperial Gold   #C6A96B  → ตัวเลขพลังงานบวก / ดาวเด่น / กำลัง / ราชา
+  สี 2: Mystic Blue     #4B6FAE  → ตัวเลขจร / ยาม / พลังงานเคลื่อนไหว / เฉย
+
+  ข้อความทั่วไป (body):  #F8F6F1  → ห้ามมีสีอื่นอีก
+  Muted/helper text:    #94A3B8  → ใช้เฉพาะ label เบาๆ
+
+  สำหรับตารางผังดวง (Emperor Chart / 7-Number Grid)
+
+  เลขกำลัง (พื้นดวง/ดาวหลัก)  → Gold  #C6A96B  + glow-gold
+  เลขจร / ยาม / วัยจร          → Mystic #4B6FAE  + glow-mystic
+  เลขที่ขัดแย้ง/กดดัน          → ขาว #F8F6F1 (ไม่ glow)
+  ห้ามใช้แดง/เขียว/ม่วง/ส้ม ในตาราง
+
+  Light Mode Palette (ใหม่)
+
+  Background:       #F5F0E8  (ivory cream — ไม่ใช่ขาวจัด)
+  Surface card:     #FDFBF7  + border rgba(198,169,107,0.20)
+  Body text:        #1C1710  (deep warm-black)
+  Accent 1 Gold:    #9A6F2A  (darker gold — readable on light bg)
+  Accent 2 Mystic:  #2B4A8A  (deeper navy blue)
+  Muted text:       #6B5E4A
+
+  ---
+  2. i18n Architecture (3 ภาษา: ไทย / อังกฤษ / 中文)
+
+  Stack ที่เลือก: remix-i18next
+
+  packages/types/src/i18n.ts          → Locale type: "th" | "en" | "zh"
+  apps/web/app/i18n/
+    ├── i18next.server.ts             → server-side instance
+    ├── i18next.client.ts             → client hydration
+    └── locales/
+        ├── th/common.json            → Thai translations
+        ├── en/common.json            → English translations
+        └── zh/common.json            → Chinese (Simplified) translations
+
+  Locale Detection Priority (cookie → header → default)
+
+  1. Cookie: locale=th  (user preference, persistent)
+  2. Accept-Language header
+  3. Default: th (เน้นตลาดไทยก่อน)
+
+  Language Switcher Component
+
+  TH / EN / 中  → 3 ปุ่มเล็กๆ ใน header top-right
+  URL ไม่เปลี่ยน — ใช้ cookie เพียงอย่างเดียว (ง่ายกว่า /en/ /zh/ prefix)
+
+  Translation Scope
+
+  ┌───────────────┬──────────────────────┐
+  │ Key Namespace │        เนื้อหา         │
+  ├───────────────┼──────────────────────┤
+  │ common        │ nav, buttons, labels │
+  ├───────────────┼──────────────────────┤
+  │ horoscope     │ ชื่อดาว/ตำแหน่ง/ผังดวง   │
+  ├───────────────┼──────────────────────┤
+  │ yam           │ ชื่อยาม, คำอธิบาย       │
+  ├───────────────┼──────────────────────┤
+  │ dashboard     │ หัวข้อ widgets         │
+  ├───────────────┼──────────────────────┤
+  │ reports       │ AI report templates  │
+  └───────────────┴──────────────────────┘
+
+  ---
+  3. Dark/Light Mode Architecture
+
+  วิธี: CSS Custom Properties + data-theme บน <html>
+
+  /* Dark (default) */
+  :root, [data-theme="dark"] {
+    --bg-base:     #020617;
+    --surface:     rgba(10,34,64,0.58);
+    --text-body:   #F8F6F1;
+    --accent-gold: #C6A96B;
+    --accent-blue: #4B6FAE;
+    --border:      rgba(217,188,130,0.18);
+  }
+
+  /* Light */
+  [data-theme="light"] {
+    --bg-base:     #F5F0E8;
+    --surface:     rgba(253,251,247,0.85);
+    --text-body:   #1C1710;
+    --accent-gold: #9A6F2A;
+    --accent-blue: #2B4A8A;
+    --border:      rgba(154,111,42,0.22);
+  }
+
+  - Theme toggle → cookie theme=dark|light → set บน <html> ก่อน hydration (ป้องกัน flash)
+  - Remix loader อ่าน cookie → inject data-theme ใน root.tsx
+
+  ---
+  4. Roadmap ลำดับการทำงาน
+
+  Phase 1 — Design Foundation (ทำก่อน, บล็อก Phase อื่น)
+
+  [ ] กำหนด 2-color rule ใน app.css → CSS variables ทุก token
+  [ ] สร้าง [data-theme="light"] palette
+  [ ] ล้างสีที่ไม่ใช่ Gold/Blue ออกจากตารางผังดวง
+  [ ] Theme toggle (cookie + root.tsx)
+
+  Phase 2 — i18n Core
+
+  [ ] ติดตั้ง remix-i18next + i18next
+  [ ] สร้างไฟล์ locale: th/en/zh (common + horoscope)
+  [ ] Language switcher component
+  [ ] แปล horoscope chart labels ทั้ง 3 ภาษา (ชื่อดาว ภาษาจีน critical)
+
+  Phase 3 — Chart/Number Polish (visual ที่เห็นชัดสุด)
+
+  [ ] Refactor Emperor Chart — ใช้ accent-gold / accent-blue เท่านั้น
+  [ ] Refactor 7-Number display — same rule
+  [ ] Yam timeline — mystic-blue สำหรับยามปัจจุบัน, gold สำหรับยามมงคล
+  [ ] Micro-interaction: hover → glow ทีละตัวเลข
+
+  Phase 4 — Light Mode Polish
+
+  [ ] ทดสอบ glass morphism บน light bg (ปรับ opacity)
+  [ ] ทดสอบ glow effects (ลด intensity บน light)
+  [ ] Typography contrast ratio ≥ 4.5:1 (WCAG AA)
+
+  ---
+  5. จุดสำคัญที่ต้องระวัง (Anti-Pattern)
+
+  ┌────────────────────────────────────┬────────────────────────────────────────────────┐
+  │               ห้ามทำ                │                     ทางออก                     │
+  ├────────────────────────────────────┼────────────────────────────────────────────────┤
+  │ ใส่สีแดง/เขียวในตาราง (แม้จะหมายถึงดีชั่ว) │ ใช้ Gold=บวก, Muted-white=กลาง/ลบ               │
+  ├────────────────────────────────────┼────────────────────────────────────────────────┤
+  │ ข้อความหลายสีใน paragraph            │ สีเดียวต่อ section                                │
+  ├────────────────────────────────────┼────────────────────────────────────────────────┤
+  │ Light mode = แค่เปลี่ยน bg ขาว        │ ต้องออกแบบ ivory warm palette ใหม่ทั้งชุด           │
+  ├────────────────────────────────────┼────────────────────────────────────────────────┤
+  │ i18n หลัง deploy                    │ ต้องทำ i18n architecture ก่อน UI components ทุกตัว │
+  ├────────────────────────────────────┼────────────────────────────────────────────────┤
+  │ ชื่อดาวแปลตรงตัว                      │ ภาษาจีนใช้ชื่อทางดาราศาสตร์จีน ไม่ใช่ทับศัพท์ไทย          │
+  └────────────────────────────────────┴────────────────────────────────────────────────┘
+
+  ---
+  จะเริ่มจาก Phase ไหนก่อน?
+
+  แนะนำ → Phase 1 (CSS 2-color token system + Light Mode palette) เพราะทุก Phase อื่นขึ้นอยู่กับนี้ —
+  ถ้าพร้อมจะเขียน code ให้เลย
