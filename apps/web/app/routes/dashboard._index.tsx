@@ -10,10 +10,89 @@ import {
   calculateRahu,
   calculateHoraTaynoo,
   PLANET_INFO,
+  getSunTimes,
+  getYamPrediction,
 } from "@phopephum/engine";
 import type { Env } from "~/env.server";
 import { useState, useEffect } from "react";
 
+// ─── Interfaces ──────────────────────────────────────────────────────────────
+interface YamSlotDetail {
+  yamNumber: number;
+  yamName: string;
+  period: "day" | "night";
+  timeLabel: string;
+  startTimeISO: string;
+  endTimeISO: string;
+  ticks: number;
+  level: "bad" | "good" | "very_good" | "excellent";
+  label: string;
+  description: string;
+  prediction: any;
+}
+
+// ─── Helper to calculate daily slots ──────────────────────────────────────────
+function calculateDailyYamSlots(targetDate: Date): YamSlotDetail[] {
+  const sunTimes = getSunTimes(targetDate);
+  const sunrise = sunTimes.sunrise;
+  const sunset = sunTimes.sunset;
+
+  const dayMs = sunset.getTime() - sunrise.getTime();
+  const nightMs = 86400000 - dayMs;
+
+  const daySlotMs = dayMs / 8;
+  const nightSlotMs = nightMs / 8;
+
+  const slots: YamSlotDetail[] = [];
+
+  // 8 daytime slots
+  for (let i = 0; i < 8; i++) {
+    const startTime = new Date(sunrise.getTime() + i * daySlotMs);
+    const endTime = new Date(sunrise.getTime() + (i + 1) * daySlotMs);
+    const midTime = new Date(startTime.getTime() + daySlotMs / 2);
+    const result = getYamPrediction(midTime);
+
+    slots.push({
+      yamNumber: i + 1,
+      yamName: result.yamName,
+      period: "day",
+      timeLabel: `${startTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} - ${endTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}`,
+      startTimeISO: startTime.toISOString(),
+      endTimeISO: endTime.toISOString(),
+      ticks: result.travelAuspiciousness.ticks,
+      level: result.travelAuspiciousness.level as any,
+      label: result.travelAuspiciousness.label,
+      description: result.travelAuspiciousness.description,
+      prediction: result.prediction ?? null,
+    });
+  }
+
+  // 8 nighttime slots
+  for (let i = 0; i < 8; i++) {
+    const startTime = new Date(sunset.getTime() + i * nightSlotMs);
+    const endTime = new Date(sunset.getTime() + (i + 1) * nightSlotMs);
+    const midTime = new Date(startTime.getTime() + nightSlotMs / 2);
+    const result = getYamPrediction(midTime);
+
+    slots.push({
+      yamNumber: i + 1,
+      yamName: result.yamName,
+      period: "night",
+      timeLabel: `${startTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} - ${endTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}`,
+      startTimeISO: startTime.toISOString(),
+      endTimeISO: endTime.toISOString(),
+      ticks: result.travelAuspiciousness.ticks,
+      level: result.travelAuspiciousness.level as any,
+      label: result.travelAuspiciousness.label,
+      description: result.travelAuspiciousness.description,
+      prediction: result.prediction ?? null,
+    });
+  }
+
+  return slots;
+}
+
+// ─── Loader ───────────────────────────────────────────────────────────────────
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
@@ -37,6 +116,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const hora      = calculateHoraTaynoo({ dateAsked: now });
 
   const STAR_TH: Record<number, string> = { 1:"อาทิตย์",2:"จันทร์",3:"อังคาร",4:"พุธ",5:"พฤหัส",6:"ศุกร์",7:"เสาร์" };
+
+  // Calculate slots for the timeline
+  const todaySlots = calculateDailyYamSlots(now);
 
   return json({
     user, profile, pendingCount,
@@ -71,10 +153,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       period:    hora.period,
       yamPlanet: PLANET_INFO[hora.yamPlanet]?.thai ?? String(hora.yamPlanet),
     },
+    todaySlots,
   });
 }
 
-// ─── helpers ──────────────────────────────────────────────────────────────────
+// ─── Helpers & Design Constants ───────────────────────────────────────────────
 
 const LEVEL_STYLE: Record<string, { bar: string; badge: string }> = {
   excellent: { bar: "bg-emerald-400", badge: "text-emerald-400 border-emerald-500/40 bg-emerald-500/8" },
@@ -85,8 +168,17 @@ const LEVEL_STYLE: Record<string, { bar: string; badge: string }> = {
 
 const PERIOD_TH: Record<string, string> = { day: "กลางวัน", night: "กลางคืน" };
 
-// ─── Live clock ───────────────────────────────────────────────────────────────
+const PLANET_SYMBOLS: Record<string, string> = {
+  สุริยะ: "☉", ระวิ:  "☉",
+  จันเทา: "☽", คะศิ:  "☽",
+  ภุมมะ:  "♂", ภุมโม: "♂",
+  พุทธะ:  "☿", พุทโธ: "☿",
+  ครู:    "♃", ชีโว:  "♃",
+  ศุกระ:  "♀", ศุโกร: "♀",
+  เสารี:  "♄", โสโร:  "♄",
+};
 
+// ─── Live Clock Component ──────────────────────────────────────────────────────
 function LiveClock() {
   const [t, setT] = useState(new Date());
   useEffect(() => { const id = setInterval(() => setT(new Date()), 1000); return () => clearInterval(id); }, []);
@@ -94,8 +186,7 @@ function LiveClock() {
   return <span className="font-mono tabular-nums">{p(t.getHours())}:{p(t.getMinutes())}:{p(t.getSeconds())}</span>;
 }
 
-// ─── Ticks ────────────────────────────────────────────────────────────────────
-
+// ─── Ticks Visual Indicator ───────────────────────────────────────────────────
 function Ticks({ n, bar }: { n: number; bar: string }) {
   return (
     <span className="flex gap-0.5">
@@ -104,12 +195,11 @@ function Ticks({ n, bar }: { n: number; bar: string }) {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
-
+// ─── Main Page Component ───────────────────────────────────────────────────────
 export default function DashboardIndex() {
   const d = useLoaderData<typeof loader>();
   const { revalidate } = useRevalidator();
-  const { profile, yam, moon, karnchata, rahu, hora, pendingCount } = d;
+  const { profile, yam, moon, karnchata, rahu, hora, pendingCount, todaySlots } = d;
 
   const displayName = profile?.display_name ?? "คุณ";
   const isPro       = profile?.role === "admin" || profile?.role === "operator" || profile?.plan === "imperial";
@@ -118,112 +208,271 @@ export default function DashboardIndex() {
 
   const [greeting, setGreeting] = useState("");
   const [dateLabel, setDateLabel] = useState("");
+  
+  // Interactive Timeline state
+  const [timelinePeriod, setTimelinePeriod] = useState<"day" | "night">("day");
+  const [selectedTimelineSlot, setSelectedTimelineSlot] = useState<typeof todaySlots[number] | null>(null);
 
+  // Sync timeline states on client mount / time update
   useEffect(() => {
     const h = new Date().getHours();
     setGreeting(h < 5 ? "ราตรีสวัสดิ์" : h < 12 ? "อรุณสวัสดิ์" : h < 17 ? "สวัสดีตอนบ่าย" : "สวัสดีตอนเย็น");
     setDateLabel(new Date().toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long" }));
-  }, []);
+    
+    // Auto-select current slot in timeline
+    const active = todaySlots.find(s => {
+      const start = new Date(s.startTimeISO).getTime();
+      const end = new Date(s.endTimeISO).getTime();
+      const t = Date.now();
+      return t >= start && t < end;
+    });
 
+    if (active) {
+      setTimelinePeriod(active.period);
+      setSelectedTimelineSlot(active);
+    } else if (todaySlots.length > 0) {
+      setSelectedTimelineSlot(todaySlots[0]);
+    }
+  }, [todaySlots]);
+
+  // Periodic page revalidation
   useEffect(() => { const id = setInterval(revalidate, 60_000); return () => clearInterval(id); }, [revalidate]);
+
+  // Find active slot for live countdown
+  const activeSlot = todaySlots.find(s => {
+    const start = new Date(s.startTimeISO).getTime();
+    const end = new Date(s.endTimeISO).getTime();
+    const t = Date.now();
+    return t >= start && t < end;
+  });
+
+  // Countdown timer string state
+  const [timeLeft, setTimeLeft] = useState("");
+  useEffect(() => {
+    if (!activeSlot) return;
+    const updateCountdown = () => {
+      const end = new Date(activeSlot.endTimeISO).getTime();
+      const diff = end - Date.now();
+      if (diff <= 0) {
+        setTimeLeft("เปลี่ยนยามแล้ว");
+        return;
+      }
+      const min = Math.floor(diff / 60_000);
+      const sec = Math.floor((diff % 60_000) / 1000);
+      setTimeLeft(`ยามนี้เหลืออีก ${min} นาที ${sec} วินาที`);
+    };
+    updateCountdown();
+    const id = setInterval(updateCountdown, 1000);
+    return () => clearInterval(id);
+  }, [activeSlot]);
 
   const ls = LEVEL_STYLE[yam.level] ?? LEVEL_STYLE.good;
 
   return (
-    <div className="max-w-xl mx-auto space-y-5 pb-6">
+    <div className="max-w-xl mx-auto space-y-6 pb-12 star-field constellation-bg animate-fade-up">
 
       {/* ── 1. Header ── */}
-      <div className="flex items-start justify-between pt-1 gap-3">
+      <div className="flex items-start justify-between pt-1 gap-3 animate-slide-in-1">
         <div>
-          <p className="text-[#94A3B8] text-xs">{greeting} · {dateLabel}</p>
-          <h1 className="font-display text-xl font-bold text-[#F8F6F1] mt-0.5">
-            สวัสดี, <span className="text-[#C6A96B]">{displayName}</span>
+          <p className="text-text-muted text-xs font-medium tracking-wider">{greeting} · {dateLabel}</p>
+          <h1 className="font-display text-2xl font-bold mt-1 text-text-primary">
+            สวัสดี, <span className="text-gold-shimmer glow-gold">{displayName}</span>
           </h1>
         </div>
-        <div className="flex items-center gap-1.5 shrink-0 mt-1 px-2.5 py-1 rounded-full border text-xs font-bold"
-          style={{ borderColor:"rgba(77,184,160,0.3)", color:"#4DB8A0", background:"rgba(77,184,160,0.08)" }}>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#4DB8A0] animate-ping" />
+        <div className="flex items-center gap-1.5 shrink-0 mt-1 px-3 py-1.5 rounded-full border text-xs font-bold bg-cosmic-800/40 border-border-gold/30 text-gold-400 shadow-[0_0_15px_rgba(232,196,106,0.1)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-gold-500 animate-ping" />
           <LiveClock />
         </div>
       </div>
 
-      {/* ── 2. ฤกษ์ยามขณะนี้ Hero ── */}
-      <Link to="/dashboard/check-yam" className="block group">
-        <div className="rounded-2xl p-4 border border-[#C6A96B]/20 bg-[#0A1628]/80 transition-all group-hover:border-[#C6A96B]/40 relative overflow-hidden">
-          <div className="absolute -top-6 -right-6 w-32 h-32 rounded-full pointer-events-none"
-            style={{ background:"radial-gradient(circle, rgba(198,169,107,0.12) 0%, transparent 70%)" }} />
-          <div className="relative">
-            <div className="flex items-start justify-between gap-3 mb-3">
-              <div>
-                <p className="text-[10px] text-[#C6A96B]/70 uppercase tracking-widest font-bold mb-1">✦ ฤกษ์ยามขณะนี้</p>
-                <p className="font-display text-2xl font-bold text-[#F8F6F1] leading-none">{yam.name}</p>
-                <p className="text-xs text-[#8A8070] mt-1">
-                  ยาม {yam.number} · {PERIOD_TH[yam.period]}
-                  {moon.isWanPhra ? " · 🔆 วันพระ" : ` · จันทร์ ${Math.round(moon.illumination)}%`}
+      {/* ── 2. Active Yam Hero Card ── */}
+      <Link to="/dashboard/check-yam" className="block group animate-slide-in-1">
+        <div className="card-glass-gold p-5 relative overflow-hidden transition-all group-hover:border-gold-liquid group-hover:shadow-[0_0_30px_rgba(232,196,106,0.15)] active:scale-[0.99] duration-300">
+          {/* Background decoration */}
+          <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none bg-radial from-gold-500/15 to-transparent blur-xl" />
+          
+          <div className="relative flex justify-between items-center gap-4">
+            <div className="flex-1">
+              <p className="text-[10px] text-gold-400 font-bold uppercase tracking-[0.2em] mb-1.5">✦ ฤกษ์ยามขณะนี้</p>
+              <div className="flex items-baseline gap-2">
+                <h2 className="font-display text-3xl font-bold text-text-primary leading-tight">{yam.name}</h2>
+                <span className="text-xl text-gold-400 font-display">{PLANET_SYMBOLS[yam.name] || "✦"}</span>
+              </div>
+              <p className="text-xs text-text-secondary mt-1 font-sans-thai">
+                ยาม {yam.number} · {PERIOD_TH[yam.period]}
+                {moon.isWanPhra ? " · 🔆 วันพระ" : ` · จันทร์ ${Math.round(moon.illumination)}%`}
+              </p>
+              {yam.shouldDo && (
+                <p className="text-xs text-text-muted mt-3 line-clamp-2 leading-relaxed italic border-l-2 border-gold-500/30 pl-2.5">
+                  "{yam.shouldDo}"
                 </p>
-              </div>
-              <div className="shrink-0 flex flex-col items-end gap-1.5">
-                <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${ls.badge}`}>{yam.label}</span>
-                <Ticks n={yam.ticks} bar={ls.bar} />
+              )}
+              {/* Live countdown */}
+              {timeLeft && (
+                <div className="text-[11px] text-gold-300 font-bold mt-4 flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>{timeLeft}</span>
+                </div>
+              )}
+            </div>
+
+            {/* Rotating central ring graphic */}
+            <div className="relative w-24 h-24 shrink-0 flex items-center justify-center pointer-events-none">
+              <div className="absolute inset-0 border border-dashed border-gold-500/30 rounded-full cosmic-ring" />
+              <div className="w-16 h-16 rounded-full card-glass-premium flex flex-col items-center justify-center border border-gold-500/40 glow-gold-box">
+                <span className="text-[9px] font-bold text-gold-400 uppercase tracking-widest leading-none">
+                  {yam.level === "bad" ? "ระวัง" : "มงคล"}
+                </span>
+                <span className="text-[11px] font-bold text-text-primary mt-1">
+                  {yam.label.split(" ")[0]}
+                </span>
               </div>
             </div>
-            {yam.shouldDo && (
-              <p className="text-xs text-[#8A8070] leading-relaxed mb-3 line-clamp-2">{yam.shouldDo}</p>
-            )}
-            <div className="flex items-center justify-between text-xs text-[#C6A96B]/60 group-hover:text-[#C6A96B] transition-colors font-bold">
-              <span>ดูทุกเครื่องมือฤกษ์ยาม</span>
-              <span>→</span>
-            </div>
+          </div>
+          
+          <div className="flex items-center justify-between text-xs text-gold-400/70 group-hover:text-gold-liquid transition-colors font-bold mt-4 pt-3 border-t border-border-gold/10">
+            <span>เข้าสู่เครื่องมือวิเคราะห์ฤกษ์ยามละเอียด</span>
+            <span>→</span>
           </div>
         </div>
       </Link>
 
-      {/* ── 3. เครื่องมือพยากรณ์หลัก (4 tools) ── */}
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#C6A96B]/50 mb-3">✦ เครื่องมือพยากรณ์</p>
+      {/* ── 3. Cosmic Energy Timeline Widget ── */}
+      <div className="space-y-3 animate-slide-in-2">
+        <div className="flex items-center justify-between">
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold-400/60">✦ TIMELINE พลังงานรายวัน</p>
+          
+          {/* Day / Night Segment Toggle */}
+          <div className="flex p-0.5 rounded-lg bg-cosmic-950/60 border border-border-gold/15">
+            <button
+              type="button"
+              onClick={() => setTimelinePeriod("day")}
+              className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${timelinePeriod === "day" ? "bg-gold-500 text-cosmic-950" : "text-text-muted hover:text-text-primary"}`}
+            >
+              ☀️ กลางวัน
+            </button>
+            <button
+              type="button"
+              onClick={() => setTimelinePeriod("night")}
+              className={`px-3 py-1 text-[10px] font-bold rounded-md transition-all ${timelinePeriod === "night" ? "bg-gold-500 text-cosmic-950" : "text-text-muted hover:text-text-primary"}`}
+            >
+              🌙 กลางคืน
+            </button>
+          </div>
+        </div>
+
+        {/* Horizontal scroll timeline */}
+        <div className="flex gap-2.5 overflow-x-auto pb-2 scrollbar-thin">
+          {todaySlots.filter(s => s.period === timelinePeriod).map(s => {
+            const isActive = activeSlot?.period === s.period && activeSlot?.yamNumber === s.yamNumber;
+            const isSelected = selectedTimelineSlot?.period === s.period && selectedTimelineSlot?.yamNumber === s.yamNumber;
+            const ls = LEVEL_STYLE[s.level] ?? LEVEL_STYLE.good;
+            const planetSym = PLANET_SYMBOLS[s.yamName] || "✦";
+
+            return (
+              <button
+                key={`${s.period}-${s.yamNumber}`}
+                onClick={() => setSelectedTimelineSlot(s)}
+                className={`shrink-0 w-28 p-3 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group select-none
+                  ${isActive ? "card-glass-gold border-gold-liquid/50 ring-1 ring-gold-liquid/20 shadow-md shadow-gold-500/10" : isSelected ? "card-glass border-mystic-500/70 bg-cosmic-800/80 shadow-md shadow-mystic-500/10" : "card-glass border-white/5 bg-[#0A1628]/40 hover:border-gold-500/30 hover:bg-[#0A1628]/60"}`}
+              >
+                {isActive && (
+                  <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse border border-cosmic-950" title="LIVE" />
+                )}
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-[9px] text-text-muted font-bold">ยาม {s.yamNumber}</span>
+                  <span className={`text-[8px] font-bold px-1 py-0.2 rounded border ${ls.badge.replace("px-2.5 py-0.5", "")}`}>{s.label.split(" ")[0]}</span>
+                </div>
+                <p className="font-display text-sm font-bold text-text-primary flex items-baseline gap-1">
+                  {s.yamName} <span className="text-[10px] text-gold-400 font-display">{planetSym}</span>
+                </p>
+                <p className="text-[9px] text-text-muted mt-1 font-mono tracking-tighter">{s.timeLabel.replace(" - ", "-")}</p>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected slot prediction details */}
+        {selectedTimelineSlot && (
+          <div className="card-glass p-4 border border-border-gold/25 animate-fade-up relative overflow-hidden">
+            <div className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full pointer-events-none bg-radial from-mystic-500/10 to-transparent blur-lg" />
+            <div className="relative">
+              <div className="flex justify-between items-start mb-2.5 gap-2">
+                <div>
+                  <h4 className="font-display font-bold text-gold-400 text-sm flex items-center gap-1.5">
+                    <span>✦ ยาม{selectedTimelineSlot.yamName}</span>
+                    <span className="text-xs font-mono text-text-muted">({selectedTimelineSlot.timeLabel})</span>
+                  </h4>
+                  <p className="text-[10px] text-text-muted mt-0.5">
+                    ยามลำดับที่ {selectedTimelineSlot.yamNumber} · {PERIOD_TH[selectedTimelineSlot.period]}
+                  </p>
+                </div>
+                <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full border shrink-0 ${LEVEL_STYLE[selectedTimelineSlot.level].badge}`}>
+                  {selectedTimelineSlot.label}
+                </span>
+              </div>
+              
+              <p className="text-xs text-text-secondary leading-relaxed mb-3">
+                {selectedTimelineSlot.description || "สัญจรนำโชคดีงามตามกาลเทวฤกษ์"}
+              </p>
+
+              {selectedTimelineSlot.prediction?.shouldDo && (
+                <div className="text-[11px] bg-emerald-500/5 border border-emerald-500/15 rounded-lg p-2.5 flex items-start gap-1.5 text-emerald-400">
+                  <span className="font-bold shrink-0">✓ ควรทำ:</span>
+                  <span className="leading-relaxed">{selectedTimelineSlot.prediction.shouldDo}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* ── 4. Forecasting Tools Grid (4 items) ── */}
+      <div className="animate-slide-in-3">
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-gold-400/50 mb-3">✦ เครื่องมือพยากรณ์</p>
         <div className="grid grid-cols-2 gap-3">
 
           {/* ยามอัฐกาล */}
-          <Link to="/dashboard/yam" className="group flex flex-col gap-2 p-4 rounded-2xl border border-white/5 bg-[#0A1628]/60 hover:border-[#C6A96B]/30 transition-all active:scale-[0.97]">
+          <Link to="/dashboard/yam" className="group flex flex-col gap-2 p-4 rounded-2xl border border-white/5 bg-[#0A1628]/40 hover:border-gold-500/30 hover:bg-cosmic-800/60 hover:shadow-lg transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="text-[#C6A96B]/70 group-hover:text-[#C6A96B] transition-colors"><IcoYam /></span>
+              <span className="text-gold-400 group-hover:text-gold-liquid transition-colors"><IcoYam /></span>
               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${ls.badge}`}>{yam.label}</span>
             </div>
             <div>
-              <p className="text-xs font-bold text-[#F8F6F1]">ยามอัฐกาล</p>
-              <p className="text-[11px] text-[#C6A96B] font-bold mt-0.5">{yam.name}</p>
-              <p className="text-[10px] text-[#8A8070] mt-0.5">{PERIOD_TH[yam.period]} · ยาม {yam.number}</p>
+              <p className="text-xs font-bold text-text-primary">ยามอัฐกาล</p>
+              <p className="text-[11px] text-gold-400 font-bold mt-0.5">{yam.name}</p>
+              <p className="text-[10px] text-text-muted mt-0.5">{PERIOD_TH[yam.period]} · ยาม {yam.number}</p>
             </div>
           </Link>
 
           {/* กาลชะตา */}
-          <Link to="/dashboard/karnchata" className="group flex flex-col gap-2 p-4 rounded-2xl border border-white/5 bg-[#0A1628]/60 hover:border-[#C6A96B]/30 transition-all active:scale-[0.97]">
+          <Link to="/dashboard/karnchata" className="group flex flex-col gap-2 p-4 rounded-2xl border border-white/5 bg-[#0A1628]/40 hover:border-gold-500/30 hover:bg-cosmic-800/60 hover:shadow-lg transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="text-[#C6A96B]/70 group-hover:text-[#C6A96B] transition-colors"><IcoHourglass /></span>
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full border text-[#C6A96B] border-[#C6A96B]/30 bg-[#C6A96B]/8">{karnchata.dayStar}</span>
+              <span className="text-gold-400 group-hover:text-gold-liquid transition-colors"><IcoHourglass /></span>
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full border text-gold-400 border-gold-500/30 bg-gold-500/8">{karnchata.dayStar}</span>
             </div>
             <div>
-              <p className="text-xs font-bold text-[#F8F6F1]">เลข ๗ กาลชะตา</p>
-              <p className="text-[11px] text-[#C6A96B] font-bold mt-0.5">{karnchata.yamYaiName}</p>
-              <p className="text-[10px] text-[#8A8070] mt-0.5">ดาว{karnchata.dayStar} · รายวัน/ชั่วโมง/นาที</p>
+              <p className="text-xs font-bold text-text-primary">เลข ๗ กาลชะตา</p>
+              <p className="text-[11px] text-gold-400 font-bold mt-0.5">{karnchata.yamYaiName}</p>
+              <p className="text-[10px] text-text-muted mt-0.5">ดาว{karnchata.dayStar} · รายวัน/ชั่วโมง/นาที</p>
             </div>
           </Link>
 
           {/* ยามพรายกระซิบ */}
-          <Link to="/dashboard/horanu" className="group flex flex-col gap-2 p-4 rounded-2xl border border-white/5 bg-[#0A1628]/60 hover:border-[#4B6FAE]/40 transition-all active:scale-[0.97]">
+          <Link to="/dashboard/horanu" className="group flex flex-col gap-2 p-4 rounded-2xl border border-white/5 bg-[#0A1628]/40 hover:border-mystic-400/30 hover:bg-cosmic-800/60 hover:shadow-lg transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden">
             <div className="flex items-center justify-between">
-              <span className="text-[#4B6FAE]/70 group-hover:text-[#4B6FAE] transition-colors"><IcoStarCross /></span>
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full border text-[#4B6FAE] border-[#4B6FAE]/40 bg-[#4B6FAE]/8">ยาม {hora.yamAsked}</span>
+              <span className="text-mystic-400 group-hover:text-mystic-300 transition-colors"><IcoStarCross /></span>
+              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-full border text-mystic-400 border-mystic-500/40 bg-mystic-500/8">ยาม {hora.yamAsked}</span>
             </div>
             <div>
-              <p className="text-xs font-bold text-[#F8F6F1]">ยามพรายกระซิบ</p>
-              <p className="text-[11px] text-[#4B6FAE] font-bold mt-0.5">{hora.yamPlanet}</p>
-              <p className="text-[10px] text-[#8A8070] mt-0.5">{PERIOD_TH[hora.period]} · ผัง ดาวลอย 11</p>
+              <p className="text-xs font-bold text-text-primary">ยามพรายกระซิบ</p>
+              <p className="text-[11px] text-mystic-400 font-bold mt-0.5">{hora.yamPlanet}</p>
+              <p className="text-[10px] text-text-muted mt-0.5">{PERIOD_TH[hora.period]} · ผัง ดาวลอย 11</p>
             </div>
           </Link>
 
           {/* ราหู */}
-          <Link to="/dashboard/rahu" className={`group flex flex-col gap-2 p-4 rounded-2xl border transition-all active:scale-[0.97] ${rahu?.isGood ? "border-emerald-500/20 bg-emerald-950/15 hover:border-emerald-500/40" : "border-rose-500/15 bg-rose-950/10 hover:border-rose-500/30"}`}>
+          <Link to="/dashboard/rahu" className={`group flex flex-col gap-2 p-4 rounded-2xl border transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden ${rahu?.isGood ? "border-emerald-500/20 bg-emerald-950/10 hover:border-emerald-500/40 hover:bg-emerald-950/20" : "border-rose-500/15 bg-rose-950/5 hover:border-rose-500/30 hover:bg-rose-950/15"}`}>
             <div className="flex items-center justify-between">
               <span className={rahu?.isGood ? "text-emerald-400/70" : "text-rose-400/70"}><IcoRahu /></span>
               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${rahu?.isGood ? "text-emerald-400 border-emerald-500/40 bg-emerald-500/8" : "text-rose-400 border-rose-500/40 bg-rose-500/8"}`}>
@@ -231,93 +480,89 @@ export default function DashboardIndex() {
               </span>
             </div>
             <div>
-              <p className="text-xs font-bold text-[#F8F6F1]">ราหูค้นทรัพย์</p>
+              <p className="text-xs font-bold text-text-primary">ราหูค้นทรัพย์</p>
               <p className={`text-[11px] font-bold mt-0.5 line-clamp-1 ${rahu?.isGood ? "text-emerald-400" : "text-rose-400"}`}>
                 {rahu ? rahu.verdict : "คำนวณ..."}
               </p>
-              <p className="text-[10px] text-[#8A8070] mt-0.5">{rahu ? `${rahu.start}–${rahu.end}` : "ตารางยามมงคล"}</p>
+              <p className="text-[10px] text-text-muted mt-0.5">{rahu ? `${rahu.start}–${rahu.end}` : "ตารางยามมงคล"}</p>
             </div>
           </Link>
 
         </div>
       </div>
 
-      {/* ── 4. เครื่องมือวิเคราะห์ดวง ── */}
-      <div>
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-[#4B6FAE]/60 mb-3">✦ วิเคราะห์ดวงชะตา</p>
-        <div className="grid grid-cols-2 gap-2.5">
+      {/* ── 5. Analysis Tools (4 items) ── */}
+      <div className="animate-slide-in-4">
+        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-mystic-400/60 mb-3">✦ วิเคราะห์ดวงชะตา</p>
+        <div className="grid grid-cols-2 gap-3">
 
-          <Link to="/dashboard/horoscope" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-white/5 bg-[#0A1628]/60 hover:border-[#4B6FAE]/30 transition-all active:scale-[0.97]">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-[#4B6FAE]"
-              style={{ background:"rgba(75,111,174,0.12)", border:"1px solid rgba(75,111,174,0.25)" }}>
+          <Link to="/dashboard/horoscope" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-white/5 bg-[#0A1628]/40 hover:border-mystic-400/30 hover:bg-cosmic-800/60 hover:shadow-lg transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-mystic-400 bg-mystic-500/10 border border-mystic-500/20 group-hover:border-mystic-400/40 transition-colors">
               <IcoCompass />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-[#F8F6F1] leading-tight">ตั้งดวงชะตา</p>
-              <p className="text-[10px] text-[#8A8070] mt-0.5">เลข ๗ ตัว ผังจักรพรรดิ</p>
+              <p className="text-xs font-bold text-text-primary leading-tight">ตั้งดวงชะตา</p>
+              <p className="text-[10px] text-text-muted mt-0.5">เลข ๗ ตัว ผังจักรพรรดิ</p>
             </div>
           </Link>
 
-          <Link to="/dashboard/mahathaksa" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-white/5 bg-[#0A1628]/60 hover:border-[#C6A96B]/20 transition-all active:scale-[0.97]">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-[#C6A96B]"
-              style={{ background:"rgba(198,169,107,0.10)", border:"1px solid rgba(198,169,107,0.22)" }}>
+          <Link to="/dashboard/mahathaksa" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-white/5 bg-[#0A1628]/40 hover:border-gold-500/30 hover:bg-cosmic-800/60 hover:shadow-lg transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-gold-400 bg-gold-500/10 border border-gold-500/20 group-hover:border-gold-400/40 transition-colors">
               <IcoTaksa />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-[#F8F6F1] leading-tight">มหาทักษา</p>
-              <p className="text-[10px] text-[#8A8070] mt-0.5">พยากรณ์ชีวิต</p>
+              <p className="text-xs font-bold text-text-primary leading-tight">มหาทักษา</p>
+              <p className="text-[10px] text-text-muted mt-0.5">พยากรณ์ชีวิต</p>
             </div>
           </Link>
 
-          <Link to="/dashboard/mahaphuti" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-white/5 bg-[#0A1628]/60 hover:border-[#C6A96B]/20 transition-all active:scale-[0.97]">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-[#C6A96B]"
-              style={{ background:"rgba(198,169,107,0.10)", border:"1px solid rgba(198,169,107,0.22)" }}>
+          <Link to="/dashboard/mahaphuti" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-white/5 bg-[#0A1628]/40 hover:border-gold-500/30 hover:bg-cosmic-800/60 hover:shadow-lg transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-gold-400 bg-gold-500/10 border border-gold-500/20 group-hover:border-gold-400/40 transition-colors">
               <IcoPhuti />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-[#F8F6F1] leading-tight">มหาภูติ</p>
-              <p className="text-[10px] text-[#8A8070] mt-0.5">ธาตุกำเนิด</p>
+              <p className="text-xs font-bold text-text-primary leading-tight">มหาภูติ</p>
+              <p className="text-[10px] text-text-muted mt-0.5">ธาตุกำเนิด</p>
             </div>
           </Link>
 
-          <Link to="/dashboard/calendar" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-white/5 bg-[#0A1628]/60 hover:border-[#8A8070]/30 transition-all active:scale-[0.97]">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-[#8A8070]"
-              style={{ background:"rgba(138,128,112,0.10)", border:"1px solid rgba(138,128,112,0.22)" }}>
+          <Link to="/dashboard/calendar" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-white/5 bg-[#0A1628]/40 hover:border-white/10 hover:bg-cosmic-800/60 hover:shadow-lg transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-text-muted bg-white/5 border border-white/10 group-hover:border-white/20 transition-colors">
               <IcoList />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-bold text-[#F8F6F1] leading-tight">ปฏิทิน 100 ปี</p>
-              <p className="text-[10px] text-[#8A8070] mt-0.5">จันทรคติไทย</p>
+              <p className="text-xs font-bold text-text-primary leading-tight">ปฏิทิน 100 ปี</p>
+              <p className="text-[10px] text-text-muted mt-0.5">จันทรคติไทย</p>
             </div>
           </Link>
 
         </div>
       </div>
 
-      {/* ── 5. Utility row ── */}
-      <div className="grid grid-cols-2 gap-2.5">
-        <Link to="/dashboard/planner" className="group flex items-center gap-2.5 p-3 rounded-xl border border-white/5 bg-[#0A1628]/40 hover:border-[#8B7FD4]/30 transition-all">
+      {/* ── 6. Utility & Profile row ── */}
+      <div className="grid grid-cols-2 gap-2.5 animate-slide-in-5">
+        <Link to="/dashboard/planner" className="group flex items-center gap-2.5 p-3 rounded-xl border border-white/5 bg-[#0A1628]/30 hover:border-[#8B7FD4]/30 hover:bg-cosmic-800/50 transition-all">
           <span className="text-[#8B7FD4]"><IcoJournal /></span>
           <div className="min-w-0">
-            <p className="text-xs font-bold text-[#F8F6F1]">บันทึก</p>
-            <p className="text-[10px] text-[#8A8070]">วางแผน + จดบันทึก</p>
+            <p className="text-xs font-bold text-text-primary">บันทึก</p>
+            <p className="text-[10px] text-text-muted">วางแผน + จดบันทึก</p>
           </div>
         </Link>
-        <Link to="/dashboard/settings" className="group flex items-center gap-2.5 p-3 rounded-xl border border-white/5 bg-[#0A1628]/40 hover:border-white/10 transition-all">
-          <span className="text-[#8A8070]"><IcoProfile /></span>
+        <Link to="/dashboard/settings" className="group flex items-center gap-2.5 p-3 rounded-xl border border-white/5 bg-[#0A1628]/30 hover:border-white/10 hover:bg-cosmic-800/50 transition-all">
+          <span className="text-text-muted"><IcoProfile /></span>
           <div className="min-w-0">
-            <p className="text-xs font-bold text-[#F8F6F1]">โปรไฟล์</p>
-            <p className="text-[10px] text-[#8A8070]">{hasBirth ? "ข้อมูลส่วนตัว" : "⚠ ยังไม่ได้ตั้งวันเกิด"}</p>
+            <p className="text-xs font-bold text-text-primary">โปรไฟล์</p>
+            <p className="text-[10px] text-text-muted">{hasBirth ? "ข้อมูลส่วนตัว" : "⚠ ยังไม่ได้ตั้งวันเกิด"}</p>
           </div>
         </Link>
       </div>
 
-      {/* ── 6. Birth prompt ── */}
+      {/* ── 7. Birth prompt ── */}
       {!hasBirth && (
-        <Link to="/dashboard/settings" className="block group">
+        <Link to="/dashboard/settings" className="block group animate-slide-in-5">
           <div className="rounded-xl px-4 py-3 flex items-center gap-3 border border-dashed border-[#C6A96B]/25 bg-[#C6A96B]/4 hover:border-[#C6A96B]/40 transition-all">
             <span className="text-[#C6A96B] text-sm">✦</span>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 font-sans-thai">
               <p className="text-xs font-semibold text-[#D9BC82]">เพิ่มวันเกิด เพื่อดวงชะตาแม่นยำ</p>
               <p className="text-[10px] text-[#94A3B8] mt-0.5">ใช้กับ ตั้งดวงชะตา · มหาทักษา · มหาภูติ</p>
             </div>
@@ -326,24 +571,24 @@ export default function DashboardIndex() {
         </Link>
       )}
 
-      {/* ── 7. Upgrade prompt (free users) ── */}
+      {/* ── 8. Upgrade prompt (free users) ── */}
       {!isPro && profile?.role !== "admin" && (
-        <Link to="/dashboard/upgrade" className="block group">
+        <Link to="/dashboard/upgrade" className="block group animate-slide-in-5">
           <div className="rounded-xl px-4 py-3 flex items-center gap-3 border border-[#C6A96B]/20 transition-all group-hover:border-[#C6A96B]/40"
             style={{ background:"linear-gradient(135deg, rgba(198,169,107,0.06) 0%, rgba(10,34,64,0.4) 100%)" }}>
             <span className="text-[#C6A96B] text-base">✦</span>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 font-sans-thai">
               <p className="text-xs font-bold text-[#C6A96B]">อัปเกรด Imperial</p>
-              <p className="text-[10px] text-[#8A8070] mt-0.5">ปลดล็อกทุกเครื่องมือ + AI วิเคราะห์เต็มรูปแบบ</p>
+              <p className="text-[10px] text-text-muted mt-0.5">ปลดล็อกทุกเครื่องมือ + AI วิเคราะห์เต็มรูปแบบ</p>
             </div>
             <span className="text-[#C6A96B]/50 group-hover:text-[#C6A96B] text-xs font-bold transition-colors">อัปเกรด →</span>
           </div>
         </Link>
       )}
 
-      {/* ── 8. Admin panel ── */}
+      {/* ── 9. Admin panel ── */}
       {isAdminOp && (
-        <Link to="/admin/approvals" className="block group">
+        <Link to="/admin/approvals" className="block group animate-slide-in-5">
           <div className="rounded-xl px-4 py-3 flex items-center gap-3 border border-sky-500/20 bg-sky-950/15 hover:border-sky-500/40 transition-all">
             <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
               style={{ background:"rgba(56,189,248,0.12)", border:"1px solid rgba(56,189,248,0.25)" }}>
@@ -352,7 +597,7 @@ export default function DashboardIndex() {
                 <path d="M9 12l2 2 4-4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
-            <div className="flex-1">
+            <div className="flex-1 font-sans-thai">
               <p className="text-xs font-bold text-sky-400">
                 Admin Panel
                 {pendingCount > 0 && (
