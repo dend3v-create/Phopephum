@@ -19,6 +19,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       throw redirect("/pending-approval");
     }
 
+    if (!profile?.birth_date && profile?.role === "user") {
+      throw redirect("/onboarding");
+    }
+
     await logEvent(request, env, EVENTS.DAILY_VISIT, { source: "web" });
     return json({ user, profile });
   } catch (err) {
