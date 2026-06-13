@@ -77,7 +77,7 @@ export default function SettingsScreen() {
            <InfoRow label="เวลาเกิด" value={profile?.birth_time || '-'} icon="time-outline" />
            <InfoRow label="สถานที่เกิด" value={profile?.birth_place || '-'} icon="location-outline" />
            <InfoRow label="เพศ" value={profile?.gender || '-'} icon="person-outline" />
-           <InfoRow label="หมึกวิญญาณ (Soul Ink)" value={profile?.plan === 'imperial' ? 'ไม่จำกัด (♾️)' : `${profile?.soul_ink ?? 0} หยด`} icon="color-filter-outline" />
+           <InfoRow label="ทรายกาลเวลา (Sands of Time)" value={profile?.plan === 'imperial' ? 'ไม่จำกัด (♾️)' : `${profile?.time_sands ?? 0} เม็ด`} icon="hourglass-outline" />
         </View>
 
         {/* Action Buttons */}

@@ -97,7 +97,7 @@ export default function DashboardScreen() {
           </View>
           <View style={styles.headerBadges}>
             <View style={styles.inkBadge}>
-              <Text style={styles.inkBadgeText}>🖋️ {profile?.plan === 'imperial' ? '♾️' : (profile?.soul_ink ?? 0)}</Text>
+              <Text style={styles.inkBadgeText}>⏳ {profile?.plan === 'imperial' ? '♾️' : (profile?.time_sands ?? 0)}</Text>
             </View>
             <View style={styles.timeBadge}>
                <View style={styles.pulseDot} />

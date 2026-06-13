@@ -73,15 +73,15 @@ export default function HomeScreen() {
           </View>
           <Text style={styles.planTitle}>{isPro ? 'สมาชิกพรีเมียม' : 'สมาชิกทั่วไป'}</Text>
           
-          {/* Soul Ink Token Display */}
+          {/* Sands of Time Token Display */}
           <View style={styles.inkContainer}>
             <View style={styles.inkHeader}>
-              <Text style={styles.inkText}>🖋️ หมึกวิญญาณ (Soul Ink)</Text>
-              <Text style={styles.inkValue}>{isPro ? '♾️ ไม่จำกัด' : `${profile?.soul_ink ?? 0} / 15`}</Text>
+              <Text style={styles.inkText}>⏳ ทรายกาลเวลา (Sands of Time)</Text>
+              <Text style={styles.inkValue}>{isPro ? '♾️ ไม่จำกัด' : `${profile?.time_sands ?? 0} / 15`}</Text>
             </View>
             {!isPro && (
               <View style={styles.progressBarBg}>
-                <View style={[styles.progressBarFill, { width: `${Math.min(100, (((profile?.soul_ink ?? 0) / 15) * 100))}%` }]} />
+                <View style={[styles.progressBarFill, { width: `${Math.min(100, (((profile?.time_sands ?? 0) / 15) * 100))}%` }]} />
               </View>
             )}
           </View>

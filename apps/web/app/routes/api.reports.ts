@@ -63,13 +63,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
   };
   const backendReportType = reportTypeMap[report_type] || "general_prediction";
 
-  // 4. ตรวจสอบแต้ม Soul Ink
+  // 4. ตรวจสอบทรายกาลเวลา (Sands of Time)
   const userPlan = getUserPlan(profile);
   const isPremium = userPlan === "imperial" || profile?.role === "admin" || profile?.role === "operator";
-  const currentInk = profile?.soul_ink ?? 0;
+  const currentSands = profile?.time_sands ?? 0;
 
-  if (!isPremium && currentInk <= 0) {
-    return json({ error: "ขออภัย แต้มหมึกวิญญาณ (Soul Ink) ของคุณหมดแล้ว กรุณาเติมแต้มหรืออัปเกรดเพื่อรับแต้มเพิ่ม" }, { status: 403 });
+  if (!isPremium && currentSands <= 0) {
+    return json({ error: "ขออภัย ทรายกาลเวลา (Sands of Time) ในนาฬิกาทรายของคุณหมดแล้ว กรุณาเติมทรายหรืออัปเกรดเพื่อรับทรายเพิ่ม" }, { status: 403 });
   }
 
   try {
@@ -138,15 +138,15 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` }, { status: 500 });
     }
 
-    // 8. หักแต้ม Soul Ink หากไม่ใช่ผู้ใช้ VIP
+    // 8. หักทรายกาลเวลา หากไม่ใช่ผู้ใช้ VIP (ทรายไหลลดลง 1 เม็ด)
     if (!isPremium) {
       const { error: decrementError } = await supabase
         .from("profiles")
-        .update({ soul_ink: currentInk - 1 })
+        .update({ time_sands: currentSands - 1 })
         .eq("id", user.id);
 
       if (decrementError) {
-        console.error("[api.reports] Failed to decrement soul_ink:", decrementError);
+        console.error("[api.reports] Failed to decrement time_sands:", decrementError);
       }
     }
 

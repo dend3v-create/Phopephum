@@ -171,7 +171,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   let rewardsEarned = 0;
   const rewardMessages: string[] = [];
 
-  // ให้รางวัล Intention (+3 Soul Ink)
+  // ให้รางวัล Intention (+3 Sands of Time)
   if (intention && (!currentPlan?.intention || !currentPlan?.intention_reward_claimed)) {
     const res = await awardIntentionReward(user.id, env);
     if (res.success) {
@@ -180,7 +180,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
   }
 
-  // ให้รางวัล Reflection (+5 Soul Ink)
+  // ให้รางวัล Reflection (+5 Sands of Time)
   if (reflection && (!currentPlan?.reflection || !currentPlan?.reflection_reward_claimed)) {
     const res = await awardReflectionReward(user.id, env);
     if (res.success) {
@@ -236,7 +236,7 @@ export default function PlannerPage() {
           {actionData.rewardMessages?.map((msg: string, idx: number) => (
             <p key={idx} className="text-sm text-[#D9CDB7]">{msg}</p>
           ))}
-          <p className="text-xs text-[#C6A96B] font-bold tracking-widest uppercase">คุณได้รับคะแนนสะสม +{actionData.rewardsEarned} Soul Ink!</p>
+          <p className="text-xs text-[#C6A96B] font-bold tracking-widest uppercase">คุณได้รับทรายกาลเวลาสะสม +{actionData.rewardsEarned} Sands of Time!</p>
         </div>
       )}
 
@@ -249,11 +249,11 @@ export default function PlannerPage() {
             </div>
             {plan?.intention_reward_claimed ? (
               <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-bold uppercase">
-                เคลมแล้ว +3 Soul Ink
+                เคลมแล้ว +3 Sands of Time
               </span>
             ) : (
               <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#C6A96B]/10 text-[#C6A96B] border border-[#C6A96B]/20 font-bold uppercase animate-pulse">
-                รับรางวัล +3 Soul Ink
+                รับรางวัล +3 Sands of Time
               </span>
             )}
           </div>
@@ -376,11 +376,11 @@ export default function PlannerPage() {
                 <h3 className="text-xl font-bold text-[#F8F6F1]">บันทึกพลังงาน & สะท้อนคิด</h3>
                 {plan?.reflection_reward_claimed ? (
                   <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 font-bold uppercase">
-                    เคลมแล้ว +5 Soul Ink
+                    เคลมแล้ว +5 Sands of Time
                   </span>
                 ) : (
                   <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-[#C6A96B]/10 text-[#C6A96B] border border-[#C6A96B]/20 font-bold uppercase animate-pulse">
-                    รับรางวัล +5 Soul Ink
+                    รับรางวัล +5 Sands of Time
                   </span>
                 )}
               </div>

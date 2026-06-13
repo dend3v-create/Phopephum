@@ -23,7 +23,7 @@ export function getThailandTodayDateString(): string {
 }
 
 /**
- * 1. ระบบ Login รายวัน (+1 Soul Ink)
+ * 1. ระบบ Login รายวัน (+1 Sands of Time)
  */
 export async function checkAndAwardDailyLogin(userId: string, env: Env): Promise<RewardResult> {
   const supabase = getServiceRoleClient(env);
@@ -32,7 +32,7 @@ export async function checkAndAwardDailyLogin(userId: string, env: Env): Promise
   // ดึงโปรไฟล์เพื่อเช็คล็อคอินล่าสุด
   const { data: profile, error: fetchErr } = await supabase
     .from("profiles")
-    .select("last_login_reward_at, soul_ink")
+    .select("last_login_reward_at, time_sands")
     .eq("id", userId)
     .single();
 
@@ -42,35 +42,35 @@ export async function checkAndAwardDailyLogin(userId: string, env: Env): Promise
 
   // เทียบวันเกิดสิทธิ
   if (profile.last_login_reward_at === today) {
-    return { success: false, earned: 0, message: "วันนี้รับรางวัลไปแล้ว", newBalance: profile.soul_ink || 0 };
+    return { success: false, earned: 0, message: "วันนี้รับทรายกาลเวลาไปแล้ว", newBalance: profile.time_sands || 0 };
   }
 
-  const newBalance = (profile.soul_ink || 0) + 1;
+  const newBalance = (profile.time_sands || 0) + 1;
 
   // อัปเดตข้อมูลรับรางวัล
   const { error: updateErr } = await supabase
     .from("profiles")
     .update({
       last_login_reward_at: today,
-      soul_ink: newBalance
+      time_sands: newBalance
     })
     .eq("id", userId);
 
   if (updateErr) {
     console.error("[rewards] Daily login reward update failed:", updateErr);
-    return { success: false, earned: 0, message: "อัปเดตเหรียญรางวัลล้มเหลว", newBalance: profile.soul_ink || 0 };
+    return { success: false, earned: 0, message: "อัปเดตทรายกาลเวลารางวัลล้มเหลว", newBalance: profile.time_sands || 0 };
   }
 
   return {
     success: true,
     earned: 1,
-    message: "ได้รับรางวัลล็อกอินรายวันประจำวัน +1 Soul Ink!",
+    message: "ได้รับทรายกาลเวลารายวัน +1 ละอองทราย!",
     newBalance
   };
 }
 
 /**
- * 2. รางวัลเช็คอิน/เปิดไพ่ประจำวัน (+1 Soul Ink)
+ * 2. รางวัลเช็คอิน/เปิดไพ่ประจำวัน (+1 Sands of Time)
  */
 export async function awardCheckinReward(userId: string, env: Env): Promise<RewardResult> {
   const supabase = getServiceRoleClient(env);
@@ -89,14 +89,14 @@ export async function awardCheckinReward(userId: string, env: Env): Promise<Rewa
   }
 
   if (plan?.checkin_reward_claimed) {
-    const { data: p } = await supabase.from("profiles").select("soul_ink").eq("id", userId).single();
-    return { success: false, earned: 0, message: "เคลมรางวัลจับไพ่ไปแล้วในวันนี้", newBalance: p?.soul_ink || 0 };
+    const { data: p } = await supabase.from("profiles").select("time_sands").eq("id", userId).single();
+    return { success: false, earned: 0, message: "เคลมรางวัลจับไพ่ไปแล้วในวันนี้", newBalance: p?.time_sands || 0 };
   }
 
   // ดึงโปรไฟล์เพื่อรับคะแนน
-  const { data: profile } = await supabase.from("profiles").select("soul_ink").eq("id", userId).single();
-  const currentInk = profile?.soul_ink || 0;
-  const newBalance = currentInk + 1;
+  const { data: profile } = await supabase.from("profiles").select("time_sands").eq("id", userId).single();
+  const currentSands = profile?.time_sands || 0;
+  const newBalance = currentSands + 1;
 
   // บันทึกและเคลม
   await supabase.from("daily_plans").upsert({
@@ -105,18 +105,18 @@ export async function awardCheckinReward(userId: string, env: Env): Promise<Rewa
     checkin_reward_claimed: true
   }, { onConflict: "user_id,date" });
 
-  await supabase.from("profiles").update({ soul_ink: newBalance }).eq("id", userId);
+  await supabase.from("profiles").update({ time_sands: newBalance }).eq("id", userId);
 
   return {
     success: true,
     earned: 1,
-    message: "ได้รับรางวัลเปิดไพ่ประจำวัน +1 Soul Ink!",
+    message: "ได้รับทรายกาลเวลาจากการเปิดไพ่ +1 ละอองทราย!",
     newBalance
   };
 }
 
 /**
- * 3. รางวัลตั้งเป้าหมายยามเช้า / Intention (+3 Soul Ink)
+ * 3. รางวัลตั้งเป้าหมายยามเช้า / Intention (+3 Sands of Time)
  */
 export async function awardIntentionReward(userId: string, env: Env): Promise<RewardResult> {
   const supabase = getServiceRoleClient(env);
@@ -130,13 +130,13 @@ export async function awardIntentionReward(userId: string, env: Env): Promise<Re
     .single();
 
   if (plan?.intention_reward_claimed) {
-    const { data: p } = await supabase.from("profiles").select("soul_ink").eq("id", userId).single();
-    return { success: false, earned: 0, message: "เคลมรางวัลความตั้งใจเช้านี้ไปแล้ว", newBalance: p?.soul_ink || 0 };
+    const { data: p } = await supabase.from("profiles").select("time_sands").eq("id", userId).single();
+    return { success: false, earned: 0, message: "เคลมรางวัลความตั้งใจเช้านี้ไปแล้ว", newBalance: p?.time_sands || 0 };
   }
 
-  const { data: profile } = await supabase.from("profiles").select("soul_ink").eq("id", userId).single();
-  const currentInk = profile?.soul_ink || 0;
-  const newBalance = currentInk + 3;
+  const { data: profile } = await supabase.from("profiles").select("time_sands").eq("id", userId).single();
+  const currentSands = profile?.time_sands || 0;
+  const newBalance = currentSands + 3;
 
   await supabase.from("daily_plans").upsert({
     user_id: userId,
@@ -144,18 +144,18 @@ export async function awardIntentionReward(userId: string, env: Env): Promise<Re
     intention_reward_claimed: true
   }, { onConflict: "user_id,date" });
 
-  await supabase.from("profiles").update({ soul_ink: newBalance }).eq("id", userId);
+  await supabase.from("profiles").update({ time_sands: newBalance }).eq("id", userId);
 
   return {
     success: true,
     earned: 3,
-    message: "บันทึกความตั้งใจรายวันเสร็จสิ้น ได้รับ +3 Soul Ink!",
+    message: "บันทึกความตั้งใจสัจจะบารมี ได้รับทรายกาลเวลา +3 ละอองทราย!",
     newBalance
   };
 }
 
 /**
- * 4. รางวัลทบทวนสะท้อนสติยามเย็น / Reflection (+5 Soul Ink)
+ * 4. รางวัลทบทวนสะท้อนสติยามเย็น / Reflection (+5 Sands of Time)
  */
 export async function awardReflectionReward(userId: string, env: Env): Promise<RewardResult> {
   const supabase = getServiceRoleClient(env);
@@ -169,13 +169,13 @@ export async function awardReflectionReward(userId: string, env: Env): Promise<R
     .single();
 
   if (plan?.reflection_reward_claimed) {
-    const { data: p } = await supabase.from("profiles").select("soul_ink").eq("id", userId).single();
-    return { success: false, earned: 0, message: "เคลมรางวัลทบทวนชีวิตยามเย็นไปแล้ว", newBalance: p?.soul_ink || 0 };
+    const { data: p } = await supabase.from("profiles").select("time_sands").eq("id", userId).single();
+    return { success: false, earned: 0, message: "เคลมรางวัลทบทวนชีวิตยามเย็นไปแล้ว", newBalance: p?.time_sands || 0 };
   }
 
-  const { data: profile } = await supabase.from("profiles").select("soul_ink").eq("id", userId).single();
-  const currentInk = profile?.soul_ink || 0;
-  const newBalance = currentInk + 5;
+  const { data: profile } = await supabase.from("profiles").select("time_sands").eq("id", userId).single();
+  const currentSands = profile?.time_sands || 0;
+  const newBalance = currentSands + 5;
 
   await supabase.from("daily_plans").upsert({
     user_id: userId,
@@ -183,18 +183,18 @@ export async function awardReflectionReward(userId: string, env: Env): Promise<R
     reflection_reward_claimed: true
   }, { onConflict: "user_id,date" });
 
-  await supabase.from("profiles").update({ soul_ink: newBalance }).eq("id", userId);
+  await supabase.from("profiles").update({ time_sands: newBalance }).eq("id", userId);
 
   return {
     success: true,
     earned: 5,
-    message: "บันทึกสะท้อนคิดยามเย็นเรียบร้อย ได้รับ +5 Soul Ink!",
+    message: "บันทึกสะท้อนคิดยามเย็น ได้รับทรายกาลเวลา +5 ละอองทราย!",
     newBalance
   };
 }
 
 /**
- * 5. รางวัลชวนเพื่อนสมัคร (+50 Soul Ink เข้าผู้แนะนำ)
+ * 5. รางวัลชวนเพื่อนสมัคร (+50 Sands of Time เข้าผู้แนะนำ)
  */
 export async function awardReferralSignupReward(referrerCode: string, referredUserId: string, env: Env): Promise<boolean> {
   if (!referrerCode) return false;
@@ -203,7 +203,7 @@ export async function awardReferralSignupReward(referrerCode: string, referredUs
   // หาผู้แนะนำจากรหัสแนะนำ (referral_code)
   const { data: referrer, error } = await supabase
     .from("profiles")
-    .select("id, soul_ink, email")
+    .select("id, time_sands, email")
     .eq("referral_code", referrerCode.trim())
     .single();
 
@@ -229,11 +229,11 @@ export async function awardReferralSignupReward(referrerCode: string, referredUs
     return false;
   }
 
-  // อัปเดต Soul Ink ให้ผู้แนะนำ
-  const newBalance = (referrer.soul_ink || 0) + 50;
+  // อัปเดตทรายกาลเวลาให้ผู้แนะนำ
+  const newBalance = (referrer.time_sands || 0) + 50;
   await supabase
     .from("profiles")
-    .update({ soul_ink: newBalance })
+    .update({ time_sands: newBalance })
     .eq("id", referrer.id);
 
   // บันทึกการแนะนำสำเร็จในตาราง affiliate_referrals

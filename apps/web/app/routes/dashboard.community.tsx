@@ -363,7 +363,7 @@ export default function CommunityPage() {
               <span className="text-xs font-bold text-[#94A3B8] uppercase tracking-wider block">รหัสแนะนำพิเศษ (Referral Code)</span>
               <div className="p-3 bg-[#C6A96B]/5 border border-[#C6A96B]/15 rounded-xl flex items-center justify-between">
                 <span className="font-display font-bold text-lg text-[#C6A96B] tracking-widest">{referralCode}</span>
-                <span className="text-[11px] text-[#94A3B8]">แจกสิทธิผู้ถูกชวน + รับ +50 Soul Ink เข้ากระเป๋าพลัง</span>
+                <span className="text-[11px] text-[#94A3B8]">แจกสิทธิผู้ถูกชวน + รับ +50 เม็ดทรายกาลเวลา</span>
               </div>
             </div>
 
@@ -374,7 +374,7 @@ export default function CommunityPage() {
               </p>
               <p className="flex items-start gap-2">
                 <span className="text-[#C6A96B] font-bold">✦</span>
-                <span>เมื่อผู้แนะนำสมัครใหม่ คุณจะได้รับแต้มพลังปัญญา <strong className="text-[#C6A96B]">+50 Soul Ink</strong> เพื่อใช้เขียนรายงานวิเคราะห์ชีวิต</span>
+                <span>เมื่อเพื่อนสมัครใหม่ คุณจะได้รับทรายกาลเวลา <strong className="text-[#C6A96B]">+50 เม็ดทราย</strong> เพื่อใช้ปลดล็อกบทวิเคราะห์ชีวิต</span>
               </p>
               <p className="flex items-start gap-2">
                 <span className="text-[#C6A96B] font-bold">✦</span>
@@ -470,7 +470,7 @@ export default function CommunityPage() {
 
             {referralsList.length === 0 ? (
               <div className="text-center py-10 text-[#94A3B8]/60 text-xs">
-                ยังไม่มีการแนะนำเครือข่ายดวงชะตา ส่งลิงก์ชวนเพื่อนเพื่อรับ +50 Soul Ink ทันที!
+                ยังไม่มีการแนะนำเครือข่ายดวงชะตา ส่งลิงก์ชวนเพื่อนเพื่อรับ +50 Sands of Time ทันที!
               </div>
             ) : (
               <div className="overflow-x-auto">

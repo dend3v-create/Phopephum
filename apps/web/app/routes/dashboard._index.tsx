@@ -411,8 +411,8 @@ export default function DashboardIndex() {
           <span className="text-[10px] sm:text-xs font-black text-gold-300 tracking-[0.2em] uppercase flex items-center gap-1.5">
             🔮 DAILY RITUAL CHECK-IN
           </span>
-          <span className="text-[10px] text-emerald-400 border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-0.5 rounded-full font-bold">
-            +1 Soul Ink Reward
+          <span className="text-[10px] text-emerald-400 border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-0.5 rounded-full font-bold animate-pulse">
+            +1 Sands of Time Reward
           </span>
         </div>
 
@@ -450,7 +450,7 @@ export default function DashboardIndex() {
             </div>
             <div>
               <p className="text-[#F8F6F1] font-bold text-sm">จับไพ่ประจำวันเพื่อหยั่งรู้วงโคจรชีวิต</p>
-              <p className="text-xs text-[#8A8070] mt-1">พร้อมรับสิทธิ์เคลมภารกิจประจำวัน +1 Soul Ink</p>
+              <p className="text-xs text-[#8A8070] mt-1">พร้อมรับสิทธิ์เคลมภารกิจประจำวัน +1 ทรายกาลเวลา</p>
             </div>
             <button
               type="button"
@@ -732,7 +732,7 @@ export default function DashboardIndex() {
             
             <div className="relative space-y-5">
               <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-[#C6A96B]/25 bg-[#C6A96B]/5 text-3xl animate-bounce">
-                🖋️
+                ⏳
               </div>
 
               <div>
@@ -740,13 +740,13 @@ export default function DashboardIndex() {
                   🎁 รางวัลล็อกอินรายวัน
                 </h3>
                 <p className="text-[#D9CDB7] text-xs mt-1.5 font-sans-thai leading-relaxed">
-                  ยินดีต้อนรับกลับมาเชื่อมต่อชะตาชีวิตในวันนี้! คุณได้รับเหรียญพลังงานสำหรับสร้างแผนชะตาฟ้า
+                  ยินดีต้อนรับกลับมาเชื่อมต่อชะตาชีวิตในวันนี้! คุณได้รับทรายกาลเวลาสำหรับสร้างแผนชะตาฟ้า
                 </p>
               </div>
 
               <div className="card-glass py-4 px-6 border border-emerald-500/25 bg-emerald-950/15 inline-block">
                 <span className="text-emerald-400 font-display text-3xl font-black block">+1</span>
-                <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.25em] mt-1 block">✦ SOUL INK / KC</span>
+                <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.25em] mt-1 block">✦ SANDS OF TIME / KC</span>
               </div>
 
               <div className="pt-2">

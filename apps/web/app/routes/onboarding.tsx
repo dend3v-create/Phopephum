@@ -63,7 +63,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       gender,
       // แถมเครดิตต้อนรับ หรือเปิดสถานะเริ่มต้น
       membership_status: "active",
-      soul_ink: 15, // มอบแต้มต้อนรับ 15 Soul Ink
+      time_sands: 15, // มอบทรายต้อนรับ 15 ละอองทราย (Sands of Time)
     })
     .eq("id", user.id);
 
@@ -308,14 +308,14 @@ export default function Onboarding() {
                   🎁 ยินดีต้อนรับสู่ ภพภูมิ!
                 </h3>
                 <p className="text-text-muted text-xs mt-1.5 font-sans-thai leading-relaxed">
-                  รหัสพลังงานฟ้าเริ่มเชื่อมต่อแล้ว คุณได้รับหมึกวิญญาณฟรีสำหรับเริ่มต้นคำนวณแผนชีวิต
+                  รหัสพลังงานฟ้าเริ่มเชื่อมต่อแล้ว คุณได้รับทรายกาลเวลาฟรีสำหรับเริ่มต้นคำนวณแผนชีวิต
                 </p>
               </div>
 
               {/* Reward Badge */}
               <div className="card-glass py-4 px-6 border border-emerald-500/20 bg-emerald-950/10 inline-block">
                 <span className="text-emerald-400 font-display text-3xl font-black block">+15</span>
-                <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.25em] mt-1 block">✦ Soul Ink ฟรี</span>
+                <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.25em] mt-1 block">✦ Sands of Time ฟรี</span>
               </div>
 
               {/* Start Button */}

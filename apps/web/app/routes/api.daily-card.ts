@@ -266,7 +266,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "ไม่สามารถจับไพ่ได้ กรุณาลองใหม่" }, { status: 500 });
   }
 
-  // 3. เคลมรางวัลเหรียญเปิดไพ่ประจำวัน (+1 Soul Ink)
+  // 3. เคลมรางวัลเหรียญเปิดไพ่ประจำวัน (+1 Sands of Time)
   const rewardResult = await awardCheckinReward(user.id, env);
 
   return json({

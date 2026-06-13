@@ -108,14 +108,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const { supabase } = createSupabaseClient(request, env);
     const profile = await getProfile(user.id, request, env);
 
-    // ── 1. Quota Check — enforce soul_ink balance for non-imperial plans ──
+    // ── 1. Quota Check — enforce time_sands balance for non-imperial plans ──
     const userPlan = getUserPlan(profile);
     const isPremium = userPlan === "imperial" || profile?.role === "admin" || profile?.role === "operator";
-    const currentInk = profile?.soul_ink ?? 0;
+    const currentSands = profile?.time_sands ?? 0;
 
     if (!isPremium) {
-      if (currentInk <= 0) {
-        return json({ error: "ขออภัย ท่านไม่มีหมึกวิญญาณ (Soul Ink) คงเหลือในระบบ กรุณาอัปเกรดแผนสมาชิกหรือซื้อสิทธิ์เพิ่มเติมเพื่อสร้างรายงานใหม่" });
+      if (currentSands <= 0) {
+        return json({ error: "ขออภัย ท่านไม่มีทรายกาลเวลา (Sands of Time) คงเหลือในระบบนาฬิกาทราย กรุณาอัปเกรดแผนสมาชิกหรือเติมเม็ดทรายกาลเวลาเพื่อสร้างรายงานใหม่" });
       }
     }
 
@@ -201,15 +201,15 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` });
     }
 
-    // ── 5.1 Decrement Soul Ink if not premium ──
+    // ── 5.1 Decrement Sands of Time if not premium (ไหลลดลง 1 ละอองทราย) ──
     if (!isPremium) {
       const { error: decrementError } = await supabase
         .from("profiles")
-        .update({ soul_ink: currentInk - 1 })
+        .update({ time_sands: currentSands - 1 })
         .eq("id", user.id);
       
       if (decrementError) {
-        console.error("Failed to decrement soul_ink:", decrementError);
+        console.error("Failed to decrement time_sands:", decrementError);
       }
     }
 
