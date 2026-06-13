@@ -1,15 +1,9 @@
+import { useFetcher } from "@remix-run/react";
 import { useTranslation } from "react-i18next";
 
 export function LanguageSwitcher() {
   const { i18n } = useTranslation();
-
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-    // Persistence: Set cookie for the server to pick up
-    document.cookie = `locale=${lng}; path=/; max-age=31536000; SameSite=Lax`;
-    // Optional: reload to ensure server-side translations are consistent (or just let Remix re-fetch)
-    window.location.reload();
-  };
+  const fetcher = useFetcher();
 
   const languages = [
     { code: "th", label: "ไทย", flag: "🇹🇭" },
@@ -17,12 +11,23 @@ export function LanguageSwitcher() {
     { code: "zh", label: "中文", flag: "🇨🇳" },
   ];
 
+  const handleLanguageChange = (lng: string) => {
+    // 1. Instant client update for UX
+    i18n.changeLanguage(lng);
+    
+    // 2. Server-side update for persistence (Set-Cookie)
+    const formData = new FormData();
+    formData.append("locale", lng);
+    fetcher.submit(formData, { method: "post", action: "/action/preferences" });
+  };
+
   return (
     <div className="flex items-center gap-1.5 p-1 rounded-full bg-slate-900/50 border border-slate-700/50 backdrop-blur-sm">
       {languages.map((lang) => (
         <button
           key={lang.code}
-          onClick={() => changeLanguage(lang.code)}
+          type="button"
+          onClick={() => handleLanguageChange(lang.code)}
           className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
             i18n.language === lang.code
               ? "bg-theme-accent text-white shadow-lg shadow-theme-accent/20"
