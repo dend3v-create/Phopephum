@@ -3,6 +3,7 @@ import { ThemeToggle } from "~/components/ThemeToggle";
 import { LanguageSwitcher } from "~/components/LanguageSwitcher";
 import { Link } from "@remix-run/react";
 import { useT } from "~/i18n/context";
+import { useTranslation } from "react-i18next";
 
 export const meta: MetaFunction = () => [
   { title: "ภพภูมิ — PhopePhum | Wisdom Guidance ที่ปรึกษาชีวิตส่วนตัวขับเคลื่อนด้วย AI" },
@@ -60,6 +61,13 @@ function LogoSymbol() {
 
 export default function Index() {
   const t = useT("common");
+  const { t: tFull } = useTranslation("common");
+
+  // Get dynamic arrays from translations
+  const features = tFull("landing.features.items", { returnObjects: true }) as any[];
+  const featureIcons = ["✦", "◈", "☽", "⊕", "⟁", "⌘"];
+  
+  const steps = tFull("landing.how.steps", { returnObjects: true }) as any[];
 
   return (
     <div className="relative min-h-screen overflow-x-hidden" style={{ background: "var(--bg-base)" }}>
@@ -126,12 +134,16 @@ export default function Index() {
 
         <p className="font-cormorant text-[#9AB3D9] text-2xl sm:text-3xl md:text-4xl italic mb-1 animate-fade-up"
           style={{ animationDelay: "0.28s" }}>
-          {t("brand.tagline")}
+          {t("landing.hero.subtitle")}
         </p>
-        
+        <p className="font-display text-[#D9BC82] text-xl sm:text-2xl md:text-3xl font-semibold tracking-wide mb-6 animate-fade-up"
+          style={{ animationDelay: "0.32s" }}>
+          {t("landing.hero.title_suffix")}
+        </p>
+
         <p className="text-[#94A3B8] text-base md:text-lg lg:text-xl leading-relaxed max-w-2xl mx-auto mb-10 animate-fade-up"
           style={{ animationDelay: "0.38s" }}>
-          {t("welcome")}
+          {t("landing.hero.desc")}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up"
@@ -150,7 +162,67 @@ export default function Index() {
             {t("login")}
           </Link>
         </div>
+
+        <p className="text-[#94A3B8]/50 text-xs mt-5 animate-fade-up" style={{ animationDelay: "0.52s" }}>
+          {t("landing.hero.footer_note")}
+        </p>
       </section>
+
+      {/* ── Features ── */}
+      <section id="features" className="relative z-10 max-w-6xl mx-auto px-4 py-20">
+        <div className="text-center mb-12">
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">{t("landing.features.label")}</p>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1] mb-3">
+            {t("landing.features.title")}
+          </h2>
+          <p className="text-[#94A3B8] text-base max-w-md mx-auto">
+            {t("landing.features.subtitle")}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {features && features.map((f, i) => (
+            <div key={i}
+              className="rounded-2xl border border-white/5 p-6 transition-all duration-300 hover:border-[#C6A96B]/20 group"
+              style={{ backdropFilter: "blur(20px)", background: "var(--card-dark-bg)" }}>
+              <div className="text-[#C6A96B] text-2xl mb-4 group-hover:scale-110 transition-transform duration-300">
+                {featureIcons[i]}
+              </div>
+              <h3 className="font-display text-[#F8F6F1] font-semibold text-lg mb-2">{f.title}</h3>
+              <p className="text-[#94A3B8] text-sm leading-relaxed">{f.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── How it works ── */}
+      <section id="how" className="relative z-10 max-w-4xl mx-auto px-4 py-20">
+        <div className="text-center mb-12">
+          <p className="text-[#C6A96B] text-[10px] tracking-[0.35em] uppercase mb-3">{t("landing.how.label")}</p>
+          <h2 className="font-display text-3xl md:text-4xl font-bold text-[#F8F6F1]">
+            {t("landing.how.title")}
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {steps && steps.map((step, i) => (
+            <div key={i} className="text-center">
+              <div className="inline-flex items-center justify-center w-14 h-14 rounded-full mb-4 mx-auto"
+                style={{ background: "rgba(198,169,107,0.12)", border: "1px solid rgba(198,169,107,0.3)" }}>
+                <span className="text-[#D9BC82] font-display font-bold">{step.num}</span>
+              </div>
+              <h3 className="font-display text-[#F8F6F1] font-semibold mb-2">{step.title}</h3>
+              <p className="text-[#94A3B8] text-sm leading-relaxed">{step.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <footer className="relative z-10 py-12 text-center border-t border-white/5">
+        <p className="text-[#94A3B8] text-xs">
+          © {new Date().getFullYear()} PhopePhum. All rights reserved.
+        </p>
+      </footer>
     </div>
   );
 }

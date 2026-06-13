@@ -11,6 +11,36 @@
   "features": "Features",
   "how_to_use": "How to Use",
   "get_started_free": "Get Started Free →",
+  "landing": {
+    "hero": {
+      "subtitle": "Wise Companion",
+      "title_suffix": "That Guides Your Life",
+      "desc": "Receive personal advice from Wisdom AI, read daily energies, and understand your life path through ancient wisdom brought to life by AI.",
+      "footer_note": "Free forever · No credit card required · Cancel anytime"
+    },
+    "features": {
+      "label": "What You Get",
+      "title": "Everything Life Needs",
+      "subtitle": "A personal life advisor that understands you, ready to use instantly.",
+      "items": [
+        { "title": "Know Yourself Deeper", "desc": "Understand your destiny code, personality, strengths, and the life direction that fits you, from your birth date." },
+        { "title": "Personal Wisdom AI", "desc": "An AI advisor that understands your fate. Ask about anything in life, love, work, and decisions." },
+        { "title": "Daily Energy", "desc": "Read daily energy and life rhythm in real-time to choose the right time for everything." },
+        { "title": "Life Path", "desc": "See important agendas, progress periods, and life directions in each age range in detail." },
+        { "title": "Record & Plan", "desc": "Record intentions, set goals, and reflect on daily life progress." },
+        { "title": "Energy Calendar", "desc": "View energy 7 days in advance to plan important decisions at the right time." }
+      ]
+    },
+    "how": {
+      "label": "Very Easy to Start",
+      "title": "3 Steps Ready to Go",
+      "steps": [
+        { "num": "01", "title": "Sign up Free 1 Min", "desc": "Enter name and email. Start immediately without a credit card." },
+        { "num": "02", "title": "Fill in Birth Date", "desc": "Day, Month, Year, and birth time (if any) for maximum accuracy." },
+        { "num": "03", "title": "Get Advice Instantly", "desc": "Wisdom AI analyzes your fate and is ready to answer all questions in real-time." }
+      ]
+    }
+  },
   "nav": {
     "dashboard": "Today",
     "horoscope": "Fate Chart",

@@ -39,10 +39,15 @@ export const links: LinksFunction = () => [
 ];
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  // useLoaderData is safe inside Layout — Remix v2 supports it here
   const data = useLoaderData<typeof loader>();
   const theme = data?.theme ?? "dark";
   const locale = data?.locale ?? "th";
+
+  // CRITICAL: Synchronously sync i18n instance with loader locale before render
+  // This prevents hydration mismatch #418/#423
+  if (typeof window !== "undefined" && i18nInstance.language !== locale) {
+    i18nInstance.changeLanguage(locale);
+  }
 
   const themeColor = theme === "light" ? "#F5F0E8" : "#020617";
 
@@ -55,14 +60,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-        {/* Technical SEO & Mobile */}
         <meta name="theme-color" content={themeColor} />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="format-detection" content="telephone=no" />
-
         <Meta />
         <Links />
       </head>
