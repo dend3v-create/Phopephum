@@ -64,10 +64,27 @@ export default function Index() {
   const { t: tFull } = useTranslation("common");
 
   // Get dynamic arrays from translations
-  const features = tFull("landing.features.items", { returnObjects: true }) as any[];
+  const featuresRaw = tFull("landing.features.items", { returnObjects: true });
+  const features = Array.isArray(featuresRaw)
+    ? featuresRaw
+    : [
+        { title: "รู้จักตัวเองลึกขึ้น", desc: "เข้าใจรหัสชะตาตนเอง บุคลิก จุดแข็ง และทิศทางชีวิตที่เหมาะกับคุณ จากวันเดือนปีเกิด" },
+        { title: "Wisdom AI ส่วนตัว", desc: "ที่ปรึกษา AI ที่เข้าใจชะตาคุณ ถามได้ทุกเรื่องชีวิต ความรัก การงาน และการตัดสินใจ" },
+        { title: "พลังงานแห่งวัน", desc: "อ่านพลังงานและจังหวะชีวิตประจำวัน real-time เพื่อเลือกเวลาที่ใช่สำหรับทุกสิ่ง" },
+        { title: "เส้นทางชีวิต", desc: "ดูวาระสำคัญ ช่วงเวลาก้าวหน้า และทิศทางชีวิตในแต่ละช่วงอายุอย่างละเอียด" },
+        { title: "บันทึก & วางแผน", desc: "จดบันทึกเจตนา ตั้งเป้าหมาย และสะท้อนความก้าวหน้าของชีวิตในแต่ละวัน" },
+        { title: "ปฏิทินพลังงาน", desc: "ดูพลังงานล่วงหน้า 7 วัน เพื่อวางแผนการตัดสินใจสำคัญในช่วงเวลาที่เหมาะสม" }
+      ];
   const featureIcons = ["✦", "◈", "☽", "⊕", "⟁", "⌘"];
   
-  const steps = tFull("landing.how.steps", { returnObjects: true }) as any[];
+  const stepsRaw = tFull("landing.how.steps", { returnObjects: true });
+  const steps = Array.isArray(stepsRaw)
+    ? stepsRaw
+    : [
+        { num: "01", title: "สมัครฟรี 1 นาที", desc: "ใส่ชื่อและอีเมล เริ่มต้นได้ทันทีโดยไม่ต้องใช้บัตรเครดิต" },
+        { num: "02", title: "กรอกวันเกิด", desc: "วัน เดือน ปี และเวลาเกิด (ถ้ามี) เพื่อความแม่นยำสูงสุด" },
+        { num: "03", title: "รับคำแนะนำทันที", desc: "Wisdom AI วิเคราะห์ชะตาคุณและพร้อมตอบทุกคำถามแบบ real-time" }
+      ];
 
   return (
     <div className="relative min-h-screen overflow-x-hidden" style={{ background: "var(--bg-base)" }}>
