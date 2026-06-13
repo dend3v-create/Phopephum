@@ -303,15 +303,15 @@ export default function DashboardIndex() {
                 {moon.isWanPhra ? " · 🔆 วันพระ" : ` · จันทร์ ${Math.round(moon.illumination)}%`}
               </p>
               {yam.shouldDo && (
-                <div className="mt-3.5 border-l-3 border-[#C6A96B] pl-3 py-1 bg-[#C6A96B]/8 rounded-r-md">
-                  <p className="text-xs sm:text-sm text-[#F8F6F1] font-bold leading-relaxed">
-                    "{yam.shouldDo}"
+                <div className="mt-4 border-l-4 border-yellow-400 pl-3.5 py-1.5 bg-yellow-400/5 rounded-r-lg shadow-[inset_1px_0_0_rgba(250,204,21,0.1)]">
+                  <p className="text-sm sm:text-base text-yellow-300 font-extrabold leading-relaxed drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+                    “{yam.shouldDo}”
                   </p>
                 </div>
               )}
               {/* Live countdown */}
               {timeLeft && (
-                <div className="text-xs sm:text-sm text-gold-200 font-extrabold mt-4 flex items-center gap-2">
+                <div className="text-xs sm:text-sm text-yellow-200 font-black mt-4 flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                   <span>{timeLeft}</span>
                 </div>
@@ -363,8 +363,8 @@ export default function DashboardIndex() {
           </div>
         </div>
 
-        {/* Horizontal scroll timeline */}
-        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin">
+        {/* 2-row grid on desktop (4 cols), 4-row grid on mobile (2 cols) to make cells larger and text bigger */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
           {todaySlots.filter(s => s.period === timelinePeriod).map(s => {
             const isActive = activeSlot?.period === s.period && activeSlot?.yamNumber === s.yamNumber;
             const isSelected = selectedTimelineSlot?.period === s.period && selectedTimelineSlot?.yamNumber === s.yamNumber;
@@ -375,20 +375,20 @@ export default function DashboardIndex() {
               <button
                 key={`${s.period}-${s.yamNumber}`}
                 onClick={() => setSelectedTimelineSlot(s)}
-                className={`shrink-0 w-32 p-3.5 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group select-none
+                className={`w-full p-3 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group select-none flex flex-col justify-between min-h-[100px] sm:min-h-[110px]
                   ${isActive ? "card-glass-gold border-gold-liquid/60 ring-2 ring-gold-liquid/20 shadow-md shadow-gold-500/10" : isSelected ? "card-glass border-mystic-500 bg-cosmic-800 shadow-md shadow-mystic-500/15" : "card-glass border-white/10 bg-[#0A1628]/60 hover:border-gold-500/40 hover:bg-[#0A1628]/80"}`}
               >
                 {isActive && (
-                  <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse border border-cosmic-950" title="LIVE" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse border border-cosmic-950" title="LIVE" />
                 )}
-                <div className="flex justify-between items-center mb-1.5">
-                  <span className="text-[10px] text-text-secondary font-bold">ยาม {s.yamNumber}</span>
-                  <span className={`text-[9px] font-black px-1.5 py-0.2 rounded border ${ls.badge.replace("px-2.5 py-0.5", "")}`}>{s.label.split(" ")[0]}</span>
+                <div className="flex justify-between items-center mb-1 w-full">
+                  <span className="text-xs text-text-secondary font-bold">ยาม {s.yamNumber}</span>
+                  <span className={`text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded border ${ls.badge.replace("px-2.5 py-0.5", "")}`}>{s.label.split(" ")[0]}</span>
                 </div>
-                <p className="font-display text-base font-extrabold text-text-primary flex items-baseline gap-1.5">
-                  {s.yamName} <span className="text-xs text-gold-400 font-display">{planetSym}</span>
+                <p className="font-display text-base sm:text-lg font-extrabold text-text-primary flex items-baseline gap-1 mt-1">
+                  {s.yamName} <span className="text-xs sm:text-sm text-gold-400 font-display">{planetSym}</span>
                 </p>
-                <p className="text-[10px] text-text-secondary mt-1.5 font-mono font-bold tracking-tight">{s.timeLabel.replace(" - ", "-")}</p>
+                <p className="text-xs text-text-secondary mt-1.5 font-mono font-bold tracking-tighter">{s.timeLabel.replace(" - ", "-")}</p>
               </button>
             );
           })}
@@ -414,12 +414,12 @@ export default function DashboardIndex() {
                 </span>
               </div>
               
-              <p className="text-sm sm:text-base text-[#F8F6F1]/95 font-semibold leading-relaxed mb-4">
+              <p className="text-base sm:text-lg text-yellow-100 font-bold leading-relaxed mb-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                 {selectedTimelineSlot.description || "สัญจรนำโชคดีงามตามกาลเทวฤกษ์"}
               </p>
 
               {selectedTimelineSlot.prediction?.shouldDo && (
-                <div className="text-xs sm:text-sm bg-emerald-500/8 border border-emerald-500/25 rounded-lg p-3 flex items-start gap-2 text-emerald-300 font-bold shadow-sm">
+                <div className="text-xs sm:text-sm bg-emerald-500/8 border border-emerald-500/25 rounded-lg p-3.5 flex items-start gap-2 text-emerald-200 font-extrabold shadow-sm">
                   <span className="font-black shrink-0 text-emerald-400">✓ ควรทำ:</span>
                   <span className="leading-relaxed">{selectedTimelineSlot.prediction.shouldDo}</span>
                 </div>
@@ -429,64 +429,80 @@ export default function DashboardIndex() {
         )}
       </div>
 
-      {/* ── 4. Forecasting Tools Grid (4 items) ── */}
+      {/* ── 4. Forecasting Tools Grid (1 column for larger layout) ── */}
       <div className="animate-slide-in-3">
         <p className="text-xs font-bold uppercase tracking-[0.25em] text-gold-300 mb-3.5">✦ เครื่องมือพยากรณ์</p>
-        <div className="grid grid-cols-2 gap-3.5">
+        <div className="grid grid-cols-1 gap-3.5">
 
           {/* ยามอัฐกาล */}
-          <Link to="/dashboard/yam" className="group flex flex-col gap-2.5 p-4.5 rounded-2xl border border-white/10 bg-[#0A1628]/60 hover:border-gold-500/40 hover:bg-cosmic-800/80 hover:shadow-lg transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-gold-300 group-hover:text-gold-liquid transition-colors"><IcoYam /></span>
-              <span className={`text-xs font-black px-2 py-0.5 rounded-full border ${ls.badge}`}>{yam.label}</span>
+          <Link to="/dashboard/yam" className="group flex items-center justify-between p-4.5 rounded-2xl border border-white/10 bg-[#0A1628]/60 hover:border-gold-500/45 hover:bg-cosmic-800/80 hover:shadow-lg transition-all duration-300 active:scale-[0.98] shimmer-sweep relative overflow-hidden gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-gold-300 bg-gold-500/10 border border-gold-500/25 group-hover:border-gold-400/50 transition-colors">
+                <IcoYam />
+              </div>
+              <div>
+                <p className="text-base font-extrabold text-text-primary">ยามอัฐกาล</p>
+                <p className="text-xs text-text-secondary mt-1 font-bold">{PERIOD_TH[yam.period]} · ยาม {yam.number}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm sm:text-base font-black text-text-primary">ยามอัฐกาล</p>
-              <p className="text-base text-gold-300 font-extrabold mt-1">{yam.name}</p>
-              <p className="text-xs text-text-secondary mt-1 font-bold">{PERIOD_TH[yam.period]} · ยาม {yam.number}</p>
+            <div className="flex flex-col items-end gap-1.5 text-right shrink-0">
+              <p className="text-lg text-gold-300 font-black tracking-wide leading-none">{yam.name}</p>
+              <span className={`text-[11px] font-black px-2 py-0.5 rounded border ${ls.badge}`}>{yam.label}</span>
             </div>
           </Link>
 
           {/* กาลชะตา */}
-          <Link to="/dashboard/karnchata" className="group flex flex-col gap-2.5 p-4.5 rounded-2xl border border-white/10 bg-[#0A1628]/60 hover:border-gold-500/40 hover:bg-cosmic-800/80 hover:shadow-lg transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-gold-300 group-hover:text-gold-liquid transition-colors"><IcoHourglass /></span>
-              <span className="text-xs font-black px-2 py-0.5 rounded-full border text-gold-300 border-gold-500/40 bg-gold-500/10">{karnchata.dayStar}</span>
+          <Link to="/dashboard/karnchata" className="group flex items-center justify-between p-4.5 rounded-2xl border border-white/10 bg-[#0A1628]/60 hover:border-gold-500/45 hover:bg-cosmic-800/80 hover:shadow-lg transition-all duration-300 active:scale-[0.98] shimmer-sweep relative overflow-hidden gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-gold-300 bg-gold-500/10 border border-gold-500/25 group-hover:border-gold-400/50 transition-colors">
+                <IcoHourglass />
+              </div>
+              <div>
+                <p className="text-base font-extrabold text-text-primary">เลข ๗ กาลชะตา</p>
+                <p className="text-xs text-text-secondary mt-1 font-bold">ดาว{karnchata.dayStar} · รายวัน/ชั่วโมง/นาที</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm sm:text-base font-black text-text-primary">เลข ๗ กาลชะตา</p>
-              <p className="text-base text-gold-300 font-extrabold mt-1">{karnchata.yamYaiName}</p>
-              <p className="text-xs text-text-secondary mt-1 font-bold">ดาว{karnchata.dayStar} · รายวัน/ชั่วโมง/นาที</p>
+            <div className="flex flex-col items-end gap-1.5 text-right shrink-0">
+              <p className="text-lg text-gold-300 font-black tracking-wide leading-none">{karnchata.yamYaiName}</p>
+              <span className="text-[11px] font-black px-2 py-0.5 rounded border text-gold-300 border-gold-500/40 bg-gold-500/10">{karnchata.dayStar}</span>
             </div>
           </Link>
 
           {/* ยามพรายกระซิบ */}
-          <Link to="/dashboard/horanu" className="group flex flex-col gap-2.5 p-4.5 rounded-2xl border border-white/10 bg-[#0A1628]/60 hover:border-mystic-400/40 hover:bg-cosmic-800/80 hover:shadow-lg transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden">
-            <div className="flex items-center justify-between">
-              <span className="text-mystic-300 group-hover:text-mystic-200 transition-colors"><IcoStarCross /></span>
-              <span className="text-xs font-black px-2 py-0.5 rounded-full border text-mystic-300 border-mystic-500/50 bg-mystic-500/10">ยาม {hora.yamAsked}</span>
+          <Link to="/dashboard/horanu" className="group flex items-center justify-between p-4.5 rounded-2xl border border-white/10 bg-[#0A1628]/60 hover:border-mystic-400/40 hover:bg-cosmic-800/80 hover:shadow-lg transition-all duration-300 active:scale-[0.98] shimmer-sweep relative overflow-hidden gap-4">
+            <div className="flex items-center gap-3.5">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 text-mystic-300 bg-mystic-500/10 border border-mystic-500/25 group-hover:border-mystic-400/50 transition-colors">
+                <IcoStarCross />
+              </div>
+              <div>
+                <p className="text-base font-extrabold text-text-primary">ยามพรายกระซิบ</p>
+                <p className="text-xs text-text-secondary mt-1 font-bold">{PERIOD_TH[hora.period]} · ผัง ดาวลอย 11</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm sm:text-base font-black text-text-primary">ยามพรายกระซิบ</p>
-              <p className="text-base text-mystic-300 font-extrabold mt-1">{hora.yamPlanet}</p>
-              <p className="text-xs text-text-secondary mt-1 font-bold">{PERIOD_TH[hora.period]} · ผัง ดาวลอย 11</p>
+            <div className="flex flex-col items-end gap-1.5 text-right shrink-0">
+              <p className="text-lg text-mystic-300 font-black tracking-wide leading-none">{hora.yamPlanet}</p>
+              <span className="text-[11px] font-black px-2 py-0.5 rounded border text-mystic-300 border-mystic-500/50 bg-mystic-500/10">ยาม {hora.yamAsked}</span>
             </div>
           </Link>
 
           {/* ราหู */}
-          <Link to="/dashboard/rahu" className={`group flex flex-col gap-2.5 p-4.5 rounded-2xl border transition-all duration-300 active:scale-[0.97] shimmer-sweep relative overflow-hidden ${rahu?.isGood ? "border-emerald-500/30 bg-emerald-950/20 hover:border-emerald-500/50 hover:bg-emerald-950/30" : "border-rose-500/30 bg-rose-950/15 hover:border-rose-500/40 hover:bg-rose-950/25"}`}>
-            <div className="flex items-center justify-between">
-              <span className={rahu?.isGood ? "text-emerald-400" : "text-rose-400"}><IcoRahu /></span>
-              <span className={`text-xs font-black px-2 py-0.5 rounded-full border ${rahu?.isGood ? "text-emerald-300 border-emerald-500/50 bg-emerald-500/10" : "text-rose-300 border-rose-500/45 bg-rose-500/10"}`}>
-                {rahu?.isGood ? "ฤกษ์ดี" : "ระวัง"}
-              </span>
+          <Link to="/dashboard/rahu" className={`group flex items-center justify-between p-4.5 rounded-2xl border transition-all duration-300 active:scale-[0.98] shimmer-sweep relative overflow-hidden gap-4 ${rahu?.isGood ? "border-emerald-500/30 bg-emerald-950/20 hover:border-emerald-500/50 hover:bg-emerald-950/30" : "border-rose-500/30 bg-rose-950/15 hover:border-rose-500/40 hover:bg-rose-950/25"}`}>
+            <div className="flex items-center gap-3.5">
+              <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 border group-hover:border-opacity-50 transition-colors ${rahu?.isGood ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/25" : "text-rose-400 bg-rose-500/10 border-rose-500/25"}`}>
+                <IcoRahu />
+              </div>
+              <div>
+                <p className="text-base font-extrabold text-text-primary">ราหูค้นทรัพย์</p>
+                <p className="text-xs text-text-secondary mt-1 font-bold">{rahu ? `${rahu.start}–${rahu.end}` : "ตารางยามมงคล"}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-sm sm:text-base font-black text-text-primary">ราหูค้นทรัพย์</p>
-              <p className={`text-sm sm:text-base font-extrabold mt-1 line-clamp-1 ${rahu?.isGood ? "text-emerald-300" : "text-rose-300"}`}>
+            <div className="flex flex-col items-end gap-1.5 text-right shrink-0">
+              <p className={`text-base font-black tracking-wide leading-none line-clamp-1 ${rahu?.isGood ? "text-emerald-300" : "text-rose-300"}`}>
                 {rahu ? rahu.verdict : "คำนวณ..."}
               </p>
-              <p className="text-xs text-text-secondary mt-1 font-bold">{rahu ? `${rahu.start}–${rahu.end}` : "ตารางยามมงคล"}</p>
+              <span className={`text-[11px] font-black px-2 py-0.5 rounded border ${rahu?.isGood ? "text-emerald-300 border-emerald-500/50 bg-emerald-500/10" : "text-rose-300 border-rose-500/45 bg-rose-500/10"}`}>
+                {rahu?.isGood ? "ฤกษ์ดี" : "ระวัง"}
+              </span>
             </div>
           </Link>
 

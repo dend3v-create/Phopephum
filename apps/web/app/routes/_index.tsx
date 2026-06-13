@@ -1,4 +1,6 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
+import { ThemeToggle } from "~/components/ThemeToggle";
+import { LanguageSwitcher } from "~/components/LanguageSwitcher";
 import { Link } from "@remix-run/react";
 
 export const meta: MetaFunction = () => [
@@ -187,8 +189,10 @@ export default function Index() {
           <a href="#how" className="hover:text-[#C6A96B] transition-colors">วิธีใช้</a>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="hidden sm:block text-sm text-[#94A3B8] hover:text-[#F8F6F1] transition-colors">
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <ThemeToggle />
+          <Link to="/login" className="hidden sm:block text-sm text-[#94A3B8] hover:text-[#F8F6F1] transition-colors px-2">
             เข้าสู่ระบบ
           </Link>
           <Link

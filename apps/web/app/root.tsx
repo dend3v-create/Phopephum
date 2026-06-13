@@ -63,7 +63,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body className="cosmic-ocean-bg text-[#F8F6F1] font-sarabun antialiased">
+      <body className="cosmic-ocean-bg text-theme-body font-sarabun antialiased">
         <LocaleContext.Provider value={{ locale, theme }}>
           {children}
         </LocaleContext.Provider>

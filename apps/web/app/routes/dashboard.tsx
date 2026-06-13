@@ -271,6 +271,12 @@ export default function DashboardLayout() {
               Admin Dashboard
             </a>
           )}
+          {/* ── Preference controls ── */}
+          <div className="flex items-center justify-between pb-2">
+            <LanguageSwitcher />
+            <ThemeToggle />
+          </div>
+
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-[#D9BC82] text-sm font-bold shrink-0"
               style={{ background: "rgba(198,169,107,0.15)", border: "1px solid rgba(217,188,130,0.25)" }}>

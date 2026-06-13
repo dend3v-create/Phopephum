@@ -31,6 +31,7 @@ import type { Env } from "~/env.server";
 import type { HoroscopeResult } from "@phopephum/types";
 import type { YamResult } from "@phopephum/engine";
 import { useState, useEffect, useCallback } from "react";
+import { useT } from "~/i18n/context";
 
 export const meta: MetaFunction = () => [
   { title: "เลข 7 ตัว 9 ฐาน และผังดวงจักรพรรดิ — PhopePhum" },
@@ -1881,42 +1882,44 @@ const NUM_COLORS: Record<number, { bg: string; text: string; border: string }> =
   8: { bg: "bg-indigo-500/20", text: "text-indigo-300", border: "border-indigo-500/30" },
 };
 
-// ── 2-Color Rule: Gold = กำเนิด/กำลัง, Blue = จร/เคลื่อนไหว ──
-// ฐาน ๔ special: 11=ราชาโชค 13=มหาอุจ 14=จักรพรรดิ 18=มหาจักรพรรดิ์ → Gold
-//                9=เกตุ 10=เสาร์ 12=ราหู → Blue
-const BASE4_GOLD = new Set([11, 13, 14, 18]);
-const BASE4_BLUE = new Set([9, 10, 12]);
+// ── Single-color system: ตัวเลขสีขาวเหมือนกันทั้งหมด ──
+// แต่ละภพมีกรอบการ์ด (bg + gold border)
+// ฐาน ๔ ใช้ bg ต่าง (blue-tinted) เพื่อแยกแถว
 
 function numColor(
-  n: number,
+  _n: number,
   opts: {
     isActive?: boolean;
-    isHighlighted?: boolean;
     isDimmed?: boolean;
-    natalStar?: number | null;
-    transitStar?: number | null;
     isBase4?: boolean;
+    isGlowFiltered?: boolean;
   } = {}
 ) {
-  const { isActive, isHighlighted, isDimmed, natalStar, transitStar, isBase4 } = opts;
+  const { isActive, isDimmed, isBase4, isGlowFiltered } = opts;
 
-  if (isBase4) {
-    if (BASE4_GOLD.has(n))
-      return { text: "text-[#C6A96B]", weight: "font-black", glow: "drop-shadow-[0_0_8px_rgba(198,169,107,0.7)]" };
-    if (BASE4_BLUE.has(n))
-      return { text: "text-[#6D8FC7]", weight: "font-bold",  glow: "drop-shadow-[0_0_6px_rgba(109,143,199,0.5)]" };
-    return { text: "text-[#F8F6F1]/80", weight: "font-bold", glow: "" };
+  const base4Card = "bg-[#071E3D]/75 border-[#6D8FC7]/22";
+  const normalCard = "bg-[#071427]/75 border-[#C6A96B]/18";
+
+  if (isDimmed) {
+    return {
+      card: isBase4 ? `${base4Card} opacity-30` : `${normalCard} opacity-30`,
+      text: "text-[#F8F6F1] font-bold",
+    };
   }
-
-  if (isActive || isHighlighted)
-    return { text: "text-[#C6A96B]", weight: "font-black", glow: "drop-shadow-[0_0_12px_rgba(198,169,107,0.9)]" };
-  if (natalStar != null && n === natalStar)
-    return { text: "text-[#C6A96B]", weight: "font-black", glow: "drop-shadow-[0_0_8px_rgba(198,169,107,0.6)]" };
-  if (transitStar != null && n === transitStar)
-    return { text: "text-[#6D8FC7]", weight: "font-bold",  glow: "drop-shadow-[0_0_8px_rgba(109,143,199,0.55)]" };
-  if (isDimmed)
-    return { text: "text-[#F8F6F1]/25", weight: "font-semibold", glow: "" };
-  return { text: "text-[#F8F6F1]/65", weight: "font-semibold", glow: "" };
+  if (isActive || isGlowFiltered) {
+    return {
+      card: isBase4
+        ? "bg-[#0D2245]/90 border-[#C6A96B]/60 shadow-[0_0_16px_rgba(198,169,107,0.22),inset_0_1px_0_rgba(198,169,107,0.10)]"
+        : "bg-[#0A1A30]/90 border-[#C6A96B]/60 shadow-[0_0_16px_rgba(198,169,107,0.22),inset_0_1px_0_rgba(198,169,107,0.10)]",
+      text: "text-[#F8F6F1] font-black",
+    };
+  }
+  return {
+    card: isBase4
+      ? `${base4Card} hover:border-[#C6A96B]/30`
+      : `${normalCard} hover:border-[#C6A96B]/32`,
+    text: "text-[#F8F6F1] font-bold",
+  };
 }
 
 function HoroscopeResultDisplay({ result, phopephumResult }: { result: any; phopephumResult?: any }) {
@@ -2002,6 +2005,8 @@ function FateMatrixPanel({
   showTaksaJorn?: boolean;
   showMahaJorn?: boolean;
 }) {
+  const tHoro = useT("horoscope");
+
   // ฟังก์ชันคำนวณช่วงอายุสะสมของทุกช่องใน 3 แถวแรก (วัยจร Mod-7 ระบบคัมภีร์ดวงไทย)
   const getCellAgeRange = (row: number, col: number, mat: number[][]) => {
     let currentAgeStart = 1;
@@ -2018,24 +2023,6 @@ function FateMatrixPanel({
     return "";
   };
 
-  // ── extract natal & transit star for 2-color rule ──
-  const natalStar: number | null = (() => {
-    if (phopephumResult?.lagna?.row && phopephumResult?.lagna?.col) {
-      return matrix[phopephumResult.lagna.row - 1]?.[phopephumResult.lagna.col - 1] ?? matrix[0]?.[0] ?? null;
-    }
-    return matrix[0]?.[0] ?? null;
-  })();
-
-  const transitStar: number | null = (() => {
-    if (phopephumResult?.lagnaTransit?.row && phopephumResult?.lagnaTransit?.col) {
-      return matrix[phopephumResult.lagnaTransit.row - 1]?.[phopephumResult.lagnaTransit.col - 1] ?? null;
-    }
-    if (phopephumResult?.vayaJorn?.row && phopephumResult?.vayaJorn?.col) {
-      return matrix[phopephumResult.vayaJorn.row - 1]?.[phopephumResult.vayaJorn.col - 1] ?? null;
-    }
-    return null;
-  })();
-
   return (
     <div onClick={() => onNumClick(null)} className="w-full">
       <Card className="p-0 overflow-hidden border-[#C6A96B]/15 shadow-2xl cursor-default">
@@ -2045,14 +2032,14 @@ function FateMatrixPanel({
       >
         <div className="flex items-center gap-3">
           <div className="w-px h-5 bg-[#C6A96B]/60" />
-          <p className="text-[#C6A96B] text-xs sm:text-sm font-bold uppercase tracking-[0.18em]">ผังดวง ๗ ตัว ๙ ฐาน</p>
+          <p className="text-[#C6A96B] text-xs sm:text-sm font-bold uppercase tracking-[0.18em]">{tHoro("chart.title")}</p>
           <span className="hidden sm:inline text-[#F8F6F1]/20 text-xs">·</span>
-          <span className="hidden sm:inline text-[#F8F6F1]/35 text-xs tracking-wide">35 ภพเรือนสมบูรณ์</span>
+          <span className="hidden sm:inline text-[#F8F6F1]/35 text-xs tracking-wide">{tHoro("chart.subtitle")}</span>
         </div>
         <div className="flex items-center gap-3 text-[10px] text-[#F8F6F1]/30 tracking-wider">
-          <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B] inline-block" />กำเนิด</span>
-          <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#6D8FC7] inline-block" />จร</span>
-          <span className="text-[#F8F6F1]/20">แตะเพื่อดูความเชื่อมโยง</span>
+          <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B] inline-block" />{tHoro("chart.natal")}</span>
+          <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#6D8FC7] inline-block" />{tHoro("chart.transit")}</span>
+          <span className="text-[#F8F6F1]/20">{tHoro("chart.tap_hint")}</span>
         </div>
       </div>
       <div className="overflow-x-auto p-1 sm:p-5 bg-transparent">
@@ -2066,12 +2053,12 @@ function FateMatrixPanel({
                   key={rIdx} 
                   className={`group transition-all ${
                     isBase4
-                      ? "border-y border-[#6D8FC7]/12"
-                      : "hover:bg-white/[0.02]"
+                      ? "bg-[#0A2240]/25 border-y border-[#4B6FAE]/10"
+                      : ""
                   }`}
                 >
-                  <td className="py-1 pr-1 sm:pr-3 text-left whitespace-nowrap w-[30px] sm:w-[72px]">
-                    <p className={`text-[10px] sm:text-xs font-bold tracking-wider ${isBase4 ? "text-[#6D8FC7]/80" : "text-[#F8F6F1]/40"}`}>{ROW_META[rIdx].label}</p>
+                  <td className="py-[3px] sm:py-1 pr-1 sm:pr-2 text-left whitespace-nowrap w-[28px] sm:w-[60px]">
+                    <p className={`text-[9px] sm:text-[10px] font-bold tracking-wider ${isBase4 ? "text-[#6D8FC7]/70" : "text-[#F8F6F1]/35"}`}>{ROW_META[rIdx].label}</p>
                   </td>
                   {row.map((num, cIdx) => {
                     const isBase4 = rIdx === 3;
@@ -2110,9 +2097,8 @@ function FateMatrixPanel({
                     const c = numColor(num, {
                       isActive: isHighlighted,
                       isDimmed,
-                      natalStar,
-                      transitStar,
                       isBase4,
+                      isGlowFiltered,
                     });
                     const houseName = isBase4 ? BASE4_MEANINGS[num] : ROW_META[rIdx].phopNames?.[cIdx];
                     
@@ -2148,116 +2134,97 @@ function FateMatrixPanel({
                       phopephumResult.dailyJorn.col === (cIdx + 1);
 
                     return (
-                      <td key={cIdx} className="p-0.5 sm:p-2 w-[40px] sm:w-[60px]">
+                      <td key={cIdx} className="p-[3px] sm:p-1">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onNumClick(isBase4 ? matrix[2]?.[cIdx] : actualNum);
                           }}
                           type="button"
-                          className="flex flex-col items-center gap-1 sm:gap-1.5 w-full focus:outline-none relative group/cell"
+                          className="w-full focus:outline-none group/cell"
                         >
-                          <div className="relative flex items-center justify-center">
-                            {/* Highlight ring — ไม่มี bg circle, แค่ ring เบาๆ */}
-                            {isHighlighted && (
-                              <span className="absolute inset-0 rounded-full ring-1 ring-[#C6A96B]/50 scale-110 animate-pulse" />
-                            )}
-                            <span className={`font-display text-[20px] sm:text-[28px] leading-none select-none transition-all duration-200
-                              ${isHighlighted ? "scale-125 z-10" : ""}
-                              ${isDimmed ? "opacity-25 scale-90" : ""}
-                              ${isGlowFiltered ? "animate-pulse" : ""}
-                              ${c.text} ${c.weight} ${c.glow}`}>
+                          {/* ── Card: กรอบภพ ── */}
+                          <div className={`
+                            relative flex flex-col items-center justify-center
+                            rounded-lg border
+                            py-1.5 sm:py-2 px-0.5
+                            min-h-[50px] sm:min-h-[64px]
+                            transition-all duration-200
+                            ${c.card}
+                            ${isHighlighted ? "scale-[1.06] z-10" : ""}
+                            ${isGlowFiltered ? "animate-pulse" : ""}
+                          `}>
+
+                            {/* ── ตัวเลขหลัก ── */}
+                            <span className={`font-display text-[17px] sm:text-[22px] leading-none select-none ${c.text}`}>
                               {num}
                             </span>
-                            
-                            {/* Taksa Transit Badge (Top-Right) */}
-                            {showTaksaJorn && taksaInd && (
-                              <span 
-                                title={taksaInd.fullName}
-                                className={`absolute -top-1.5 -right-2 text-[10px] font-bold px-1 py-[1px] rounded-md border leading-none shadow-sm transition-all group-hover/cell:scale-105 ${taksaInd.color}`}
-                              >
-                                {taksaInd.label}
-                              </span>
-                            )}
-                            
-                            {/* Maha Transit Badge (Top-Left) */}
-                            {showMahaJorn && mahaInd && (
-                              <span 
-                                title={mahaInd.fullName}
-                                className={`absolute -top-1.5 -left-2 text-[10px] font-bold px-1 py-[1px] rounded-md border leading-none shadow-sm transition-all group-hover/cell:scale-105 ${mahaInd.color}`}
-                              >
-                                {mahaInd.label}
-                              </span>
-                            )}
 
-                            {/* ลัคนากำเนิด (ล) - Bottom Left */}
-                            {showNatalLagna && isLagnaNatal && (
-                              <span 
-                                title="ลัคนากำเนิด"
-                                className="absolute -bottom-1 -left-2.5 text-[11px] font-bold bg-[#C6A96B] text-[#020617] border border-[#C6A96B]/60 px-1 py-[0.5px] rounded-full leading-none shadow-md transition-all group-hover/cell:scale-105 select-none z-10"
-                              >
-                                ล
-                              </span>
-                            )}
-
-                            {/* ลัคนาจร (ลจ) - Bottom Right */}
-                            {showTransitLagna && isLagnaTransit && (
-                              <span
-                                title={`ลัคนาจร (อายุย่าง ${phopephumResult?.taksaTransit?.ageYang ?? 0} ปี)`}
-                                className="absolute -bottom-1 -right-2.5 text-[11px] font-bold bg-[#4B6FAE] text-[#F8F6F1] border border-[#4B6FAE]/60 px-1 py-[0.5px] rounded-full leading-none shadow-md transition-all group-hover/cell:scale-105 select-none animate-pulse z-10"
-                              >
-                                ลจ
-                              </span>
-                            )}
-
-                            {/* วัยจร / ปีจร / เดือนจร / วันจร Dots - Bottom Center */}
-                            {((showVayaJorn && isVayaJorn) || 
-                              (showYearlyJorn && isYearlyJorn) || 
-                              (showMonthlyJorn && isMonthlyJorn) || 
-                              (showDailyJorn && isDailyJorn)) && (
-                              <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 flex items-center justify-center gap-0.5 bg-slate-950/90 px-1.5 py-[1.5px] rounded-full border border-white/10 shadow-sm z-20">
-                                {showVayaJorn && isVayaJorn && (
-                                  <span 
-                                    title="วัยจร"
-                                    className="w-1.5 h-1.5 rounded-full bg-[#C6A96B] animate-pulse"
-                                  />
-                                )}
-                                {showYearlyJorn && isYearlyJorn && (
-                                  <span 
-                                    title="ปีจร"
-                                    className="w-1.5 h-1.5 rounded-full bg-[#4B6FAE]"
-                                  />
-                                )}
-                                {showMonthlyJorn && isMonthlyJorn && (
-                                  <span
-                                    title="เดือนจร"
-                                    className="w-1.5 h-1.5 rounded-full bg-[#6D8FC7]"
-                                  />
-                                )}
-                                {showDailyJorn && isDailyJorn && (
-                                  <span
-                                    title="วันจร"
-                                    className="w-1.5 h-1.5 rounded-full bg-[#9AB3D9]"
-                                  />
-                                )}
-                              </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex flex-col items-center mt-1">
+                            {/* ── ชื่อภพ ── */}
                             {showHouseNames && houseName && (
-                              <span className={`text-[10px] sm:text-[11px] font-medium leading-tight mb-0.5 transition-colors text-center tracking-wide ${
-                                isHighlighted
-                                  ? "text-[#C6A96B]/90"
-                                  : "text-[#F8F6F1]/30"
-                              }`}>
+                              <span className="text-[8px] sm:text-[9px] text-[#F8F6F1]/32 mt-1 leading-none text-center font-medium px-0.5">
                                 {houseName}
                               </span>
                             )}
+
+                            {/* ── ช่วงอายุ ── */}
                             {showAgeRange && rIdx < 3 && (
-                              <span className="text-[13px] text-[#94A3B8] mt-1 leading-none font-sans font-semibold">
-                                {getCellAgeRange(rIdx, cIdx, matrix)} ปี
+                              <span className="text-[8px] text-[#F8F6F1]/30 mt-0.5 leading-none">
+                                {getCellAgeRange(rIdx, cIdx, matrix)}
                               </span>
+                            )}
+
+                            {/* ── ลัคนากำเนิด badge (ล) ── */}
+                            {showNatalLagna && isLagnaNatal && (
+                              <span
+                                title="ลัคนากำเนิด"
+                                className="absolute -top-2 -left-1.5 text-[9px] font-black bg-[#C6A96B] text-[#020617] px-1 py-px rounded leading-none shadow-md select-none z-10"
+                              >ล</span>
+                            )}
+
+                            {/* ── ลัคนาจร badge (ลจ) ── */}
+                            {showTransitLagna && isLagnaTransit && (
+                              <span
+                                title={`ลัคนาจร (อายุย่าง ${phopephumResult?.taksaTransit?.ageYang ?? 0} ปี)`}
+                                className="absolute -top-2 -right-1.5 text-[9px] font-black bg-[#4B6FAE] text-[#F8F6F1] px-1 py-px rounded leading-none shadow-md select-none animate-pulse z-10"
+                              >ลจ</span>
+                            )}
+
+                            {/* ── Taksa badge (top-right corner) ── */}
+                            {showTaksaJorn && taksaInd && (
+                              <span
+                                title={taksaInd.fullName}
+                                className={`absolute -top-1.5 right-0.5 text-[8px] font-bold px-1 py-px rounded border leading-none shadow-sm ${taksaInd.color}`}
+                              >{taksaInd.label}</span>
+                            )}
+
+                            {/* ── Maha badge (top-left corner) ── */}
+                            {showMahaJorn && mahaInd && (
+                              <span
+                                title={mahaInd.fullName}
+                                className={`absolute -top-1.5 left-0.5 text-[8px] font-bold px-1 py-px rounded border leading-none shadow-sm ${mahaInd.color}`}
+                              >{mahaInd.label}</span>
+                            )}
+
+                            {/* ── จร dots แถบล่าง card ── */}
+                            {((showVayaJorn && isVayaJorn) ||
+                              (showYearlyJorn && isYearlyJorn) ||
+                              (showMonthlyJorn && isMonthlyJorn) ||
+                              (showDailyJorn && isDailyJorn)) && (
+                              <div className="absolute bottom-1 left-1/2 -translate-x-1/2 flex items-center gap-0.5">
+                                {showVayaJorn && isVayaJorn && (
+                                  <span title="วัยจร" className="w-1 h-1 rounded-full bg-[#C6A96B] animate-pulse" />
+                                )}
+                                {showYearlyJorn && isYearlyJorn && (
+                                  <span title="ปีจร" className="w-1 h-1 rounded-full bg-[#C6A96B]/60" />
+                                )}
+                                {showMonthlyJorn && isMonthlyJorn && (
+                                  <span title="เดือนจร" className="w-1 h-1 rounded-full bg-[#F8F6F1]/40" />
+                                )}
+                                {showDailyJorn && isDailyJorn && (
+                                  <span title="วันจร" className="w-1 h-1 rounded-full bg-[#F8F6F1]/25" />
+                                )}
+                              </div>
                             )}
                           </div>
                         </button>

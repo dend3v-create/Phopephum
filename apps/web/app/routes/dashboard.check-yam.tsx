@@ -86,10 +86,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const LEVEL_COLOR: Record<string, string> = {
-  excellent: "text-emerald-400 border-emerald-500/40 bg-emerald-500/8",
-  very_good: "text-sky-400 border-sky-500/40 bg-sky-500/8",
-  good:      "text-amber-400 border-amber-500/40 bg-amber-500/8",
-  bad:       "text-rose-400 border-rose-500/40 bg-rose-500/8",
+  excellent: "text-[#C6A96B] border-[#C6A96B]/40 bg-[#C6A96B]/8",
+  very_good: "text-[#D9BC82] border-[#D9BC82]/30 bg-[#D9BC82]/6",
+  good:      "text-[#F8F6F1] border-[#F8F6F1]/20 bg-white/5",
+  bad:       "text-[#6D8FC7] border-[#6D8FC7]/20 bg-[#4B6FAE]/5",
 };
 
 const PHASE_TH: Record<string, string> = {
@@ -280,9 +280,9 @@ export default function CheckYamPage() {
         </div>
 
         {/* ราหูค้นทรัพย์ */}
-        <div className={`rounded-2xl p-4 flex flex-col gap-2 border ${rahu?.isGood ? "bg-emerald-950/20 border-emerald-500/20" : "bg-rose-950/20 border-rose-500/20"}`}>
+        <div className={`rounded-2xl p-4 flex flex-col gap-2 border ${rahu?.isGood ? "bg-[#C6A96B]/8 border-[#C6A96B]/20" : "bg-[#4B6FAE]/8 border-[#4B6FAE]/20"}`}>
           <p className="text-[10px] text-[#8A8070] uppercase tracking-widest font-bold">ราหูค้นทรัพย์</p>
-          <p className={`text-lg font-display font-bold leading-tight ${rahu?.isGood ? "text-emerald-400" : "text-rose-400"}`}>
+          <p className={`text-lg font-display font-bold leading-tight ${rahu?.isGood ? "text-[#C6A96B]" : "text-[#6D8FC7]"}`}>
             {rahu?.isGood ? "✓ ฤกษ์ดี" : "✕ ระวัง"}
           </p>
           {rahu && (
@@ -343,8 +343,8 @@ export default function CheckYamPage() {
             title="ยามราหูค้นทรัพย์"
             badge={rahu?.isGood ? "ฤกษ์ดี" : "ระวัง"}
             badgeColor={rahu?.isGood
-              ? "text-emerald-400 border-emerald-500/40 bg-emerald-500/8"
-              : "text-rose-400 border-rose-500/40 bg-rose-500/8"}
+              ? "text-[#C6A96B] border-[#C6A96B]/40 bg-[#C6A96B]/8"
+              : "text-[#6D8FC7] border-[#6D8FC7]/30 bg-[#4B6FAE]/6"}
             lines={[
               rahu ? rahu.verdict : "คำนวณฤกษ์ราหู",
               rahu ? `✦ ${rahu.advice}` : "ตารางยามมงคลรายวัน",
@@ -370,7 +370,7 @@ export default function CheckYamPage() {
           <p className="text-[10px] text-[#C6A96B] uppercase tracking-widest font-bold mb-3">
             ✦ แนวทางยามปัจจุบัน — {yam.yamName}
           </p>
-          <p className="text-sm text-[#D9CDB7] leading-relaxed">{yam.shouldDo}</p>
+          <p className="text-base text-yellow-100 font-bold leading-relaxed">{yam.shouldDo}</p>
           {rahu?.advice && (
             <div className="mt-3 pt-3 border-t border-white/5">
               <p className="text-[10px] text-[#8A8070] font-bold mb-1">ราหู: {rahu.verdict}</p>
