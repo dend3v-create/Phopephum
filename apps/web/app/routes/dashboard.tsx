@@ -407,20 +407,6 @@ export default function DashboardLayout() {
                   <NavIcon name="sparkles" size={5} />
                 </div>
               </Link>
-
-              {/* แดชบอร์ด */}
-              <Link
-                to="/dashboard"
-                onClick={() => setIsQuickMenuOpen(false)}
-                className="flex items-center gap-2.5 group"
-              >
-                <span className="text-[13px] font-bold text-[var(--text-body)] bg-[var(--bg-surface)] px-3 py-1.5 rounded-xl border border-[var(--border-gold)] backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity shadow-lg">
-                  แดชบอร์ด
-                </span>
-                <div className="w-12 h-12 rounded-full bg-[var(--text-body)] border-2 border-[#C6A96B] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all text-[var(--bg-base)]">
-                  <NavIcon name="grid" size={5} />
-                </div>
-              </Link>
             </div>
 
             {/* Bottom Row (Capsule + Close Button) */}
@@ -433,37 +419,27 @@ export default function DashboardLayout() {
                   borderColor: "var(--border-gold)",
                 }}
               >
-                {/* ตั้งดวงชะตา */}
-                <Link
-                  to="/dashboard/horoscope"
-                  onClick={() => setIsQuickMenuOpen(false)}
-                  className="flex flex-col items-center justify-center w-16 h-12 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
-                >
-                  <NavIcon name="journey" size={4.5} />
-                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">ตั้งดวง</span>
-                </Link>
-
-                {/* ปฏิทินมงคล */}
+                {/* ฤกษ์มงคล */}
                 <Link
                   to="/dashboard/calendar"
                   onClick={() => setIsQuickMenuOpen(false)}
                   className="flex flex-col items-center justify-center w-16 h-12 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
                 >
                   <NavIcon name="calendar" size={4.5} />
-                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">ปฏิทินมงคล</span>
+                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">ฤกษ์มงคล</span>
                 </Link>
 
-                {/* เช็คฤกษ์ยาม */}
+                {/* แผนงาน */}
                 <Link
-                  to="/dashboard/check-yam"
+                  to="/dashboard/planner"
                   onClick={() => setIsQuickMenuOpen(false)}
                   className="flex flex-col items-center justify-center w-16 h-12 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
                 >
-                  <NavIcon name="yam" size={4.5} />
-                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">ฤกษ์ยาม</span>
+                  <NavIcon name="journal" size={4.5} />
+                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">แผนงาน</span>
                 </Link>
 
-                {/* เครือข่ายพันธมิตร */}
+                {/* พันธมิตร */}
                 <Link
                   to="/dashboard/community"
                   onClick={() => setIsQuickMenuOpen(false)}
@@ -519,11 +495,11 @@ function MobileBottomBar({
   setIsQuickMenuOpen: (open: boolean) => void;
 }) {
   const tabs = [
-    { to: "/dashboard",           label: "แดชบอร์ด",    icon: "grid",     exact: true },
-    { to: "/dashboard/calendar",  label: "ปฏิทินมงคล",  icon: "calendar", exact: false },
-    { type: "quick-menu",         label: "เมนูด่วน",    icon: "sparkles" },
-    { to: "/dashboard/planner",   label: "แผนงาน",      icon: "journal",  exact: false },
-    { to: "/dashboard/settings",  label: "โปรไฟล์",    icon: "profile",  exact: false },
+    { to: "/dashboard",            label: "แดชบอร์ด",    icon: "grid",     exact: true },
+    { to: "/dashboard/check-yam",  label: "ฤกษ์ยาม",      icon: "yam",      exact: false },
+    { type: "quick-menu",          label: "เมนูด่วน",    icon: "sparkles" },
+    { to: "/dashboard/horoscope",  label: "ตั้งดวงชะตา",  icon: "journey",  exact: false },
+    { to: "/dashboard/settings",   label: "โปรไฟล์",     icon: "profile",  exact: false },
   ] as const;
 
   return (
