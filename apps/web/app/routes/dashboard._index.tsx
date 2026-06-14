@@ -208,10 +208,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 // ─── Helpers & Design Constants ───────────────────────────────────────────────
 const LEVEL_STYLE: Record<string, { bar: string; badge: string }> = {
-  excellent: { bar: "bg-emerald-400", badge: "text-emerald-400 border-emerald-500/40 bg-emerald-500/8" },
-  very_good: { bar: "bg-sky-400",     badge: "text-sky-400 border-sky-500/40 bg-sky-500/8" },
-  good:      { bar: "bg-amber-400",   badge: "text-amber-400 border-amber-500/40 bg-amber-500/8" },
-  bad:       { bar: "bg-rose-400",    badge: "text-rose-400 border-rose-500/40 bg-rose-500/8" },
+  excellent: { bar: "bg-emerald-400", badge: "text-emerald-800 border-emerald-300 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/40 dark:bg-emerald-500/8" },
+  very_good: { bar: "bg-sky-400",     badge: "text-sky-800 border-sky-300 bg-sky-50 dark:text-sky-400 dark:border-sky-500/40 dark:bg-sky-500/8" },
+  good:      { bar: "bg-amber-400",   badge: "text-amber-800 border-amber-300 bg-amber-50 dark:text-amber-400 dark:border-amber-500/40 dark:bg-amber-500/8" },
+  bad:       { bar: "bg-rose-400",    badge: "text-rose-800 border-rose-300 bg-rose-50 dark:text-rose-400 dark:border-rose-500/40 dark:bg-rose-500/8" },
 };
 
 const PERIOD_TH: Record<string, string> = { day: "กลางวัน", night: "กลางคืน" };
@@ -357,48 +357,48 @@ export default function DashboardIndex() {
 
       {/* ── 2. Layer 1: Identity Card (รหัสชีวิตของฉัน) ── */}
       {identity && (
-        <div className="card-glass p-6 border-2 border-[#C6A96B]/25 bg-gradient-to-br from-[#0c2240] to-[#020617] relative overflow-hidden shadow-2xl rounded-[2rem] animate-fade-up">
+        <div className="card-glass p-6 border-2 border-slate-200 dark:border-[#C6A96B]/25 bg-gradient-to-br from-white via-[#F5F0ED] to-white dark:from-[#0c2240] dark:to-[#020617] relative overflow-hidden shadow-2xl rounded-[2rem] animate-fade-up">
           {/* Background elements */}
           <div className="absolute top-0 right-0 w-36 h-36 bg-radial from-[#C6A96B]/15 to-transparent blur-xl pointer-events-none" />
           <div className="absolute bottom-0 left-0 w-36 h-36 bg-radial from-[#4B6FAE]/15 to-transparent blur-xl pointer-events-none" />
           
           <div className="relative space-y-4">
-            <div className="flex justify-between items-center border-b border-[#C6A96B]/15 pb-3">
-              <span className="text-[10px] sm:text-xs font-black text-[#C6A96B] tracking-[0.22em] uppercase flex items-center gap-1.5">
+            <div className="flex justify-between items-center border-b border-slate-200 dark:border-[#C6A96B]/15 pb-3">
+              <span className="text-[10px] sm:text-xs font-black text-[#A68444] dark:text-[#C6A96B] tracking-[0.22em] uppercase flex items-center gap-1.5">
                 <Compass className="w-3.5 h-3.5 animate-spin-slow" /> IDENTITY OS Blueprint
               </span>
-              <span className="text-xs font-black text-[#94A3B8] px-2 py-0.5 rounded-full border border-white/10 bg-white/5 uppercase">
+              <span className="text-xs font-black text-slate-500 dark:text-[#94A3B8] px-2 py-0.5 rounded-full border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 uppercase">
                 {identity.element}ธาตุเกิด
               </span>
             </div>
 
             <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl border-2 border-[#C6A96B]/45 bg-[#0a2240] flex flex-col items-center justify-center shrink-0 shadow-lg shadow-[#C6A96B]/10">
-                <span className="text-2xl text-[#C6A96B]">{identity.guardianSymbol}</span>
-                <span className="text-[9px] font-black text-[#C6A96B] tracking-widest leading-none mt-0.5">STAR {identity.starNumber}</span>
+              <div className="w-14 h-14 rounded-2xl border-2 border-[#A68444]/45 dark:border-[#C6A96B]/45 bg-slate-50 dark:bg-[#0a2240] flex flex-col items-center justify-center shrink-0 shadow-lg shadow-[#C6A96B]/10">
+                <span className="text-2xl text-[#A68444] dark:text-[#C6A96B]">{identity.guardianSymbol}</span>
+                <span className="text-[9px] font-black text-[#A68444] dark:text-[#C6A96B] tracking-widest leading-none mt-0.5">STAR {identity.starNumber}</span>
               </div>
 
               <div className="space-y-1">
-                <p className="text-[11px] text-[#C6B79F] font-black tracking-widest uppercase">บุคลิกลักษณะชีวิต</p>
-                <h3 className="font-display font-black text-lg text-[#F8F6F1] flex items-center gap-2">
+                <p className="text-[11px] text-slate-500 dark:text-[#C6B79F] font-black tracking-widest uppercase">บุคลิกลักษณะชีวิต</p>
+                <h3 className="font-display font-black text-lg text-slate-900 dark:text-[#F8F6F1] flex items-center gap-2">
                   {identity.archetypeTitle}
-                  <span className="text-xs text-[#C6A96B] font-mono">({identity.archetypeLabel})</span>
+                  <span className="text-xs text-[#A68444] dark:text-[#C6A96B] font-mono">({identity.archetypeLabel})</span>
                 </h3>
               </div>
             </div>
 
-            <p className="text-xs sm:text-sm text-[#D9CDB7] leading-relaxed font-sans-thai font-medium">
+            <p className="text-xs sm:text-sm text-slate-700 dark:text-[#D9CDB7] leading-relaxed font-sans-thai font-medium">
               {identity.description}
             </p>
 
-            <div className="grid grid-cols-2 gap-3 pt-2 text-[11px] sm:text-xs border-t border-white/5">
+            <div className="grid grid-cols-2 gap-3 pt-2 text-[11px] sm:text-xs border-t border-slate-200 dark:border-white/5">
               <div className="space-y-1">
-                <p className="text-[#C6A96B] font-black uppercase tracking-wider flex items-center gap-1">🛡️ จิตเทพผู้พิทักษ์</p>
-                <p className="text-[#F8F6F1] font-bold">{identity.guardianName}</p>
+                <p className="text-[#A68444] dark:text-[#C6A96B] font-black uppercase tracking-wider flex items-center gap-1">🛡️ จิตเทพผู้พิทักษ์</p>
+                <p className="text-slate-900 dark:text-[#F8F6F1] font-bold">{identity.guardianName}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sky-300 font-black uppercase tracking-wider flex items-center gap-1">🌟 จุดเด่นประจำตัว</p>
-                <p className="text-[#F8F6F1] font-bold line-clamp-1">{identity.strengths[0]}, {identity.strengths[1]}</p>
+                <p className="text-sky-700 dark:text-sky-300 font-black uppercase tracking-wider flex items-center gap-1">🌟 จุดเด่นประจำตัว</p>
+                <p className="text-slate-900 dark:text-[#F8F6F1] font-bold line-clamp-1">{identity.strengths[0]}, {identity.strengths[1]}</p>
               </div>
             </div>
           </div>
@@ -406,12 +406,12 @@ export default function DashboardIndex() {
       )}
 
       {/* ── 3. Layer 3: Daily Tarot Card Pull Widget ── */}
-      <div className="card-glass p-6 border border-[#C6A96B]/20 bg-[#0A1628]/70 rounded-[2rem] space-y-4 animate-fade-up relative overflow-hidden">
-        <div className="flex justify-between items-center border-b border-white/5 pb-3">
-          <span className="text-[10px] sm:text-xs font-black text-gold-300 tracking-[0.2em] uppercase flex items-center gap-1.5">
+      <div className="card-glass p-6 border border-[#C6A96B]/20 dark:bg-[#0A1628]/70 rounded-[2rem] space-y-4 animate-fade-up relative overflow-hidden">
+        <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/5 pb-3">
+          <span className="text-[10px] sm:text-xs font-black text-[#A68444] dark:text-gold-300 tracking-[0.2em] uppercase flex items-center gap-1.5">
             🔮 DAILY RITUAL CHECK-IN
           </span>
-          <span className="text-[10px] text-emerald-400 border border-emerald-500/20 bg-emerald-950/20 px-2.5 py-0.5 rounded-full font-bold animate-pulse">
+          <span className="text-[10px] text-emerald-700 border border-emerald-500/35 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-950/20 px-2.5 py-0.5 rounded-full font-bold animate-pulse">
             +1 Sands of Time Reward
           </span>
         </div>
@@ -419,25 +419,25 @@ export default function DashboardIndex() {
         {currentCard ? (
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 animate-fade-up">
             {/* Tarot Card Display */}
-            <div className="w-24 h-40 shrink-0 rounded-2xl border-2 border-[#C6A96B] bg-gradient-to-b from-[#0c2240] to-[#020617] flex flex-col items-center justify-center p-2 text-center shadow-lg relative overflow-hidden shadow-[#C6A96B]/10">
-              <div className="absolute inset-0.5 border border-white/5 rounded-xl flex flex-col items-center justify-between p-2">
-                <span className="text-xs text-[#C6A96B] font-bold">✦ PHOPEPHUM ✦</span>
+            <div className="w-24 h-40 shrink-0 rounded-2xl border-2 border-[#A68444] dark:border-[#C6A96B] bg-gradient-to-b from-white via-[#F5F0ED] to-white dark:from-[#0c2240] dark:to-[#020617] flex flex-col items-center justify-center p-2 text-center shadow-lg relative overflow-hidden shadow-[#C6A96B]/10">
+              <div className="absolute inset-0.5 border border-slate-200 dark:border-white/5 rounded-xl flex flex-col items-center justify-between p-2">
+                <span className="text-xs text-[#A68444] dark:text-[#C6A96B] font-bold">✦ PHOPEPHUM ✦</span>
                 <span className="text-3xl text-gold-liquid">✨</span>
-                <span className="text-[10px] font-black text-[#F8F6F1] line-clamp-2 uppercase leading-snug">
+                <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] line-clamp-2 uppercase leading-snug">
                   {currentCard.name || currentCard.thaiName.split(" ")[0]}
                 </span>
               </div>
             </div>
             {/* Tarot Reading text */}
             <div className="flex-1 space-y-2">
-              <h4 className="font-display font-black text-base text-gold-liquid">
+              <h4 className="font-display font-black text-base text-[#A68444] dark:text-gold-liquid">
                 คุณเปิดได้: {currentCard.thaiName || currentCard.name}
               </h4>
-              <p className="text-xs sm:text-sm text-[#D9CDB7] leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-700 dark:text-[#D9CDB7] leading-relaxed">
                 {currentCard.meaning || currentCard.description}
               </p>
               {currentCard.advice && (
-                <p className="text-[13px] text-emerald-300 font-bold leading-normal">
+                <p className="text-[13px] text-emerald-700 dark:text-emerald-300 font-bold leading-normal">
                   💡 คำแนะนำสัจจะ: {currentCard.advice}
                 </p>
               )}
@@ -467,63 +467,63 @@ export default function DashboardIndex() {
       {/* ── 4. Layer 3: Daily Advisor Guidelines (Work, Money, Love, Health) ── */}
       {dailyAdvice && (
         <div className="space-y-4 animate-fade-up">
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-gold-300">✦ คำแนะนำการจัดสรรสิริมงคลวันนี้</p>
+          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#A68444] dark:text-gold-300">✦ คำแนะนำการจัดสรรสิริมงคลวันนี้</p>
           <div className="grid grid-cols-2 gap-3">
             
             {/* Work */}
-            <div className="card-glass p-4 border border-white/5 bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
+            <div className="card-glass p-4 border border-slate-200 dark:border-white/5 dark:bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💼 การงาน</span>
+                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💼 การงาน</span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
-                  dailyAdvice.work.status === "excellent" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5" :
-                  dailyAdvice.work.status === "warning" ? "text-rose-400 border-rose-500/20 bg-rose-500/5" :
-                  "text-sky-300 border-sky-500/20 bg-sky-500/5"
+                  dailyAdvice.work.status === "excellent" ? "text-emerald-700 border-emerald-500/30 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/5" :
+                  dailyAdvice.work.status === "warning" ? "text-rose-700 border-rose-500/30 bg-rose-50 dark:text-rose-400 dark:border-rose-500/20 dark:bg-rose-500/5" :
+                  "text-sky-700 border-sky-500/30 bg-sky-50 dark:text-sky-300 dark:border-sky-500/20 dark:bg-sky-500/5"
                 }`}>{dailyAdvice.work.status}</span>
               </div>
-              <p className="text-xs sm:text-sm font-black text-[#F8F6F1] leading-tight line-clamp-1">{dailyAdvice.work.title}</p>
-              <p className="text-[11px] text-[#94A3B8] leading-snug mt-1.5 line-clamp-3">{dailyAdvice.work.description}</p>
+              <p className="text-xs sm:text-sm font-black text-slate-900 dark:text-[#F8F6F1] leading-tight line-clamp-1">{dailyAdvice.work.title}</p>
+              <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] leading-snug mt-1.5 line-clamp-3">{dailyAdvice.work.description}</p>
             </div>
 
             {/* Wealth */}
-            <div className="card-glass p-4 border border-white/5 bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
+            <div className="card-glass p-4 border border-slate-200 dark:border-white/5 dark:bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💰 การเงิน</span>
+                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💰 การเงิน</span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
-                  dailyAdvice.wealth.status === "excellent" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5" :
-                  dailyAdvice.wealth.status === "warning" ? "text-rose-400 border-rose-500/20 bg-rose-500/5" :
-                  "text-sky-300 border-sky-500/20 bg-sky-500/5"
+                  dailyAdvice.wealth.status === "excellent" ? "text-emerald-700 border-emerald-500/30 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/5" :
+                  dailyAdvice.wealth.status === "warning" ? "text-rose-700 border-rose-500/30 bg-rose-50 dark:text-rose-400 dark:border-rose-500/20 dark:bg-rose-500/5" :
+                  "text-sky-700 border-sky-500/30 bg-sky-50 dark:text-sky-300 dark:border-sky-500/20 dark:bg-sky-500/5"
                 }`}>{dailyAdvice.wealth.status}</span>
               </div>
-              <p className="text-xs sm:text-sm font-black text-[#F8F6F1] leading-tight line-clamp-1">{dailyAdvice.wealth.title}</p>
-              <p className="text-[11px] text-[#94A3B8] leading-snug mt-1.5 line-clamp-3">{dailyAdvice.wealth.description}</p>
+              <p className="text-xs sm:text-sm font-black text-slate-900 dark:text-[#F8F6F1] leading-tight line-clamp-1">{dailyAdvice.wealth.title}</p>
+              <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] leading-snug mt-1.5 line-clamp-3">{dailyAdvice.wealth.description}</p>
             </div>
 
             {/* Love */}
-            <div className="card-glass p-4 border border-white/5 bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
+            <div className="card-glass p-4 border border-slate-200 dark:border-white/5 dark:bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💖 ความรัก</span>
+                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💖 ความรัก</span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
-                  dailyAdvice.love.status === "excellent" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5" :
-                  dailyAdvice.love.status === "warning" ? "text-rose-400 border-rose-500/20 bg-rose-500/5" :
-                  "text-sky-300 border-sky-500/20 bg-sky-500/5"
+                  dailyAdvice.love.status === "excellent" ? "text-emerald-700 border-emerald-500/30 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/5" :
+                  dailyAdvice.love.status === "warning" ? "text-rose-700 border-rose-500/30 bg-rose-50 dark:text-rose-400 dark:border-rose-500/20 dark:bg-rose-500/5" :
+                  "text-sky-700 border-sky-500/30 bg-sky-50 dark:text-sky-300 dark:border-sky-500/20 dark:bg-sky-500/5"
                 }`}>{dailyAdvice.love.status}</span>
               </div>
-              <p className="text-xs sm:text-sm font-black text-[#F8F6F1] leading-tight line-clamp-1">{dailyAdvice.love.title}</p>
-              <p className="text-[11px] text-[#94A3B8] leading-snug mt-1.5 line-clamp-3">{dailyAdvice.love.description}</p>
+              <p className="text-xs sm:text-sm font-black text-slate-900 dark:text-[#F8F6F1] leading-tight line-clamp-1">{dailyAdvice.love.title}</p>
+              <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] leading-snug mt-1.5 line-clamp-3">{dailyAdvice.love.description}</p>
             </div>
 
             {/* Health */}
-            <div className="card-glass p-4 border border-white/5 bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
+            <div className="card-glass p-4 border border-slate-200 dark:border-white/5 dark:bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">🌿 สุขภาพ</span>
+                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">🌿 สุขภาพ</span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
-                  dailyAdvice.health.status === "excellent" ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/5" :
-                  dailyAdvice.health.status === "warning" ? "text-rose-400 border-rose-500/20 bg-rose-500/5" :
-                  "text-sky-300 border-sky-500/20 bg-sky-500/5"
+                  dailyAdvice.health.status === "excellent" ? "text-emerald-700 border-emerald-500/30 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/5" :
+                  dailyAdvice.health.status === "warning" ? "text-rose-700 border-rose-500/30 bg-rose-50 dark:text-rose-400 dark:border-rose-500/20 dark:bg-rose-500/5" :
+                  "text-sky-700 border-sky-500/30 bg-sky-50 dark:text-sky-300 dark:border-sky-500/20 dark:bg-sky-500/5"
                 }`}>{dailyAdvice.health.status}</span>
               </div>
-              <p className="text-xs sm:text-sm font-black text-[#F8F6F1] leading-tight line-clamp-1">{dailyAdvice.health.title}</p>
-              <p className="text-[11px] text-[#94A3B8] leading-snug mt-1.5 line-clamp-3">{dailyAdvice.health.description}</p>
+              <p className="text-xs sm:text-sm font-black text-slate-900 dark:text-[#F8F6F1] leading-tight line-clamp-1">{dailyAdvice.health.title}</p>
+              <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] leading-snug mt-1.5 line-clamp-3">{dailyAdvice.health.description}</p>
             </div>
 
           </div>
@@ -532,37 +532,37 @@ export default function DashboardIndex() {
 
       {/* ── 5. Layer 7: Ecosystem Hub Navigation ── */}
       <div className="animate-fade-up">
-        <p className="text-xs font-black uppercase tracking-[0.25em] text-[#4B6FAE] mb-3">✦ PHOPPHUM ECOSYSTEM HUB</p>
+        <p className="text-xs font-black uppercase tracking-[0.25em] text-[#3D5361] dark:text-[#4B6FAE] mb-3">✦ PHOPPHUM ECOSYSTEM HUB</p>
         <div className="grid grid-cols-3 gap-2">
           
-          <Link to="/dashboard/horoscope" className="card-glass p-3 text-center border border-white/5 bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
+          <Link to="/dashboard/horoscope" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">🧭</span>
-            <span className="text-[10px] font-black text-[#F8F6F1] tracking-wider leading-none">WHO (ดวงวิถี)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">WHO (ดวงวิถี)</span>
           </Link>
 
-          <Link to="/dashboard/chat" className="card-glass p-3 text-center border border-white/5 bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
+          <Link to="/dashboard/chat" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">💬</span>
-            <span className="text-[10px] font-black text-[#F8F6F1] tracking-wider leading-none">WHAT (ถาม AI)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">WHAT (ถาม AI)</span>
           </Link>
 
-          <Link to="/dashboard/calendar" className="card-glass p-3 text-center border border-white/5 bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
+          <Link to="/dashboard/calendar" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">📅</span>
-            <span className="text-[10px] font-black text-[#F8F6F1] tracking-wider leading-none">WHEN (ฤกษ์มงคล)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">WHEN (ฤกษ์มงคล)</span>
           </Link>
 
-          <Link to="/dashboard/reports" className="card-glass p-3 text-center border border-white/5 bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
+          <Link to="/dashboard/reports" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">📄</span>
-            <span className="text-[10px] font-black text-[#F8F6F1] tracking-wider leading-none">HOW (รายงานลึก)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">HOW (รายงานลึก)</span>
           </Link>
 
-          <Link to="/dashboard/planner" className="card-glass p-3 text-center border border-white/5 bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
+          <Link to="/dashboard/planner" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">🎯</span>
-            <span className="text-[10px] font-black text-[#F8F6F1] tracking-wider leading-none">WHY (บันทึกเป้าหมาย)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">WHY (บันทึกเป้าหมาย)</span>
           </Link>
 
-          <Link to="/dashboard/chat" className="card-glass p-3 text-center border border-white/5 bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
+          <Link to="/dashboard/chat" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">📜</span>
-            <span className="text-[10px] font-black text-[#F8F6F1] tracking-wider leading-none">REFLECT (คลังปัญญา)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">REFLECT (คลังปัญญา)</span>
           </Link>
 
         </div>
@@ -570,30 +570,30 @@ export default function DashboardIndex() {
 
       {/* ── 6. Active Yam Hero Card ── */}
       <Link to="/dashboard/check-yam" className="block group animate-fade-up">
-        <div className="card-glass p-6 relative overflow-hidden transition-all group-hover:border-gold-liquid group-hover:shadow-[0_0_30px_rgba(232,196,106,0.2)] active:scale-[0.99] duration-300 border-[#C6A96B]/30 bg-[#0a2240]/85 rounded-[2rem]">
+        <div className="card-glass p-6 relative overflow-hidden transition-all group-hover:border-gold-liquid group-hover:shadow-[0_0_30px_rgba(232,196,106,0.2)] active:scale-[0.99] duration-300 border-slate-200 dark:border-[#C6A96B]/30 bg-white/85 dark:bg-[#0a2240]/85 rounded-[2rem]">
           <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full pointer-events-none bg-radial from-gold-500/20 to-transparent blur-xl" />
           
           <div className="relative flex justify-between items-center gap-4">
             <div className="flex-1">
-              <p className="text-xs sm:text-sm text-gold-300 font-extrabold uppercase tracking-[0.22em] mb-2">✦ ฤกษ์ยามขณะนี้</p>
+              <p className="text-xs sm:text-sm text-[#A68444] dark:text-gold-300 font-extrabold uppercase tracking-[0.22em] mb-2">✦ ฤกษ์ยามขณะนี้</p>
               <div className="flex items-baseline gap-2.5">
-                <h2 className="font-display text-4xl sm:text-5xl font-black text-text-primary leading-none text-shadow-gold">{yam.name}</h2>
-                <span className="text-2xl sm:text-3xl text-gold-300 font-display">{PLANET_SYMBOLS[yam.name] || "✦"}</span>
+                <h2 className="font-display text-4xl sm:text-5xl font-black text-slate-900 dark:text-text-primary leading-none text-shadow-gold">{yam.name}</h2>
+                <span className="text-2xl sm:text-3xl text-[#A68444] dark:text-gold-300 font-display">{PLANET_SYMBOLS[yam.name] || "✦"}</span>
               </div>
-              <p className="text-sm sm:text-base text-[#F8F6F1] mt-2 font-sans-thai font-bold tracking-wide">
+              <p className="text-sm sm:text-base text-slate-900 dark:text-[#F8F6F1] mt-2 font-sans-thai font-bold tracking-wide">
                 ยาม {yam.number} · {PERIOD_TH[yam.period]}
                 {moon.isWanPhra ? " · 🔆 วันพระ" : ` · จันทร์ ${Math.round(moon.illumination)}%`}
               </p>
               {yam.shouldDo && (
-                <div className="mt-4 border-l-4 border-yellow-400 pl-3.5 py-1.5 bg-yellow-400/5 rounded-r-lg shadow-[inset_1px_0_0_rgba(250,204,21,0.1)]">
-                  <p className="text-sm sm:text-base text-yellow-300 font-extrabold leading-relaxed drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
+                <div className="mt-4 border-l-4 border-amber-500 dark:border-yellow-400 pl-3.5 py-1.5 bg-amber-50 dark:bg-yellow-400/5 rounded-r-lg shadow-[inset_1px_0_0_rgba(250,204,21,0.1)]">
+                  <p className="text-sm sm:text-base text-amber-800 dark:text-yellow-300 font-extrabold leading-relaxed dark:drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)]">
                     “{yam.shouldDo}”
                   </p>
                 </div>
               )}
               {timeLeft && (
-                <div className="text-xs sm:text-sm text-yellow-200 font-black mt-4 flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                <div className="text-xs sm:text-sm text-amber-800 dark:text-yellow-200 font-black mt-4 flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" />
                   <span>{timeLeft}</span>
                 </div>
               )}
@@ -601,18 +601,18 @@ export default function DashboardIndex() {
 
             <div className="relative w-28 h-28 shrink-0 flex items-center justify-center pointer-events-none">
               <div className="absolute inset-0 border-2 border-dashed border-gold-500/40 rounded-full cosmic-ring" />
-              <div className="w-20 h-20 rounded-full card-glass-premium flex flex-col items-center justify-center border-2 border-[#C6A96B]/60 bg-[#0a2240] glow-gold-box">
-                <span className="text-[10px] sm:text-[11px] font-black text-gold-300 uppercase tracking-widest leading-none">
+              <div className="w-20 h-20 rounded-full card-glass-premium flex flex-col items-center justify-center border-2 border-slate-200 dark:border-[#C6A96B]/60 bg-slate-50 dark:bg-[#0a2240] glow-gold-box">
+                <span className="text-[10px] sm:text-[11px] font-black text-[#A68444] dark:text-gold-300 uppercase tracking-widest leading-none">
                   {yam.level === "bad" ? "ระวัง" : "มงคล"}
                 </span>
-                <span className="text-xs sm:text-sm font-black text-text-primary mt-1.5">
+                <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-text-primary mt-1.5">
                   {yam.label.split(" ")[0]}
                 </span>
               </div>
             </div>
           </div>
           
-          <div className="flex items-center justify-between text-xs sm:text-sm text-gold-300 group-hover:text-gold-liquid transition-colors font-extrabold mt-5 pt-3.5 border-t border-border-gold/20">
+          <div className="flex items-center justify-between text-xs sm:text-sm text-[#A68444] dark:text-gold-300 group-hover:text-gold-liquid transition-colors font-extrabold mt-5 pt-3.5 border-t border-slate-200 dark:border-border-gold/20">
             <span>เข้าสู่เครื่องมือวิเคราะห์ฤกษ์ยามละเอียด</span>
             <span>→</span>
           </div>
@@ -622,20 +622,20 @@ export default function DashboardIndex() {
       {/* ── 7. Cosmic Energy Timeline Widget ── */}
       <div className="space-y-4 animate-fade-up">
         <div className="flex items-center justify-between">
-          <p className="text-xs sm:text-sm font-black uppercase tracking-[0.25em] text-gold-300">✦ TIMELINE พลังงานรายวัน</p>
+          <p className="text-xs sm:text-sm font-black uppercase tracking-[0.25em] text-[#A68444] dark:text-gold-300">✦ TIMELINE พลังงานรายวัน</p>
           
-          <div className="flex p-0.5 rounded-lg bg-cosmic-950/80 border border-border-gold/25">
+          <div className="flex p-0.5 rounded-lg bg-slate-100 dark:bg-cosmic-950/80 border border-slate-300 dark:border-border-gold/25">
             <button
               type="button"
               onClick={() => setTimelinePeriod("day")}
-              className={`px-3.5 py-1 text-xs font-black rounded-md transition-all ${timelinePeriod === "day" ? "bg-gold-500 text-cosmic-950 shadow-sm" : "text-text-secondary hover:text-text-primary"}`}
+              className={`px-3.5 py-1 text-xs font-black rounded-md transition-all ${timelinePeriod === "day" ? "bg-gold-500 text-cosmic-950 dark:text-cosmic-950 shadow-sm" : "text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary"}`}
             >
               ☀️ กลางวัน
             </button>
             <button
               type="button"
               onClick={() => setTimelinePeriod("night")}
-              className={`px-3.5 py-1 text-xs font-black rounded-md transition-all ${timelinePeriod === "night" ? "bg-gold-500 text-cosmic-950 shadow-sm" : "text-text-secondary hover:text-text-primary"}`}
+              className={`px-3.5 py-1 text-xs font-black rounded-md transition-all ${timelinePeriod === "night" ? "bg-gold-500 text-cosmic-950 dark:text-cosmic-950 shadow-sm" : "text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary"}`}
             >
               🌙 กลางคืน
             </button>
@@ -654,35 +654,35 @@ export default function DashboardIndex() {
                 key={`${s.period}-${s.yamNumber}`}
                 onClick={() => setSelectedTimelineSlot(s)}
                 className={`w-full p-3 rounded-xl border text-left transition-all duration-300 relative overflow-hidden group select-none flex flex-col justify-between min-h-[100px] sm:min-h-[110px]
-                  ${isActive ? "card-glass-gold border-gold-liquid/60 ring-2 ring-gold-liquid/20 shadow-md shadow-gold-500/10" : isSelected ? "card-glass border-mystic-500 bg-cosmic-800 shadow-md shadow-mystic-500/15" : "card-glass border-white/10 bg-[#0A1628]/60 hover:border-gold-500/40 hover:bg-[#0A1628]/80"}`}
+                  ${isActive ? "card-glass-gold border-gold-liquid/60 ring-2 ring-gold-liquid/20 shadow-md shadow-gold-500/10 dark:shadow-gold-500/20" : isSelected ? "card-glass border-mystic-500 dark:border-mystic-500 bg-slate-100 dark:bg-cosmic-800 shadow-md shadow-mystic-500/15" : "card-glass border-slate-200 dark:border-white/10 bg-white/60 dark:bg-[#0A1628]/60 hover:border-gold-500/40 dark:hover:bg-[#0A1628]/80 hover:bg-slate-100"}`}
               >
                 {isActive && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse border border-cosmic-950" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse border border-cosmic-950" />
                 )}
                 <div className="flex justify-between items-center mb-1 w-full">
-                  <span className="text-xs text-text-secondary font-bold">ยาม {s.yamNumber}</span>
+                  <span className="text-xs text-slate-600 dark:text-text-secondary font-bold">ยาม {s.yamNumber}</span>
                   <span className={`text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded border ${ls.badge.replace("px-2.5 py-0.5", "")}`}>{s.label.split(" ")[0]}</span>
                 </div>
-                <p className="font-display text-base sm:text-lg font-extrabold text-text-primary flex items-baseline gap-1 mt-1">
-                  {s.yamName} <span className="text-xs sm:text-sm text-gold-400 font-display">{planetSym}</span>
+                <p className="font-display text-base sm:text-lg font-extrabold text-slate-900 dark:text-text-primary flex items-baseline gap-1 mt-1">
+                  {s.yamName} <span className="text-xs sm:text-sm text-[#A68444] dark:text-gold-400 font-display">{planetSym}</span>
                 </p>
-                <p className="text-xs text-text-secondary mt-1.5 font-mono font-bold tracking-tighter">{s.timeLabel.replace(" - ", "-")}</p>
+                <p className="text-xs text-slate-600 dark:text-text-secondary mt-1.5 font-mono font-bold tracking-tighter">{s.timeLabel.replace(" - ", "-")}</p>
               </button>
             );
           })}
         </div>
 
         {selectedTimelineSlot && (
-          <div className="card-glass p-5 border-2 border-border-gold/30 bg-[#0A1628]/95 animate-fade-up relative overflow-hidden rounded-2xl">
+          <div className="card-glass p-5 border-2 border-[#C6A96B]/30 dark:border-border-gold/30 bg-white/95 dark:bg-[#0A1628]/95 animate-fade-up relative overflow-hidden rounded-2xl">
             <div className="absolute -bottom-8 -right-8 w-24 h-24 rounded-full pointer-events-none bg-radial from-mystic-500/15 to-transparent blur-lg" />
             <div className="relative">
               <div className="flex justify-between items-start mb-3 gap-2">
                 <div>
-                  <h4 className="font-display font-black text-gold-300 text-base sm:text-lg flex items-center gap-2">
+                  <h4 className="font-display font-black text-[#A68444] dark:text-gold-300 text-base sm:text-lg flex items-center gap-2">
                     <span>✦ ยาม{selectedTimelineSlot.yamName}</span>
-                    <span className="text-sm font-mono font-bold text-text-secondary">({selectedTimelineSlot.timeLabel})</span>
+                    <span className="text-sm font-mono font-bold text-slate-600 dark:text-[#C6B79F]">({selectedTimelineSlot.timeLabel})</span>
                   </h4>
-                  <p className="text-xs text-text-secondary mt-1 font-bold">
+                  <p className="text-xs text-slate-600 dark:text-[#C6B79F] mt-1 font-bold">
                     ยามลำดับที่ {selectedTimelineSlot.yamNumber} · {PERIOD_TH[selectedTimelineSlot.period]}
                   </p>
                 </div>
@@ -691,13 +691,13 @@ export default function DashboardIndex() {
                 </span>
               </div>
               
-              <p className="text-base sm:text-lg text-yellow-100 font-bold leading-relaxed mb-4 drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+              <p className="text-base sm:text-lg text-slate-900 dark:text-yellow-100 font-bold leading-relaxed mb-4 dark:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
                 {selectedTimelineSlot.description || "สัญจรนำโชคดีงามตามกาลเทวฤกษ์"}
               </p>
 
               {selectedTimelineSlot.prediction?.shouldDo && (
-                <div className="text-xs sm:text-sm bg-emerald-500/8 border border-emerald-500/25 rounded-lg p-3.5 flex items-start gap-2 text-emerald-200 font-extrabold shadow-sm">
-                  <span className="font-black shrink-0 text-emerald-400">✓ ควรทำ:</span>
+                <div className="text-xs sm:text-sm bg-emerald-50 dark:bg-emerald-500/8 border border-emerald-300 dark:border-emerald-500/25 rounded-lg p-3.5 flex items-start gap-2 text-emerald-800 dark:text-emerald-200 font-extrabold shadow-sm">
+                  <span className="font-black shrink-0 text-emerald-700 dark:text-emerald-400">✓ ควรทำ:</span>
                   <span className="leading-relaxed">{selectedTimelineSlot.prediction.shouldDo}</span>
                 </div>
               )}
@@ -708,52 +708,52 @@ export default function DashboardIndex() {
 
       {/* ── 8. Day/Night Astrologer Tools row ── */}
       <div className="grid grid-cols-2 gap-3.5 animate-fade-up">
-        <Link to="/dashboard/planner" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-white/10 bg-[#0A1628]/40 hover:border-[#8B7FD4]/45 hover:bg-cosmic-800/70 transition-all shadow-md">
+        <Link to="/dashboard/planner" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/40 dark:bg-[#0A1628]/40 hover:border-[#8B7FD4]/45 dark:hover:bg-cosmic-800/70 hover:bg-slate-100 transition-all shadow-md">
           <span className="text-[#8B7FD4]"><Target className="w-5 h-5" /></span>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-[#F8F6F1]">เป้าหมาย TQM</p>
-            <p className="text-[11px] text-[#94A3B8] mt-0.5">วางแผน + สะท้อนคิด</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1]">เป้าหมาย TQM</p>
+            <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-0.5">วางแผน + สะท้อนคิด</p>
           </div>
         </Link>
-        <Link to="/dashboard/community" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-white/10 bg-[#0A1628]/40 hover:border-amber-400/40 hover:bg-cosmic-800/70 transition-all shadow-md">
+        <Link to="/dashboard/community" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/40 dark:bg-[#0A1628]/40 hover:border-amber-400/40 dark:hover:bg-cosmic-800/70 hover:bg-slate-100 transition-all shadow-md">
           <span className="text-amber-400"><Award className="w-5 h-5" /></span>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-[#F8F6F1]">คอมมูนิตี้ Rank</p>
-            <p className="text-[11px] text-[#94A3B8] mt-0.5">ชวนเพื่อน & ค่าคอม</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1]">คอมมูนิตี้ Rank</p>
+            <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-0.5">ชวนเพื่อน & ค่าคอม</p>
           </div>
         </Link>
       </div>
 
       {/* ── 9. Welcome Login Reward Modal ── */}
       {showLoginModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#020617]/95 backdrop-blur-md animate-fade-up">
-          <div className="relative w-full max-w-sm bg-gradient-to-br from-[#0a2240] to-[#020617] rounded-[2.5rem] border border-[#C6A96B]/30 p-8 text-center shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#020617]/90 dark:bg-[#020617]/95 backdrop-blur-md animate-fade-up">
+          <div className="relative w-full max-w-sm bg-gradient-to-br from-white to-[#F5F0ED] dark:from-[#0a2240] dark:to-[#020617] rounded-[2.5rem] border border-slate-200 dark:border-[#C6A96B]/30 p-8 text-center shadow-2xl overflow-hidden">
             <div className="absolute -top-12 -left-12 w-32 h-32 rounded-full pointer-events-none bg-radial from-gold-500/10 to-transparent blur-xl" />
             
             <div className="relative space-y-5">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-[#C6A96B]/25 bg-[#C6A96B]/5 text-3xl animate-bounce">
+              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full border border-slate-200 dark:border-[#C6A96B]/25 bg-slate-50 dark:bg-[#C6A96B]/5 text-3xl animate-bounce">
                 ⏳
               </div>
-
+ 
               <div>
-                <h3 className="font-display text-2xl font-black text-[#F8F6F1] tracking-wide glow-gold">
+                <h3 className="font-display text-2xl font-black text-slate-900 dark:text-[#F8F6F1] tracking-wide glow-gold">
                   🎁 รางวัลล็อกอินรายวัน
                 </h3>
-                <p className="text-[#D9CDB7] text-xs mt-1.5 font-sans-thai leading-relaxed">
+                <p className="text-slate-600 dark:text-[#D9CDB7] text-xs mt-1.5 font-sans-thai leading-relaxed">
                   ยินดีต้อนรับกลับมาเชื่อมต่อชะตาชีวิตในวันนี้! คุณได้รับทรายกาลเวลาสำหรับสร้างแผนชะตาฟ้า
                 </p>
               </div>
-
-              <div className="card-glass py-4 px-6 border border-emerald-500/25 bg-emerald-950/15 inline-block">
-                <span className="text-emerald-400 font-display text-3xl font-black block">+1</span>
-                <span className="text-[10px] text-emerald-400 font-bold uppercase tracking-[0.25em] mt-1 block">✦ SANDS OF TIME / KC</span>
+ 
+              <div className="card-glass py-4 px-6 border border-emerald-300 dark:border-emerald-500/25 bg-emerald-50 dark:bg-emerald-950/15 inline-block">
+                <span className="text-emerald-800 dark:text-emerald-400 font-display text-3xl font-black block">+1</span>
+                <span className="text-[10px] text-emerald-800 dark:text-emerald-400 font-bold uppercase tracking-[0.25em] mt-1 block">✦ SANDS OF TIME / KC</span>
               </div>
-
+ 
               <div className="pt-2">
                 <button
                   type="button"
                   onClick={() => setShowLoginModal(false)}
-                  className="w-full py-3 rounded-xl text-xs font-black text-[#020617] bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] transition-all hover:scale-105 active:scale-95 shadow-md shadow-[#C6A96B]/20"
+                  className="w-full py-3 rounded-xl text-xs font-black text-slate-950 dark:text-[#020617] bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] transition-all hover:scale-105 active:scale-95 shadow-md shadow-[#C6A96B]/20"
                 >
                   รับสิทธิ์และเข้าสู่ระบบ
                 </button>

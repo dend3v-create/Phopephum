@@ -794,32 +794,32 @@ export default function HoroscopePage() {
 
           {/* ── ข้อมูลเจ้าชะตา (ด้านบนสุดของผัง) ── */}
           {activeResult?.birthDate && (
-            <div className="relative rounded-2xl border border-[#C6A96B]/30 bg-gradient-to-r from-[#0A2240]/70 via-[#0A1628]/80 to-[#0A2240]/70 backdrop-blur-xl px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,0.4)] overflow-hidden">
+            <div className="relative rounded-2xl border border-slate-200 dark:border-[#C6A96B]/30 bg-gradient-to-r from-[#F5F0ED] via-white to-[#F5F0ED] dark:from-[#0A2240]/70 dark:via-[#0A1628]/80 dark:to-[#0A2240]/70 backdrop-blur-xl px-5 py-4 shadow-[0_4px_24px_rgba(0,0,0,0.05)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)] overflow-hidden">
               {/* Glow bg */}
               <div className="absolute inset-0 bg-gradient-to-br from-[#C6A96B]/5 via-transparent to-[#4B6FAE]/5 pointer-events-none" />
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-px bg-gradient-to-r from-transparent via-[#C6A96B]/40 to-transparent" />
 
               <div className="relative z-10 space-y-3">
                 {/* แถวบน: Moon Phase + วันที่จร */}
-                <div className="flex items-center justify-between gap-3 pb-3 border-b border-[#C6A96B]/15">
+                <div className="flex items-center justify-between gap-3 pb-3 border-b border-slate-200 dark:border-[#C6A96B]/15">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-950/40 flex items-center justify-center text-xl border border-[#C6A96B]/20 shadow-[0_0_12px_rgba(198,169,107,0.2)] select-none shrink-0">
+                    <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-950/40 flex items-center justify-center text-xl border border-slate-300 dark:border-[#C6A96B]/20 shadow-[0_0_12px_rgba(198,169,107,0.1)] dark:shadow-[0_0_12px_rgba(198,169,107,0.2)] select-none shrink-0">
                       {isWaxing ? "🌕" : "🌑"}
                     </div>
                     <div className="flex flex-col gap-0.5">
-                      <span className="text-[#F8F6F1] font-extrabold text-base leading-tight flex flex-wrap items-center gap-1.5">
+                      <span className="text-slate-900 dark:text-[#F8F6F1] font-extrabold text-base leading-tight flex flex-wrap items-center gap-1.5">
                         <span>{moonPhaseText}</span>
-                        <span className="text-[#C6A96B] text-xs font-normal border border-[#C6A96B]/25 px-1.5 py-[0.5px] rounded-md bg-[#C6A96B]/5">
+                        <span className="text-[#A68444] dark:text-[#C6A96B] text-xs font-normal border border-[#A68444]/25 dark:border-[#C6A96B]/25 px-1.5 py-[0.5px] rounded-md bg-[#A68444]/5 dark:bg-[#C6A96B]/5">
                           เดือน {lunar?.lunarMonthName || lunar?.lunarMonth} ปี {lunar?.zodiacName || ''}
                         </span>
                       </span>
-                      <span className="text-[#C6B79F] text-xs italic leading-tight">{lunarDescText}</span>
+                      <span className="text-slate-500 dark:text-[#C6B79F] text-xs italic leading-tight">{lunarDescText}</span>
                     </div>
                   </div>
-                  <div className="text-right shrink-0 pl-3 border-l border-white/10">
-                    <span className="text-[#C6A96B] font-display font-extrabold text-xl leading-tight block">{brightnessText}</span>
-                    <span className="text-[#C6B79F] text-xs uppercase tracking-widest font-bold">ความสว่าง</span>
-                    <span className="text-xs text-[#C6B79F] block mt-0.5">{formattedTransitDate}</span>
+                  <div className="text-right shrink-0 pl-3 border-l border-slate-200 dark:border-white/10">
+                    <span className="text-[#A68444] dark:text-[#C6A96B] font-display font-extrabold text-xl leading-tight block">{brightnessText}</span>
+                    <span className="text-slate-500 dark:text-[#C6B79F] text-xs uppercase tracking-widest font-bold">ความสว่าง</span>
+                    <span className="text-xs text-slate-500 dark:text-[#C6B79F] block mt-0.5">{formattedTransitDate}</span>
                   </div>
                 </div>
 
@@ -827,8 +827,8 @@ export default function HoroscopePage() {
                 <div className="flex flex-col md:flex-row md:items-start justify-between gap-3">
                   {/* ชื่อ */}
                   <div className="flex flex-col gap-0.5">
-                    <span className="text-xs font-bold uppercase tracking-[0.3em] text-[#C6A96B]/70">เจ้าชะตา</span>
-                    <span className="font-display text-2xl font-extrabold text-[#F8F6F1] leading-tight">
+                    <span className="text-xs font-bold uppercase tracking-[0.3em] text-[#A68444]/70 dark:text-[#C6A96B]/70">เจ้าชะตา</span>
+                    <span className="font-display text-2xl font-extrabold text-slate-900 dark:text-[#F8F6F1] leading-tight">
                       {profile?.display_name ?? "ไม่ระบุชื่อ"}
                     </span>
                   </div>
@@ -837,9 +837,9 @@ export default function HoroscopePage() {
                   <div className="flex flex-wrap gap-x-4 gap-y-1.5 md:justify-end text-xs sm:text-sm">
                     {/* วันเกิด */}
                     <div className="flex items-center gap-1.5">
-                      <span className="text-[#C6A96B]">#</span>
-                      <span className="text-[#C6B79F]">วันเกิด</span>
-                      <span className="text-[#F8F6F1] font-semibold">
+                      <span className="text-[#A68444] dark:text-[#C6A96B]">#</span>
+                      <span className="text-slate-500 dark:text-[#C6B79F]">วันเกิด</span>
+                      <span className="text-slate-900 dark:text-[#F8F6F1] font-semibold">
                         {(() => {
                           const d = new Date(activeResult.birthDate);
                           return d.toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" });
@@ -849,33 +849,33 @@ export default function HoroscopePage() {
                     {/* เวลาเกิด */}
                     {(activeResult?.birthTime || profile?.birth_time) && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[#C6A96B]">◷</span>
-                        <span className="text-[#C6B79F]">เวลาเกิด</span>
-                        <span className="text-[#F8F6F1] font-semibold">{activeResult?.birthTime || profile?.birth_time} น.</span>
+                        <span className="text-[#A68444] dark:text-[#C6A96B]">◷</span>
+                        <span className="text-slate-500 dark:text-[#C6B79F]">เวลาเกิด</span>
+                        <span className="text-slate-900 dark:text-[#F8F6F1] font-semibold">{activeResult?.birthTime || profile?.birth_time} น.</span>
                       </div>
                     )}
                     {/* จังหวัดเกิด */}
                     {profile?.birth_place && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[#C6A96B]">@</span>
-                        <span className="text-[#C6B79F]">จังหวัด</span>
-                        <span className="text-[#F8F6F1] font-semibold">{profile.birth_place}</span>
+                        <span className="text-[#A68444] dark:text-[#C6A96B]">@</span>
+                        <span className="text-slate-500 dark:text-[#C6B79F]">จังหวัด</span>
+                        <span className="text-slate-900 dark:text-[#F8F6F1] font-semibold">{profile.birth_place}</span>
                       </div>
                     )}
                     {/* อายุย่าง */}
                     {currentAge > 0 && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[#C6A96B]">·</span>
-                        <span className="text-[#C6B79F]">อายุย่าง</span>
-                        <span className="text-[#C6A96B] font-extrabold font-display">{currentAge} ปี</span>
+                        <span className="text-[#A68444] dark:text-[#C6A96B]">·</span>
+                        <span className="text-slate-500 dark:text-[#C6B79F]">อายุย่าง</span>
+                        <span className="text-[#A68444] dark:text-[#C6A96B] font-extrabold font-display">{currentAge} ปี</span>
                       </div>
                     )}
                     {/* วันจันทรคติเกิด */}
                     {lunar?.dayName && (
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[#C6A96B]">☽</span>
-                        <span className="text-[#C6B79F]">จันทรคติเกิด</span>
-                        <span className="text-[#F8F6F1] font-semibold">
+                        <span className="text-[#A68444] dark:text-[#C6A96B]">☽</span>
+                        <span className="text-slate-500 dark:text-[#C6B79F]">จันทรคติเกิด</span>
+                        <span className="text-slate-900 dark:text-[#F8F6F1] font-semibold">
                           วัน{lunar.dayName} เดือน{lunar.lunarMonthName ?? lunar.lunarMonth} ปี{lunar.zodiacName ?? ""}
                         </span>
                       </div>
