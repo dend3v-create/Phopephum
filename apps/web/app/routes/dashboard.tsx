@@ -189,19 +189,19 @@ export default function DashboardLayout() {
         {/* Logo */}
         <div className="mb-6 pl-1 flex items-center gap-3">
           <div className="relative w-9 h-9 shrink-0 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/5" />
-            <span className="text-[#C6A96B] text-xs font-bold z-10 font-display">P</span>
-            <div className="absolute inset-0 opacity-20">
+            <div className="absolute inset-0 rounded-full border-2 border-[#C6A96B]/60 dark:border-[#C6A96B]/40 bg-[#C6A96B]/10 dark:bg-[#C6A96B]/5" />
+            <span className="text-[#A68444] dark:text-[#C6A96B] text-xs font-bold z-10 font-display">P</span>
+            <div className="absolute inset-0 opacity-50 dark:opacity-25">
               <svg viewBox="0 0 40 40" fill="none">
-                <circle cx="20" cy="20" r="18" stroke="#C6A96B" strokeWidth="0.5" strokeDasharray="2 2" />
+                <circle cx="20" cy="20" r="18" stroke="#C6A96B" strokeWidth="0.8" strokeDasharray="2 2" />
               </svg>
             </div>
           </div>
           <div>
-            <p className="text-[#D9BC82] text-[9px] tracking-[0.2em] uppercase mb-0.5 opacity-60">
+            <p className="text-[9px] tracking-[0.2em] uppercase mb-0.5 opacity-60" style={{ color: "var(--accent-gold)" }}>
               Wisdom Guidance OS
             </p>
-            <h2 className="font-display text-lg font-bold text-[#F8F6F1] glow-gold leading-none">
+            <h2 className="font-display text-lg font-bold glow-gold leading-none" style={{ color: "var(--text-body)" }}>
               PhopePhum
             </h2>
           </div>
@@ -289,7 +289,7 @@ export default function DashboardLayout() {
               )}
             </div>
             {!isPro && (
-              <div className="w-full bg-[#020617] h-1.5 rounded-full overflow-hidden border border-white/5">
+              <div className="w-full h-1.5 rounded-full overflow-hidden" style={{ background: "var(--bg-base)", border: "1px solid var(--border-dim)" }}>
                 <div
                   className="bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] h-full transition-all duration-500"
                   style={{ width: `${Math.min(100, (((profile?.time_sands ?? 0) / 15) * 100))}%` }}
@@ -305,17 +305,17 @@ export default function DashboardLayout() {
           </div>
 
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-[#D9BC82] text-sm font-bold shrink-0"
-              style={{ background: "rgba(198,169,107,0.15)", border: "1px solid rgba(217,188,130,0.25)" }}>
+            <div className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
+              style={{ background: "rgba(198,169,107,0.15)", border: "1px solid rgba(217,188,130,0.25)", color: "var(--accent-gold)" }}>
               {displayName.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-[#F8F6F1] truncate font-medium leading-tight">{displayName}</p>
-              <p className="text-[11px] text-[#94A3B8]/60 truncate leading-tight" title={user.email}>{user.email}</p>
+              <p className="text-sm truncate font-medium leading-tight" style={{ color: "var(--text-body)" }}>{displayName}</p>
+              <p className="text-[11px] truncate leading-tight" style={{ color: "var(--text-muted)" }} title={user.email}>{user.email}</p>
             </div>
           </div>
           <Form method="post" action="/logout">
-            <button type="submit" className="w-full text-left text-xs text-[#94A3B8] hover:text-[#F8F6F1] px-2 py-1.5 rounded-lg transition-colors hover:bg-white/5">
+            <button type="submit" className="w-full text-left text-xs px-2 py-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5" style={{ color: "var(--text-muted)" }}>
               ออกจากระบบ
             </button>
           </Form>
@@ -328,8 +328,8 @@ export default function DashboardLayout() {
         style={{ background: "var(--sidebar-bg)", backdropFilter: "blur(16px)", borderColor: "var(--sidebar-border)" }}
       >
         <Link to="/dashboard" className="flex items-center gap-2">
-          <span className="font-display text-base font-bold text-[#F8F6F1]">PhopePhum</span>
-          <span className="text-[9px] text-[#C6A96B]/50 font-medium tracking-widest uppercase hidden xs:inline">Wisdom OS</span>
+          <span className="font-display text-base font-bold" style={{ color: "var(--text-body)" }}>PhopePhum</span>
+          <span className="text-[9px] font-medium tracking-widest uppercase hidden xs:inline" style={{ color: "var(--accent-gold)", opacity: 0.6 }}>Wisdom OS</span>
         </Link>
 
         {/* Controls: Language + Theme + Menu */}

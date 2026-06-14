@@ -17,7 +17,7 @@ export function NavLink({ to, icon, label, exact }: NavLinkProps) {
         ${
           isActive
             ? "text-[#D9BC82]"
-            : "text-[#94A3B8] hover:text-[#F8F6F1]"
+            : "text-[#94A3B8] hover:text-[#A68444] dark:hover:text-[#F8F6F1]"
         }`
       }
       style={({ isActive }) => ({
