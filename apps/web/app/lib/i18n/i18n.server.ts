@@ -17,7 +17,7 @@ import zhYam from "../../locales/zh/yam.json";
 export const localeCookie = createCookie("locale", {
   path: "/",
   sameSite: "lax",
-  secure: true, 
+  secure: false, // Allow in dev (HTTP)
   httpOnly: false,
   maxAge: 31536000,
 });

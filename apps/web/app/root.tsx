@@ -47,10 +47,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const theme = data?.theme ?? "dark";
   const locale = (data?.locale ?? "th") as Locale;
 
-  if (typeof window !== "undefined" && i18nInstance.language !== locale) {
-    i18nInstance.changeLanguage(locale);
-  }
-
   const themeColor = theme === "light" ? "#F5F0E8" : "#020617";
 
   return (

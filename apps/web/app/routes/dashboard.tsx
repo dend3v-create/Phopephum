@@ -36,17 +36,31 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 // ── Single source of truth for main nav (5 items) ────────────────────────────
 const NAV_ITEMS = [
-  { to: "/dashboard",            label: "วันนี้",           icon: "today",   exact: true  },
+  { to: "/dashboard",            label: "แดชบอร์ด",         icon: "grid",    exact: true  },
   { to: "/dashboard/check-yam",  label: "เช็คฤกษ์ยาม",     icon: "yam",     exact: false },
   { to: "/dashboard/horoscope",  label: "ตั้งดวงชะตา",     icon: "journey", exact: false },
-  { to: "/dashboard/planner",    label: "บันทึก",           icon: "journal", exact: false },
+  { to: "/dashboard/planner",    label: "แผนงาน",           icon: "journal", exact: false },
   { to: "/dashboard/settings",   label: "โปรไฟล์",         icon: "profile", exact: false },
 ] as const;
 
 type IconKey = typeof NAV_ITEMS[number]["icon"];
 
-function NavIcon({ name, size = 5 }: { name: IconKey | string; size?: number }) {
+function NavIcon({ name, size = 5 }: { name: IconKey | string; size?: number | string }) {
   const cls = `w-${size} h-${size}`;
+  if (name === "grid") return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={cls}>
+      <rect x="3" y="3" width="7" height="7" rx="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="14" y="3" width="7" height="7" rx="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="14" y="14" width="7" height="7" rx="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  if (name === "calendar") return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={cls}>
+      <rect x="3" y="4" width="18" height="18" rx="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
   if (name === "today") return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={cls}>
       <circle cx="12" cy="12" r="4" />
@@ -160,6 +174,7 @@ export default function DashboardLayout() {
   const location = useLocation();
   const displayName = profile?.display_name ?? profile?.email ?? "ผู้ใช้งาน";
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false);
 
   const isPro = profile?.role === "admin" || profile?.role === "operator" || profile?.plan === "imperial";
 
@@ -360,8 +375,119 @@ export default function DashboardLayout() {
         </div>
       </div>
 
-      {/* ── Mobile Bottom Tab Bar (5 tabs — matches sidebar) ─────────────────── */}
-      <MobileBottomBar currentPath={location.pathname} />
+      {/* ── Mobile Bottom Tab Bar (5 tabs — custom layout with popup) ─────────── */}
+      <MobileBottomBar
+        currentPath={location.pathname}
+        isQuickMenuOpen={isQuickMenuOpen}
+        setIsQuickMenuOpen={setIsQuickMenuOpen}
+      />
+
+      {/* ── Mobile Quick Menu Overlay ─────────────────────────────────────── */}
+      {isQuickMenuOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-45 md:hidden animate-fade-in"
+          onClick={() => setIsQuickMenuOpen(false)}
+        >
+          <div
+            className="absolute bottom-20 right-4 flex flex-col items-end gap-3.5 z-50 animate-fade-up"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Circular Buttons Column */}
+            <div className="flex flex-col items-end gap-3.5 mr-1">
+              {/* Sesheta (Wisdom AI) */}
+              <Link
+                to="/dashboard/chat"
+                onClick={() => setIsQuickMenuOpen(false)}
+                className="flex items-center gap-2.5 group"
+              >
+                <span className="text-xs font-bold text-[#F8F6F1] bg-black/65 px-2.5 py-1.5 rounded-xl border border-[#C6A96B]/20 backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity">
+                  Wisdom AI
+                </span>
+                <div className="w-12 h-12 rounded-full bg-[#0A2240] border-2 border-[#C6A96B] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all text-[#C6A96B] glow-gold-box">
+                  <NavIcon name="sparkles" size={5} />
+                </div>
+              </Link>
+
+              {/* แดชบอร์ด */}
+              <Link
+                to="/dashboard"
+                onClick={() => setIsQuickMenuOpen(false)}
+                className="flex items-center gap-2.5 group"
+              >
+                <span className="text-xs font-bold text-[#F8F6F1] bg-black/65 px-2.5 py-1.5 rounded-xl border border-[#C6A96B]/20 backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity">
+                  แดชบอร์ด
+                </span>
+                <div className="w-12 h-12 rounded-full bg-[var(--text-body)] border-2 border-[#C6A96B] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all text-[var(--bg-base)]">
+                  <NavIcon name="grid" size={5} />
+                </div>
+              </Link>
+            </div>
+
+            {/* Bottom Row (Capsule + Close Button) */}
+            <div className="flex items-center gap-3">
+              {/* Capsule Menu */}
+              <div
+                className="flex items-center gap-2 px-3.5 py-2 rounded-full border shadow-2xl backdrop-blur-2xl"
+                style={{
+                  background: "var(--bg-surface)",
+                  borderColor: "var(--border-gold)",
+                }}
+              >
+                {/* ตั้งดวงชะตา */}
+                <Link
+                  to="/dashboard/horoscope"
+                  onClick={() => setIsQuickMenuOpen(false)}
+                  className="flex flex-col items-center justify-center w-14 h-11 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
+                >
+                  <NavIcon name="journey" size={4.5} />
+                  <span className="text-[9px] font-bold mt-1 text-center truncate w-full">ตั้งดวง</span>
+                </Link>
+
+                {/* ปฏิทินมงคล */}
+                <Link
+                  to="/dashboard/calendar"
+                  onClick={() => setIsQuickMenuOpen(false)}
+                  className="flex flex-col items-center justify-center w-14 h-11 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
+                >
+                  <NavIcon name="calendar" size={4.5} />
+                  <span className="text-[9px] font-bold mt-1 text-center truncate w-full">ปฏิทินมงคล</span>
+                </Link>
+
+                {/* เช็คฤกษ์ยาม */}
+                <Link
+                  to="/dashboard/check-yam"
+                  onClick={() => setIsQuickMenuOpen(false)}
+                  className="flex flex-col items-center justify-center w-14 h-11 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
+                >
+                  <NavIcon name="yam" size={4.5} />
+                  <span className="text-[9px] font-bold mt-1 text-center truncate w-full">ฤกษ์ยาม</span>
+                </Link>
+
+                {/* เครือข่ายพันธมิตร */}
+                <Link
+                  to="/dashboard/community"
+                  onClick={() => setIsQuickMenuOpen(false)}
+                  className="flex flex-col items-center justify-center w-16 h-11 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
+                >
+                  <NavIcon name="people" size={4.5} />
+                  <span className="text-[9px] font-bold mt-1 text-center truncate w-full leading-none">พันธมิตร</span>
+                </Link>
+              </div>
+
+              {/* Close Button 'X' */}
+              <button
+                onClick={() => setIsQuickMenuOpen(false)}
+                className="w-12 h-12 rounded-full bg-[var(--text-body)] border border-slate-300 dark:border-slate-700 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all text-[var(--bg-base)]"
+                aria-label="ปิดเมนูด่วน"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="w-5 h-5">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Main Content ───────────────────────────────────────────────────── */}
       <main className="flex-1 md:ml-60 min-h-screen" style={{ paddingTop: "var(--topbar-h, 48px)", paddingBottom: "var(--bottombar-h, 64px)" }}>
@@ -383,10 +509,26 @@ export default function DashboardLayout() {
 
 // ─── Mobile Bottom Tab Bar ────────────────────────────────────────────────────
 
-function MobileBottomBar({ currentPath }: { currentPath: string }) {
+function MobileBottomBar({
+  currentPath,
+  isQuickMenuOpen,
+  setIsQuickMenuOpen,
+}: {
+  currentPath: string;
+  isQuickMenuOpen: boolean;
+  setIsQuickMenuOpen: (open: boolean) => void;
+}) {
+  const tabs = [
+    { to: "/dashboard",           label: "แดชบอร์ด",    icon: "grid",     exact: true },
+    { to: "/dashboard/calendar",  label: "ปฏิทินมงคล",  icon: "calendar", exact: false },
+    { type: "quick-menu",         label: "เมนูด่วน",    icon: "sparkles" },
+    { to: "/dashboard/planner",   label: "แผนงาน",      icon: "journal",  exact: false },
+    { to: "/dashboard/settings",  label: "โปรไฟล์",    icon: "profile",  exact: false },
+  ] as const;
+
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-20 border-t flex items-stretch"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t flex items-stretch"
       style={{
         background: "rgba(2,6,23,0.98)",
         backdropFilter: "blur(20px)",
@@ -394,15 +536,35 @@ function MobileBottomBar({ currentPath }: { currentPath: string }) {
         height: "64px",
       }}
     >
-      {NAV_ITEMS.map((tab) => {
-        const isActive = tab.exact
-          ? currentPath === tab.to
-          : currentPath.startsWith(tab.to);
+      {tabs.map((tab, idx) => {
+        if ("type" in tab && tab.type === "quick-menu") {
+          return (
+            <button
+              key="quick-menu-trigger"
+              onClick={() => setIsQuickMenuOpen(!isQuickMenuOpen)}
+              className="relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
+              style={{ color: isQuickMenuOpen ? "#C6A96B" : "#94A3B8" }}
+              aria-label="เปิดเมนูด่วน"
+            >
+              <span className={`w-9 h-9 rounded-full flex items-center justify-center transition-all bg-[#0a2240]/60 border border-[#C6A96B]/30 hover:scale-105 active:scale-95 ${isQuickMenuOpen ? "rotate-45" : ""}`}>
+                <NavIcon name="sparkles" size={5} />
+              </span>
+              <span className="text-[10px] font-medium leading-none tracking-wide">
+                {tab.label}
+              </span>
+            </button>
+          );
+        }
+
+        const navLink = tab as { readonly to: string; readonly label: string; readonly icon: string; readonly exact: boolean };
+        const isActive = navLink.exact
+          ? currentPath === navLink.to
+          : currentPath.startsWith(navLink.to);
 
         return (
           <Link
-            key={tab.to}
-            to={tab.to}
+            key={navLink.to}
+            to={navLink.to}
             className="relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
             style={{ color: isActive ? "#C6A96B" : "#94A3B8" }}
           >
@@ -414,10 +576,10 @@ function MobileBottomBar({ currentPath }: { currentPath: string }) {
               />
             )}
             <span className={`transition-transform duration-200 ${isActive ? "scale-110" : ""}`}>
-              <NavIcon name={tab.icon} size={5} />
+              <NavIcon name={navLink.icon} size={5} />
             </span>
             <span className="text-[10px] font-medium leading-none tracking-wide">
-              {tab.label}
+              {navLink.label}
             </span>
           </Link>
         );

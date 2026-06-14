@@ -1,4 +1,4 @@
-import { json, redirect } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
 import type { ActionFunctionArgs } from "@remix-run/cloudflare";
 import { serialize } from "cookie";
 import { localeCookie } from "~/lib/i18n/i18n.server";
@@ -15,7 +15,7 @@ export async function action({ request }: ActionFunctionArgs) {
     maxAge: 60 * 60 * 24 * 365, // 1 year
     sameSite: "lax" as const,
     httpOnly: false, 
-    secure: true, 
+    secure: false, // Allow in dev (HTTP)
   };
 
   if (theme === "dark" || theme === "light") {
@@ -25,9 +25,9 @@ export async function action({ request }: ActionFunctionArgs) {
     headers.append("Set-Cookie", await localeCookie.serialize(locale));
   }
 
-  // Redirect back to referer or root
-  const referer = request.headers.get("Referer") ?? "/";
-  return redirect(referer, { headers });
+  // Returning json instead of redirect avoids full page reload on fetcher.submit
+  // while still triggering loader revalidation.
+  return json({ ok: true }, { headers });
 }
 
 // No loader needed — action only
