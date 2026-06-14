@@ -22,16 +22,16 @@ export function LanguageSwitcher() {
   };
 
   return (
-    <div className="flex items-center gap-1.5 p-1 rounded-full bg-slate-900/50 border border-slate-700/50 backdrop-blur-sm">
+    <div className="flex items-center gap-1.5 p-1 rounded-full bg-[var(--input-bg)] border border-[var(--border-dim)] backdrop-blur-sm">
       {languages.map((lang) => (
         <button
           key={lang.code}
           type="button"
           onClick={() => handleLanguageChange(lang.code)}
-          className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+          className={`px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap inline-flex items-center ${
             i18n.language === lang.code
-              ? "bg-theme-accent text-white shadow-lg shadow-theme-accent/20"
-              : "text-slate-400 hover:text-white hover:bg-slate-800"
+              ? "bg-[var(--accent-blue)] text-white shadow-md shadow-[var(--accent-blue)]/10"
+              : "text-[var(--text-muted)] hover:text-[var(--text-body)] hover:bg-black/5 dark:hover:bg-white/5"
           }`}
         >
           <span className="mr-1.5">{lang.flag}</span>
