@@ -400,7 +400,7 @@ export default function DashboardLayout() {
                 onClick={() => setIsQuickMenuOpen(false)}
                 className="flex items-center gap-2.5 group"
               >
-                <span className="text-xs font-bold text-[#F8F6F1] bg-black/65 px-2.5 py-1.5 rounded-xl border border-[#C6A96B]/20 backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity">
+                <span className="text-[13px] font-bold text-[var(--text-body)] bg-[var(--bg-surface)] px-3 py-1.5 rounded-xl border border-[var(--border-gold)] backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity shadow-lg">
                   Wisdom AI
                 </span>
                 <div className="w-12 h-12 rounded-full bg-[#0A2240] border-2 border-[#C6A96B] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all text-[#C6A96B] glow-gold-box">
@@ -414,7 +414,7 @@ export default function DashboardLayout() {
                 onClick={() => setIsQuickMenuOpen(false)}
                 className="flex items-center gap-2.5 group"
               >
-                <span className="text-xs font-bold text-[#F8F6F1] bg-black/65 px-2.5 py-1.5 rounded-xl border border-[#C6A96B]/20 backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity">
+                <span className="text-[13px] font-bold text-[var(--text-body)] bg-[var(--bg-surface)] px-3 py-1.5 rounded-xl border border-[var(--border-gold)] backdrop-blur-md opacity-90 group-hover:opacity-100 transition-opacity shadow-lg">
                   แดชบอร์ด
                 </span>
                 <div className="w-12 h-12 rounded-full bg-[var(--text-body)] border-2 border-[#C6A96B] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all text-[var(--bg-base)]">
@@ -427,7 +427,7 @@ export default function DashboardLayout() {
             <div className="flex items-center gap-3">
               {/* Capsule Menu */}
               <div
-                className="flex items-center gap-2 px-3.5 py-2 rounded-full border shadow-2xl backdrop-blur-2xl"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full border shadow-2xl backdrop-blur-2xl"
                 style={{
                   background: "var(--bg-surface)",
                   borderColor: "var(--border-gold)",
@@ -437,40 +437,40 @@ export default function DashboardLayout() {
                 <Link
                   to="/dashboard/horoscope"
                   onClick={() => setIsQuickMenuOpen(false)}
-                  className="flex flex-col items-center justify-center w-14 h-11 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
+                  className="flex flex-col items-center justify-center w-16 h-12 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
                 >
                   <NavIcon name="journey" size={4.5} />
-                  <span className="text-[9px] font-bold mt-1 text-center truncate w-full">ตั้งดวง</span>
+                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">ตั้งดวง</span>
                 </Link>
 
                 {/* ปฏิทินมงคล */}
                 <Link
                   to="/dashboard/calendar"
                   onClick={() => setIsQuickMenuOpen(false)}
-                  className="flex flex-col items-center justify-center w-14 h-11 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
+                  className="flex flex-col items-center justify-center w-16 h-12 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
                 >
                   <NavIcon name="calendar" size={4.5} />
-                  <span className="text-[9px] font-bold mt-1 text-center truncate w-full">ปฏิทินมงคล</span>
+                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">ปฏิทินมงคล</span>
                 </Link>
 
                 {/* เช็คฤกษ์ยาม */}
                 <Link
                   to="/dashboard/check-yam"
                   onClick={() => setIsQuickMenuOpen(false)}
-                  className="flex flex-col items-center justify-center w-14 h-11 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
+                  className="flex flex-col items-center justify-center w-16 h-12 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
                 >
                   <NavIcon name="yam" size={4.5} />
-                  <span className="text-[9px] font-bold mt-1 text-center truncate w-full">ฤกษ์ยาม</span>
+                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">ฤกษ์ยาม</span>
                 </Link>
 
                 {/* เครือข่ายพันธมิตร */}
                 <Link
                   to="/dashboard/community"
                   onClick={() => setIsQuickMenuOpen(false)}
-                  className="flex flex-col items-center justify-center w-16 h-11 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
+                  className="flex flex-col items-center justify-center w-16 h-12 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
                 >
                   <NavIcon name="people" size={4.5} />
-                  <span className="text-[9px] font-bold mt-1 text-center truncate w-full leading-none">พันธมิตร</span>
+                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full leading-none">พันธมิตร</span>
                 </Link>
               </div>
 
