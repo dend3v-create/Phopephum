@@ -38,6 +38,23 @@ export interface ZodiacCell {
   timeLabel: string | null    // เวลา เช่น "10:37:30"
 }
 
+import { DIGNITY_MAP } from './datasets/tables.js'
+
+export interface StarWithStatus {
+  star: FloatingStar
+  status: string
+  statusSymbol: string
+}
+
+export interface PredictionPoint {
+  house: string
+  stars: StarWithStatus[]
+  rasi: RasiIndex
+  rasiName: string
+  lord: number
+  lordStatus: string
+}
+
 export interface PhraKrasibChart {
   // Input
   queryTime: Date
@@ -63,6 +80,13 @@ export interface PhraKrasibChart {
   // Step 6
   timeStartCell: RasiIndex    // เริ่มลงเวลาที่ช่องไหน
   timeStartValue: string      // เวลาเริ่ม (หลังบวก 7.5 นาที)
+
+  // Prediction Path
+  predictionPath: {
+    x: PredictionPoint
+    y: PredictionPoint
+    z: PredictionPoint
+  } | null
 }
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -399,6 +423,96 @@ function minutesToTimeStr(totalMinutes: number): string {
   return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`
 }
 
+/**
+ * วิเคราะห์เส้นทางการพยากรณ์ X+Y+Z
+ */
+export function getPredictionPath(
+  chart: Omit<PhraKrasibChart, 'predictionPath'>,
+  starPositions: Map<string, RasiIndex>,
+  houseMap: Map<RasiIndex, string>
+): { x: PredictionPoint; y: PredictionPoint; z: PredictionPoint } | null {
+  const queryTime = chart.queryTime
+  // แปลงเป็นเวลาไทย UTC+7 สำหรับการเปรียบเทียบ
+  const utcMs = queryTime.getTime() + queryTime.getTimezoneOffset() * 60_000
+  const thai = new Date(utcMs + 7 * 3_600_000)
+  const totalMin = thai.getHours() * 60 + thai.getMinutes() + thai.getSeconds() / 60
+
+  // หา cell ที่เวลาครอบคลุม
+  const targetCell = chart.zodiacCells.find(cell => {
+    if (!cell.timeLabel) return false
+    const [h, m, s] = cell.timeLabel.split(':').map(Number)
+    const cellEndMin = h * 60 + m + s / 60
+    const cellStartMin = cellEndMin - 7.5
+    
+    // จัดการกรณีข้ามเที่ยงคืน
+    let qMin = totalMin
+    if (cellEndMin < 6 * 60 && totalMin >= 18 * 60) qMin -= 1440
+    if (cellEndMin >= 18 * 60 && totalMin < 6 * 60) qMin += 1440
+
+    return qMin >= cellStartMin && qMin < cellEndMin
+  })
+
+  if (!targetCell) return null
+
+  const getPoint = (rasi: RasiIndex): PredictionPoint => {
+    const stars: StarWithStatus[] = []
+    
+    const getStatusStr = (planet: number, rIdx: number): { label: string; symbol: string } => {
+      const d = DIGNITY_MAP[planet]
+      if (!d) return { label: 'ปกติ', symbol: '·' }
+      // DIGNITY_MAP uses Taurus=0 indexing. Our rIdx uses Aries=0 indexing.
+      // Convert rIdx to Taurus-first index:
+      const mappedIdx = (rIdx + 11) % 12
+      
+      if (d.kaset.includes(mappedIdx))    return { label: 'เกษตร', symbol: '△' }
+      if (d.maha_uch.includes(mappedIdx)) return { label: 'มหาอุจจ์', symbol: '○' }
+      if (d.neech.includes(mappedIdx))    return { label: 'นิจ', symbol: '✳' }
+      if (d.pra.includes(mappedIdx))      return { label: 'ประ', symbol: '⋮' }
+      return { label: 'ปกติ', symbol: '·' }
+    }
+
+    for (const [s, pos] of starPositions.entries()) {
+      if (pos === rasi) {
+        const starNum = s === 'la' ? -1 : Number(s)
+        const { label, symbol } = starNum >= 1 && starNum <= 7 
+          ? getStatusStr(starNum, rasi) 
+          : { label: 'ปกติ', symbol: '·' }
+          
+        stars.push({
+          star: s === 'la' ? 'la' : Number(s) as FloatingStar,
+          status: label,
+          statusSymbol: symbol
+        })
+      }
+    }
+
+    const lord = KASETCH_FIXED_BY_RASI[rasi]
+    const lordStatus = getStatusStr(lord, rasi).label
+
+    return {
+      house: houseMap.get(rasi) || '?',
+      stars,
+      rasi,
+      rasiName: RASI_NAMES[rasi],
+      lord,
+      lordStatus
+    }
+  }
+
+  // X: ภพ ณ เวลาถาม
+  const x = getPoint(targetCell.rasiIndex)
+
+  // Y: ภพที่ดาวเจ้าเรือนของ X ลอยไปประทับ
+  const yRasi = starPositions.get(String(x.lord))!
+  const y = getPoint(yRasi)
+
+  // Z: ภพที่ดาวเจ้าเรือนของ Y ลอยไปประทับ
+  const zRasi = starPositions.get(String(y.lord))!
+  const z = getPoint(zRasi)
+
+  return { x, y, z }
+}
+
 // ─── Main ──────────────────────────────────────────────────────────────────────
 
 /**
@@ -443,7 +557,7 @@ export function calculatePhraKrasib(date: Date = new Date()): PhraKrasibChart {
   const kasetchCenter = KASETCH_FIXED_BY_RASI[lagnaRasi]
   const timeStartCell = starPositions.get(String(kasetchCenter))!
 
-  return {
+  const chartBase = {
     queryTime: date,
     queryDay: yamResult.dayOfWeek,
     period: yamResult.period,
@@ -457,6 +571,13 @@ export function calculatePhraKrasib(date: Date = new Date()): PhraKrasibChart {
     lagnaCellIndex: lagnaRasi,
     timeStartCell,
     timeStartValue: timeCells[0]?.time ?? '',
+  }
+
+  const predictionPath = getPredictionPath(chartBase, starPositions, houseMap)
+
+  return {
+    ...chartBase,
+    predictionPath,
   }
 }
 

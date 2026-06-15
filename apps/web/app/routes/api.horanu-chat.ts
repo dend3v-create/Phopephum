@@ -12,6 +12,7 @@ import {
   ZODIAC_ORDER,
   BHAVA_KNOWLEDGE,
   PLANET_KNOWLEDGE,
+  KASTERN_FIXED,
 } from "@phopephum/engine";
 import type { HoraTaynooResult, HoraTaynooSubSlot, PlanetEntry } from "@phopephum/engine";
 import type { Env } from "~/env.server";
@@ -73,6 +74,28 @@ function buildHoranuPrompt(
     return `  ${i + 1}. ${s.startStr}–${s.endStr} | ${s.zodiacName} | ภพ${s.bhavaName}${mark}`;
   }).join('\n');
 
+  // 5. คำนวณสมการเส้นทางการพยากรณ์ X+Y+Z
+  const getPointDesc = (zIdx: number) => {
+    const bhava = chart.bhavaMap[zIdx] || '?';
+    const lord = KASTERN_FIXED[zIdx];
+    const planetsInSlot = chart.planetEntries.filter(p => p.zodiacIndex === zIdx && p.planetNum !== null);
+    const planetsStr = planetsInSlot.length > 0 
+      ? planetsInSlot.map(p => `${p.label}(${p.status ? STATUS_LABEL[p.status].split(' ')[0] : 'ปกติ'})`).join(', ')
+      : 'ไม่มีดาวลอย';
+    
+    // หาว่า lord ไปอยู่ไหน
+    const lordPosEntry = chart.planetEntries.find(p => p.planetNum === lord);
+    const nextZIdx = lordPosEntry ? lordPosEntry.zodiacIndex : zIdx;
+    
+    return { zIdx, bhava, lord, nextZIdx, planetsStr };
+  };
+
+  const x = getPointDesc(activeSlot.zodiacIndex);
+  const y = getPointDesc(x.nextZIdx);
+  const z = getPointDesc(y.nextZIdx);
+
+  const xyzEquation = `${x.bhava}(ดาว: ${x.planetsStr}) + ${y.bhava}(ดาว: ${y.planetsStr}) + ${z.bhava}(ดาว: ${z.planetsStr})`;
+
   return `คุณคือ "โหรพรายกระซิบ" ผู้เชี่ยวชาญระบบยามพรายกระซิบ (ยามอัฐกาล + ดาวลอย 11 + ภพ 12)
 ตอบเป็นภาษาไทยเท่านั้น กระชับ ตรงประเด็น ไม่ต้องขอข้อมูลเพิ่มเติม ไม่ต้องแนะนำให้ไปดูโหรคนอื่น
 
@@ -99,6 +122,14 @@ ${slotsCtx}
 ${planetsDesc}
 
 ════════════════════════════════════
+เส้นทางการพยากรณ์หลัก (สมการ X+Y+Z)
+════════════════════════════════════
+จงใช้สมการนี้เป็นแกนหลักในการทำนายทิศทางของเรื่องที่ถาม:
+X (ภพเวลาถาม) → Y (ภพที่เจ้าเรือน X สถิต) → Z (ภพที่เจ้าเรือน Y สถิต)
+
+สมการของคุณคือ: ${xyzEquation}
+
+════════════════════════════════════
 กฎการตีความ (ใช้ครบ)
 ════════════════════════════════════
 1. ภพดี + ดาวดี (มหาอุจจ์/เกษตร/ราชาโชค) = สำเร็จง่าย โชคดีมาก
@@ -108,6 +139,7 @@ ${planetsDesc}
 5. ดาวมีทั้งมหาจักร + ราชาโชคพร้อมกัน = "ต้นเหนื่อย-ปลายดี"
 6. แหล่งที่มาตามเลขดาว: 1=ชื่อเสียง/อำนาจ 2=ผู้หญิง/บริการ 3=ต่อสู้/แข่งขัน 4=เจรจา/ค้าขาย 5=ผู้ใหญ่/โชค 6=ความรัก/ศิลปะ/เงิน 7=ความอดทน/ชักช้า 8=เสี่ยง/ต่างถิ่น/พลิกผัน
 7. ในภพเสีย (อริ, มรณะ, วินาศ) ดาวแข็ง = ศัตรู/ปัญหาแข็ง | ดาวอ่อน = ศัตรู/ปัญหาอ่อน
+8. ควรอ่านการเชื่อมโยงของภพแบบ X+Y+Z เสมอ เพื่อให้เห็นลำดับเหตุการณ์ ต้น-กลาง-ปลาย
 
 ════════════════════════════════════
 คำถามของผู้ถาม
@@ -119,7 +151,7 @@ ${planetsDesc}
 ════════════════════════════════════
 ตอบ 3–5 ประโยค ประกอบด้วย:
 (1) ภพที่คำถามตก + ความหมายสำหรับคำถามนี้โดยเฉพาะ
-(2) ดาวในช่อง + มาตรฐานดาว + ผลที่จะเกิดขึ้น (ถ้าไม่มีดาว ตีความจากภพล้วนๆ)
+(2) วิเคราะห์การเชื่อมโยง X+Y+Z เพื่อเล่าแนวโน้ม (ดาวในช่อง + มาตรฐานดาว + ผลที่จะเกิดขึ้น)
 (3) สรุปคำพยากรณ์ชัดเจน + คำแนะนำ 1 ประโยค`;
 }
 
