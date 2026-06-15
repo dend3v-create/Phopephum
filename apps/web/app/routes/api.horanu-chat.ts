@@ -40,10 +40,48 @@ function buildHoranuPrompt(
   question: string
 ): string {
   // 1. หาช่อง 7.5 นาทีที่คำถามตก
-  const nowMin = dateAsked.getHours() * 60 + dateAsked.getMinutes() + dateAsked.getSeconds() / 60;
-  const activeSlot: HoraTaynooSubSlot =
-    chart.subTimeSlots.find(s => nowMin >= s.startMin && nowMin < s.endMin)
-    ?? chart.subTimeSlots[0];
+  // Use UTC+7 time strictly matching the engine's approach
+  const utcMs = dateAsked.getTime() + (dateAsked.getTimezoneOffset() * 60000);
+  const thaiDate = new Date(utcMs + (3600000 * 7));
+  const h = thaiDate.getHours();
+  const m = thaiDate.getMinutes();
+  const s = thaiDate.getSeconds();
+  
+  // Create nowMin that accounts for the fact that night yams (after midnight) 
+  // might map to a day-scale minute. The safest way is to check the subTimeSlots directly.
+  let nowMin = h * 60 + m + s / 60;
+  
+  // Fix for after-midnight night periods in subTimeSlots.
+  // In the engine, if it's past midnight (h < 6), the engine often treats the yam limits
+  // between 0 and 360 minutes.
+  const isAfterMidnight = h >= 0 && h < 6;
+  
+  // We need to map `nowMin` into the same scale the `chart.subTimeSlots` use.
+  // The first slot's startMin tells us what scale the slots are on.
+  if (chart.subTimeSlots.length > 0) {
+    const firstStart = chart.subTimeSlots[0].startMin;
+    if (isAfterMidnight && firstStart > 720) {
+        // The slot is using a 24-hour continuous scale (1440 mins offset) but we are at h<6
+        // Actually, night yams after midnight often map to 0-360 directly in the engine.
+        // Let's just find the slot by string matching or by safely moduloing both.
+    }
+  }
+
+  // A safer approach is to test `nowMin` directly, and if not found, test `nowMin + 1440` or `nowMin - 1440`
+  let activeSlot = chart.subTimeSlots.find(slot => nowMin >= slot.startMin && nowMin < slot.endMin);
+  
+  if (!activeSlot) {
+    const nextDayMin = nowMin + 1440;
+    activeSlot = chart.subTimeSlots.find(slot => nextDayMin >= slot.startMin && nextDayMin < slot.endMin);
+  }
+  
+  if (!activeSlot) {
+    const prevDayMin = nowMin - 1440;
+    activeSlot = chart.subTimeSlots.find(slot => prevDayMin >= slot.startMin && prevDayMin < slot.endMin);
+  }
+
+  // Fallback
+  if (!activeSlot) activeSlot = chart.subTimeSlots[0];
 
   const bhavaInfo = BHAVA_KNOWLEDGE[activeSlot.bhavaName];
   const isBadBhava = BAD_BHAVAS.has(activeSlot.bhavaName);
@@ -70,7 +108,8 @@ function buildHoranuPrompt(
 
   // 4. สรุปยามย่อยทั้ง 12 ช่องสำหรับ context
   const slotsCtx = chart.subTimeSlots.map((s, i) => {
-    const mark = s.startMin <= nowMin && nowMin < s.endMin ? ' ◄ (ตกนี่)' : '';
+    // Check if it's the active slot by reference rather than min values to be absolutely sure
+    const mark = s.slotIndex === activeSlot.slotIndex ? ' ◄ (ตกนี่)' : '';
     return `  ${i + 1}. ${s.startStr}–${s.endStr} | ${s.zodiacName} | ภพ${s.bhavaName}${mark}`;
   }).join('\n');
 
