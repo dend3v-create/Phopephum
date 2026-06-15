@@ -40,7 +40,6 @@ function buildHoranuPrompt(
   question: string
 ): string {
   // 1. หาช่อง 7.5 นาทีที่คำถามตก
-  // ใช้ Intl.DateTimeFormat เพื่อหลีกเลี่ยงปัญหา Timezone Offset 0 บน Cloudflare Workers
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone: 'Asia/Bangkok',
     hour: '2-digit',
@@ -53,26 +52,20 @@ function buildHoranuPrompt(
   let h = Number(parts.find(p => p.type === 'hour')?.value);
   const m = Number(parts.find(p => p.type === 'minute')?.value);
   const s = Number(parts.find(p => p.type === 'second')?.value);
-  
   if (h === 24) h = 0;
   
   const nowMin = h * 60 + m + s / 60;
 
-  // ค้นหาช่องเวลาที่ครอบคลุม nowMin โดยตรงก่อน
+  // ค้นหาช่องเวลาที่ครอบคลุม nowMin
   let activeSlot = chart.subTimeSlots.find(slot => nowMin >= slot.startMin && nowMin < slot.endMin);
-  
-  // กรณีช่วงรอยต่อเวลาข้ามคืน (เช่น Engine ใช้สเกลนาที 1440+)
   if (!activeSlot) {
     const nextDayMin = nowMin + 1440;
     activeSlot = chart.subTimeSlots.find(slot => nextDayMin >= slot.startMin && nextDayMin < slot.endMin);
   }
-  
   if (!activeSlot) {
     const prevDayMin = nowMin - 1440;
     activeSlot = chart.subTimeSlots.find(slot => prevDayMin >= slot.startMin && prevDayMin < slot.endMin);
   }
-
-  // Fallback เพื่อกันพัง แต่ในทางทฤษฎีไม่ควรมาถึงจุดนี้ถ้าตารางเวลาสมบูรณ์
   if (!activeSlot) activeSlot = chart.subTimeSlots[0];
 
   const bhavaInfo = BHAVA_KNOWLEDGE[activeSlot.bhavaName];
@@ -83,42 +76,32 @@ function buildHoranuPrompt(
     p => p.zodiacIndex === activeSlot.zodiacIndex && p.planetNum !== null
   );
 
-  // 3. สร้างคำอธิบายดาวแต่ละดวง
   const planetsDesc = planetsInSlot.length === 0
     ? '(ไม่มีดาวลอยสถิตในช่องเวลานี้ — ตีความจากความหมายภพล้วนๆ)'
     : planetsInSlot.map(p => {
         const pInfo = PLANET_INFO[p.planetNum!];
         const pkInfo = PLANET_KNOWLEDGE[p.planetNum!];
         const statusStr = p.status ? (STATUS_LABEL[p.status] ?? p.status) : 'ปกติ (ไม่มีมาตรฐานพิเศษ)';
-        const statuses = `มาตรฐาน: ${statusStr}`;
         return [
           `  • ดาว ${p.planetNum} (${pInfo?.thai ?? '?'})`,
-          `    ${statuses}`,
-          `    ความหมาย: ${pkInfo?.meaning ?? '—'}`,
+          `    มาตรฐาน: ${statusStr}`,
+          `    ความหมายดาว: ${pkInfo?.meaning ?? '—'}`,
         ].join('\n');
       }).join('\n');
 
-  // 4. สรุปยามย่อยทั้ง 12 ช่องสำหรับ context
-  const slotsCtx = chart.subTimeSlots.map((s, i) => {
-    // เทียบด้วย index แทนนาที เพื่อให้มั่นใจว่า highlight ตรงกับ activeSlot จริงๆ
-    const mark = s.slotIndex === activeSlot.slotIndex ? ' ◄ (ตกนี่)' : '';
-    return `  ${i + 1}. ${s.startStr}–${s.endStr} | ${s.zodiacName} | ภพ${s.bhavaName}${mark}`;
-  }).join('\n');
-
-  // 5. คำนวณสมการเส้นทางการพยากรณ์ X+Y+Z
+  // 3. คำนวณสมการเส้นทางการพยากรณ์ X+Y+Z
   const getPointDesc = (zIdx: number) => {
     const bhava = chart.bhavaMap[zIdx] || '?';
     const lord = KASTERN_FIXED[zIdx];
-    const planetsInSlot = chart.planetEntries.filter(p => p.zodiacIndex === zIdx && p.planetNum !== null);
-    const planetsStr = planetsInSlot.length > 0 
-      ? planetsInSlot.map(p => `${p.label}(${p.status ? STATUS_LABEL[p.status].split(' ')[0] : 'ปกติ'})`).join(', ')
+    const ps = chart.planetEntries.filter(p => p.zodiacIndex === zIdx && p.planetNum !== null);
+    const planetsStr = ps.length > 0 
+      ? ps.map(p => `${p.labelThai}(${p.status ? STATUS_LABEL[p.status].split(' ')[0] : 'ปกติ'})`).join(', ')
       : 'ไม่มีดาวลอย';
     
-    // หาว่า lord ไปอยู่ไหน
     const lordPosEntry = chart.planetEntries.find(p => p.planetNum === lord);
     const nextZIdx = lordPosEntry ? lordPosEntry.zodiacIndex : zIdx;
     
-    return { zIdx, bhava, lord, nextZIdx, planetsStr };
+    return { bhava, lord, nextZIdx, planetsStr };
   };
 
   const x = getPointDesc(activeSlot.zodiacIndex);
@@ -128,62 +111,39 @@ function buildHoranuPrompt(
   const xyzEquation = `${x.bhava}(ดาว: ${x.planetsStr}) + ${y.bhava}(ดาว: ${y.planetsStr}) + ${z.bhava}(ดาว: ${z.planetsStr})`;
 
   return `คุณคือ "โหรพรายกระซิบ" ผู้เชี่ยวชาญระบบยามพรายกระซิบ (ยามอัฐกาล + ดาวลอย 11 + ภพ 12)
-ตอบเป็นภาษาไทยเท่านั้น กระชับ ตรงประเด็น ไม่ต้องขอข้อมูลเพิ่มเติม ไม่ต้องแนะนำให้ไปดูโหรคนอื่น
+ตอบเป็นภาษาไทยเท่านั้น กระชับ ตรงประเด็น ห้ามเกริ่นนาน
 
 ════════════════════════════════════
-ข้อมูลผังดวง ณ เวลาที่ถาม
+ข้อมูลผังดวง ณ เวลาที่ถาม (จุดพยากรณ์)
 ════════════════════════════════════
-วัน${DAY_NAMES_TH[chart.dayOfWeek]} | ยามที่ ${chart.yamAsked} (${chart.period === 'day' ? 'กลางวัน' : 'กลางคืน'})
-ลัคนา: ราศี${ZODIAC_ORDER[chart.lagnaZodiacIndex]?.name ?? ''} | ดาวเจ้ายาม: ดาว ${chart.yamPlanet} (${PLANET_INFO[chart.yamPlanet]?.thai ?? ''})
+เวลาที่กดถาม: ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')} น.
+ยามถาม: ยามที่ ${chart.yamAsked} (${chart.period === 'day' ? 'กลางวัน' : 'กลางคืน'}) วัน${DAY_NAMES_TH[chart.dayOfWeek]}
 
-════════════════════════════════════
-ยามย่อย 7.5 นาที × 12 ช่อง
-════════════════════════════════════
-${slotsCtx}
-
-════════════════════════════════════
-จุดเวลาที่คำถามตก (สำคัญที่สุด)
-════════════════════════════════════
-เวลา: ${activeSlot.startStr} – ${activeSlot.endStr} น.
-ราศี: ${activeSlot.zodiacName}
-ภพ: "${activeSlot.bhavaName}" — ${bhavaInfo?.meaning ?? 'ไม่มีข้อมูล'}
-ประเภทภพ: ${isBadBhava ? 'ภพเสีย (ทดสอบ / อุปสรรค / ความสูญเสีย)' : 'ภพดี (ส่งเสริมผลบวก)'}
-
-ดาวลอยในช่องนี้:
+จุดพยากรณ์ที่คำถามตก (X):
+- ภพ: "${activeSlot.bhavaName}" — ${bhavaInfo?.meaning ?? 'ไม่มีข้อมูล'}
+- ประเภทภพ: ${isBadBhava ? 'ภพเสีย (อริ/มรณะ/วินาศ)' : 'ภพดี'}
+- ดาวลอยสถิตในจุดพยากรณ์นี้:
 ${planetsDesc}
 
 ════════════════════════════════════
-เส้นทางการพยากรณ์หลัก (สมการ X+Y+Z)
+สมการเส้นทางการพยากรณ์ (X+Y+Z)
 ════════════════════════════════════
-จงใช้สมการนี้เป็นแกนหลักในการทำนายทิศทางของเรื่องที่ถาม:
-X (ภพเวลาถาม) → Y (ภพที่เจ้าเรือน X สถิต) → Z (ภพที่เจ้าเรือน Y สถิต)
-
-สมการของคุณคือ: ${xyzEquation}
+จงใช้สมการนี้เป็นแกนหลักในการทำนาย "จุดเริ่มต้น -> การดำเนินไป -> บทสรุป":
+${xyzEquation}
 
 ════════════════════════════════════
-กฎการตีความ (ใช้ครบ)
+กฎการตีความ (ห้ามละเลย)
 ════════════════════════════════════
-1. ภพดี + ดาวดี (มหาอุจจ์/เกษตร/ราชาโชค) = สำเร็จง่าย โชคดีมาก
-2. ภพดี + ดาวอ่อน (นิจ/ประ) = มีโอกาสแต่ต้องพยายาม อาจติดขัดระยะสั้น
-3. ภพเสีย + ดาวเข้มแข็ง (มหาอุจจ์/เกษตร) = ปัญหา/ศัตรูมีกำลังมาก ต้องระวัง
-4. ภพเสีย + ดาวอ่อน (นิจ/ประ) = ปัญหาอ่อนกำลัง เอาชนะได้
-5. ดาวมีทั้งมหาจักร + ราชาโชคพร้อมกัน = "ต้นเหนื่อย-ปลายดี"
-6. แหล่งที่มาตามเลขดาว: 1=ชื่อเสียง/อำนาจ 2=ผู้หญิง/บริการ 3=ต่อสู้/แข่งขัน 4=เจรจา/ค้าขาย 5=ผู้ใหญ่/โชค 6=ความรัก/ศิลปะ/เงิน 7=ความอดทน/ชักช้า 8=เสี่ยง/ต่างถิ่น/พลิกผัน
-7. ในภพเสีย (อริ, มรณะ, วินาศ) ดาวแข็ง = ศัตรู/ปัญหาแข็ง | ดาวอ่อน = ศัตรู/ปัญหาอ่อน
-8. ควรอ่านการเชื่อมโยงของภพแบบ X+Y+Z เสมอ เพื่อให้เห็นลำดับเหตุการณ์ ต้น-กลาง-ปลาย
+1. เริ่มพยากรณ์จาก ภพที่คำถามตก (X) ทันที
+2. เชื่อมโยงเรื่องราวไปยัง Y และ Z ตามสมการ เพื่อให้เห็นลำดับเหตุการณ์
+3. ภพดี + ดาวดี = สำเร็จง่าย | ภพเสีย + ดาวดี = อุปสรรคเยอะแต่ดาวช่วย | ภพเสีย + ดาวอ่อน = ปัญหาเบาบาง
+4. สรุปคำพยากรณ์ให้ชัดเจนว่า "ดี" หรือ "ควรระวัง" พร้อมคำแนะนำ 1 ข้อ
 
 ════════════════════════════════════
-คำถามของผู้ถาม
+คำถามของผู้ใช้งาน: "${question}"
 ════════════════════════════════════
-"${question}"
 
-════════════════════════════════════
-รูปแบบการตอบ (ทำตามนี้เท่านั้น)
-════════════════════════════════════
-ตอบ 3–5 ประโยค ประกอบด้วย:
-(1) ภพที่คำถามตก + ความหมายสำหรับคำถามนี้โดยเฉพาะ
-(2) วิเคราะห์การเชื่อมโยง X+Y+Z เพื่อเล่าแนวโน้ม (ดาวในช่อง + มาตรฐานดาว + ผลที่จะเกิดขึ้น)
-(3) สรุปคำพยากรณ์ชัดเจน + คำแนะนำ 1 ประโยค`;
+ตอบ 3–5 ประโยค ให้เข้าเรื่องคำทำนายทันทีตามสมการ X+Y+Z`;
 }
 
 // ─── Action (POST only) ───────────────────────────────────────────────────────
