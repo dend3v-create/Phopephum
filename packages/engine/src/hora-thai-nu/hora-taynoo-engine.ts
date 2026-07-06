@@ -334,9 +334,8 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
   const R_PLN_LBL   = (R_RING2 + R_RING3) / 2;
   const R_FIX_LBL   = (R_RING3 + R_CORE) / 2;
 
-  const GOLD = '#C9A96E'; const GOLD_TXT = '#F2D49B'; const TXT = '#F8F6F1'; const TXT_TIME = '#FDE047';
-  const LAGNA_BG = '#1A4E9A35'; const PLN_BG = '#C9A96E1A'; const GOOD_CLR = '#6EE7B7';
-  const BAD_CLR = '#FDA4AF'; const MED_CLR = '#C5BCAE';
+  const GOLD = '#C9A96E'; const GOLD_TXT = '#C9A96E'; const TXT = '#F8F6F1'; const TXT_TIME = '#C9A96E';
+  const LAGNA_BG = '#1A4E9A35'; const PLN_BG = '#C9A96E1A'; const BHAVA_CLR = '#4B6FAE';
 
   function polar(deg: number, r: number) {
     const rad = (deg * Math.PI) / 180;
@@ -379,9 +378,7 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
     const pCenter = polar(z.sectorAngle, R_ZOD_BHAVA);
     ring1Labels += `<text x="${pCenter.x.toFixed(1)}" y="${(pCenter.y - 8*s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${12.5*s}" font-family="sans-serif" fill="${isLagna ? '#6EB0F5' : TXT}" font-weight="900">${z.name}</text>`;
     if (bhava) {
-      const isBad = ['อริ','มรณะ','วินาศ'].includes(bhava);
-      const isGood = ['ตนุ','กฎุมภะ','ปุตตะ','ปัตนิ','ศุภะ','กัมมะ','ลาภะ'].includes(bhava);
-      const color = isBad ? BAD_CLR : isGood ? GOOD_CLR : MED_CLR;
+      const color = isLagna ? '#6EB0F5' : BHAVA_CLR;
       ring1Labels += `<text x="${pCenter.x.toFixed(1)}" y="${(pCenter.y + 10*s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${10.5*s}" font-family="sans-serif" fill="${color}" font-weight="800">${bhava}</text>`;
     }
   }
@@ -401,7 +398,7 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
       const gap = 22 * s; const totalWidth = (entries.length - 1) * gap;
       entries.forEach((entry, idx) => {
         const x = pos.x - totalWidth / 2 + idx * gap; const y = pos.y;
-        const color = entry.planetNum ? (PLANET_INFO[entry.planetNum]?.color ?? GOLD) : (entry.isLagna ? '#6EB0F5' : GOLD);
+        const color = entry.isLagna ? '#6EB0F5' : GOLD;
         if (entry.status && SHOW_STATUS) {
           const st = STATUS_GLYPHS[entry.status];
           planetLabels += `<text x="${x.toFixed(1)}" y="${(y - 15 * s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${11*s}" font-family="sans-serif" fill="${st.color}" font-weight="900">${st.char}</text>`;
@@ -415,7 +412,7 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
   if (SHOW_FIXED) {
     for (const z of ZODIAC_ORDER) {
       const pos = polar(z.sectorAngle, R_FIX_LBL);
-      kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${17*s}" font-family="sans-serif" fill="${GOLD_TXT}" opacity="0.65" font-weight="800">${KASTERN_FIXED[z.index]}</text>`;
+      kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${17*s}" font-family="sans-serif" fill="${TXT}" opacity="0.85" font-weight="800">${KASTERN_FIXED[z.index]}</text>`;
     }
   }
 
@@ -430,8 +427,8 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
 
   const centerMask = `<circle cx="${CX}" cy="${CY}" r="${(R_CORE + 12*s).toFixed(1)}" fill="#020617" stroke="${GOLD}" stroke-width="3"/>`;
   const pDay = polar(225, 20 * s); const pYam = polar(45, 20 * s);
-  const dayLabel = `<text x="${pDay.x.toFixed(1)}" y="${pDay.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD_TXT}" font-weight="900">${result.dayPlanet}</text>`;
-  const yamLabel = `<text x="${pYam.x.toFixed(1)}" y="${pYam.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD_TXT}" font-weight="900">${result.yamAsked}</text>`;
+  const dayLabel = `<text x="${pDay.x.toFixed(1)}" y="${pDay.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD}" font-weight="900">${result.dayPlanet}</text>`;
+  const yamLabel = `<text x="${pYam.x.toFixed(1)}" y="${pYam.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD}" font-weight="900">${result.yamAsked}</text>`;
 
   let startMarker = '';
   if (SHOW_START) {

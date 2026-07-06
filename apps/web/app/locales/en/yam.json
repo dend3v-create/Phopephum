@@ -1,9 +1,262 @@
 {
-  "title": "Current Auspicious Time",
+  "title": "Current Yam",
   "subtitle": "Energy of the Moment",
   "current": "Current Yam",
   "next": "Next Yam",
   "countdown": "in",
   "auspicious": "Auspicious",
-  "inauspicious": "Caution"
+  "inauspicious": "Inauspicious",
+  "yam_names": {
+    "สุริยะ": "Solar",
+    "ระวิ": "Ravi",
+    "จันเทา": "Lunar",
+    "คะศิ": "Kashi",
+    "ภุมมะ": "Mars",
+    "ภุมรา": "Bhumra",
+    "ทิวา": "Diwa",
+    "วาณี": "Wanee",
+    "ชีโว": "Cheewo",
+    "คุรุ": "Guru",
+    "ศุกระ": "Venus",
+    "ภัสสะ": "Passa",
+    "โสระ": "Sora",
+    "เสารี": "Sauri",
+    "อสุรินทร์": "Asurinth",
+    "ราหู": "Rahu"
+  },
+  "period_day": "Daytime",
+  "period_night": "Nighttime",
+  "phase_start": "Early phase",
+  "phase_middle": "Mid phase",
+  "phase_end": "Late phase",
+  "yam_number": "Yam {{number}}",
+  "yam_order": "Yam Order {{order}}",
+  "buddhist_holy_day": "Buddhist Holy Day",
+  "moon_illumination": "Moon {{illumination}}%",
+  "caution": "Caution",
+  "auspicious_label": "Auspicious",
+  "excellent": "Excellent",
+  "very_good": "Very Good",
+  "good": "Good",
+  "bad": "Caution",
+  "check_yam_title": "Check Auspicious Time",
+  "check_yam_subtitle": "Auspicious Time Hub",
+  "check_yam_update": "Updated every 60s",
+  "karnchata_soy": "Sub-Yam: {{soy}} · Month {{month}}",
+  "hora_lagna": "Lagna {{lagna}}",
+  "hora_day_star": "Day Star: {{star}}",
+  "hora_yam_star": "Yam Ruler Star: {{star}}",
+  "rahu_good": "✓ Good Time",
+  "rahu_bad": "✕ Caution",
+  "open_tool": "Open",
+  "yam_guideline": "Current Yam Guidelines — {{name}}",
+  "ticks_unit": "ticks",
+  "travel_prediction_now": "Current Travel Prediction",
+  "auspiciousness": "Auspiciousness",
+  "travel_caution": "⚠️ Obstacle-prone time. Avoid starting important journeys or take extra safety care.",
+  "travel_auspicious": "✨ Auspicious time, highly suitable for journey transits and business contacts.",
+  "compare": {
+    "verdict_a": "🏆 Highly recommend Option 1! Due to receiving travel auspiciousness of {{ticks}} ticks (Level: {{rating}}), which is smoother, safer, and supports wealth energy significantly more than Option 2.",
+    "verdict_b": "🏆 Highly recommend Option 2! Due to receiving travel auspiciousness of {{ticks}} ticks (Level: {{rating}}), which is supreme, free from obstacles, and commutes much smoother.",
+    "verdict_equal": "⚖️ Both options have equal auspiciousness ({{ticks}} ticks). Feel free to choose according to your schedule while maintaining mindfulness and safety caution equally."
+  },
+  "advices": {
+    "travel": {
+      "level_default": {
+        "ratingText": "Somewhat Suitable",
+        "description": "Good auspicious time. General travel and commuting can begin smoothly.",
+        "shouldDo": ["Commence transit mindfully", "Pack and check vehicle conditions thoroughly"],
+        "shouldAvoid": ["Impatience and rushing while driving", "Starting travel in inauspicious directions"]
+      },
+      "level_3": {
+        "ratingText": "Highly Excellent",
+        "description": "Supreme auspicious time for travel, tours, or long-distance business. Highly successful, safe, and yielding double wealth.",
+        "shouldDo": ["Start important trips", "Acquire a new vehicle", "Travel for long-distance trade"],
+        "shouldAvoid": ["Hesitation in starting the trip", "Expressing conflicting emotions at departure"]
+      },
+      "level_2": {
+        "ratingText": "Very Good",
+        "description": "Very auspicious transit time, suitable for family trips or general business travel without obstacles.",
+        "shouldDo": ["Negotiate exchanges on the way", "Travel across provinces", "Visit supportive friends"],
+        "shouldAvoid": ["Lethargy or delays in starting", "Commuting in high-risk routes"]
+      },
+      "level_0": {
+        "ratingText": "Caution Required",
+        "description": "Obstacle-prone transit time. Prone to delays, disruptions, or accidents. Exercise extreme care.",
+        "shouldDo": ["Postpone travel if possible", "Check vehicle safety details thoroughly", "Stay focused and spread loving-kindness before departing"],
+        "shouldAvoid": ["Speeding or reckless driving", "Starting important long-distance trips in this yam"]
+      },
+      "speech": "May this trip bring great fortune, remain completely safe, and achieve all your intentions successfully."
+    },
+    "default": {
+      "ratingText": "Suitable",
+      "description": "Good timing, stable and safe according to Atthakarn Yam guidelines.",
+      "shouldDo": ["Good for cooperative transit", "Explain things via appropriate channels"],
+      "shouldAvoid": ["Hot tempers", "Sudden hasty decisions"],
+      "speech": "May this work succeed exactly as you intended."
+    },
+    "planets": {
+      "1": {
+        "love": {
+          "ratingText": "Somewhat Suitable",
+          "description": "Solar energy values truth and directness. Resolving issues works best by revealing facts, but watch out for pride and ego.",
+          "shouldDo": ["Speak with absolute honesty", "Show respect and acknowledge the other's value"],
+          "shouldAvoid": ["Showing controlling power or patronizing", "Sarcastic remarks that hurt dignity"],
+          "speech": "I sincerely apologize for the mistakes... I promise to improve and hope we can work this out together."
+        },
+        "trade": {
+          "ratingText": "Very Suitable",
+          "description": "Excellent time for dealing with major clients, selling luxury products, or high-value trade negotiations.",
+          "shouldDo": ["Present high-standard product samples", "Show distinct professionalism and expertise"],
+          "shouldAvoid": ["Excessive discounts that hurt brand value", "Hesitation in offering the deal"],
+          "speech": "This is the best and most premium package we selected specifically for your brand. Count on our highest standards."
+        },
+        "negotiate": {
+          "ratingText": "Highly Excellent",
+          "description": "Auspicious time to present major proposals, meet influential leaders, or enter competitions for a clear win.",
+          "shouldDo": ["Present plans with firm confidence", "Use solid statistics and long-term vision"],
+          "shouldAvoid": ["Arguments driven by anger", "Lack of prepared key documents"],
+          "speech": "This project has been thoroughly planned and structured to ensure the highest long-term benefits for our organization."
+        }
+      },
+      "2": {
+        "love": {
+          "ratingText": "Most Suitable (Recommended ✨)",
+          "description": "High charm and mercy energy. Soft and warm atmosphere, ideal for resolving issues, reconciling, or opening up on deep topics.",
+          "shouldDo": ["Speak with a gentle voice", "Show sweetness and pay extra attention to feelings", "Offer a small gift or favorite treat"],
+          "shouldAvoid": ["Bringing up past errors or history", "Being indifferent or cold"],
+          "speech": "I have been thinking about your feelings... I don't want us to remain silent like this. Let's start over gently."
+        },
+        "trade": {
+          "ratingText": "Very Suitable",
+          "description": "Good time for services, welcoming customers, or sales pitches that emphasize goodwill and great relationships.",
+          "shouldDo": ["Serve customers with absolute care and smiles", "Engage in friendly, casual conversations"],
+          "shouldAvoid": ["Rushing the close to make the customer feel pressured", "Selling without showing human warmth"],
+          "speech": "We handpicked and prepared this product for you with absolute care. Rest assured with our full after-sales support."
+        },
+        "negotiate": {
+          "ratingText": "Suitable",
+          "description": "Good time for coordination, compromises, or requesting support from partners.",
+          "shouldDo": ["Show understanding of the other's perspective", "Offer terms emphasizing mutual compromises"],
+          "shouldAvoid": ["Using too rigid or aggressive approaches", "Signing high-risk large joint-venture contracts"],
+          "speech": "We are fully open to feedback and adjusting some terms to achieve the most comfortable and fitting outcome for both sides."
+        }
+      },
+      "3": {
+        "love": {
+          "ratingText": "Avoid if Possible",
+          "description": "Warrior or aggressive energy. High risk of arguments or heated disputes. Highly recommend avoiding reconciling in this yam.",
+          "shouldDo": ["Give space for the other to calm down", "Listen quietly without arguing if criticized"],
+          "shouldAvoid": ["Challenging each other to win by temper", "Sending long sarcastic messages"],
+          "speech": "I understand you might still be angry. It's alright... I'm willing to wait until we are both calm to talk again."
+        },
+        "trade": {
+          "ratingText": "Somewhat Suitable",
+          "description": "Fire energy. Ideal for quick stock clearance, selling hardware tools, repair equipment, or sports gear.",
+          "shouldDo": ["Offer time-limited flash promotions", "Close sales quickly and energetically"],
+          "shouldAvoid": ["Long-term trade negotiations that require high effort", "Disputes with clients"],
+          "speech": "This special promo is only valid for today! Close the deal now to receive additional free gifts instantly!"
+        },
+        "negotiate": {
+          "ratingText": "Caution Required",
+          "description": "Yam of obstacles and disputes. Unsuitable for signing joint venture contracts, but good for active troubleshooting.",
+          "shouldDo": ["Take action and check on-site issues directly", "Show brave decisiveness in facing obstacles"],
+          "shouldAvoid": ["Agreeing to offers that you still worry about", "Arguments with colleagues or partners"],
+          "speech": "Our team is ready to jump in and implement emergency solutions immediately for the fastest recovery."
+        }
+      },
+      "4": {
+        "love": {
+          "ratingText": "Very Suitable",
+          "description": "Star of wisdom and communication. Ideal for resolving misunderstandings by discussing facts and talking with reasons.",
+          "shouldDo": ["Present weight and polite reasons", "Talk casually to reduce tense atmosphere"],
+          "shouldAvoid": ["Distorting facts or hiding truths", "Sarcastic or passive-aggressive remarks"],
+          "speech": "I'd like to ask for a chance to explain and talk openly and comfortably. I'm ready to listen to everything you think."
+        },
+        "trade": {
+          "ratingText": "Highly Excellent (Recommended ✨)",
+          "description": "Star of merchants and communications. Excellent success in any sales, meeting targets, and fluent client interactions.",
+          "shouldDo": ["Write charming, attractive sales pitches", "Focus on clear benefits and value delivered"],
+          "shouldAvoid": ["Leaving conversations silent for a long time", "Vague or incorrect information"],
+          "speech": "This special campaign was created specifically to solve your issues and optimize your budget directly."
+        },
+        "negotiate": {
+          "ratingText": "Highly Excellent (Recommended ✨)",
+          "description": "Best timing for signing agreements, job interviews, exams, key business negotiations, or contract signing.",
+          "shouldDo": ["Prepare references and statistics accurately", "Speak clearly, firmly, and with excellent manners"],
+          "shouldAvoid": ["Arriving late or showing negligence", "Lacking confidence in what you present"],
+          "speech": "We prepared our collaboration framework and statistics in detail to ensure maximum mutual benefits."
+        }
+      },
+      "5": {
+        "love": {
+          "ratingText": "Very Suitable",
+          "description": "Elder and wisdom energy. Reconciling succeeds by showing mutual respect and listening with empathy.",
+          "shouldDo": ["Listen with a willingness to improve", "Seek advice from neutral elders/mentors to help"],
+          "shouldAvoid": ["Trying to act superior or lecturing the other", "Showing stubborn or arrogant attitudes"],
+          "speech": "I understand and take your feedback... I agree that we should work together to build a stronger relationship."
+        },
+        "trade": {
+          "ratingText": "Highly Excellent (Recommended ✨)",
+          "description": "Supreme wealth fortune time. Ideal for high-value items, academic works, sacred items, or large property trades.",
+          "shouldDo": ["Emphasize product quality and exact specifications", "Provide service information honestly and transparently"],
+          "shouldAvoid": ["Taking advantage of clients or exaggerating", "Impolite or inappropriate services"],
+          "speech": "This item is designed with a blend of innovation and durability to deliver the best sustainable outcome."
+        },
+        "negotiate": {
+          "ratingText": "Highly Excellent (Recommended ✨)",
+          "description": "Victory time for meeting managers/elders, consulting on planning, legal advice, or building study/business foundations.",
+          "shouldDo": ["Approach elders with the most respectful manners", "Present details honestly and transparently"],
+          "shouldAvoid": ["Negotiating illegal or immoral interests", "Rushing decisions with impatience"],
+          "speech": "This structural planning is based on correctness and prioritizes benefits for all parties involved."
+        }
+      },
+      "6": {
+        "love": {
+          "ratingText": "Highly Excellent (Recommended ✨)",
+          "description": "Star of love and romance. Ideal for reconciling, dating, dining at fine restaurants, or giving surprise gifts.",
+          "shouldDo": ["Offer a bouquet or a refined gift", "Create a romantic, relaxing atmosphere", "Show full affection and care"],
+          "shouldAvoid": ["Bringing up stressful financial or chore topics", "Dressing untidily"],
+          "speech": "I'm sorry, my dear... I prepared your favorite treat and a special dinner. Hope it makes you smile."
+        },
+        "trade": {
+          "ratingText": "Very Suitable",
+          "description": "Lucky star for beauty, fashion, apparel, fine dining, arts, and entertainment. Excellent attraction for wealth.",
+          "shouldDo": ["Decorate storefront or work beautifully", "Present items with positive energy and lively vibes"],
+          "shouldAvoid": ["Dull or overly serious atmospheres", "Vague pricing schemas"],
+          "speech": "This new collection is designed to enhance your charm and boost your confidence amazingly."
+        },
+        "negotiate": {
+          "ratingText": "Very Suitable",
+          "description": "Good time to strengthen ties with partners, settle collaborations over social gatherings, or welcome partners warmly.",
+          "shouldDo": ["Use friendly and approachable attitudes to create charm", "Negotiate wins that bring mutual happiness"],
+          "shouldAvoid": ["Setting rigid or overly pressuring terms", "Showing frustration or displeasure"],
+          "speech": "This collaborative effort will surely bring beautiful and praiseworthy success to both of our sides."
+        }
+      },
+      "7": {
+        "love": {
+          "ratingText": "Caution Required",
+          "description": "Energy of silence and seriousness. Reconciliation will be slow or meet high tension. Be patient and resilient.",
+          "shouldDo": ["Show patience and wait until the other is ready", "Focus on showing consistency in actions over time"],
+          "shouldAvoid": ["Pressuring the other to forgive quickly", "Using complaining words to win"],
+          "speech": "I'm always willing to give you space and wait. Let time prove the sincerity and commitment of my intentions."
+        },
+        "trade": {
+          "ratingText": "Suitable",
+          "description": "Good time for real estate, land, large construction tools, or multi-year trade contracts.",
+          "shouldDo": ["Focus on durability, strength, and stability", "Explain contract terms with careful discipline"],
+          "shouldAvoid": ["Offering short-term speculative contracts", "Presenting information hastily"],
+          "speech": "This property project was filtered to support your wealth and permanent stability in the future."
+        },
+        "negotiate": {
+          "ratingText": "Suitable",
+          "description": "Good time for infrastructure foundations, concession contracts, or long-term contracts requiring patience.",
+          "shouldDo": ["Negotiate with calmness, caution, and high patience", "Review terms and legal agreements in the highest detail"],
+          "shouldAvoid": ["Signing agreements hastily without caution", "Trusting verbal words without written records"],
+          "speech": "We prepared this infrastructure plan with the highest discipline to ensure stable and long-term execution."
+        }
+      }
+    }
+  }
 }

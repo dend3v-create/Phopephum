@@ -3,18 +3,18 @@ import { Form, useLoaderData, useNavigation, useActionData } from "@remix-run/re
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
-import { notifyWithdrawalRequest } from "~/services/line.server";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
 import type { Env } from "~/env.server";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import i18next from "~/lib/i18n/i18n.server";
 
 export const meta: MetaFunction = () => [
-  { title: "ตั้งค่าโปรไฟล์และรายได้แนะนำ — PhopePhum" },
+  { title: "Settings — PhopePhum" },
 ];
 
-/** สร้าง referral_code แบบ unique จาก userId */
 function generateReferralCode(userId: string): string {
   return userId.replace(/-/g, "").substring(0, 8).toUpperCase();
 }
@@ -24,9 +24,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const user = await requireAuth(request, env);
   let profile = await getProfile(user.id, request, env);
 
+  const locale = await i18next.getLocale(request);
+  const currentLocale = locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "th-TH";
+
   const { supabase } = createSupabaseClient(request, env);
 
-  // Auto-generate referral_code ถ้ายังไม่มี (ทุก member รวมถึง free tier)
   if (profile && !profile.referral_code) {
     const newCode = generateReferralCode(user.id);
     await supabase
@@ -36,23 +38,19 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     profile = { ...profile, referral_code: newCode };
   }
 
-  // 1. ดึงข้อมูลประวัติกระเป๋าเงิน (Wallet Transactions)
   const { data: walletHistory } = await supabase
     .from("wallet_transactions")
     .select("*")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
-  // 2. ดึงข้อมูลคำขอถอนเงิน (ถอนเงินสดปิดใช้งานแล้ว)
   const withdrawals: any[] = [];
 
-  // 3. นับจำนวนคนที่แนะนำมา
   const { count: referralsCount } = await supabase
     .from("profiles")
     .select("*", { count: "exact", head: true })
     .eq("referred_by", profile?.referral_code);
 
-  // 4. ดึงรายชื่อคนที่ชวนมาล่าสุด
   const { data: referralsList } = await supabase
     .from("profiles")
     .select("created_at, display_name, plan")
@@ -60,12 +58,12 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .order("created_at", { ascending: false })
     .limit(10);
 
-  // 5. คำนวณเปอร์เซ็นต์ตามแผนปัจจุบัน
   const commissionRate = profile?.plan === 'imperial' ? 10 : profile?.plan === 'pro' ? 5 : 3;
 
   return json({
     user,
     profile,
+    currentLocale,
     wallet: {
       balance: Number(profile?.wallet_balance || 0),
       history: walletHistory || [],
@@ -95,10 +93,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const gender = String(formData.get("gender") ?? "");
 
     if (!displayName) {
-      return json({ error: "กรุณากรอกชื่อแสดงผล" }, { status: 400 });
+      return json({ error: "displayName is required" }, { status: 400 });
     }
 
-    // แปลง พ.ศ. → ค.ศ. (ลบ 543) แล้วสร้าง ISO date string สำหรับฐานข้อมูล
     let birthDate: string | null = null;
     if (birthDay > 0 && birthMonth > 0 && birthYearBE >= 2400) {
       const birthYearCE = birthYearBE - 543;
@@ -117,26 +114,24 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .eq("id", user.id);
 
     if (error) {
-      console.error("[settings] update personal error:", error.code, error.message);
-      return json({ error: `ไม่สามารถบันทึกข้อมูลส่วนตัวได้: ${error.message}` }, { status: 500 });
+      return json({ error: `Save profile error: ${error.message}` }, { status: 500 });
     }
 
     return redirect("/dashboard/settings?saved=personal");
   }
 
-  return json({ error: "รูปแบบการทำงานไม่ถูกต้อง" }, { status: 400 });
+  return json({ error: "Invalid action" }, { status: 400 });
 }
 
 export default function SettingsPage() {
-  const { profile, wallet } = useLoaderData<typeof loader>();
+  const { profile, wallet, currentLocale } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
+  const { t } = useTranslation(["common"]);
 
-  // จัดการแท็บ
   const [activeTab, setActiveTab] = useState("personal");
 
-  // แปลงวันเกิดจากฐานข้อมูล (ค.ศ.) → พ.ศ. สำหรับแสดงในฟอร์ม
   const birthDateBE = (() => {
     if (!profile?.birth_date) return { day: "", month: "", year: "" };
     const d = new Date(profile.birth_date + "T12:00:00");
@@ -147,60 +142,56 @@ export default function SettingsPage() {
     };
   })();
 
-  // รหัสแนะนำเฉพาะตัว
-  const affiliateCode = profile?.referral_code || "";
-  const referralLink = affiliateCode
-    ? `https://phopephum.com/register?ref=${affiliateCode}`
-    : "";
+  const affiliateCode = profile?.referral_code ?? "";
   const [copied, setCopied] = useState(false);
-  const isFreetier = !profile?.subscription || profile.subscription === "free";
 
   const handleCopyLink = () => {
-    if (!referralLink) return;
-    navigator.clipboard.writeText(referralLink).catch(() => {
-      // fallback สำหรับ browser ที่ไม่รองรับ
-      const el = document.createElement("textarea");
-      el.value = referralLink;
-      document.body.appendChild(el);
-      el.select();
-      document.execCommand("copy");
-      document.body.removeChild(el);
-    });
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    if (typeof window !== "undefined" && affiliateCode) {
+      const url = `${window.location.origin}/register?ref=${affiliateCode}`;
+      navigator.clipboard.writeText(url).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      });
+    }
   };
 
+  const isFreetier = profile?.plan !== 'pro' && profile?.plan !== 'imperial';
+
   return (
-    <div className="space-y-6 max-w-2xl pb-16">
-      <div>
-        <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-1 font-bold">โปรไฟล์</p>
-        <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">การตั้งค่า</h1>
-        <p className="text-[#94A3B8] text-sm mt-1">
-          ปรับแต่งข้อมูลส่วนตัว และจัดการรายได้แนะนำเพื่อน
-        </p>
+    <div className="space-y-8 max-w-2xl pb-20">
+      {/* Header */}
+      <div className="flex justify-between items-end">
+        <div>
+          <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-1">
+            {t("common:nav.settings", "โปรไฟล์")}
+          </p>
+          <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">
+            {t("common:settings.title", "ตั้งค่าโปรไฟล์และดวงชะตา")}
+          </h1>
+        </div>
       </div>
 
-      {/* เมนูแท็บ */}
-      <div className="flex border-b border-[#C6A96B]/15 overflow-x-auto gap-1">
+      {/* Navigation tabs */}
+      <div className="flex border-b border-white/5 bg-[#0A1628]/45 p-1 rounded-2xl border border-[#D9BC82]/10 gap-1 w-full">
         <button
           onClick={() => setActiveTab("personal")}
-          className={`py-2.5 px-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
+          className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "personal"
-              ? "border-[#C6A96B] text-[#C6A96B] bg-white/5"
+              ? "bg-[#D9BC82] text-[#0A1628]"
               : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
           }`}
         >
-          ข้อมูลโปรไฟล์
+          {t("common:settings.personal_tab", "ข้อมูลส่วนตัว")}
         </button>
         <button
           onClick={() => setActiveTab("affiliate")}
-          className={`py-2.5 px-4 text-sm font-semibold transition-all border-b-2 whitespace-nowrap ${
+          className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "affiliate"
-              ? "border-[#C6A96B] text-[#C6A96B] bg-white/5"
+              ? "bg-[#D9BC82] text-[#0A1628]"
               : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
           }`}
         >
-          พันธมิตร & รายได้
+          {t("common:settings.affiliate_tab", "พันธมิตร & รายได้")}
         </button>
       </div>
 
@@ -210,7 +201,7 @@ export default function SettingsPage() {
           <div className="space-y-6">
             <Card className="border-[#C6A96B]/10 p-6 bg-slate-950/40">
               <h2 className="text-[#C6A96B] font-display text-lg font-bold mb-4 flex items-center gap-2">
-                <span>✦</span> ข้อมูลดวงชะตากำเนิด
+                <span>✦</span> {t("common:settings.birth_chart_data", "ข้อมูลดวงชะตากำเนิด")}
               </h2>
               
               <Form method="post" className="flex flex-col gap-5">
@@ -219,23 +210,25 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <Input
                     name="displayName"
-                    label="ชื่อดวงชะตา (ใช้แสดง)"
+                    label={t("common:settings.display_name", "ชื่อดวงชะตา (ใช้แสดง)")}
                     defaultValue={profile?.display_name ?? ""}
-                    placeholder="เช่น คุณดวงดี มีโชค"
+                    placeholder={t("common:settings.display_name_placeholder", "เช่น คุณดวงดี มีโชค")}
                     required
                   />
 
                   <div className="flex flex-col">
-                    <label className="text-[#C6B79F] text-[14px] uppercase tracking-widest block mb-2 font-bold">เพศกำเนิด (สำหรับโหราจร)</label>
+                    <label className="text-[#C6B79F] text-[14px] uppercase tracking-widest block mb-2 font-bold">
+                      {t("common:settings.gender", "เพศกำเนิด (สำหรับโหราจร)")}
+                    </label>
                     <select
                       name="gender"
                       defaultValue={profile?.gender ?? ""}
                       className="w-full bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
                     >
-                      <option value="">เลือกเพศ...</option>
-                      <option value="male">ชาย (Male)</option>
-                      <option value="female">หญิง (Female)</option>
-                      <option value="other">อื่น ๆ (Other)</option>
+                      <option value="">{t("common:settings.select_gender", "เลือกเพศ...")}</option>
+                      <option value="male">{t("common:settings.male", "ชาย (Male)")}</option>
+                      <option value="female">{t("common:settings.female", "หญิง (Female)")}</option>
+                      <option value="other">{t("common:settings.other", "อื่น ๆ (Other)")}</option>
                     </select>
                   </div>
                 </div>
@@ -244,7 +237,7 @@ export default function SettingsPage() {
                 <div className="grid grid-cols-3 gap-3">
                   <div className="flex flex-col">
                     <label className="text-[#C6B79F] text-[14px] uppercase tracking-widest block mb-2 font-bold">
-                      วันเกิด
+                      {t("common:settings.birth_day", "วันเกิด")}
                     </label>
                     <input
                       name="birthDay"
@@ -252,39 +245,39 @@ export default function SettingsPage() {
                       min={1}
                       max={31}
                       defaultValue={birthDateBE.day}
-                      placeholder="วัน"
+                      placeholder={t("common:settings.birth_day", "วัน")}
                       className="w-full bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
                     />
                   </div>
 
                   <div className="flex flex-col">
                     <label className="text-[#C6B79F] text-[14px] uppercase tracking-widest block mb-2 font-bold">
-                      เดือนเกิด
+                      {t("common:settings.birth_month", "เดือนเกิด")}
                     </label>
                     <select
                       name="birthMonth"
                       defaultValue={birthDateBE.month}
                       className="w-full bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
                     >
-                      <option value="">เดือน...</option>
-                      <option value="1">มกราคม</option>
-                      <option value="2">กุมภาพันธ์</option>
-                      <option value="3">มีนาคม</option>
-                      <option value="4">เมษายน</option>
-                      <option value="5">พฤษภาคม</option>
-                      <option value="6">มิถุนายน</option>
-                      <option value="7">กรกฎาคม</option>
-                      <option value="8">สิงหาคม</option>
-                      <option value="9">กันยายน</option>
-                      <option value="10">ตุลาคม</option>
-                      <option value="11">พฤศจิกายน</option>
-                      <option value="12">ธันวาคม</option>
+                      <option value="">{t("common:settings.birth_month", "เดือน...")}</option>
+                      <option value="1">{t("common:language.th") === "ไทย" ? "มกราคม" : "January"}</option>
+                      <option value="2">{t("common:language.th") === "ไทย" ? "กุมภาพันธ์" : "February"}</option>
+                      <option value="3">{t("common:language.th") === "ไทย" ? "มีนาคม" : "March"}</option>
+                      <option value="4">{t("common:language.th") === "ไทย" ? "เมษายน" : "April"}</option>
+                      <option value="5">{t("common:language.th") === "ไทย" ? "พฤษภาคม" : "May"}</option>
+                      <option value="6">{t("common:language.th") === "ไทย" ? "มิถุนายน" : "June"}</option>
+                      <option value="7">{t("common:language.th") === "ไทย" ? "กรกฎาคม" : "July"}</option>
+                      <option value="8">{t("common:language.th") === "ไทย" ? "สิงหาคม" : "August"}</option>
+                      <option value="9">{t("common:language.th") === "ไทย" ? "กันยายน" : "September"}</option>
+                      <option value="10">{t("common:language.th") === "ไทย" ? "ตุลาคม" : "October"}</option>
+                      <option value="11">{t("common:language.th") === "ไทย" ? "พฤศจิกายน" : "November"}</option>
+                      <option value="12">{t("common:language.th") === "ไทย" ? "ธันวาคม" : "December"}</option>
                     </select>
                   </div>
 
                   <div className="flex flex-col">
                     <label className="text-[#C6B79F] text-[14px] uppercase tracking-widest block mb-2 font-bold">
-                      ปีเกิด (พ.ศ.)
+                      {t("common:settings.birth_year", "ปีเกิด (พ.ศ.)")}
                     </label>
                     <input
                       name="birthYear"
@@ -302,20 +295,24 @@ export default function SettingsPage() {
                   <Input
                     name="birthTime"
                     type="time"
-                    label="เวลาเกิด (ตามสูติบัตร)"
+                    label={t("common:settings.birth_time", "เวลาเกิด (ตามสูติบัตร)")}
                     defaultValue={profile?.birth_time ?? ""}
                   />
 
                   <Input
                     name="birthPlace"
-                    label="จังหวัดที่เกิด"
+                    label={t("common:settings.birth_place", "จังหวัดที่เกิด")}
                     defaultValue={profile?.birth_place ?? ""}
                     placeholder="เช่น กรุงเทพมหานคร"
                   />
                 </div>
 
+                {actionData && (actionData as any).error && (
+                  <p className="text-red-400 text-xs font-bold">{(actionData as any).error}</p>
+                )}
+
                 <Button type="submit" loading={isLoading} className="mt-2">
-                  บันทึกข้อมูลดวงเกิด
+                  {t("common:settings.save_birth_data", "บันทึกข้อมูลดวงเกิด")}
                 </Button>
               </Form>
             </Card>
@@ -324,13 +321,15 @@ export default function SettingsPage() {
           <Card className="border-[#C6A96B]/20 p-5 bg-gradient-to-b from-[#0A1628] to-[#020617]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-[13px] text-[#94A3B8] mb-1">ระดับสมาชิกปัจจุบัน</p>
+                <p className="text-[13px] text-[#94A3B8] mb-1">
+                  {t("common:settings.current_plan", "ระดับสมาชิกปัจจุบัน")}
+                </p>
                 <p className="text-2xl font-black font-display text-[#F8F6F1] uppercase">{profile?.plan || 'FREE'}</p>
               </div>
               <a href="/dashboard/upgrade"
                 className="px-4 py-2 rounded-xl text-xs font-bold text-[#020617] whitespace-nowrap"
                 style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}>
-                อัปเกรด →
+                {t("common:settings.upgrade", "อัปเกรด →")}
               </a>
             </div>
           </Card>
@@ -347,92 +346,43 @@ export default function SettingsPage() {
               <div className="p-6 md:w-2/3 space-y-4">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">🤝</span>
-                  <h2 className="font-display text-xl font-bold text-[#F8F6F1]">โปรแกรมแนะนำเพื่อน (Affiliate)</h2>
+                  <h2 className="font-display text-xl font-bold text-[#F8F6F1]">
+                    {t("common:settings.affiliate_title", "โปรแกรมแนะนำเพื่อน (Affiliate)")}
+                  </h2>
                 </div>
                 <p className="text-[#94A3B8] text-sm leading-relaxed">
-                  ร่วมเป็นส่วนหนึ่งกับ <span className="text-[#C6A96B] font-bold">ภพภูมิ</span> และสร้างรายได้ง่ายๆ เพียงแนะนำเพื่อนให้รู้จักกับระบบภูมิปัญญาพยากรณ์ของเรา <span className="text-[#F8F6F1] font-medium italic">"สมาชิกแบบฟรีก็สร้างรายได้ได้ทันที!"</span>
+                  {t("common:landing.features.items.4.desc", "ร่วมเป็นส่วนหนึ่งและสร้างรายได้ง่ายๆ เพียงแนะนำเพื่อนให้รู้จักกับระบบภูมิปัญญาของเรา")}
                 </p>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-                  <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
-                    <p className="text-[13px] text-[#C6B79F] uppercase font-bold mb-1">สมาชิกทั่วไป/Basic</p>
-                    <p className="text-xl font-black text-[#F8F6F1]">3%</p>
-                  </div>
-                  <div className="bg-[#C6A96B]/10 border border-[#C6A96B]/30 rounded-2xl p-3 text-center relative overflow-hidden">
-                    <div className="absolute top-0 right-0 bg-[#C6A96B] text-[#020617] text-[11px] px-2 font-bold uppercase">Popular</div>
-                    <p className="text-[13px] text-[#C6A96B] uppercase font-bold mb-1">สมาชิกระดับ PRO</p>
-                    <p className="text-xl font-black text-[#C6A96B]">5%</p>
-                  </div>
-                  <div className="bg-indigo-500/10 border border-indigo-500/30 rounded-2xl p-3 text-center">
-                    <p className="text-[13px] text-indigo-400 uppercase font-bold mb-1">ระดับ IMPERIAL</p>
-                    <p className="text-xl font-black text-indigo-400">10%</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-white/5 p-6 md:w-1/3 border-t md:border-t-0 md:border-l border-white/10">
-                <h3 className="text-[#F8F6F1] font-bold text-sm mb-4">เงื่อนไขการรับรายได้</h3>
-                <ul className="space-y-3">
-                  <li className="flex items-start gap-2 text-xs">
-                    <span className="text-[#C6A96B]">✓</span>
-                    <span className="text-[#D9CDB7]">ถอนเงินขั้นต่ำ <span className="font-bold text-[#F8F6F1]">100 บาท</span></span>
-                  </li>
-                  <li className="flex items-start gap-2 text-xs">
-                    <span className="text-[#C6A96B]">✓</span>
-                    <span className="text-[#D9CDB7]">คำนวณยอดเงินแบบเรียลไทม์</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-xs">
-                    <span className="text-[#C6A96B]">✓</span>
-                    <span className="text-[#D9CDB7]">สรุปยอดชัดเจนที่หน้าแดชบอร์ดนี้</span>
-                  </li>
-                  <li className="flex items-start gap-2 text-xs">
-                    <span className="text-[#C6A96B]">✓</span>
-                    <span className="text-[#D9CDB7]">ถอนเข้าบัญชีธนาคารไทยได้ทุกธนาคาร</span>
-                  </li>
-                </ul>
               </div>
             </div>
           </Card>
-
-          {/* Commission upgrade prompt สำหรับ free member */}
-          {isFreetier && (
-            <div className="rounded-2xl border border-[#C6A96B]/25 px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
-              style={{ background: "rgba(198,169,107,0.06)" }}>
-              <div>
-                <p className="text-[#C6A96B] text-xs font-bold mb-0.5">✦ อัปเกรดเพื่อรับคอมมิชชั่นสูงขึ้น</p>
-                <p className="text-[#94A3B8] text-[14px]">
-                  Free: 3% · Basic: 3% · Pro: 5% · Imperial: 10% — ยิ่งระดับสูง ยิ่งได้มากขึ้น
-                </p>
-              </div>
-              <a href="/dashboard/upgrade"
-                className="shrink-0 px-4 py-2 rounded-xl text-xs font-bold text-[#020617] whitespace-nowrap"
-                style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}>
-                อัปเกรดสมาชิก →
-              </a>
-            </div>
-          )}
 
           {/* Wallet & Stats Dashboard */}
           <div className="grid grid-cols-1 gap-4">
             <Card className="relative overflow-hidden border-[#C6A96B]/30 p-6 bg-gradient-to-br from-[#0B1528] to-[#020617] shadow-xl">
               <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">💰</div>
-              <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">ยอดเงินสะสมในกระเป๋าพันธมิตร</p>
-              <h3 className="text-3xl font-black font-display text-[#F8F6F1]">฿{wallet.balance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</h3>
+              <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">
+                {t("common:settings.wallet_balance", "ยอดเงินสะสมในกระเป๋าพันธมิตร")}
+              </p>
+              <h3 className="text-3xl font-black font-display text-[#F8F6F1]">฿{wallet.balance.toLocaleString(currentLocale, { minimumFractionDigits: 2 })}</h3>
               <div className="mt-4 w-full py-2 bg-[#C6A96B]/5 text-[#C6A96B] border border-[#C6A96B]/20 rounded-xl text-center text-xs font-bold flex items-center justify-center gap-1.5 uppercase tracking-wider">
-                ⏳ แลกรับบริการภายในแอป
+                {t("common:settings.redeem_service", "แลกรับบริการภายในแอป")}
               </div>
             </Card>
 
             <Card className="border-white/5 p-6 bg-slate-900/40">
-              <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">แนะนำเพื่อนสำเร็จ</p>
-              <h3 className="text-3xl font-black font-display text-[#F8F6F1]">{wallet.referralsCount} <span className="text-sm font-normal text-[#C6B79F]">ท่าน</span></h3>
-              <p className="text-[13px] text-[#C6A96B] mt-2 font-bold uppercase tracking-tighter">
-                คอมมิชชั่นปัจจุบัน {wallet.commissionRate}%
-                {isFreetier && <span className="text-[#4A5568] ml-1">(อัปเกรดเพื่อเพิ่ม)</span>}
+              <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">
+                {t("common:settings.referred_friends", "แนะนำเพื่อนสำเร็จ")}
               </p>
+              <h3 className="text-3xl font-black font-display text-[#F8F6F1]">
+                {wallet.referralsCount} <span className="text-sm font-normal text-[#C6B79F]">{t("common:settings.friends_unit", "ท่าน")}</span>
+              </h3>
             </Card>
 
             <Card className="border-white/5 p-6 bg-slate-900/40">
-              <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">รหัสแนะนำของคุณ</p>
+              <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">
+                {t("common:settings.referred_code_label", "รหัสแนะนำของคุณ")}
+              </p>
               {affiliateCode ? (
                 <>
                   <h3 className="text-3xl font-black font-display text-[#C6A96B] tracking-widest">{affiliateCode}</h3>
@@ -440,53 +390,56 @@ export default function SettingsPage() {
                     onClick={handleCopyLink}
                     className="mt-3 text-[13px] font-bold text-[#F8F6F1] underline hover:text-[#C6A96B] transition-colors"
                   >
-                    {copied ? "✓ คัดลอกลิงก์แล้ว" : "คัดลอกลิงก์แนะนำเพื่อน"}
+                    {copied ? t("common:settings.copied_link", "✓ คัดลอกลิงก์แล้ว") : t("common:settings.copy_link_btn", "คัดลอกลิงก์แนะนำเพื่อน")}
                   </button>
                 </>
               ) : (
-                <p className="text-[#4A5568] text-xs mt-2 italic">กำลังสร้างรหัส...</p>
+                <p className="text-[#4A5568] text-xs mt-2 italic">Generating code...</p>
               )}
             </Card>
           </div>
 
           <div className="space-y-4">
-            <div className="space-y-4">
-              {/* Transaction History Table */}
-              <Card className="border-white/5 p-0 overflow-hidden bg-slate-900/40">
-                <div className="px-6 py-4 border-b border-white/5 bg-white/5">
-                  <h3 className="text-[#F8F6F1] font-display text-sm font-bold">ประวัติกระเป๋าเงิน (Wallet History)</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left text-xs border-collapse">
-                    <thead>
-                      <tr className="bg-slate-950/60 text-[#C6B79F] uppercase font-bold tracking-widest text-[12px]">
-                        <th className="px-6 py-3">วัน/เวลา</th>
-                        <th className="px-6 py-3">รายการ</th>
-                        <th className="px-6 py-3 text-right">จำนวนเงิน</th>
+            {/* Transaction History Table */}
+            <Card className="border-white/5 p-0 overflow-hidden bg-slate-900/40">
+              <div className="px-6 py-4 border-b border-white/5 bg-white/5">
+                <h3 className="text-[#F8F6F1] font-display text-sm font-bold">
+                  {t("common:settings.wallet_history", "ประวัติกระเป๋าเงิน (Wallet History)")}
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-slate-950/60 text-[#C6B79F] uppercase font-bold tracking-widest text-[12px]">
+                      <th className="px-6 py-3">{t("common:settings.tx_datetime", "วัน/เวลา")}</th>
+                      <th className="px-6 py-3">{t("common:settings.tx_type", "รายการ")}</th>
+                      <th className="px-6 py-3 text-right">{t("common:settings.tx_amount", "จำนวนเงิน")}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {wallet.history.length > 0 ? (
+                      wallet.history.map((tx: any) => (
+                        <tr key={tx.id} className="hover:bg-white/5 text-[#D9CDB7]">
+                          <td className="px-6 py-4 text-[13px]">
+                            {new Date(tx.created_at).toLocaleString(currentLocale, { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                          </td>
+                          <td className="px-6 py-4">{tx.description}</td>
+                          <td className={`px-6 py-4 text-right font-bold ${tx.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                            {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} ฿
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={3} className="px-6 py-10 text-center text-[#C6B79F] italic">
+                          {t("common:settings.no_tx_history", "ยังไม่มีรายการในขณะนี้")}
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {wallet.history.length > 0 ? (
-                        wallet.history.map((tx: any) => (
-                          <tr key={tx.id} className="hover:bg-white/5 text-[#D9CDB7]">
-                            <td className="px-6 py-4 text-[13px]">
-                              {new Date(tx.created_at).toLocaleString("th-TH", { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                            </td>
-                            <td className="px-6 py-4">{tx.description}</td>
-                            <td className={`px-6 py-4 text-right font-bold ${tx.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                              {tx.amount > 0 ? '+' : ''}{tx.amount.toLocaleString()} ฿
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr><td colSpan={3} className="px-6 py-10 text-center text-[#C6B79F] italic">ยังไม่มีรายการในขณะนี้</td></tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-            </div>
-
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
           </div>
         </div>
       )}

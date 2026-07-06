@@ -13,6 +13,7 @@ import {
   BHAVA_KNOWLEDGE,
   PLANET_KNOWLEDGE,
   KASTERN_FIXED,
+  PLANET_KASTERN,
 } from "@phopephum/engine";
 import type { HoraTaynooResult, HoraTaynooSubSlot, PlanetEntry } from "@phopephum/engine";
 import type { Env } from "~/env.server";
@@ -71,21 +72,36 @@ function buildHoranuPrompt(
   const bhavaInfo = BHAVA_KNOWLEDGE[activeSlot.bhavaName];
   const isBadBhava = BAD_BHAVAS.has(activeSlot.bhavaName);
 
+  // 3 ภพ helper
+  function getPlanetThreeBhavas(planetNum: number, zodiacIndex: number, bhavaMap: Record<number, string>, status: string | null): string[] {
+    const occBhava = bhavaMap[zodiacIndex] ?? "—";
+    const ownedZodiacs = planetNum !== null ? (PLANET_KASTERN[planetNum] ?? []) : [];
+    const ownedBhavas = ownedZodiacs.map(z => bhavaMap[z] ?? "—");
+    if (ownedBhavas.length === 1) {
+      return [ownedBhavas[0], ownedBhavas[0], occBhava];
+    } else if (ownedBhavas.length === 2) {
+      return [ownedBhavas[0], ownedBhavas[1], occBhava];
+    }
+    return [occBhava, occBhava, occBhava];
+  }
+
   // 2. หาดาวในช่องนั้น
   const planetsInSlot: PlanetEntry[] = chart.planetEntries.filter(
-    p => p.zodiacIndex === activeSlot.zodiacIndex && p.planetNum !== null
+    p => p.zodiacIndex === activeSlot.zodiacIndex && !p.isLagna
   );
 
   const planetsDesc = planetsInSlot.length === 0
     ? '(ไม่มีดาวลอยสถิตในช่องเวลานี้ — ตีความจากความหมายภพล้วนๆ)'
     : planetsInSlot.map(p => {
-        const pInfo = PLANET_INFO[p.planetNum!];
-        const pkInfo = PLANET_KNOWLEDGE[p.planetNum!];
+        const pInfo = p.planetNum !== null ? PLANET_INFO[p.planetNum] : null;
+        const pkInfo = p.planetNum !== null ? PLANET_KNOWLEDGE[p.planetNum] : null;
         const statusStr = p.status ? (STATUS_LABEL[p.status] ?? p.status) : 'ปกติ (ไม่มีมาตรฐานพิเศษ)';
+        const threeBhavas = getPlanetThreeBhavas(p.planetNum!, p.zodiacIndex, chart.bhavaMap, p.status);
         return [
-          `  • ดาว ${p.planetNum} (${pInfo?.thai ?? '?'})`,
+          `  • ดาว ${p.labelThai} (${pInfo?.thai ?? 'ดาวประกอบ'})`,
           `    มาตรฐาน: ${statusStr}`,
           `    ความหมายดาว: ${pkInfo?.meaning ?? '—'}`,
+          `    ดาว 3 ภพ (เจ้าเรือน+สถิต): ${threeBhavas.join(' - ')}`,
         ].join('\n');
       }).join('\n');
 
@@ -93,7 +109,7 @@ function buildHoranuPrompt(
   const getPointDesc = (zIdx: number) => {
     const bhava = chart.bhavaMap[zIdx] || '?';
     const lord = KASTERN_FIXED[zIdx];
-    const ps = chart.planetEntries.filter(p => p.zodiacIndex === zIdx && p.planetNum !== null);
+    const ps = chart.planetEntries.filter(p => p.zodiacIndex === zIdx && !p.isLagna);
     const planetsStr = ps.length > 0 
       ? ps.map(p => `${p.labelThai}(${p.status ? STATUS_LABEL[p.status].split(' ')[0] : 'ปกติ'})`).join(', ')
       : 'ไม่มีดาวลอย';
@@ -135,9 +151,10 @@ ${xyzEquation}
 กฎการตีความ (ห้ามละเลย)
 ════════════════════════════════════
 1. เริ่มพยากรณ์จาก ภพที่คำถามตก (X) ทันที
-2. เชื่อมโยงเรื่องราวไปยัง Y และ Z ตามสมการ เพื่อให้เห็นลำดับเหตุการณ์
-3. ภพดี + ดาวดี = สำเร็จง่าย | ภพเสีย + ดาวดี = อุปสรรคเยอะแต่ดาวช่วย | ภพเสีย + ดาวอ่อน = ปัญหาเบาบาง
-4. สรุปคำพยากรณ์ให้ชัดเจนว่า "ดี" หรือ "ควรระวัง" พร้อมคำแนะนำ 1 ข้อ
+2. หากใน ภพจุดเริ่มต้น (X) หรือภพตามสมการ (Y, Z) มีดาวลอยสถิตอยู่มากกว่า 1 ดวง (เช่น มีดาว ๓, ๔, ๕) คุณต้องดึงดาวลอยทุกๆ ดวงในภพนั้นๆ มาทำนายให้ครบถ้วน ห้ามละทิ้งดาวใดดาวหนึ่งเด็ดขาด
+3. เชื่อมโยงเรื่องราวไปยัง Y และ Z ตามสมการ โดยพิจารณาถึงความหมายของดาว 3 ภพ (เจ้าเรือน+สถิต) ของดาวแต่ละดวง เพื่อแสดงให้เห็นจุดเริ่มต้น -> การดำเนินไป -> บทสรุป ของเหตุการณ์
+4. ภพดี + ดาวดี = สำเร็จง่าย | ภพเสีย + ดาวดี = อุปสรรคเยอะแต่ดาวช่วย | ภพเสีย + ดาวอ่อน = ปัญหาเบาบาง
+5. สรุปคำพยากรณ์ให้ชัดเจนว่า "ดี" หรือ "ควรระวัง" พร้อมคำแนะนำ 1 ข้อ
 
 ════════════════════════════════════
 คำถามของผู้ใช้งาน: "${question}"

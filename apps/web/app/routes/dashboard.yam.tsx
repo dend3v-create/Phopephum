@@ -2,6 +2,7 @@ import { json } from "@remix-run/cloudflare";
 import { useLoaderData, useRevalidator } from "@remix-run/react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { requireMinPlan } from "~/services/auth.server";
 import { canAccess } from "~/services/permissions.server";
 import {
@@ -176,47 +177,23 @@ interface TopicAdvice {
   speechTemplate: string;
 }
 
-function getTopicAdvice(topic: "love" | "trade" | "negotiate" | "travel", yamName: string, phase: string, ticks: number): TopicAdvice {
+function getTopicAdvice(topic: "love" | "trade" | "negotiate" | "travel", yamName: string, phase: string, ticks: number, t: any): TopicAdvice {
   // สำหรับการเดินทาง คะแนนและข้อความจะสลับตาม Ticks ของสล็อตเวลานั้นๆ
   if (topic === "travel") {
-    let score = 6.8;
-    let ratingText = "ค่อนข้างเหมาะสม";
-    let desc = "ยามมงคลระดับดี สามารถเริ่มต้นเดินทางสัญจรได้ทั่วไป";
-    let shouldDo = ["เริ่มต้นสัญจรอย่างมีสติ", "จัดสัมภาระและตรวจยานพาหนะให้เรียบร้อย"];
-    let shouldAvoid = ["ความใจร้อนเร่งรีบขณะขับขี่", "การเริ่มต้นเดินทางในจุดอับโชค"];
+    const key = [3, 2, 0].includes(ticks) ? `level_${ticks}` : "level_default";
+    const advice = t(`yam:advices.travel.${key}`, { returnObjects: true }) as any;
     
-    if (ticks === 3) {
-      score = 9.8;
-      ratingText = "ดีเยี่ยมที่สุด";
-      desc = "ฤกษ์มหามงคลในการเดินทางสัญจร ท่องเที่ยว หรือติดต่อการงานแดนไกล ประสบผลสำเร็จอย่างงดงาม ปลอดภัยและมีโชคลาภพูนทวี";
-      shouldDo = ["เริ่มต้นทริปสำคัญ", "ออกยานพาหนะใหม่", "สัญจรติดต่อการค้าทางไกล"];
-      shouldAvoid = ["การโลเลลังเลในการออกเดินทาง", "การใช้อารมณ์ขัดแย้งขณะออกสตาร์ท"];
-    } else if (ticks === 2) {
-      score = 8.8;
-      ratingText = "ดีเยี่ยมมาก";
-      desc = "ฤกษ์สัญจรเป็นมงคลยิ่ง เหมาะสมสำหรับทริปครอบครัวหรือการสัญจรติดต่อธุรกิจทั่วไป ไร้อุปสรรคขัดขวาง";
-      shouldDo = ["เจรจาตกลงข้อแลกเปลี่ยนระหว่างทาง", "ออกเดินทางข้ามจังหวัด", "สัญจรพบปะกัลยาณมิตร"];
-      shouldAvoid = ["ความเกียจคร้านล่าช้าในการเริ่มต้น", "การสัญจรในเส้นทางที่มีความเสี่ยงสูง"];
-    } else if (ticks === 0) {
-      score = 3.5;
-      ratingText = "ติดขัดควรระวัง";
-      desc = "ยามติดขัดตามตำราฤกษ์สัญจร มีเกณฑ์ล่าช้า ประสบอุปสรรคขัดขวาง หรือมีอุบัติเหตุเกิดขึ้นได้ง่ายเป็นพิเศษ";
-      shouldDo = ["เลื่อนเวลาเดินทางออกไปหากทำได้", "ตรวจเช็คสภาพความปลอดภัยของรถยนต์อย่างละเอียด", "ตั้งสติและสวดมนต์แผ่เมตตาก่อนสัญจร"];
-      shouldAvoid = ["การขับขี่รถด้วยความเร็วสูงหรือประมาท", "การเริ่มต้นออกทริปไกลครั้งสำคัญในยามนี้"];
-    }
-
     return {
-      score,
-      ratingText,
-      description: desc,
-      shouldDo,
-      shouldAvoid,
-      speechTemplate: "ขอให้การเดินทางครั้งนี้เป็นทริปมหาเฮง ปลอดภัยตลอดเส้นทาง และประสบผลสำเร็จสมเจตนารมณ์ทุกประการค่ะ",
+      score: ticks === 3 ? 9.8 : ticks === 2 ? 8.8 : ticks === 0 ? 3.5 : 6.8,
+      ratingText: advice?.ratingText || "ค่อนข้างเหมาะสม",
+      description: advice?.description || "ยามมงคลระดับดี สามารถเริ่มต้นเดินทางสัญจรได้ทั่วไป",
+      shouldDo: advice?.shouldDo || [],
+      shouldAvoid: advice?.shouldAvoid || [],
+      speechTemplate: t("yam:advices.travel.speech", "ขอให้การเดินทางครั้งนี้เป็นทริปมหาเฮง ปลอดภัยตลอดเส้นทาง และประสบผลสำเร็จสมเจตนารมณ์ทุกประการค่ะ"),
     };
   }
 
   // สำหรับเรื่องอื่นๆ (ง้อแฟน, ค้าขาย, เจรจา) จะแมปตามเจ้าครองดาว (๑-๗)
-  // แมปชื่อยาม (รวมคำสะกดอื่นๆ)
   let planet = 4; // default พุธ
   if (["สุริยะ", "ระวิ"].includes(yamName)) planet = 1;
   else if (["จันเทา", "จันทรา", "คะศิ", "ศะศิ"].includes(yamName)) planet = 2;
@@ -226,177 +203,26 @@ function getTopicAdvice(topic: "love" | "trade" | "negotiate" | "travel", yamNam
   else if (["ศุกระ", "ศุโกร", "ศุกโร"].includes(yamName)) planet = 6;
   else if (["เสารี", "เสาร์", "โสโร"].includes(yamName)) planet = 7;
 
-  const mapping: Record<number, Record<"love" | "trade" | "negotiate", TopicAdvice>> = {
-    1: { // สุริยะ / ระวิ (๑)
-      love: {
-        score: 6.8, ratingText: "ค่อนข้างเหมาะสม",
-        description: "ยามพลังสุริยเทพเน้นความจริงจังและตรงไปตรงมา การปรับความเข้าใจจะดีหากเปิดเผยความจริง แต่ต้องระวังอารมณ์ถือทิฐิตัวเอง",
-        shouldDo: ["พูดคุยอธิบายด้วยความสัตย์จริง", "ให้เกียรติและรับรองความสำคัญของอีกฝ่าย"],
-        shouldAvoid: ["การแสดงอำนาจควบคุมหรือข่มอีกฝ่าย", "การประชดประชันทำลายศักดิ์ศรี"],
-        speechTemplate: "เราขอโทษจากใจจริงนะ... สิ่งที่ผิดพลาดไปเราสัญญาว่าจะปรับปรุงตัวอย่างดีที่สุด และอยากให้เราจับมือแก้มันไปด้วยกัน",
-      },
-      trade: {
-        score: 8.8, ratingText: "เหมาะสมมาก",
-        description: "ยามดีในการดีลลูกค้ารายใหญ่ ขายสินค้าเกรดหรูหราพรีเมียม หรือเจรจาค้าขายของมีมูลค่าสูงเด่น",
-        shouldDo: ["นำเสนอตัวอย่างสินค้าที่ดูดีมีระดับ", "แสดงความเชี่ยวชาญและความเป็นมืออาชีพเด่นชัด"],
-        shouldAvoid: ["การลดราคามากเกินไปจนเสียมูลค่าแบรนด์", "การลังเลใจในการเสนอข้อตกลง"],
-        speechTemplate: "นี่คือแพ็กเกจที่ดีที่สุดและคุ้มค่าที่สุดที่เราคัดสรรมาให้แบรนด์ของคุณโดยเฉพาะครับ มั่นใจได้ในมาตรฐานสูงสุด",
-      },
-      negotiate: {
-        score: 9.2, ratingText: "ดีเยี่ยมที่สุด",
-        description: "ยามมหามงคลในการนำเสนอแผนงานใหญ่ เข้าพบผู้ใหญ่ผู้มีอิทธิพล หรือประกวดแข่งขันเพื่อรับชัยชนะเด่น",
-        shouldDo: ["แถลงแผนงานด้วยความเด็ดขาดมั่นใจ", "นำเสนอผลงานด้วยสถิติและวิสัยทัศน์ที่กว้างไกล"],
-        shouldAvoid: ["การโต้เถียงแบบใช้อารมณ์โกรธ", "การขาดเตรียมความพร้อมของเอกสารสำคัญ"],
-        speechTemplate: "โครงการนี้ได้รับการศึกษาและวางกรอบการดำเนินงานมาอย่างรัดกุม เพื่อประโยชน์สูงสุดในระยะยาวขององค์กรเราครับ",
-      }
-    },
-    2: { // จันเทา / จันทรา / ศะศิ (๒)
-      love: {
-        score: 9.5, ratingText: "เหมาะสมที่สุด (แนะนำ ✨)",
-        description: "ยามเมตตามหาเสน่ห์อย่างสูง บรรยากาศนุ่มนวลอบอุ่น เหมาะแก่การปรับความเข้าใจ ง้อแฟน หรือเริ่มต้นเปิดใจพูดคุยสิ่งลึกซึ้ง",
-        shouldDo: ["เริ่มต้นพูดคุยด้วยน้ำเสียงอ่อนโยน", "แสดงความอ่อนหวาน ใส่ใจในความรู้สึกเป็นพิเศษ", "มีของขวัญชิ้นเล็กหรือของโปรดมามอบให้"],
-        shouldAvoid: ["การหยิบยกเรื่องอดีตหรือข้อผิดพลาดเก่าขึ้นมาทวงถาม", "การมีท่าทีเฉยเมยหรือเย็นชา"],
-        speechTemplate: "เราคิดถึงความรู้สึกของเธอตลอดเลยนะ... เราไม่อยากให้เราต้องเงียบใส่กันแบบนี้ มาเริ่มปรับความเข้าใจกันใหม่นะคนดี 💜",
-      },
-      trade: {
-        score: 8.5, ratingText: "เหมาะสมมาก",
-        description: "ยามดีสำหรับการค้าขายบริการ ต้อนรับลูกค้า หรือการเปิดการขายที่เน้นความประทับใจและความสัมพันธ์ที่ดีงาม",
-        shouldDo: ["บริการลูกค้าด้วยความเอาใจใส่และยิ้มแย้ม", "ชักชวนสนทนาสร้างความเป็นมิตรเป็นกันเอง"],
-        shouldAvoid: ["การเร่งรัดปิดการขายจนดูบีบบังคับลูกค้า", "การเสนอขายแบบไม่มีมนุษยสัมพันธ์"],
-        speechTemplate: "สินค้าตัวนี้เราดูแลคัดสรรให้ลูกค้าด้วยใจเลยค่ะ สบายใจได้เลยนะคะ มีรับประกันและดูแลหลังการขายเต็มที่เลยค่ะ",
-      },
-      negotiate: {
-        score: 8.0, ratingText: "เหมาะสม",
-        description: "ยามดีสำหรับการประสานงาน ประนีประนอมความขัดแย้ง หรือขอความช่วยเหลือจากพันธมิตร",
-        shouldDo: ["แสดงความเข้าใจในมุมมองของอีกฝ่าย", "เสนอเงื่อนไขที่เน้นการประนีประนอมยอมความ"],
-        shouldAvoid: ["การใช้ท่าทีเด็ดขาดแข็งกระ้าวเกินไป", "การเซ็นสัญญาร่วมทุนขนาดใหญ่ที่มีความเสี่ยงสูง"],
-        speechTemplate: "เราพร้อมรับฟังความเห็นและปรับเปลี่ยนเงื่อนไขบางจุด เพื่อให้ได้ทางออกที่สบายใจและลงตัวที่สุดสำหรับทั้งสองฝ่ายค่ะ",
-      }
-    },
-    3: { // ภุมมะ / ภูมมะ / ภุมโม (๓)
-      love: {
-        score: 4.2, ratingText: "ติดขัดควรเลี่ยง",
-        description: "ยามทหารกล้าหรือพลังงานเดือดดาล มีโอกาสทะเลาะวิวาทหรือโต้เถียงกันรุนแรงได้ง่ายที่สุด ควรหลีกเลี่ยงการง้อแฟนในยามนี้",
-        shouldDo: ["เว้นระยะห่างให้อีกฝ่ายได้สงบสติอารมณ์", "รับฟังเงียบๆ โดยไม่โต้แย้งหากถูกตำหนิ"],
-        shouldAvoid: ["การท้าทายเอาชนะคะคานกันด้วยอารมณ์", "การส่งข้อความประชดประชันยาวเหยียด"],
-        speechTemplate: "เราเห็นใจและเข้าใจนะว่าตอนนี้เธออาจยังโกรธอยู่ ไม่เป็นไรนะ... เรายินดีรอเวลาให้เราทั้งคู่ใจเย็นลงค่อยมาคุยกันใหม่นะ",
-      },
-      trade: {
-        score: 7.0, ratingText: "ค่อนข้างเหมาะสม",
-        description: "ยามพลังไฟ เหมาะสำหรับการระบายสต็อกสินค้าด่วน ค้าขายเครื่องมือฮาร์ดแวร์ อุปกรณ์ซ่อมแซม หรือของเล่นกีฬา",
-        shouldDo: ["นำเสนอโปรโมชันลดราคาด่วนจำกัดเวลา", "ปิดการขายด้วยความรวดเร็วและกระฉับกระเฉง"],
-        shouldAvoid: ["การเจรจาค้าขายระยะยาวที่ต้องอาศัยความพยายามสูง", "การทะเลาะเบาะแว้งกับลูกค้า"],
-        speechTemplate: "โปรพิเศษตัวนี้ลดสูงสุดเฉพาะรอบวันนี้วันเดียวเท่านั้นครับ! ปิดดีลตอนนี้รับของแถมมูลค่าเพิ่มไปได้เลยทันทีครับ!",
-      },
-      negotiate: {
-        score: 5.5, ratingText: "ติดขัดควรระวัง",
-        description: "ยามแห่งอุปสรรคและการโต้แย้ง ไม่เหมาะสำหรับการตกลงเซ็นสัญญาร่วมทุนใดๆ แต่เหมาะสำหรับการลุยแก้ปัญหาหน้างานอย่างเร่งด่วน",
-        shouldDo: ["ลงมือปฏิบัติตรวจเช็คปัญหาของหน้างาน", "แสดงความเด็ดเดี่ยวกล้าหาญในการเผชิญหน้าอุปสรรค"],
-        shouldAvoid: ["การตกลงข้อเสนอที่มีความกังวลหรือไม่มั่นใจ", "การมีปากเสียงกับเพื่อนร่วมงานหรือพันธมิตร"],
-        speechTemplate: "ทีมงานของเราพร้อมที่จะลุยและดำเนินการปฏิบัติการแก้ไขสถานการณ์ฉุกเฉินนี้ทันทีเพื่อผลลัพธ์ที่ดีขึ้นโดยเร็วที่สุดครับ",
-      }
-    },
-    4: { // พุทธะ / พุธ / พุทโธ (๔)
-      love: {
-        score: 8.0, ratingText: "เหมาะสมมาก",
-        description: "ยามดาวปัญญาและการพูดคุยชี้แจง เหมาะสำหรับการปรับความเข้าใจโดยการพูดคุยด้วยเหตุและผล อธิบายความจริงอย่างประนีประนอม",
-        shouldDo: ["ยกเหตุผลมาชี้แจงอย่างมีน้ำหนักและสุภาพ", "ชวนคุยแบบสบายๆ เพื่อลดบรรยากาศตึงเครียด"],
-        shouldAvoid: ["การบิดเบือนข้อเท็จจริงหรือการโกหกปิดบัง", "การพูดเหน็บแนมหรือพูดจาประชดประชัน"],
-        speechTemplate: "เราอยากขอโอกาสมาอธิบายเหตุผลและพูดคุยปรับความเข้าใจกันแบบเปิดอกสบายๆ นะ เรายินดีฟังสิ่งที่เธอคิดทั้งหมดเลย",
-      },
-      trade: {
-        score: 9.5, ratingText: "ดีเยี่ยมที่สุด (แนะนำ ✨)",
-        description: "ยามดวงดาวแห่งพ่อค้าวาณิชและการสื่อสาร ค้าขายสิ่งใดก็ได้ผลสำเร็จ ปิดยอดทะลุเป้า เจรจาลูกค้าคล่องแคล่วที่สุด",
-        shouldDo: ["เขียนโฆษณาเสนอขายอย่างมีเสน่ห์ดึงดูด", "ปิดการขายแบบเน้นข้อมูลผลประโยชน์ที่ได้รับอย่างชัดเจน"],
-        shouldAvoid: ["การปล่อยให้บทสนทนาเงียบเฉยเป็นเวลานาน", "การสื่อสารข้อมูลที่ผิดพลาดกุมเครือ"],
-        speechTemplate: "ข้อเสนอแคมเปญสิทธิพิเศษตัวนี้จัดทำขึ้นโดยตรงเพื่อช่วยแก้ปัญหาและประหยัดงบประมาณของคุณอย่างตรงจุดที่สุดเลยครับ",
-      },
-      negotiate: {
-        score: 9.8, ratingText: "ดีเยี่ยมที่สุด (แนะนำ ✨)",
-        description: "ยามฤกษ์งามยามดีที่สุดในการทำสัญญา สอบสัมภาษณ์ สอบแข่งขัน เจรจาธุรกิจสำคัญ หรือเซ็นเอกสารเซ็นรับข้อตกลง",
-        shouldDo: ["เตรียมข้อมูลและสถิติอ้างอิงให้พร้อมและแม่นยำ", "พูดจาฉะฉาน ชัดถ้อยชัดคำและมีมารยาทดีเลิศ"],
-        shouldAvoid: ["การมาสายหรือการแสดงความประมาทเลินเล่อ", "การขาดความมั่นใจในสิ่งที่จะพูด"],
-        speechTemplate: "เราได้จัดเตรียมกรอบความร่วมมือและสถิติตัวเลขทั้งหมดมาอย่างละเอียด เพื่อให้มั่นใจว่าจะเกิดประโยชน์ร่วมกันสูงสุดแน่นอนครับ",
-      }
-    },
-    5: { // ครู / พฤหัส / ชีโว (๕)
-      love: {
-        score: 8.5, ratingText: "เหมาะสมมาก",
-        description: "ยามผู้หลักผู้ใหญ่และธรรมะเมตตา การปรับความเข้าใจจะสำเร็จได้ด้วยการให้เกียรติซึ่งกันและกัน และรับฟังด้วยความเห็นอกเห็นใจ",
-        shouldDo: ["รับฟังอีกฝ่ายด้วยท่าทียินดีปรับปรุงตัว", "ขอคำปรึกษาจากผู้ใหญ่ที่เป็นกลางคอยช่วยเหลือ"],
-        shouldAvoid: ["การพยายามทำตัวเหนือกว่าหรือสั่งสอนเทศนาอีกฝ่าย", "การแสดงท่าทีเย่อหยิ่งหัวแข็ง"],
-        speechTemplate: "เราเข้าใจและน้อมรับฟังข้อติเตียนของเธอนะ... เราเห็นด้วยว่าเราควรช่วยกันแก้ไขเพื่อสร้างความรักที่ยั่งยืนแข็งแรงขึ้น",
-      },
-      trade: {
-        score: 9.8, ratingText: "ดีเยี่ยมที่สุด (แนะนำ ✨)",
-        description: "ยามมหามงคลโชคลาภพูนทวี เหมาะสำหรับการค้าขายของมีมูลค่า ผลงานวิชาการ สินค้ามงคล หรือตกลงการซื้อขายทรัพย์สินขนาดใหญ่",
-        shouldDo: ["เน้นขายคุณภาพสินค้าและความถูกต้องของสเปก", "ให้ข้อมูลบริการอย่างซื่อสัตย์โปร่งใสและตรงไปตรงมา"],
-        shouldAvoid: ["การเอาเปรียบลูกค้าหรือพูดโกหกเกินจริง", "การบริการที่ขาดความสุภาพไม่เหมาะสม"],
-        speechTemplate: "สินค้าชิ้นนี้ถูกออกแบบมาด้วยการผสมผสานนวัตกรรมและความคงทนถาวร เพื่อส่งมอบผลลัพธ์ที่ดีและยั่งยืนที่สุดแก่ผู้ใช้ครับ",
-      },
-      negotiate: {
-        score: 9.5, ratingText: "ดีเยี่ยมที่สุด (แนะนำ ✨)",
-        description: "ยามฤกษ์มีชัยในการเข้าพบหัวหน้าผู้ใหญ่ ปรึกษางานวางแผน ขอคำแนะนำทางกฎหมาย หรือวางรากฐานการเรียนและธุรกิจ",
-        shouldDo: ["เข้าหาผู้ใหญ่ด้วยมารยาทนอบน้อมสุภาพที่สุด", "เสนอข้อมูลตรงไปตรงมาด้วยความซื่อสัตย์โปร่งใส"],
-        shouldAvoid: ["การเจรจาผลประโยชน์ที่ผิดกฎหมายหรือศีลธรรม", "การเร่งรัดเอาแต่ใจตนเอง"],
-        speechTemplate: "แผนงานวางรากฐานโครงสร้างชิ้นนี้ตั้งอยู่บนหลักเกณฑ์ความถูกต้องและคำนึงถึงผลประโยชน์ของทุกภาคส่วนเป็นสำคัญครับ",
-      }
-    },
-    6: { // ศุกระ / ศุโกร / ศุกโร (๖)
-      love: {
-        score: 9.8, ratingText: "ดีเยี่ยมที่สุด (แนะนำ ✨)",
-        description: "ยามแห่งดาวความรักและความโรแมนติกชั้นเลิศ เหมาะกับการง้อแฟน ปรับความเข้าใจ พาไปเดท ทานอาหารอร่อย หรือมอบของขวัญเซอร์ไพรส์",
-        shouldDo: ["มอบช่อดอกไม้หรือของขวัญที่ประณีตพึงใจ", "สร้างบรรยากาศที่โรแมนติกผ่อนคลาย", "แสดงความเมตตารักใคร่ห่วงใยอย่างเต็มที่"],
-        shouldAvoid: ["การดึงประเด็นเครียดๆ เรื่องภาระการเงินหรือปัญหาอื่นมาขัดจังหวะ", "การแต่งกายไม่เรียบร้อย"],
-        speechTemplate: "ขอโทษนะคะคนดี... วันนี้เราเตรียมของที่เธอชอบที่สุดพร้อมอาหารมื้อพิเศษไว้รอ หวังว่าจะช่วยให้เธอยิ้มและหายงอนเรานะ 💖",
-      },
-      trade: {
-        score: 9.2, ratingText: "เหมาะสมมาก",
-        description: "ยามดารานำโชคในเรื่องความงาม แฟชั่น เสื้อผ้า อาหารอร่อย ศิลปะและความบันเทิง ค้าขายสิ่งเหล่านี้จะดึงดูดเงินทองดีเยี่ยม",
-        shouldDo: ["ตกแต่งหน้าร้านหรือชิ้นงานให้สวยงามสะดุดตา", "นำเสนอสินค้าด้วยพลังบวกและอินเนอร์ที่มีชีวิตชีวา"],
-        shouldAvoid: ["การพูดคุยที่มีบรรยากาศจืดชืดเคร่งเครียด", "การตั้งราคาแบบคลุมเครือไม่ชัดเจน"],
-        speechTemplate: "สินค้าคอลเลกชันใหม่ล่าสุดชิ้นนี้ถูกออกแบบมาเพื่อเพิ่มเสน่ห์และเสริมสร้างภาพลักษณ์ความมั่นใจให้คุณอย่างน่าทึ่งเลยค่ะ",
-      },
-      negotiate: {
-        score: 8.8, ratingText: "เหมาะสมมาก",
-        description: "ยามดีในการกระชับความสัมพันธ์กับคู่เจรจา ตกลงการร่วมมือผ่านงานสังสรรค์ ต้อนรับพันธมิตรแบบเป็นกันเองและรื่นรมย์",
-        shouldDo: ["ใช้ท่าทีที่เป็นมิตรและเข้าถึงง่ายสร้างเสน่ห์", "เจรจาผลประโยชน์แบบให้เกิดความสุขพึงใจร่วมกัน"],
-        shouldAvoid: ["การตั้งเงื่อนไขที่ตึงเครียดหรือเข้มงวดบีบคั้นเกินไป", "การแสดงอารมณ์หงุดหงิดขัดใจ"],
-        speechTemplate: "ความร่วมมือร่วมใจกันพัฒนาในครั้งนี้จะช่วยสร้างสรรค์ผลลัพธ์และความสำเร็จอันงดงามและน่าชื่นชมให้เราทั้งสองฝ่ายแน่นอนค่ะ",
-      }
-    },
-    7: { // เสารี / เสาร์ / โสโร (๗)
-      love: {
-        score: 5.0, ratingText: "ติดขัดควรระวัง",
-        description: "ยามแห่งพลังความเงียบงันและความเคร่งขรึม การปรับความเข้าใจจะล่าช้าหรือพบความตึงเครียดสูง ควรใจเย็นและอดทนอย่างยิ่ง",
-        shouldDo: ["แสดงความอดทนและรอคอยให้อีกฝ่ายพร้อม", "เน้นการพิสูจน์ความสม่ำเสมอสัจจะในการกระทำยาวๆ"],
-        shouldAvoid: ["การกดดันเร่งเร้าให้อีกฝ่ายให้อภัยรวดเร็ว", "การใช้วาจาตัดพ้อเอาชนะ"],
-        speechTemplate: "เราพร้อมที่จะให้เวลาและรอคอยเธอเสมอนะ ขอให้เวลาเป็นเครื่องพิสูจน์ความจริงใจและสัจจะในความตั้งใจดีของเรานะ",
-      },
-      trade: {
-        score: 8.0, ratingText: "เหมาะสม",
-        description: "ยามดีสำหรับการตกลงซื้อขายอสังหาริมทรัพย์ ที่ดิน อุปกรณ์ก่อสร้างขนาดใหญ่ หรือสัญญาการค้าระยะยาวหลายปี",
-        shouldDo: ["เน้นจุดเด่นเรื่องความคงทนแข็งแรง มั่นคง", "อธิบายเงื่อนไขของสัญญาให้รอบคอบมีวินัย"],
-        shouldAvoid: ["การเสนอสัญญาระยะสั้นเก็งกำไรฉาบฉวย", "การนำเสนอข้อมูลอย่างลวกๆ ลนลาน"],
-        speechTemplate: "โครงการและทรัพย์สินชิ้นนี้ได้รับการคัดกรองมาเพื่อช่วยรองรับความมั่งคั่งและความมั่นคงถาวรในอนาคตของคุณอย่างดีที่สุดครับ",
-      },
-      negotiate: {
-        score: 8.2, ratingText: "เหมาะสม",
-        description: "ยามดีสำหรับการวางรากฐานโครงสร้างพื้นฐาน สัญญาสัมปทาน สัญญาระยะยาวที่มีความอดทนและรอบคอบสูง",
-        shouldDo: ["เจรจาด้วยความใจเย็น รอบคอบและอดทนสูง", "ทบทวนหัวข้อและกฎหมายข้อตกลงอย่างละเอียดที่สุด"],
-        shouldAvoid: ["การลงนามตกลงอย่างเร่งร้อนโดยขาดความรอบคอบ", "การไว้ใจคำพูดลอยๆ โดยไม่มีลายลักษณ์อักษร"],
-        speechTemplate: "เราตั้งใจและจัดทำรายละเอียดโครงสร้างพื้นฐานนี้อย่างรอบคอบมีวินัยสูงสุด เพื่อให้แผนงานนี้ดำเนินไปอย่างมั่นคงถาวรครับ",
-      }
-    }
+  const scoreMap: Record<number, Record<"love" | "trade" | "negotiate", number>> = {
+    1: { love: 6.8, trade: 8.8, negotiate: 9.2 },
+    2: { love: 9.5, trade: 8.5, negotiate: 8.0 },
+    3: { love: 4.2, trade: 7.0, negotiate: 5.5 },
+    4: { love: 8.0, trade: 9.5, negotiate: 9.8 },
+    5: { love: 8.5, trade: 9.8, negotiate: 9.5 },
+    6: { love: 9.8, trade: 9.2, negotiate: 8.8 },
+    7: { love: 5.0, trade: 8.0, negotiate: 8.2 }
   };
 
-  return mapping[planet]?.[topic] ?? {
-    score: 7.0,
-    ratingText: "เหมาะสม",
-    description: "ช่วงเวลาดี มีความมั่นคง ปลอดภัยตามตำรายามอัฏฐกาล",
-    shouldDo: ["สัญจรร่วมมือดี", "ชี้แจงตามระบบที่เหมาะสม"],
-    shouldAvoid: ["การใช้อารมณ์ร้อน", "การตัดสินใจกะทันหัน"],
-    speechTemplate: "ขอให้งานครั้งนี้ประสบผลสำเร็จตามที่ตั้งใจไว้นะคะ",
+  const adviceObj = t(`yam:advices.planets.${planet}.${topic}`, { returnObjects: true }) as any;
+  const defaultObj = t("yam:advices.default", { returnObjects: true }) as any;
+
+  return {
+    score: scoreMap[planet]?.[topic] ?? 7.0,
+    ratingText: adviceObj?.ratingText || defaultObj?.ratingText || "เหมาะสม",
+    description: adviceObj?.description || defaultObj?.description || "ช่วงเวลาดี มีความมั่นคง ปลอดภัยตามตำรายามอัฏฐกาล",
+    shouldDo: adviceObj?.shouldDo || defaultObj?.shouldDo || [],
+    shouldAvoid: adviceObj?.shouldAvoid || defaultObj?.shouldAvoid || [],
+    speechTemplate: adviceObj?.speech || defaultObj?.speech || "ขอให้งานครั้งนี้ประสบผลสำเร็จตามที่ตั้งใจไว้นะคะ",
   };
 }
 
@@ -404,6 +230,7 @@ import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
 
 export default function YamPage() {
   const data = useLoaderData<typeof loader>();
+  const { t, i18n } = useTranslation(["yam", "common", "horoscope"]);
   // isLocked = pro+ features (compare, grid) locked for basic users
   const isLocked = (data as any).isProLocked as boolean;
 
@@ -558,8 +385,9 @@ export default function YamPage() {
   const yamDisplayDate = new Date(now);
   if (now.getHours() < 6) yamDisplayDate.setDate(yamDisplayDate.getDate() - 1);
 
-  const timeStr = now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-  const dateStr = yamDisplayDate.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  const currentLocale = i18n.language === "zh" ? "zh-CN" : i18n.language === "en" ? "en-US" : "th-TH";
+  const timeStr = now.toLocaleTimeString(currentLocale, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const dateStr = yamDisplayDate.toLocaleDateString(currentLocale, { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   // 🪐 Handle Finder calculation Click
   const handleCalculateFinder = () => {
@@ -577,7 +405,7 @@ export default function YamPage() {
       return targetDate.getTime() >= sStart.getTime() && targetDate.getTime() < sEnd.getTime();
     }) || slots[0]!;
 
-    const advice = getTopicAdvice(selectedTopic, result.yamName, result.phase, matchingSlot.ticks);
+    const advice = getTopicAdvice(selectedTopic, result.yamName, result.phase, matchingSlot.ticks, t);
 
     setCalculatedResult({
       yamName: result.yamName,
@@ -606,7 +434,7 @@ export default function YamPage() {
       const sEnd = new Date(s.endTimeISO);
       return dateA.getTime() >= sStart.getTime() && dateA.getTime() < sEnd.getTime();
     }) || slotsA[0]!;
-    const adviceA = getTopicAdvice("travel", resultA.yamName, resultA.phase, slotA.ticks);
+    const adviceA = getTopicAdvice("travel", resultA.yamName, resultA.phase, slotA.ticks, t);
 
     const resultB = getYamPrediction(dateB);
     const slotsB = calculateDailyYamSlots(dateB);
@@ -615,21 +443,32 @@ export default function YamPage() {
       const sEnd = new Date(s.endTimeISO);
       return dateB.getTime() >= sStart.getTime() && dateB.getTime() < sEnd.getTime();
     }) || slotsB[0]!;
-    const adviceB = getTopicAdvice("travel", resultB.yamName, resultB.phase, slotB.ticks);
+    const adviceB = getTopicAdvice("travel", resultB.yamName, resultB.phase, slotB.ticks, t);
 
     // ดึงบทสรุปแนะนำการเดินทางที่ดีที่สุด
     let verdict = "";
     if (adviceA.score > adviceB.score) {
-      verdict = `🏆 แนะนำทางเลือกที่ 1 อย่างยิ่ง! เนื่องจากได้รับความมงคลเดินทาง ${slotA.ticks} ขีด (ระดับ ${adviceA.ratingText}) ซึ่งราบรื่น ปลอดภัย และให้พลังงานโชคลาภเกื้อหนุนมากกว่าทางเลือกที่ 2 อย่างเด่นชัดค่ะ`;
+      verdict = t("yam:compare.verdict_a", {
+        ticks: slotA.ticks,
+        rating: adviceA.ratingText,
+        defaultValue: `🏆 แนะนำทางเลือกที่ 1 อย่างยิ่ง! เนื่องจากได้รับความมงคลเดินทาง ${slotA.ticks} ขีด (ระดับ ${adviceA.ratingText}) ซึ่งราบรื่น ปลอดภัย และให้พลังงานโชคลาภเกื้อหนุนมากกว่าทางเลือกที่ 2 อย่างเด่นชัดค่ะ`
+      });
     } else if (adviceB.score > adviceA.score) {
-      verdict = `🏆 แนะนำทางเลือกที่ 2 อย่างยิ่ง! เนื่องจากได้รับความมงคลเดินทาง ${slotB.ticks} ขีด (ระดับ ${adviceB.ratingText}) ซึ่งประเสริฐเลิศล้ำ ปลอดภัยจากเคราะห์ภัย และสัญจรเดินทางคล่องแคล่วกว่าค่ะ`;
+      verdict = t("yam:compare.verdict_b", {
+        ticks: slotB.ticks,
+        rating: adviceB.ratingText,
+        defaultValue: `🏆 แนะนำทางเลือกที่ 2 อย่างยิ่ง! เนื่องจากได้รับความมงคลเดินทาง ${slotB.ticks} ขีด (ระดับ ${adviceB.ratingText}) ซึ่งประเสริฐเลิศล้ำ ปลอดภัยจากเคราะห์ภัย และสัญจรเดินทางคล่องแคล่วกว่าค่ะ`
+      });
     } else {
-      verdict = `⚖️ ทั้งสองช่วงเวลามีระดับความมงคลเสมอกัน (${slotA.ticks} ขีด) สามารถเลือกสัญจรเดินทางได้ตามความสะดวกของตารางเวลาท่าน โดยพึงรักษาความระมัดระวังและตั้งมั่นในสติบารมีตามคำแนะนำอย่างเสมอกันค่ะ`;
+      verdict = t("yam:compare.verdict_equal", {
+        ticks: slotA.ticks,
+        defaultValue: `⚖️ ทั้งสองช่วงเวลามีระดับความมงคลเสมอกัน (${slotA.ticks} ขีด) สามารถเลือกสัญจรเดินทางได้ตามความสะดวกของตารางเวลาท่าน โดยพึงรักษาความระมัดระวังและตั้งมั่นในสติบารมีตามคำแนะนำอย่างเสมอกันค่ะ`
+      });
     }
 
     setCompareResult({
       a: {
-        dateLabel: dateA.toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" }),
+        dateLabel: dateA.toLocaleDateString(currentLocale, { day: "numeric", month: "long", year: "numeric" }),
         timeLabel: slotA.timeLabel,
         yamName: resultA.yamName,
         phase: resultA.phase,
@@ -637,7 +476,7 @@ export default function YamPage() {
         advice: adviceA,
       },
       b: {
-        dateLabel: dateB.toLocaleDateString("th-TH", { day: "numeric", month: "long", year: "numeric" }),
+        dateLabel: dateB.toLocaleDateString(currentLocale, { day: "numeric", month: "long", year: "numeric" }),
         timeLabel: slotB.timeLabel,
         yamName: resultB.yamName,
         phase: resultB.phase,
@@ -686,10 +525,10 @@ export default function YamPage() {
     const fullPrediction = getYamPrediction(new Date(), { withPrediction: true }); // triggers predict lookup
     
     // ดึงข้อมูลคำแนะนำ
-    const loveAdvice = getTopicAdvice("love", yamName, "middle", ticks);
-    const tradeAdvice = getTopicAdvice("trade", yamName, "middle", ticks);
-    const negotiateAdvice = getTopicAdvice("negotiate", yamName, "middle", ticks);
-    const travelAdvice = getTopicAdvice("travel", yamName, "middle", ticks);
+    const loveAdvice = getTopicAdvice("love", yamName, "middle", ticks, t);
+    const tradeAdvice = getTopicAdvice("trade", yamName, "middle", ticks, t);
+    const negotiateAdvice = getTopicAdvice("negotiate", yamName, "middle", ticks, t);
+    const travelAdvice = getTopicAdvice("travel", yamName, "middle", ticks, t);
 
     setGridDetailAdvice({
       yamName,
@@ -882,13 +721,13 @@ export default function YamPage() {
                   </h2>
                   <div className="flex gap-2 items-center mt-3 flex-wrap">
                     <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-[#F8F6F1]">
-                      ยามใหญ่ที่ {data.yamNumber}
+                      {t("yam:yam_number", { number: data.yamNumber, defaultValue: `ยามใหญ่ที่ ${data.yamNumber}` })}
                     </span>
                     <span className="px-3 py-1 rounded-full bg-[#4B6FAE]/20 border border-[#4B6FAE]/30 text-xs font-bold text-[#D9CDB7]">
-                      ช่วง{PERIOD_LABEL[data.period]}
+                      {t("yam:period_" + data.period, { defaultValue: PERIOD_LABEL[data.period] })}
                     </span>
                     <span className="px-3 py-1 rounded-full bg-[#D9BC82]/20 border border-[#D9BC82]/30 text-xs font-bold text-[#D9BC82]">
-                      เฟส{PHASE_LABEL[data.phase]}
+                      {t("yam:phase_" + data.phase, { defaultValue: PHASE_LABEL[data.phase] })}
                     </span>
                   </div>
                 </div>
@@ -982,7 +821,7 @@ export default function YamPage() {
                         : "rgba(239, 68, 68, 0.2)",
                   }}
                 >
-                  <span className="text-sm text-[#D9CDB7] font-bold uppercase tracking-wider mb-1">ความมงคล</span>
+                  <span className="text-sm text-[#D9CDB7] font-bold uppercase tracking-wider mb-1">{t("yam:auspiciousness", { defaultValue: "ความมงคล" })}</span>
                   <span className={`text-xl font-bold ${
                     data.travelAuspiciousness.level === "excellent"
                       ? "text-[#D9BC82] glow-gold"
@@ -992,24 +831,24 @@ export default function YamPage() {
                       ? "text-green-400"
                       : "text-red-400"
                   }`}>
-                    {data.travelAuspiciousness.ticks === 3 ? "ดีเยี่ยม" :
-                     data.travelAuspiciousness.ticks === 2 ? "ดีมาก" :
-                     data.travelAuspiciousness.ticks === 1 ? "ดี" : "ติดขัด"}
+                    {data.travelAuspiciousness.ticks === 3 ? t("yam:excellent", { defaultValue: "ดีเยี่ยม" }) :
+                     data.travelAuspiciousness.ticks === 2 ? t("yam:very_good", { defaultValue: "ดีมาก" }) :
+                     data.travelAuspiciousness.ticks === 1 ? t("yam:good", { defaultValue: "ดี" }) : t("yam:bad", { defaultValue: "ติดขัด" })}
                   </span>
                   <span className="text-xs text-[#F8F6F1] mt-1 tabular-nums font-bold">
-                    {data.travelAuspiciousness.ticks} / 3 ขีด
+                    {data.travelAuspiciousness.ticks} / 3 {t("yam:ticks_unit", { defaultValue: "ขีด" })}
                   </span>
                 </div>
 
                 <div className="flex-1 space-y-1">
-                  <span className="text-[13px] text-[#94A3B8] uppercase font-bold block">คำพยากรณ์เดินทางขณะนี้</span>
+                  <span className="text-[13px] text-[#94A3B8] uppercase font-bold block">{t("yam:travel_prediction_now", { defaultValue: "คำพยากรณ์เดินทางขณะนี้" })}</span>
                   <p className="text-base text-[#F8F6F1] font-medium leading-relaxed">
                     {data.travelAuspiciousness.description}
                   </p>
                   <p className="text-xs text-[#94A3B8] mt-1 italic">
                     {data.travelAuspiciousness.ticks === 0 
-                      ? "⚠️ ยามติดขัด หลีกเลี่ยงการเริ่มต้นออกเดินทางสำคัญ หรือระมัดระวังความปลอดภัยเป็นพิเศษ" 
-                      : "✨ ฤกษ์มงคลเหมาะสมสำหรับการเดินทางสัญจรและการติดต่อเจรจาธุรกิจ"}
+                      ? t("yam:travel_caution", { defaultValue: "⚠️ ยามติดขัด หลีกเลี่ยงการเริ่มต้นออกเดินทางสำคัญ หรือระมัดระวังความปลอดภัยเป็นพิเศษ" }) 
+                      : t("yam:travel_auspicious", { defaultValue: "✨ ฤกษ์มงคลเหมาะสมสำหรับการเดินทางสัญจรและการติดต่อเจรจาธุรกิจ" })}
                   </p>
                 </div>
               </div>
@@ -1443,15 +1282,15 @@ export default function YamPage() {
                   <div className="flex-1 space-y-4">
                     <div className="space-y-1">
                       <div className="flex items-center gap-1.5 text-xs text-[#94A3B8] font-bold">
-                        <span>🕒</span> ช่วงเวลาที่ดีที่สุดของยามนี้
+                        <span>🕒</span> {t("dashboard_index.yam_best_time", "ช่วงเวลาที่ดีที่สุดของยามนี้")}
                       </div>
                       <h4 className="font-display text-2xl font-bold text-[#F8F6F1]">{calculatedResult.timeLabel}</h4>
                       <div className="flex gap-2 mt-1">
                         <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[13px] font-bold text-[#D9BC82]">
-                          ยาม{PHASE_LABEL[calculatedResult.phase]}
+                          {t("yam.yam_label", "ยาม")}{t("yam.phase_" + calculatedResult.phase, PHASE_LABEL[calculatedResult.phase])}
                         </span>
                         <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[13px] font-bold text-[#94A3B8]">
-                          ดาว{calculatedResult.yamName} ({PLANET_SYMBOLS[calculatedResult.yamName]})
+                          {(t("horoscope:planets.planet", "ดาว") as string)}{(t("yam:yam_names." + calculatedResult.yamName, calculatedResult.yamName) as string)} ({PLANET_SYMBOLS[calculatedResult.yamName]})
                         </span>
                       </div>
                     </div>

@@ -20,6 +20,8 @@ import { generateDailyAdvice } from "~/services/dailyAdvisor.server";
 import type { Env } from "~/env.server";
 import { useState, useEffect } from "react";
 import { Sparkles, Compass, Shield, Target, BookOpen, Star, Heart, TrendingUp, Award } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import i18next from "~/lib/i18n/i18n.server";
 
 export const meta: MetaFunction = () => [
   { title: "แดชบอร์ดหลัก — PhopePhum" },
@@ -132,8 +134,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const rahu      = calculateRahu(now);
   const hora      = calculateHoraTaynoo({ dateAsked: now });
 
-  const STAR_TH: Record<number, string> = { 1:"อาทิตย์",2:"จันทร์",3:"อังคาร",4:"พุธ",5:"พฤหัส",6:"ศุกร์",7:"เสาร์" };
-
   const todaySlots = calculateDailyYamSlots(now);
   const todayDateStr = now.toISOString().split("T")[0]!;
 
@@ -159,7 +159,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
         birthTime: profile.birth_time || "12:00",
         birthPlace: profile.birth_place || "กรุงเทพมหานคร",
       }, now);
-      dailyAdvice = generateDailyAdvice(phopephumResult);
+      const locale = await i18next.getLocale(request);
+      dailyAdvice = generateDailyAdvice(phopephumResult, locale);
     } catch (err) {
       console.error("Daily advice engine error:", err);
     }
@@ -189,7 +190,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     karnchata: {
       yamYaiName:   karnchata.yamYaiName,
       yamYaiNumber: karnchata.yamYaiNumber,
-      dayStar:      STAR_TH[karnchata.dayStarNumber] ?? String(karnchata.dayStarNumber),
+      dayStarNumber: karnchata.dayStarNumber,
     },
     rahu: rahu ? {
       isGood:  rahu.is_current_moment_good,
@@ -200,7 +201,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     hora: {
       yamAsked:  hora.yamAsked,
       period:    hora.period,
-      yamPlanet: PLANET_INFO[hora.yamPlanet]?.thai ?? String(hora.yamPlanet),
+      yamPlanet: hora.yamPlanet,
     },
     todaySlots,
   });
@@ -213,8 +214,6 @@ const LEVEL_STYLE: Record<string, { bar: string; badge: string }> = {
   good:      { bar: "bg-amber-400",   badge: "text-amber-800 border-amber-300 bg-amber-50 dark:text-amber-400 dark:border-amber-500/40 dark:bg-amber-500/8" },
   bad:       { bar: "bg-rose-400",    badge: "text-rose-800 border-rose-300 bg-rose-50 dark:text-rose-400 dark:border-rose-500/40 dark:bg-rose-500/8" },
 };
-
-const PERIOD_TH: Record<string, string> = { day: "กลางวัน", night: "กลางคืน" };
 
 const PLANET_SYMBOLS: Record<string, string> = {
   สุริยะ: "☉", ระวิ:  "☉", จันเทา: "☽", คะศิ:  "☽",
@@ -235,11 +234,11 @@ function LiveClock() {
 export default function DashboardIndex() {
   const d = useLoaderData<typeof loader>();
   const { revalidate } = useRevalidator();
+  const { t, i18n } = useTranslation(["common", "yam", "horoscope"]);
   const { profile, loginReward, identity, dailyPlan, dailyAdvice, yam, moon, karnchata, rahu, pendingCount, todaySlots } = d;
 
   const displayName = profile?.display_name ?? "คุณ";
   const isPro       = profile?.role === "admin" || profile?.role === "operator" || profile?.plan === "imperial";
-  const isAdminOp   = profile?.role === "admin" || profile?.role === "operator";
   const hasBirth    = !!(profile?.birth_date);
 
   const [greeting, setGreeting] = useState("");
@@ -258,8 +257,15 @@ export default function DashboardIndex() {
   // Sync timeline states on client mount / time update
   useEffect(() => {
     const h = new Date().getHours();
-    setGreeting(h < 5 ? "ราตรีสวัสดิ์" : h < 12 ? "อรุณสวัสดิ์" : h < 17 ? "สวัสดีตอนบ่าย" : "สวัสดีตอนเย็น");
-    setDateLabel(new Date().toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long" }));
+    setGreeting(
+      h < 5 ? t("greeting.night", "ราตรีสวัสดิ์") : 
+      h < 12 ? t("greeting.morning", "อรุณสวัสดิ์") : 
+      h < 17 ? t("greeting.afternoon", "สวัสดีตอนบ่าย") : 
+      t("greeting.evening", "สวัสดีตอนเย็น")
+    );
+    
+    const currentLocale = i18n.language === "zh" ? "zh-CN" : i18n.language === "en" ? "en-US" : "th-TH";
+    setDateLabel(new Date().toLocaleDateString(currentLocale, { weekday: "long", day: "numeric", month: "long" }));
     
     // Auto-select current slot in timeline
     const active = todaySlots.find(s => {
@@ -280,7 +286,7 @@ export default function DashboardIndex() {
     if (loginReward && loginReward.success && loginReward.earned > 0) {
       setShowLoginModal(true);
     }
-  }, [todaySlots, loginReward]);
+  }, [todaySlots, loginReward, i18n.language, t]);
 
   // Periodic page revalidation
   useEffect(() => { const id = setInterval(revalidate, 60_000); return () => clearInterval(id); }, [revalidate]);
@@ -301,17 +307,17 @@ export default function DashboardIndex() {
       const end = new Date(activeSlot.endTimeISO).getTime();
       const diff = end - Date.now();
       if (diff <= 0) {
-        setTimeLeft("เปลี่ยนยามแล้ว");
+        setTimeLeft(t("dashboard_index.yam_change", "เปลี่ยนยามแล้ว"));
         return;
       }
       const min = Math.floor(diff / 60_000);
       const sec = Math.floor((diff % 60_000) / 1000);
-      setTimeLeft(`ยามนี้เหลืออีก ${min} นาที ${sec} วินาที`);
+      setTimeLeft(t("dashboard_index.yam_remain", { min, sec, defaultValue: `ยามนี้เหลืออีก ${min} นาที ${sec} วินาที` }));
     };
     updateCountdown();
     const id = setInterval(updateCountdown, 1000);
     return () => clearInterval(id);
-  }, [activeSlot]);
+  }, [activeSlot, t]);
 
   // Handle Tarot Card Pull
   const handleCardPull = async () => {
@@ -338,6 +344,9 @@ export default function DashboardIndex() {
 
   const ls = LEVEL_STYLE[yam.level] ?? LEVEL_STYLE.good;
 
+  // Translation helpers
+  const translatedYamName = t("yam:yam_names." + yam.name, { defaultValue: yam.name });
+
   return (
     <div className="max-w-xl mx-auto space-y-7 pb-12 star-field constellation-bg px-1.5 sm:px-0">
       
@@ -346,7 +355,7 @@ export default function DashboardIndex() {
         <div>
           <p className="text-[#C6B79F] text-sm sm:text-base font-bold tracking-wide">{greeting} · {dateLabel}</p>
           <h1 className="font-display text-3xl sm:text-4xl font-extrabold mt-1 text-[#F8F6F1]">
-            สวัสดี, <span className="text-[#C6A96B] glow-gold font-black">{displayName}</span>
+            {t("greeting.hello", "สวัสดี")}, <span className="text-[#C6A96B] glow-gold font-black">{displayName}</span>
           </h1>
         </div>
         <div className="flex items-center gap-2 shrink-0 mt-1 px-3.5 py-2 rounded-full border text-xs sm:text-sm font-extrabold bg-[#0A1628]/50 border-[#C6A96B]/45 text-[#C6A96B] shadow-[0_0_15px_rgba(232,196,106,0.15)]">
@@ -365,10 +374,10 @@ export default function DashboardIndex() {
           <div className="relative space-y-4">
             <div className="flex justify-between items-center border-b border-slate-200 dark:border-[#C6A96B]/15 pb-3">
               <span className="text-[10px] sm:text-xs font-black text-[#A68444] dark:text-[#C6A96B] tracking-[0.22em] uppercase flex items-center gap-1.5">
-                <Compass className="w-3.5 h-3.5 animate-spin-slow" /> IDENTITY OS Blueprint
+                <Compass className="w-3.5 h-3.5 animate-spin-slow" /> {t("dashboard_index.identity_title", "IDENTITY OS Blueprint")}
               </span>
               <span className="text-xs font-black text-slate-500 dark:text-[#94A3B8] px-2 py-0.5 rounded-full border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 uppercase">
-                {identity.element}ธาตุเกิด
+                {t("horoscope:houses." + identity.element, identity.element)}{t("dashboard_index.birth_element", "ธาตุเกิด")}
               </span>
             </div>
 
@@ -379,7 +388,7 @@ export default function DashboardIndex() {
               </div>
 
               <div className="space-y-1">
-                <p className="text-[11px] text-slate-500 dark:text-[#C6B79F] font-black tracking-widest uppercase">บุคลิกลักษณะชีวิต</p>
+                <p className="text-[11px] text-slate-500 dark:text-[#C6B79F] font-black tracking-widest uppercase">{t("dashboard_index.life_archetype", "บุคลิกลักษณะชีวิต")}</p>
                 <h3 className="font-display font-black text-lg text-slate-900 dark:text-[#F8F6F1] flex items-center gap-2">
                   {identity.archetypeTitle}
                   <span className="text-xs text-[#A68444] dark:text-[#C6A96B] font-mono">({identity.archetypeLabel})</span>
@@ -393,11 +402,15 @@ export default function DashboardIndex() {
 
             <div className="grid grid-cols-2 gap-3 pt-2 text-[11px] sm:text-xs border-t border-slate-200 dark:border-white/5">
               <div className="space-y-1">
-                <p className="text-[#A68444] dark:text-[#C6A96B] font-black uppercase tracking-wider flex items-center gap-1">🛡️ จิตเทพผู้พิทักษ์</p>
+                <p className="text-[#A68444] dark:text-[#C6A96B] font-black uppercase tracking-wider flex items-center gap-1">
+                  {t("dashboard_index.guardian_spirit", "🛡️ จิตเทพผู้พิทักษ์")}
+                </p>
                 <p className="text-slate-900 dark:text-[#F8F6F1] font-bold">{identity.guardianName}</p>
               </div>
               <div className="space-y-1">
-                <p className="text-sky-700 dark:text-sky-300 font-black uppercase tracking-wider flex items-center gap-1">🌟 จุดเด่นประจำตัว</p>
+                <p className="text-sky-700 dark:text-sky-300 font-black uppercase tracking-wider flex items-center gap-1">
+                  {t("dashboard_index.strength", "🌟 จุดเด่นประจำตัว")}
+                </p>
                 <p className="text-slate-900 dark:text-[#F8F6F1] font-bold line-clamp-1">{identity.strengths[0]}, {identity.strengths[1]}</p>
               </div>
             </div>
@@ -405,14 +418,14 @@ export default function DashboardIndex() {
         </div>
       )}
 
-      {/* ── 3. Layer 3: Daily Tarot Card Pull Widget ── */}
+      {/* ── 3. Daily Tarot Card Pull Widget ── */}
       <div className="card-glass p-6 border border-[#C6A96B]/20 dark:bg-[#0A1628]/70 rounded-[2rem] space-y-4 animate-fade-up relative overflow-hidden">
         <div className="flex justify-between items-center border-b border-slate-200 dark:border-white/5 pb-3">
           <span className="text-[10px] sm:text-xs font-black text-[#A68444] dark:text-gold-300 tracking-[0.2em] uppercase flex items-center gap-1.5">
-            🔮 DAILY RITUAL CHECK-IN
+            {t("dashboard_index.tarot_title", "🔮 DAILY RITUAL CHECK-IN")}
           </span>
           <span className="text-[10px] text-emerald-700 border border-emerald-500/35 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-950/20 px-2.5 py-0.5 rounded-full font-bold animate-pulse">
-            +1 Sands of Time Reward
+            {t("dashboard_index.tarot_reward", "+1 Sands of Time Reward")}
           </span>
         </div>
 
@@ -431,14 +444,14 @@ export default function DashboardIndex() {
             {/* Tarot Reading text */}
             <div className="flex-1 space-y-2">
               <h4 className="font-display font-black text-base text-[#A68444] dark:text-gold-liquid">
-                คุณเปิดได้: {currentCard.thaiName || currentCard.name}
+                {t("dashboard_index.tarot_result", "คุณเปิดได้: ")}{currentCard.thaiName || currentCard.name}
               </h4>
               <p className="text-xs sm:text-sm text-slate-700 dark:text-[#D9CDB7] leading-relaxed">
                 {currentCard.meaning || currentCard.description}
               </p>
               {currentCard.advice && (
                 <p className="text-[13px] text-emerald-700 dark:text-emerald-300 font-bold leading-normal">
-                  💡 คำแนะนำสัจจะ: {currentCard.advice}
+                  {t("dashboard_index.tarot_advice", "💡 คำแนะนำสัจจะ: ")}{currentCard.advice}
                 </p>
               )}
             </div>
@@ -449,8 +462,8 @@ export default function DashboardIndex() {
               <span className="text-3xl animate-pulse text-[#C6A96B]/50">🔮</span>
             </div>
             <div>
-              <p className="text-[#F8F6F1] font-bold text-sm">จับไพ่ประจำวันเพื่อหยั่งรู้วงโคจรชีวิต</p>
-              <p className="text-xs text-[#C6B79F] mt-1">พร้อมรับสิทธิ์เคลมภารกิจประจำวัน +1 ทรายกาลเวลา</p>
+              <p className="text-[#F8F6F1] font-bold text-sm">{t("dashboard_index.tarot_pull_card", "จับไพ่ประจำวันเพื่อหยั่งรู้วงโคจรชีวิต")}</p>
+              <p className="text-xs text-[#C6B79F] mt-1">{t("dashboard_index.tarot_pull_desc", "พร้อมรับสิทธิ์เคลมภารกิจประจำวัน +1 ทรายกาลเวลา")}</p>
             </div>
             <button
               type="button"
@@ -458,7 +471,7 @@ export default function DashboardIndex() {
               onClick={handleCardPull}
               className="px-6 py-2.5 rounded-xl text-xs font-black text-cosmic-950 bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] transition-all hover:scale-105 active:scale-95 shadow-md shadow-[#C6A96B]/15"
             >
-              {cardPullLoading ? "กำลังสับไพ่โชคชะตา..." : "✦ ดึงพลังงานวิถีชะตา (จับไพ่)"}
+              {cardPullLoading ? t("dashboard_index.tarot_shuffling", "กำลังสับไพ่โชคชะตา...") : t("dashboard_index.tarot_pull_btn", "✦ ดึงพลังงานวิถีชะตา (จับไพ่)")}
             </button>
           </div>
         )}
@@ -467,13 +480,17 @@ export default function DashboardIndex() {
       {/* ── 4. Layer 3: Daily Advisor Guidelines (Work, Money, Love, Health) ── */}
       {dailyAdvice && (
         <div className="space-y-4 animate-fade-up">
-          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#A68444] dark:text-gold-300">✦ คำแนะนำการจัดสรรสิริมงคลวันนี้</p>
+          <p className="text-xs font-black uppercase tracking-[0.25em] text-[#A68444] dark:text-gold-300">
+            {t("dashboard_index.advice_title", "✦ คำแนะนำการจัดสรรสิริมงคลวันนี้")}
+          </p>
           <div className="grid grid-cols-2 gap-3">
             
             {/* Work */}
             <div className="card-glass p-4 border border-slate-200 dark:border-white/5 dark:bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💼 การงาน</span>
+                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">
+                  {t("dashboard_index.advice_work", "💼 การงาน")}
+                </span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
                   dailyAdvice.work.status === "excellent" ? "text-emerald-700 border-emerald-500/30 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/5" :
                   dailyAdvice.work.status === "warning" ? "text-rose-700 border-rose-500/30 bg-rose-50 dark:text-rose-400 dark:border-rose-500/20 dark:bg-rose-500/5" :
@@ -487,7 +504,9 @@ export default function DashboardIndex() {
             {/* Wealth */}
             <div className="card-glass p-4 border border-slate-200 dark:border-white/5 dark:bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💰 การเงิน</span>
+                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">
+                  {t("dashboard_index.advice_wealth", "💰 การเงิน")}
+                </span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
                   dailyAdvice.wealth.status === "excellent" ? "text-emerald-700 border-emerald-500/30 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/5" :
                   dailyAdvice.wealth.status === "warning" ? "text-rose-700 border-rose-500/30 bg-rose-50 dark:text-rose-400 dark:border-rose-500/20 dark:bg-rose-500/5" :
@@ -501,7 +520,9 @@ export default function DashboardIndex() {
             {/* Love */}
             <div className="card-glass p-4 border border-slate-200 dark:border-white/5 dark:bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">💖 ความรัก</span>
+                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">
+                  {t("dashboard_index.advice_love", "💖 ความรัก")}
+                </span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
                   dailyAdvice.love.status === "excellent" ? "text-emerald-700 border-emerald-500/30 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/5" :
                   dailyAdvice.love.status === "warning" ? "text-rose-700 border-rose-500/30 bg-rose-50 dark:text-rose-400 dark:border-rose-500/20 dark:bg-rose-500/5" :
@@ -515,7 +536,9 @@ export default function DashboardIndex() {
             {/* Health */}
             <div className="card-glass p-4 border border-slate-200 dark:border-white/5 dark:bg-[#0A1628]/40 flex flex-col justify-between min-h-[120px]">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">🌿 สุขภาพ</span>
+                <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-black uppercase tracking-wider flex items-center gap-1">
+                  {t("dashboard_index.advice_health", "🌿 สุขภาพ")}
+                </span>
                 <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border uppercase ${
                   dailyAdvice.health.status === "excellent" ? "text-emerald-700 border-emerald-500/30 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-500/20 dark:bg-emerald-500/5" :
                   dailyAdvice.health.status === "warning" ? "text-rose-700 border-rose-500/30 bg-rose-50 dark:text-rose-400 dark:border-rose-500/20 dark:bg-rose-500/5" :
@@ -532,37 +555,51 @@ export default function DashboardIndex() {
 
       {/* ── 5. Layer 7: Ecosystem Hub Navigation ── */}
       <div className="animate-fade-up">
-        <p className="text-xs font-black uppercase tracking-[0.25em] text-[#3D5361] dark:text-[#4B6FAE] mb-3">✦ PHOPPHUM ECOSYSTEM HUB</p>
+        <p className="text-xs font-black uppercase tracking-[0.25em] text-[#3D5361] dark:text-[#4B6FAE] mb-3">
+          {t("dashboard_index.eco_hub", "✦ PHOPPHUM ECOSYSTEM HUB")}
+        </p>
         <div className="grid grid-cols-3 gap-2">
           
           <Link to="/dashboard/horoscope" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">🧭</span>
-            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">WHO (ดวงวิถี)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">
+              {t("dashboard_index.eco_who", "WHO (ดวงวิถี)")}
+            </span>
           </Link>
 
           <Link to="/dashboard/chat" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">💬</span>
-            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">WHAT (ถาม AI)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">
+              {t("dashboard_index.eco_what", "WHAT (ถาม AI)")}
+            </span>
           </Link>
 
           <Link to="/dashboard/calendar" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">📅</span>
-            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">WHEN (ฤกษ์มงคล)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">
+              {t("dashboard_index.eco_when", "WHEN (ฤกษ์มงคล)")}
+            </span>
           </Link>
 
           <Link to="/dashboard/reports" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">📄</span>
-            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">HOW (รายงานลึก)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">
+              {t("dashboard_index.eco_how", "HOW (รายงานลึก)")}
+            </span>
           </Link>
 
           <Link to="/dashboard/planner" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">🎯</span>
-            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">WHY (บันทึกเป้าหมาย)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">
+              {t("dashboard_index.eco_why", "WHY (บันทึกเป้าหมาย)")}
+            </span>
           </Link>
 
           <Link to="/dashboard/chat" className="card-glass p-3 text-center border border-slate-200 dark:border-white/5 dark:bg-[#0a2240]/45 hover:border-[#C6A96B]/30 hover:bg-slate-100 dark:hover:bg-[#0a2240]/70 transition-all flex flex-col items-center gap-1">
             <span className="text-lg">📜</span>
-            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">REFLECT (คลังปัญญา)</span>
+            <span className="text-[10px] font-black text-slate-900 dark:text-[#F8F6F1] tracking-wider leading-none">
+              {t("dashboard_index.eco_reflect", "REFLECT (คลังปัญญา)")}
+            </span>
           </Link>
 
         </div>
@@ -575,14 +612,16 @@ export default function DashboardIndex() {
           
           <div className="relative flex justify-between items-center gap-4">
             <div className="flex-1">
-              <p className="text-xs sm:text-sm text-[#A68444] dark:text-gold-300 font-extrabold uppercase tracking-[0.22em] mb-2">✦ ฤกษ์ยามขณะนี้</p>
+              <p className="text-xs sm:text-sm text-[#A68444] dark:text-gold-300 font-extrabold uppercase tracking-[0.22em] mb-2">
+                {t("dashboard_index.yam_hero_title", "✦ ฤกษ์ยามขณะนี้")}
+              </p>
               <div className="flex items-baseline gap-2.5">
-                <h2 className="font-display text-4xl sm:text-5xl font-black text-slate-900 dark:text-text-primary leading-none text-shadow-gold">{yam.name}</h2>
+                <h2 className="font-display text-4xl sm:text-5xl font-black text-slate-900 dark:text-text-primary leading-none text-shadow-gold">{translatedYamName}</h2>
                 <span className="text-2xl sm:text-3xl text-[#A68444] dark:text-gold-300 font-display">{PLANET_SYMBOLS[yam.name] || "✦"}</span>
               </div>
               <p className="text-sm sm:text-base text-slate-900 dark:text-[#F8F6F1] mt-2 font-sans-thai font-bold tracking-wide">
-                ยาม {yam.number} · {PERIOD_TH[yam.period]}
-                {moon.isWanPhra ? " · 🔆 วันพระ" : ` · จันทร์ ${Math.round(moon.illumination)}%`}
+                {t("yam.yam_number", { number: yam.number, defaultValue: `ยาม ${yam.number}` })} · {t("yam.period_" + yam.period, yam.period === "day" ? "กลางวัน" : "กลางคืน")}
+                {moon.isWanPhra ? ` · 🔆 ${t("dashboard_index.yam_buddhist_day", "วันพระ")}` : ` · ${t("dashboard_index.yam_moon_pct", { pct: Math.round(moon.illumination), defaultValue: `จันทร์ ${Math.round(moon.illumination)}%` })}`}
               </p>
               {yam.shouldDo && (
                 <div className="mt-4 border-l-4 border-amber-500 dark:border-yellow-400 pl-3.5 py-1.5 bg-amber-50 dark:bg-yellow-400/5 rounded-r-lg shadow-[inset_1px_0_0_rgba(250,204,21,0.1)]">
@@ -603,17 +642,17 @@ export default function DashboardIndex() {
               <div className="absolute inset-0 border-2 border-dashed border-gold-500/40 rounded-full cosmic-ring" />
               <div className="w-20 h-20 rounded-full card-glass-premium flex flex-col items-center justify-center border-2 border-slate-200 dark:border-[#C6A96B]/60 bg-slate-50 dark:bg-[#0a2240] glow-gold-box">
                 <span className="text-[10px] sm:text-[11px] font-black text-[#A68444] dark:text-gold-300 uppercase tracking-widest leading-none">
-                  {yam.level === "bad" ? "ระวัง" : "มงคล"}
+                  {yam.level === "bad" ? t("dashboard_index.yam_warning", "ระวัง") : t("dashboard_index.yam_auspicious", "มงคล")}
                 </span>
                 <span className="text-xs sm:text-sm font-black text-slate-900 dark:text-text-primary mt-1.5">
-                  {yam.label.split(" ")[0]}
+                  {t("yam." + yam.level, yam.label.split(" ")[0])}
                 </span>
               </div>
             </div>
           </div>
           
           <div className="flex items-center justify-between text-xs sm:text-sm text-[#A68444] dark:text-gold-300 group-hover:text-gold-liquid transition-colors font-extrabold mt-5 pt-3.5 border-t border-slate-200 dark:border-border-gold/20">
-            <span>เข้าสู่เครื่องมือวิเคราะห์ฤกษ์ยามละเอียด</span>
+            <span>{t("dashboard_index.yam_detailed_analysis", "เข้าสู่เครื่องมือวิเคราะห์ฤกษ์ยามละเอียด")}</span>
             <span>→</span>
           </div>
         </div>
@@ -622,7 +661,9 @@ export default function DashboardIndex() {
       {/* ── 7. Cosmic Energy Timeline Widget ── */}
       <div className="space-y-4 animate-fade-up">
         <div className="flex items-center justify-between">
-          <p className="text-xs sm:text-sm font-black uppercase tracking-[0.25em] text-[#A68444] dark:text-gold-300">✦ TIMELINE พลังงานรายวัน</p>
+          <p className="text-xs sm:text-sm font-black uppercase tracking-[0.25em] text-[#A68444] dark:text-gold-300">
+            {t("dashboard_index.yam_timeline", "✦ TIMELINE พลังงานรายวัน")}
+          </p>
           
           <div className="flex p-0.5 rounded-lg bg-slate-100 dark:bg-cosmic-950/80 border border-slate-300 dark:border-border-gold/25">
             <button
@@ -630,14 +671,14 @@ export default function DashboardIndex() {
               onClick={() => setTimelinePeriod("day")}
               className={`px-3.5 py-1 text-xs font-black rounded-md transition-all ${timelinePeriod === "day" ? "bg-gold-500 text-cosmic-950 dark:text-cosmic-950 shadow-sm" : "text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary"}`}
             >
-              ☀️ กลางวัน
+              {t("dashboard_index.yam_daytime", "☀️ กลางวัน")}
             </button>
             <button
               type="button"
               onClick={() => setTimelinePeriod("night")}
               className={`px-3.5 py-1 text-xs font-black rounded-md transition-all ${timelinePeriod === "night" ? "bg-gold-500 text-cosmic-950 dark:text-cosmic-950 shadow-sm" : "text-slate-600 dark:text-text-secondary hover:text-slate-900 dark:hover:text-text-primary"}`}
             >
-              🌙 กลางคืน
+              {t("dashboard_index.yam_nighttime", "🌙 กลางคืน")}
             </button>
           </div>
         </div>
@@ -648,6 +689,7 @@ export default function DashboardIndex() {
             const isSelected = selectedTimelineSlot?.period === s.period && selectedTimelineSlot?.yamNumber === s.yamNumber;
             const ls = LEVEL_STYLE[s.level] ?? LEVEL_STYLE.good;
             const planetSym = PLANET_SYMBOLS[s.yamName] || "✦";
+            const translatedSlotYamName = t("yam:yam_names." + s.yamName, { defaultValue: s.yamName });
 
             return (
               <button
@@ -660,11 +702,15 @@ export default function DashboardIndex() {
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse border border-cosmic-950" />
                 )}
                 <div className="flex justify-between items-center mb-1 w-full">
-                  <span className="text-xs text-slate-600 dark:text-text-secondary font-bold">ยาม {s.yamNumber}</span>
-                  <span className={`text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded border ${ls.badge.replace("px-2.5 py-0.5", "")}`}>{s.label.split(" ")[0]}</span>
+                  <span className="text-xs text-slate-600 dark:text-text-secondary font-bold">
+                    {t("yam.yam_number", { number: s.yamNumber, defaultValue: `ยาม ${s.yamNumber}` })}
+                  </span>
+                  <span className={`text-[10px] sm:text-xs font-black px-1.5 py-0.5 rounded border ${ls.badge.replace("px-2.5 py-0.5", "")}`}>
+                    {t("yam." + s.level, s.label.split(" ")[0])}
+                  </span>
                 </div>
                 <p className="font-display text-base sm:text-lg font-extrabold text-slate-900 dark:text-text-primary flex items-baseline gap-1 mt-1">
-                  {s.yamName} <span className="text-xs sm:text-sm text-[#A68444] dark:text-gold-400 font-display">{planetSym}</span>
+                  {translatedSlotYamName} <span className="text-xs sm:text-sm text-[#A68444] dark:text-gold-400 font-display">{planetSym}</span>
                 </p>
                 <p className="text-xs text-slate-600 dark:text-text-secondary mt-1.5 font-mono font-bold tracking-tighter">{s.timeLabel.replace(" - ", "-")}</p>
               </button>
@@ -679,15 +725,15 @@ export default function DashboardIndex() {
               <div className="flex justify-between items-start mb-3 gap-2">
                 <div>
                   <h4 className="font-display font-black text-[#A68444] dark:text-gold-300 text-base sm:text-lg flex items-center gap-2">
-                    <span>✦ ยาม{selectedTimelineSlot.yamName}</span>
+                    <span>{t("nav.quick_menu") === "เมนูด่วน" ? `✦ ยาม${selectedTimelineSlot.yamName}` : `✦ Yam ${t("yam:yam_names." + selectedTimelineSlot.yamName, selectedTimelineSlot.yamName)}`}</span>
                     <span className="text-sm font-mono font-bold text-slate-600 dark:text-[#C6B79F]">({selectedTimelineSlot.timeLabel})</span>
                   </h4>
                   <p className="text-xs text-slate-600 dark:text-[#C6B79F] mt-1 font-bold">
-                    ยามลำดับที่ {selectedTimelineSlot.yamNumber} · {PERIOD_TH[selectedTimelineSlot.period]}
+                    {t("yam.yam_order", { order: selectedTimelineSlot.yamNumber, defaultValue: `ยามลำดับที่ ${selectedTimelineSlot.yamNumber}` })} · {t("yam.period_" + selectedTimelineSlot.period, selectedTimelineSlot.period === "day" ? "กลางวัน" : "กลางคืน")}
                   </p>
                 </div>
                 <span className={`text-xs font-black px-3 py-1 rounded-full border shrink-0 ${LEVEL_STYLE[selectedTimelineSlot.level].badge}`}>
-                  {selectedTimelineSlot.label}
+                  {t("yam." + selectedTimelineSlot.level, selectedTimelineSlot.label)}
                 </span>
               </div>
               
@@ -697,7 +743,7 @@ export default function DashboardIndex() {
 
               {selectedTimelineSlot.prediction?.shouldDo && (
                 <div className="text-xs sm:text-sm bg-emerald-50 dark:bg-emerald-500/8 border border-emerald-300 dark:border-emerald-500/25 rounded-lg p-3.5 flex items-start gap-2 text-emerald-800 dark:text-emerald-200 font-extrabold shadow-sm">
-                  <span className="font-black shrink-0 text-emerald-700 dark:text-emerald-400">✓ ควรทำ:</span>
+                  <span className="font-black shrink-0 text-emerald-700 dark:text-emerald-400">{t("action.should_do", "✓ ควรทำ:")}</span>
                   <span className="leading-relaxed">{selectedTimelineSlot.prediction.shouldDo}</span>
                 </div>
               )}
@@ -711,15 +757,15 @@ export default function DashboardIndex() {
         <Link to="/dashboard/planner" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/40 dark:bg-[#0A1628]/40 hover:border-[#8B7FD4]/45 dark:hover:bg-cosmic-800/70 hover:bg-slate-100 transition-all shadow-md">
           <span className="text-[#8B7FD4]"><Target className="w-5 h-5" /></span>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1]">เป้าหมาย TQM</p>
-            <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-0.5">วางแผน + สะท้อนคิด</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1]">{t("dashboard_index.tqm_title", "เป้าหมาย TQM")}</p>
+            <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-0.5">{t("dashboard_index.tqm_desc", "วางแผน + สะท้อนคิด")}</p>
           </div>
         </Link>
         <Link to="/dashboard/community" className="group flex items-center gap-3 p-3.5 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/40 dark:bg-[#0A1628]/40 hover:border-amber-400/40 dark:hover:bg-cosmic-800/70 hover:bg-slate-100 transition-all shadow-md">
           <span className="text-amber-400"><Award className="w-5 h-5" /></span>
           <div className="min-w-0">
-            <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1]">คอมมูนิตี้ Rank</p>
-            <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-0.5">ชวนเพื่อน & ค่าคอม</p>
+            <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1]">{t("dashboard_index.community_rank_title", "คอมมูนิตี้ Rank")}</p>
+            <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-0.5">{t("dashboard_index.community_rank_desc", "ชวนเพื่อน & ค่าคอม")}</p>
           </div>
         </Link>
       </div>
@@ -737,10 +783,10 @@ export default function DashboardIndex() {
  
               <div>
                 <h3 className="font-display text-2xl font-black text-slate-900 dark:text-[#F8F6F1] tracking-wide glow-gold">
-                  🎁 รางวัลล็อกอินรายวัน
+                  {t("dashboard_index.login_reward_title", "🎁 รางวัลล็อกอินรายวัน")}
                 </h3>
                 <p className="text-slate-600 dark:text-[#D9CDB7] text-xs mt-1.5 font-sans-thai leading-relaxed">
-                  ยินดีต้อนรับกลับมาเชื่อมต่อชะตาชีวิตในวันนี้! คุณได้รับทรายกาลเวลาสำหรับสร้างแผนชะตาฟ้า
+                  {t("dashboard_index.login_reward_desc", "ยินดีต้อนรับกลับมาเชื่อมต่อชะตาชีวิตในวันนี้! คุณได้รับทรายกาลเวลาสำหรับสร้างแผนชะตาฟ้า")}
                 </p>
               </div>
  
@@ -755,7 +801,7 @@ export default function DashboardIndex() {
                   onClick={() => setShowLoginModal(false)}
                   className="w-full py-3 rounded-xl text-xs font-black text-slate-950 dark:text-[#020617] bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] transition-all hover:scale-105 active:scale-95 shadow-md shadow-[#C6A96B]/20"
                 >
-                  รับสิทธิ์และเข้าสู่ระบบ
+                  {t("dashboard_index.login_reward_claim", "รับสิทธิ์และเข้าสู่ระบบ")}
                 </button>
               </div>
             </div>

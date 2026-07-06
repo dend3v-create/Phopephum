@@ -2058,7 +2058,9 @@ function FateMatrixPanel({
                   }`}
                 >
                   <td className="py-[3px] sm:py-1 pr-1 sm:pr-2 text-left whitespace-nowrap w-[36px] sm:w-[65px]">
-                    <p className={`text-[11px] sm:text-[12px] font-extrabold tracking-wider ${isBase4 ? "text-[#6D8FC7]/90" : "text-[#F8F6F1]/75"}`}>{ROW_META[rIdx].label}</p>
+                    <p className={`text-[11px] sm:text-[12px] font-extrabold tracking-wider ${isBase4 ? "text-[#6D8FC7]/90" : "text-[#F8F6F1]/75"}`}>
+                      {tHoro("bases." + (rIdx + 1), ROW_META[rIdx].label)}
+                    </p>
                   </td>
                   {row.map((num, cIdx) => {
                     const isBase4 = rIdx === 3;
@@ -2163,7 +2165,9 @@ function FateMatrixPanel({
                             {/* ── ชื่อภพ ── */}
                             {showHouseNames && houseName && (
                               <span className="text-[9.5px] sm:text-[11px] text-[#F8F6F1]/70 mt-1 leading-tight text-center font-bold px-0.5">
-                                {houseName}
+                                {isBase4 
+                                  ? tHoro("base4_meanings." + houseName, houseName) 
+                                  : tHoro("houses." + houseName, houseName)}
                               </span>
                             )}
 

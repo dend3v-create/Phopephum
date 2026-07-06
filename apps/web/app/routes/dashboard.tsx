@@ -9,6 +9,7 @@ import { ThemeToggle } from "~/components/ThemeToggle";
 import { LanguageSwitcher } from "~/components/LanguageSwitcher";
 import type { Env } from "~/env.server";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -36,11 +37,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
 // ── Single source of truth for main nav (5 items) ────────────────────────────
 const NAV_ITEMS = [
-  { to: "/dashboard",            label: "แดชบอร์ด",         icon: "grid",    exact: true  },
-  { to: "/dashboard/check-yam",  label: "เช็คฤกษ์ยาม",     icon: "yam",     exact: false },
-  { to: "/dashboard/horoscope",  label: "ตั้งดวงชะตา",     icon: "journey", exact: false },
-  { to: "/dashboard/planner",    label: "แผนงาน",           icon: "journal", exact: false },
-  { to: "/dashboard/settings",   label: "โปรไฟล์",         icon: "profile", exact: false },
+  { to: "/dashboard",            labelKey: "dashboard",    icon: "grid",    exact: true  },
+  { to: "/dashboard/check-yam",  labelKey: "check-yam",    icon: "yam",     exact: false },
+  { to: "/dashboard/horoscope",  labelKey: "horoscope",    icon: "journey", exact: false },
+  { to: "/dashboard/planner",    labelKey: "planner",      icon: "journal", exact: false },
+  { to: "/dashboard/settings",   labelKey: "settings",     icon: "profile", exact: false },
 ] as const;
 
 type IconKey = typeof NAV_ITEMS[number]["icon"];
@@ -171,8 +172,9 @@ function NavIcon({ name, size = 5 }: { name: IconKey | string; size?: number | s
 
 export default function DashboardLayout() {
   const { user, profile } = useLoaderData<typeof loader>();
+  const { t } = useTranslation("common");
   const location = useLocation();
-  const displayName = profile?.display_name ?? profile?.email ?? "ผู้ใช้งาน";
+  const displayName = profile?.display_name ?? profile?.email ?? t("auth.user", "ผู้ใช้งาน");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isQuickMenuOpen, setIsQuickMenuOpen] = useState(false);
 
@@ -224,7 +226,9 @@ export default function DashboardLayout() {
 
         {/* ── Main Nav — exactly 5 items ── */}
         <nav className="flex flex-col gap-0.5 flex-1 overflow-y-auto">
-          <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] px-3 mb-1.5 opacity-70">เมนูหลัก</p>
+          <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] px-3 mb-1.5 opacity-70">
+            {t("nav.main_menu", "เมนูหลัก")}
+          </p>
 
           {NAV_ITEMS.map(item => (
             <NavLink
@@ -232,7 +236,7 @@ export default function DashboardLayout() {
               to={item.to}
               exact={item.exact}
               icon={<NavIcon name={item.icon} />}
-              label={item.label}
+              label={t("nav." + item.labelKey)}
             />
           ))}
 
@@ -240,35 +244,35 @@ export default function DashboardLayout() {
             to="/dashboard/community"
             exact={false}
             icon={<NavIcon name="people" />}
-            label="ชะตาพันธมิตร"
+            label={t("nav.community")}
           />
 
           {/* ── Pro Astrologer Tools ── */}
           {isPro && (
             <div className="mt-5 pt-4 border-t" style={{ borderColor: "rgba(217,188,130,0.08)" }}>
               <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#C6A96B]/50 px-3 mb-1.5">
-                ✦ เครื่องมือนักพยากรณ์
+                {t("nav.pro_tools")}
               </p>
-              <NavLink to="/dashboard/yam"          exact={false} icon={<NavIcon name="yam" />}        label="ยามอัฐกาลชั้นฉาย" />
-              <NavLink to="/dashboard/karnchata"    exact={false} icon={<NavIcon name="hourglass" />}  label="เลข ๗ ตัวกาลชะตา" />
-              <NavLink to="/dashboard/horanu"       exact={false} icon={<NavIcon name="horanu" />}     label="ยามพรายกระซิบ" />
-              <NavLink to="/dashboard/rahu"         exact={false} icon={<NavIcon name="rahu" />}       label="ยามราหูค้นทรัพย์" />
-              <NavLink to="/dashboard/mahathaksa"   exact={false} icon={<NavIcon name="taksa" />}     label="มหาทักษาพยากรณ์" />
-              <NavLink to="/dashboard/mahaphuti"    exact={false} icon={<NavIcon name="phuti" />}     label="มหาภูติกำเนิด" />
-              <NavLink to="/dashboard/people"       exact={false} icon={<NavIcon name="people" />}    label="โปรไฟล์บุคคล" />
-              <NavLink to="/dashboard/calendar"     exact={false} icon={<NavIcon name="list" />}       label="ปฏิทิน 100 ปี" />
+              <NavLink to="/dashboard/yam"          exact={false} icon={<NavIcon name="yam" />}        label={t("nav.yam_pro")} />
+              <NavLink to="/dashboard/karnchata"    exact={false} icon={<NavIcon name="hourglass" />}  label={t("nav.karnchata")} />
+              <NavLink to="/dashboard/horanu"       exact={false} icon={<NavIcon name="horanu" />}     label={t("nav.yam_whisper")} />
+              <NavLink to="/dashboard/rahu"         exact={false} icon={<NavIcon name="rahu" />}       label={t("nav.rahu")} />
+              <NavLink to="/dashboard/mahathaksa"   exact={false} icon={<NavIcon name="taksa" />}     label={t("nav.taksa")} />
+              <NavLink to="/dashboard/mahaphuti"    exact={false} icon={<NavIcon name="phuti" />}     label={t("nav.phuti")} />
+              <NavLink to="/dashboard/people"       exact={false} icon={<NavIcon name="people" />}    label={t("nav.people")} />
+              <NavLink to="/dashboard/calendar"     exact={false} icon={<NavIcon name="list" />}       label={t("nav.calendar_100")} />
             </div>
           )}
 
           {/* ── Admin / Operator ── */}
           {(profile?.role === "admin" || profile?.role === "operator") && (
             <div className="mt-2">
-              <NavLink to="/operator" exact={false} icon={<NavIcon name="operator" />} label="ระบบ Operator" />
+              <NavLink to="/operator" exact={false} icon={<NavIcon name="operator" />} label={t("nav.operator_system")} />
             </div>
           )}
           {profile?.role === "admin" && (
             <div className="mt-1">
-              <NavLink to="/admin/approvals" exact={false} icon={<NavIcon name="approve" />} label="อนุมัติคำขอ" />
+              <NavLink to="/admin/approvals" exact={false} icon={<NavIcon name="approve" />} label={t("nav.approvals")} />
             </div>
           )}
         </nav>
@@ -282,7 +286,7 @@ export default function DashboardLayout() {
               style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)", color: "#020617" }}
             >
               <NavIcon name="sparkles" size={4} />
-              อัปเกรดสมาชิก
+              {t("nav.upgrade_membership")}
             </Link>
           )}
           {profile?.role === "admin" && (
@@ -290,17 +294,17 @@ export default function DashboardLayout() {
               className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl text-xs font-bold tracking-wide"
               style={{ background: "linear-gradient(135deg, #1e3a5f, #2d5490)", border: "1px solid rgba(56,189,248,0.35)", color: "#38BDF8" }}>
               <NavIcon name="admin" size={4} />
-              Admin Dashboard
+              {t("nav.admin_dashboard")}
             </a>
           )}
           {/* ── Sands of Time Token Progress Bar ── */}
           <div className="px-3 py-2 rounded-xl mb-1.5" style={{ background: "rgba(198,169,107,0.05)", border: "1px solid rgba(198,169,107,0.15)" }}>
             <div className="flex justify-between items-center text-[10px] font-bold text-[#C6A96B] mb-1">
-              <span className="tracking-wider">⏳ SANDS OF TIME</span>
+              <span className="tracking-wider">{t("sands_of_time")}</span>
               {isPro ? (
-                <span className="text-xs">♾️ Unlimited</span>
+                <span className="text-xs">{t("unlimited")}</span>
               ) : (
-                <span>{profile?.time_sands ?? 0} / 15 เม็ด</span>
+                <span>{t("sands_unit", { count: profile?.time_sands ?? 0 })}</span>
               )}
             </div>
             {!isPro && (
@@ -331,7 +335,7 @@ export default function DashboardLayout() {
           </div>
           <Form method="post" action="/logout">
             <button type="submit" className="w-full text-left text-xs px-2 py-1.5 rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5" style={{ color: "var(--text-muted)" }}>
-              ออกจากระบบ
+              {t("nav.logout")}
             </button>
           </Form>
         </div>
@@ -426,7 +430,9 @@ export default function DashboardLayout() {
                   className="flex flex-col items-center justify-center w-16 h-12 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
                 >
                   <NavIcon name="calendar" size={4.5} />
-                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">ฤกษ์มงคล</span>
+                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">
+                    {t("nav.calendar_100")}
+                  </span>
                 </Link>
 
                 {/* แผนงาน */}
@@ -436,7 +442,9 @@ export default function DashboardLayout() {
                   className="flex flex-col items-center justify-center w-16 h-12 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
                 >
                   <NavIcon name="journal" size={4.5} />
-                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">แผนงาน</span>
+                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full">
+                    {t("nav.planner")}
+                  </span>
                 </Link>
 
                 {/* พันธมิตร */}
@@ -446,7 +454,9 @@ export default function DashboardLayout() {
                   className="flex flex-col items-center justify-center w-16 h-12 text-[var(--text-secondary)] hover:text-[#C6A96B] transition-colors"
                 >
                   <NavIcon name="people" size={4.5} />
-                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full leading-none">พันธมิตร</span>
+                  <span className="text-[11px] font-bold mt-1 text-center truncate w-full leading-none">
+                    {t("nav.community")}
+                  </span>
                 </Link>
               </div>
 
@@ -454,7 +464,7 @@ export default function DashboardLayout() {
               <button
                 onClick={() => setIsQuickMenuOpen(false)}
                 className="w-12 h-12 rounded-full bg-[var(--text-body)] border border-slate-300 dark:border-slate-700 flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-all text-[var(--bg-base)]"
-                aria-label="ปิดเมนูด่วน"
+                aria-label={t("nav.close_menu", "ปิดเมนูด่วน")}
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} className="w-5 h-5">
                   <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
@@ -494,12 +504,13 @@ function MobileBottomBar({
   isQuickMenuOpen: boolean;
   setIsQuickMenuOpen: (open: boolean) => void;
 }) {
+  const { t } = useTranslation("common");
   const tabs = [
-    { to: "/dashboard",            label: "แดชบอร์ด",    icon: "grid",     exact: true },
-    { to: "/dashboard/check-yam",  label: "ฤกษ์ยาม",      icon: "yam",      exact: false },
-    { type: "quick-menu",          label: "เมนูด่วน",    icon: "sparkles" },
-    { to: "/dashboard/horoscope",  label: "ตั้งดวงชะตา",  icon: "journey",  exact: false },
-    { to: "/dashboard/settings",   label: "โปรไฟล์",     icon: "profile",  exact: false },
+    { to: "/dashboard",            labelKey: "dashboard",    icon: "grid",     exact: true },
+    { to: "/dashboard/check-yam",  labelKey: "check-yam",    icon: "yam",      exact: false },
+    { type: "quick-menu",          labelKey: "quick_menu",   icon: "sparkles" },
+    { to: "/dashboard/horoscope",  labelKey: "horoscope",    icon: "journey",  exact: false },
+    { to: "/dashboard/settings",   labelKey: "settings",     icon: "profile",  exact: false },
   ] as const;
 
   return (
@@ -520,19 +531,19 @@ function MobileBottomBar({
               onClick={() => setIsQuickMenuOpen(!isQuickMenuOpen)}
               className="relative flex-1 flex flex-col items-center justify-center gap-0.5 transition-colors"
               style={{ color: isQuickMenuOpen ? "#C6A96B" : "#94A3B8" }}
-              aria-label="เปิดเมนูด่วน"
+              aria-label={t("nav.quick_menu", "เมนูด่วน")}
             >
               <span className={`w-9 h-9 rounded-full flex items-center justify-center transition-all bg-[#0a2240]/60 border border-[#C6A96B]/30 hover:scale-105 active:scale-95 ${isQuickMenuOpen ? "rotate-45" : ""}`}>
                 <NavIcon name="sparkles" size={5} />
               </span>
               <span className="text-[10px] font-medium leading-none tracking-wide">
-                {tab.label}
+                {t("nav.quick_menu", "เมนูด่วน")}
               </span>
             </button>
           );
         }
 
-        const navLink = tab as { readonly to: string; readonly label: string; readonly icon: string; readonly exact: boolean };
+        const navLink = tab as { readonly to: string; readonly labelKey: string; readonly icon: string; readonly exact: boolean };
         const isActive = navLink.exact
           ? currentPath === navLink.to
           : currentPath.startsWith(navLink.to);
@@ -555,7 +566,7 @@ function MobileBottomBar({
               <NavIcon name={navLink.icon} size={5} />
             </span>
             <span className="text-[10px] font-medium leading-none tracking-wide">
-              {navLink.label}
+              {t("nav." + navLink.labelKey)}
             </span>
           </Link>
         );
@@ -563,3 +574,4 @@ function MobileBottomBar({
     </nav>
   );
 }
+

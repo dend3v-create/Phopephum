@@ -11,9 +11,11 @@ import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import { Input } from "~/components/ui/Input";
 import type { Env } from "~/env.server";
+import { useTranslation } from "react-i18next";
+import i18next from "~/lib/i18n/i18n.server";
 
 export const meta: MetaFunction = () => [
-  { title: "สร้างบทวิเคราะห์ชีวิต — PhopePhum" },
+  { title: "New Report — PhopePhum" },
 ];
 
 const REPORT_TYPES = [
@@ -77,7 +79,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const { profile } = await requireMinPlan("basic", request, env);
   const aiLimit = getAiReportLimit(profile);
-  return json({ profile, aiLimit });
+  
+  const locale = await i18next.getLocale(request);
+  const currentLocale = locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "th-TH";
+
+  return json({ profile, aiLimit, currentLocale });
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -88,7 +94,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const reportType = String(formData.get("reportType") ?? "general_prediction");
   const displayName = String(formData.get("displayName") ?? "");
   
-  // ── แปลงวันที่เกิด พ.ศ. ➔ ค.ศ. ──
   const bDay = Number(formData.get("birthDay") ?? "0");
   const bMonth = Number(formData.get("birthMonth") ?? "0");
   const bYear = Number(formData.get("birthYear") ?? "0");
@@ -100,41 +105,42 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const birthTime = String(formData.get("birthTime") ?? "");
   const birthPlace = String(formData.get("birthPlace") ?? "");
 
-  if (!birthDate) {
-    return json({ error: "กรุณาเลือกวันเกิดก่อนสร้างรายงาน" });
+  const { supabase } = createSupabaseClient(request, env);
+  const locale = await i18next.getLocale(request);
+
+  // 1. Get Profile & check quota
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan, time_sands")
+    .eq("id", user.id)
+    .single();
+
+  const plan = getUserPlan(profile);
+  const isPremium = plan === "pro" || plan === "imperial";
+  const currentSands = profile?.time_sands ?? 0;
+
+  if (!isPremium && currentSands <= 0) {
+    return json({ error: "คุณไม่มีเม็ดทรายกาลเวลาเหลือพอสำหรับการวิเคราะห์นี้ (Sands of Time: 0) กรุณาร่วมกิจกรรมรายวันหรืออัปเกรดเพื่อวิเคราะห์ไม่จำกัด" });
+  }
+
+  // 2. Count reports today
+  const startOfDay = new Date();
+  startOfDay.setUTCHours(0, 0, 0, 0);
+
+  const { count: reportsCount } = await supabase
+    .from("ai_reports")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id)
+    .eq("report_type", reportType)
+    .gte("created_at", startOfDay.toISOString());
+
+  const limit = getAiReportLimit(profile);
+  if (reportsCount && reportsCount >= limit) {
+    return json({ error: `คุณสร้างบทวิเคราะห์ประเภทนี้ครบกำหนด ${limit} ครั้งของวันนี้แล้ว กรุณากลับมาใหม่ในวันถัดไป` });
   }
 
   try {
-    const { supabase } = createSupabaseClient(request, env);
-    const profile = await getProfile(user.id, request, env);
-
-    // ── 1. Quota Check — enforce time_sands balance for non-imperial plans ──
-    const userPlan = getUserPlan(profile);
-    const isPremium = userPlan === "imperial" || profile?.role === "admin" || profile?.role === "operator";
-    const currentSands = profile?.time_sands ?? 0;
-
-    if (!isPremium) {
-      if (currentSands <= 0) {
-        return json({ error: "ขออภัย ท่านไม่มีทรายกาลเวลา (Sands of Time) คงเหลือในระบบนาฬิกาทราย กรุณาอัปเกรดแผนสมาชิกหรือเติมเม็ดทรายกาลเวลาเพื่อสร้างรายงานใหม่" });
-      }
-    }
-
-    // ── 2. Update Profile ──
-    const { error: profileUpdateError } = await supabase
-      .from("profiles")
-      .update({
-        ...(displayName && { display_name: displayName }),
-        ...(birthDate && { birth_date: birthDate }),
-        ...(birthTime && { birth_time: birthTime }),
-        ...(birthPlace && { birth_place: birthPlace }),
-      })
-      .eq("id", user.id);
-
-    if (profileUpdateError) {
-      console.warn("Profile update during report gen warning:", profileUpdateError);
-    }
-
-    // ── 3. Call AI Service ──
+    // 3. Call AI report generator
     const stream = await generateAIReport(
       {
         userId: user.id,
@@ -145,7 +151,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           birthPlace: birthPlace || null,
           displayName: displayName || "ผู้ใช้งาน",
         },
-        locale: (profile.language as any) || "th",
+        locale: (locale === "zh" ? "zh" : locale === "en" ? "en" : "th") as any,
       },
       env
     );
@@ -153,56 +159,56 @@ export async function action({ request, context }: ActionFunctionArgs) {
     // ── 4. Collect SSE stream → plain text ──
     const reader = stream.getReader();
     const decoder = new TextDecoder();
-    let text = "";
+    let reportText = "";
     let buffer = "";
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split("\n");
-        buffer = lines.pop() ?? "";
-
-        for (const line of lines) {
-          if (!line.trim() || !line.startsWith("data: ")) continue;
-          const raw = line.slice(6).trim();
+    
+    while (true) {
+      const { value, done } = await reader.read();
+      if (done) break;
+      const chunk = decoder.decode(value, { stream: true });
+      buffer += chunk;
+      
+      const lines = buffer.split("\n");
+      buffer = lines.pop() || "";
+      
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          const raw = line.slice(6);
           if (raw === "[DONE]") break;
           try {
             const parsed = JSON.parse(raw);
-            if (parsed.text) text += parsed.text;
+            if (parsed.text) {
+              reportText += parsed.text;
+            }
           } catch (e) {
-            console.error("Malformed SSE chunk:", raw, e);
+            // ignore JSON error for custom chunk
           }
         }
       }
-    } finally {
-      reader.releaseLock();
     }
 
-    if (!text || text.length < 50) {
-      return json({ error: "ระบบพยากรณ์ไม่ส่งเนื้อหากลับมา หรือเนื้อหาสั้นเกินไป กรุณาลองใหม่อีกครั้ง" });
-    }
-
-    // ── 5. Save to Database ──
+    // 4. Save to Database
     const { data: report, error: insertError } = await supabase
       .from("ai_reports")
       .insert({
         user_id: user.id,
         report_type: reportType,
-        content: text,
+        display_name: displayName,
+        birth_date: birthDate,
+        birth_time: birthTime || null,
+        birth_place: birthPlace || null,
+        content: reportText,
       })
       .select("id")
       .single();
 
-    if (insertError || !report) {
+    if (insertError) {
       console.error("Report save error:", insertError);
       alertDatabaseError(env, "insert ai_reports", insertError, user.id).catch(console.error);
       return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` });
     }
 
-    // ── 5.1 Decrement Sands of Time if not premium (ไหลลดลง 1 ละอองทราย) ──
+    // 5. Decrement Sands of Time if not premium
     if (!isPremium) {
       const { error: decrementError } = await supabase
         .from("profiles")
@@ -214,7 +220,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       }
     }
 
-    // ── 6. Record Usage (Non-blocking) ──
+    // 6. Record Usage (Non-blocking)
     supabase.from("ai_report_usage").insert({
       user_id: user.id,
       report_type: reportType,
@@ -233,15 +239,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Page Component
-// ─────────────────────────────────────────────────────────────────────────────
-
 export default function NewReportPage() {
   const { profile } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isGenerating = navigation.state === "submitting";
+  const { t } = useTranslation(["common"]);
 
   const [searchParams] = useSearchParams();
   const defaultType = searchParams.get("type") || "general_prediction";
@@ -249,13 +252,11 @@ export default function NewReportPage() {
   const [selectedType, setSelectedType] = useState<string>(defaultType);
   const selectedMeta = REPORT_TYPES.find((t) => t.value === selectedType);
 
-  // ── Hydration Fix ──
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // ── คำนวณค่าเริ่มต้นวันเกิด (พ.ศ.) ──
   const birthDateObj = profile?.birth_date ? new Date(profile.birth_date) : null;
   const defaultBDay = birthDateObj ? birthDateObj.getDate() : 15;
   const defaultBMonth = birthDateObj ? birthDateObj.getMonth() + 1 : 6;
@@ -277,13 +278,13 @@ export default function NewReportPage() {
       <div className="relative">
         <div className="absolute -top-4 -left-4 w-32 h-32 bg-[#C6A96B]/8 rounded-full blur-3xl pointer-events-none" />
         <p className="text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold mb-2">
-          ✦ สร้างใหม่
+          {t("common:reports.subtitle", "✦ สร้างใหม่")}
         </p>
         <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">
-          บทวิเคราะห์ชีวิต
+          {t("common:reports.title", "บทวิเคราะห์ชีวิต")}
         </h1>
         <p className="text-[#C6B79F] text-sm mt-1">
-          ถอดรหัสชะตาชีวิตด้วยระบบ Living Wisdom Engine · ทักษา · มหาภูติ · เลข 7 ตัว
+          {t("common:reports.desc", "ถอดรหัสชะตาชีวิตด้วยระบบ Living Wisdom Engine · ทักษา · มหาภูติ · เลข 7 ตัว")}
         </p>
       </div>
 
@@ -292,7 +293,9 @@ export default function NewReportPage() {
         <div className="animate-in fade-in rounded-2xl border border-red-400/30 bg-red-400/5 px-5 py-4 flex items-start gap-3">
           <span className="text-red-400 text-lg flex-shrink-0 mt-0.5">⚠</span>
           <div>
-            <p className="text-sm font-semibold text-red-300 mb-0.5">เกิดข้อผิดพลาด</p>
+            <p className="text-sm font-semibold text-red-300 mb-0.5">
+              {t("common:action.cancel", "เกิดข้อผิดพลาด")}
+            </p>
             <p className="text-xs text-red-200/80 leading-relaxed">{actionData.error}</p>
           </div>
         </div>
@@ -303,7 +306,7 @@ export default function NewReportPage() {
         {/* ── Report Type Grid ── */}
         <div>
           <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-3">
-            เลือกประเภทรายงาน
+            {t("common:reports.select_type", "เลือกประเภทรายงาน")}
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {REPORT_TYPES.map((type) => (
@@ -331,10 +334,10 @@ export default function NewReportPage() {
                   </span>
                   <div>
                     <p className={`text-sm font-bold ${selectedType === type.value ? 'text-[#F8F6F1]' : 'text-[#D9CDB7]'}`}>
-                      {type.label}
+                      {t("common:reports.types." + type.value + ".label", String(type.label))}
                     </p>
                     <p className="text-[13px] text-[#C6B79F] mt-0.5 leading-relaxed">
-                      {type.desc}
+                      {t("common:reports.types." + type.value + ".desc", String(type.desc))}
                     </p>
                   </div>
                 </div>
@@ -347,21 +350,25 @@ export default function NewReportPage() {
         <div className="space-y-6">
           <div>
             <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-3 flex items-center justify-between">
-              <span>ข้อมูลสำหรับผูกดวง</span>
-              <span className="font-normal normal-case opacity-60">ดึงจากโปรไฟล์อัตโนมัติ - แก้ไขได้เพื่อใช้ในรายงานนี้</span>
+              <span>{t("common:reports.form_title", "ข้อมูลสำหรับผูกดวง")}</span>
+              <span className="font-normal normal-case opacity-60 text-xs hidden sm:inline">
+                {t("common:reports.form_desc", "ดึงจากโปรไฟล์อัตโนมัติ - แก้ไขได้เพื่อใช้ในรายงานนี้")}
+              </span>
             </p>
             
             <div className="card-glass border-white/5 p-6 rounded-2xl space-y-6">
               <Input
                 name="displayName"
-                label="ชื่อที่ใช้แสดงในรายงาน"
+                label={t("common:reports.report_name", "ชื่อที่ใช้แสดงในรายงาน")}
                 defaultValue={profile?.display_name || ""}
-                placeholder="ระบุชื่อของคุณ"
+                placeholder={t("common:reports.report_name_placeholder", "ระบุชื่อของคุณ")}
               />
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-[13px] font-bold text-[#C6B79F] uppercase tracking-wider ml-1">วันเกิด (พ.ศ.)</label>
+                  <label className="text-[13px] font-bold text-[#C6B79F] uppercase tracking-wider ml-1">
+                    {t("common:settings.birth_day", "วันเกิด (พ.ศ.)")}
+                  </label>
                   <div className="grid grid-cols-3 gap-2">
                     <select name="birthDay" defaultValue={defaultBDay} className="bg-black/40 border border-white/10 rounded-xl px-2 py-2.5 text-xs text-[#F8F6F1] focus:border-[#C6A96B] transition-all">
                       {Array.from({ length: 31 }, (_, i) => (
@@ -385,13 +392,13 @@ export default function NewReportPage() {
                 <Input
                   name="birthTime"
                   type="time"
-                  label="เวลาเกิด"
+                  label={t("common:settings.birth_time", "เวลาเกิด")}
                   defaultValue={profile?.birth_time || ""}
                 />
 
                 <Input
                   name="birthPlace"
-                  label="จังหวัดที่เกิด"
+                  label={t("common:settings.birth_place", "จังหวัดที่เกิด")}
                   defaultValue={profile?.birth_place || ""}
                   placeholder="เช่น กรุงเทพฯ"
                 />
@@ -405,8 +412,12 @@ export default function NewReportPage() {
           <div className={`rounded-2xl border bg-gradient-to-r ${selectedMeta.color} ${selectedMeta.border} p-4 flex items-center gap-4`}>
             <span className="text-3xl flex-shrink-0">{selectedMeta.icon}</span>
             <div className="flex-1 min-w-0">
-              <p className="text-[#F8F6F1] font-semibold text-sm">{selectedMeta.label}</p>
-              <p className="text-[#C6B79F] text-xs">{selectedMeta.desc}</p>
+              <p className="text-[#F8F6F1] font-semibold text-sm">
+                {t("common:reports.types." + selectedMeta.value + ".label", String(selectedMeta.label))}
+              </p>
+              <p className="text-[#C6B79F] text-xs">
+                {t("common:reports.types." + selectedMeta.value + ".desc", String(selectedMeta.desc))}
+              </p>
             </div>
             <div className="text-right flex-shrink-0 hidden sm:block">
               <p className="text-[#C9A96E] text-[13px] font-bold uppercase">Wisdom Guidance</p>
@@ -419,22 +430,21 @@ export default function NewReportPage() {
         <Button
           type="submit"
           loading={isGenerating}
-          disabled={isGenerating}
           className="w-full h-14 text-base font-bold"
         >
           {isGenerating ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-              กำลังประมวลผล... (30–60 วิ)
+              {t("common:reports.generating", "กำลังจัดส่งจิตสู่ปัญญาดาว...")}
             </span>
           ) : (
-            `✨ สร้างบทวิเคราะห์ · ${selectedMeta?.label ?? ""}`
+            `✨ ${t("common:reports.generate_btn", "สร้างรายงาน AI")} · ${t("common:reports.types." + (selectedMeta?.value || "general_prediction") + ".label", String(selectedMeta?.label ?? ""))}`
           )}
         </Button>
 
         <p className="text-center text-[#C6B79F] text-[14px]">
           ระบบ Living Wisdom ใช้เฉพาะข้อมูลดวงชะตาของคุณ ไม่เก็บข้อมูลส่วนตัวอื่น
         </p>
+
       </Form>
 
       {/* ── Full-screen Generating Overlay ── */}
@@ -456,7 +466,7 @@ export default function NewReportPage() {
                 กำลังเปิดดวงชะตา
               </p>
               <p className="text-[#C9A96E] text-sm font-semibold mb-2">
-                {selectedMeta?.label}
+                {t("common:reports.types." + (selectedMeta?.value || "general_prediction") + ".label", String(selectedMeta?.label ?? ""))}
               </p>
               <p className="text-[#C6B79F] text-xs leading-relaxed">
                 ระบบกำลังวิเคราะห์ทักษา มหาภูติ และเลข 7 ตัว<br />กรุณารอสักครู่...

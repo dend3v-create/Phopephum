@@ -15,12 +15,15 @@ import {
   PLANET_INFO,
   ZODIAC_ORDER,
   BHAVA_NAMES,
+  PLANET_KASTERN,
+  KASTERN_FIXED,
 } from "@phopephum/engine";
-import type { HoraTaynooResult, ChartConfig, ChartInterpretation } from "@phopephum/engine";
+import type { HoraTaynooResult, ChartConfig, ChartInterpretation, PlanetEntry } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import type { Env } from "~/env.server";
 import { getYamLibrary } from "~/services/yam-library.server";
+import { createSupabaseClient } from "~/services/supabase.server";
 import type { YamLibraryRow } from "~/services/yam-library.server";
 import { useState, useEffect, useRef } from "react";
 
@@ -33,6 +36,7 @@ export const meta: MetaFunction = () => [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
+  const user = await requireAuth(request, env);
   await requireMinPlan("basic", request, env);
 
   const now    = new Date();
@@ -42,7 +46,23 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const meta   = getSuccessYamMeta();
   const library = await getYamLibrary(env);
 
-  return json({ result, interpretation, svg, serverTime: now.toISOString(), meta, library });
+  const { supabase } = createSupabaseClient(request, env);
+  const { data: pastChats } = await supabase
+    .from("horanu_chats")
+    .select("*")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(30);
+
+  return json({
+    result,
+    interpretation,
+    svg,
+    serverTime: now.toISOString(),
+    meta,
+    library,
+    pastChats: pastChats || [],
+  });
 }
 
 // ─── Action ───────────────────────────────────────────────────────────────────
@@ -93,45 +113,6 @@ const DAY_COLORS   = ["#F59E0B","#CBD5E1","#EF4444","#10B981","#EAB308","#A855F7
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-function ChartInterpretationPanel({ interpretation }: { interpretation: ChartInterpretation }) {
-  const { overallScore, grade, categories } = interpretation;
-  const gradeColor = grade === 'A' ? 'text-emerald-400' : grade === 'B' ? 'text-blue-400' : grade === 'C' ? 'text-yellow-400' : 'text-rose-400';
-  
-  return (
-    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 bg-[#6EB0F5] rounded-full" />
-          <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">คำพยากรณ์ดวงยาม (Rule-Based)</p>
-        </div>
-        <div className="text-right flex items-end gap-2">
-          <span className={`font-display text-2xl font-bold leading-none ${gradeColor}`}>{grade}</span>
-          <span className="text-[#D9CDB7] text-[10px]">Score: {overallScore}/100</span>
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        {[
-          { label: 'การเงิน', text: categories.finance, icon: '💰' },
-          { label: 'การงาน', text: categories.work, icon: '💼' },
-          { label: 'ความรัก', text: categories.love, icon: '❤️' },
-          { label: 'สุขภาพ', text: categories.health, icon: '🏥' },
-          { label: 'คดีความ', text: categories.law, icon: '⚖️' },
-        ].map(cat => (
-          <div key={cat.label} className="bg-[#020617]/50 rounded-xl p-3 border border-white/5">
-            <div className="flex items-start gap-3">
-              <span className="text-lg mt-0.5">{cat.icon}</span>
-              <div>
-                <p className="text-[10px] text-[#C9A96E] font-bold mb-0.5">{cat.label}</p>
-                <p className="text-xs text-[#F8F6F1] leading-relaxed">{cat.text}</p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}
 
 function YamBadge({ result }: { result: HoraTaynooResult }) {
   return (
@@ -186,6 +167,228 @@ function PlanetSummary({ result }: { result: HoraTaynooResult }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function getPlanetThreeBhavas(planetNum: number, zodiacIndex: number, bhavaMap: Record<number, string>, status: string | null): string[] {
+  const occBhava = bhavaMap[zodiacIndex] ?? "—";
+  const ownedZodiacs = PLANET_KASTERN[planetNum] ?? [];
+  const ownedBhavas = ownedZodiacs.map(z => bhavaMap[z] ?? "—");
+  
+  if (ownedBhavas.length === 1) {
+    return [ownedBhavas[0], ownedBhavas[0], occBhava];
+  } else if (ownedBhavas.length === 2) {
+    return [ownedBhavas[0], ownedBhavas[1], occBhava];
+  }
+  
+  return [occBhava, occBhava, occBhava];
+}
+
+function ThreeBhavaTable({ result }: { result: HoraTaynooResult }) {
+  const planetsList = [1, 2, 3, 4, 5, 6, 7, 8];
+  return (
+    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 bg-[#C9A96E] rounded-full" />
+        <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold font-display">ดาว 3 ภพ (เจ้าเรือน + สถิต)</p>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {planetsList.map(pNum => {
+          const pInfo = PLANET_INFO[pNum];
+          const entry = result.planetEntries.find(e => e.planetNum === pNum);
+          if (!entry) return null;
+          const threeBhavas = getPlanetThreeBhavas(pNum, entry.zodiacIndex, result.bhavaMap, entry.status);
+          return (
+            <div key={pNum} className="rounded-xl p-2 text-center border border-white/5 bg-slate-950/20">
+              <div className="flex items-center justify-between mb-0.5">
+                <span className="text-[9px] text-[#D9CDB7] font-bold">ดาว {pNum}</span>
+                {entry.status && (
+                  <span className="text-[7.5px] px-1 py-0.2 rounded bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">
+                    {entry.status === 'kaset' ? 'เกษตร' : entry.status === 'maha-uccj' ? 'อุจจ์' : entry.status === 'racha-chok' ? 'ราชาโชค' : entry.status === 'maha-chakr' ? 'มหาจักร' : entry.status === 'pra' ? 'ประ' : 'นิจ'}
+                  </span>
+                )}
+              </div>
+              <div className="font-display text-sm font-bold text-[#F8F6F1] mb-0.5">
+                {pInfo?.thai.replace('พระ', '') ?? `ดาว ${pNum}`}
+              </div>
+              <div className="text-[9px] text-[#C9A96E] font-medium leading-relaxed">
+                {threeBhavas.join(' - ')}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Card>
+  );
+}
+
+function CurrentPredictionPoint({ result }: { result: HoraTaynooResult }) {
+  const [nowMin, setNowMin] = useState(0);
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setNowMin(now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60);
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  let activeSlot = result.subTimeSlots.find(slot => nowMin >= slot.startMin && nowMin < slot.endMin);
+  if (!activeSlot) activeSlot = result.subTimeSlots[0];
+
+  const planetsInSlot = result.planetEntries.filter(e => e.zodiacIndex === activeSlot.zodiacIndex && !e.isLagna);
+  
+  const STATUS_GLYPHS: Record<string, { char: string; color: string; label: string }> = {
+    'maha-uccj': { char: '✿', color: '#22C55E', label: 'มหาอุจจ์' },
+    'kaset': { char: '△', color: '#EF4444', label: 'เกษตร' },
+    'racha-chok': { char: '⬡', color: '#3B82F6', label: 'ราชาโชค' },
+    'maha-chakr': { char: '□', color: '#EAB308', label: 'มหาจักร' },
+    'pra': { char: '○', color: '#EF4444', label: 'ประ' },
+    'nij': { char: '✳', color: '#EF4444', label: 'นิจ' },
+  };
+
+  return (
+    <div className="border border-[#C9A96E]/20 bg-[#C9A96E]/5 rounded-2xl p-4 mt-3">
+      <p className="text-[10px] text-[#C9A96E] uppercase tracking-wider mb-2 font-bold flex items-center gap-1.5 font-display">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        จุดพยากรณ์ปัจจุบัน (ยามย่อยขณะนี้)
+      </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-bold text-[#F8F6F1] font-display">
+            ภพ{activeSlot.bhavaName} ({activeSlot.zodiacName})
+          </p>
+          <p className="text-[10px] text-[#D9CDB7] mt-0.5">
+            เวลา: {activeSlot.startStr} - {activeSlot.endStr} น.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {planetsInSlot.length === 0 ? (
+            <span className="text-[10px] text-[#D9CDB7] italic">ไม่มีดาวลอย</span>
+          ) : (
+            planetsInSlot.map((p, idx) => {
+              const pInfo = p.planetNum !== null ? PLANET_INFO[p.planetNum] : null;
+              const st = p.status ? STATUS_GLYPHS[p.status] : null;
+              return (
+                <div key={idx} className="flex flex-col items-center bg-slate-950/40 border border-white/5 rounded-lg px-2 py-0.5">
+                  <span className="text-sm font-bold font-serif" style={{ color: pInfo?.color ?? '#C9A96E' }}>
+                    {p.labelThai}
+                  </span>
+                  {st ? (
+                    <span className="text-[8px] font-bold flex items-center gap-0.5" style={{ color: st.color }}>
+                      {st.char} {st.label}
+                    </span>
+                  ) : (
+                    <span className="text-[8px] text-[#D9CDB7]">ปกติ</span>
+                  )}
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PhraKrasibCalcTable({ result }: { result: HoraTaynooResult }) {
+  const [nowMin, setNowMin] = useState(0);
+  const [timeStr, setTimeStr] = useState("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setNowMin(now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60);
+      setTimeStr(now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", hour12: false }));
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  let activeSlot = result.subTimeSlots.find(slot => nowMin >= slot.startMin && nowMin < slot.endMin);
+  if (!activeSlot) activeSlot = result.subTimeSlots[0];
+
+  // Step X
+  const xZIdx = activeSlot.zodiacIndex;
+  const xBhava = result.bhavaMap[xZIdx] ?? "—";
+  const xPlanets = result.planetEntries.filter(p => p.zodiacIndex === xZIdx && !p.isLagna);
+
+  // Step Y
+  const xLord = KASTERN_FIXED[xZIdx];
+  const xLordEntry = result.planetEntries.find(p => p.planetNum === xLord);
+  const yZIdx = xLordEntry ? xLordEntry.zodiacIndex : xZIdx;
+  const yBhava = result.bhavaMap[yZIdx] ?? "—";
+  const yPlanets = result.planetEntries.filter(p => p.zodiacIndex === yZIdx && !p.isLagna);
+
+  // Step Z
+  const yLord = KASTERN_FIXED[yZIdx];
+  const yLordEntry = result.planetEntries.find(p => p.planetNum === yLord);
+  const zZIdx = yLordEntry ? yLordEntry.zodiacIndex : yZIdx;
+  const zBhava = result.bhavaMap[zZIdx] ?? "—";
+  const zPlanets = result.planetEntries.filter(p => p.zodiacIndex === zZIdx && !p.isLagna);
+
+  const STATUS_GLYPHS_SIMPLE: Record<string, string> = {
+    'maha-uccj': '✿',
+    'kaset': '△',
+    'racha-chok': '⬡',
+    'maha-chakr': '□',
+    'pra': '○',
+    'nij': '✳',
+  };
+
+  const renderPlanets = (planets: PlanetEntry[]) => {
+    if (planets.length === 0) return <span className="text-[#D9CDB7]/40">—</span>;
+    return (
+      <div className="flex justify-center gap-1.5">
+        {planets.map((p, idx) => {
+          const glyph = p.status ? (STATUS_GLYPHS_SIMPLE[p.status] ?? "") : "";
+          const statusColors: Record<string, string> = {
+            'maha-uccj': '#22C55E', 'kaset': '#EF4444',
+            'racha-chok': '#3B82F6', 'maha-chakr': '#EAB308',
+            'pra': '#EF4444', 'nij': '#EF4444'
+          };
+          const color = p.status ? statusColors[p.status] : '#F8F6F1';
+          return (
+            <span key={idx} className="font-serif font-bold text-sm" style={{ color }}>
+              {p.labelThai}
+              {glyph && <span className="text-[10px] ml-0.5" style={{ color }}>{glyph}</span>}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4 mt-3">
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
+        <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold font-display">คำนวณโหรทายหนู (สมการจุดพยากรณ์)</p>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-center border-collapse">
+          <thead>
+            <tr className="border-b border-[#C9A96E]/20 text-[11px] text-[#C9A96E] font-bold">
+              <th className="py-2 bg-[#C9A96E]/5 px-2">เวลา</th>
+              <th className="py-2 bg-[#C9A96E]/5 px-2">{xBhava} (X)</th>
+              <th className="py-2 bg-[#C9A96E]/5 px-2">{yBhava} (Y)</th>
+              <th className="py-2 bg-[#C9A96E]/5 px-2">{zBhava} (Z)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr className="text-xs text-[#F8F6F1] font-semibold">
+              <td className="py-2.5 font-mono text-[#D9CDB7]">{timeStr} น.</td>
+              <td className="py-2.5 font-serif text-sm text-[#F8F6F1]">{renderPlanets(xPlanets)}</td>
+              <td className="py-2.5 font-serif text-sm text-[#F8F6F1]">{renderPlanets(yPlanets)}</td>
+              <td className="py-2.5 font-serif text-sm text-[#F8F6F1]">{renderPlanets(zPlanets)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </Card>
   );
 }
 
@@ -275,15 +478,27 @@ function SubTimePanel({ result, isLive }: { result: HoraTaynooResult; isLive: bo
   const now    = new Date();
   const nowMin = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
 
+  const STATUS_GLYPHS: Record<string, string> = {
+    'maha-uccj': '✿',
+    'kaset': '△',
+    'racha-chok': '⬡',
+    'maha-chakr': '□',
+    'pra': '○',
+    'nij': '✳',
+  };
+
   return (
     <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
       <div className="flex items-center gap-2 mb-3">
         <div className={`w-2 h-2 bg-[#C9A96E] rounded-full ${isLive ? "animate-pulse" : ""}`} />
-        <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">ยามย่อย (7.5 นาที × 12)</p>
+        <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold font-display">ยามย่อย (7.5 นาที × 12)</p>
       </div>
       <div className="space-y-1.5">
         {result.subTimeSlots.map((slot, i) => {
           const isCurrent = isLive && nowMin >= slot.startMin && nowMin < slot.endMin;
+          const planetsInSlot = result.planetEntries.filter(
+            e => e.zodiacIndex === slot.zodiacIndex && e.planetNum !== null
+          );
           return (
             <div key={i} className={`flex items-center gap-3 px-3 py-2 rounded-xl text-xs transition-all ${
               isCurrent
@@ -295,12 +510,30 @@ function SubTimePanel({ result, isLive }: { result: HoraTaynooResult; isLive: bo
                 : <span className="w-1.5 h-1.5 shrink-0" />
               }
               <span className="w-14 font-mono text-[11px] text-[#D9CDB7]">{slot.startStr}</span>
-              <span className="flex-1 font-medium text-[#F8F6F1]">{slot.zodiacName}</span>
-              <span className={`text-[10px] font-bold ${
+              <span className="w-20 font-medium text-[#F8F6F1]">{slot.zodiacName}</span>
+              <span className={`w-16 font-bold ${
                 ["ตนุ","ลาภะ","กัมมะ","ศุภะ"].includes(slot.bhavaName) ? "text-emerald-400" :
                 ["อริ","มรณะ","วินาศ"].includes(slot.bhavaName)         ? "text-rose-400"    :
                 "text-[#D9CDB7]"
               }`}>{slot.bhavaName}</span>
+
+              <div className="flex-1 flex flex-wrap gap-1.5 items-center justify-end">
+                {planetsInSlot.map((p, pIdx) => {
+                  const glyph = p.status ? STATUS_GLYPHS[p.status] : '';
+                  const statusColors: Record<string, string> = {
+                    'maha-uccj': '#22C55E', 'kaset': '#EF4444',
+                    'racha-chok': '#3B82F6', 'maha-chakr': '#EAB308',
+                    'pra': '#EF4444', 'nij': '#EF4444'
+                  };
+                  const color = p.status ? statusColors[p.status] : '#C9A96E';
+                  return (
+                    <span key={pIdx} className="text-[11.5px] font-bold font-serif flex items-center gap-0.5" style={{ color }}>
+                      {p.labelThai}
+                      {glyph && <span className="text-[8.5px] font-sans font-bold">{glyph}</span>}
+                    </span>
+                  );
+                })}
+              </div>
             </div>
           );
         })}
@@ -632,13 +865,15 @@ const QUESTION_CATEGORIES = [
   },
 ];
 
-function HoranuChatPanel() {
+function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }) {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [lockedTime, setLockedTime] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("work");
+  const [pastChats, setPastChats] = useState<any[]>(initialPastChats);
+  const [showHistory, setShowHistory] = useState(false);
   const answerRef = useRef<HTMLDivElement>(null);
 
   const handleAsk = async () => {
@@ -666,6 +901,7 @@ function HoranuChatPanel() {
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      let fullAnswer = "";
 
       while (true) {
         const { done, value } = await reader.read();
@@ -679,10 +915,46 @@ function HoranuChatPanel() {
           if (raw === "[DONE]") break;
           try {
             const parsed = JSON.parse(raw) as { text?: string };
-            if (parsed.text) setAnswer(prev => prev + parsed.text);
+            if (parsed.text) {
+              setAnswer(prev => prev + parsed.text);
+              fullAnswer += parsed.text;
+            }
           } catch { /* skip malformed */ }
         }
       }
+
+      // Save to database
+      if (fullAnswer.trim()) {
+        const formData = new FormData();
+        formData.append("question", question.trim());
+        formData.append("answer", fullAnswer.trim());
+        formData.append("lockedTime", now);
+
+        try {
+          const saveRes = await fetch("/api/horanu-save", {
+            method: "POST",
+            body: formData,
+          });
+          if (saveRes.ok) {
+            const saveResult = await saveRes.json() as { success: boolean; chatId: string };
+            if (saveResult.success) {
+              setPastChats(prev => [
+                {
+                  id: saveResult.chatId,
+                  question: question.trim(),
+                  answer: fullAnswer.trim(),
+                  locked_time: now,
+                  created_at: now,
+                },
+                ...prev,
+              ]);
+            }
+          }
+        } catch (e) {
+          console.error("Error saving chat history:", e);
+        }
+      }
+
     } catch {
       setError("เกิดข้อผิดพลาดในการเชื่อมต่อ กรุณาลองใหม่");
     } finally {
@@ -699,6 +971,12 @@ function HoranuChatPanel() {
 
   const fmtTime = (iso: string) =>
     new Date(iso).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+  const selectPastChat = (chat: any) => {
+    setQuestion(chat.question);
+    setAnswer(chat.answer);
+    setLockedTime(chat.locked_time);
+  };
 
   return (
     <Card className="border-[#C9A96E]/20 bg-[#020617]/60 p-5">
@@ -749,21 +1027,26 @@ function HoranuChatPanel() {
       </div>
 
       {/* Input row */}
-      <div className="flex gap-2">
-        <input
-          type="text"
+      <div className="flex flex-col sm:flex-row gap-2 items-stretch">
+        <textarea
           value={question}
           onChange={e => setQuestion(e.target.value)}
-          onKeyDown={e => e.key === "Enter" && handleAsk()}
-          placeholder="พิมพ์คำถามของคุณ... (กด Enter หรือปุ่ม ถามยาม)"
+          onKeyDown={e => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleAsk();
+            }
+          }}
+          placeholder="พิมพ์คำถามของคุณที่นี่... (กด Enter เพื่อส่งคำถาม หรือ Shift+Enter เพื่อขึ้นบรรทัดใหม่)"
           disabled={isLoading}
-          className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1] placeholder:text-[#D9CDB7]/40 focus:outline-none focus:border-[#C9A96E]/40 disabled:opacity-60"
+          rows={3}
+          className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#F8F6F1] placeholder:text-[#D9CDB7]/40 focus:outline-none focus:border-[#C9A96E]/40 disabled:opacity-60 resize-none"
         />
         <button
           type="button"
           onClick={handleAsk}
           disabled={isLoading || !question.trim()}
-          className="px-5 py-2.5 rounded-xl font-bold text-sm border border-[#C9A96E]/40 bg-[#C9A96E]/10 text-[#C9A96E] hover:bg-[#C9A96E]/20 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0"
+          className="px-6 py-3 rounded-xl font-bold text-sm border border-[#C9A96E]/40 bg-[#C9A96E]/10 text-[#C9A96E] hover:bg-[#C9A96E]/20 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0 flex items-center justify-center"
         >
           {isLoading ? "กำลังอ่าน..." : "ถามยาม"}
         </button>
@@ -778,7 +1061,7 @@ function HoranuChatPanel() {
       {(answer || (isLoading && !error)) && (
         <div
           ref={answerRef}
-          className="mt-4 p-4 rounded-xl bg-[#020617]/80 border border-[#C9A96E]/10 text-sm text-[#F8F6F1] leading-relaxed whitespace-pre-wrap"
+          className="mt-4 p-4 rounded-xl bg-[#020617]/80 border border-[#C9A96E]/10 text-sm text-[#F8F6F1] leading-relaxed whitespace-pre-wrap text-left"
         >
           {isLoading && !answer ? (
             <span className="inline-flex items-center gap-2 text-[#D9CDB7]">
@@ -797,6 +1080,44 @@ function HoranuChatPanel() {
           )}
         </div>
       )}
+
+      {/* Collapsible History Section */}
+      <div className="mt-6 pt-5 border-t border-[#C9A96E]/10">
+        <button
+          type="button"
+          onClick={() => setShowHistory(v => !v)}
+          className="flex items-center justify-center gap-2 text-[10px] text-[#C9A96E] hover:text-[#C9A96E]/80 transition-colors font-bold uppercase tracking-wider mx-auto"
+        >
+          <span>{showHistory ? "▼ ซ่อนประวัติถามยาม" : `▶ แสดงประวัติถามยาม (${pastChats.length})`}</span>
+        </button>
+
+        {showHistory && (
+          <div className="mt-4 space-y-2 max-h-52 overflow-y-auto pr-2 custom-scrollbar">
+            {pastChats.length === 0 ? (
+              <p className="text-xs text-[#D9CDB7]/40 text-center py-4">ยังไม่มีประวัติการถามยาม</p>
+            ) : (
+              pastChats.map((c: any) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => selectPastChat(c)}
+                  className="w-full p-3 rounded-xl bg-slate-950/40 border border-white/5 hover:border-[#C9A96E]/20 transition-all cursor-pointer text-left block"
+                >
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className="text-[10px] text-[#D9CDB7]/60 font-mono">
+                      {new Date(c.created_at).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" })} • {new Date(c.locked_time).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
+                    </span>
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#C9A96E]/10 text-[#C9A96E] font-medium border border-[#C9A96E]/20">
+                      ย้อนหลัง
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#F8F6F1] font-bold line-clamp-1">{c.question}</p>
+                </button>
+              ))
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Hint */}
       <p className="text-[9px] text-[#94A3B8] mt-3 text-center">
@@ -896,76 +1217,67 @@ export default function HoraNuPage() {
       {tab === "library" && <LibraryGrid library={library} />}
 
       {/* ── Main chart grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-
-        {/* Left: Chart */}
-        <div className="lg:col-span-6 xl:col-span-7 space-y-4">
-          <Card className="p-4 sm:p-6 border-[#C9A96E]/20 bg-[#020617]/70">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <div className="flex items-center gap-2">
-                  <p className="text-[11px] font-bold text-[#C9A96E] uppercase tracking-widest">ผังดวงยามพรายกระซิบ</p>
-                  {!isLive && (
-                    <span className="text-[9px] px-2 py-0.5 rounded-full border border-[#4B6FAE]/40 bg-[#4B6FAE]/10 text-[#4B6FAE] font-bold">
-                      ยามสำเร็จ
-                    </span>
-                  )}
-                </div>
-                <p className="text-[10px] text-[#D9CDB7] mt-0.5">
-                  ยาม {result.yamAsked} · {result.period === "day" ? "กลางวัน" : "กลางคืน"} · ลัคนา {ZODIAC_ORDER[result.lagnaZodiacIndex]?.name}
-                </p>
+      <div className="max-w-2xl mx-auto space-y-5">
+        <Card className="p-4 sm:p-6 border-[#C9A96E]/20 bg-[#020617]/70">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <p className="text-[11px] font-bold text-[#C9A96E] uppercase tracking-widest">ผังดวงยามพรายกระซิบ</p>
+                {!isLive && (
+                  <span className="text-[9px] px-2 py-0.5 rounded-full border border-[#4B6FAE]/40 bg-[#4B6FAE]/10 text-[#4B6FAE] font-bold">
+                    ยามสำเร็จ
+                  </span>
+                )}
               </div>
-              <div className="text-right text-[10px] text-[#D9CDB7]">
-                <p>เกษตร: <span className="text-[#C9A96E] font-bold">{ZODIAC_ORDER[result.kasternZodiacIndex]?.name}</span></p>
-                <p>ดาวยาม: <span className="text-[#C9A96E] font-bold">{PLANET_INFO[result.yamPlanet]?.thai}</span></p>
-              </div>
+              <p className="text-[10px] text-[#D9CDB7] mt-0.5">
+                ยาม {result.yamAsked} · {result.period === "day" ? "กลางวัน" : "กลางคืน"} · ลัคนา {ZODIAC_ORDER[result.lagnaZodiacIndex]?.name}
+              </p>
             </div>
-            
-            <div className="w-full max-w-[480px] mx-auto"
-              dangerouslySetInnerHTML={{ __html: svgStr }} />
-
-            {/* Display Toggles */}
-            <div className="mt-6 pt-6 border-t border-[#C9A96E]/10 flex flex-wrap gap-x-4 gap-y-2 justify-center">
-              {[
-                { key: 'showKasternFixed', label: 'ดาวเกษตรคงที่' },
-                { key: 'showFloatingPlanets', label: 'ดาวลอย' },
-                { key: 'showPlanetStatus', label: 'มาตรฐานดาว' },
-                { key: 'showTimeRing', label: 'เวลารอบผัง' },
-                { key: 'showLagnaRulerMarker', label: 'จุดลงเวลา' },
-              ].map(opt => (
-                <label key={opt.key} className="flex items-center gap-2 cursor-pointer group">
-                  <input 
-                    type="checkbox" 
-                    checked={(options as any)[opt.key]}
-                    onChange={(e) => setOptions(prev => ({ ...prev, [opt.key]: e.target.checked }))}
-                    className="w-3.5 h-3.5 rounded border-[#C9A96E]/30 bg-slate-900 text-[#C9A96E] focus:ring-[#C9A96E]/50"
-                  />
-                  <span className="text-[11px] text-[#D9CDB7] group-hover:text-[#C9A96E] transition-colors">{opt.label}</span>
-                </label>
-              ))}
+            <div className="text-right text-[10px] text-[#D9CDB7]">
+              <p>เกษตร: <span className="text-[#C9A96E] font-bold">{ZODIAC_ORDER[result.kasternZodiacIndex]?.name}</span></p>
+              <p>ดาวยาม: <span className="text-[#C9A96E] font-bold">{PLANET_INFO[result.yamPlanet]?.thai}</span></p>
             </div>
+          </div>
+          
+          <div className="w-full max-w-[480px] mx-auto"
+            dangerouslySetInnerHTML={{ __html: svgStr }} />
 
-            {/* Planet Status Legend */}
-            <PlanetStatusLegend />
-          </Card>
+          {/* Display Toggles */}
+          <div className="mt-6 pt-6 border-t border-[#C9A96E]/10 flex flex-wrap gap-x-4 gap-y-2 justify-center">
+            {[
+              { key: 'showKasternFixed', label: 'ดาวเกษตรคงที่' },
+              { key: 'showFloatingPlanets', label: 'ดาวลอย' },
+              { key: 'showPlanetStatus', label: 'มาตรฐานดาว' },
+              { key: 'showTimeRing', label: 'เวลารอบผัง' },
+              { key: 'showLagnaRulerMarker', label: 'จุดลงเวลา' },
+            ].map(opt => (
+              <label key={opt.key} className="flex items-center gap-2 cursor-pointer group">
+                <input 
+                  type="checkbox" 
+                  checked={(options as any)[opt.key]}
+                  onChange={(e) => setOptions(prev => ({ ...prev, [opt.key]: e.target.checked }))}
+                  className="w-3.5 h-3.5 rounded border-[#C9A96E]/30 bg-slate-900 text-[#C9A96E] focus:ring-[#C9A96E]/50"
+                />
+                <span className="text-[11px] text-[#D9CDB7] group-hover:text-[#C9A96E] transition-colors">{opt.label}</span>
+              </label>
+            ))}
+          </div>
 
-          <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
-            <YamBadge result={result} />
-            <div className="mt-3"><PlanetSummary result={result} /></div>
-          </Card>
-        </div>
+          {/* Planet Status Legend */}
+          <PlanetStatusLegend />
+        </Card>
 
-        {/* Right: Tables & Interpretation */}
-        <div className="lg:col-span-6 xl:col-span-5 space-y-4">
-          {interpretation && <ChartInterpretationPanel interpretation={interpretation} />}
-          <PlanetTable result={result} />
-          <SubTimePanel result={result} isLive={isLive} />
-          <BhavaTable result={result} />
-        </div>
+        <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+          <YamBadge result={result} />
+          <div className="mt-3"><PlanetSummary result={result} /></div>
+          <CurrentPredictionPoint result={result} />
+        </Card>
+
+        <PhraKrasibCalcTable result={result} />
       </div>
 
       {/* ── Horanu Chat ── */}
-      <HoranuChatPanel />
+      <HoranuChatPanel initialPastChats={loaderData.pastChats} />
 
       {/* Loading overlay */}
       {isSubmitting && (

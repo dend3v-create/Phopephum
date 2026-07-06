@@ -24,6 +24,21 @@ const common = {
       reports: "รายงาน",
       planner: "บันทึก",
       settings: "โปรไฟล์",
+      community: "ชะตาพันธมิตร",
+      pro_tools: "✦ เครื่องมือนักพยากรณ์",
+      yam_pro: "ยามอัฐกาลชั้นฉาย",
+      karnchata: "เลข ๗ ตัวกาลชะตา",
+      yam_whisper: "ยามพรายกระซิบ",
+      rahu: "ยามราหูค้นทรัพย์",
+      taksa: "มหาทักษาพยากรณ์",
+      phuti: "มหาภูติกำเนิด",
+      people: "โปรไฟล์บุคคล",
+      calendar_100: "ปฏิทิน 100 ปี",
+      operator_system: "ระบบ Operator",
+      approvals: "อนุมัติคำขอ",
+      upgrade_membership: "อัปเกรดสมาชิก",
+      admin_dashboard: "Admin Dashboard",
+      logout: "ออกจากระบบ"
     },
     auth: {
       login: "เข้าสู่ระบบ",
@@ -47,6 +62,9 @@ const common = {
       name: "PhopePhum",
       tagline: "ถอดรหัสพลังงานชีวิต",
     },
+    sands_of_time: "⏳ SANDS OF TIME",
+    unlimited: "♾️ Unlimited",
+    sands_unit: "{{count}} / 15 เม็ด"
   },
   en: {
     nav: {
@@ -56,6 +74,21 @@ const common = {
       reports: "Reports",
       planner: "Journal",
       settings: "Profile",
+      community: "Destiny Alliance",
+      pro_tools: "✦ Astrologer Tools",
+      yam_pro: "Atthakarn Solar Yam",
+      karnchata: "7-Star Horary Fate",
+      yam_whisper: "Whispering Yam",
+      rahu: "Rahu Wealth Yam",
+      taksa: "Maha Taksa Chart",
+      phuti: "Mahabhuti Elemental",
+      people: "People Profiles",
+      calendar_100: "100-Year Calendar",
+      operator_system: "Operator System",
+      approvals: "Approve Requests",
+      upgrade_membership: "Upgrade Membership",
+      admin_dashboard: "Admin Dashboard",
+      logout: "Sign Out"
     },
     auth: {
       login: "Sign In",
@@ -79,15 +112,33 @@ const common = {
       name: "PhopePhum",
       tagline: "Decode the Energy of Life",
     },
+    sands_of_time: "⏳ SANDS OF TIME",
+    unlimited: "♾️ Unlimited",
+    sands_unit: "{{count}} / 15 sands"
   },
   zh: {
     nav: {
-      dashboard: "今日",
-      horoscope: "命盘",
+      dashboard: "今日运势",
+      horoscope: "命运盘",
       yam: "吉时查询",
       reports: "报告",
-      planner: "日记",
+      planner: "生活日记",
       settings: "个人资料",
+      community: "命运盟友",
+      pro_tools: "✦ 占星师工具",
+      yam_pro: "八卦日晷时辰",
+      karnchata: "七星占卜法",
+      yam_whisper: "耳语吉时",
+      rahu: "罗睺寻宝时辰",
+      taksa: "大达沙预测",
+      phuti: "五行大本命",
+      people: "人物档案",
+      calendar_100: "百年历书",
+      operator_system: "操作员系统",
+      approvals: "审批申请",
+      upgrade_membership: "升级会员",
+      admin_dashboard: "管理员面板",
+      logout: "退出登录"
     },
     auth: {
       login: "登录",
@@ -111,6 +162,9 @@ const common = {
       name: "PhopePhum",
       tagline: "解码生命能量",
     },
+    sands_of_time: "⏳ 时间沙漏",
+    unlimited: "♾️ 无限制",
+    sands_unit: "{{count}} / 15 粒"
   },
 } as const;
 
@@ -134,6 +188,15 @@ const horoscope = {
       natal: "กำเนิด",
       transit: "จร",
     },
+    houses: {
+      "อัตตะ": "อัตตะ", "หินะ": "หินะ", "ธนัง": "ธนัง", "ปิตา": "ปิตา", "มาตา": "มาตา", "โภคา": "โภคา", "มัชฌิมา": "มัชฌิมา",
+      "สักกะ": "สักกะ", "ญาติ": "ญาติ", "เคหัง": "เคหัง", "นาวัง": "นาวัง", "ภริยัง": "ภริยัง",
+      "ตนุ": "ตนุ", "กดุมภะ": "กดุมภะ", "สหัชชะ": "สหัชชะ", "พันธุ": "พันธุ", "ปุตตะ": "ปุตตะ", "อริ": "อริ", "ปัตนิ": "ปัตนิ", "มรณะ": "มรณะ", "ศุภะ": "ศุภะ", "กัมมะ": "กัมมะ", "ลาภะ": "ลาภะ", "วินาศน์": "วินาศน์"
+    },
+    standards: {
+      "เกษตร": "เกษตร", "มหาอุจ": "มหาอุจ", "มหาอุจจ์": "มหาอุจจ์", "ราชาโชค": "ราชาโชค", "มหาจักร": "มหาจักร", "ประ": "ประ", "นิจ": "นิจ",
+      "จักรพรรดิ": "จักรพรรดิ", "พระจันทร์": "พระจันทร์", "โสฬสมงคล": "โสฬสมงคล"
+    }
   },
   en: {
     planets: {
@@ -153,6 +216,15 @@ const horoscope = {
       natal: "Natal",
       transit: "Transit",
     },
+    houses: {
+      "อัตตะ": "Atta (Self)", "หินะ": "Hina (Obstacle)", "ธนัง": "Thanang (Wealth)", "ปิตา": "Pita (Father)", "มาตา": "Mata (Mother)", "โภคา": "Phoka (Asset)", "มัชฌิมา": "Matchima (Middle)",
+      "สักกะ": "Sakka (Honor)", "ญาติ": "Yati (Relatives)", "เคหัง": "Kehang (Home)", "นาวัง": "Nawang (Journey)", "ภริยัง": "Phariyang (Spouse)",
+      "ตนุ": "Tanu (Self)", "กดุมภะ": "Kadumbha (Finance)", "สหัชชะ": "Sahatcha (Friends)", "พันธุ": "Phanthu (Family)", "ปุตตะ": "Putta (Children)", "อริ": "Ari (Enemy)", "ปัตนิ": "Patni (Partner)", "มรณะ": "Morana (Loss)", "ศุภะ": "Supha (Success)", "กัมมะ": "Kamma (Career)", "ลาภะ": "Lapha (Fortune)", "วินาศน์": "Winat (Crisis)"
+    },
+    standards: {
+      "เกษตร": "Kaset (Stable)", "มหาอุจ": "Maha Uch (Exalted)", "มหาอุจจ์": "Maha Uch (Exalted)", "ราชาโชค": "Racha Chok (Fortune)", "มหาจักร": "Maha Chak (Great)", "ประ": "Pra (Weak)", "นิจ": "Neech (Debilitated)",
+      "จักรพรรดิ": "Emperor", "พระจันทร์": "Moon Power", "โสฬสมงคล": "Solas Mongkol"
+    }
   },
   zh: {
     planets: {
@@ -172,6 +244,15 @@ const horoscope = {
       natal: "本命",
       transit: "流年",
     },
+    houses: {
+      "อัตตะ": "自我 (Atta)", "หินะ": "阻碍 (Hina)", "ธนัง": "财富 (Thanang)", "ปิตา": "父亲 (Pita)", "มาตา": "母亲 (Mata)", "โภคา": "资产 (Phoka)", "มัชฌิมา": "中庸 (Matchima)",
+      "สักกะ": "荣誉 (Sakka)", "ญาติ": "亲属 (Yati)", "เคหัง": "家宅 (Kehang)", "นาวัง": "旅程 (Nawang)", "ภริยัง": "配偶 (Phariyang)",
+      "ตนุ": "身宫 (Tanu)", "กดุมภะ": "财帛 (Kadumbha)", "สหัชชะ": "兄弟 (Sahatcha)", "พันธุ": "田宅 (Phanthu)", "ปุตตะ": "子女 (Putta)", "อริ": "疾厄 (Ari)", "ปัตนิ": "夫妻 (Patni)", "มรณะ": "奴仆 (Morana)", "ศุภะ": "官禄 (Supha)", "กัมมะ": "福德 (Kamma)", "ลาภะ": "迁移 (Lapha)", "วินาศน์": "相貌 (Winat)"
+    },
+    standards: {
+      "เกษตร": "本位 (Kaset)", "มหาอุจ": "耀升 (Maha Uch)", "มหาอุจจ์": "耀升 (Maha Uch)", "ราชาโชค": "王赐 (Racha Chok)", "มหาจักร": "大轮 (Maha Chak)", "ประ": "失陷 (Pra)", "นิจ": "落陷 (Neech)",
+      "จักรพรรดิ": "帝王 (Emperor)", "พระจันทร์": "月德 (Moon Power)", "โสฬสมงคล": "十六吉兆"
+    }
   },
 } as const;
 
@@ -185,6 +266,11 @@ const yam = {
     countdown: "อีก",
     auspicious: "เป็นมงคล",
     inauspicious: "ควรระวัง",
+    yam_names: {
+      "สุริยะ": "สุริยะ", "ระวิ": "ระวิ", "จันเทา": "จันเทา", "คะศิ": "คะศิ", "ภุมมะ": "ภุมมะ", "ภุมรา": "ภุมรา",
+      "ทิวา": "ทิวา", "วาณี": "วาณี", "ชีโว": "ชีโว", "คุรุ": "คุรุ", "ศุกระ": "ศุกระ", "ภัสสะ": "ภัสสะ",
+      "โสระ": "โสระ", "เสารี": "เสารี", "อสุรินทร์": "อสุรินทร์", "ราหู": "ราหู"
+    }
   },
   en: {
     title: "Current Auspicious Time",
@@ -194,6 +280,11 @@ const yam = {
     countdown: "in",
     auspicious: "Auspicious",
     inauspicious: "Caution",
+    yam_names: {
+      "สุริยะ": "Suriya (Sun)", "ระวิ": "Rawi (Sun)", "จันเทา": "Chanthau (Moon)", "คะศิ": "Khasi (Moon)", "ภุมมะ": "Bhumma (Mars)", "ภุมรา": "Bhumra (Mars)",
+      "ทิวา": "Thiwa (Mercury)", "วาณี": "Wanee (Mercury)", "ชีโว": "Cheewo (Jupiter)", "คุรุ": "Khuru (Jupiter)", "ศุกระ": "Sukra (Venus)", "ภัสสะ": "Phatsa (Venus)",
+      "โสระ": "Sora (Saturn)", "เสารี": "Sauree (Saturn)", "อสุรินทร์": "Asurin (Rahu)", "ราหู": "Rahu"
+    }
   },
   zh: {
     title: "当前时辰",
@@ -203,6 +294,11 @@ const yam = {
     countdown: "还有",
     auspicious: "吉",
     inauspicious: "凶",
+    yam_names: {
+      "สุริยะ": "日华 (Suriya)", "ระวิ": "烈阳 (Rawi)", "จันเทา": "皎月 (Chanthau)", "คะศิ": "月魄 (Khasi)", "ภุมมะ": "荧惑 (Bhumma)", "ภุมรา": "战神 (Bhumra)",
+      "ทิวา": "辰星 (Thiwa)", "วาณี": "水星 (Wanee)", "ชีโว": "岁星 (Cheewo)", "คุรุ": "木星 (Khuru)", "ศุกระ": "太白 (Sukra)", "ภัสสะ": "金星 (Phatsa)",
+      "โสระ": "镇星 (Sora)", "เสารี": "土星 (Sauree)", "อสุรินทร์": "蚀神 (Asurin)", "ราหู": "罗睺 (Rahu)"
+    }
   },
 } as const;
 
