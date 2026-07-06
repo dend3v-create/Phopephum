@@ -72,7 +72,19 @@
     "email": "Email",
     "password": "Password",
     "name": "Name",
-    "user": "User"
+    "user": "User",
+    "forgot_password": "Forgot password?",
+    "reset_password": "Reset Password",
+    "forgot_password_title": "Recover Password",
+    "forgot_password_desc": "Enter your email to receive a password reset link.",
+    "send_reset_link": "Send Reset Link",
+    "reset_success": "A reset link has been sent to your email. Please check your inbox.",
+    "new_password": "New Password",
+    "confirm_new_password": "Confirm New Password",
+    "reset_password_desc": "Enter a new password for your account.",
+    "update_password": "Update Password",
+    "password_update_success": "Your password has been reset successfully.",
+    "password_mismatch": "Passwords do not match."
   },
   "theme": {
     "dark": "Dark",

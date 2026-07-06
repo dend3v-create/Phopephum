@@ -1,6 +1,7 @@
 import { json, redirect } from "@remix-run/cloudflare";
 import { Form, Link, useActionData, useNavigation } from "@remix-run/react";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
+import { useTranslation } from "react-i18next";
 import { signIn } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import { Input } from "~/components/ui/Input";
@@ -37,6 +38,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export default function LoginPage() {
+  const { t } = useTranslation("common");
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
@@ -44,29 +46,39 @@ export default function LoginPage() {
   return (
     <Card glow>
       <h2 className="font-display text-2xl font-semibold text-[#F3EFE8] mb-1">
-        เข้าสู่ระบบ
+        {t("auth.login")}
       </h2>
       <p className="text-[#C6B79F] text-sm mb-8">
-        ยินดีต้อนรับกลับมา
+        {t("welcome")}
       </p>
 
       <Form method="post" className="flex flex-col gap-5">
         <Input
           name="email"
           type="email"
-          label="อีเมล"
+          label={t("auth.email")}
           placeholder="your@email.com"
           autoComplete="email"
           required
         />
-        <Input
-          name="password"
-          type="password"
-          label="รหัสผ่าน"
-          placeholder="••••••••"
-          autoComplete="current-password"
-          required
-        />
+        <div>
+          <Input
+            name="password"
+            type="password"
+            label={t("auth.password")}
+            placeholder="••••••••"
+            autoComplete="current-password"
+            required
+          />
+          <div className="flex justify-end mt-1.5">
+            <Link
+              to="/forgot-password"
+              className="text-xs text-[#C6A96B] hover:text-[#F8F6F1] transition-colors"
+            >
+              {t("auth.forgot_password")}
+            </Link>
+          </div>
+        </div>
 
         {actionData?.error && (
           <p className="text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-lg px-4 py-3">
@@ -75,7 +87,7 @@ export default function LoginPage() {
         )}
 
         <Button type="submit" loading={isLoading} className="w-full mt-1">
-          เข้าสู่ระบบ
+          {t("auth.login")}
         </Button>
       </Form>
 
@@ -85,7 +97,7 @@ export default function LoginPage() {
           to="/register"
           className="text-[#C9A96E] hover:text-[#E8D4A8] transition-colors"
         >
-          สมัครสมาชิก
+          {t("auth.register")}
         </Link>
       </p>
     </Card>
