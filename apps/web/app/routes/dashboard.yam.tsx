@@ -266,10 +266,9 @@ export default function YamPage() {
   const [now, setNow] = useState<Date>(new Date());
   
   // React states for tab controllers & interactive form
-  const [activeTab, setActiveTab] = useState<"live" | "master" | "ashta" | "finder" | "grid" | "compare">("live");
-  const [masterSubTab, setMasterSubTab] = useState<"chanChai" | "matrix" | "slots">("chanChai");
-  const [masterSelectedYam, setMasterSelectedYam] = useState<number | null>(null);
-  const [masterSlotPeriod, setMasterSlotPeriod] = useState<"day" | "night">("day");
+  const [activeTab, setActiveTab] = useState<"live" | "ashta" | "finder" | "grid" | "compare">("live");
+  const [activeInquiry, setActiveInquiry] = useState<"news" | "sickness" | "lostItem" | "travel" | "bestTime">("news");
+  const [ashtaInquiry, setAshtaInquiry] = useState<"news" | "sickness" | "lostItem" | "travel" | "bestTime">("news");
 
   // Manual Ashta Calculator states
   const [ashtaDay, setAshtaDay] = useState<number>(() => new Date().getDate());
@@ -634,16 +633,6 @@ export default function YamPage() {
           ⏱️ ยามสดขณะนี้
         </button>
         <button
-          onClick={() => setActiveTab("master")}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-            activeTab === "master"
-              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
-              : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
-          }`}
-        >
-          📜 คัมภีร์ยาม & ชั้นฉาย
-        </button>
-        <button
           onClick={() => setActiveTab("ashta")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "ashta"
@@ -955,444 +944,189 @@ export default function YamPage() {
             </Card>
           )}
 
-          {/* 4 Pillars of Yam Prophecy Cards */}
+          {/* 💬 ถาม-ตอบยามอัฏฐกาล & ชั้นฉาย (Mobile-Friendly Interactive Q&A) */}
           {liveChanChaiItem && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* เรื่องที่ได้ยิน */}
-              <Card className="p-5 bg-[#0A1628]/40 border-white/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">🚩</span>
-                  <span className="text-xs font-bold text-[#D9BC82] uppercase tracking-wider">เรื่องที่ได้ยิน (ข่าวกาลกิณี/มงคล)</span>
+            <Card className="p-5 bg-gradient-to-br from-[#0A2240]/90 via-[#0A1628]/80 to-[#020617] border-[#D9BC82]/30 shadow-xl relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-40 h-40 bg-[#D9BC82]/5 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3 mb-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-xl">💬</span>
+                  <div>
+                    <h3 className="font-display text-base font-bold text-[#F8F6F1]">
+                      ถาม-ตอบยามอัฏฐกาล & ชั้นฉาย
+                    </h3>
+                    <p className="text-[12px] text-[#D9BC82]">
+                      กดเลือกเรื่องที่ต้องการตรวจ เพื่อดูคำทำนายเจาะลึกเฉพาะเรื่องทันที
+                    </p>
+                  </div>
                 </div>
-                <p className="text-sm sm:text-base text-yellow-100 font-semibold leading-relaxed">
+                <span className="px-2.5 py-1 rounded-full bg-[#D9BC82]/15 text-[#D9BC82] text-[11px] font-bold border border-[#D9BC82]/30 shrink-0">
+                  ยาม{data.yamName} ({PHASE_LABEL[data.phase]})
+                </span>
+              </div>
+
+              {/* Inquiry Topic Chips */}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-4">
+                {[
+                  { id: "news", icon: "🚩", label: "เรื่องที่ได้ยิน", q: "ข่าวที่ได้ยินจริงไหม?" },
+                  { id: "sickness", icon: "🏥", label: "คนเจ็บไข้", q: "คนป่วยเป็นอย่างไร?" },
+                  { id: "lostItem", icon: "🔍", label: "ของหาย", q: "ของหายจะได้คืนไหม?" },
+                  { id: "travel", icon: "🚗", label: "การเดินทาง", q: "ควรเดินทางช่วงไหน?" },
+                  { id: "bestTime", icon: "⭐", label: "เวลาที่ดีที่สุด", q: "เวลาทองของยามนี้?" },
+                ].map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => setActiveInquiry(item.id as any)}
+                    className={`p-2.5 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${
+                      activeInquiry === item.id
+                        ? "bg-[#D9BC82] text-[#0A1628] border-[#D9BC82] font-black shadow-[0_0_15px_rgba(217,188,130,0.3)] scale-[1.02]"
+                        : "bg-black/30 border-white/10 text-[#D9CDB7] hover:border-[#D9BC82]/40 hover:text-[#F8F6F1]"
+                    }`}
+                  >
+                    <span className="text-base mb-0.5">{item.icon}</span>
+                    <span className="text-[12px] font-bold">{item.label}</span>
+                    <span className={`text-[10px] mt-0.5 truncate max-w-full ${
+                      activeInquiry === item.id ? "text-[#0A1628]/80 font-medium" : "text-[#94A3B8]"
+                    }`}>{item.q}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* Inquiry Answer Box */}
+              <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2 animate-fade-in">
+                <div className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
+                  <span className="text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span>💡</span> คำพยากรณ์สำหรับคำถาม: {
+                      activeInquiry === "news" ? "เรื่องที่ได้ยิน (ข่าวกาลกิณี/มงคล)" :
+                      activeInquiry === "sickness" ? "คนเจ็บไข้ (พยากรณ์โรค)" :
+                      activeInquiry === "lostItem" ? "ของหาย (โอกาสได้คืน/ที่ซ่อน)" :
+                      activeInquiry === "travel" ? "การเดินทาง 3 ช่วงระยะ" : "เวลามงคลที่ดีที่สุดประจำยาม"
+                    }
+                  </span>
+                  <span className="text-[11px] text-[#94A3B8]">
+                    ตามคัมภีร์อัฏฐกาล 7 ยาม
+                  </span>
+                </div>
+
+                {activeInquiry === "news" && (
+                  <div className="space-y-1">
+                    <p className="text-base font-bold text-yellow-100 leading-relaxed">
+                      "{liveChanChaiItem.news}"
+                    </p>
+                    <p className="text-xs text-[#94A3B8]">
+                      {liveChanChaiItem.news.includes("จริง") ? "✓ ข้อมูลหรือข่าวสารที่ได้ยินในยามนี้ มีน้ำหนักความจริงสูง" : "✕ ควรฟังหูไว้หู อย่าเพิ่งปักใจเชื่อในทันที"}
+                    </p>
+                  </div>
+                )}
+
+                {activeInquiry === "sickness" && (
+                  <div className="space-y-1">
+                    <p className="text-base font-bold text-rose-200 leading-relaxed">
+                      "{liveChanChaiItem.sickness}"
+                    </p>
+                    <p className="text-xs text-[#94A3B8]">
+                      การดูแลรักษาพยาบาลในยามนี้ควรปฏิบัติตามคำแนะนำของแพทย์อย่างเคร่งครัด
+                    </p>
+                  </div>
+                )}
+
+                {activeInquiry === "lostItem" && (
+                  <div className="space-y-1">
+                    <p className="text-base font-bold text-amber-200 leading-relaxed">
+                      "{liveChanChaiItem.lostItem}"
+                    </p>
+                    <p className="text-xs text-[#94A3B8]">
+                      คำแนะนำสถานที่ค้นหาตามธาตุและทิศทางของดาวเจ้ายาม
+                    </p>
+                  </div>
+                )}
+
+                {activeInquiry === "travel" && (
+                  <div className="space-y-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <div className={`p-2.5 rounded-lg border text-xs ${data.phase === "start" ? "bg-[#D9BC82]/15 border-[#D9BC82]" : "bg-white/[0.02] border-white/5"}`}>
+                        <span className="font-bold text-[#D9BC82] block mb-1">ยามต้น (30 นาทีแรก)</span>
+                        <p className="text-[#F8F6F1]">{liveChanChaiItem.travel.start}</p>
+                      </div>
+                      <div className={`p-2.5 rounded-lg border text-xs ${data.phase === "middle" ? "bg-[#D9BC82]/15 border-[#D9BC82]" : "bg-white/[0.02] border-white/5"}`}>
+                        <span className="font-bold text-[#D9BC82] block mb-1">ยามกลาง (30 นาทีกลาง)</span>
+                        <p className="text-[#F8F6F1]">{liveChanChaiItem.travel.middle}</p>
+                      </div>
+                      <div className={`p-2.5 rounded-lg border text-xs ${data.phase === "end" ? "bg-[#D9BC82]/15 border-[#D9BC82]" : "bg-white/[0.02] border-white/5"}`}>
+                        <span className="font-bold text-[#D9BC82] block mb-1">ยามปลาย (30 นาทีสุดท้าย)</span>
+                        <p className="text-[#F8F6F1]">{liveChanChaiItem.travel.end}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeInquiry === "bestTime" && (
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs text-[#94A3B8]">เวลาที่ดีที่สุดของยามนี้คือ:</span>
+                      <span className="px-3 py-1 rounded-lg bg-[#D9BC82]/20 text-[#D9BC82] font-black border border-[#D9BC82]/40 text-sm">
+                        {liveChanChaiItem.bestTime}
+                      </span>
+                    </div>
+                    <p className="text-xs text-[#D9CDB7] leading-relaxed">
+                      หากต้องการนัดหมาย เจรจาสำคัญ หรือออกเดินทาง แนะนำให้เจาะจงเลือกช่วงเวลา <strong>{liveChanChaiItem.bestTime}</strong> ของยามนี้เพื่อให้เกิดผลสำเร็จสูงสุด
+                    </p>
+                  </div>
+                )}
+              </div>
+            </Card>
+          )}
+
+          {/* 4 Pillars of Yam Prophecy Summary Cards */}
+          {liveChanChaiItem && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+              {/* เรื่องที่ได้ยิน */}
+              <Card className="p-4 bg-[#0A1628]/40 border-white/10">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-base">🚩</span>
+                  <span className="text-[11px] font-bold text-[#D9BC82] uppercase tracking-wider">เรื่องที่ได้ยิน</span>
+                </div>
+                <p className="text-xs sm:text-sm text-yellow-100 font-semibold leading-relaxed line-clamp-3">
                   {liveChanChaiItem.news}
                 </p>
               </Card>
 
               {/* คนเจ็บไข้ */}
-              <Card className="p-5 bg-[#0A1628]/40 border-white/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">🏥</span>
-                  <span className="text-xs font-bold text-rose-300 uppercase tracking-wider">คนเจ็บไข้</span>
+              <Card className="p-4 bg-[#0A1628]/40 border-white/10">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-base">🏥</span>
+                  <span className="text-[11px] font-bold text-rose-300 uppercase tracking-wider">คนเจ็บไข้</span>
                 </div>
-                <p className="text-sm sm:text-base text-yellow-100 font-semibold leading-relaxed">
+                <p className="text-xs sm:text-sm text-rose-100 font-semibold leading-relaxed line-clamp-3">
                   {liveChanChaiItem.sickness}
                 </p>
               </Card>
 
               {/* ของหาย */}
-              <Card className="p-5 bg-[#0A1628]/40 border-white/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">🔍</span>
-                  <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">ของหาย</span>
+              <Card className="p-4 bg-[#0A1628]/40 border-white/10">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-base">🔍</span>
+                  <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">ของหาย</span>
                 </div>
-                <p className="text-sm sm:text-base text-yellow-100 font-semibold leading-relaxed">
+                <p className="text-xs sm:text-sm text-amber-100 font-semibold leading-relaxed line-clamp-3">
                   {liveChanChaiItem.lostItem}
                 </p>
               </Card>
 
               {/* เวลาที่ดี */}
-              <Card className="p-5 bg-[#0A1628]/40 border-white/10">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-lg">⭐</span>
-                  <span className="text-xs font-bold text-[#D9BC82] uppercase tracking-wider">เวลาที่ดีที่สุดประจำยาม</span>
+              <Card className="p-4 bg-[#0A1628]/40 border-white/10">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <span className="text-base">⭐</span>
+                  <span className="text-[11px] font-bold text-[#D9BC82] uppercase tracking-wider">เวลาที่ดี</span>
                 </div>
-                <p className="text-base text-[#D9BC82] font-black leading-relaxed">
+                <p className="text-sm text-[#D9BC82] font-black leading-relaxed">
                   {liveChanChaiItem.bestTime}
                 </p>
               </Card>
             </div>
           )}
-        </div>
-      )}
-
-      {/* 📜 MASTER REFERENCE & CHAN CHAI VIEW */}
-      {activeTab === "master" && (
-        <div className="space-y-6 animate-fade-in">
-          {/* Sub-tab Navigation */}
-          <div className="flex bg-[#0A1628]/60 p-1 rounded-2xl border border-white/10 gap-1 w-full max-w-xl mx-auto">
-            <button
-              onClick={() => setMasterSubTab("chanChai")}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold uppercase transition-all ${
-                masterSubTab === "chanChai"
-                  ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_10px_rgba(217,188,130,0.2)] font-black"
-                  : "text-[#94A3B8] hover:text-[#F8F6F1]"
-              }`}
-            >
-              📑 สรุปตารางอัฏฐกาลชั้นฉาย
-            </button>
-            <button
-              onClick={() => setMasterSubTab("matrix")}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold uppercase transition-all ${
-                masterSubTab === "matrix"
-                  ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_10px_rgba(217,188,130,0.2)] font-black"
-                  : "text-[#94A3B8] hover:text-[#F8F6F1]"
-              }`}
-            >
-              📜 คัมภีร์ยาม 7 ยาม
-            </button>
-            <button
-              onClick={() => setMasterSubTab("slots")}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-bold uppercase transition-all ${
-                masterSubTab === "slots"
-                  ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_10px_rgba(217,188,130,0.2)] font-black"
-                  : "text-[#94A3B8] hover:text-[#F8F6F1]"
-              }`}
-            >
-              ⏱️ ช่วงเวลาย่อย 24 ชั้นฉาย
-            </button>
-          </div>
-
-          {/* Sub-view 1: สรุปตารางอัฏฐกาลชั้นฉาย (Chan Chai Summary View) */}
-          {masterSubTab === "chanChai" && (
-            <div className="space-y-6">
-              <div className="text-center max-w-2xl mx-auto space-y-1">
-                <span className="text-xs text-[#D9BC82] font-bold uppercase tracking-widest">คัมภีร์ตำราโบราณ</span>
-                <h2 className="font-display text-2xl font-bold text-[#F8F6F1]">สรุปตารางอัฏฐกาลชั้นฉาย</h2>
-                <p className="text-xs text-[#94A3B8] leading-relaxed">
-                  การแบ่งยามอัฏฐกาลออกเป็น 3 ชั้นฉาย (ยามต้น 00-30 นาที, ยามกลาง 31-60 นาที, ยามปลาย 61-90 นาที) เพื่อตรวจพยากรณ์เจาะลึกเฉพาะช่วงเวลา
-                </p>
-              </div>
-
-              {/* Chan Chai Master Table */}
-              <Card className="p-0 overflow-hidden bg-[#0A1628]/40 border-[#D9BC82]/20">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse min-w-[760px]">
-                    <thead>
-                      <tr className="border-b border-white/10 bg-[#0A2240]/60 text-xs font-bold uppercase tracking-wider text-[#D9BC82]">
-                        <th className="p-3.5 text-center w-28 border-r border-white/10">ยามที่ & ชื่อยาม</th>
-                        <th className="p-3.5 border-r border-white/10 w-1/3">ยามต้น (30 นาทีแรก)</th>
-                        <th className="p-3.5 border-r border-white/10 w-1/3">ยามกลาง (30 นาทีกลาง)</th>
-                        <th className="p-3.5 w-1/3">ยามปลาย (30 นาทีสุดท้าย)</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5 text-sm">
-                      {ATTHAKARN_CHAN_CHAI_TABLE.map((item) => {
-                        const isLiveYam = item.nameDay === data.yamName || item.nameNight === data.yamName;
-                        return (
-                          <tr
-                            key={item.yamNumber}
-                            className={`transition-colors ${
-                              isLiveYam ? "bg-[#D9BC82]/10 ring-1 ring-inset ring-[#D9BC82]/40" : "hover:bg-white/[0.02]"
-                            }`}
-                          >
-                            {/* Column 1: Yam Number & Name */}
-                            <td className="p-4 text-center border-r border-white/10 align-middle">
-                              <div className="flex flex-col items-center gap-1">
-                                <span className="text-xs font-bold text-[#94A3B8]">ยามที่ {item.yamNumber}</span>
-                                <span className="text-2xl text-[#D9BC82] font-serif">{item.planetSymbol}</span>
-                                <span className="text-sm font-bold text-[#F8F6F1]">
-                                  {item.nameDay} / {item.nameNight}
-                                </span>
-                                {isLiveYam && (
-                                  <span className="mt-1 text-[11px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 border border-green-500/30 animate-pulse">
-                                    LIVE NOW
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-
-                            {/* Column 2: ยามต้น */}
-                            <td className={`p-4 border-r border-white/10 align-top ${
-                              isLiveYam && data.phase === "start" ? "bg-[#D9BC82]/15 ring-2 ring-inset ring-[#D9BC82]" : ""
-                            }`}>
-                              <div className="space-y-1.5">
-                                <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${
-                                  item.chanChai.start.quality === "good"
-                                    ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                                    : "bg-red-500/10 text-rose-300 border border-red-500/20"
-                                }`}>
-                                  {item.chanChai.start.quality === "good" ? "✓ มงคล" : "✕ ระวัง"}
-                                </span>
-                                <p className="text-sm text-[#F8F6F1] font-medium leading-relaxed">
-                                  {item.chanChai.start.text}
-                                </p>
-                              </div>
-                            </td>
-
-                            {/* Column 3: ยามกลาง */}
-                            <td className={`p-4 border-r border-white/10 align-top ${
-                              isLiveYam && data.phase === "middle" ? "bg-[#D9BC82]/15 ring-2 ring-inset ring-[#D9BC82]" : ""
-                            }`}>
-                              <div className="space-y-1.5">
-                                <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${
-                                  item.chanChai.middle.quality === "good"
-                                    ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                                    : "bg-red-500/10 text-rose-300 border border-red-500/20"
-                                }`}>
-                                  {item.chanChai.middle.quality === "good" ? "✓ มงคล" : "✕ ระวัง"}
-                                </span>
-                                <p className="text-sm text-[#F8F6F1] font-medium leading-relaxed">
-                                  {item.chanChai.middle.text}
-                                </p>
-                              </div>
-                            </td>
-
-                            {/* Column 4: ยามปลาย */}
-                            <td className={`p-4 align-top ${
-                              isLiveYam && data.phase === "end" ? "bg-[#D9BC82]/15 ring-2 ring-inset ring-[#D9BC82]" : ""
-                            }`}>
-                              <div className="space-y-1.5">
-                                <span className={`inline-block px-2 py-0.5 rounded text-[11px] font-bold ${
-                                  item.chanChai.end.quality === "good"
-                                    ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                                    : "bg-red-500/10 text-rose-300 border border-red-500/20"
-                                }`}>
-                                  {item.chanChai.end.quality === "good" ? "✓ มงคล" : "✕ ระวัง"}
-                                </span>
-                                <p className="text-sm text-[#F8F6F1] font-medium leading-relaxed">
-                                  {item.chanChai.end.text}
-                                </p>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          {/* Sub-view 2: ตารางคัมภีร์ยามอัฏฐกาล 7 ยาม (7-Yam Master Matrix View) */}
-          {masterSubTab === "matrix" && (
-            <div className="space-y-6">
-              <div className="text-center max-w-2xl mx-auto space-y-1">
-                <span className="text-xs text-[#D9BC82] font-bold uppercase tracking-widest">คัมภีร์โหราศาสตร์ไทย</span>
-                <h2 className="font-display text-2xl font-bold text-[#F8F6F1]">ตารางคัมภีร์ยามอัฏฐกาล 7 ยาม</h2>
-                <p className="text-xs text-[#94A3B8] leading-relaxed">
-                  รายละเอียดคำพยากรณ์ครบถ้วนทั้ง 4 เสาหลัก: เรื่องที่ได้ยิน, คนเจ็บไข้, ของหาย, การเดินทาง 3 ช่วง, และเวลาที่ดีที่สุด
-                </p>
-              </div>
-
-              {/* Master 7 Yam Table */}
-              <Card className="p-0 overflow-hidden bg-[#0A1628]/40 border-[#D9BC82]/20">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse min-w-[980px]">
-                    <thead>
-                      <tr className="border-b border-white/10 bg-[#0A2240]/60 text-xs font-bold uppercase tracking-wider text-[#D9BC82]">
-                        <th className="p-3 text-center w-16 border-r border-white/10">ยามที่</th>
-                        <th className="p-3 border-r border-white/10 w-36">ชื่อยาม (กลางวัน/กลางคืน)</th>
-                        <th className="p-3 border-r border-white/10 w-44">เรื่องที่ได้ยิน</th>
-                        <th className="p-3 border-r border-white/10 w-44">คนเจ็บไข้</th>
-                        <th className="p-3 border-r border-white/10 w-52">ของหาย</th>
-                        <th className="p-3 border-r border-white/10 w-40">เดินทาง (ยามต้น)</th>
-                        <th className="p-3 border-r border-white/10 w-40">เดินทาง (ยามกลาง)</th>
-                        <th className="p-3 border-r border-white/10 w-40">เดินทาง (ยามปลาย)</th>
-                        <th className="p-3 text-center w-28">เวลาที่ดี</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5 text-xs">
-                      {ATTHAKARN_CHAN_CHAI_TABLE.map((item) => {
-                        const isLiveYam = item.nameDay === data.yamName || item.nameNight === data.yamName;
-                        return (
-                          <tr
-                            key={item.yamNumber}
-                            className={`transition-colors ${
-                              isLiveYam ? "bg-[#D9BC82]/10 ring-1 ring-inset ring-[#D9BC82]/40" : "hover:bg-white/[0.02]"
-                            }`}
-                          >
-                            <td className="p-3 text-center font-bold text-base text-[#D9BC82] border-r border-white/10 align-top">
-                              {item.yamNumber}
-                            </td>
-                            <td className="p-3 border-r border-white/10 align-top font-semibold text-[#F8F6F1]">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-base text-[#D9BC82]">{item.planetSymbol}</span>
-                                <div>
-                                  <p>{item.nameDay} (กลางวัน)</p>
-                                  <p className="text-[#94A3B8]">{item.nameNight} (กลางคืน)</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="p-3 border-r border-white/10 align-top text-yellow-100 font-medium leading-relaxed">
-                              {item.news}
-                            </td>
-                            <td className="p-3 border-r border-white/10 align-top text-rose-200 font-medium leading-relaxed">
-                              {item.sickness}
-                            </td>
-                            <td className="p-3 border-r border-white/10 align-top text-amber-200 font-medium leading-relaxed">
-                              {item.lostItem}
-                            </td>
-                            <td className="p-3 border-r border-white/10 align-top text-[#D9CDB7] leading-relaxed">
-                              {item.travel.start}
-                            </td>
-                            <td className="p-3 border-r border-white/10 align-top text-[#D9CDB7] leading-relaxed">
-                              {item.travel.middle}
-                            </td>
-                            <td className="p-3 border-r border-white/10 align-top text-[#D9CDB7] leading-relaxed">
-                              {item.travel.end}
-                            </td>
-                            <td className="p-3 text-center font-bold text-[#D9BC82] align-top bg-black/20">
-                              {item.bestTime}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-            </div>
-          )}
-
-          {/* Sub-view 3: ตารางช่วงเวลาย่อย 24 ชั้นฉาย (Time Breakdown Matrix) */}
-          {masterSubTab === "slots" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center flex-wrap gap-4">
-                <div>
-                  <span className="text-xs text-[#D9BC82] font-bold uppercase tracking-widest">การแบ่งเวลา 24 ช่วงย่อย</span>
-                  <h2 className="font-display text-2xl font-bold text-[#F8F6F1]">ตารางช่วงเวลา 24 ชั้นฉาย</h2>
-                </div>
-
-                <div className="flex bg-[#0A1628]/60 p-1 rounded-xl border border-white/10 gap-1">
-                  <button
-                    onClick={() => setMasterSlotPeriod("day")}
-                    className={`py-1.5 px-3 rounded-lg text-xs font-bold uppercase transition-all ${
-                      masterSlotPeriod === "day"
-                        ? "bg-[#D9BC82] text-[#0A1628] font-black shadow"
-                        : "text-[#94A3B8] hover:text-[#F8F6F1]"
-                    }`}
-                  >
-                    ☀️ กลางวัน (06:01 - 18:00)
-                  </button>
-                  <button
-                    onClick={() => setMasterSlotPeriod("night")}
-                    className={`py-1.5 px-3 rounded-lg text-xs font-bold uppercase transition-all ${
-                      masterSlotPeriod === "night"
-                        ? "bg-[#D9BC82] text-[#0A1628] font-black shadow"
-                        : "text-[#94A3B8] hover:text-[#F8F6F1]"
-                    }`}
-                  >
-                    🌙 กลางคืน (18:01 - 06:00)
-                  </button>
-                </div>
-              </div>
-
-              {/* 24-Sub Times Grid Card */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                {(masterSlotPeriod === "day" ? DAY_SUB_TIME_SLOTS_24 : NIGHT_SUB_TIME_SLOTS_24)
-                  .reduce<SubTimeSlotItem[][]>((acc, item, idx) => {
-                    const groupIdx = Math.floor(idx / 3);
-                    if (!acc[groupIdx]) acc[groupIdx] = [];
-                    acc[groupIdx].push(item);
-                    return acc;
-                  }, [])
-                  .map((group, gIdx) => {
-                    const yamNum = gIdx + 1;
-                    const isCurrentMajor = data.period === masterSlotPeriod && data.yamNumber === yamNum;
-                    return (
-                      <Card
-                        key={gIdx}
-                        className={`p-4 space-y-3 transition-all ${
-                          isCurrentMajor
-                            ? "bg-[#D9BC82]/15 border-[#D9BC82] shadow-[0_0_20px_rgba(217,188,130,0.15)] ring-1 ring-[#D9BC82]"
-                            : "bg-[#0A1628]/40 border-white/5"
-                        }`}
-                      >
-                        <div className="flex justify-between items-center border-b border-white/10 pb-2">
-                          <span className="text-xs font-bold text-[#D9BC82]">ยามใหญ่ที่ {yamNum}</span>
-                          <span className="text-[12px] text-[#94A3B8] font-mono">{group[0]?.majorRangeLabel}</span>
-                        </div>
-
-                        <div className="space-y-1.5">
-                          {group.map((sub) => {
-                            const isCurrentSub = isCurrentMajor && data.phase === sub.subPhase;
-                            return (
-                              <div
-                                key={sub.subPhase}
-                                className={`flex items-center justify-between text-xs p-2 rounded-lg transition-all ${
-                                  isCurrentSub
-                                    ? "bg-[#D9BC82] text-[#0A1628] font-bold shadow-sm"
-                                    : "bg-black/20 text-[#D9CDB7]"
-                                }`}
-                              >
-                                <span>{sub.subPhaseLabel}</span>
-                                <span className="font-mono">{sub.startTime} - {sub.endTime} น.</span>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </Card>
-                    );
-                  })}
-              </div>
-            </div>
-          )}
-
-          {/* ✦ สรุปเวลาที่ดีของแต่ละยาม & หมายเหตุตำรา */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-2">
-            {/* สรุปเวลาที่ดีของแต่ละยาม */}
-            <Card className="lg:col-span-6 bg-gradient-to-br from-[#0A2240]/80 via-[#0A1628]/60 to-[#020617] border-[#D9BC82]/30 p-5 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#D9BC82]/5 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
-                <span className="text-xl text-[#D9BC82]">✦</span>
-                <div>
-                  <h3 className="font-display text-base font-bold text-[#F8F6F1]">
-                    เวลาที่ดีของแต่ละยาม (สรุป)
-                  </h3>
-                  <p className="text-[12px] text-[#D9BC82]">
-                    ช่วงเวลาที่ควรเลือกออกเดินทางหรือทำธุระเพื่อให้ได้ผลสำเร็จสูงสุด
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-2.5 text-xs">
-                {YAM_BEST_TIMES_SUMMARY.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-black/30 border border-white/5 hover:border-[#D9BC82]/30 transition-all gap-2"
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <span className="w-5 h-5 rounded-full bg-[#D9BC82]/15 text-[#D9BC82] font-mono text-[11px] font-bold flex items-center justify-center shrink-0">
-                        {idx + 1}
-                      </span>
-                      <span className="font-semibold text-[#F8F6F1]">
-                        {item.yams}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[#94A3B8] text-[11px]">เวลาที่ดีคือ:</span>
-                      <span className="px-3 py-1 rounded-lg bg-[#D9BC82]/20 text-[#D9BC82] font-bold border border-[#D9BC82]/30 shadow-sm text-xs">
-                        {item.bestTime}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* หมายเหตุและวิธีจำ */}
-            <Card className="lg:col-span-6 bg-gradient-to-br from-[#0A2240]/80 via-[#0A1628]/60 to-[#020617] border-[#4B6FAE]/30 p-5 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-[#4B6FAE]/5 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center gap-2 mb-4 border-b border-white/10 pb-3">
-                <span className="text-xl text-[#4B6FAE]">✦</span>
-                <div>
-                  <h3 className="font-display text-base font-bold text-[#F8F6F1]">
-                    หมายเหตุ & เคล็ดวิชาการจำยาม
-                  </h3>
-                  <p className="text-[12px] text-[#94A3B8]">
-                    หลักการคำนวณและข้อสังเกตสำคัญตามตำราโบราณ
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3 text-xs leading-relaxed">
-                <p className="text-[#D9CDB7] bg-white/[0.02] p-3 rounded-xl border border-white/5">
-                  {YAM_RULES_NOTE.intro} โดยกำหนดเวลาที่ดีของแต่ละยามเอาไว้ว่า:
-                </p>
-
-                <div className="space-y-2.5 pl-1">
-                  {YAM_RULES_NOTE.points.map((pt, i) => (
-                    <div key={i} className="flex items-start gap-2.5 text-[#F8F6F1]">
-                      <span className="text-[#D9BC82] text-sm leading-none mt-0.5">•</span>
-                      <span className="font-medium text-[#E2E8F0]">{pt}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Card>
-          </div>
         </div>
       )}
 
@@ -1533,6 +1267,141 @@ export default function YamPage() {
               </Card>
             )}
 
+            {/* 💬 ถาม-ตอบยามอัฏฐกาล & ชั้นฉาย (Mobile-Friendly Interactive Q&A for calculated time) */}
+            {ashtaChanChaiItem && (
+              <Card className="p-5 bg-gradient-to-br from-[#0A2240]/90 via-[#0A1628]/80 to-[#020617] border-[#D9BC82]/30 shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-40 h-40 bg-[#D9BC82]/5 rounded-full blur-3xl pointer-events-none" />
+                
+                <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3 mb-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">💬</span>
+                    <div>
+                      <h3 className="font-display text-base font-bold text-[#F8F6F1]">
+                        ถาม-ตอบยามอัฏฐกาล & ชั้นฉาย
+                      </h3>
+                      <p className="text-[12px] text-[#D9BC82]">
+                        กดเลือกเรื่องที่ต้องการตรวจ สำหรับยามที่คำนวณนี้
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-[#D9BC82]/15 text-[#D9BC82] text-[11px] font-bold border border-[#D9BC82]/30 shrink-0">
+                    ยาม{ashtaResult.yamName} ({PHASE_LABEL[ashtaResult.phase]})
+                  </span>
+                </div>
+
+                {/* Inquiry Topic Chips */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-4">
+                  {[
+                    { id: "news", icon: "🚩", label: "เรื่องที่ได้ยิน", q: "ข่าวที่ได้ยินจริงไหม?" },
+                    { id: "sickness", icon: "🏥", label: "คนเจ็บไข้", q: "คนป่วยเป็นอย่างไร?" },
+                    { id: "lostItem", icon: "🔍", label: "ของหาย", q: "ของหายจะได้คืนไหม?" },
+                    { id: "travel", icon: "🚗", label: "การเดินทาง", q: "ควรเดินทางช่วงไหน?" },
+                    { id: "bestTime", icon: "⭐", label: "เวลาที่ดีที่สุด", q: "เวลาทองของยามนี้?" },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setAshtaInquiry(item.id as any)}
+                      className={`p-2.5 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${
+                        ashtaInquiry === item.id
+                          ? "bg-[#D9BC82] text-[#0A1628] border-[#D9BC82] font-black shadow-[0_0_15px_rgba(217,188,130,0.3)] scale-[1.02]"
+                          : "bg-black/30 border-white/10 text-[#D9CDB7] hover:border-[#D9BC82]/40 hover:text-[#F8F6F1]"
+                      }`}
+                    >
+                      <span className="text-base mb-0.5">{item.icon}</span>
+                      <span className="text-[12px] font-bold">{item.label}</span>
+                      <span className={`text-[10px] mt-0.5 truncate max-w-full ${
+                        ashtaInquiry === item.id ? "text-[#0A1628]/80 font-medium" : "text-[#94A3B8]"
+                      }`}>{item.q}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Inquiry Answer Box */}
+                <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2 animate-fade-in">
+                  <div className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
+                    <span className="text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                      <span>💡</span> คำพยากรณ์สำหรับคำถาม: {
+                        ashtaInquiry === "news" ? "เรื่องที่ได้ยิน (ข่าวกาลกิณี/มงคล)" :
+                        ashtaInquiry === "sickness" ? "คนเจ็บไข้ (พยากรณ์โรค)" :
+                        ashtaInquiry === "lostItem" ? "ของหาย (โอกาสได้คืน/ที่ซ่อน)" :
+                        ashtaInquiry === "travel" ? "การเดินทาง 3 ช่วงระยะ" : "เวลามงคลที่ดีที่สุดประจำยาม"
+                      }
+                    </span>
+                    <span className="text-[11px] text-[#94A3B8]">
+                      ตามคัมภีร์อัฏฐกาล 7 ยาม
+                    </span>
+                  </div>
+
+                  {ashtaInquiry === "news" && (
+                    <div className="space-y-1">
+                      <p className="text-base font-bold text-yellow-100 leading-relaxed">
+                        "{ashtaChanChaiItem.news}"
+                      </p>
+                      <p className="text-xs text-[#94A3B8]">
+                        {ashtaChanChaiItem.news.includes("จริง") ? "✓ ข้อมูลหรือข่าวสารที่ได้ยินในยามนี้ มีน้ำหนักความจริงสูง" : "✕ ควรฟังหูไว้หู อย่าเพิ่งปักใจเชื่อในทันที"}
+                      </p>
+                    </div>
+                  )}
+
+                  {ashtaInquiry === "sickness" && (
+                    <div className="space-y-1">
+                      <p className="text-base font-bold text-rose-200 leading-relaxed">
+                        "{ashtaChanChaiItem.sickness}"
+                      </p>
+                      <p className="text-xs text-[#94A3B8]">
+                        การดูแลรักษาพยาบาลในยามนี้ควรปฏิบัติตามคำแนะนำของแพทย์อย่างเคร่งครัด
+                      </p>
+                    </div>
+                  )}
+
+                  {ashtaInquiry === "lostItem" && (
+                    <div className="space-y-1">
+                      <p className="text-base font-bold text-amber-200 leading-relaxed">
+                        "{ashtaChanChaiItem.lostItem}"
+                      </p>
+                      <p className="text-xs text-[#94A3B8]">
+                        คำแนะนำสถานที่ค้นหาตามธาตุและทิศทางของดาวเจ้ายาม
+                      </p>
+                    </div>
+                  )}
+
+                  {ashtaInquiry === "travel" && (
+                    <div className="space-y-2">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div className={`p-2.5 rounded-lg border text-xs ${ashtaResult.phase === "start" ? "bg-[#D9BC82]/15 border-[#D9BC82]" : "bg-white/[0.02] border-white/5"}`}>
+                          <span className="font-bold text-[#D9BC82] block mb-1">ยามต้น (30 นาทีแรก)</span>
+                          <p className="text-[#F8F6F1]">{ashtaChanChaiItem.travel.start}</p>
+                        </div>
+                        <div className={`p-2.5 rounded-lg border text-xs ${ashtaResult.phase === "middle" ? "bg-[#D9BC82]/15 border-[#D9BC82]" : "bg-white/[0.02] border-white/5"}`}>
+                          <span className="font-bold text-[#D9BC82] block mb-1">ยามกลาง (30 นาทีกลาง)</span>
+                          <p className="text-[#F8F6F1]">{ashtaChanChaiItem.travel.middle}</p>
+                        </div>
+                        <div className={`p-2.5 rounded-lg border text-xs ${ashtaResult.phase === "end" ? "bg-[#D9BC82]/15 border-[#D9BC82]" : "bg-white/[0.02] border-white/5"}`}>
+                          <span className="font-bold text-[#D9BC82] block mb-1">ยามปลาย (30 นาทีสุดท้าย)</span>
+                          <p className="text-[#F8F6F1]">{ashtaChanChaiItem.travel.end}</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {ashtaInquiry === "bestTime" && (
+                    <div className="space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-[#94A3B8]">เวลาที่ดีที่สุดของยามนี้คือ:</span>
+                        <span className="px-3 py-1 rounded-lg bg-[#D9BC82]/20 text-[#D9BC82] font-black border border-[#D9BC82]/40 text-sm">
+                          {ashtaChanChaiItem.bestTime}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#D9CDB7] leading-relaxed">
+                        หากต้องการนัดหมาย เจรจาสำคัญ หรือออกเดินทาง แนะนำให้เจาะจงเลือกช่วงเวลา <strong>{ashtaChanChaiItem.bestTime}</strong> ของยามนี้เพื่อให้เกิดผลสำเร็จสูงสุด
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            )}
+
             {/* 4-Pillar Prediction Cards */}
             {ashtaChanChaiItem && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1562,11 +1431,11 @@ export default function YamPage() {
 
                 <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-base">🚗</span>
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-green-300">การเดินทาง ({PHASE_LABEL[ashtaResult.phase]})</span>
+                    <span className="text-base">⭐</span>
+                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#D9BC82]">เวลาที่ดีที่สุด</span>
                   </div>
-                  <p className="text-sm sm:text-base leading-relaxed text-yellow-100 font-semibold">
-                    {ashtaResult.travelAuspiciousness.description}
+                  <p className="text-sm sm:text-base leading-relaxed text-[#D9BC82] font-black">
+                    {ashtaChanChaiItem.bestTime}
                   </p>
                 </div>
               </div>
