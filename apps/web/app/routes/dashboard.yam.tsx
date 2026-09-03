@@ -45,6 +45,28 @@ const PLANET_SYMBOLS: Record<string, string> = {
   เสารี:  "♄", โสโร:  "♄",
 };
 
+const DAY_GRID_HEADER_TIMES = [
+  { major: "06.01-7.30 น.", subs: ["6.01", "6.31", "7.01"] },
+  { major: "07.31-09.00 น.", subs: ["7.31", "8.01", "8.31"] },
+  { major: "09.01-10.30 น.", subs: ["9.01", "9.31", "10.01"] },
+  { major: "10.31-12.00 น.", subs: ["10.31", "11.01", "11.31"] },
+  { major: "12.01-13.30 น.", subs: ["12.01", "12.31", "13.01"] },
+  { major: "13.31-15.00 น.", subs: ["13.31", "14.01", "14.31"] },
+  { major: "15.01-16.30 น.", subs: ["15.01", "15.31", "16.01"] },
+  { major: "16.31-18.00 น.", subs: ["16.31", "17.01", "17.31"] },
+];
+
+const NIGHT_GRID_HEADER_TIMES = [
+  { major: "18.01-19.30 น.", subs: ["18.01", "18.31", "19.01"] },
+  { major: "19.31-21.00 น.", subs: ["19.31", "20.01", "20.31"] },
+  { major: "21.01-22.30 น.", subs: ["21.01", "21.31", "22.01"] },
+  { major: "22.31-24.00 น.", subs: ["22.31", "23.01", "23.31"] },
+  { major: "0.01-01.30 น.", subs: ["0.01", "0.31", "1.01"] },
+  { major: "01.31-03.00 น.", subs: ["1.31", "2.01", "2.31"] },
+  { major: "03.10-04.30 น.", subs: ["3.01", "3.31", "4.01"] },
+  { major: "04.31-06.00 น.", subs: ["4.31", "5.01", "5.31"] },
+];
+
 const PHASE_LABEL: Record<string, string> = {
   start:  "ยามต้น",
   middle: "ยามกลาง",
@@ -665,7 +687,7 @@ export default function YamPage() {
           }`}
           title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
-          📅 ตาราง 8x7 {isLocked && '🔒'}
+          📅 ตารางยามอัฐกาล {isLocked && '🔒'}
         </button>
       </div>
 
@@ -1849,56 +1871,47 @@ export default function YamPage() {
           {/* 8x7 Watch Grid Table */}
           <Card className="p-0 overflow-hidden bg-[#0A1628]/40 border-white/5">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[700px]">
+              <table className="w-full text-left border-collapse min-w-[760px]">
                 <thead>
-                  <tr className="border-b border-white/5 bg-white/[0.02]">
-                    <th className="p-3 text-[13px] font-bold uppercase tracking-wider text-[#94A3B8] text-center w-24">
+                  {/* Row 1: กลางวัน / กลางคืน + 8 ช่วงเวลายามใหญ่ */}
+                  <tr className="border-b border-white/10 bg-[#0A2240]/80 text-[#D9BC82]">
+                    <th className="p-2.5 text-xs font-bold text-center border-r border-white/10 w-24 bg-[#0A1628]/90">
+                      {gridPeriod === "day" ? "กลางวัน" : "กลางคืน"}
+                    </th>
+                    {(gridPeriod === "day" ? DAY_GRID_HEADER_TIMES : NIGHT_GRID_HEADER_TIMES).map((item, i) => (
+                      <th key={i} className="p-2 text-center border-r border-white/10 last:border-r-0 bg-[#0A2240]/60">
+                        <span className="text-xs font-bold text-[#F8F6F1] font-mono block">
+                          {item.major}
+                        </span>
+                      </th>
+                    ))}
+                  </tr>
+
+                  {/* Row 2: วัน + 24 ช่วงเวลาย่อย (ต้น กลาง ปลาย) */}
+                  <tr className="border-b border-white/10 bg-[#0A1628]/90">
+                    <th className="p-2 text-xs font-bold text-center text-[#F8F6F1] border-r border-white/10 bg-white/[0.04]">
                       วัน
                     </th>
-                    {Array.from({ length: 8 }).map((_, i) => {
-                      const num = i + 1;
-                      let label = "";
-                      if (gridPeriod === "day") {
-                        const start = 360 + i * 90;
-                        const end = 360 + (i + 1) * 90;
-                        const startH = Math.floor(start / 60);
-                        const startM = start % 60;
-                        const endH = Math.floor(end / 60);
-                        const endM = end % 60;
-                        label = `${String(startH).padStart(2, "0")}:${String(startM).padStart(2, "0")}-${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`;
-                      } else {
-                        const start = 1080 + i * 90;
-                        const end = 1080 + (i + 1) * 90;
-                        let startH = Math.floor(start / 60);
-                        if (startH >= 24) startH -= 24;
-                        const startM = start % 60;
-                        let endH = Math.floor(end / 60);
-                        if (endH >= 24) endH -= 24;
-                        const endM = end % 60;
-                        label = `${String(startH).padStart(2, "0")}:${String(startM).padStart(2, "0")}-${String(endH).padStart(2, "0")}:${String(endM).padStart(2, "0")}`;
-                      }
-
-                      return (
-                        <th key={i} className="p-2 text-[13px] font-bold uppercase tracking-wider text-center text-[#94A3B8]">
-                          ยามที่ {num}
-                          <span className="block text-[11px] font-medium text-[#94A3B8] tracking-normal mt-0.5">{label} น.</span>
-                          <div className="flex justify-center gap-px mt-1.5">
-                            {["ต้น","กลาง","ปลาย"].map(p => (
-                              <span key={p} className="text-[10px] font-normal text-[#94A3B8] bg-white/[0.04] px-1 py-px rounded">
-                                {p}
-                              </span>
-                            ))}
-                          </div>
-                        </th>
-                      );
-                    })}
+                    {(gridPeriod === "day" ? DAY_GRID_HEADER_TIMES : NIGHT_GRID_HEADER_TIMES).map((item, i) => (
+                      <th key={i} className="p-1 border-r border-white/10 last:border-r-0 bg-[#0A1628]/80">
+                        <div className="grid grid-cols-3 gap-0.5 text-center">
+                          {item.subs.map((subTime, sIdx) => (
+                            <div
+                              key={sIdx}
+                              className="bg-black/30 rounded px-0.5 py-1 text-[11px] font-mono text-[#D9CDB7] font-semibold"
+                            >
+                              {subTime}
+                            </div>
+                          ))}
+                        </div>
+                      </th>
+                    ))}
                   </tr>
                 </thead>
                 <tbody>
                   {DAY_NAMES_TH.map((dayName, dIdx) => {
                     const dayNameEn = DAY_NAMES_EN[dIdx]!;
                     const table = gridPeriod === "day" ? yamDayTable[dayNameEn] : yamNightTable[dayNameEn];
-                    const ticksTable = gridPeriod === "day" ? yamDayTicksTable[dayNameEn] : yamNightTicksTable[dayNameEn];
                     const subTable = gridPeriod === "day" ? yamDaySubTable[dayNameEn] : yamNightSubTable[dayNameEn];
 
                     return (
@@ -1916,7 +1929,7 @@ export default function YamPage() {
                               onClick={() => handleGridCellClick(dayName, yIdx + 1)}
                               className={`p-2 text-center cursor-pointer transition-all border-r border-white/5 select-none align-top ${
                                 isSelected
-                                  ? "bg-[#D9BC82]/15 text-[#D9BC82]"
+                                  ? "bg-[#D9BC82]/15 text-[#D9BC82] ring-1 ring-inset ring-[#D9BC82]"
                                   : "hover:bg-white/5"
                               }`}
                             >
@@ -1927,18 +1940,21 @@ export default function YamPage() {
                                 <span className={`text-[13px] font-bold ${isSelected ? "text-[#D9BC82]" : "text-[#D9CDB7]"}`}>
                                   {yamName}
                                 </span>
-                                <div className="flex flex-col gap-0.5 w-full mt-0.5 border-t border-white/10 pt-1">
+                                <div className="grid grid-cols-3 gap-0.5 w-full mt-1 border-t border-white/10 pt-1">
                                   {(["ต้น","กลาง","ปลาย"] as const).map((phase, pIdx) => {
                                     const isGood = subTable[yIdx]?.[pIdx] ?? false;
 
                                     return (
-                                      <div key={phase} className={`flex items-center justify-between text-[12px] px-1 rounded-sm ${
-                                        isSelected
-                                          ? (isGood ? "text-[#C6A96B]" : "text-[#F8F6F1]/15")
-                                          : (isGood ? "text-[#C6A96B]/80" : "text-[#F8F6F1]/15")
-                                      }`}>
-                                        <span>ยาม{phase}</span>
-                                        <span className="font-mono">{isGood ? "✓" : "–"}</span>
+                                      <div
+                                        key={phase}
+                                        className={`flex flex-col items-center justify-center py-1 px-0.5 rounded text-[10px] ${
+                                          isGood
+                                            ? "bg-green-500/15 text-green-400 border border-green-500/25 font-bold"
+                                            : "bg-red-500/10 text-rose-300 border border-red-500/20 font-medium"
+                                        }`}
+                                      >
+                                        <span className="text-[9px] opacity-75">{phase}</span>
+                                        <span className="font-bold leading-none mt-0.5">{isGood ? "✓" : "✕"}</span>
                                       </div>
                                     );
                                   })}
