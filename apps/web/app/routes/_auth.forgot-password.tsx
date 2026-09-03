@@ -2,7 +2,7 @@ import { json } from "@remix-run/cloudflare";
 import { Form, Link, useActionData, useNavigation } from "@remix-run/react";
 import type { ActionFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { useTranslation } from "react-i18next";
-import { createSupabaseClient } from "~/services/supabase.server";
+import { createSupabaseClient, createServiceRoleClient } from "~/services/supabase.server";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
@@ -21,7 +21,33 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ success: false, error: "กรุณากรอกอีเมล" }, { status: 400 });
   }
 
-  const { supabase } = createSupabaseClient(request, env);
+  // 1. ตรวจสอบว่ามีอีเมลนี้อยู่ในระบบสมาชิกหรือไม่
+  try {
+    const adminSupabase = createServiceRoleClient(env);
+    const { data: profile, error: dbError } = await adminSupabase
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .maybeSingle();
+
+    if (dbError) {
+      console.error("Database check email error:", dbError);
+      return json({ success: false, error: "เกิดข้อผิดพลาดในการตรวจสอบข้อมูลสมาชิก" }, { status: 500 });
+    }
+
+    if (!profile) {
+      return json(
+        { success: false, error: "ไม่พบอีเมลนี้ในระบบสมาชิก กรุณาตรวจสอบอีเมลหรือสมัครสมาชิกใหม่" },
+        { status: 400 }
+      );
+    }
+  } catch (err) {
+    console.error("Email verification exception:", err);
+    return json({ success: false, error: "เกิดข้อผิดพลาดภายในระบบ" }, { status: 500 });
+  }
+
+  // 2. ดำเนินการรีเซ็ตรหัสผ่าน
+  const { supabase, headers } = createSupabaseClient(request, env);
   
   const origin = new URL(request.url).origin;
   const redirectTo = `${origin}/auth/callback?next=/reset-password`;
@@ -35,7 +61,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ success: false, error: "ไม่สามารถส่งอีเมลได้ในขณะนี้: " + error.message }, { status: 500 });
   }
 
-  return json({ success: true, error: null });
+  return json({ success: true, error: null }, { headers });
 }
 
 export default function ForgotPasswordPage() {

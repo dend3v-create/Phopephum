@@ -6,7 +6,6 @@ import { logEvent, EVENTS } from "~/services/analytics.server";
 import { NavLink } from "~/components/ui/NavLink";
 import { ProtectedContent } from "~/components/ui/ProtectedContent";
 import { ThemeToggle } from "~/components/ThemeToggle";
-import { LanguageSwitcher } from "~/components/LanguageSwitcher";
 import type { Env } from "~/env.server";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -318,8 +317,7 @@ export default function DashboardLayout() {
           </div>
 
           {/* ── Preference controls ── */}
-          <div className="flex items-center justify-between pb-2">
-            <LanguageSwitcher />
+          <div className="flex items-center justify-end pb-2">
             <ThemeToggle />
           </div>
 
@@ -351,9 +349,8 @@ export default function DashboardLayout() {
           <span className="text-[9px] font-medium tracking-widest uppercase hidden xs:inline" style={{ color: "var(--accent-gold)", opacity: 0.6 }}>Wisdom OS</span>
         </Link>
 
-        {/* Controls: Language + Theme + Menu */}
+        {/* Controls: Theme + Menu */}
         <div className="flex items-center gap-1">
-          <LanguageSwitcher />
           <ThemeToggle />
 
         {isPro ? (

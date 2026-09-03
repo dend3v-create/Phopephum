@@ -324,6 +324,7 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
   const SHOW_STATUS = config.showPlanetStatus !== false;
   const SHOW_TIME   = config.showTimeRing !== false;
   const SHOW_START  = config.showLagnaRulerMarker !== false;
+  const isLight     = config.theme === 'light';
 
   const SIZE = config.size ?? 520;
   const CX = SIZE / 2; const CY = SIZE / 2; const s = SIZE / 520;
@@ -334,8 +335,15 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
   const R_PLN_LBL   = (R_RING2 + R_RING3) / 2;
   const R_FIX_LBL   = (R_RING3 + R_CORE) / 2;
 
-  const GOLD = '#C9A96E'; const GOLD_TXT = '#C9A96E'; const TXT = '#F8F6F1'; const TXT_TIME = '#C9A96E';
-  const LAGNA_BG = '#1A4E9A35'; const PLN_BG = '#C9A96E1A'; const BHAVA_CLR = '#4B6FAE';
+  const GOLD = isLight ? '#A68444' : '#C9A96E';
+  const GOLD_TXT = isLight ? '#8C6D2D' : '#C9A96E';
+  const TXT = isLight ? '#1D2939' : '#F8F6F1';
+  const TXT_TIME = isLight ? '#8C6D2D' : '#C9A96E';
+  const LAGNA_BG = isLight ? 'rgba(75, 111, 174, 0.16)' : '#1A4E9A35';
+  const PLN_BG = isLight ? 'rgba(166, 132, 68, 0.14)' : '#C9A96E1A';
+  const BHAVA_CLR = isLight ? '#2A5298' : '#4B6FAE';
+  const CENTER_MASK_FILL = isLight ? '#F9F7F3' : '#07132b';
+  const CORE_CIRCLE_FILL = isLight ? '#F4EFE6' : '#020617';
 
   function polar(deg: number, r: number) {
     const rad = (deg * Math.PI) / 180;
@@ -359,9 +367,9 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
 
   const circles = [
     `<circle cx="${CX}" cy="${CY}" r="${R_RING1.toFixed(1)}" fill="none" stroke="${GOLD}" stroke-width="2.2"/>`,
-    `<circle cx="${CX}" cy="${CY}" r="${R_RING2.toFixed(1)}" fill="none" stroke="${GOLD}60" stroke-width="1.2"/>`,
-    `<circle cx="${CX}" cy="${CY}" r="${R_RING3.toFixed(1)}" fill="none" stroke="${GOLD}28" stroke-width="1"/>`,
-    `<circle cx="${CX}" cy="${CY}" r="${R_CORE.toFixed(1)}" fill="#020617" stroke="${GOLD}" stroke-width="1.8"/>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R_RING2.toFixed(1)}" fill="none" stroke="${GOLD}${isLight ? '90' : '60'}" stroke-width="1.2"/>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R_RING3.toFixed(1)}" fill="none" stroke="${GOLD}${isLight ? '50' : '28'}" stroke-width="1"/>`,
+    `<circle cx="${CX}" cy="${CY}" r="${R_CORE.toFixed(1)}" fill="${CORE_CIRCLE_FILL}" stroke="${GOLD}" stroke-width="1.8"/>`,
   ].join('\n');
 
   let dividers = '';
@@ -376,17 +384,17 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
     const isLagna = z.index === result.lagnaZodiacIndex;
     const bhava = result.bhavaMap[z.index];
     const pCenter = polar(z.sectorAngle, R_ZOD_BHAVA);
-    ring1Labels += `<text x="${pCenter.x.toFixed(1)}" y="${(pCenter.y - 8*s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${12.5*s}" font-family="sans-serif" fill="${isLagna ? '#6EB0F5' : TXT}" font-weight="900">${z.name}</text>`;
+    ring1Labels += `<text x="${pCenter.x.toFixed(1)}" y="${(pCenter.y - 8*s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${12.5*s}" font-family="sans-serif" fill="${isLagna ? (isLight ? '#1A4E9A' : '#6EB0F5') : TXT}" font-weight="900">${z.name}</text>`;
     if (bhava) {
-      const color = isLagna ? '#6EB0F5' : BHAVA_CLR;
+      const color = isLagna ? (isLight ? '#1A4E9A' : '#6EB0F5') : BHAVA_CLR;
       ring1Labels += `<text x="${pCenter.x.toFixed(1)}" y="${(pCenter.y + 10*s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${10.5*s}" font-family="sans-serif" fill="${color}" font-weight="800">${bhava}</text>`;
     }
   }
 
   const STATUS_GLYPHS: Record<Exclude<PlanetStatus, null>, { char: string; color: string }> = {
-    'maha-uccj': { char: '✿', color: '#22C55E' }, 'kaset': { char: '△', color: '#EF4444' },
-    'racha-chok':{ char: '⬡', color: '#3B82F6' }, 'maha-chakr':{ char: '□', color: '#EAB308' },
-    'pra': { char: '○', color: '#EF4444' }, 'nij': { char: '✳', color: '#EF4444' },
+    'maha-uccj': { char: '✿', color: '#16A34A' }, 'kaset': { char: '△', color: '#DC2626' },
+    'racha-chok':{ char: '⬡', color: '#2563EB' }, 'maha-chakr':{ char: '□', color: '#CA8A04' },
+    'pra': { char: '○', color: '#DC2626' }, 'nij': { char: '✳', color: '#DC2626' },
   };
 
   let planetLabels = '';
@@ -398,7 +406,7 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
       const gap = 22 * s; const totalWidth = (entries.length - 1) * gap;
       entries.forEach((entry, idx) => {
         const x = pos.x - totalWidth / 2 + idx * gap; const y = pos.y;
-        const color = entry.isLagna ? '#6EB0F5' : GOLD;
+        const color = entry.isLagna ? (isLight ? '#1A4E9A' : '#6EB0F5') : GOLD;
         if (entry.status && SHOW_STATUS) {
           const st = STATUS_GLYPHS[entry.status];
           planetLabels += `<text x="${x.toFixed(1)}" y="${(y - 15 * s).toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${11*s}" font-family="sans-serif" fill="${st.color}" font-weight="900">${st.char}</text>`;
@@ -412,7 +420,7 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
   if (SHOW_FIXED) {
     for (const z of ZODIAC_ORDER) {
       const pos = polar(z.sectorAngle, R_FIX_LBL);
-      kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${17*s}" font-family="sans-serif" fill="${TXT}" opacity="0.85" font-weight="800">${KASTERN_FIXED[z.index]}</text>`;
+      kasternFixedLabels += `<text x="${pos.x.toFixed(1)}" y="${pos.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${17*s}" font-family="sans-serif" fill="${TXT}" opacity="${isLight ? '0.75' : '0.85'}" font-weight="800">${KASTERN_FIXED[z.index]}</text>`;
     }
   }
 
@@ -425,21 +433,22 @@ export function generateHoraTaynooSVG(result: HoraTaynooResult, config: ChartCon
     }
   }
 
-  const centerMask = `<circle cx="${CX}" cy="${CY}" r="${(R_CORE + 12*s).toFixed(1)}" fill="#020617" stroke="${GOLD}" stroke-width="3"/>`;
+  const centerMask = `<circle cx="${CX}" cy="${CY}" r="${(R_CORE + 12*s).toFixed(1)}" fill="${CENTER_MASK_FILL}" stroke="${GOLD}" stroke-width="2.5"/>`;
   const pDay = polar(225, 20 * s); const pYam = polar(45, 20 * s);
-  const dayLabel = `<text x="${pDay.x.toFixed(1)}" y="${pDay.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD}" font-weight="900">${result.dayPlanet}</text>`;
-  const yamLabel = `<text x="${pYam.x.toFixed(1)}" y="${pYam.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD}" font-weight="900">${result.yamAsked}</text>`;
+  const dayLabel = `<text x="${pDay.x.toFixed(1)}" y="${pDay.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD_TXT}" font-weight="900">${result.dayPlanet}</text>`;
+  const yamLabel = `<text x="${pYam.x.toFixed(1)}" y="${pYam.y.toFixed(1)}" text-anchor="middle" dominant-baseline="central" font-size="${28*s}" font-family="sans-serif" fill="${GOLD_TXT}" font-weight="900">${result.yamAsked}</text>`;
 
   let startMarker = '';
   if (SHOW_START) {
     const startAngle = ZODIAC_ORDER[result.timeStartZodiacIndex].sectorAngle;
     const pos = polar(startAngle, R_RING1);
-    startMarker = `<circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${7.5*s}" fill="none" stroke="#6EB0F5" stroke-width="3" opacity="0.9" />`;
-    startMarker += `<circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${3.5*s}" fill="#6EB0F5" opacity="1" />`;
+    const startColor = isLight ? '#1A4E9A' : '#6EB0F5';
+    startMarker = `<circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${7.5*s}" fill="none" stroke="${startColor}" stroke-width="3" opacity="0.9" />`;
+    startMarker += `<circle cx="${pos.x.toFixed(1)}" cy="${pos.y.toFixed(1)}" r="${3.5*s}" fill="${startColor}" opacity="1" />`;
   }
 
-  return `<svg viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg" style="background:#020617; border-radius:1.5rem;">
-  <circle cx="${CX}" cy="${CY}" r="${R_LIMIT.toFixed(1)}" fill="#020617" stroke="none" />
+  return `<svg viewBox="0 0 ${SIZE} ${SIZE}" xmlns="http://www.w3.org/2000/svg" style="background:transparent; border-radius:1.5rem;">
+  <circle cx="${CX}" cy="${CY}" r="${R_LIMIT.toFixed(1)}" fill="none" stroke="none" />
 ${highlights} ${circles} ${dividers} ${kasternFixedLabels} ${ring1Labels} ${planetLabels} ${timeLabels} ${startMarker} ${centerMask} ${dayLabel} ${yamLabel}
 </svg>`;
 }

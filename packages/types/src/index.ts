@@ -282,3 +282,75 @@ export interface ApiError {
 }
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiError;
+
+// ─── Hora Nu (ยามพรายกระซิบ) ──────────────────────────────────────────────────
+
+export interface HoraNuHouseEntry {
+  houseNum: number;
+  houseName: string;
+  zodiacNum: number;
+  zodiacName: string;
+  zodiacSymbol: string;
+  lordPlanet: number;
+  lordName: string;
+  lordSymbol: string;
+  lordColor: string;
+  lordStatus: string;
+  lordStatusSymbol: string;
+  lordStatusLabel: string;
+  lordStatusColor: string;
+  isCurrentYam: boolean;
+  isSecondaryKaset: boolean;
+}
+
+export interface HoraNuYamPeriod {
+  periodNum: number;
+  startTime: string;
+  endTime: string;
+  planet: number;
+  planetName: string;
+  planetSymbol: string;
+  planetColor: string;
+  direction: string;
+  directionAngleDeg: number;
+  isCurrent: boolean;
+}
+
+export interface HoraNuChartData {
+  queryTime: string;
+  phase: "day" | "night";
+  dayName: string;
+  dayRuler: number;
+  dayRulerName: string;
+  dayRulerSymbol: string;
+  dayRulerColor: string;
+
+  yamNumber: number;
+  mainPeriodStart: string;
+  mainPeriodEnd: string;
+  secondsRemainingMain: number;
+
+  subYamNumber: number;
+  subPeriodStart: string;
+  subPeriodEnd: string;
+  secondsRemainingSub: number;
+
+  microYamNumber: number;
+  secondsRemainingMicro: number;
+
+  currentPlanet: number;
+  currentPlanetName: string;
+  currentPlanetSymbol: string;
+  currentPlanetColor: string;
+  currentPrimaryHouse: number;
+  currentZodiacName: string;
+
+  currentStatus: string;
+  currentStatusSymbol: string;
+  currentStatusLabel: string;
+  currentDirectionThai: string;
+  currentDirectionAngleDeg: number;
+
+  yamSchedule: HoraNuYamPeriod[];
+  houseChart: HoraNuHouseEntry[];
+}

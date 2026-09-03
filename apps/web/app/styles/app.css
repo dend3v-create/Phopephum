@@ -287,6 +287,37 @@ body {
 [data-theme="light"] .bg-\[\#0f172a\]\/60 { background-color: rgba(255, 255, 255, 0.88) !important; }
 [data-theme="light"] .bg-\[\#0f172a\]\/80 { background-color: rgba(255, 255, 255, 0.92) !important; }
 
+/* #07132b / #091a3e / #050e24 / #091838 / #040a18 (Grand Horanu & Astral Cards) */
+[data-theme="light"] .bg-\[\#07132b\]        { background-color: rgba(255, 255, 255, 0.95) !important; }
+[data-theme="light"] .bg-\[\#07132b\]\/85    { background-color: rgba(255, 255, 255, 0.90) !important; }
+[data-theme="light"] .bg-\[\#07132b\]\/90    { background-color: rgba(255, 255, 255, 0.95) !important; }
+[data-theme="light"] .bg-\[\#091a3e\]        { background-color: rgba(245, 240, 232, 0.95) !important; }
+[data-theme="light"] .bg-\[\#050e24\]        { background-color: rgba(238, 232, 220, 0.95) !important; }
+[data-theme="light"] .bg-\[\#091838\]        { background-color: rgba(246, 243, 238, 0.88) !important; }
+[data-theme="light"] .bg-\[\#091838\]\/40    { background-color: rgba(246, 243, 238, 0.40) !important; }
+[data-theme="light"] .bg-\[\#091838\]\/50    { background-color: rgba(246, 243, 238, 0.50) !important; }
+[data-theme="light"] .bg-\[\#091838\]\/60    { background-color: rgba(246, 243, 238, 0.60) !important; }
+[data-theme="light"] .bg-\[\#091838\]\/70    { background-color: rgba(246, 243, 238, 0.70) !important; }
+[data-theme="light"] .bg-\[\#091838\]\/80    { background-color: rgba(246, 243, 238, 0.80) !important; }
+[data-theme="light"] .bg-\[\#040a18\]        { background-color: rgba(246, 243, 238, 0.95) !important; }
+
+/* Gradients in Light Mode (Warm Parchment / Sacred Ivory) */
+[data-theme="light"] .from-\[\#07132b\] {
+  --tw-gradient-from: #FAF8F5 var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgba(250, 248, 245, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+[data-theme="light"] .via-\[\#091a3e\] {
+  --tw-gradient-to: rgba(244, 239, 230, 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #F4EFE6 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+[data-theme="light"] .to-\[\#050e24\] {
+  --tw-gradient-to: #EDE6D8 var(--tw-gradient-to-position) !important;
+}
+[data-theme="light"] .to-\[\#040a18\] {
+  --tw-gradient-to: #F5EFE6 var(--tw-gradient-to-position) !important;
+}
+
 /* ── White opacity backgrounds → keep as subtle white ── */
 [data-theme="light"] .bg-white\/5         { background-color: rgba(255, 255, 255, 0.50) !important; }
 [data-theme="light"] .bg-white\/8         { background-color: rgba(255, 255, 255, 0.60) !important; }
@@ -376,6 +407,23 @@ body {
 [data-theme="light"] .border-white\/20    { border-color: rgba(61, 83, 97, 0.20) !important; }
 [data-theme="light"] .border-white\/25    { border-color: rgba(61, 83, 97, 0.25) !important; }
 [data-theme="light"] .border-white\/30    { border-color: rgba(61, 83, 97, 0.30) !important; }
+
+/* ── Border Gold (#C6A96B) in Light Mode ── */
+[data-theme="light"] .border-\[\#C6A96B\]     { border-color: #A68444 !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/10 { border-color: rgba(166, 132, 68, 0.12) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/15 { border-color: rgba(166, 132, 68, 0.18) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/20 { border-color: rgba(166, 132, 68, 0.22) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/25 { border-color: rgba(166, 132, 68, 0.28) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/30 { border-color: rgba(166, 132, 68, 0.32) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/35 { border-color: rgba(166, 132, 68, 0.38) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/40 { border-color: rgba(166, 132, 68, 0.42) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/50 { border-color: rgba(166, 132, 68, 0.50) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/60 { border-color: rgba(166, 132, 68, 0.60) !important; }
+
+/* ── Text Gold (#C6A96B / #D9BC82) in Light Mode ── */
+[data-theme="light"] .text-\[\#C6A96B\]     { color: #8C6D2D !important; }
+[data-theme="light"] .text-\[\#D9BC82\]     { color: #8C6D2D !important; }
+[data-theme="light"] .text-\[\#C6A96B\]\/50 { color: rgba(140, 109, 45, 0.55) !important; }
 
 /* ── Rings ── */
 [data-theme="light"] .ring-white\/10      { --tw-ring-color: rgba(61, 83, 97, 0.12); }

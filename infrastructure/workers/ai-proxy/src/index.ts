@@ -1,18 +1,18 @@
 // Phopephum AI Proxy — Cloudflare Worker
-// AI Provider: Google Gemini (gemini-1.5-flash)
+// AI Provider: DeepSeek (deepseek-chat)
 // Streams SSE → Remix client via AI_WORKER_SECRET auth
 
 interface Env {
-  GEMINI_API_KEY: string;
+  deepseek_api_key?: string;
+  DEEPSEEK_API_KEY?: string;
+  GEMINI_API_KEY?: string;
   AI_WORKER_SECRET: string;
   KV_PROMPT_CACHE: KVNamespace;
   ENVIRONMENT: string;
 }
 
-// ใช้โมเดล alias 'gemini-flash-latest' ตามที่ curl ทดสอบผ่าน
-const GEMINI_MODEL = "gemini-flash-latest";
-const GEMINI_STREAM_URL = (model: string) =>
-  `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse`;
+const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
+const DEEPSEEK_MODEL = "deepseek-chat";
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
@@ -28,11 +28,19 @@ export default {
     const url = new URL(request.url);
 
     if (url.pathname === "/health") {
+      const apiKey = env.deepseek_api_key || env.DEEPSEEK_API_KEY || env.GEMINI_API_KEY;
       return corsResponse(
-        new Response(JSON.stringify({ status: "healthy" }), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        })
+        new Response(
+          JSON.stringify({
+            status: "healthy",
+            provider: env.deepseek_api_key || env.DEEPSEEK_API_KEY ? "deepseek" : "gemini",
+            hasApiKey: Boolean(apiKey),
+          }),
+          {
+            status: 200,
+            headers: { "Content-Type": "application/json" },
+          }
+        )
       );
     }
 
@@ -52,45 +60,58 @@ async function handleGenerate(request: Request, env: Env): Promise<Response> {
     prompt: string;
   }>();
 
-  if (!env.GEMINI_API_KEY) {
-    return corsResponse(new Response("Internal Error: Missing GEMINI_API_KEY in Worker Secrets", { status: 500 }));
-  }
+  const apiKey = env.deepseek_api_key || env.DEEPSEEK_API_KEY;
 
-  // Call Gemini streaming API
-  const geminiRes = await fetch(GEMINI_STREAM_URL(GEMINI_MODEL), {
-    method: "POST",
-    headers: { 
-      "Content-Type": "application/json",
-      "X-goog-api-key": env.GEMINI_API_KEY
-    },
-    body: JSON.stringify({
-      contents: [{ role: "user", parts: [{ text: body.prompt }] }],
-      generationConfig: {
-        maxOutputTokens: 8192,
-        temperature: 0.7,
-      },
-    }),
-  });
-
-  if (!geminiRes.ok) {
-    const errText = await geminiRes.text();
+  if (!apiKey) {
     return corsResponse(
-      new Response(`Gemini error (${geminiRes.status}): ${errText}`, { status: 502 })
+      new Response("Internal Error: Missing deepseek_api_key in Worker Secrets", { status: 500 })
     );
   }
 
-  if (!geminiRes.body) {
-    return corsResponse(new Response("Gemini error: Empty response body", { status: 502 }));
+  // Call DeepSeek streaming API (OpenAI-compatible)
+  const deepseekRes = await fetch(DEEPSEEK_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: DEEPSEEK_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: "คุณคือ Wisdom Guidance ผู้เชี่ยวชาญการวิเคราะห์ดวงชะตาและระบบภพภูมิ โหราศาสตร์ไทยโบราณผสมผสานวิทยาศาสตร์การวางแผนชีวิต ให้คำแนะนำที่สุขุม ลึกซึ้ง และสร้างแรงบันดาลใจ",
+        },
+        {
+          role: "user",
+          content: body.prompt,
+        },
+      ],
+      stream: true,
+      temperature: 0.7,
+      max_tokens: 8192,
+    }),
+  });
+
+  if (!deepseekRes.ok) {
+    const errText = await deepseekRes.text();
+    return corsResponse(
+      new Response(`DeepSeek error (${deepseekRes.status}): ${errText}`, { status: 502 })
+    );
   }
 
-  // Transform Gemini SSE → phopephum SSE format
+  if (!deepseekRes.body) {
+    return corsResponse(new Response("DeepSeek error: Empty response body", { status: 502 }));
+  }
+
+  // Transform DeepSeek OpenAI SSE → phopephum SSE format { "text": "..." }
   const { readable, writable } = new TransformStream();
   const writer = writable.getWriter();
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
 
   (async () => {
-    const reader = geminiRes.body!.getReader();
+    const reader = deepseekRes.body!.getReader();
     let buffer = "";
 
     try {
@@ -103,13 +124,14 @@ async function handleGenerate(request: Request, env: Env): Promise<Response> {
         buffer = lines.pop() ?? "";
 
         for (const line of lines) {
-          if (!line.trim() || !line.startsWith("data: ")) continue;
-          const raw = line.slice(6).trim();
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith("data:")) continue;
+          const raw = trimmed.replace(/^data:\s*/, "");
           if (raw === "[DONE]") break;
 
           try {
             const parsed = JSON.parse(raw);
-            const text = parsed?.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
+            const text = parsed?.choices?.[0]?.delta?.content ?? "";
             if (text) {
               await writer.write(encoder.encode(`data: ${JSON.stringify({ text })}\n\n`));
             }

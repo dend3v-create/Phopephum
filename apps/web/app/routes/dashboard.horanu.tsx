@@ -26,6 +26,7 @@ import { getYamLibrary } from "~/services/yam-library.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import type { YamLibraryRow } from "~/services/yam-library.server";
 import { useState, useEffect, useRef } from "react";
+import { useTheme } from "~/i18n/context";
 
 export const meta: MetaFunction = () => [
   { title: "ยามพรายกระซิบ — PhopePhum" },
@@ -293,7 +294,526 @@ function CurrentPredictionPoint({ result }: { result: HoraTaynooResult }) {
   );
 }
 
-function PhraKrasibCalcTable({ result }: { result: HoraTaynooResult }) {
+// ─────────────────────────────────────────────────────────────────────────────
+// ✦ PhopePhum Sacred Celestial Symbols (สัญลักษณ์ภพภูมิและดวงดาว) ✦
+// ─────────────────────────────────────────────────────────────────────────────
+
+function BhavaSymbol({
+  bhava,
+  className = "w-5 h-5",
+  color,
+}: {
+  bhava: string;
+  className?: string;
+  color?: string;
+}) {
+  const iconColor = color ?? "currentColor";
+
+  switch (bhava) {
+    case "กดุมภะ": // ทรัพย์สิน / เงินทอง
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="9.5" strokeOpacity="0.35" />
+          <path d="M7 10h10v7a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2v-7z" fill={iconColor} fillOpacity="0.18" />
+          <path d="M7 10a5 5 0 0 1 10 0" />
+          <circle cx="12" cy="13.5" r="1.5" fill={iconColor} />
+          <path d="M12 15v2" />
+        </svg>
+      );
+    case "กัมมะ": // หน้าที่การงาน / ธุรกิจ
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="4" y="7" width="16" height="13" rx="2.5" fill={iconColor} fillOpacity="0.18" />
+          <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+          <path d="M4 12h16" strokeOpacity="0.35" />
+          <circle cx="12" cy="13.5" r="1.2" fill={iconColor} />
+          <path d="M12 10.5v1.5" />
+        </svg>
+      );
+    case "ปุตตะ": // บุตรบริวาร / สิ่งใหม่ / คนหาย
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3c-2.5 4-5 7-5 11a5 5 0 0 0 10 0c0-4-2.5-7-5-11z" fill={iconColor} fillOpacity="0.18" />
+          <path d="M12 4v14" strokeOpacity="0.5" />
+          <circle cx="12" cy="8.5" r="1.2" fill={iconColor} />
+          <path d="m9.5 13 2.5 2 2.5-2" />
+        </svg>
+      );
+    case "พันธุ": // ครอบครัว / บ้าน / หลักเรือน
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 2.5L3.5 9.5v10a1.5 1.5 0 0 0 1.5 1.5h14a1.5 1.5 0 0 0 1.5-1.5v-10L12 2.5z" fill={iconColor} fillOpacity="0.18" />
+          <path d="M9.5 21v-6.5a2.5 2.5 0 0 1 5 0V21" />
+          <circle cx="12" cy="7.5" r="1.2" fill={iconColor} />
+        </svg>
+      );
+    case "ปัตนิ": // คู่ครอง / หุ้นส่วน / สัญญา
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="9" cy="12" r="5.5" fill={iconColor} fillOpacity="0.12" />
+          <circle cx="15" cy="12" r="5.5" fill={iconColor} fillOpacity="0.12" />
+          <path d="M12 8.5a5.5 5.5 0 0 1 0 7" strokeWidth="2" />
+          <circle cx="12" cy="4" r="0.75" fill={iconColor} />
+          <circle cx="12" cy="20" r="0.75" fill={iconColor} />
+        </svg>
+      );
+    case "ลาภะ": // โชคลาภ / ผลประโยชน์
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 4h12v4a6 6 0 0 1-12 0V4z" fill={iconColor} fillOpacity="0.18" />
+          <path d="M6 6H4a2 2 0 0 0-2 2v1a3 3 0 0 0 3 3h1" />
+          <path d="M18 6h2a2 2 0 0 1 2 2v1a3 3 0 0 1-3 3h-1" />
+          <path d="M12 14v4" />
+          <path d="M8 21h8" strokeWidth="2" />
+          <circle cx="12" cy="8" r="1.5" fill={iconColor} />
+        </svg>
+      );
+    case "ศุภะ": // ความสำเร็จ / ผู้ใหญ่เมตตา / มงคล
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4" fill={iconColor} fillOpacity="0.25" />
+          <path d="M12 2v3.5M12 18.5V22M2 12h3.5M18.5 12H22" strokeWidth="1.8" />
+          <path d="m5 5 2.5 2.5M16.5 16.5 19 19M5 19l2.5-2.5M16.5 7.5 19 5" strokeOpacity="0.6" />
+          <circle cx="12" cy="12" r="1.5" fill={iconColor} />
+        </svg>
+      );
+    case "มรณะ": // ของหาย / การเปลี่ยนแปลง / แดนไกล
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="9" strokeOpacity="0.3" />
+          <path d="M12 3a9 9 0 0 1 6.36 15.36L12 12V3z" fill={iconColor} fillOpacity="0.18" />
+          <circle cx="12" cy="12" r="4.5" strokeDasharray="2 2" />
+          <circle cx="12" cy="12" r="1.5" fill={iconColor} />
+        </svg>
+      );
+    case "อริ": // อุปสรรค / ปัญหาเฉพาะหน้า
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3.5L4.5 7v6c0 5 3.5 8.5 7.5 9.5 4-1 7.5-4.5 7.5-9.5V7l-7.5-3.5z" fill={iconColor} fillOpacity="0.18" />
+          <path d="M12 8v7.5" strokeWidth="1.8" />
+          <path d="M9 11.5h6" strokeWidth="1.5" />
+          <circle cx="12" cy="7.5" r="1" fill={iconColor} />
+        </svg>
+      );
+    case "วินาศ": // เรื่องลับ / สิ่งซ่อนเร้น / เบื้องหลัง
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M2.5 12c3-6 7.5-8 9.5-8s6.5 2 9.5 8c-3 6-7.5 8-9.5 8s-6.5-2-9.5-8z" fill={iconColor} fillOpacity="0.15" />
+          <circle cx="12" cy="12" r="3.5" />
+          <circle cx="12" cy="12" r="1.5" fill={iconColor} />
+          <path d="M12 4v2M12 18v2" strokeOpacity="0.5" />
+        </svg>
+      );
+    case "สหัชชะ": // การเจรจา / มิตรสหาย / ติดต่อ
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="7" cy="12" r="3.5" fill={iconColor} fillOpacity="0.18" />
+          <circle cx="17" cy="12" r="3.5" fill={iconColor} fillOpacity="0.18" />
+          <path d="M10.5 12h3" strokeWidth="2" strokeDasharray="1 1" />
+          <path d="M12 6c-2 2-2 4 0 6 2 2 2 4 0 6" strokeOpacity="0.6" />
+          <circle cx="12" cy="12" r="1.2" fill={iconColor} />
+        </svg>
+      );
+    case "ตนุ": // ตนเอง / กายใจ / การตัดสินใจ
+    default:
+      return (
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="8" r="4" fill={iconColor} fillOpacity="0.22" />
+          <path d="M5.5 20.5c0-3.8 3-6.8 6.5-6.8s6.5 3 6.5 6.8" fill={iconColor} fillOpacity="0.12" />
+          <circle cx="12" cy="8" r="1.2" fill={iconColor} />
+          <path d="M12 2v2M12 20v2" strokeOpacity="0.4" />
+        </svg>
+      );
+  }
+}
+
+function ModeSymbol({
+  mode,
+  className = "w-5 h-5",
+}: {
+  mode: "bhava" | "time";
+  className?: string;
+}) {
+  if (mode === "bhava") {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="9" strokeOpacity="0.35" />
+        <path d="m14.5 9.5-5 2 2 5 5-2-2-5z" fill="currentColor" fillOpacity="0.2" />
+        <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+        <path d="M12 3v2.5M12 18.5V21M3 12h2.5M18.5 12H21" strokeOpacity="0.5" />
+      </svg>
+    );
+  }
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9" strokeOpacity="0.35" />
+      <path d="M12 7v5l3.5 2" strokeWidth="1.8" />
+      <path d="M12 3a9 9 0 0 1 8.5 6" strokeOpacity="0.7" strokeDasharray="2 2" />
+      <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      <path d="m17.5 4.5 2 2" />
+    </svg>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ✦ Two-Stage Bhava Predictor (การพยากรณ์เชื่อมโยง ๒ ภพ) ✦
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface BhavaQuestionCategory {
+  id: string;
+  bhava: string;
+  name: string;
+  color: string;
+  category: string;
+  keywords: string;
+  sampleQuestion: string;
+}
+
+const BHAVA_QUESTION_CATEGORIES: BhavaQuestionCategory[] = [
+  { id: "wealth", bhava: "กดุมภะ", name: "การเงิน / ของมีค่า / หนี้สิน", color: "#F59E0B", category: "ทรัพย์สินเงินทอง", keywords: "เงินทอง, ของมีค่า, ทรัพย์สมบัติ, หนี้สินที่จะทวง", sampleQuestion: "ถามเรื่องการเงินและทรัพย์สิน: จะได้รับเงินก้อนหรือของมีค่าที่รอคอยไหม?" },
+  { id: "career", bhava: "กัมมะ", name: "การงาน / ธุรกิจ / กิจการ", color: "#38BDF8", category: "หน้าที่การงาน", keywords: "หน้าที่การงาน, ธุรกิจ, การค้าขาย, ความรับผิดชอบ", sampleQuestion: "ถามเรื่องการงานและธุรกิจ: งานที่ดำเนินอยู่หรือการเจรจาจะสำเร็จลุล่วงไหม?" },
+  { id: "children", bhava: "ปุตตะ", name: "บุตร / บริวาร / คนหาย", color: "#EC4899", category: "บุตรบริวารและการเริ่มต้น", keywords: "บุตรหลาน, บริวาร, คนหาย, สัตว์เลี้ยง, โครงการใหม่", sampleQuestion: "ถามเรื่องบุตรบริวารหรือคนหาย: คน/สิ่งของที่ตามหาจะพบเจอหรือไม่?" },
+  { id: "family", bhava: "พันธุ", name: "บ้าน / รถยนต์ / ครอบครัว", color: "#10B981", category: "หลักทรัพย์และครอบครัว", keywords: "ที่อยู่อาศัย, ที่ดิน, รถยนต์, ครอบครัว, ของหายในบ้าน", sampleQuestion: "ถามเรื่องบ้านและครอบครัว: เรื่องที่ดิน ยานพาหนะ หรือคนในบ้านจะเป็นอย่างไร?" },
+  { id: "partner", bhava: "ปัตนิ", name: "คู่ครอง / ความรัก / หุ้นส่วน", color: "#F43F5E", category: "คู่ครองและสัญญา", keywords: "คนรัก, คู่ครอง, หุ้นส่วนธุรกิจ, สัญญาผูกพัน", sampleQuestion: "ถามเรื่องคู่ครองและหุ้นส่วน: ความสัมพันธ์หรือสัญญาข้อตกลงจะราบรื่นไหม?" },
+  { id: "fortune", bhava: "ลาภะ", name: "โชคลาภ / ผลกำไร / สมหวัง", color: "#FBBF24", category: "โชคลาภและความสำเร็จ", keywords: "โชคลาภ, ลาภผล, เงินก้อน, ผลตอบแทน", sampleQuestion: "ถามเรื่องโชคลาภ: จะมีลาภลอยหรือความสำเร็จสมหวังเข้ามาไหม?" },
+  { id: "success", bhava: "ศุภะ", name: "ความสำเร็จ / ผู้ใหญ่เมตตา", color: "#A855F7", category: "ความสำเร็จและมงคล", keywords: "ความสำเร็จ, ผู้ใหญ่สนับสนุน, การศึกษา, ต่างประเทศ", sampleQuestion: "ถามเรื่องความสำเร็จ: ผู้ใหญ่จะเมตตาช่วยเหลือและสนับสนุนไหม?" },
+  { id: "lost", bhava: "มรณะ", name: "ของหาย / สูญเสีย / ต่างแดน", color: "#94A3B8", category: "ความสูญเสียและต่างแดน", keywords: "ของหาย, คนพลัดพราก, สิ่งเก่า, มรดก, แดนไกล", sampleQuestion: "ถามเรื่องของหายหรือการสูญเสีย: ของที่สูญหายจะได้คืนไหมหรือตกหล่นที่ใด?" },
+  { id: "obstacle", bhava: "อริ", name: "อุปสรรค / ศัตรู / คดีความ", color: "#FB7185", category: "ปัญหาและคู่แข่ง", keywords: "ปัญหาเฉพาะหน้า, หนี้สิน, ศัตรูคู่แข่ง, คดีความ", sampleQuestion: "ถามเรื่องอุปสรรคและข้อพิพาท: ปัญหาติดขัดหรือคู่แข่งจะคลี่คลายอย่างไร?" },
+  { id: "secret", bhava: "วินาศ", name: "เรื่องลับ / ซ่อนเร้น / ที่ลับตา", color: "#818CF8", category: "สิ่งลี้ลับและเบื้องหลัง", keywords: "ความลับ, เบื้องหลัง, ตกหล่นในที่ลับตา, เรื่องคาดไม่ถึง", sampleQuestion: "ถามเรื่องที่ปิดบังซ่อนเร้น: มีสิ่งใดซ่อนเร้นอยู่เบื้องหลัง หรือตกหล่นในที่ลับตาไหม?" },
+  { id: "negotiation", bhava: "สหัชชะ", name: "การเจรจา / มิตรสหาย / ติดต่อ", color: "#2DD4BF", category: "การสื่อสารและมิตรภาพ", keywords: "การติดต่อสื่อสาร, การเดินทางใกล้, มิตรสหาย, การนัดหมาย", sampleQuestion: "ถามเรื่องการเจรจาและมิตรสหาย: การติดต่อสื่อสารและการเดินทางจะราบรื่นไหม?" },
+  { id: "self", bhava: "ตนุ", name: "ตนเอง / สุขภาพ / การตัดสินใจ", color: "#C6A96B", category: "ตัวตนและการตัดสินใจ", keywords: "สุขภาพกาย-ใจ, ความเป็นอยู่, การกระทำส่วนตัว", sampleQuestion: "ถามเรื่องตนเองและการตัดสินใจ: สิ่งที่กำลังตัดสินใจควรเดินหน้าอย่างไร?" },
+];
+
+function TwoStageBhavaPredictor({
+  result,
+  onAskAI,
+}: {
+  result: HoraTaynooResult;
+  onAskAI: (prompt: string) => void;
+}) {
+  const [selectedBhava, setSelectedBhava] = useState<string>("กดุมภะ");
+
+  const currentCategory = BHAVA_QUESTION_CATEGORIES.find(c => c.bhava === selectedBhava) ?? BHAVA_QUESTION_CATEGORIES[0];
+
+  // ── 1. Origin Bhava Calculation ──
+  const originZodiacEntry = Object.entries(result.bhavaMap).find(([_, name]) => name === selectedBhava);
+  const originZodiacIndex = originZodiacEntry ? Number(originZodiacEntry[0]) : 0;
+  const originZodiac = ZODIAC_ORDER[originZodiacIndex];
+
+  // Ruling Planet
+  const rulingPlanetNum = KASTERN_FIXED[originZodiacIndex];
+  const rulingPlanetInfo = PLANET_INFO[rulingPlanetNum];
+
+  // Planets currently floating in origin zodiac
+  const originFloatingPlanets = result.planetEntries.filter(
+    p => p.zodiacIndex === originZodiacIndex && !p.isLagna
+  );
+
+  // ── 2. Destination Bhava Calculation (Two-Stage Link) ──
+  const rulingPlanetEntry = result.planetEntries.find(p => p.planetNum === rulingPlanetNum);
+  const destZodiacIndex = rulingPlanetEntry ? rulingPlanetEntry.zodiacIndex : originZodiacIndex;
+  const destZodiac = ZODIAC_ORDER[destZodiacIndex];
+  const destBhavaName = result.bhavaMap[destZodiacIndex] ?? "ตนุ";
+
+  // Planet status at destination
+  const planetStatus = rulingPlanetEntry?.status ?? null;
+  const STATUS_THAI: Record<string, { label: string; glyph: string; color: string }> = {
+    "maha-uccj": { label: "มหาอุจจ์ (กำลังสูงสุด)", glyph: "✿", color: "#22C55E" },
+    "kaset": { label: "เกษตร (มั่นคงเข้มแข็ง)", glyph: "△", color: "#EF4444" },
+    "racha-chok": { label: "ราชาโชค (นิยมโชคลาภ)", glyph: "⬡", color: "#3B82F6" },
+    "maha-chakr": { label: "มหาจักร (รุ่งโรจน์ยิ่งใหญ่)", glyph: "□", color: "#EAB308" },
+    "pra": { label: "ประ (อ่อนกำลัง)", glyph: "○", color: "#F97316" },
+    "nij": { label: "นิจ (ตกต่ำด้อยค่า)", glyph: "✳", color: "#EF4444" },
+  };
+  const statusInfo = planetStatus ? (STATUS_THAI[planetStatus] ?? { label: "มาตรฐานปกติ", glyph: "✦", color: "#C6A96B" }) : { label: "มาตรฐานปกติ", glyph: "✦", color: "#C6A96B" };
+
+  // Co-occupying planets in destination
+  const destCoPlanets = result.planetEntries.filter(
+    p => p.zodiacIndex === destZodiacIndex && p.planetNum !== rulingPlanetNum && !p.isLagna
+  );
+
+  // ── 3. Synthetic Astrological Reading ──
+  const getSynthesis = () => {
+    let verdict = "";
+    let indicator: "good" | "warning" | "neutral" = "good";
+    let indicatorText = "เกณฑ์ดีเยี่ยม / มีผลสำเร็จสมหวัง";
+    let advice = "";
+
+    if (destBhavaName === "ลาภะ") {
+      indicator = "good";
+      indicatorText = "เกณฑ์ดีมาก • ได้ลาภผลสำเร็จ";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} (ดาว ${rulingPlanetInfo?.thai ?? rulingPlanetNum}) จรเข้าสู่ "ภพลาภะ" บ่งชี้ถึงผลลัพธ์ที่ให้คุณสูงยิ่ง เรื่องที่ถามมีเกณฑ์สำเร็จสมหวัง ได้รับผลประโยชน์ ผลกำไร หรือมีโชคลาภเข้ามาเกื้อหนุนอย่างน่าพึงพอใจ`;
+      advice = `เหมาะแก่การเจรจา ปิดการขาย ทวงถามผลประโยชน์ หรือเดินหน้าอย่างเต็มที่ จะได้รับผลตอบแทนคุ้มค่า`;
+    } else if (destBhavaName === "ศุภะ") {
+      indicator = "good";
+      indicatorText = "เกณฑ์ดีมาก • ผู้ใหญ่เมตตาอุปถัมภ์";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรเข้าสู่ "ภพศุภะ" บ่งชี้ถึงความเจริญก้าวหน้า มีผู้ใหญ่ ครูบาอาจารย์ หรือโอกาสดีคอยช่วยเหลือ เรื่องที่ดำเนินอยู่จะราบรื่นและนำมาซึ่งชื่อเสียงเกียรติยศ`;
+      advice = `เข้าหาผู้ใหญ่ ขอคำปรึกษา หรืออาศัยความซื่อสัตย์สุจริตเป็นที่ตั้ง จะได้รับความร่วมมือเป็นอย่างดี`;
+    } else if (destBhavaName === "กัมมะ") {
+      indicator = "neutral";
+      indicatorText = "เกณฑ์ปานกลาง • ต้องลงมือทำจริงจัง";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรเข้าสู่ "ภพกัมมะ" บ่งบอกว่าเรื่องนี้ขึ้นอยู่กับการลงมือทำ ความรับผิดชอบ และความต่อเนื่อง ผลลัพธ์จะตามมาด้วยความพยายาม`;
+      advice = `วางแผนการทำงานให้ชัดเจน ติดตามงานอย่างใกล้ชิด อย่าปล่อยให้ล่าช้า`;
+    } else if (destBhavaName === "กดุมภะ") {
+      indicator = "good";
+      indicatorText = "เกณฑ์ดี • ส่งผลต่อทรัพย์สินเงินทอง";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรเข้าสู่ "ภพกดุมภะ" ชี้ชัดว่าเรื่องนี้จะนำมาซึ่งความมั่นคงทางการเงิน หรือได้ทรัพย์สินของมีค่ากลับคืนมา`;
+      advice = `เน้นการบริหารจัดการเรื่องเงินทองและผลประโยชน์ให้รอบคอบ`;
+    } else if (destBhavaName === "พันธุ") {
+      indicator = "good";
+      indicatorText = "เกณฑ์ดี • คนใกล้ชิด/ครอบครัวช่วย";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรเข้าสู่ "ภพพันธุ" สื่อถึงความเกี่ยวข้องกับคนในครอบครัว บ้าน หรือสถานที่เดิม หากตามหาของหรือบุคคล มีเกณฑ์พบในที่ใกล้ชิด`;
+      advice = `ติดต่อสอบถามคนในบ้าน ญาติมิตร หรือค้นหาในสถานที่ที่คุ้นเคยเป็นอันดับแรก`;
+    } else if (destBhavaName === "ปุตตะ") {
+      indicator = "good";
+      indicatorText = "เกณฑ์ดี • มีสิ่งใหม่/บริวารหนุน";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรเข้าสู่ "ภพปุตตะ" สื่อถึงการเริ่มต้นใหม่ ข่าวดีจากคนอายุน้อยกว่า หรือบริวารสัตว์เลี้ยงที่ให้คุณ`;
+      advice = `เปิดรับแนวคิดใหม่ๆ และมอบหมายงานให้บริวารช่วยดูแล`;
+    } else if (destBhavaName === "ปัตนิ") {
+      indicator = "good";
+      indicatorText = "เกณฑ์ดี • หุ้นส่วน/คู่ครองมีส่วนสำคัญ";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรเข้าสู่ "ภพปัตนิ" ชี้ถึงความร่วมมือจากคู่ครอง หุ้นส่วน หรือคู่ค้าภายนอกที่จะเป็นกุญแจสำคัญสู่ความสำเร็จ`;
+      advice = `ประสานงานอย่างเปิดเผยและให้เกียรติซึ่งกันและกัน`;
+    } else if (destBhavaName === "สหัชชะ") {
+      indicator = "good";
+      indicatorText = "เกณฑ์ดี • การสื่อสาร/เพื่อนฝูงนำทาง";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรเข้าสู่ "ภพสหัชชะ" การติดต่อสื่อสาร มิตรสหาย และการเดินทางใกล้จะนำพาคำตอบหรือทางออกที่ดีมาให้`;
+      advice = `ใช้การโทรศัพท์ สอบถาม หรือเดินทางไปดูด้วยตนเอง`;
+    } else if (destBhavaName === "ตนุ") {
+      indicator = "good";
+      indicatorText = "เกณฑ์ดี • ขึ้นอยู่กับตนเองโดยตรง";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรกลับมาสถิต "ภพตนุ" (กุมลัคนา) เรื่องนี้จะสำเร็จหรือไม่ขึ้นอยู่กับการตัดสินใจและความเด็ดขาดของคุณเอง`;
+      advice = `มั่นใจในการตัดสินใจของตนเองและลงมือทำอย่างตั้งใจ`;
+    } else if (destBhavaName === "อริ") {
+      indicator = "warning";
+      indicatorText = "เกณฑ์ระวัง • มีอุปสรรคหรือข้อขัดแย้ง";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรตก "ภพอริ" บ่งชี้ว่าเรื่องนี้อาจมีอุปสรรค มีคู่แข่ง หรือมีข้อขัดแย้งแทรกซ้อน ต้องใช้ความอดทนและระมัดระวัง`;
+      advice = `ตรวจสอบสัญญาและหลักฐานให้รัดกุม หลีกเลี่ยงการปะทะอารมณ์`;
+    } else if (destBhavaName === "มรณะ") {
+      indicator = "warning";
+      indicatorText = "เกณฑ์ระวัง • ความสูญเสีย/แดนไกล";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรตก "ภพมรณะ" บ่งชี้ถึงการเปลี่ยนแปลง การพลัดพราก หรือความไม่แน่นอน หากตามหาของหายมักสูญหายไปไกลหรือต้องใช้เวลา`;
+      advice = `เตรียมแผนสำรอง และอย่าเพิ่งรีบร้อนตัดสินใจเรื่องสำคัญ`;
+    } else if (destBhavaName === "วินาศ") {
+      indicator = "warning";
+      indicatorText = "เกณฑ์ระวัง • สิ่งปิดบัง/ที่ลับตา";
+      verdict = `ดาวเจ้าเรือน${selectedBhava} จรตก "ภพวินาศ" บ่งบอกว่ามีเรื่องปิดบัง ซ่อนเร้น หรืออยู่เบื้องหลัง หากเป็นของหายมีเกณฑ์ตกหล่นในมุมอับ/ที่ลับตา`;
+      advice = `ตรวจดูในที่มิดชิด ซอกมุมลับตา หรือสอบถามผู้ที่อยู่เบื้องหลัง`;
+    }
+
+    return { verdict, indicator, indicatorText, advice };
+  };
+
+  const synthesis = getSynthesis();
+
+  const handleAskAIWithTopic = () => {
+    const prompt = `ขอคำพยากรณ์โหรทายหนู (ยามพรายกระซิบ) เรื่อง: "${currentCategory.name}"\n` +
+      `- ภพตั้งต้นเรื่องคำถาม (จังหวะที่ ๑): ภพ${selectedBhava} (ราศี${originZodiac?.name}) ดาวเจ้าเรือนเกษตรคือ ดาว ${rulingPlanetNum} (${rulingPlanetInfo?.thai ?? rulingPlanetNum})\n` +
+      `- ภพปลายทางที่ดาวจรไปสถิต (จังหวะที่ ๒): ภพ${destBhavaName} (ราศี${destZodiac?.name}) ได้มาตรฐาน "${statusInfo.label}"\n` +
+      `- คำถามเจาะจง: ${currentCategory.sampleQuestion}\n` +
+      `กรุณาพยากรณ์ตามหลักโหรทายหนูโบราณอย่างละเอียด ชี้แนะทิศทาง ผลลัพธ์ และข้อควรปฏิบัติเฉพาะหน้า`;
+    onAskAI(prompt);
+  };
+
+  return (
+    <div className="border border-[#C6A96B]/30 bg-gradient-to-b from-[#07132b] to-[#040a18] backdrop-blur-md rounded-2xl p-5 sm:p-7 shadow-xl shadow-black/60 space-y-5 text-left">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#C6A96B]/20 pb-4">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/10 text-[#C6A96B] text-[10.5px] font-bold tracking-[0.2em] uppercase font-display mb-1.5">
+            ✦ โหรทายหนู · อ่านดาว ๒ จังหวะ ✦
+          </div>
+          <h2 className="text-lg sm:text-xl font-display font-bold text-[#F8F6F1]">
+            พยากรณ์เจาะลึกเรื่องที่ถาม (เชื่อมโยง ๒ ภพ)
+          </h2>
+          <p className="text-xs text-[#D9CDB7]/80 mt-0.5">
+            เลือกเรื่องที่ต้องการสอบถาม เพื่อเชื่อมโยงดาวเจ้าเรือนจากภพคำถาม ➔ ไปยังภพที่ดาวจรไปสถิต
+          </p>
+        </div>
+      </div>
+
+      {/* Bhava Selector Chips */}
+      <div>
+        <label className="block text-[11px] font-bold text-[#C6A96B] uppercase tracking-wider mb-2.5 font-display">
+          ๑. เลือกเรื่องหรือภพที่ต้องการถาม:
+        </label>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+          {BHAVA_QUESTION_CATEGORIES.map(cat => {
+            const isSelected = selectedBhava === cat.bhava;
+            return (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setSelectedBhava(cat.bhava)}
+                className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
+                  isSelected
+                    ? "border-[#C6A96B] bg-[#C6A96B]/20 text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20 ring-1 ring-[#C6A96B]/40"
+                    : "border-white/10 bg-[#091838]/50 text-[#D9CDB7] hover:border-[#C6A96B]/40 hover:text-[#F8F6F1]"
+                }`}
+              >
+                <div
+                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 border transition-all ${
+                    isSelected
+                      ? "bg-[#C6A96B]/25 border-[#C6A96B]/60 shadow-inner"
+                      : "bg-white/5 border-white/10"
+                  }`}
+                >
+                  <BhavaSymbol bhava={cat.bhava} className="w-4 h-4" color={isSelected ? "#F8F6F1" : cat.color} />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs font-bold font-display text-[#C6A96B]">{cat.bhava}</span>
+                  </div>
+                  <p className="text-[10px] text-[#D9CDB7]/80 truncate">{cat.name.split('/')[0]}</p>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Two-Stage Visual Flow */}
+      <div className="bg-[#091838]/70 border border-[#C6A96B]/20 rounded-2xl p-4 sm:p-6 space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] font-bold text-[#C6A96B] uppercase tracking-wider font-display">
+            ๒. การเชื่อมโยงเส้นทางดาว (๒ จังหวะ):
+          </span>
+          <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold border ${
+            synthesis.indicator === "good" ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30" :
+            synthesis.indicator === "warning" ? "bg-amber-500/10 text-amber-400 border-amber-500/30" :
+            "bg-blue-500/10 text-blue-400 border-blue-500/30"
+          }`}>
+            {synthesis.indicatorText}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-11 gap-3 items-center">
+          {/* Stage 1: Origin Card */}
+          <div className="md:col-span-5 rounded-xl border border-[#C6A96B]/30 bg-[#07132b] p-4 shadow-inner">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] text-[#C6A96B] font-bold font-display uppercase tracking-wider">
+                จังหวะที่ ๑: ภพตั้งต้นเรื่องที่ถาม
+              </span>
+              <span className="text-[10px] text-[#D9CDB7] font-mono">ราศี{originZodiac?.name}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border shadow-inner"
+                style={{
+                  background: `${currentCategory.color}18`,
+                  borderColor: `${currentCategory.color}45`,
+                }}
+              >
+                <BhavaSymbol bhava={selectedBhava} className="w-6 h-6" color={currentCategory.color} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-[#F8F6F1] font-display">
+                  ภพ{selectedBhava} ({currentCategory.name})
+                </p>
+                <p className="text-[11px] text-[#D9BC82] mt-0.5">
+                  ดาวเจ้าเรือนเกษตร: <b className="text-[#F8F6F1]">ดาว {rulingPlanetNum} ({rulingPlanetInfo?.thai ?? rulingPlanetNum})</b>
+                </p>
+              </div>
+            </div>
+            {originFloatingPlanets.length > 0 && (
+              <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center gap-1.5 text-[10px] text-[#D9CDB7]">
+                <span>ดาวลอยในภพนี้:</span>
+                {originFloatingPlanets.map((p, idx) => (
+                  <span key={idx} className="font-serif font-bold text-[#C6A96B]">ดาว {p.labelThai}</span>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Transition Arrow */}
+          <div className="md:col-span-1 flex flex-col items-center justify-center py-1">
+            <div className="w-8 h-8 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/40 flex items-center justify-center text-[#C6A96B] font-bold shadow-md shadow-[#C6A96B]/20">
+              ➔
+            </div>
+            <span className="text-[8.5px] text-[#C6A96B] font-mono mt-1 text-center">ดาว {rulingPlanetNum} จรไป</span>
+          </div>
+
+          {/* Stage 2: Destination Card */}
+          <div className="md:col-span-5 rounded-xl border border-[#C6A96B]/30 bg-[#07132b] p-4 shadow-inner">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] text-[#C6A96B] font-bold font-display uppercase tracking-wider">
+                จังหวะที่ ๒: ภพปลายทางผลลัพธ์
+              </span>
+              <span className="text-[10px] text-[#D9CDB7] font-mono">ราศี{destZodiac?.name}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold font-serif shrink-0 border"
+                style={{
+                  background: `${statusInfo.color}15`,
+                  borderColor: `${statusInfo.color}40`,
+                  color: statusInfo.color,
+                }}
+              >
+                {rulingPlanetNum}
+              </div>
+              <div>
+                <p className="text-sm font-bold text-[#F8F6F1] font-display">
+                  ภพ{destBhavaName}
+                </p>
+                <p className="text-[11px] font-medium" style={{ color: statusInfo.color }}>
+                  มาตรฐาน: {statusInfo.label}
+                </p>
+              </div>
+            </div>
+            {destCoPlanets.length > 0 && (
+              <div className="mt-2.5 pt-2 border-t border-white/5 flex items-center gap-1.5 text-[10px] text-[#D9CDB7]">
+                <span>ดาวร่วมเรือน:</span>
+                {destCoPlanets.map((p, idx) => (
+                  <span key={idx} className="font-serif font-bold text-[#F8F6F1]">ดาว {p.labelThai}</span>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Synthetic Astrological Verdict Box */}
+        <div className="rounded-xl border border-[#C6A96B]/25 bg-[#07132b]/90 p-4 space-y-2 text-left">
+          <div className="flex items-center gap-2">
+            <span className="text-[#C6A96B] text-xs">✦</span>
+            <p className="text-xs font-bold text-[#C6A96B] uppercase tracking-wide font-display">
+              คำพยากรณ์สังเคราะห์ (ตามหลักโหรทายหนูโบราณ):
+            </p>
+          </div>
+          <p className="text-xs sm:text-sm text-[#F8F6F1] leading-relaxed">
+            {synthesis.verdict}
+          </p>
+          <div className="pt-2 border-t border-white/5 text-[11px] text-[#D9CDB7]/90 flex items-start gap-1.5">
+            <span className="text-[#C6A96B] font-bold shrink-0">💡 ข้อแนะนำ:</span>
+            <span>{synthesis.advice}</span>
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-[10px] text-[#D9CDB7]/70 italic">
+            คำถามตัวอย่าง: "{currentCategory.sampleQuestion}"
+          </p>
+          <button
+            type="button"
+            onClick={handleAskAIWithTopic}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs border border-[#C6A96B]/50 bg-gradient-to-r from-[#C6A96B]/25 to-[#D9BC82]/30 text-[#F8F6F1] hover:from-[#C6A96B]/35 hover:to-[#D9BC82]/40 active:scale-95 transition-all shadow-md shadow-[#C6A96B]/15 flex items-center justify-center gap-2 font-display cursor-pointer"
+          >
+            <span>✦ ถามโหรพรายกระซิบ AI เจาะลึกเรื่องนี้ ✦</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PhraKrasibCalcTable({
+  result,
+  onAskAI,
+}: {
+  result: HoraTaynooResult;
+  onAskAI?: (prompt: string) => void;
+}) {
   const [nowMin, setNowMin] = useState(0);
   const [timeStr, setTimeStr] = useState("");
 
@@ -314,20 +834,25 @@ function PhraKrasibCalcTable({ result }: { result: HoraTaynooResult }) {
   // Step X
   const xZIdx = activeSlot.zodiacIndex;
   const xBhava = result.bhavaMap[xZIdx] ?? "—";
+  const xZodiac = ZODIAC_ORDER[xZIdx];
   const xPlanets = result.planetEntries.filter(p => p.zodiacIndex === xZIdx && !p.isLagna);
 
   // Step Y
   const xLord = KASTERN_FIXED[xZIdx];
+  const xLordInfo = PLANET_INFO[xLord];
   const xLordEntry = result.planetEntries.find(p => p.planetNum === xLord);
   const yZIdx = xLordEntry ? xLordEntry.zodiacIndex : xZIdx;
   const yBhava = result.bhavaMap[yZIdx] ?? "—";
+  const yZodiac = ZODIAC_ORDER[yZIdx];
   const yPlanets = result.planetEntries.filter(p => p.zodiacIndex === yZIdx && !p.isLagna);
 
   // Step Z
   const yLord = KASTERN_FIXED[yZIdx];
+  const yLordInfo = PLANET_INFO[yLord];
   const yLordEntry = result.planetEntries.find(p => p.planetNum === yLord);
   const zZIdx = yLordEntry ? yLordEntry.zodiacIndex : yZIdx;
   const zBhava = result.bhavaMap[zZIdx] ?? "—";
+  const zZodiac = ZODIAC_ORDER[zZIdx];
   const zPlanets = result.planetEntries.filter(p => p.zodiacIndex === zZIdx && !p.isLagna);
 
   const STATUS_GLYPHS_SIMPLE: Record<string, string> = {
@@ -342,7 +867,7 @@ function PhraKrasibCalcTable({ result }: { result: HoraTaynooResult }) {
   const renderPlanets = (planets: PlanetEntry[]) => {
     if (planets.length === 0) return <span className="text-[#D9CDB7]/40">—</span>;
     return (
-      <div className="flex justify-center gap-1.5">
+      <div className="flex justify-center gap-1.5 flex-wrap">
         {planets.map((p, idx) => {
           const glyph = p.status ? (STATUS_GLYPHS_SIMPLE[p.status] ?? "") : "";
           const statusColors: Record<string, string> = {
@@ -362,33 +887,114 @@ function PhraKrasibCalcTable({ result }: { result: HoraTaynooResult }) {
     );
   };
 
+  const handleAskTimeAI = () => {
+    const prompt = `ขอคำพยากรณ์โหรทายหนู (ยามพรายกระซิบ) ตามเวลาเกิดเหตุ (${timeStr} น. / ยามย่อย ${activeSlot.startStr}-${activeSlot.endStr} น.):\n` +
+      `- สมการจุดพยากรณ์: X (${xBhava} ราศี${xZodiac?.name}) ➔ Y (${yBhava} ราศี${yZodiac?.name}) ➔ Z (${zBhava} ราศี${zZodiac?.name})\n` +
+      `- ดาวนำทาง: ดาวเกษตรเจ้าเรือน X (ดาว ${xLord} ${xLordInfo?.thai}) จรไป Y, ดาวเกษตรเจ้าเรือน Y (ดาว ${yLord} ${yLordInfo?.thai}) จรไป Z\n` +
+      `กรุณาพยากรณ์ทิศทางของเหตุการณ์เฉพาะหน้าตามสมการจุดพยากรณ์นี้อย่างละเอียด`;
+    onAskAI?.(prompt);
+  };
+
   return (
-    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4 mt-3">
-      <div className="flex items-center gap-2 mb-3">
-        <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
-        <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold font-display">คำนวณโหรทายหนู (สมการจุดพยากรณ์)</p>
+    <div className="border border-[#C6A96B]/30 bg-gradient-to-b from-[#07132b] to-[#040a18] backdrop-blur-md rounded-2xl p-5 sm:p-7 shadow-xl shadow-black/60 space-y-5 text-left">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#C6A96B]/20 pb-4">
+        <div>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/10 text-[#C6A96B] text-[10.5px] font-bold tracking-[0.2em] uppercase font-display mb-1.5">
+            ✦ โหรทายหนู · ยามพรายกระซิบ ✦
+          </div>
+          <h2 className="text-lg sm:text-xl font-display font-bold text-[#F8F6F1]">
+            พยากรณ์ตามเวลาที่เกิดเหตุ (สมการจุดพยากรณ์ X ➔ Y ➔ Z)
+          </h2>
+          <p className="text-xs text-[#D9CDB7]/80 mt-0.5">
+            คำนวณตามเวลาจริงที่เกิดเรื่อง (ยามย่อย 7.5 นาที) เพื่อถอดรหัสสมการลูกโซ่ ๓ จุดพยากรณ์
+          </p>
+        </div>
+        <div className="text-right font-mono text-xs text-[#C6A96B] font-bold shrink-0">
+          เวลาขณะนี้: {timeStr} น.
+        </div>
       </div>
-      <div className="overflow-x-auto">
+
+      {/* 3 Step Equation Flow */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Step X */}
+        <div className="rounded-xl border border-[#C6A96B]/30 bg-[#07132b] p-4 shadow-inner">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-[#C6A96B] font-bold font-display uppercase">จุดพยากรณ์แรก (X)</span>
+            <span className="text-[10px] text-[#D9CDB7] font-mono">{activeSlot.startStr}-{activeSlot.endStr}</span>
+          </div>
+          <p className="text-base font-bold text-[#F8F6F1] font-display">ภพ{xBhava} (ราศี{xZodiac?.name})</p>
+          <p className="text-xs text-[#D9BC82] mt-1">ดาวเจ้าเรือน: <b>ดาว {xLord} ({xLordInfo?.thai})</b></p>
+          <div className="mt-2 pt-2 border-t border-white/5 text-[11px] text-[#D9CDB7]">
+            ดาวลอย: {renderPlanets(xPlanets)}
+          </div>
+        </div>
+
+        {/* Step Y */}
+        <div className="rounded-xl border border-[#C6A96B]/30 bg-[#07132b] p-4 shadow-inner">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-[#C6A96B] font-bold font-display uppercase">จุดพยากรณ์สอง (Y)</span>
+            <span className="text-[10px] text-[#C6A96B] font-mono">ดาว {xLord} จรไป</span>
+          </div>
+          <p className="text-base font-bold text-[#F8F6F1] font-display">ภพ{yBhava} (ราศี{yZodiac?.name})</p>
+          <p className="text-xs text-[#D9BC82] mt-1">ดาวเจ้าเรือน: <b>ดาว {yLord} ({yLordInfo?.thai})</b></p>
+          <div className="mt-2 pt-2 border-t border-white/5 text-[11px] text-[#D9CDB7]">
+            ดาวลอย: {renderPlanets(yPlanets)}
+          </div>
+        </div>
+
+        {/* Step Z */}
+        <div className="rounded-xl border border-[#C6A96B]/30 bg-[#07132b] p-4 shadow-inner">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-[10px] text-[#C6A96B] font-bold font-display uppercase">จุดพยากรณ์สาม (Z)</span>
+            <span className="text-[10px] text-[#C6A96B] font-mono">ดาว {yLord} จรไป</span>
+          </div>
+          <p className="text-base font-bold text-[#F8F6F1] font-display">ภพ{zBhava} (ราศี{zZodiac?.name})</p>
+          <p className="text-xs text-[#D9BC82] mt-1">ผลลัพธ์ปลายทาง</p>
+          <div className="mt-2 pt-2 border-t border-white/5 text-[11px] text-[#D9CDB7]">
+            ดาวลอย: {renderPlanets(zPlanets)}
+          </div>
+        </div>
+      </div>
+
+      {/* Summary Table */}
+      <div className="overflow-x-auto rounded-xl border border-[#C6A96B]/20 bg-[#091838]/60 p-2">
         <table className="w-full text-center border-collapse">
           <thead>
-            <tr className="border-b border-[#C9A96E]/20 text-[11px] text-[#C9A96E] font-bold">
-              <th className="py-2 bg-[#C9A96E]/5 px-2">เวลา</th>
-              <th className="py-2 bg-[#C9A96E]/5 px-2">{xBhava} (X)</th>
-              <th className="py-2 bg-[#C9A96E]/5 px-2">{yBhava} (Y)</th>
-              <th className="py-2 bg-[#C9A96E]/5 px-2">{zBhava} (Z)</th>
+            <tr className="border-b border-[#C6A96B]/20 text-[11px] text-[#C6A96B] font-bold">
+              <th className="py-2.5 bg-[#C6A96B]/10 px-3 rounded-l-lg">เวลายามย่อย</th>
+              <th className="py-2.5 bg-[#C6A96B]/10 px-3">X: {xBhava}</th>
+              <th className="py-2.5 bg-[#C6A96B]/10 px-3">Y: {yBhava}</th>
+              <th className="py-2.5 bg-[#C6A96B]/10 px-3 rounded-r-lg">Z: {zBhava}</th>
             </tr>
           </thead>
           <tbody>
             <tr className="text-xs text-[#F8F6F1] font-semibold">
-              <td className="py-2.5 font-mono text-[#D9CDB7]">{timeStr} น.</td>
-              <td className="py-2.5 font-serif text-sm text-[#F8F6F1]">{renderPlanets(xPlanets)}</td>
-              <td className="py-2.5 font-serif text-sm text-[#F8F6F1]">{renderPlanets(yPlanets)}</td>
-              <td className="py-2.5 font-serif text-sm text-[#F8F6F1]">{renderPlanets(zPlanets)}</td>
+              <td className="py-3 font-mono text-[#D9CDB7]">{activeSlot.startStr} - {activeSlot.endStr} น.</td>
+              <td className="py-3 font-serif text-sm text-[#F8F6F1]">{renderPlanets(xPlanets)}</td>
+              <td className="py-3 font-serif text-sm text-[#F8F6F1]">{renderPlanets(yPlanets)}</td>
+              <td className="py-3 font-serif text-sm text-[#F8F6F1]">{renderPlanets(zPlanets)}</td>
             </tr>
           </tbody>
         </table>
       </div>
-    </Card>
+
+      {/* Action Button */}
+      {onAskAI && (
+        <div className="pt-1 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-[10px] text-[#D9CDB7]/70 italic">
+            สมการ: {xBhava} ➔ {yBhava} ➔ {zBhava} ณ เวลา {timeStr} น.
+          </p>
+          <button
+            type="button"
+            onClick={handleAskTimeAI}
+            className="w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs border border-[#C6A96B]/50 bg-gradient-to-r from-[#C6A96B]/25 to-[#D9BC82]/30 text-[#F8F6F1] hover:from-[#C6A96B]/35 hover:to-[#D9BC82]/40 active:scale-95 transition-all shadow-md shadow-[#C6A96B]/15 flex items-center justify-center gap-2 font-display cursor-pointer"
+          >
+            <span>✦ ถามโหรพรายกระซิบ AI ตามสมการเวลานี้ ✦</span>
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -799,7 +1405,7 @@ function LiveClock({ serverTime }: { serverTime: string }) {
 const QUESTION_CATEGORIES = [
   {
     key: "work",
-    label: "💼 งาน",
+    label: "กัมมะ · การงาน",
     questions: [
       "งานที่ทำอยู่จะสำเร็จลุล่วงไหม?",
       "วันนี้เหมาะกับการเจรจาธุรกิจไหม?",
@@ -810,7 +1416,7 @@ const QUESTION_CATEGORIES = [
   },
   {
     key: "money",
-    label: "💰 การเงิน",
+    label: "กดุมภะ · การเงิน",
     questions: [
       "การเงินช่วงนี้ไหลเข้าหรือไหลออก?",
       "วันนี้เหมาะกับการลงทุนไหม?",
@@ -821,7 +1427,7 @@ const QUESTION_CATEGORIES = [
   },
   {
     key: "love",
-    label: "💛 ความรัก",
+    label: "ปัตนิ · ความรัก",
     questions: [
       "ความสัมพันธ์ที่มีอยู่จะพัฒนาต่อไปได้ไหม?",
       "คนที่รอผลอยู่จะตอบรับไหม?",
@@ -832,7 +1438,7 @@ const QUESTION_CATEGORIES = [
   },
   {
     key: "health",
-    label: "🌿 สุขภาพ",
+    label: "ตนุ · สุขภาพ",
     questions: [
       "พลังงานวันนี้เป็นอย่างไร ควรพักหรือลุย?",
       "อาการที่เป็นอยู่จะดีขึ้นเร็วไหม?",
@@ -843,7 +1449,7 @@ const QUESTION_CATEGORIES = [
   },
   {
     key: "travel",
-    label: "🕐 เดินทาง",
+    label: "สหัชชะ · เดินทาง",
     questions: [
       "ตอนนี้เหมาะกับการออกเดินทางไหม?",
       "ทิศทางไหนเป็นมงคลสำหรับวันนี้?",
@@ -854,7 +1460,7 @@ const QUESTION_CATEGORIES = [
   },
   {
     key: "decide",
-    label: "⚖️ ตัดสินใจ",
+    label: "ศุภะ · ตัดสินใจ",
     questions: [
       "ปัญหาที่กำลังเผชิญจะคลี่คลายไหม?",
       "สิ่งที่รอคำตอบอยู่จะมีข่าวดีไหม?",
@@ -865,7 +1471,15 @@ const QUESTION_CATEGORIES = [
   },
 ];
 
-function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }) {
+function HoranuChatPanel({
+  initialPastChats = [],
+  externalPrompt,
+  onPromptHandled,
+}: {
+  initialPastChats?: any[];
+  externalPrompt?: string;
+  onPromptHandled?: () => void;
+}) {
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -876,8 +1490,9 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
   const [showHistory, setShowHistory] = useState(false);
   const answerRef = useRef<HTMLDivElement>(null);
 
-  const handleAsk = async () => {
-    if (!question.trim() || isLoading) return;
+  const handleAsk = async (overrideQuestion?: string) => {
+    const q = (overrideQuestion ?? question).trim();
+    if (!q || isLoading) return;
 
     const now = new Date().toISOString();
     setLockedTime(now);
@@ -889,7 +1504,7 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
       const res = await fetch("/api/horanu-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question: question.trim(), isoTime: now }),
+        body: JSON.stringify({ question: q, isoTime: now }),
       });
 
       if (!res.ok || !res.body) {
@@ -926,7 +1541,7 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
       // Save to database
       if (fullAnswer.trim()) {
         const formData = new FormData();
-        formData.append("question", question.trim());
+        formData.append("question", q);
         formData.append("answer", fullAnswer.trim());
         formData.append("lockedTime", now);
 
@@ -941,7 +1556,7 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
               setPastChats(prev => [
                 {
                   id: saveResult.chatId,
-                  question: question.trim(),
+                  question: q,
                   answer: fullAnswer.trim(),
                   locked_time: now,
                   created_at: now,
@@ -962,6 +1577,16 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
     }
   };
 
+  // Handle external prompt trigger from 2-stage predictor
+  useEffect(() => {
+    if (externalPrompt && externalPrompt.trim()) {
+      const p = externalPrompt.trim();
+      setQuestion(p);
+      onPromptHandled?.();
+      handleAsk(p);
+    }
+  }, [externalPrompt]);
+
   // Auto-scroll to answer as it streams
   useEffect(() => {
     if (answer && answerRef.current) {
@@ -979,31 +1604,31 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
   };
 
   return (
-    <Card className="border-[#C9A96E]/20 bg-[#020617]/60 p-5">
+    <div className="border border-[#C6A96B]/25 bg-[#07132b]/85 backdrop-blur-md rounded-2xl p-6 shadow-xl shadow-black/50 text-left">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
-        <div className={`w-2 h-2 rounded-full ${isLoading ? "bg-[#C9A96E] animate-pulse" : "bg-[#C9A96E]"}`} />
-        <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">ถามโหรพรายกระซิบ</p>
+        <div className={`w-2 h-2 rounded-full ${isLoading ? "bg-[#C6A96B] animate-pulse" : "bg-[#C6A96B]"}`} />
+        <p className="text-[#C6A96B] text-[11px] uppercase tracking-widest font-bold font-display">✦ ถามโหรพรายกระซิบ ✦</p>
         <span className="ml-2 text-[11px] text-[#D9CDB7]/80 font-medium">— ตีความตามดวงยาม ณ เวลาที่กดถาม</span>
         {lockedTime && (
-          <span className="ml-auto text-[9px] text-[#D9CDB7] font-mono shrink-0">
+          <span className="ml-auto text-[9px] text-[#C6A96B] font-mono shrink-0">
             ล็อกเวลา {fmtTime(lockedTime)} น.
           </span>
         )}
       </div>
 
       {/* Category tabs */}
-      <div className="flex flex-wrap gap-1.5 mb-2">
+      <div className="flex flex-wrap gap-1.5 mb-2.5">
         {QUESTION_CATEGORIES.map(cat => (
           <button
             key={cat.key}
             type="button"
             onClick={() => setActiveCategory(cat.key)}
             disabled={isLoading}
-            className={`text-[10px] px-2.5 py-1 rounded-full border transition-all disabled:opacity-40 ${
+            className={`text-[10px] px-3 py-1.5 rounded-full border transition-all disabled:opacity-40 ${
               activeCategory === cat.key
-                ? "border-[#C9A96E]/60 bg-[#C9A96E]/15 text-[#C9A96E] font-bold"
-                : "border-white/10 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E]"
+                ? "border-[#C6A96B] bg-[#C6A96B]/20 text-[#C6A96B] font-bold shadow-sm shadow-[#C6A96B]/20"
+                : "border-[#C6A96B]/20 bg-[#091838]/40 text-[#D9CDB7] hover:border-[#C6A96B]/50 hover:text-[#F8F6F1]"
             }`}
           >
             {cat.label}
@@ -1012,14 +1637,14 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
       </div>
 
       {/* Suggested questions for active category */}
-      <div className="flex flex-wrap gap-1.5 mb-3">
+      <div className="flex flex-wrap gap-1.5 mb-3.5">
         {(QUESTION_CATEGORIES.find(c => c.key === activeCategory)?.questions ?? []).map(q => (
           <button
             key={q}
             type="button"
             onClick={() => setQuestion(q)}
             disabled={isLoading}
-            className="text-[10px] px-2.5 py-1 rounded-full border border-white/8 bg-white/3 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E] disabled:opacity-40 transition-all"
+            className="text-[10px] px-3 py-1.5 rounded-full border border-[#C6A96B]/15 bg-[#091838]/60 text-[#D9CDB7] hover:border-[#C6A96B]/40 hover:text-[#F8F6F1] disabled:opacity-40 transition-all text-left"
           >
             {q}
           </button>
@@ -1027,7 +1652,7 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
       </div>
 
       {/* Input row */}
-      <div className="flex flex-col sm:flex-row gap-2 items-stretch">
+      <div className="flex flex-col sm:flex-row gap-2.5 items-stretch">
         <textarea
           value={question}
           onChange={e => setQuestion(e.target.value)}
@@ -1040,15 +1665,15 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
           placeholder="พิมพ์คำถามของคุณที่นี่... (กด Enter เพื่อส่งคำถาม หรือ Shift+Enter เพื่อขึ้นบรรทัดใหม่)"
           disabled={isLoading}
           rows={3}
-          className="flex-1 min-w-0 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#F8F6F1] placeholder:text-[#D9CDB7]/40 focus:outline-none focus:border-[#C9A96E]/40 disabled:opacity-60 resize-none"
+          className="flex-1 min-w-0 bg-[#091838]/70 border border-[#C6A96B]/25 rounded-xl px-4 py-3 text-sm text-[#F8F6F1] placeholder:text-[#D9CDB7]/40 focus:outline-none focus:border-[#C6A96B]/60 disabled:opacity-60 resize-none"
         />
         <button
           type="button"
-          onClick={handleAsk}
+          onClick={() => handleAsk()}
           disabled={isLoading || !question.trim()}
-          className="px-6 py-3 rounded-xl font-bold text-sm border border-[#C9A96E]/40 bg-[#C9A96E]/10 text-[#C9A96E] hover:bg-[#C9A96E]/20 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0 flex items-center justify-center"
+          className="px-6 py-3 rounded-xl font-bold text-sm border border-[#C6A96B]/50 bg-gradient-to-r from-[#C6A96B]/25 to-[#D9BC82]/30 text-[#F8F6F1] hover:from-[#C6A96B]/35 hover:to-[#D9BC82]/40 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all shrink-0 flex items-center justify-center font-display"
         >
-          {isLoading ? "กำลังอ่าน..." : "ถามยาม"}
+          {isLoading ? "กำลังอ่าน..." : "✦ ถามยาม ✦"}
         </button>
       </div>
 
@@ -1061,20 +1686,20 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
       {(answer || (isLoading && !error)) && (
         <div
           ref={answerRef}
-          className="mt-4 p-4 rounded-xl bg-[#020617]/80 border border-[#C9A96E]/10 text-sm text-[#F8F6F1] leading-relaxed whitespace-pre-wrap text-left"
+          className="mt-4 p-5 rounded-xl bg-[#091838]/80 border border-[#C6A96B]/20 text-sm text-[#F8F6F1] leading-relaxed whitespace-pre-wrap text-left shadow-inner"
         >
           {isLoading && !answer ? (
             <span className="inline-flex items-center gap-2 text-[#D9CDB7]">
-              <span className="w-1.5 h-1.5 bg-[#C9A96E] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-1.5 h-1.5 bg-[#C9A96E] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-1.5 h-1.5 bg-[#C9A96E] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
-              <span className="text-xs">กำลังอ่านดวง...</span>
+              <span className="w-1.5 h-1.5 bg-[#C6A96B] rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-1.5 h-1.5 bg-[#C6A96B] rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-1.5 h-1.5 bg-[#C6A96B] rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+              <span className="text-xs">กำลังอ่านดวงยามพรายกระซิบ...</span>
             </span>
           ) : (
             <>
               {answer}
               {isLoading && (
-                <span className="inline-block w-0.5 h-4 bg-[#C9A96E] animate-pulse ml-0.5 align-middle" />
+                <span className="inline-block w-0.5 h-4 bg-[#C6A96B] animate-pulse ml-0.5 align-middle" />
               )}
             </>
           )}
@@ -1082,11 +1707,11 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
       )}
 
       {/* Collapsible History Section */}
-      <div className="mt-6 pt-5 border-t border-[#C9A96E]/10">
+      <div className="mt-6 pt-5 border-t border-[#C6A96B]/15">
         <button
           type="button"
           onClick={() => setShowHistory(v => !v)}
-          className="flex items-center justify-center gap-2 text-[10px] text-[#C9A96E] hover:text-[#C9A96E]/80 transition-colors font-bold uppercase tracking-wider mx-auto"
+          className="flex items-center justify-center gap-2 text-[10px] text-[#C6A96B] hover:text-[#C6A96B]/80 transition-colors font-bold uppercase tracking-wider mx-auto"
         >
           <span>{showHistory ? "▼ ซ่อนประวัติถามยาม" : `▶ แสดงประวัติถามยาม (${pastChats.length})`}</span>
         </button>
@@ -1101,13 +1726,13 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
                   key={c.id}
                   type="button"
                   onClick={() => selectPastChat(c)}
-                  className="w-full p-3 rounded-xl bg-slate-950/40 border border-white/5 hover:border-[#C9A96E]/20 transition-all cursor-pointer text-left block"
+                  className="w-full p-3 rounded-xl bg-[#091838]/60 border border-[#C6A96B]/15 hover:border-[#C6A96B]/40 transition-all cursor-pointer text-left block"
                 >
                   <div className="flex items-center justify-between gap-2 mb-1.5">
                     <span className="text-[10px] text-[#D9CDB7]/60 font-mono">
                       {new Date(c.created_at).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" })} • {new Date(c.locked_time).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
                     </span>
-                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#C9A96E]/10 text-[#C9A96E] font-medium border border-[#C9A96E]/20">
+                    <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#C6A96B]/10 text-[#C6A96B] font-medium border border-[#C6A96B]/20">
                       ย้อนหลัง
                     </span>
                   </div>
@@ -1120,10 +1745,10 @@ function HoranuChatPanel({ initialPastChats = [] }: { initialPastChats?: any[] }
       </div>
 
       {/* Hint */}
-      <p className="text-[9px] text-[#94A3B8] mt-3 text-center">
+      <p className="text-[9px] text-[#D9CDB7]/60 mt-3 text-center">
         เวลาที่กดปุ่มถามคือเวลาที่ใช้คำนวณผังดวง — ผลลัพธ์จะเปลี่ยนทุก 7.5 นาที
       </p>
-    </Card>
+    </div>
   );
 }
 
@@ -1141,10 +1766,10 @@ export default function HoraNuPage() {
   const initialSvg  = (actionData as any)?.svg    ?? loaderData.svg;
   const isLive      = activeMode !== "success-yam";
 
-  const library = (loaderData as any).library as YamLibraryRow[] ?? [];
-
-  const [tab,       setTab]       = useState<"live"|"library">("live");
-  const [showCustom,setShowCustom] = useState(false);
+  const [showCustom, setShowCustom] = useState(false);
+  const currentTheme = useTheme();
+  const [externalPrompt, setExternalPrompt] = useState<string>("");
+  const [predictionMethod, setPredictionMethod] = useState<"bhava" | "time">("bhava");
 
   // Chart Options State
   const [options, setOptions] = useState<ChartConfig>({
@@ -1157,93 +1782,87 @@ export default function HoraNuPage() {
 
   const [svgStr, setSvgStr] = useState(initialSvg);
 
-  // Re-generate SVG when options or result change
+  // Re-generate SVG when options, result, or theme changes
   useEffect(() => {
-    const newSvg = generateHoraTaynooSVG(result, { ...options, size: 520, theme: "dark" });
+    const newSvg = generateHoraTaynooSVG(result, { ...options, size: 520, theme: currentTheme });
     setSvgStr(newSvg);
-  }, [result, options]);
+  }, [result, options, currentTheme]);
 
-  // switch to library tab when success-yam result arrives
-  useEffect(() => {
-    if (activeMode === "success-yam") setTab("library");
-  }, [activeMode]);
+  const handleAskAIWithTopic = (prompt: string) => {
+    setExternalPrompt(prompt);
+    const el = document.getElementById("horanu-chat-section");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   return (
-    <div className="space-y-5 pb-10">
+    <div className="max-w-3xl mx-auto space-y-6 pb-12">
 
-      {/* ── Header ── */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
-            <p className="text-[#C9A96E] text-[11px] tracking-[0.3em] uppercase font-bold">Hora Taynoo System</p>
+      {/* ── Grand Astral Book Cover Frame ── */}
+      <div className="relative rounded-3xl border-2 border-[#C6A96B]/35 bg-gradient-to-b from-[#07132b] via-[#091a3e] to-[#050e24] p-6 sm:p-10 shadow-2xl shadow-black/80 overflow-hidden text-center">
+        
+        {/* Subtle Decorative Star Accents */}
+        <div className="absolute top-3.5 left-3.5 text-[#C6A96B]/50 text-xs select-none">✦</div>
+        <div className="absolute top-3.5 right-3.5 text-[#C6A96B]/50 text-xs select-none">✦</div>
+        <div className="absolute bottom-3.5 left-3.5 text-[#C6A96B]/50 text-xs select-none">✦</div>
+        <div className="absolute bottom-3.5 right-3.5 text-[#C6A96B]/50 text-xs select-none">✦</div>
+
+        {/* Inner double border */}
+        <div className="absolute inset-2.5 sm:inset-3.5 border border-[#C6A96B]/20 rounded-[20px] pointer-events-none" />
+
+        {/* ── Header ── */}
+        <div className="relative z-10 space-y-2 mb-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/10 text-[#C6A96B] text-[11px] font-bold tracking-[0.25em] uppercase font-display">
+            ✦ ภพภูมิ · โหรทายหนู ✦
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">ยามพรายกระซิบ</h1>
-          <p className="text-[#D9CDB7] text-sm mt-1">ผังดวงยามพรายกระซิบ — ยามอัฐกาล + ดาวลอย 11 + ภพ 12</p>
-        </div>
-        {isLive && (
-          <div className="flex items-center sm:flex-col sm:items-end gap-2 shrink-0">
-            <LiveClock serverTime={loaderData.serverTime} />
-            <div className="flex gap-2">
-              <button onClick={() => setShowCustom(v => !v)}
-                className={`text-[11px] font-bold px-3 py-1.5 rounded-full border transition-all ${
+          <h1 className="font-display text-2xl sm:text-4xl text-[#F8F6F1] font-bold tracking-wide">
+            ผังดวงยามพรายกระซิบ ๑๒ ภพ
+          </h1>
+          <p className="font-display text-xs sm:text-sm text-[#D9BC82] tracking-[0.15em] font-medium">
+            ศาสตร์ถอดรหัสชะตากาลเวลา · ยามอัฐกาลและดาวลอย ๑๑ ดวง
+          </p>
+          <div className="text-[11px] text-[#D9CDB7]/80 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-1">
+            <span>ยาม {result.yamAsked} ({result.period === "day" ? "กลางวัน" : "กลางคืน"})</span>
+            <span>•</span>
+            <span>ลัคนา <b className="text-[#F8F6F1]">{ZODIAC_ORDER[result.lagnaZodiacIndex]?.name}</b></span>
+            <span>•</span>
+            <span>เกษตร <b className="text-[#C6A96B]">{ZODIAC_ORDER[result.kasternZodiacIndex]?.name}</b></span>
+            <span>•</span>
+            <span>ดาวยาม <b className="text-[#C6A96B]">{PLANET_INFO[result.yamPlanet]?.thai}</b></span>
+          </div>
+
+          {isLive && (
+            <div className="flex items-center justify-center gap-3 pt-3">
+              <LiveClock serverTime={loaderData.serverTime} />
+              <button
+                onClick={() => setShowCustom(v => !v)}
+                className={`text-[11px] font-bold px-3 py-1 rounded-full border transition-all ${
                   showCustom
-                    ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#C9A96E]"
-                    : "border-white/10 text-[#D9CDB7] hover:border-[#C9A96E]/30 hover:text-[#C9A96E]"
-                }`}>{showCustom ? "✕ ปิด" : "⚙ ตั้งเวลา"}</button>
+                    ? "bg-[#C6A96B]/20 border-[#C6A96B]/50 text-[#C6A96B]"
+                    : "border-[#C6A96B]/25 bg-[#091838]/40 text-[#D9CDB7] hover:border-[#C6A96B]/60 hover:text-[#C6A96B]"
+                }`}
+              >
+                {showCustom ? "✕ ปิด" : "⚙ ตั้งเวลา"}
+              </button>
             </div>
+          )}
+        </div>
+
+        {/* ── Live mode controls ── */}
+        {showCustom && <div className="relative z-10 mb-6 text-left"><CustomTimeForm /></div>}
+
+        {/* ── Center Astrological Wheel ── */}
+        <div className="relative z-10 max-w-lg mx-auto">
+          <div className="w-full flex justify-center py-2">
+            <div
+              className="w-full max-w-[480px] drop-shadow-[0_0_35px_rgba(198,169,107,0.12)]"
+              dangerouslySetInnerHTML={{ __html: svgStr }}
+            />
           </div>
-        )}
-      </div>
-
-      {/* ── Tab switcher ── */}
-      <div className="flex gap-1 p-1 bg-white/5 rounded-2xl">
-        {(["live", "library"] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all ${
-              tab === t
-                ? "bg-[#C9A96E]/15 text-[#C9A96E]"
-                : "text-[#D9CDB7] hover:text-[#F8F6F1]"
-            }`}>
-            {t === "live" ? "⚡ คำนวณสด" : <><span className="hidden sm:inline">📚 ดวงยามสำเร็จ (112 ผัง)</span><span className="sm:hidden">📚 ดวงยามสำเร็จ</span></>}
-          </button>
-        ))}
-      </div>
-
-      {/* ── Live mode controls ── */}
-      {tab === "live" && showCustom && <CustomTimeForm />}
-
-      {/* ── Library mode browser ── */}
-      {tab === "library" && <LibraryGrid library={library} />}
-
-      {/* ── Main chart grid ── */}
-      <div className="max-w-2xl mx-auto space-y-5">
-        <Card className="p-4 sm:p-6 border-[#C9A96E]/20 bg-[#020617]/70">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <p className="text-[11px] font-bold text-[#C9A96E] uppercase tracking-widest">ผังดวงยามพรายกระซิบ</p>
-                {!isLive && (
-                  <span className="text-[9px] px-2 py-0.5 rounded-full border border-[#4B6FAE]/40 bg-[#4B6FAE]/10 text-[#4B6FAE] font-bold">
-                    ยามสำเร็จ
-                  </span>
-                )}
-              </div>
-              <p className="text-[10px] text-[#D9CDB7] mt-0.5">
-                ยาม {result.yamAsked} · {result.period === "day" ? "กลางวัน" : "กลางคืน"} · ลัคนา {ZODIAC_ORDER[result.lagnaZodiacIndex]?.name}
-              </p>
-            </div>
-            <div className="text-right text-[10px] text-[#D9CDB7]">
-              <p>เกษตร: <span className="text-[#C9A96E] font-bold">{ZODIAC_ORDER[result.kasternZodiacIndex]?.name}</span></p>
-              <p>ดาวยาม: <span className="text-[#C9A96E] font-bold">{PLANET_INFO[result.yamPlanet]?.thai}</span></p>
-            </div>
-          </div>
-          
-          <div className="w-full max-w-[480px] mx-auto"
-            dangerouslySetInnerHTML={{ __html: svgStr }} />
 
           {/* Display Toggles */}
-          <div className="mt-6 pt-6 border-t border-[#C9A96E]/10 flex flex-wrap gap-x-4 gap-y-2 justify-center">
+          <div className="mt-4 pt-4 border-t border-[#C6A96B]/20 flex flex-wrap gap-x-4 gap-y-2 justify-center">
             {[
               { key: 'showKasternFixed', label: 'ดาวเกษตรคงที่' },
               { key: 'showFloatingPlanets', label: 'ดาวลอย' },
@@ -1256,35 +1875,69 @@ export default function HoraNuPage() {
                   type="checkbox" 
                   checked={(options as any)[opt.key]}
                   onChange={(e) => setOptions(prev => ({ ...prev, [opt.key]: e.target.checked }))}
-                  className="w-3.5 h-3.5 rounded border-[#C9A96E]/30 bg-slate-900 text-[#C9A96E] focus:ring-[#C9A96E]/50"
+                  className="w-3.5 h-3.5 rounded border-[#C6A96B]/30 bg-[#091838] text-[#C6A96B] focus:ring-[#C6A96B]/50"
                 />
-                <span className="text-[11px] text-[#D9CDB7] group-hover:text-[#C9A96E] transition-colors">{opt.label}</span>
+                <span className="text-[11px] text-[#D9CDB7] group-hover:text-[#C6A96B] transition-colors">{opt.label}</span>
               </label>
             ))}
           </div>
 
           {/* Planet Status Legend */}
           <PlanetStatusLegend />
-        </Card>
-
-        <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
-          <YamBadge result={result} />
-          <div className="mt-3"><PlanetSummary result={result} /></div>
-          <CurrentPredictionPoint result={result} />
-        </Card>
-
-        <PhraKrasibCalcTable result={result} />
+        </div>
       </div>
 
+      {/* ── 2 Prediction Mode Switcher (แท็บเลือกวิธีการพยากรณ์ ๒ แบบ) ── */}
+      <div className="flex flex-col sm:flex-row gap-2.5 p-1.5 rounded-2xl bg-[#07132b]/90 border border-[#C6A96B]/30 shadow-xl shadow-black/50">
+        <button
+          type="button"
+          onClick={() => setPredictionMethod("bhava")}
+          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
+            predictionMethod === "bhava"
+              ? "bg-gradient-to-r from-[#C6A96B]/30 to-[#D9BC82]/35 border border-[#C6A96B] text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20"
+              : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[#091838]/60"
+          }`}
+        >
+          <ModeSymbol mode="bhava" className="w-5 h-5 text-[#C6A96B] shrink-0" />
+          <span>๑. อ่านจากเรื่องที่ถาม (เจาะลึก ๑๒ ภพ)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setPredictionMethod("time")}
+          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
+            predictionMethod === "time"
+              ? "bg-gradient-to-r from-[#C6A96B]/30 to-[#D9BC82]/35 border border-[#C6A96B] text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20"
+              : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[#091838]/60"
+          }`}
+        >
+          <ModeSymbol mode="time" className="w-5 h-5 text-[#C6A96B] shrink-0" />
+          <span>๒. อ่านตามดวงยาม ณ เวลาที่ถาม (สมการจุดพยากรณ์)</span>
+        </button>
+      </div>
+
+      {/* ── Active Prediction Method View ── */}
+      {predictionMethod === "bhava" ? (
+        <TwoStageBhavaPredictor result={result} onAskAI={handleAskAIWithTopic} />
+      ) : (
+        <PhraKrasibCalcTable result={result} onAskAI={handleAskAIWithTopic} />
+      )}
+
       {/* ── Horanu Chat ── */}
-      <HoranuChatPanel initialPastChats={loaderData.pastChats} />
+      <div id="horanu-chat-section">
+        <HoranuChatPanel
+          initialPastChats={loaderData.pastChats}
+          externalPrompt={externalPrompt}
+          onPromptHandled={() => setExternalPrompt("")}
+        />
+      </div>
 
       {/* Loading overlay */}
       {isSubmitting && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-[#020617] border border-[#C9A96E]/30 rounded-2xl p-8 flex flex-col items-center gap-3">
-            <div className="w-10 h-10 border-2 border-[#C9A96E]/30 border-t-[#C9A96E] rounded-full animate-spin" />
-            <p className="text-[#C9A96E] text-sm font-bold">กำลังโหลดดวงยาม...</p>
+          <div className="bg-[#07132b] border border-[#C6A96B]/40 rounded-2xl p-8 flex flex-col items-center gap-3">
+            <div className="w-10 h-10 border-2 border-[#C6A96B]/30 border-t-[#C6A96B] rounded-full animate-spin" />
+            <p className="text-[#C6A96B] text-sm font-bold">กำลังโหลดดวงยาม...</p>
           </div>
         </div>
       )}

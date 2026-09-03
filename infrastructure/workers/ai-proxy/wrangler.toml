@@ -12,5 +12,5 @@ preview_id = "68170184b5e047b09b0d98abce21383f"
 ENVIRONMENT = "production"
 
 # Secrets (set via wrangler secret put)
-# GEMINI_API_KEY      ← Google AI Studio key
+# deepseek_api_key    ← DeepSeek API key (or DEEPSEEK_API_KEY)
 # AI_WORKER_SECRET    ← shared secret กับ Remix web app

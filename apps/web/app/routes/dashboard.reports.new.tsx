@@ -151,7 +151,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
           birthPlace: birthPlace || null,
           displayName: displayName || "ผู้ใช้งาน",
         },
-        locale: (locale === "zh" ? "zh" : locale === "en" ? "en" : "th") as any,
+        locale: "th",
       },
       env
     );

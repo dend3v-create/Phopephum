@@ -6,14 +6,6 @@ import thCommon from "../../locales/th/common.json";
 import thHoroscope from "../../locales/th/horoscope.json";
 import thYam from "../../locales/th/yam.json";
 
-import enCommon from "../../locales/en/common.json";
-import enHoroscope from "../../locales/en/horoscope.json";
-import enYam from "../../locales/en/yam.json";
-
-import zhCommon from "../../locales/zh/common.json";
-import zhHoroscope from "../../locales/zh/horoscope.json";
-import zhYam from "../../locales/zh/yam.json";
-
 export const localeCookie = createCookie("locale", {
   path: "/",
   sameSite: "lax",
@@ -24,20 +16,16 @@ export const localeCookie = createCookie("locale", {
 
 const i18next = new RemixI18Next({
   detection: {
-    supportedLanguages: supportedLngs,
-    fallbackLanguage: fallbackLng,
+    supportedLanguages: ["th"],
+    fallbackLanguage: "th",
     cookie: localeCookie,
-    // Add other detectors as fallback
-    order: ["searchParams", "cookie", "header"],
   },
   i18next: {
-    supportedLngs,
-    fallbackLng,
+    supportedLngs: ["th"],
+    fallbackLng: "th",
     defaultNS: "common",
     resources: {
       th: { common: thCommon, horoscope: thHoroscope, yam: thYam },
-      en: { common: enCommon, horoscope: enHoroscope, yam: enYam },
-      zh: { common: zhCommon, horoscope: zhHoroscope, yam: zhYam }
     }
   },
 });

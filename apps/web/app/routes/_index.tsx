@@ -1,6 +1,5 @@
 import type { MetaFunction } from "@remix-run/cloudflare";
 import { ThemeToggle } from "~/components/ThemeToggle";
-import { LanguageSwitcher } from "~/components/LanguageSwitcher";
 import { Link } from "@remix-run/react";
 import { useT } from "~/i18n/context";
 import { useTranslation } from "react-i18next";
@@ -125,7 +124,6 @@ export default function Index() {
         </div>
 
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           <ThemeToggle />
           <Link to="/login" className="text-sm text-[#94A3B8] hover:text-[#F8F6F1] transition-colors px-2">
             {t("login")}

@@ -1,4 +1,4 @@
-import type { HoraNuChartData } from "@phopephum/engine";
+import type { HoraNuChartData, HoraNuYamPeriod, HoraNuHouseEntry } from "@phopephum/types";
 
 export function buildHoraNuChatPrompt(
   question: string,
@@ -8,12 +8,12 @@ export function buildHoraNuChatPrompt(
 ): string {
   // Build yam schedule summary
   const scheduleLines = data.yamSchedule
-    .map((y) => `  ยาม ${y.periodNum}: ${y.startTime}–${y.endTime} ดาว${y.planetName} (${y.direction})${y.isCurrent ? " ◀ ปัจจุบัน" : ""}`)
+    .map((y: HoraNuYamPeriod) => `  ยาม ${y.periodNum}: ${y.startTime}–${y.endTime} ดาว${y.planetName} (${y.direction})${y.isCurrent ? " ◀ ปัจจุบัน" : ""}`)
     .join("\n");
 
   // Build house chart summary (highlight active house)
   const houseLines = data.houseChart
-    .map((h) => `  ภพ ${h.houseNum} ${h.houseName} (${h.zodiacName}) — เจ้าเรือน: ดาว${h.lordName} ${h.lordStatusSymbol}${h.isCurrentYam ? " ◀ ยามปัจจุบัน" : ""}`)
+    .map((h: HoraNuHouseEntry) => `  ภพ ${h.houseNum} ${h.houseName} (${h.zodiacName}) — เจ้าเรือน: ดาว${h.lordName} ${h.lordStatusSymbol}${h.isCurrentYam ? " ◀ ยามปัจจุบัน" : ""}`)
     .join("\n");
 
   const phaseLabel = data.phase === "day" ? "กลางวัน ☀" : "กลางคืน ☾";
