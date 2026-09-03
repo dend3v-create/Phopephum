@@ -567,7 +567,7 @@ export default function TodayScreen() {
   const findTimingLabel = locale === "en" ? "🔎 Find My Best Time" : locale === "zh" ? "🔎 为我寻找吉时" : "🔎 หาฤกษ์ให้ฉัน";
 
   return (
-    <div className="max-w-xl mx-auto space-y-5 pb-8 pt-1 px-0.5">
+    <div className="max-w-xl mx-auto space-y-5 pt-1 px-3 sm:px-4" style={{ paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))" }}>
       {/* ── Login Reward Toast ── */}
       {showReward && loginReward && (
         <LoginRewardToast
@@ -586,14 +586,22 @@ export default function TodayScreen() {
 
       {/* ── HEADER ── */}
       <div className="pt-1 animate-fade-up">
-        <p className="text-[11px] font-black uppercase tracking-[0.25em] text-[#C6A96B] opacity-80 mb-0.5">
+        <p
+          className="text-[11px] font-black uppercase tracking-[0.25em] text-[#C6A96B] opacity-80 mb-0.5 min-h-[14px]"
+          suppressHydrationWarning
+        >
           {greeting}
         </p>
         <h1 className="font-display text-3xl font-extrabold text-[#F8F6F1] leading-tight">
           {titleLabel}{" "}
           <span className="text-[#C6A96B]">{displayName}</span>
         </h1>
-        <p className="text-xs text-[#94A3B8] mt-1 tracking-wide">{dateLabel}</p>
+        <p
+          className="text-xs text-[#94A3B8] mt-1 tracking-wide min-h-[16px]"
+          suppressHydrationWarning
+        >
+          {dateLabel}
+        </p>
       </div>
 
       {/* ── CARD 1: วันนี้ของคุณ (Daily Energy Score) ── */}
@@ -621,17 +629,18 @@ export default function TodayScreen() {
                 className="w-2 h-2 rounded-full animate-pulse shrink-0"
                 style={{ background: yamLevelColor }}
               />
-              <span className="text-xs text-[#C6B79F] font-semibold">
+              <span className="text-xs text-[#C6B79F] font-semibold truncate">
                 ยามปัจจุบัน:{" "}
                 <span className="font-bold" style={{ color: yamLevelColor }}>
                   {yam.name}
                 </span>
               </span>
-              {timeLeft && (
-                <span className="text-[10px] text-[#64748B] font-mono ml-auto">
-                  {timeLeft}
-                </span>
-              )}
+              <span
+                className="text-[10px] text-[#64748B] font-mono ml-auto shrink-0 min-w-[40px] text-right"
+                suppressHydrationWarning
+              >
+                {timeLeft}
+              </span>
             </div>
 
             {/* Moon Phase */}
@@ -735,11 +744,14 @@ export default function TodayScreen() {
       {/* ── CTA: หาฤกษ์ให้ฉัน ── */}
       <Link
         to="/dashboard/check-yam"
-        className="block w-full text-center font-display font-black text-base tracking-wide py-4 rounded-2xl border transition-all active:scale-[0.98] hover:scale-[1.01] shadow-xl shadow-[#C6A96B]/15 animate-fade-up"
+        className="block w-full text-center font-display font-black text-lg tracking-wide py-5 rounded-2xl transition-all active:scale-[0.98] hover:scale-[1.01] shadow-xl shadow-[#C6A96B]/20 animate-fade-up"
         style={{
-          background: "linear-gradient(135deg, #C6A96B, #D9BC82, #C6A96B)",
+          background: "linear-gradient(135deg, #C6A96B 0%, #F2D49B 50%, #C6A96B 100%)",
           color: "#020617",
-          borderColor: "transparent",
+          minHeight: "56px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
         {findTimingLabel}
