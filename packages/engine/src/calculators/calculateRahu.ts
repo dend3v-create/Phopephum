@@ -214,12 +214,22 @@ function findTimeBlock(totalMinutes: number): RahuTimeBlock | null {
   return null;
 }
 
+function getThaiTime(date: Date) {
+  const bkkMs = date.getTime() + 7 * 3600 * 1000;
+  const bkk = new Date(bkkMs);
+  return {
+    hours: bkk.getUTCHours(),
+    minutes: bkk.getUTCMinutes(),
+    seconds: bkk.getUTCSeconds(),
+    day: bkk.getUTCDay(), // 0=อาทิตย์ … 6=เสาร์
+  };
+}
+
 export function calculateRahu(date: Date): RahuResult | null {
-  const hours   = date.getHours();
-  const minutes = date.getMinutes();
+  const { hours, minutes, day } = getThaiTime(date);
 
   // ระบบยามราหูนับวันตั้งแต่ 06:00 น. — ช่วง 00:00-05:59 ยังอยู่ในยามกลางคืนของวันก่อนหน้า
-  let jsDay = date.getDay(); // 0=อาทิตย์ … 6=เสาร์
+  let jsDay = day; // 0=อาทิตย์ … 6=เสาร์
   if (hours < 6) {
     jsDay = (jsDay + 6) % 7; // ถอยหลัง 1 วัน
   }

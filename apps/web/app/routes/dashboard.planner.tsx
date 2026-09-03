@@ -41,7 +41,7 @@ const YAM_SLOTS = [
 
 const PLANET_DATA: Record<string, { label: string; color: string; symbol: string; meaning: string; promotes: string[]; warns: string[] }> = {
   "อาทิตย์": { 
-    label: "อาทิตย์", color: "#EF4444", symbol: "☉", 
+    label: "สุริชะ", color: "#EF4444", symbol: "☉", 
     meaning: "เป็นเรื่องจริง เชื่อถือได้ เป็นเรื่องจริง ทำจริง มีเรื่องร้อนใจ", 
     promotes: ["ผู้นำ", "การเจรจา", "ความมีชื่อเสียง", "สุขภาพ"], 
     warns: ["อัตตาสูง", "ความเย่อหยิ่ง"] 
@@ -59,7 +59,7 @@ const PLANET_DATA: Record<string, { label: string; color: string; symbol: string
     warns: ["ความขัดแย้ง", "อุบัติเหตุ", "ความโกรธ"] 
   },
   "พุธ": { 
-    label: "พุทธะ", color: "#10B981", symbol: "☿", 
+    label: "พุธะ", color: "#10B981", symbol: "☿", 
     meaning: "เป็นเรื่องจริง เชื่อถือได้", 
     promotes: ["การสื่อสาร", "ธุรกิจ", "การเรียนรู้", "เทคโนโลยี", "การเขียน"], 
     warns: ["ความไม่ซื่อสัตย์", "ความลังเล"] 

@@ -19,13 +19,22 @@ export interface TimeEngineResult {
   isDay: boolean;
 }
 
+function getThaiTime(date: Date) {
+  const bkkMs = date.getTime() + 7 * 3600 * 1000;
+  const bkk = new Date(bkkMs);
+  return {
+    h: bkk.getUTCHours(),
+    m: bkk.getUTCMinutes(),
+    s: bkk.getUTCSeconds(),
+    day: bkk.getUTCDay(),
+  };
+}
+
 /**
  * คำนวณยามและช่วงเวลา
  */
 export function calculateTimeEngine(date: Date): TimeEngineResult {
-  const h = date.getHours();
-  const m = date.getMinutes();
-  const s = date.getSeconds();
+  const { h, m, s, day } = getThaiTime(date);
   const totalMinutes = h * 60 + m + s / 60;
   
   // ตัดวันใหม่ที่ 06:00
@@ -48,7 +57,7 @@ export function calculateTimeEngine(date: Date): TimeEngineResult {
   const yamSoyNumber = Math.floor((minutesInYamYai * 60) / 225) + 1;
   
   // หาดาวประจำวัน (อาทิตย์=1 ... เสาร์=7)
-  let dayOfWeek = date.getDay();
+  let dayOfWeek = day;
   if (totalMinutes < 360) {
     dayOfWeek = (dayOfWeek + 6) % 7;
   }
@@ -94,7 +103,8 @@ export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: 
   const row = time.subPeriod === 'early' ? 0 : (time.subPeriod === 'middle' ? 1 : 2);
 
   // คำนวณฤกษ์ 10 นาที (0-8) — ใช้สำหรับแสดงชื่อฤกษ์เท่านั้น
-  const totalMin = date.getHours() * 60 + date.getMinutes();
+  const { h, m, day } = getThaiTime(date);
+  const totalMin = h * 60 + m;
   let adjusted = (totalMin - 360 + 1440) % 1440;
   const isDay = adjusted < 720;
   const periodMin = isDay ? adjusted : adjusted - 720;
@@ -160,10 +170,9 @@ export function calculateHorary(date: Date): FateMatrix {
   const tanu = time.yamYai;
   
   // 3. ดาวประจำวันที่ถาม -> ภพมรณะ (2, 0)
-  let h = date.getHours();
-  let m = date.getMinutes();
-  let dayOfWeek = date.getDay();
-  if ((h * 60 + m) < 360) {
+  const { h: horaryH, m: horaryM, day: horaryDay } = getThaiTime(date);
+  let dayOfWeek = horaryDay;
+  if ((horaryH * 60 + horaryM) < 360) {
     dayOfWeek = (dayOfWeek + 6) % 7;
   }
   const morana = dayOfWeek === 0 ? 1 : dayOfWeek + 1;

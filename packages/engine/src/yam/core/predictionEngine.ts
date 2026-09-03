@@ -8,35 +8,6 @@ import {
   PeriodType,
 } from "../types/yam.types.js";
 
-/** ฐานข้อมูลคำทำนายเดินทางกลางวันใหม่สำหรับดาว ๑, ๒, ๓ */
-const DAYTIME_NEW_TRAVEL_MEANINGS: Record<string, { start: string; middle: string; end: string }> = {
-  "สุริยะ": {
-    start: "แสนทรพ์ไม่ประสบความยาก เดินทางราบรื่นและไร้อุปสรรค",
-    middle: "ดีเลิศ เด่นทำนองสิ่งดี ประสบความสำเร็จขั้นสูงสุด มีชื่อเสียง",
-    end: "ดีติดขัดหลักสิ้นสุด ปลายยามมีเกณฑ์สะดุดหรือล่าช้าเล็กน้อย",
-  },
-  "สุริชะ": {
-    start: "แสนทรพ์ไม่ประสบความยาก เดินทางราบรื่นและไร้อุปสรรค",
-    middle: "ดีเลิศ เด่นทำนองสิ่งดี ประสบความสำเร็จขั้นสูงสุด มีชื่อเสียง",
-    end: "ดีติดขัดหลักสิ้นสุด ปลายยามมีเกณฑ์สะดุดหรือล่าช้าเล็กน้อย",
-  },
-  "จันเทา": {
-    start: "ร้อนใจ อ่อนไม่มีเชื่อ เริ่มต้นสัญจรด้วยความร้อนใจหรือปัญหาติดขัด",
-    middle: "คนไทว่าไม่ไสร้เชื่อ ข่าวสารหรือผู้คนระหว่างเดินทางยังไม่น่าไว้วางใจ",
-    end: "ดูถูกดูหมิ่นของ ระมัดระวังการทำของเสียหาย หรือเสียเกียรติยศ",
-  },
-  "จันทรา": { // เผื่อการสะกดในจุดอื่นๆ
-    start: "ร้อนใจ อ่อนไม่มีเชื่อ เริ่มต้นสัญจรด้วยความร้อนใจหรือปัญหาติดขัด",
-    middle: "คนไทว่าไม่ไสร้เชื่อ ข่าวสารหรือผู้คนระหว่างเดินทางยังไม่น่าไว้วางใจ",
-    end: "ดูถูกดูหมิ่นของ ระมัดระวังการทำของเสียหาย หรือเสียเกียรติยศ",
-  },
-  "ภุมมะ": {
-    start: "สำเภาทุกข์ เพิ่มเติมอันเนื่องมา การสัญจรระยะแรกมีความเหน็ดเหนื่อยหรือทุกขลาภ",
-    middle: "งามนิยมรัก งามประสบชัย ประสบความสำเร็จอย่างโดดเด่นและปลอดภัย",
-    end: "เนื้อนิยม ได้รับสิ่งดี ได้ลาภผลประโยชน์และสิ่งพึงพอใจอย่างมาก",
-  },
-};
-
 /** ดึงคำทำนายเต็มรูปแบบตามชื่อยาม และระบุช่วงเวลา (กลางวัน/กลางคืน) */
 export function getPrediction(yamName: string, period: PeriodType = "day"): PredictionResult | undefined {
   const m = yamMeaning[yamName];
@@ -45,8 +16,8 @@ export function getPrediction(yamName: string, period: PeriodType = "day"): Pred
   let travel = { ...m.travel };
 
   if (period === "night") {
-    // ใช้คำทำนายเดินทางกลางคืนจาก night_watch_app
-    const nightM = yamNightMeaning[yamName];
+    // ใช้คำทำนายเดินทางกลางคืนจาก yamNightMeaning (อ้างอิงตำรายามอัฏฐกาลกลางคืน)
+    const nightM = yamNightMeaning[yamName] || (m.nightName ? yamNightMeaning[m.nightName] : undefined);
     if (nightM) {
       travel = {
         start: nightM.travel.start,
@@ -55,15 +26,12 @@ export function getPrediction(yamName: string, period: PeriodType = "day"): Pred
       };
     }
   } else {
-    // ใช้คำทำนายเดินทางกลางวันใหม่สำหรับ สุริยะ, จันทรา/จันเทา, ภูมมะ/ภุมมะ
-    const dayNewM = DAYTIME_NEW_TRAVEL_MEANINGS[yamName];
-    if (dayNewM) {
-      travel = {
-        start: dayNewM.start,
-        middle: dayNewM.middle,
-        end: dayNewM.end,
-      };
-    }
+    // ใช้คำทำนายเดินทางกลางวันจาก yamMeaning (อ้างอิงตำรายามอัฏฐกาลกลางวัน)
+    travel = {
+      start: m.travel.start,
+      middle: m.travel.middle,
+      end: m.travel.end,
+    };
   }
 
   return {
