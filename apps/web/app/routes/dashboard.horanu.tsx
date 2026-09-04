@@ -1769,7 +1769,7 @@ export default function HoraNuPage() {
   const [showCustom, setShowCustom] = useState(false);
   const currentTheme = useTheme();
   const [externalPrompt, setExternalPrompt] = useState<string>("");
-  const [predictionMethod, setPredictionMethod] = useState<"bhava" | "time">("bhava");
+  const [predictionMethod, setPredictionMethod] = useState<"bhava" | "time">("time");
 
   // Chart Options State
   const [options, setOptions] = useState<ChartConfig>({
@@ -1891,19 +1891,6 @@ export default function HoraNuPage() {
       <div className="flex flex-col sm:flex-row gap-2.5 p-1.5 rounded-2xl bg-[#07132b]/90 border border-[#C6A96B]/30 shadow-xl shadow-black/50">
         <button
           type="button"
-          onClick={() => setPredictionMethod("bhava")}
-          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
-            predictionMethod === "bhava"
-              ? "bg-gradient-to-r from-[#C6A96B]/30 to-[#D9BC82]/35 border border-[#C6A96B] text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20"
-              : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[#091838]/60"
-          }`}
-        >
-          <ModeSymbol mode="bhava" className="w-5 h-5 text-[#C6A96B] shrink-0" />
-          <span>๑. อ่านจากเรื่องที่ถาม (เจาะลึก ๑๒ ภพ)</span>
-        </button>
-
-        <button
-          type="button"
           onClick={() => setPredictionMethod("time")}
           className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
             predictionMethod === "time"
@@ -1912,15 +1899,28 @@ export default function HoraNuPage() {
           }`}
         >
           <ModeSymbol mode="time" className="w-5 h-5 text-[#C6A96B] shrink-0" />
-          <span>๒. อ่านตามดวงยาม ณ เวลาที่ถาม (สมการจุดพยากรณ์)</span>
+          <span>๑. อ่านตามดวงยาม ณ เวลาที่ถาม (สมการจุดพยากรณ์)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setPredictionMethod("bhava")}
+          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
+            predictionMethod === "bhava"
+              ? "bg-gradient-to-r from-[#C6A96B]/30 to-[#D9BC82]/35 border border-[#C6A96B] text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20"
+              : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[#091838]/60"
+          }`}
+        >
+          <ModeSymbol mode="bhava" className="w-5 h-5 text-[#C6A96B] shrink-0" />
+          <span>๒. อ่านจากเรื่องที่ถาม (เจาะลึก ๑๒ ภพ)</span>
         </button>
       </div>
 
       {/* ── Active Prediction Method View ── */}
-      {predictionMethod === "bhava" ? (
-        <TwoStageBhavaPredictor result={result} onAskAI={handleAskAIWithTopic} />
-      ) : (
+      {predictionMethod === "time" ? (
         <PhraKrasibCalcTable result={result} onAskAI={handleAskAIWithTopic} />
+      ) : (
+        <TwoStageBhavaPredictor result={result} onAskAI={handleAskAIWithTopic} />
       )}
 
       {/* ── Horanu Chat ── */}
