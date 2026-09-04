@@ -103,6 +103,24 @@ export interface WisdomHistoryFilters {
   offset?: number;
 }
 
+export function normalizeWisdomIntentCategory(raw?: string): string {
+  if (!raw) return "general";
+  const valid = ["timing", "finance", "relationship", "lost", "career", "health", "general"];
+  if (valid.includes(raw)) return raw;
+  switch (raw) {
+    case "horanu":
+      return "general";
+    case "yam":
+      return "timing";
+    case "karnchata":
+      return "career";
+    case "rahu":
+      return "lost";
+    default:
+      return "general";
+  }
+}
+
 /**
  * Phase A — Save wisdom query to database
  * Only saves successful, valid predictions (skips empty questions, errors, or keystrokes)
@@ -121,12 +139,18 @@ export async function saveWisdomQuery(
   }
 
   try {
+    const normalizedCategory = normalizeWisdomIntentCategory(input.intentCategory);
+    const engineSnapshot = {
+      ...(input.engineSnapshot || {}),
+      sacredEngine: input.intentCategory || "general",
+    };
+
     const { data, error } = await supabase
       .from("wisdom_queries")
       .insert({
         user_id: userId,
         question: cleanQuestion,
-        intent_category: input.intentCategory || "general",
+        intent_category: normalizedCategory,
         context_type: input.contextType || "horary",
         confidence: input.confidence || "medium",
         answer: cleanAnswer,
@@ -137,7 +161,7 @@ export async function saveWisdomQuery(
             ? Math.round(input.predictionScore)
             : null,
         evidence_snapshot: input.evidenceSnapshot || [],
-        engine_snapshot: input.engineSnapshot || {},
+        engine_snapshot: engineSnapshot,
         is_bookmarked: false,
       })
       .select("*")

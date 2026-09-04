@@ -402,7 +402,18 @@ export default function CheckYamPage() {
   const [winCEnd, setWinCEnd] = useState("16:30");
 
   const isSubmitting = navigation.state === "submitting" || navigation.state === "loading";
-  const prediction = actionData?.prediction;
+  const [persistedPrediction, setPersistedPrediction] = useState<PredictionResult | null>(null);
+
+  useEffect(() => {
+    if (actionData?.prediction) {
+      setPersistedPrediction(actionData.prediction);
+      if (actionData.prediction.isBookmarked !== undefined) {
+        setBookmarked(Boolean(actionData.prediction.isBookmarked));
+      }
+    }
+  }, [actionData?.prediction]);
+
+  const prediction = persistedPrediction || actionData?.prediction;
   const comparisonResult = actionData?.comparisonResult;
 
   const bookmarkFetcher = useFetcher<{ success?: boolean; result?: { is_bookmarked: boolean } }>();
@@ -551,12 +562,6 @@ export default function CheckYamPage() {
     setWinCStart("15:00");
     setWinCEnd("16:30");
   };
-
-  // Auto-revalidate live clock data every 60s
-  useEffect(() => {
-    const id = setInterval(revalidate, 60_000);
-    return () => clearInterval(id);
-  }, [revalidate]);
 
   const handleChipClick = (question: string) => {
     setInputQuery(question);
@@ -1301,19 +1306,6 @@ export default function CheckYamPage() {
             </div>
           )}
 
-          {/* Actionable Advice Box */}
-          <div className="p-4 rounded-2xl border border-emerald-200 dark:border-emerald-400/20 bg-emerald-50/90 dark:bg-emerald-500/5 flex items-start gap-3">
-            <span className="text-emerald-600 dark:text-emerald-400 text-base mt-0.5">✓</span>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400 mb-0.5">
-                ข้อแนะนำที่ทำได้ทันที
-              </p>
-              <p className="text-sm text-slate-800 dark:text-[#E2E8F0] font-medium leading-snug">
-                {prediction.actionable}
-              </p>
-            </div>
-          </div>
-
           {/* Deep Engine Link Portal (เชื่อมตรงสู่ ๔ ศาสตร์หลัก) */}
           {prediction.targetRoute && (
             <div className="p-4 sm:p-5 rounded-2xl border border-[#C6A96B]/50 bg-gradient-to-r from-amber-500/15 via-[#C6A96B]/10 to-transparent dark:from-[#0A1A2F] dark:to-[#071324] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
@@ -1335,31 +1327,6 @@ export default function CheckYamPage() {
               >
                 <span>เปิดผังวิเคราะห์ ↗</span>
               </Link>
-            </div>
-          )}
-
-          {/* Level 2: Evidence Chain Accordion */}
-          {prediction.evidenceChain && prediction.evidenceChain.length > 0 && (
-            <div className="pt-2 border-t border-black/10 dark:border-white/8">
-              <button
-                type="button"
-                onClick={() => setShowEvidence(!showEvidence)}
-                className="flex items-center justify-between w-full text-left py-2 text-xs font-bold text-slate-600 dark:text-[#94A3B8] hover:text-[#C6A96B] transition-colors"
-              >
-                <span>🔍 ดูปัจจัยพลังงานเชิงลึก (Evidence Chain — Level 2)</span>
-                <span>{showEvidence ? "▲ ย่อ" : "▼ ขยาย"}</span>
-              </button>
-
-              {showEvidence && (
-                <div className="mt-3 space-y-2 pl-3 border-l-2 border-[#C6A96B]/40 animate-fade-up">
-                  {prediction.evidenceChain.map((ev, idx) => (
-                    <div key={idx} className="text-xs space-y-0.5">
-                      <span className="font-bold text-[#C6A96B]">{ev.source}:</span>
-                      <p className="text-slate-700 dark:text-[#CBD5E1]">{ev.finding}</p>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
           )}
 
@@ -1437,6 +1404,7 @@ export default function CheckYamPage() {
             <button
               type="button"
               onClick={() => {
+                setPersistedPrediction(null);
                 setInputQuery("");
                 if (inputRef.current) {
                   inputRef.current.value = "";

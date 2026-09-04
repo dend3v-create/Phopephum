@@ -323,25 +323,57 @@ function buildEvidenceChain(
   return chain;
 }
 
-// ─── Fallback Generator ───────────────────────────────────────────────────────
+// ─── Fallback Generator (Context-Aware & Question-Specific) ─────────────────
 
 function generateFallbackAnswer(
   intent: ParsedIntent,
   snap: EngineSnapshot,
   userName: string
 ): string {
+  const q = (intent.raw || "").toLowerCase();
+  const score = snap.horaOverallScore;
+
+  // 1. ตรวจจับเรื่องการเงิน / เบิกเงิน / ค่าห้อง / ทรัพย์สิน / หนี้สิน
+  const isFinance = /เงิน|เบิก|ค่าห้อง|ค่าเช่า|จ่าย|หนี้|โอน|กู้|ซื้อ|ขาย|รายได้|กำไร|มัดจำ/i.test(q);
+  if (isFinance) {
+    if (score >= 50) {
+      return `${userName}ครับ สำหรับเรื่องการขอเบิกเงินหรือจัดการค่าใช้จ่ายเฉพาะหน้านี้ พลังงานดวงยามบ่งชี้ว่ามีเกณฑ์สำเร็จลุล่วงสมหวัง (เกณฑ์ความพร้อม ${score}%) แนะนำให้ติดต่อสื่อสารกับผู้มีอำนาจหรือฝ่ายที่เกี่ยวข้องโดยตรงพร้อมแจ้งเหตุผลความจำเป็นอย่างสุภาพและชัดเจน จะได้รับความเห็นชอบและช่วยเหลืออย่างราบรื่นครับ`;
+    } else {
+      return `${userName}ครับ สำหรับการขอเบิกเงินหรือเรื่องค่าใช้จ่ายในจังหวะนี้ ดวงยามระบุว่าอาจมีขั้นตอนหรือความล่าช้าเล็กน้อย (เกณฑ์ความพร้อม ${score}%) แนะนำให้เตรียมเอกสารและเหตุผลให้รอบคอบก่อนเจรจา จะช่วยให้การพูดคุยลุล่วงได้ครับ`;
+    }
+  }
+
+  // 2. ตรวจจับเรื่องการงาน / สัญญา / สัมภาษณ์ / สอบ / ตำแหน่ง
+  const isCareer = /งาน|สัมภาษณ์|โปรเจกต์|เจรจา|สัญญา|ดีล|หุ้นส่วน|เลื่อนขั้น|สอบ/i.test(q);
+  if (isCareer) {
+    return `${userName}ครับ สำหรับเรื่องการงานและการติดต่อนัดหมายนี้ จังหวะพลังงานเกื้อหนุนอย่างมีนัยสำคัญ (เกณฑ์ความพร้อม ${score}%) การตัดสินใจที่เด็ดขาดและการสื่อสารอย่างตรงไปตรงมาจะช่วยให้บรรลุเป้าหมายตามที่ตั้งใจครับ`;
+  }
+
+  // 3. ตรวจจับเรื่องความรัก / ความสัมพันธ์
+  const isLove = /รัก|แฟน|คนรัก|แต่งงาน|สู่ขอ|ง้อ|คืนดี|ใจ/i.test(q);
+  if (isLove) {
+    return `${userName}ครับ สำหรับเรื่องความสัมพันธ์และความรู้สึกในขณะนี้ พลังงานมีทิศทางส่งเสริม (เกณฑ์ความพร้อม ${score}%) การเปิดใจพูดคุยด้วยความนุ่มนวลและรับฟังซึ่งกันและกันจะช่วยคลี่คลายและนำไปสู่ความเข้าใจที่ดีครับ`;
+  }
+
+  // 4. ตรวจจับเรื่องของหาย / สิ่งของ
+  const isLost = /ของหาย|ตกหล่น|ลืม|หาไม่เจอ|อยู่ไหน|กุญแจ|กระเป๋า|โทรศัพท์/i.test(q);
+  if (isLost) {
+    return `${userName}ครับ สำหรับสิ่งของที่กำลังตามหา ${snap.rahuLostItem ? `พลังงานระบุว่ามีเกณฑ์อยู่${snap.rahuLostItem}` : "มีเกณฑ์ตกหล่นอยู่ในมุมอับหรือบริเวณที่เพิ่งใช้งานล่าสุด"} แนะนำให้ตั้งสติและค้นหาในจุดใกล้ตัวก่อน จะมีโอกาสพบได้ครับ`;
+  }
+
+  // 5. ตาม 4 ศาสตร์หลัก
   switch (snap.sacredEngine) {
     case "horanu":
-      return `${userName}ครับ สำหรับเรื่องที่ถามเฉพาะหน้านี้ พลังงานดวงยามบ่งชี้ว่ามีโอกาสสำเร็จสมหวัง (เกณฑ์ความพร้อม ${snap.horaOverallScore}%) สิ่งสำคัญคือการตัดสินใจที่เด็ดขาดและลงมือทำอย่างต่อเนื่องครับ`;
+      return `${userName}ครับ สำหรับเรื่องเฉพาะหน้าที่ถามนี้ พลังงานดวงยามบ่งชี้ว่ามีโอกาสสำเร็จสมหวัง (เกณฑ์ความพร้อม ${score}%) สิ่งสำคัญคือความมั่นใจและการลงมือทำอย่างต่อเนื่องครับ`;
 
     case "yam":
-      return `${userName}ครับ ช่วงเวลาและยามมงคลสำหรับการเดินทางหรือเจรจาธุรกิจคือช่วง ${snap.auspiciousBestSlot || snap.yamName} โดยมีทิศมงคลเกื้อหนุนคือ ${snap.yamTravelDirection} จะช่วยให้การติดต่อราบรื่นสำเร็จครับ`;
+      return `${userName}ครับ ช่วงเวลาและยามมงคลที่ส่งเสริมความราบรื่นคือช่วง ${snap.auspiciousBestSlot || snap.yamName} โดยมีทิศมงคลคือ ${snap.yamTravelDirection} จะช่วยให้การติดต่อสำเร็จตามเป้าหมายครับ`;
 
     case "karnchata":
-      return `${userName}ครับ ในการวางแผนรายวันรายชั่วโมงเพื่อเจรจาหรือติดต่อเรื่องสำคัญ แนะนำให้ดำเนินตามจังหวะยามซอย ${snap.karnchataYamSoy} ซึ่งเป็นจังหวะที่ผู้ใหญ่และคู่เจรจาเปิดรับและเห็นพ้องต้องกันได้ง่ายที่สุดครับ`;
+      return `${userName}ครับ ในการวางแผนเจรจาหรือดำเนินการตามไทม์ไลน์ แนะนำให้ใช้จังหวะยามซอย ${snap.karnchataYamSoy} ซึ่งเป็นช่วงที่พลังงานเปิดรับและเห็นพ้องต้องกันได้ง่ายที่สุดครับ`;
 
     case "rahu":
-      return `${userName}ครับ สำหรับฤกษ์ย่อย ๑๐ นาทีและการตามหาของหาย ${snap.rahuAdvice || "แนะนำให้ตั้งสติและตรวจสอบในมุมอับหรือทิศทางที่คุ้นเคย"} ${snap.rahuLostItem ? `มีเกณฑ์สูงว่าจะอยู่${snap.rahuLostItem}` : ""}`;
+      return `${userName}ครับ สำหรับฤกษ์ย่อยและสถานการณ์เฉพาะหน้า ${snap.rahuAdvice || "แนะนำให้ดำเนินการอย่างมีสติและรอบคอบ"} จะช่วยให้ทุกอย่างผ่านพ้นไปด้วยดีครับ`;
   }
 }
 
@@ -379,8 +411,29 @@ export async function orchestratePrediction(
       });
 
       if (aiRes.ok) {
-        const aiData = await aiRes.json<{ text?: string; error?: string }>();
-        answer = aiData.text?.trim() ?? "";
+        const rawText = await aiRes.text();
+        if (rawText.includes("data: ")) {
+          let sseText = "";
+          for (const line of rawText.split("\n")) {
+            const trimmed = line.trim();
+            if (trimmed.startsWith("data: ")) {
+              const payload = trimmed.slice(6).trim();
+              if (payload === "[DONE]") continue;
+              try {
+                const parsed = JSON.parse(payload);
+                if (parsed.text) sseText += parsed.text;
+              } catch {}
+            }
+          }
+          if (sseText.trim()) {
+            answer = sseText.trim();
+          }
+        } else {
+          try {
+            const aiData = JSON.parse(rawText);
+            answer = aiData.text?.trim() ?? "";
+          } catch {}
+        }
       }
     }
   } catch (err) {
@@ -397,7 +450,13 @@ export async function orchestratePrediction(
     snap.yamShouldDo ??
     "ตั้งสติและดำเนินการตามจังหวะเวลาที่เอื้ออำนวย";
 
-  const bestWindow = snap.auspiciousBestSlot
+  // แสดง bestWindow เฉพาะเมื่อคำถามเกี่ยวข้องกับ "เวลา / ยาม / ฤกษ์ / เดินทาง / นัดหมาย"
+  const isTimingQuestion =
+    intent.sacredEngine === "yam" ||
+    intent.sacredEngine === "karnchata" ||
+    /เวลา|ยาม|ฤกษ์|กี่โมง|เดินทาง|นัด|วันไหน/i.test(intent.raw);
+
+  const bestWindow = isTimingQuestion && snap.auspiciousBestSlot
     ? {
         timeRange: snap.auspiciousBestSlot,
         description: snap.auspiciousBestFor?.join(", ") ?? "ช่วงเวลาส่งเสริมความสำเร็จ",
