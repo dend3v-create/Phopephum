@@ -29,8 +29,8 @@ import { useState, useEffect, useRef } from "react";
 import { useTheme } from "~/i18n/context";
 
 export const meta: MetaFunction = () => [
-  { title: "ยามพรายกระซิบ — PhopePhum" },
-  { name: "description", content: "ผังดวงยามพรายกระซิบ ระบบยามอัฐกาลและดาวลอยโบราณ 11 ดวง ภพ 12 หลัง" },
+  { title: "โหรทายหนู (ยามพรายกระซิบ) — PhopePhum" },
+  { name: "description", content: "โหรทายหนู (หรือเรียกว่า วิชายามพรายกระซิบ หรือยามอัฏฐกาล) เป็นศาสตร์การพยากรณ์ยามโบราณของไทยที่ใช้คำนวณเหตุการณ์เฉพาะหน้าหรือตอบคำถามเร่งด่วน โดยอาศัยหลักการเทียบเวลาและวันเกิดเหตุการณ์จริงกับตำแหน่งดาว" },
 ];
 
 // ─── Loader ───────────────────────────────────────────────────────────────────
@@ -1812,15 +1812,15 @@ export default function HoraNuPage() {
         <div className="absolute inset-2.5 sm:inset-3.5 border border-[#C6A96B]/20 rounded-[20px] pointer-events-none" />
 
         {/* ── Header ── */}
-        <div className="relative z-10 space-y-2 mb-6">
+        <div className="relative z-10 space-y-3 mb-6 max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/10 text-[#C6A96B] text-[11px] font-bold tracking-[0.25em] uppercase font-display">
             ✦ ภพภูมิ · โหรทายหนู ✦
           </div>
           <h1 className="font-display text-2xl sm:text-4xl text-[#F8F6F1] font-bold tracking-wide">
             ผังดวงยามพรายกระซิบ ๑๒ ภพ
           </h1>
-          <p className="font-display text-xs sm:text-sm text-[#D9BC82] tracking-[0.15em] font-medium">
-            ศาสตร์ถอดรหัสชะตากาลเวลา · ยามอัฐกาลและดาวลอย ๑๑ ดวง
+          <p className="text-xs sm:text-sm text-[#D9CDB7] leading-relaxed font-normal">
+            โหรทายหนู (หรือเรียกว่า วิชายามพรายกระซิบ หรือยามอัฏฐกาล) เป็นศาสตร์การพยากรณ์ยามโบราณของไทยที่ใช้คำนวณเหตุการณ์เฉพาะหน้าหรือตอบคำถามเร่งด่วน โดยอาศัยหลักการเทียบเวลาและวันเกิดเหตุการณ์จริงกับตำแหน่งดาว
           </p>
           <div className="text-[11px] text-[#D9CDB7]/80 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 pt-1">
             <span>ยาม {result.yamAsked} ({result.period === "day" ? "กลางวัน" : "กลางคืน"})</span>

@@ -1,89 +1,109 @@
 /**
- * predictionOrchestrator.server.ts — Intent-Based Prediction Orchestrator
+ * predictionOrchestrator.server.ts — 4 Sacred Engines Prediction Orchestrator
  *
- * Thin middleware layer:
- * ParsedIntent → Run relevant engines → Normalize → Build AI prompt → Call AI Worker
- *
- * RULE: ห้ามแก้ Calculation Engine ใดๆ ทั้งสิ้น
- * RULE: ห้าม expose ชื่อศาสตร์ใน L1 output
- * RULE: ทุก AI call ผ่าน AI_WORKER_URL/generate เท่านั้น
+ * ParsedIntent → ดึง Logic ของศาสตร์ที่ตรงที่สุด (โหรทายหนู / ยามอัฏฐกาล / กาลชะตา / ราหูค้นทรัพย์)
+ * → สังเคราะห์เป็นคำตอบภาษาชีวิตจริง (Level 1)
+ * → ส่งออก Deep Link & Target Route ไปยังผังการคำนวณเจาะลึก
  */
 
-import type { IntentCategory, ParsedIntent } from "./intentParser.server";
+import type { IntentCategory, ParsedIntent, SacredEngineCategory } from "./intentParser.server";
+import { SACRED_ENGINES } from "./intentParser.server";
 import {
   getCurrentYam,
   calculateHoraTaynoo,
   interpretChart,
   calculateRahu,
   calculateAuspiciousTime,
-  calculatePhopephum,
-  getYamPrediction,
+  calculateKarnchata,
+  PLANET_INFO,
+  ZODIAC_ORDER,
 } from "@phopephum/engine";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
 export interface UserProfile {
-  birthDate?: string | null
-  birthTime?: string | null
-  birthPlace?: string | null
-  displayName?: string | null
-  taksaSri?: string | null
-  taksaKala?: string | null
-  ageYang?: number | string | null
+  birthDate?: string | null;
+  birthTime?: string | null;
+  birthPlace?: string | null;
+  displayName?: string | null;
+  taksaSri?: string | null;
+  taksaKala?: string | null;
+  ageYang?: number | string | null;
 }
 
-// L1 — User sees this only
+// L1 — User sees this
 export interface PredictionResult {
-  question: string
-  intentCategory: IntentCategory
-  confidence: "high" | "medium" | "low"
+  question: string;
+  intentCategory: IntentCategory;
+  sacredEngine?: SacredEngineCategory;
+  targetRoute?: string;
+  targetEngineTitle?: string;
+  targetEngineReason?: string;
+  confidence: "high" | "medium" | "low";
 
-  // Main answer (AI-generated, no jargon)
-  answer: string
+  // Main answer (AI-generated or synthesized fallback)
+  answer: string;
 
-  // Optional timing suggestion (for timing/career/finance intent)
+  // Optional timing suggestion
   bestWindow?: {
-    timeRange: string
-    description: string
-  }
+    timeRange: string;
+    description: string;
+  };
 
-  // 1 actionable advice
-  actionable: string
+  // Actionable advice
+  actionable: string;
 
-  // Evidence chain (L2 — Pro users only)
+  // Evidence chain (L2)
   evidenceChain?: Array<{
-    source: string    // "พลังงานจักรวาล" (plain language, no jargon)
-    finding: string
-    weight: "primary" | "supporting"
-  }>
+    source: string;
+    finding: string;
+    weight: "primary" | "supporting";
+  }>;
 
-  // Memory & snapshot properties (STEP 4.1 & 4.2)
-  engineSnapshot?: Record<string, any>
-  predictionScore?: number
-  queryId?: string
-  isBookmarked?: boolean
+  // Memory & snapshot properties
+  engineSnapshot?: Record<string, any>;
+  predictionScore?: number;
+  queryId?: string;
+  isBookmarked?: boolean;
 
   // Error state
-  error?: string
+  error?: string;
 }
 
 // ─── Engine Evidence Builder ───────────────────────────────────────────────────
 
 interface EngineSnapshot {
-  yamLevel: string
-  yamName: string
-  yamShouldDo: string
-  horaOverallScore: number
-  horaWork: string
-  horaFinance: string
-  horaLove: string
-  horaHealth: string
-  rahuAdvice?: string
-  rahuLostItem?: string
-  auspiciousBestSlot?: string
-  auspiciousBestFor?: string[]
-  personalSri?: string
-  personalKala?: string
+  sacredEngine: SacredEngineCategory;
+  targetRoute: string;
+  targetEngineTitle: string;
+  // ยามอัฏฐกาล
+  yamLevel: string;
+  yamName: string;
+  yamShouldDo: string;
+  yamTravelDirection?: string;
+  // โหรทายหนู
+  horaOverallScore: number;
+  horaLagnaName: string;
+  horaYamPlanetName: string;
+  horaWork: string;
+  horaFinance: string;
+  horaLove: string;
+  horaHealth: string;
+  // กาลชะตา
+  karnchataYamYai: string;
+  karnchataYamSoy: string;
+  karnchataDayStar: number;
+  // ราหูค้นทรัพย์
+  rahuCurrentMomentGood: boolean;
+  rahuAdvice?: string;
+  rahuLostItem?: string;
+  rahuSubSlotName?: string;
+  rahuSubSlotTime?: string;
+  // ฤกษ์มงคล & ทักษา
+  auspiciousBestSlot?: string;
+  auspiciousBestFor?: string[];
+  personalSri?: string;
+  personalKala?: string;
 }
 
 function buildEngineSnapshot(
@@ -91,61 +111,86 @@ function buildEngineSnapshot(
   now: Date,
   profile: UserProfile | null
 ): EngineSnapshot {
-  // 1. ยามอัฏฐกาล (always)
-  const yam = getCurrentYam()
-  const yamLevel = yam.travelAuspiciousness.level
-  const yamShouldDo = yam.prediction?.shouldDo ?? ""
+  const engineInfo = SACRED_ENGINES[intent.sacredEngine] || SACRED_ENGINES.horanu;
 
-  // 2. ยามพรายกระซิบ (always for context)
-  const hora = calculateHoraTaynoo({ dateAsked: now })
-  const interpretation = interpretChart(hora)
-  const horaScore = interpretation.overallScore ?? 50
-  const horaCategories = interpretation.categories ?? {}
+  // 1. ยามอัฏฐกาล (Atthakarn)
+  const yam = getCurrentYam();
+  const yamLevel = yam.travelAuspiciousness.level;
+  const yamShouldDo = yam.prediction?.shouldDo ?? "";
+  const yamTravelDirection = (yam.prediction as any)?.travelDirection ?? yam.travelAuspiciousness.label ?? "ทิศมงคลประจำวัน";
 
-  // 3. ราหูค้นทรัพย์ (only for lost)
-  let rahuAdvice: string | undefined
-  let rahuLostItem: string | undefined
-  if (intent.category === "lost") {
-    const rahu = calculateRahu(now)
-    if (rahu) {
-      rahuAdvice = rahu.summary.advice
-      rahuLostItem = rahu.yam_rule?.huajai_lost_item ?? undefined
+  // 2. โหรทายหนู (Horanu / Phra Krasib)
+  const hora = calculateHoraTaynoo({ dateAsked: now });
+  const interpretation = interpretChart(hora);
+  const horaScore = interpretation.overallScore ?? 50;
+  const horaCategories = interpretation.categories ?? {};
+  const horaLagnaName = ZODIAC_ORDER[hora.lagnaZodiacIndex]?.name ?? "เมษ";
+  const horaYamPlanetName = PLANET_INFO[hora.yamPlanet]?.thai ?? "ดาวพฤหัส";
+
+  // 3. กาลชะตา (Karnchata - รายชั่วโมง ยามซอย)
+  const karnchata = calculateKarnchata(now);
+
+  // 4. ราหูค้นทรัพย์ (Rahu - ๙ ฤกษ์ย่อย ๑๐ นาที & ของหาย)
+  let rahuCurrentMomentGood = false;
+  let rahuAdvice: string | undefined;
+  let rahuLostItem: string | undefined;
+  let rahuSubSlotName: string | undefined;
+  let rahuSubSlotTime: string | undefined;
+
+  const rahu = calculateRahu(now);
+  if (rahu) {
+    rahuCurrentMomentGood = rahu.is_current_moment_good;
+    rahuAdvice = rahu.summary.advice;
+    rahuLostItem = rahu.yam_rule?.huajai_lost_item ?? undefined;
+    if (rahu.sub_block) {
+      rahuSubSlotName = rahu.sub_block.name;
+      rahuSubSlotTime = `นาทีที่ ${rahu.sub_block.minute_start} - ${rahu.sub_block.minute_end}`;
     }
   }
 
-  // 4. ฤกษ์มงคล (for timing + career + finance)
-  let auspiciousBestSlot: string | undefined
-  let auspiciousBestFor: string[] | undefined
-  if (["timing", "career", "finance"].includes(intent.category)) {
-    const auspicious = calculateAuspiciousTime(now)
-    if (auspicious.bestSlot) {
-      auspiciousBestSlot = auspicious.bestSlot.timeRange
-      auspiciousBestFor = auspicious.bestSlot.suitableFor
-    }
+  // 5. ฤกษ์มงคล
+  let auspiciousBestSlot: string | undefined;
+  let auspiciousBestFor: string[] | undefined;
+  const auspicious = calculateAuspiciousTime(now);
+  if (auspicious.bestSlot) {
+    auspiciousBestSlot = auspicious.bestSlot.timeRange;
+    auspiciousBestFor = auspicious.bestSlot.suitableFor;
   }
 
-  // 5. ทักษาจร (personal, only if birth_date available)
-  let personalSri: string | undefined
-  let personalKala: string | undefined
-  if (profile?.taksaSri) personalSri = profile.taksaSri
-  if (profile?.taksaKala) personalKala = profile.taksaKala
+  // 6. ทักษาจร
+  let personalSri: string | undefined;
+  let personalKala: string | undefined;
+  if (profile?.taksaSri) personalSri = profile.taksaSri;
+  if (profile?.taksaKala) personalKala = profile.taksaKala;
 
   return {
+    sacredEngine: intent.sacredEngine,
+    targetRoute: engineInfo.route,
+    targetEngineTitle: engineInfo.title,
     yamLevel,
     yamName: yam.yamName,
     yamShouldDo,
+    yamTravelDirection,
     horaOverallScore: horaScore,
+    horaLagnaName,
+    horaYamPlanetName,
     horaWork: horaCategories.work ?? "",
     horaFinance: horaCategories.finance ?? "",
     horaLove: horaCategories.love ?? "",
     horaHealth: horaCategories.health ?? "",
+    karnchataYamYai: karnchata.yamYaiName,
+    karnchataYamSoy: karnchata.yamSoyName,
+    karnchataDayStar: karnchata.dayStarNumber,
+    rahuCurrentMomentGood,
     rahuAdvice,
     rahuLostItem,
+    rahuSubSlotName,
+    rahuSubSlotTime,
     auspiciousBestSlot,
     auspiciousBestFor,
     personalSri,
     personalKala,
-  }
+  };
 }
 
 // ─── AI Prompt Builder ─────────────────────────────────────────────────────────
@@ -156,97 +201,72 @@ function buildIntentPrompt(
   userName: string,
   now: Date
 ): string {
-  const timeStr = now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })
-  const dayStr = now.toLocaleDateString("th-TH", { weekday: "long" })
+  const timeStr = now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+  const dayStr = now.toLocaleDateString("th-TH", { weekday: "long" });
 
-  // Translate engine data → plain Thai (no jargon)
-  const yamStrength = snap.yamLevel === "excellent"
-    ? "พลังงานจักรวาลขณะนี้อยู่ในช่วงดีเยี่ยม เหมาะอย่างยิ่ง"
-    : snap.yamLevel === "very_good"
-    ? "พลังงานจักรวาลขณะนี้เอื้ออำนวยและเป็นมงคล"
-    : snap.yamLevel === "good"
-    ? "พลังงานจักรวาลขณะนี้อยู่ในระดับดี พอเหมาะ"
-    : "พลังงานจักรวาลขณะนี้ค่อนข้างติดขัด ควรระมัดระวัง"
+  let engineKnowledge = "";
 
-  // Category-specific context
-  let categoryContext = ""
-  switch (intent.category) {
-    case "timing":
-      categoryContext = `
-[จังหวะเวลา]
-- ${yamStrength}
-${snap.auspiciousBestSlot ? `- ช่วงเวลาที่ดีที่สุดของวันนี้: ${snap.auspiciousBestSlot}` : ""}
-${snap.auspiciousBestFor ? `  เหมาะกับ: ${snap.auspiciousBestFor.slice(0, 3).join(", ")}` : ""}
-${snap.yamShouldDo ? `- สิ่งที่ควรทำตอนนี้: ${snap.yamShouldDo}` : ""}`.trim()
-      break
+  switch (snap.sacredEngine) {
+    case "horanu":
+      // โหรทายหนู: เจาะเหตุการณ์เฉพาะหน้า จะได้ไหม สำเร็จไหม
+      engineKnowledge = `
+[หลักการพยากรณ์: โหรทายหนู ๑๒ ภพ (เฉพาะหน้า/จะได้ไหม/สำเร็จไหม)]
+- จุดกาลเวลาลัคนาสถิต: ภพ${snap.horaLagnaName} | ดาวยามผู้ครองกาล: ${snap.horaYamPlanetName}
+- คะแนนดวงยามภาพรวม: ${snap.horaOverallScore}/100
+- ความรัก/ความสัมพันธ์: ${snap.horaLove || "ดำเนินไปตามเหตุปัจจัย"}
+- การงาน/ข้อตกลง: ${snap.horaWork || "ขึ้นอยู่กับความเด็ดขาดในการลงมือทำ"}
+- การเงิน/ผลประโยชน์: ${snap.horaFinance || "มีเกณฑ์ขยับขยายตามจังหวะ"}
+- สรุปเกณฑ์: หากคะแนนเกิน 60 ถือว่าสำเร็จสมหวัง หากต่ำกว่า 50 จะมีอุปสรรคต้องแก้ไข`;
+      break;
 
-    case "lost":
-      categoryContext = `
-[การค้นหาทรัพย์]
-- ${yamStrength}
-${snap.rahuAdvice ? `- คำแนะนำ: ${snap.rahuAdvice}` : ""}
-${snap.rahuLostItem ? `- เกี่ยวกับสิ่งที่หาย: ${snap.rahuLostItem}` : ""}`.trim()
-      break
+    case "yam":
+      // ยามอัฏฐกาล: ถามยาม ช่วงเวลาเดินทาง วันเวลาเจรจาธุรกิจสำเร็จ
+      engineKnowledge = `
+[หลักการพยากรณ์: ยามอัฏฐกาล ๘ ยาม (ช่วงเวลาเดินทาง/วันเวลาเจรจาสำเร็จ)]
+- ยามปัจจุบัน: ${snap.yamName} (ระดับพลังงาน: ${snap.yamLevel})
+- ทิศมงคลนำโชค: ${snap.yamTravelDirection}
+- ช่วงเวลาทองของวัน: ${snap.auspiciousBestSlot || "ช่วงยามปลอดกลางวัน"}
+- คำแนะนำการเคลื่อนไหว: ${snap.yamShouldDo || "มุ่งหน้าสู่เป้าหมายด้วยความมั่นใจ"}`;
+      break;
 
-    case "relationship":
-      categoryContext = `
-[ความสัมพันธ์]
-- ${yamStrength}
-${snap.horaLove ? `- พลังงานด้านความสัมพันธ์ตอนนี้: ${snap.horaLove}` : ""}`.trim()
-      break
+    case "karnchata":
+      // กาลชะตา: วางแผนรายวัน รายชั่วโมง (เจรจา, ขอแต่งงาน, ปิดการขาย)
+      engineKnowledge = `
+[หลักการพยากรณ์: กาลชะตายามซอย (วางแผนรายวัน รายชั่วโมง เจรจา/แต่งงาน/ปิดการขาย)]
+- ยามใหญ่ขณะนี้: ${snap.karnchataYamYai} | ยามซอยขณะนี้: ${snap.karnchataYamSoy}
+- ดาวประจำวันครองฤกษ์: ดาว ${snap.karnchataDayStar}
+- แนวทางจัดไทม์ไลน์: เน้นจังหวะที่ยามซอยเป็นยามศุภะ/ลาภะ เหมาะกับการเอ่ยปากขอแต่งงานหรือปิดการขายสำคัญ`;
+      break;
 
-    case "finance":
-      categoryContext = `
-[การเงินและธุรกิจ]
-- ${yamStrength}
-${snap.horaFinance ? `- พลังงานด้านการเงินตอนนี้: ${snap.horaFinance}` : ""}
-${snap.auspiciousBestSlot ? `- ช่วงเวลาดีสำหรับการเงิน: ${snap.auspiciousBestSlot}` : ""}`.trim()
-      break
-
-    case "career":
-      categoryContext = `
-[การงานและอาชีพ]
-- ${yamStrength}
-${snap.horaWork ? `- พลังงานด้านการงานตอนนี้: ${snap.horaWork}` : ""}
-${snap.auspiciousBestSlot ? `- ช่วงเวลาดีสำหรับการงาน: ${snap.auspiciousBestSlot}` : ""}
-${snap.yamShouldDo ? `- สิ่งที่ควรทำ: ${snap.yamShouldDo}` : ""}`.trim()
-      break
-
-    case "health":
-      categoryContext = `
-[สุขภาพและความเป็นอยู่]
-- ${yamStrength}
-${snap.horaHealth ? `- พลังงานด้านสุขภาพตอนนี้: ${snap.horaHealth}` : ""}`.trim()
-      break
-
-    default:
-      categoryContext = `
-[พลังงานทั่วไป]
-- ${yamStrength}
-${snap.yamShouldDo ? `- สิ่งที่ควรทำ: ${snap.yamShouldDo}` : ""}`.trim()
+    case "rahu":
+      // ราหูค้นทรัพย์: ฤกษ์ย่อย 10 นาที และของหาย
+      engineKnowledge = `
+[หลักการพยากรณ์: ราหูค้นทรัพย์ ๙ ฤกษ์ย่อย ๑๐ นาที (ฤกษ์ด่วน/ตามหาของหาย)]
+- สถานะฤกษ์ย่อยขณะนี้: ${snap.rahuCurrentMomentGood ? "ฤกษ์ดีเปิดทรัพย์" : "ฤกษ์ควรระวัง"}
+- ช่วงฤกษ์ย่อย 10 นาที: ${snap.rahuSubSlotName || "ฤกษ์จร"} (${snap.rahuSubSlotTime || timeStr})
+- ทิศทางและสัญญาณของหาย: ${snap.rahuLostItem || "ของอาจตกหล่นในมุมอับหรือทิศตะวันออก"}
+- คำแนะนำการตามหา: ${snap.rahuAdvice || "มีเกณฑ์พบหากตรวจสอบในที่ใกล้ตัวหรือมุมเดิม"}`;
+      break;
   }
 
   const personalNote = snap.personalSri
-    ? `\n[พลังงานส่วนตัวของ${userName}]\n- ดาวแห่งโชคลาภของคุณตอนนี้คือ: ${snap.personalSri}\n${snap.personalKala ? `- ควรระวังพลังงานของ: ${snap.personalKala}` : ""}`
-    : ""
+    ? `\n[พลังงานส่วนบุคคลของ${userName}]\n- ดาวส่งเสริม: ${snap.personalSri}\n${snap.personalKala ? `- จุดควรระวัง: ${snap.personalKala}` : ""}`
+    : "";
 
-  return `คุณคือ "Wisdom" — เพื่อนผู้ทรงปัญญาส่วนตัวของ${userName}
-คุณเข้าใจภูมิปัญญาโบราณเชิงลึก แต่พูดคุยแบบเพื่อน ไม่ใช้ศัพท์เทคนิค ไม่บรรยายระบบ
+  return `คุณคือ "Wisdom" — ที่ปรึกษาปัญญาญาณกาลเวลาส่วนตัวของ${userName}
+ทำหน้าที่แปลผลจากศาสตร์พยากรณ์ชั้นสูงของไทยเป็นภาษาชีวิตจริงที่แม่นยำ ลุ่มลึก และตรงประเด็น
 
-กำลังสนทนากับ: ${userName} | เวลา: ${timeStr} ${dayStr}
+ผู้ถาม: ${userName} | เวลาปัจจุบัน: ${timeStr} วัน${dayStr}
+คำถามที่ถาม: "${intent.raw}"
 
-${categoryContext}
+${engineKnowledge}
 ${personalNote}
 
-คำถาม: "${intent.raw}"
-
-─── วิธีตอบ ───
-1. ตอบตรงๆ จากมุมเพื่อนที่รู้ทิศทางพลังงาน ไม่ใช่โหร
-2. แปลพลังงานออกมาเป็นภาษาชีวิตจริง ห้ามพูดว่า "ยามอัฏฐกาล" "ราหู" "ทักษา" "มหาภูติ" "พรายกระซิบ" "กาลชะตา"
-3. ถ้ามีข้อมูลส่วนตัว ให้สอดแทรก "สำหรับคุณโดยเฉพาะ..."
-4. จบด้วยคำแนะนำปฏิบัติ 1 ข้อที่ทำได้ทันที
-5. ความยาว: 3-5 ประโยค กระชับ อบอุ่น มีพลัง
-6. น้ำเสียง: เพื่อนสนิท ลุ่มลึก ห่วงใย`
+─── กฎเหล็กในการตอบ ───
+1. ตอบตรงประเด็นคำถามทันทีในประโยคแรก (จะได้ไหม / เวลาไหนดี / แผนอย่างไร / ของอยู่ที่ไหน)
+2. อธิบายเหตุผลตามพลังงานอย่างเข้าใจง่าย ห้ามใช้ศัพท์บาลีโหรที่ฟังยาก
+3. ให้คำแนะนำเชิงปฏิบัติ (Actionable Advice) ที่นำไปใช้ได้ทันที 1 ข้อ
+4. ความยาวกระชับ 3-5 ประโยค ทรงพลัง เป็นมิตร และให้ความมั่นใจ`;
 }
 
 // ─── Evidence Chain Builder (L2) ──────────────────────────────────────────────
@@ -255,96 +275,77 @@ function buildEvidenceChain(
   intent: ParsedIntent,
   snap: EngineSnapshot
 ): PredictionResult["evidenceChain"] {
-  const chain: NonNullable<PredictionResult["evidenceChain"]> = []
+  const chain: NonNullable<PredictionResult["evidenceChain"]> = [];
 
-  // Primary: Yam (always)
-  chain.push({
-    source: "พลังงานจักรวาล ณ เวลานี้",
-    finding: snap.yamLevel === "excellent"
-      ? "ช่วงเวลานี้เอื้ออำนวยมากที่สุด"
-      : snap.yamLevel === "very_good"
-      ? "ช่วงเวลานี้เป็นมงคลและเอื้ออำนวย"
-      : snap.yamLevel === "good"
-      ? "ช่วงเวลานี้อยู่ในระดับดี"
-      : "ช่วงเวลานี้ค่อนข้างขัดข้อง",
-    weight: "primary",
-  })
+  switch (snap.sacredEngine) {
+    case "horanu":
+      chain.push({
+        source: "ผังดวงโหรทายหนู ๑๒ ภพ",
+        finding: `ลัคนาสถิตภพ${snap.horaLagnaName} ดาวเจ้ายามคือ${snap.horaYamPlanetName} (คะแนนรวม ${snap.horaOverallScore}/100)`,
+        weight: "primary",
+      });
+      if (snap.horaWork) {
+        chain.push({ source: "เกณฑ์ด้านการงาน/ข้อตกลง", finding: snap.horaWork, weight: "supporting" });
+      }
+      break;
 
-  // Secondary: Category-specific
-  if (intent.category === "lost" && snap.rahuAdvice) {
-    chain.push({ source: "พลังงานค้นหาทรัพย์", finding: snap.rahuAdvice, weight: "primary" })
-    if (snap.rahuLostItem)
-      chain.push({ source: "สัญญาณเกี่ยวกับสิ่งของ", finding: snap.rahuLostItem, weight: "supporting" })
+    case "yam":
+      chain.push({
+        source: "ยามอัฏฐกาล ๘ ยาม",
+        finding: `ยามปัจจุบันคือ ${snap.yamName} สถานะพลังงาน ${snap.yamLevel}`,
+        weight: "primary",
+      });
+      if (snap.auspiciousBestSlot) {
+        chain.push({ source: "ช่วงเวลามงคลเจรจา/เดินทาง", finding: snap.auspiciousBestSlot, weight: "supporting" });
+      }
+      break;
+
+    case "karnchata":
+      chain.push({
+        source: "กาลชะตายามซอยรายชั่วโมง",
+        finding: `กำลังสถิตยามใหญ่ ${snap.karnchataYamYai} แตกยามซอย ${snap.karnchataYamSoy}`,
+        weight: "primary",
+      });
+      break;
+
+    case "rahu":
+      chain.push({
+        source: "ราหูค้นทรัพย์ ๙ ฤกษ์ย่อย ๑๐ นาที",
+        finding: snap.rahuLostItem ? `เบาะแสสิ่งของ: ${snap.rahuLostItem}` : `ฤกษ์ย่อย: ${snap.rahuSubSlotName || "ช่วงเวลาปัจจุบัน"}`,
+        weight: "primary",
+      });
+      if (snap.rahuAdvice) {
+        chain.push({ source: "คำแนะนำการค้นหา/ฤกษ์", finding: snap.rahuAdvice, weight: "supporting" });
+      }
+      break;
   }
 
-  if (["timing", "career", "finance"].includes(intent.category) && snap.auspiciousBestSlot) {
-    chain.push({
-      source: "ช่วงเวลาที่เป็นมงคล",
-      finding: `${snap.auspiciousBestSlot}${snap.auspiciousBestFor ? " — เหมาะกับ" + snap.auspiciousBestFor.slice(0, 2).join(", ") : ""}`,
-      weight: "supporting",
-    })
-  }
-
-  if (intent.category === "relationship" && snap.horaLove) {
-    chain.push({ source: "พลังงานด้านความสัมพันธ์", finding: snap.horaLove, weight: "supporting" })
-  }
-
-  if (intent.category === "career" && snap.horaWork) {
-    chain.push({ source: "พลังงานด้านการงาน", finding: snap.horaWork, weight: "supporting" })
-  }
-
-  if (intent.category === "finance" && snap.horaFinance) {
-    chain.push({ source: "พลังงานด้านการเงิน", finding: snap.horaFinance, weight: "supporting" })
-  }
-
-  if (snap.personalSri) {
-    chain.push({
-      source: "พลังงานส่วนตัวของคุณ",
-      finding: `ช่วงนี้ดาวแห่งโชคลาภส่งผลให้คุณ${snap.horaOverallScore >= 60 ? "เอื้ออำนวย" : "ต้องระวัง"}`,
-      weight: "supporting",
-    })
-  }
-
-  return chain
+  return chain;
 }
 
+// ─── Fallback Generator ───────────────────────────────────────────────────────
 
 function generateFallbackAnswer(
   intent: ParsedIntent,
   snap: EngineSnapshot,
   userName: string
 ): string {
-  const energyDesc =
-    snap.yamLevel === "excellent"
-      ? "พลังงานจักรวาลช่วงเวลานี้เปิดกว้างและส่งผลดีเยี่ยมสำหรับคุณ"
-      : snap.yamLevel === "very_good"
-      ? "พลังงานจักรวาลขณะนี้มีความราบรื่นและเป็นมงคล"
-      : snap.yamLevel === "good"
-      ? "พลังงานขณะนี้อยู่ในเกณฑ์ปกติ เหมาะกับการดำเนินงานอย่างรอบคอบ"
-      : "พลังงานจักรวาลช่วงเวลานี้ค่อนข้างผันผวน ควรชะลอการตัดสินใจสำคัญ";
+  switch (snap.sacredEngine) {
+    case "horanu":
+      return `${userName}ครับ สำหรับเรื่องที่ถามเฉพาะหน้านี้ พลังงานดวงยามบ่งชี้ว่ามีโอกาสสำเร็จสมหวัง (เกณฑ์ความพร้อม ${snap.horaOverallScore}%) สิ่งสำคัญคือการตัดสินใจที่เด็ดขาดและลงมือทำอย่างต่อเนื่องครับ`;
 
-  if (intent.category === "lost") {
-    return `${userName}ครับ สำหรับสิ่งของที่กำลังค้นหา ${snap.rahuAdvice || "ขอแนะนำให้ตั้งสติและลองตรวจดูในบริเวณที่คุ้นเคยหรือทิศตะวันออก"} ${snap.rahuLostItem ? `มีแนวโน้มว่าจะอยู่${snap.rahuLostItem}` : ""}`;
+    case "yam":
+      return `${userName}ครับ ช่วงเวลาและยามมงคลสำหรับการเดินทางหรือเจรจาธุรกิจคือช่วง ${snap.auspiciousBestSlot || snap.yamName} โดยมีทิศมงคลเกื้อหนุนคือ ${snap.yamTravelDirection} จะช่วยให้การติดต่อราบรื่นสำเร็จครับ`;
+
+    case "karnchata":
+      return `${userName}ครับ ในการวางแผนรายวันรายชั่วโมงเพื่อเจรจาหรือติดต่อเรื่องสำคัญ แนะนำให้ดำเนินตามจังหวะยามซอย ${snap.karnchataYamSoy} ซึ่งเป็นจังหวะที่ผู้ใหญ่และคู่เจรจาเปิดรับและเห็นพ้องต้องกันได้ง่ายที่สุดครับ`;
+
+    case "rahu":
+      return `${userName}ครับ สำหรับฤกษ์ย่อย ๑๐ นาทีและการตามหาของหาย ${snap.rahuAdvice || "แนะนำให้ตั้งสติและตรวจสอบในมุมอับหรือทิศทางที่คุ้นเคย"} ${snap.rahuLostItem ? `มีเกณฑ์สูงว่าจะอยู่${snap.rahuLostItem}` : ""}`;
   }
-
-  if (intent.category === "timing") {
-    return `${userName}ครับ ${energyDesc} ${snap.auspiciousBestSlot ? `หากต้องการดำเนินการเรื่องสำคัญ ช่วงเวลาทองของวันนี้คือ ${snap.auspiciousBestSlot}` : ""} ${snap.yamShouldDo ? `ข้อแนะนำสำคัญ: ${snap.yamShouldDo}` : ""}`;
-  }
-
-  if (intent.category === "relationship") {
-    return `${userName}ครับ ในเรื่องความสัมพันธ์ช่วงนี้ ${snap.horaLove || energyDesc} ควรเน้นการสื่อสารด้วยความจริงใจและใจเย็น`;
-  }
-
-  if (intent.category === "finance") {
-    return `${userName}ครับ สำหรับเรื่องการเงินและการลงทุน ${snap.horaFinance || energyDesc} ${snap.auspiciousBestSlot ? `ช่วงเวลาที่เหมาะกับการเจรจาหรือทำสัญญาคือ ${snap.auspiciousBestSlot}` : ""}`;
-  }
-
-  if (intent.category === "career") {
-    return `${userName}ครับ ด้านการงานและภารกิจ ${snap.horaWork || energyDesc} ${snap.yamShouldDo ? `สิ่งที่ควรเน้น: ${snap.yamShouldDo}` : ""}`;
-  }
-
-  return `${userName}ครับ ${energyDesc} ${snap.yamShouldDo ? `คำแนะนำสำหรับช่วงเวลานี้คือ: ${snap.yamShouldDo}` : "ขอให้ดำเนินชีวิตด้วยความมีสติและรอบคอบ"}`;
 }
+
+// ─── Main Orchestrator ─────────────────────────────────────────────────────────
 
 export async function orchestratePrediction(
   intent: ParsedIntent,
@@ -368,8 +369,11 @@ export async function orchestratePrediction(
         },
         body: JSON.stringify({
           userId: "intent-prediction",
-          reportType: `intent_${intent.category}`,
-          context: { intentCategory: intent.category },
+          reportType: `sacred_${snap.sacredEngine}`,
+          context: {
+            sacredEngine: snap.sacredEngine,
+            intentCategory: intent.category,
+          },
           prompt,
         }),
       });
@@ -383,36 +387,35 @@ export async function orchestratePrediction(
     console.warn("[orchestratePrediction] AI Worker unreachable, falling back to engine synthesis:", err);
   }
 
-  // Graceful fallback if AI worker didn't provide answer
   if (!answer) {
     answer = generateFallbackAnswer(intent, snap, userName);
   }
 
-  // Extract actionable (last sentence or fallback)
   const sentences = answer.split(/[.!?。\n]/).filter(Boolean);
   const actionable =
     sentences[sentences.length - 1]?.trim() ??
     snap.yamShouldDo ??
-    "สังเกตพลังงานรอบข้างและดำเนินการด้วยสติ";
+    "ตั้งสติและดำเนินการตามจังหวะเวลาที่เอื้ออำนวย";
 
-  // Best window (for timing intents)
   const bestWindow = snap.auspiciousBestSlot
     ? {
         timeRange: snap.auspiciousBestSlot,
-        description: snap.auspiciousBestFor?.join(", ") ?? "",
+        description: snap.auspiciousBestFor?.join(", ") ?? "ช่วงเวลาส่งเสริมความสำเร็จ",
       }
     : undefined;
 
-  // Confidence level
   const confidenceLevel: PredictionResult["confidence"] =
     intent.confidence >= 0.8 ? "high" : intent.confidence >= 0.6 ? "medium" : "low";
 
-  // Evidence chain (L2)
   const evidenceChain = buildEvidenceChain(intent, snap);
 
   return {
     question: intent.raw,
     intentCategory: intent.category,
+    sacredEngine: snap.sacredEngine,
+    targetRoute: snap.targetRoute,
+    targetEngineTitle: snap.targetEngineTitle,
+    targetEngineReason: SACRED_ENGINES[snap.sacredEngine].reason,
     confidence: confidenceLevel,
     answer,
     bestWindow,

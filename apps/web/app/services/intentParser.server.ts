@@ -1,154 +1,264 @@
 /**
- * intentParser.server.ts — Rule-based Intent Parser (No AI credits)
+ * intentParser.server.ts — 4 Sacred Engines Intent Parser & Router (PhopePhum V3)
  *
- * Parses user's free-text question → ParsedIntent
- * Rule-based only — AI is used ONLY for generating the final answer, not for parsing.
- *
- * Architecture: User Question → [this parser] → ParsedIntent → Orchestrator → AI
+ * แปลงคำถามภาษาธรรมชาติของผู้ใช้ → จัดหมวดหมู่ ๔ ศาสตร์พยากรณ์หลักที่ตรงตามหลักวิชาการแท้จริง:
+ * ๑. โหรทายหนู (horanu): เรื่องเฉพาะหน้า, คำถามทั่วไป, จะได้ไหม, จะสำเร็จไหม, ลัคนายาม ๑๒ ภพ
+ * ๒. ยามอัฏฐกาล (yam): ถามยาม, ช่วงเวลาในวัน, เลือกวันเดินทาง, วันเวลาเจรจาธุรกิจที่จะสำเร็จ
+ * ๓. กาลชะตา (karnchata): วางแผนเป็นรายวัน รายชั่วโมง, การเจรจาสำคัญ, ขอแต่งงาน, การขาย/ปิดดีล
+ * ๔. ราหูค้นทรัพย์ (rahu): ถามฤกษ์ย่อย ๑๐ นาที (๑ ยาม ๙ ฤกษ์), ตามหาของหาย อยู่ไหน ตกหล่นอย่างไร
  */
 
+export type SacredEngineCategory = "horanu" | "yam" | "karnchata" | "rahu";
+
 export type IntentCategory =
-  | "timing"       // เดินทางเวลาไหนดี, ออกจากบ้านเมื่อไหร่, ฤกษ์ทำสัญญา
-  | "relationship" // ง้อแฟน, คนรัก, สัมพันธ์, แต่งงาน, หุ้นส่วน
-  | "finance"      // เงิน, ลงทุน, ค้าขาย, ซื้อขาย, สัญญาธุรกิจ
-  | "lost"         // ของหาย, สูญหาย, หาเจอไหม, ค้นหา
-  | "health"       // ป่วย, โรค, รักษา, อาการ, หมอ
-  | "career"       // งาน, สัมภาษณ์, เลื่อนตำแหน่ง, ลาออก, ธุรกิจ
-  | "general"      // คำถามทั่วไปที่ไม่ตรงหมวดใด
+  | "horanu"       // เรื่องเฉพาะหน้า, สำเร็จไหม, จะได้ไหม
+  | "yam"          // ยาม, ช่วงเวลา, เลือกวันเดินทาง, เวลาสำเร็จ
+  | "karnchata"    // วางแผนรายวัน รายชั่วโมง, เจรจา, แต่งงาน, ขาย
+  | "rahu"         // ฤกษ์ย่อย 10 นาที, ของหาย
+  | "timing"       // Legacy alias -> map to yam / rahu
+  | "relationship" // Legacy alias -> map to karnchata / horanu
+  | "finance"      // Legacy alias -> map to karnchata / horanu
+  | "lost"         // Legacy alias -> map to rahu
+  | "health"       // Legacy alias -> map to horanu
+  | "career"       // Legacy alias -> map to karnchata / yam
+  | "general";     // Legacy alias -> map to horanu
 
 export type ContextType =
-  | "present_moment"  // ถามเรื่องตอนนี้ / ตอนเย็น / วันนี้
-  | "near_future"     // ถามเรื่องวันหน้า / สัปดาห์นี้ / เดือนนี้
-  | "person_specific" // ถามเกี่ยวกับคนที่ระบุ (แฟน, หัวหน้า, ลูกค้า)
-  | "item_specific"   // ถามเกี่ยวกับสิ่งของ (กระเป๋า, สัญญา)
+  | "present_moment"  // ถามเรื่องตอนนี้ / ตอนนี้เลย / วันนี้
+  | "near_future"     // ถามเรื่องวันหน้า / พรุ่งนี้ / สัปดาห์นี้
+  | "person_specific" // ถามเกี่ยวกับคน (แฟน, คู่ค้า, หัวหน้า)
+  | "item_specific";  // ถามเกี่ยวกับสิ่งของ ทรัพย์สิน ของหาย
 
-export interface ParsedIntent {
-  raw: string
-  category: IntentCategory
-  context: ContextType
-  keywords: string[]    // คำสำคัญที่ตรวจพบ (internal)
-  confidence: number    // 0.0–1.0
+export interface SacredEngineInfo {
+  id: SacredEngineCategory;
+  title: string;
+  subtitle: string;
+  route: string;
+  icon: string;
+  badgeLabel: string;
+  badgeColor: string;
+  reason: string;
 }
 
-// ─── Keyword Tables (verified from atthakarn KB + horaNuChat.ts) ─────────────
+export const SACRED_ENGINES: Record<SacredEngineCategory, SacredEngineInfo> = {
+  horanu: {
+    id: "horanu",
+    title: "โหรทายหนู (ยามพรายกระซิบ)",
+    subtitle: "คำนวณเหตุการณ์เฉพาะหน้า ตอบคำถามเร่งด่วน ผังดวง ๑๒ ภพ",
+    route: "/dashboard/horanu",
+    icon: "🎯",
+    badgeLabel: "โหรทายหนู · เรื่องเฉพาะหน้า",
+    badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
+    reason: "เหมาะที่สุดสำหรับคำนวณเหตุการณ์เฉพาะหน้าหรือตอบคำถามเร่งด่วน โดยอาศัยหลักการเทียบเวลาและวันเกิดเหตุการณ์จริงกับตำแหน่งดาว ๑๒ ภพ",
+  },
+  yam: {
+    id: "yam",
+    title: "ยามอัฏฐกาล (๘ ยาม)",
+    subtitle: "เลือกช่วงเวลาเดินทาง วันมงคล และเวลาเจรจาธุรกิจที่จะสำเร็จ",
+    route: "/dashboard/yam",
+    icon: "⏰",
+    badgeLabel: "ยามอัฏฐกาล · ช่วงเวลาสำเร็จ",
+    badgeColor: "bg-sky-500/10 text-sky-600 dark:text-sky-400 border-sky-500/30",
+    reason: "เหมาะที่สุดสำหรับการเลือกยามมงคล วันเดินทางไกล และช่วงเวลาเริ่มต้นเจรจาธุรกิจที่มีเกณฑ์สำเร็จสูงสุด",
+  },
+  karnchata: {
+    id: "karnchata",
+    title: "กาลชะตา (ยามซอยรายชั่วโมง)",
+    subtitle: "วางแผนกลยุทธ์รายวัน รายชั่วโมง เจรจา ขอแต่งงาน ปิดการขาย",
+    route: "/dashboard/karnchata",
+    icon: "📅",
+    badgeLabel: "กาลชะตา · แผนงานรายชั่วโมง",
+    badgeColor: "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/30",
+    reason: "เหมาะที่สุดสำหรับการวางแผนไทม์ไลน์รายชั่วโมงตลอดวัน ในการนัดเจรจา ขอแต่งงาน หรือจังหวะปิดการขาย",
+  },
+  rahu: {
+    id: "rahu",
+    title: "ราหูค้นทรัพย์ (๙ ฤกษ์ย่อย ๑๐ นาที)",
+    subtitle: "ฤกษ์ย่อยฉับพลัน และสแกนตำแหน่งหาของหาย ตกหล่นอยู่ที่ไหน",
+    route: "/dashboard/rahu",
+    icon: "🧭",
+    badgeLabel: "ราหูค้นทรัพย์ · ฤกษ์ย่อย/ของหาย",
+    badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+    reason: "เหมาะที่สุดสำหรับการดูฤกษ์ย่อย ๑๐ นาที (๑ ยามมี ๙ ฤกษ์) และการสแกนทิศทางตามหาของหายและทรัพย์สินที่ตกหล่น",
+  },
+};
 
-const TIMING_KEYWORDS = [
-  "เดินทาง", "ออกเดินทาง", "เวลาไหน", "เมื่อไหร่", "ฤกษ์", "ฤกษ์ดี",
-  "ช่วงเวลา", "วันไหน", "ออกจากบ้าน", "เริ่มต้น", "เปิดตัว", "เซ็น",
-  "ทำสัญญา", "ประชุม", "เข้าพบ", "สัมภาษณ์", "ช่วงดี", "เวลาดี",
-  "ไปเมื่อไหร่", "ออกไป", "วันดี", "วันมงคล", "ฤกษ์มงคล",
-]
+export interface ParsedIntent {
+  raw: string;
+  category: IntentCategory;
+  sacredEngine: SacredEngineCategory;
+  targetRoute: string;
+  targetEngineTitle: string;
+  targetEngineReason: string;
+  context: ContextType;
+  keywords: string[];
+  confidence: number;
+}
 
-const RELATIONSHIP_KEYWORDS = [
-  "แฟน", "คนรัก", "ง้อ", "คืนดี", "สัมพันธ์", "ความรัก", "แต่งงาน",
-  "หุ้นส่วน", "คู่ชีวิต", "เพื่อน", "ทะเลาะ", "เลิก", "กลับมา",
-  "หวานใจ", "กิ๊ก", "คบ", "จีบ", "ออกเดท", "นัด",
-]
+// ─── Keyword Tables ──────────────────────────────────────────────────────────
 
-const FINANCE_KEYWORDS = [
-  "เงิน", "ลงทุน", "ค้าขาย", "ซื้อ", "ขาย", "ธุรกิจ", "สัญญา",
-  "กู้", "ยืม", "หุ้น", "กำไร", "ขาดทุน", "รายได้", "โชค",
-  "โชคลาภ", "ทรัพย์", "เจ๊ง", "ปิดดีล", "เซ็นสัญญา", "เปิดร้าน",
-  "ปิดการขาย", "การขาย", "ยอดขาย", "ลูกค้า",
-]
+// ๑. โหรทายหนู (Horanu): เรื่องเฉพาะหน้า, ทั่วไป, จะได้ไหม, สำเร็จไหม
+const HORANU_KEYWORDS = [
+  "จะได้ไหม", "สำเร็จไหม", "จะสำเร็จไหม", "ผ่านไหม", "จะผ่านไหม",
+  "ได้ไหม", "รอดไหม", "จะรอดไหม", "ดีไหม", "ตอบรับไหม", "จะตอบรับไหม",
+  "ตกลงไหม", "ผลลัพธ์", "เฉพาะหน้า", "ด่วน", "ตอนนี้เลย", "ทันไหม",
+  "สมหวังไหม", "แก้ปัญหา", "มีโอกาสไหม", "จะดีไหม", "จริงไหม",
+  "จะกลับมาไหม", "เลิกไหม", "รักจริงไหม", "ทายหนู", "พรายกระซิบ",
+];
 
-const LOST_KEYWORDS = [
-  "หาย", "สูญหาย", "ของหาย", "หาเจอ", "ค้นหา", "ทรัพย์หาย",
-  "กระเป๋าหาย", "เงินหาย", "โทรศัพท์หาย", "ลืม", "วางไว้ที่ไหน",
-  "หาไม่เจอ", "หายไปไหน", "หายได้ไหม",
-]
+// ๒. ยามอัฏฐกาล (Yam): ยาม, ช่วงเวลา, เลือกวันเดินทาง, วันเวลาเจรจาธุรกิจสำเร็จ
+const YAM_KEYWORDS = [
+  "ยาม", "ยามไหน", "ยามอะไร", "ช่วงเวลา", "ช่วงเวลาไหน", "เวลาไหนดี",
+  "วันไหนดี", "วันไหน", "เดินทาง", "ออกเดินทาง", "ออกจากบ้าน",
+  "ไปต่างจังหวัด", "ขึ้นเครื่อง", "ออกรถ", "วันเวลาเจรจา", "วันเจรจา",
+  "เจรจาธุรกิจสำเร็จ", "วันมงคล", "ยามดี", "ยามมงคล", "ทิศมงคล",
+  "ทิศไหน", "ทิศดี", "ยามอุบาทว์", "ยามปลอด", "อัฏฐกาล",
+];
 
-const HEALTH_KEYWORDS = [
-  "ป่วย", "โรค", "รักษา", "หมอ", "อาการ", "เจ็บ", "ไม่สบาย",
-  "ผ่าตัด", "ยา", "โรงพยาบาล", "ฟื้นตัว", "หาย", "เจ็บป่วย",
-]
+// ๓. กาลชะตา (Karnchata): วางแผนรายวัน รายชั่วโมง, เจรจา, ขอแต่งงาน, การขาย
+const KARNCHATA_KEYWORDS = [
+  "วางแผน", "รายวัน", "รายชั่วโมง", "ไทม์ไลน์", "ตลอดทั้งวัน", "กำหนดการ",
+  "ขอแต่งงาน", "ขอแฟนแต่งงาน", "สารภาพรัก", "ปิดการขาย", "ปิดดีล",
+  "การขาย", "นัดพบเจรจา", "ขั้นตอน", "กาลชะตา", "ชั่วโมงไหน",
+  "ยามซอย", "นัดหมาย", "ตารางเวลา", "เข้าพบผู้ใหญ่", "คุยธุรกิจ",
+];
 
-const CAREER_KEYWORDS = [
-  "งาน", "สัมภาษณ์", "เลื่อนตำแหน่ง", "ลาออก", "เปลี่ยนงาน",
-  "หัวหน้า", "บริษัท", "โปรโมท", "ขึ้นเงินเดือน", "เริ่มงาน",
-  "ธุรกิจ", "เปิดบริษัท", "ทำงาน", "สมัครงาน", "ได้งาน",
-  "ลูกค้า", "พบลูกค้า", "หาลูกค้า", "เสนองาน", "เจรจา",
-]
+// ๔. ราหูค้นทรัพย์ (Rahu): ฤกษ์ย่อย 10 นาที, ของหาย, อยู่ไหน อย่างไร
+const RAHU_KEYWORDS = [
+  "ฤกษ์", "ฤกษ์ย่อย", "10 นาที", "๑๐ นาที", "ฤกษ์ด่วน", "ฤกษ์ฉับพลัน",
+  "ของหาย", "หาย", "สูญหาย", "อยู่ไหน", "อยู่ที่ไหน", "หาเจอไหม",
+  "กระเป๋าหาย", "โทรศัพท์หาย", "กุญแจหาย", "ลืมของ", "ตกหล่น",
+  "ของตก", "ลืมไว้ที่ไหน", "หาไม่เจอ", "ราหู", "ราหูค้นทรัพย์", "ค้นทรัพย์",
+];
 
-// ─── Context Keywords ─────────────────────────────────────────────────────────
-
-const PRESENT_KEYWORDS = ["ตอนนี้", "วันนี้", "เดี๋ยวนี้", "ทันที", "ตอนเย็น", "เช้านี้", "คืนนี้"]
-const FUTURE_KEYWORDS = ["วันหน้า", "พรุ่งนี้", "อาทิตย์หน้า", "เดือนหน้า", "เร็วๆ นี้", "สัปดาห์"]
-const PERSON_KEYWORDS = ["แฟน", "หัวหน้า", "ลูกค้า", "เพื่อน", "คนรัก", "ครอบครัว", "คู่"]
-const ITEM_KEYWORDS = ["กระเป๋า", "โทรศัพท์", "สัญญา", "เอกสาร", "กุญแจ", "รถ", "เงิน"]
-
-// ─── Scoring ──────────────────────────────────────────────────────────────────
+// Context keywords
+const PRESENT_KEYWORDS = ["ตอนนี้", "วันนี้", "เดี๋ยวนี้", "ทันที", "ตอนเย็น", "เช้านี้", "คืนนี้"];
+const FUTURE_KEYWORDS = ["วันหน้า", "พรุ่งนี้", "อาทิตย์หน้า", "เดือนหน้า", "เร็วๆ นี้", "สัปดาห์"];
+const PERSON_KEYWORDS = ["แฟน", "หัวหน้า", "ลูกค้า", "เพื่อน", "คนรัก", "ครอบครัว", "คู่"];
+const ITEM_KEYWORDS = ["กระเป๋า", "โทรศัพท์", "สัญญา", "เอกสาร", "กุญแจ", "รถ", "เงิน", "ของ"];
 
 function scoreKeywords(text: string, keywords: string[]): { count: number; matched: string[] } {
-  const matched: string[] = []
+  const matched: string[] = [];
   for (const kw of keywords) {
-    if (text.includes(kw)) matched.push(kw)
+    if (text.includes(kw)) matched.push(kw);
   }
-  return { count: matched.length, matched }
+  return { count: matched.length, matched };
 }
 
 function inferContext(text: string): ContextType {
-  if (scoreKeywords(text, ITEM_KEYWORDS).count > 0) return "item_specific"
-  if (scoreKeywords(text, PERSON_KEYWORDS).count > 0) return "person_specific"
-  if (scoreKeywords(text, FUTURE_KEYWORDS).count > 0) return "near_future"
-  return "present_moment"
+  if (scoreKeywords(text, ITEM_KEYWORDS).count > 0) return "item_specific";
+  if (scoreKeywords(text, PERSON_KEYWORDS).count > 0) return "person_specific";
+  if (scoreKeywords(text, FUTURE_KEYWORDS).count > 0) return "near_future";
+  return "present_moment";
 }
 
 // ─── Main Parser ──────────────────────────────────────────────────────────────
 
 export function parseIntent(question: string): ParsedIntent {
-  const text = question.trim()
+  const text = question.trim();
 
-  const scores: { category: IntentCategory; count: number; matched: string[] }[] = [
-    { category: "timing",       ...scoreKeywords(text, TIMING_KEYWORDS) },
-    { category: "lost",         ...scoreKeywords(text, LOST_KEYWORDS) },
-    { category: "relationship", ...scoreKeywords(text, RELATIONSHIP_KEYWORDS) },
-    { category: "finance",      ...scoreKeywords(text, FINANCE_KEYWORDS) },
-    { category: "health",       ...scoreKeywords(text, HEALTH_KEYWORDS) },
-    { category: "career",       ...scoreKeywords(text, CAREER_KEYWORDS) },
-  ]
+  const scores: { engine: SacredEngineCategory; count: number; matched: string[] }[] = [
+    { engine: "rahu",      ...scoreKeywords(text, RAHU_KEYWORDS) },
+    { engine: "karnchata", ...scoreKeywords(text, KARNCHATA_KEYWORDS) },
+    { engine: "yam",       ...scoreKeywords(text, YAM_KEYWORDS) },
+    { engine: "horanu",    ...scoreKeywords(text, HORANU_KEYWORDS) },
+  ];
 
-  // Sort by match count
-  scores.sort((a, b) => b.count - a.count)
+  // เรียงตามจำนวนคำที่ตรงกันมากที่สุด
+  scores.sort((a, b) => b.count - a.count);
 
-  const top = scores[0]
+  const top = scores[0];
 
-  if (!top || top.count === 0) {
-    return {
-      raw: text,
-      category: "general",
-      context: inferContext(text),
-      keywords: [],
-      confidence: 0.3,
+  // ถ้าไม่มี match ชัดเจน หรือถามกว้างๆ:
+  // คำถามปลายปิด/เหตุการณ์เฉพาะหน้าส่วนใหญ่ในชีวิตประจำวัน ให้ default เป็น โหรทายหนู (horanu)
+  let detectedEngine: SacredEngineCategory = "horanu";
+  let matchedWords: string[] = [];
+  let confidence = 0.5;
+
+  if (top && top.count > 0) {
+    detectedEngine = top.engine;
+    matchedWords = top.matched;
+    confidence = top.count >= 3 ? 0.95 : top.count === 2 ? 0.85 : 0.7;
+  } else {
+    // ตรวจสอบบริบทถ้ามีคำว่า หาย/ของ
+    if (text.includes("หาย") || text.includes("ลืม")) {
+      detectedEngine = "rahu";
+      confidence = 0.75;
+    } else if (text.includes("เวลา") || text.includes("กี่โมง") || text.includes("เดินทาง")) {
+      detectedEngine = "yam";
+      confidence = 0.75;
+    } else if (text.includes("แผน") || text.includes("ขาย") || text.includes("แต่งงาน")) {
+      detectedEngine = "karnchata";
+      confidence = 0.75;
     }
   }
 
-  // Confidence: 1 match = 0.6, 2 = 0.8, 3+ = 0.95
-  const confidence = top.count >= 3 ? 0.95 : top.count === 2 ? 0.8 : 0.6
+  const engineInfo = SACRED_ENGINES[detectedEngine];
 
   return {
     raw: text,
-    category: top.category,
+    category: detectedEngine,
+    sacredEngine: detectedEngine,
+    targetRoute: engineInfo.route,
+    targetEngineTitle: engineInfo.title,
+    targetEngineReason: engineInfo.reason,
     context: inferContext(text),
-    keywords: top.matched,
+    keywords: matchedWords,
     confidence,
-  }
+  };
 }
 
-// ─── Suggestion Chips (for UI) ────────────────────────────────────────────────
+// ─── Suggestion Chips (4 ประตูหลัก + คำถามตัวอย่าง) ───────────────────────────
 
 export interface SuggestionChip {
-  label: string
-  question: string
-  category: IntentCategory
-  emoji: string
+  label: string;
+  question: string;
+  category: SacredEngineCategory;
+  emoji: string;
+  badge: string;
 }
 
 export const SUGGESTION_CHIPS: SuggestionChip[] = [
-  { label: "เดินทาง",   emoji: "✈️", category: "timing",       question: "วันนี้เดินทางช่วงเวลาไหนดีที่สุด?" },
-  { label: "การเงิน",   emoji: "💰", category: "finance",      question: "วันนี้เหมาะกับการลงทุนหรือทำธุรกิจไหม?" },
-  { label: "ความรัก",   emoji: "💛", category: "relationship", question: "วันนี้เหมาะกับการพูดคุยเรื่องความรักไหม?" },
-  { label: "ของหาย",    emoji: "🔍", category: "lost",         question: "ของที่หายไปจะหาเจอได้ไหม?" },
-  { label: "การงาน",    emoji: "💼", category: "career",       question: "วันนี้เหมาะกับการเจรจาธุรกิจหรือสัมภาษณ์งานไหม?" },
-  { label: "สุขภาพ",    emoji: "🌿", category: "health",       question: "วันนี้ควรดูแลสุขภาพด้านไหนเป็นพิเศษ?" },
-]
+  {
+    label: "เรื่องเฉพาะหน้า",
+    emoji: "🎯",
+    category: "horanu",
+    question: "ข้อตกลงนี้จะสำเร็จลุล่วงสมหวังไหม?",
+    badge: "โหรทายหนู ๑๒ ภพ",
+  },
+  {
+    label: "เลือกยามเดินทาง",
+    emoji: "⏰",
+    category: "yam",
+    question: "วันนี้ควรออกเดินทางช่วงยามใดดีที่สุด?",
+    badge: "ยามอัฏฐกาล ๘ ยาม",
+  },
+  {
+    label: "วางแผนรายชั่วโมง",
+    emoji: "📅",
+    category: "karnchata",
+    question: "วางแผนเข้าพบเจรจาปิดการขายวันนี้ช่วงชั่วโมงไหนดี?",
+    badge: "กาลชะตา ยามซอย",
+  },
+  {
+    label: "ตามหาของหาย",
+    emoji: "🧭",
+    category: "rahu",
+    question: "ของที่ทำหล่นหายไป อยู่ทิศไหนและจะหาเจอได้อย่างไร?",
+    badge: "ราหูค้นทรัพย์ ๑๐ นาที",
+  },
+  {
+    label: "เจรจาธุรกิจสำเร็จ",
+    emoji: "💼",
+    category: "yam",
+    question: "วันและเวลาใดเหมาะแก่การนัดเจรจาธุรกิจให้สำเร็จ?",
+    badge: "ยามอัฏฐกาล ๘ ยาม",
+  },
+  {
+    label: "ฤกษ์ขอแต่งงาน",
+    emoji: "💍",
+    category: "karnchata",
+    question: "วางแผนฤกษ์ชั่วโมงมงคลสำหรับขอแต่งงานในวันนี้",
+    badge: "กาลชะตา ยามซอย",
+  },
+];
