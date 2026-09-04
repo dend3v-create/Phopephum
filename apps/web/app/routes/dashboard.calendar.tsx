@@ -302,7 +302,7 @@ export default function DashboardCalendar() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 pb-20">
+    <div className="w-full max-w-full min-w-0 overflow-x-hidden max-w-6xl mx-auto space-y-8 pb-20">
       
       {/* ── Header ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -351,7 +351,7 @@ export default function DashboardCalendar() {
           <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
             <div className="grid grid-cols-7 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
               {["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."].map((d, i) => (
-                <div key={i} className={`py-3 text-center text-xs font-bold uppercase tracking-widest font-sans-thai ${i === 0 ? "text-rose-400" : i === 6 ? "text-sky-400" : "text-[#F3D68B]"}`}>
+                <div key={i} className={`py-2 sm:py-3 text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest font-sans-thai ${i === 0 ? "text-rose-400" : i === 6 ? "text-sky-400" : "text-[#F3D68B]"}`}>
                   {d}
                 </div>
               ))}
@@ -366,10 +366,10 @@ export default function DashboardCalendar() {
                 <Link 
                   key={day.day}
                   to={`?year=${year}&month=${month}&eventDate=${day.dateStr}&eventTime=${eventTime}&eventType=${eventType}&title=${encodeURIComponent(appointmentTitle)}`}
-                  className={`relative aspect-square md:aspect-video border-b border-r border-white/5 p-2 transition-all hover:bg-[#C9A96E]/10 group ${day.isWanPhra ? "bg-[#C9A96E]/5" : ""} ${eventDate === day.dateStr ? "bg-[#C9A96E]/20 ring-1 ring-inset ring-gold-liquid/50" : ""}`}
+                  className={`relative aspect-square md:aspect-video border-b border-r border-white/5 p-1 sm:p-2 transition-all hover:bg-[#C9A96E]/10 group ${day.isWanPhra ? "bg-[#C9A96E]/5" : ""} ${eventDate === day.dateStr ? "bg-[#C9A96E]/20 ring-1 ring-inset ring-gold-liquid/50" : ""}`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className={`text-xs sm:text-sm font-bold ${day.weekDay === 0 ? "text-rose-400/80" : "text-[#F8F6F1]/60"} group-hover:text-[#F8F6F1] transition-colors`}>
+                    <span className={`text-[11px] sm:text-sm font-bold ${day.weekDay === 0 ? "text-rose-400/80" : "text-[#F8F6F1]/60"} group-hover:text-[#F8F6F1] transition-colors`}>
                       {day.day}
                     </span>
                     {day.hasGoldenWindow && (

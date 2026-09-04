@@ -496,24 +496,24 @@ export default function SettingsPage() {
   const isFreetier = profile?.plan !== 'pro' && profile?.plan !== 'imperial';
 
   return (
-    <div className="space-y-8 max-w-2xl pb-20">
+    <div className="space-y-8 max-w-2xl mx-auto pb-20 w-full max-w-full min-w-0 overflow-x-hidden">
       {/* Header */}
       <div className="flex justify-between items-end">
         <div>
           <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-1">
             {t("common:nav.settings", "โปรไฟล์")}
           </p>
-          <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#F8F6F1]">
             {t("common:settings.title", "ตั้งค่าโปรไฟล์และดวงชะตา")}
           </h1>
         </div>
       </div>
 
-      {/* Navigation tabs */}
-      <div className="flex border-b border-white/5 bg-[#0A1628]/45 p-1 rounded-2xl border border-[#D9BC82]/10 gap-1 w-full">
+      {/* Navigation tabs (Horizontally scrollable on mobile) */}
+      <div className="flex overflow-x-auto no-scrollbar border-b border-white/5 bg-[#0A1628]/45 p-1 rounded-2xl border border-[#D9BC82]/10 gap-1 w-full max-w-full -mx-1 px-1 sm:mx-0 sm:px-1">
         <button
           onClick={() => handleTabChange("personal")}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+          className={`shrink-0 sm:flex-1 py-2 px-3 sm:px-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
             activeTab === "personal"
               ? "bg-[#D9BC82] text-[#0A1628]"
               : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
@@ -523,7 +523,7 @@ export default function SettingsPage() {
         </button>
         <button
           onClick={() => handleTabChange("wisdom")}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+          className={`shrink-0 sm:flex-1 py-2 px-3 sm:px-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 ${
             activeTab === "wisdom"
               ? "bg-[#D9BC82] text-[#0A1628]"
               : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
@@ -545,7 +545,7 @@ export default function SettingsPage() {
         </button>
         <button
           onClick={() => handleTabChange("affiliate")}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+          className={`shrink-0 sm:flex-1 py-2 px-3 sm:px-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
             activeTab === "affiliate"
               ? "bg-[#D9BC82] text-[#0A1628]"
               : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
@@ -555,7 +555,7 @@ export default function SettingsPage() {
         </button>
         <button
           onClick={() => handleTabChange("reminders")}
-          className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+          className={`shrink-0 sm:flex-1 py-2 px-3 sm:px-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 ${
             activeTab === "reminders"
               ? "bg-[#D9BC82] text-[#0A1628]"
               : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
@@ -752,59 +752,60 @@ export default function SettingsPage() {
           </div>
 
           {/* Personal Wisdom Hub Banner & Metrics (STEP 4.3) */}
-          <div className="rounded-3xl border border-[#C6A96B]/30 bg-gradient-to-br from-[#0A1628] via-[#0D1C34] to-[#020617] p-5 sm:p-6 shadow-xl space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-white/10 pb-3">
-              <div className="space-y-0.5">
+          <div className="rounded-3xl border border-[#C6A96B]/30 bg-gradient-to-br from-[#0A1628] via-[#0D1C34] to-[#020617] p-4 sm:p-6 shadow-xl space-y-4 w-full max-w-full overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 border-b border-white/10 pb-3">
+              <div className="space-y-0.5 min-w-0">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
                   PERSONAL WISDOM MEMORY
                 </span>
-                <h3 className="text-sm sm:text-base font-bold text-[#F8F6F1] flex items-center gap-2">
+                <h3 className="text-sm sm:text-base font-bold text-[#F8F6F1] flex items-center gap-1.5 flex-wrap">
                   <span>🏛️</span>
                   <span>วงจรตกผลึกปัญญา (Outcome & Wisdom Loop)</span>
                 </h3>
               </div>
-              <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C6A96B]/10 border border-[#C6A96B]/30 text-[10px] sm:text-[11px] font-medium text-[#D9BC82] overflow-x-auto max-w-full">
-                <span>Prediction → Decision → Action → Outcome → Feedback → Wisdom</span>
+              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C6A96B]/10 border border-[#C6A96B]/30 text-[10px] sm:text-[11px] font-medium text-[#D9BC82] overflow-x-auto max-w-full whitespace-nowrap no-scrollbar self-start sm:self-auto">
+                <span className="hidden xs:inline">Prediction → Decision → Action → Outcome → Feedback → Wisdom</span>
+                <span className="xs:hidden">วงจรตกผลึก 6 ขั้นตอน</span>
               </div>
             </div>
 
             {/* 4 KPI Metrics */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
-                <p className="text-[11px] text-[#94A3B8]">อัตราความแม่นยำ</p>
-                <p className="text-xl sm:text-2xl font-black text-emerald-400 font-display">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1 min-w-0 overflow-hidden">
+                <p className="text-[10px] sm:text-[11px] text-[#94A3B8] truncate">อัตราความแม่นยำ</p>
+                <p className="text-lg sm:text-2xl font-black text-emerald-400 font-display">
                   {wisdomStats.trackedOutcomes > 0 ? `${wisdomStats.successRate}%` : "—"}
                 </p>
-                <p className="text-[10px] text-[#64748B]">จากผลลัพธ์ที่ตรงตามคาด</p>
+                <p className="text-[9px] sm:text-[10px] text-[#64748B] truncate">จากผลลัพธ์ที่ตรงตามคาด</p>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
-                <p className="text-[11px] text-[#94A3B8]">การลงมือทำจริง</p>
-                <p className="text-xl sm:text-2xl font-black text-amber-300 font-display">
-                  {wisdomStats.actionTakenCount} <span className="text-xs font-normal text-[#94A3B8]">/ {wisdomStats.trackedOutcomes} ครั้ง</span>
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1 min-w-0 overflow-hidden">
+                <p className="text-[10px] sm:text-[11px] text-[#94A3B8] truncate">การลงมือทำจริง</p>
+                <p className="text-lg sm:text-2xl font-black text-amber-300 font-display">
+                  {wisdomStats.actionTakenCount} <span className="text-[10px] sm:text-xs font-normal text-[#94A3B8]">/ {wisdomStats.trackedOutcomes}</span>
                 </p>
-                <p className="text-[10px] text-[#64748B]">ทำตามจังหวะเวลาที่แนะ</p>
+                <p className="text-[9px] sm:text-[10px] text-[#64748B] truncate">ทำตามจังหวะเวลา</p>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
-                <p className="text-[11px] text-[#94A3B8]">ติดตามผลแล้ว</p>
-                <p className="text-xl sm:text-2xl font-black text-[#F8F6F1] font-display">
-                  {trackedTotalCount} <span className="text-xs font-normal text-[#94A3B8]">/ {wisdomQueries.length} คำถาม</span>
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1 min-w-0 overflow-hidden">
+                <p className="text-[10px] sm:text-[11px] text-[#94A3B8] truncate">ติดตามผลแล้ว</p>
+                <p className="text-lg sm:text-2xl font-black text-[#F8F6F1] font-display">
+                  {trackedTotalCount} <span className="text-[10px] sm:text-xs font-normal text-[#94A3B8]">/ {wisdomQueries.length}</span>
                 </p>
-                <p className="text-[10px] text-[#64748B]">
+                <p className="text-[9px] sm:text-[10px] text-[#64748B] truncate">
                   {wisdomQueries.length - trackedTotalCount > 0
-                    ? `รอติดตามผลอีก ${wisdomQueries.length - trackedTotalCount} รายการ`
-                    : "ติดตามผลครบถ้วน"}
+                    ? `รออีก ${wisdomQueries.length - trackedTotalCount} รายการ`
+                    : "ติดตามผลครบ"}
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
-                <p className="text-[11px] text-[#94A3B8]">ความพึงพอใจเฉลี่ย</p>
-                <p className="text-xl sm:text-2xl font-black text-amber-400 font-display flex items-center gap-1">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1 min-w-0 overflow-hidden">
+                <p className="text-[10px] sm:text-[11px] text-[#94A3B8] truncate">ความพึงพอใจเฉลี่ย</p>
+                <p className="text-lg sm:text-2xl font-black text-amber-400 font-display flex items-center gap-1">
                   <span>{wisdomStats.trackedOutcomes > 0 ? wisdomStats.averageRating.toFixed(1) : "—"}</span>
-                  <span className="text-sm font-normal text-amber-300/80">★</span>
+                  <span className="text-xs sm:text-sm font-normal text-amber-300/80">★</span>
                 </p>
-                <p className="text-[10px] text-[#64748B]">ประเมินคุณภาพย้อนหลัง</p>
+                <p className="text-[9px] sm:text-[10px] text-[#64748B] truncate">ประเมินย้อนหลัง</p>
               </div>
             </div>
           </div>
@@ -1176,11 +1177,11 @@ export default function SettingsPage() {
           {/* PHASE D — Detail Modal with Outcome Tracking & Personal Wisdom Form */}
           {selectedDetailQuery && (
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+              className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
               onClick={() => setSelectedDetailQuery(null)}
             >
               <div
-                className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl border border-[#C6A96B]/30 bg-[#0A1628] p-5 sm:p-7 shadow-2xl space-y-5"
+                className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl border border-[#C6A96B]/30 bg-[#0A1628] p-4 sm:p-7 shadow-2xl space-y-4 sm:space-y-5"
                 onClick={(e) => e.stopPropagation()}
               >
                 {/* Modal Header */}

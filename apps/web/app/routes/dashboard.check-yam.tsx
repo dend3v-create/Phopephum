@@ -409,7 +409,7 @@ export default function CheckYamPage() {
   const horaP = PLANET_INFO[hora.yamPlanet];
 
   return (
-    <div className="space-y-6 pb-24 animate-in fade-in duration-500 max-w-4xl mx-auto">
+    <div className="space-y-6 pb-24 animate-in fade-in duration-500 max-w-4xl mx-auto w-full max-w-full min-w-0 overflow-x-hidden">
 
       {/* ── Top Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 border-b border-white/8 pb-4">
@@ -432,7 +432,7 @@ export default function CheckYamPage() {
 
       {/* ── 1. HERO INTERACTION AREA (Mode Switcher + Forms) ── */}
       <div
-        className="rounded-3xl p-5 sm:p-7 border border-[#C6A96B]/30 shadow-2xl relative overflow-hidden"
+        className="rounded-3xl p-4 sm:p-7 border border-[#C6A96B]/30 shadow-2xl relative overflow-hidden w-full max-w-full"
         style={{
           background: "linear-gradient(145deg, rgba(10,34,64,0.7) 0%, rgba(2,6,23,0.9) 100%)",
           backdropFilter: "blur(24px)",
@@ -442,11 +442,11 @@ export default function CheckYamPage() {
         <div className="absolute top-0 right-0 w-48 h-48 bg-[#C6A96B]/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Mode Switcher Tabs */}
-        <div className="flex items-center gap-1.5 p-1 rounded-2xl bg-[#020617]/70 border border-white/10 w-fit mb-5 relative z-10">
+        <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-1.5 p-1 rounded-2xl bg-[#020617]/70 border border-white/10 w-full xs:w-fit mb-5 relative z-10">
           <button
             type="button"
             onClick={() => setActiveMode("instant")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeMode === "instant"
                 ? "bg-[#C6A96B] text-[#0A1628] shadow-md shadow-[#C6A96B]/20"
                 : "text-[#94A3B8] hover:text-white"
@@ -458,7 +458,7 @@ export default function CheckYamPage() {
           <button
             type="button"
             onClick={() => setActiveMode("compare")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
               activeMode === "compare"
                 ? "bg-gradient-to-r from-amber-400 to-[#C6A96B] text-[#0A1628] shadow-md shadow-amber-400/20"
                 : "text-[#94A3B8] hover:text-white"

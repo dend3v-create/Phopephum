@@ -49,7 +49,7 @@ export default function DashboardLayout() {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex bg-[#020617] text-[#F8F6F1]">
+    <div className="min-h-screen flex bg-[#020617] text-[#F8F6F1] w-full max-w-full overflow-x-hidden">
       {/* ── 1. Desktop Sidebar (md:flex) & Mobile Drawer ── */}
       <DesktopSidebar
         displayName={displayName}
@@ -72,7 +72,7 @@ export default function DashboardLayout() {
 
       {/* ── 3. Main Content Outlet ── */}
       <main
-        className="flex-1 md:ml-64 min-h-screen transition-all"
+        className="flex-1 md:ml-64 min-h-screen transition-all w-full max-w-full min-w-0 overflow-x-hidden"
         style={{
           paddingTop: "var(--topbar-h, 52px)",
           paddingBottom: "calc(var(--bottombar-h, 62px) + env(safe-area-inset-bottom, 0px))",
@@ -89,7 +89,7 @@ export default function DashboardLayout() {
         `}</style>
         <ProtectedContent
           userLabel={profile?.display_name ? `${profile.display_name} · ${user.email}` : user.email}
-          className="max-w-5xl mx-auto px-3.5 sm:px-6 py-4 md:py-6"
+          className="max-w-5xl mx-auto px-3.5 sm:px-6 py-4 md:py-6 w-full max-w-full min-w-0 overflow-x-hidden"
         >
           <Outlet />
         </ProtectedContent>
