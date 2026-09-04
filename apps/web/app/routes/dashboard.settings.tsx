@@ -15,6 +15,8 @@ import {
   type ActualResult,
   type OutcomeStatus,
 } from "~/services/wisdom.server";
+import { generatePersonalWisdomIntelligence } from "~/services/wisdomIntelligence.server";
+import type { PersonalWisdomIntelligence } from "@phopephum/types";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
@@ -84,14 +86,32 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     successRate: 0,
     averageRating: 0,
   };
+  let wisdomIntelligence: PersonalWisdomIntelligence = {
+    summary: "",
+    patterns: [],
+    actionRecommendations: [],
+    hasSufficientData: false,
+    sampleCount: 0,
+    threshold: 3,
+    stats: wisdomStats,
+    lastUpdated: new Date().toISOString(),
+  };
   let wisdomError: string | null = null;
   try {
-    const [queries, stats] = await Promise.all([
+    const [queries, stats, intelligence] = await Promise.all([
       getWisdomHistory(supabase, user.id, { limit: 100 }),
       getWisdomStats(supabase, user.id),
+      generatePersonalWisdomIntelligence({
+        userId: user.id,
+        supabase,
+        aiWorkerUrl: env.AI_WORKER_URL,
+        aiWorkerSecret: env.AI_WORKER_SECRET,
+        userName: profile?.full_name || user.user_metadata?.full_name,
+      }),
     ]);
     wisdomQueries = queries;
     wisdomStats = stats;
+    wisdomIntelligence = intelligence;
   } catch (wErr) {
     console.warn("[dashboard.settings] Failed to load wisdom queries:", wErr);
     wisdomError = "ไม่สามารถเชื่อมต่อคลังปัญญาได้ในขณะนี้";
@@ -104,6 +124,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     initialTab,
     wisdomQueries,
     wisdomStats,
+    wisdomIntelligence,
     wisdomError,
     wallet: {
       balance: Number(profile?.wallet_balance || 0),
@@ -294,6 +315,7 @@ export default function SettingsPage() {
     initialTab,
     wisdomQueries,
     wisdomStats,
+    wisdomIntelligence,
     wisdomError,
   } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
@@ -757,6 +779,124 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
+
+          {/* STEP 4.5 — Personal Wisdom Intelligence Hub */}
+          {wisdomIntelligence && (
+            <div className="rounded-3xl border border-[#C6A96B]/30 bg-[#0A1628]/80 backdrop-blur-xl p-5 sm:p-7 shadow-2xl space-y-6 relative overflow-hidden">
+              {/* Subtle background glow */}
+              <div
+                className="absolute -top-24 -right-24 w-80 h-80 rounded-full pointer-events-none opacity-20 blur-3xl"
+                style={{ background: "radial-gradient(circle, #C6A96B 0%, transparent 70%)" }}
+              />
+
+              {/* Header */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/10 pb-4 relative z-10">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl sm:text-3xl">✨</span>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+                      PERSONAL WISDOM INTELLIGENCE
+                    </span>
+                    <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                      <span>ปัญญาเฉพาะตน & การสังเคราะห์จังหวะชีวิต</span>
+                      {wisdomIntelligence.hasSufficientData ? (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                          ✓ ตกผลึกพร้อม
+                        </span>
+                      ) : (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                          ⏳ กำลังสะสมข้อมูล ({wisdomIntelligence.sampleCount}/{wisdomIntelligence.threshold})
+                        </span>
+                      )}
+                    </h3>
+                  </div>
+                </div>
+
+                <div className="text-[11px] text-[#94A3B8] self-start sm:self-auto">
+                  <span>อัปเดต: {new Date(wisdomIntelligence.lastUpdated).toLocaleDateString("th-TH")}</span>
+                </div>
+              </div>
+
+              {/* AI Synthesized Executive Summary */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/10 space-y-3 relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-bold text-[#C6A96B] uppercase tracking-wider">
+                    ✦ บทสรุปปัญญาสำหรับคุณ (Executive Insight)
+                  </span>
+                </div>
+                <p className="text-sm sm:text-base text-[#F8F6F1] font-sans leading-relaxed font-medium">
+                  {wisdomIntelligence.summary}
+                </p>
+
+                {/* Progress bar if insufficient data */}
+                {!wisdomIntelligence.hasSufficientData && (
+                  <div className="pt-2 space-y-1.5 border-t border-white/5">
+                    <div className="flex items-center justify-between text-[11px] text-[#94A3B8]">
+                      <span>ความพร้อมของข้อมูลในการตรวจจับแพทเทิร์นส่วนตัว</span>
+                      <span className="font-bold text-amber-300">
+                        {wisdomIntelligence.sampleCount} / {wisdomIntelligence.threshold} ครั้ง
+                      </span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-amber-400 to-[#C6A96B] rounded-full transition-all duration-500"
+                        style={{
+                          width: `${Math.min(100, (wisdomIntelligence.sampleCount / wisdomIntelligence.threshold) * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Personal Pattern Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 relative z-10">
+                {wisdomIntelligence.patterns.map((p, idx) => (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-[#C6A96B]/30 hover:bg-white/[0.04] transition-all flex flex-col justify-between gap-3 shadow-md"
+                  >
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xl">{p.icon || "💡"}</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white/5 text-[#CBD5E1] border border-white/10">
+                          {p.confidence}% สอดคล้อง
+                        </span>
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-bold text-[#94A3B8]">{p.title}</p>
+                        <p className="text-sm font-bold text-[#F8F6F1] mt-0.5">{p.highlight}</p>
+                      </div>
+                      <p className="text-xs text-[#94A3B8] leading-relaxed">{p.description}</p>
+                    </div>
+
+                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-[#64748B]">
+                      <span>บันทึก {p.sampleCount} ครั้ง</span>
+                      <span className="text-emerald-400 font-medium">✓ วิเคราะห์เฉพาะตน</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Action Recommendations */}
+              {wisdomIntelligence.actionRecommendations && wisdomIntelligence.actionRecommendations.length > 0 && (
+                <div className="p-4 rounded-2xl bg-[#C6A96B]/5 border border-[#C6A96B]/20 space-y-2.5 relative z-10">
+                  <p className="text-xs font-bold text-[#C6A96B] uppercase tracking-wider flex items-center gap-1.5">
+                    <span>⚡</span>
+                    <span>คำแนะนำเชิงปฏิบัติการเพื่อยกระดับการตัดสินใจ (Actionable Guidance)</span>
+                  </p>
+                  <ul className="space-y-1.5 text-xs text-[#CBD5E1]">
+                    {wisdomIntelligence.actionRecommendations.map((rec, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <span className="text-[#C6A96B] font-bold shrink-0">✦</span>
+                        <span>{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Filter Bar: Outcome Status & Categories */}
           <div className="space-y-2.5">

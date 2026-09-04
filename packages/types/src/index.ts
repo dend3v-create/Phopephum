@@ -399,3 +399,39 @@ export interface TimingComparisonResult {
   isBookmarked?: boolean;
 }
 
+// ─── STEP 4.5 — Personal Wisdom Intelligence Data Contracts ──────────────────
+
+export type PersonalPatternType =
+  | "timing_affinity"
+  | "activity_affinity"
+  | "action_impact"
+  | "decision_consistency";
+
+export interface PersonalPattern {
+  type: PersonalPatternType;
+  title: string;
+  highlight: string;
+  sampleCount: number;
+  confidence: number; // 0 - 100
+  description: string;
+  icon?: string;
+}
+
+export interface PersonalWisdomIntelligence {
+  summary: string;
+  patterns: PersonalPattern[];
+  actionRecommendations: string[];
+  hasSufficientData: boolean;
+  sampleCount: number;
+  threshold: number;
+  stats: {
+    totalQueries: number;
+    trackedOutcomes: number;
+    actionTakenCount: number;
+    successRate: number;
+    averageRating: number;
+  };
+  lastUpdated: string;
+}
+
+
