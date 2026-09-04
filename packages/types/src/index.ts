@@ -354,3 +354,48 @@ export interface HoraNuChartData {
   yamSchedule: HoraNuYamPeriod[];
   houseChart: HoraNuHouseEntry[];
 }
+
+// ─── STEP 4.4 — Timing Comparison Data Contracts ─────────────────────────────
+
+export type TimingSuitability = "optimal" | "favorable" | "neutral" | "cautious" | "avoid";
+
+export interface CandidateWindow {
+  /** รหัสช่วงเวลา เช่น "A" | "B" | "C" */
+  id: string;
+  /** ป้ายกำกับ เช่น "ช่วงเช้า (A)", "ช่วงบ่าย (B)" */
+  label?: string;
+  /** เวลาเริ่มต้น "HH:mm" */
+  start: string;
+  /** เวลาสิ้นสุด "HH:mm" */
+  end: string;
+  /** คะแนนพลังงาน 0–100 ที่คำนวณโดย Engine */
+  score: number;
+  /** ระดับความเหมาะสม */
+  suitability: TimingSuitability;
+  /** จุดเด่นและข้อดีของช่วงเวลานี้ (ภาษาชีวิตจริง ไม่เปิดศัพท์เทคนิคใน L1) */
+  strengths: string[];
+  /** ข้อควรระวัง (ถ้ามี) */
+  cautions: string[];
+  /** กิจกรรมที่เกื้อหนุนเป็นพิเศษ */
+  recommended_for: string[];
+}
+
+export interface CandidateWindowInput {
+  id?: string;
+  start: string; // "HH:mm"
+  end: string;   // "HH:mm"
+  label?: string;
+}
+
+export interface TimingComparisonResult {
+  question: string;
+  activity: string;
+  date: string; // "YYYY-MM-DD"
+  candidates: CandidateWindow[];
+  recommendedCandidate: CandidateWindow;
+  reason: string;
+  actionable?: string;
+  queryId?: string;
+  isBookmarked?: boolean;
+}
+
