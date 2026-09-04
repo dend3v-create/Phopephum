@@ -2,6 +2,7 @@ import { Link, Form, useLocation } from "@remix-run/react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "~/components/ThemeToggle";
+import { TimingReminderBell } from "~/components/timing/TimingReminderBell";
 
 export interface DesktopSidebarProps {
   displayName: string;
@@ -411,7 +412,10 @@ export function DesktopSidebar({
               </div>
             </div>
 
-            <ThemeToggle />
+            <div className="flex items-center gap-1">
+              <TimingReminderBell />
+              <ThemeToggle />
+            </div>
           </div>
 
           {/* Logout button */}

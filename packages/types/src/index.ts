@@ -487,5 +487,43 @@ export interface CalendarMonthDayOverview {
   appointmentCount: number;
 }
 
+// ─── STEP 5.2 — Personal Timing Reminder Data Contracts ─────────────────────
 
+export type TimingReminderType = "daily_brief" | "golden_window" | "appointment";
+export type ReminderPriority = "high" | "normal" | "low";
 
+export interface TimingReminder {
+  id: string;
+  userId: string;
+  type: TimingReminderType;
+  priority: ReminderPriority;
+  title: string;
+  message: string;
+  targetTime?: string; // "HH:mm" หรือ ISO
+  windowScore?: number;
+  actionUrl?: string;
+  actionLabel?: string;
+  isRead: boolean;
+  createdAt: string;
+  metadata?: Record<string, unknown>;
+}
+
+export interface TimingReminderSettings {
+  enableDailyBrief: boolean;
+  dailyBriefTime: string; // "07:30"
+  enableGoldenWindowAlert: boolean;
+  goldenWindowLeadMinutes: number; // e.g. 30
+  enableAppointmentReminder: boolean;
+  appointmentLeadMinutes: number; // e.g. 30
+  enableLineNotify: boolean;
+}
+
+export const DEFAULT_TIMING_REMINDER_SETTINGS: TimingReminderSettings = {
+  enableDailyBrief: true,
+  dailyBriefTime: "07:30",
+  enableGoldenWindowAlert: true,
+  goldenWindowLeadMinutes: 30,
+  enableAppointmentReminder: true,
+  appointmentLeadMinutes: 30,
+  enableLineNotify: false,
+};

@@ -1,5 +1,6 @@
 import { Link } from "@remix-run/react";
 import { ThemeToggle } from "~/components/ThemeToggle";
+import { TimingReminderBell } from "~/components/timing/TimingReminderBell";
 import { useTranslation } from "react-i18next";
 
 export interface AppTopBarProps {
@@ -43,11 +44,14 @@ export function AppTopBar({
       </Link>
 
       {/* ── Actions on Right ── */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
+        {/* Timing Reminder Bell */}
+        <TimingReminderBell />
+
         {/* Sands of Time Token Badge */}
         <Link
           to="/dashboard/settings"
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold transition-all active:scale-95 border"
+          className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold transition-all active:scale-95 border"
           style={{
             background: "rgba(198, 169, 107, 0.08)",
             borderColor: "rgba(198, 169, 107, 0.25)",

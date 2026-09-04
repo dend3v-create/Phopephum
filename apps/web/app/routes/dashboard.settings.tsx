@@ -16,7 +16,8 @@ import {
   type OutcomeStatus,
 } from "~/services/wisdom.server";
 import { generatePersonalWisdomIntelligence } from "~/services/wisdomIntelligence.server";
-import type { PersonalWisdomIntelligence } from "@phopephum/types";
+import type { PersonalWisdomIntelligence, TimingReminderSettings } from "@phopephum/types";
+import { DEFAULT_TIMING_REMINDER_SETTINGS } from "@phopephum/types";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
@@ -360,9 +361,26 @@ export default function SettingsPage() {
     }
   }, [outcomeFetcher.data]);
 
+  // STEP 5.2 — Timing Reminder Settings
+  const reminderFetcher = useFetcher<any>();
+  const initialReminderSettings: TimingReminderSettings = {
+    ...DEFAULT_TIMING_REMINDER_SETTINGS,
+    ...((profile as any)?.reminder_settings || {}),
+  };
+  const [reminderSettings, setReminderSettings] = useState<TimingReminderSettings>(initialReminderSettings);
+  const [reminderSavedSuccess, setReminderSavedSuccess] = useState(false);
+
+  useEffect(() => {
+    if (reminderFetcher.data?.ok && reminderFetcher.data?.success) {
+      setReminderSavedSuccess(true);
+      const timer = setTimeout(() => setReminderSavedSuccess(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [reminderFetcher.data]);
+
   useEffect(() => {
     const tabParam = searchParams.get("tab");
-    if (tabParam && (tabParam === "personal" || tabParam === "wisdom" || tabParam === "affiliate")) {
+    if (tabParam && (tabParam === "personal" || tabParam === "wisdom" || tabParam === "affiliate" || tabParam === "reminders")) {
       setActiveTab(tabParam);
     }
   }, [searchParams]);
@@ -534,6 +552,17 @@ export default function SettingsPage() {
           }`}
         >
           {t("common:settings.affiliate_tab", "พันธมิตร & รายได้")}
+        </button>
+        <button
+          onClick={() => handleTabChange("reminders")}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+            activeTab === "reminders"
+              ? "bg-[#D9BC82] text-[#0A1628]"
+              : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
+          }`}
+        >
+          <span>🔔</span>
+          <span>เตือนจังหวะเวลา</span>
         </button>
       </div>
 
@@ -1599,6 +1628,222 @@ export default function SettingsPage() {
               </div>
             </Card>
           </div>
+        </div>
+      )}
+
+      {/* 4. แท็บการแจ้งเตือนจังหวะเวลาเฉพาะตน (STEP 5.2) */}
+      {activeTab === "reminders" && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          <Card className="border-[#C6A96B]/15 p-6 bg-slate-950/40">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[#C6A96B] font-display text-lg font-bold flex items-center gap-2">
+                <span>🔔</span> ตั้งค่าการแจ้งเตือนจังหวะเวลา (Personal Timing Reminder)
+              </h2>
+              {reminderSavedSuccess && (
+                <span className="text-xs font-bold text-emerald-400 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/30 animate-in fade-in">
+                  ✓ บันทึกการตั้งค่าแล้ว
+                </span>
+              )}
+            </div>
+
+            <p className="text-xs text-[#F8F6F1]/70 mb-6 leading-relaxed">
+              Phopephum จะแจ้งเตือนเฉพาะจังหวะเวลาที่มีความหมายและส่งผลต่อการลงมือทำจริงของคุณ โดยไม่ส่งสแปม 
+              สามารถเลือกรับการแจ้งเตือนล่วงหน้าได้ตามต้องการ
+            </p>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                reminderFetcher.submit(
+                  JSON.stringify({
+                    intent: "update_settings",
+                    settings: reminderSettings,
+                  }),
+                  {
+                    method: "put",
+                    action: "/api/reminders",
+                    encType: "application/json",
+                  }
+                );
+              }}
+              className="space-y-6"
+            >
+              {/* Card 1: Golden Window Alert */}
+              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">⭐</span>
+                    <h3 className="text-sm font-bold text-[#F8F6F1]">
+                      แจ้งเตือนช่วงเวลาทองคำ (Golden Window Alert)
+                    </h3>
+                  </div>
+                  <p className="text-xs text-[#F8F6F1]/60">
+                    แจ้งเตือนเมื่อถึงช่วงเวลาที่คะแนนพลังงานและความราบรื่นสูงสุดของวัน
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <select
+                    disabled={!reminderSettings.enableGoldenWindowAlert}
+                    value={reminderSettings.goldenWindowLeadMinutes}
+                    onChange={(e) =>
+                      setReminderSettings({
+                        ...reminderSettings,
+                        goldenWindowLeadMinutes: parseInt(e.target.value, 10),
+                      })
+                    }
+                    className="bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#C6A96B] disabled:opacity-40"
+                  >
+                    <option value={15}>ก่อน 15 นาที</option>
+                    <option value={30}>ก่อน 30 นาที</option>
+                    <option value={45}>ก่อน 45 นาที</option>
+                  </select>
+
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reminderSettings.enableGoldenWindowAlert}
+                      onChange={(e) =>
+                        setReminderSettings({
+                          ...reminderSettings,
+                          enableGoldenWindowAlert: e.target.checked,
+                        })
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C6A96B]"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Card 2: Appointment Timing Reminder */}
+              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">🔔</span>
+                    <h3 className="text-sm font-bold text-[#F8F6F1]">
+                      แจ้งเตือนนัดหมายตามจังหวะเวลา (Appointment Reminder)
+                    </h3>
+                  </div>
+                  <p className="text-xs text-[#F8F6F1]/60">
+                    เตือนก่อนถึงเวลานัดหมาย พร้อมระบุความสอดคล้องกับจังหวะฤกษ์
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <select
+                    disabled={!reminderSettings.enableAppointmentReminder}
+                    value={reminderSettings.appointmentLeadMinutes}
+                    onChange={(e) =>
+                      setReminderSettings({
+                        ...reminderSettings,
+                        appointmentLeadMinutes: parseInt(e.target.value, 10),
+                      })
+                    }
+                    className="bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#C6A96B] disabled:opacity-40"
+                  >
+                    <option value={15}>ก่อน 15 นาที</option>
+                    <option value={30}>ก่อน 30 นาที</option>
+                    <option value={45}>ก่อน 45 นาที</option>
+                  </select>
+
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reminderSettings.enableAppointmentReminder}
+                      onChange={(e) =>
+                        setReminderSettings({
+                          ...reminderSettings,
+                          enableAppointmentReminder: e.target.checked,
+                        })
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C6A96B]"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Card 3: Daily Morning Brief */}
+              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">🌅</span>
+                    <h3 className="text-sm font-bold text-[#F8F6F1]">
+                      สรุปภาพรวมพลังงานประจำวัน (Daily Morning Brief)
+                    </h3>
+                  </div>
+                  <p className="text-xs text-[#F8F6F1]/60">
+                    รับสรุปทิศทางวัน ธีมชีวิต และข้อควรระวังในยามเช้า
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <input
+                    type="time"
+                    disabled={!reminderSettings.enableDailyBrief}
+                    value={reminderSettings.dailyBriefTime}
+                    onChange={(e) =>
+                      setReminderSettings({
+                        ...reminderSettings,
+                        dailyBriefTime: e.target.value,
+                      })
+                    }
+                    className="bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#C6A96B] disabled:opacity-40"
+                  />
+
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reminderSettings.enableDailyBrief}
+                      onChange={(e) =>
+                        setReminderSettings({
+                          ...reminderSettings,
+                          enableDailyBrief: e.target.checked,
+                        })
+                      }
+                      className="sr-only peer"
+                    />
+                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C6A96B]"></div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Card 4: LINE Notification (Future Ready) */}
+              <div className="p-4 rounded-xl border border-white/10 bg-white/[0.02] flex flex-col md:flex-row md:items-center justify-between gap-4 opacity-85">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-base">💬</span>
+                    <h3 className="text-sm font-bold text-[#F8F6F1]">
+                      แจ้งเตือนผ่าน LINE (LINE Messaging API)
+                    </h3>
+                  </div>
+                  <p className="text-xs text-[#F8F6F1]/60">
+                    รับการแจ้งเตือนจังหวะเวลาตรงเข้าสู่แชท LINE ของคุณ
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <span className="text-[11px] text-[#C6A96B] font-semibold bg-[#C6A96B]/10 px-2.5 py-1 rounded-full border border-[#C6A96B]/20">
+                    {(profile as any)?.line_user_id ? "เชื่อมต่อแล้ว" : "พร้อมเชื่อมต่อระยะถัดไป"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex justify-end pt-4">
+                <Button
+                  type="submit"
+                  disabled={reminderFetcher.state === "submitting"}
+                  className="bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold px-6 py-2.5 rounded-xl shadow-md hover:scale-[1.02] active:scale-[0.98] transition-all"
+                >
+                  {reminderFetcher.state === "submitting"
+                    ? "กำลังบันทึก..."
+                    : "บันทึกการตั้งค่า"}
+                </Button>
+              </div>
+            </form>
+          </Card>
         </div>
       )}
     </div>
