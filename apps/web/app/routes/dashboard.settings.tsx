@@ -3,7 +3,18 @@ import { Form, useLoaderData, useNavigation, useActionData, Link, useFetcher, us
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
-import { getWisdomHistory, toggleWisdomBookmark, type WisdomQueryRecord } from "~/services/wisdom.server";
+import {
+  getWisdomHistory,
+  getWisdomStats,
+  toggleWisdomBookmark,
+  upsertWisdomOutcome,
+  deleteWisdomOutcome,
+  type WisdomQueryRecord,
+  type WisdomOutcomeRecord,
+  type PersonalWisdomStats,
+  type ActualResult,
+  type OutcomeStatus,
+} from "~/services/wisdom.server";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
@@ -64,11 +75,23 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const commissionRate = profile?.plan === 'imperial' ? 10 : profile?.plan === 'pro' ? 5 : 3;
 
-  // STEP 4.2 — Load Wisdom Queries history
+  // STEP 4.2 & 4.3 — Load Wisdom Queries history & Personal Wisdom stats
   let wisdomQueries: WisdomQueryRecord[] = [];
+  let wisdomStats: PersonalWisdomStats = {
+    totalQueries: 0,
+    trackedOutcomes: 0,
+    actionTakenCount: 0,
+    successRate: 0,
+    averageRating: 0,
+  };
   let wisdomError: string | null = null;
   try {
-    wisdomQueries = await getWisdomHistory(supabase, user.id, { limit: 100 });
+    const [queries, stats] = await Promise.all([
+      getWisdomHistory(supabase, user.id, { limit: 100 }),
+      getWisdomStats(supabase, user.id),
+    ]);
+    wisdomQueries = queries;
+    wisdomStats = stats;
   } catch (wErr) {
     console.warn("[dashboard.settings] Failed to load wisdom queries:", wErr);
     wisdomError = "ไม่สามารถเชื่อมต่อคลังปัญญาได้ในขณะนี้";
@@ -80,6 +103,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     currentLocale,
     initialTab,
     wisdomQueries,
+    wisdomStats,
     wisdomError,
     wallet: {
       balance: Number(profile?.wallet_balance || 0),
@@ -116,6 +140,53 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return json({ error: "Failed to update bookmark" }, { status: 500 });
     }
     return json({ success: true, bookmark: result });
+  }
+
+  // STEP 4.3 — Save Outcome & Personal Wisdom Action
+  if (formType === "saveOutcome") {
+    const queryId = String(formData.get("queryId") ?? "").trim();
+    if (!queryId) return json({ error: "queryId is required" }, { status: 400 });
+
+    const status = (formData.get("status") as OutcomeStatus) || "completed";
+    const actionTakenRaw = formData.get("actionTaken");
+    const actionTaken =
+      actionTakenRaw === "true" || actionTakenRaw === "1"
+        ? true
+        : actionTakenRaw === "false" || actionTakenRaw === "0"
+        ? false
+        : null;
+
+    const actualResult = (formData.get("actualResult") as ActualResult) || null;
+    const userNotes = formData.get("userNotes") ? String(formData.get("userNotes")).trim() : null;
+    const occurredAt = formData.get("occurredAt") ? String(formData.get("occurredAt")).trim() : null;
+
+    const ratingRaw = formData.get("feedbackRating");
+    const feedbackRating = ratingRaw ? parseInt(String(ratingRaw), 10) : null;
+
+    const outcome = await upsertWisdomOutcome(supabase, user.id, {
+      queryId,
+      status,
+      actionTaken,
+      actualResult,
+      userNotes,
+      occurredAt,
+      feedbackRating,
+    });
+
+    if (!outcome) {
+      return json({ error: "ไม่สามารถบันทึกผลลัพธ์ได้ กรุณาตรวจสอบสิทธิ์" }, { status: 403 });
+    }
+
+    return json({ success: true, outcome });
+  }
+
+  // STEP 4.3 — Delete Outcome Action
+  if (formType === "deleteOutcome") {
+    const queryId = String(formData.get("queryId") ?? "").trim();
+    if (!queryId) return json({ error: "queryId is required" }, { status: 400 });
+
+    const ok = await deleteWisdomOutcome(supabase, user.id, queryId);
+    return json({ success: ok });
   }
 
   if (formType === "personal") {
@@ -169,8 +240,62 @@ const INTENT_META: Record<string, { label: string; emoji: string; color: string 
   general:      { label: "ทั่วไป",      emoji: "✦",  color: "text-[#C6A96B] border-[#C6A96B]/30 bg-[#C6A96B]/10" },
 };
 
+export const ACTUAL_RESULT_META: Record<
+  ActualResult,
+  { label: string; shortLabel: string; emoji: string; color: string; badgeColor: string; description: string }
+> = {
+  accurate_success: {
+    label: "สำเร็จราบรื่น ตรงตามคำทำนาย",
+    shortLabel: "สำเร็จตามคาด",
+    emoji: "🌟",
+    color: "text-emerald-400 border-emerald-400/40 bg-emerald-500/10",
+    badgeColor: "bg-emerald-500/20 text-emerald-300 border-emerald-400/30",
+    description: "ผลลัพธ์เป็นไปตามจังหวะเวลาและคำแนะนำ ได้ผลลัพธ์ที่ดี",
+  },
+  accurate_neutral: {
+    label: "เป็นไปตามคาด ปลอดภัย ไร้อุปสรรค",
+    shortLabel: "เป็นไปตามคาด",
+    emoji: "⚖️",
+    color: "text-blue-400 border-blue-400/40 bg-blue-500/10",
+    badgeColor: "bg-blue-500/20 text-blue-300 border-blue-400/30",
+    description: "สถานการณ์ราบรื่น ไม่เกิดข้อผิดพลาดหรือปัญหาแทรกซ้อน",
+  },
+  partially_accurate: {
+    label: "ตรงบางส่วน หรือมีปัจจัยอื่นแทรก",
+    shortLabel: "ตรงบางส่วน",
+    emoji: "🌗",
+    color: "text-amber-400 border-amber-400/40 bg-amber-500/10",
+    badgeColor: "bg-amber-500/20 text-amber-300 border-amber-400/30",
+    description: "มีทั้งส่วนที่ตรงและส่วนที่มีตัวแปรภายนอกเปลี่ยนแปลง",
+  },
+  inaccurate: {
+    label: "คลาดเคลื่อน ไม่ตรงกับสถานการณ์",
+    shortLabel: "คลาดเคลื่อน",
+    emoji: "⚡",
+    color: "text-rose-400 border-rose-400/40 bg-rose-500/10",
+    badgeColor: "bg-rose-500/20 text-rose-300 border-rose-400/30",
+    description: "ผลลัพธ์ไม่เป็นไปตามที่ประเมินไว้ เป็นบทเรียนเพื่อสังเกตจังหวะ",
+  },
+  unresolved: {
+    label: "ยังไม่ปรากฏผลชัดเจน / รอจังหวะเวลา",
+    shortLabel: "รอผลลัพธ์",
+    emoji: "⏳",
+    color: "text-purple-400 border-purple-400/40 bg-purple-500/10",
+    badgeColor: "bg-purple-500/20 text-purple-300 border-purple-400/30",
+    description: "เหตุการณ์ยังดำเนินอยู่ หรือยังไม่ถึงช่วงเวลาตัดสิน",
+  },
+};
+
 export default function SettingsPage() {
-  const { profile, wallet, currentLocale, initialTab, wisdomQueries, wisdomError } = useLoaderData<typeof loader>();
+  const {
+    profile,
+    wallet,
+    currentLocale,
+    initialTab,
+    wisdomQueries,
+    wisdomStats,
+    wisdomError,
+  } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
@@ -182,6 +307,7 @@ export default function SettingsPage() {
   // Wisdom Tab filters & states
   const [activeIntent, setActiveIntent] = useState("all");
   const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
+  const [outcomeFilter, setOutcomeFilter] = useState<"all" | "tracked" | "pending">("all");
   const [selectedDetailQuery, setSelectedDetailQuery] = useState<WisdomQueryRecord | null>(null);
   const [showEvidence, setShowEvidence] = useState(false);
   const [copiedQueryId, setCopiedQueryId] = useState<string | null>(null);
@@ -189,6 +315,28 @@ export default function SettingsPage() {
   // Optimistic bookmark tracking
   const [localBookmarks, setLocalBookmarks] = useState<Record<string, boolean>>({});
   const bookmarkFetcher = useFetcher<any>();
+
+  // STEP 4.3 — Optimistic Outcome Tracking & Form states
+  const [localOutcomes, setLocalOutcomes] = useState<Record<string, WisdomOutcomeRecord>>({});
+  const outcomeFetcher = useFetcher<any>();
+  const [outcomeSavedSuccess, setOutcomeSavedSuccess] = useState(false);
+
+  // Outcome Editor states inside modal
+  const [formActionTaken, setFormActionTaken] = useState<boolean | null>(true);
+  const [formActualResult, setFormActualResult] = useState<ActualResult | null>("accurate_success");
+  const [formFeedbackRating, setFormFeedbackRating] = useState<number>(5);
+  const [formUserNotes, setFormUserNotes] = useState<string>("");
+  const [formOccurredAt, setFormOccurredAt] = useState<string>("");
+
+  useEffect(() => {
+    if (outcomeFetcher.data?.success && outcomeFetcher.data?.outcome) {
+      const saved = outcomeFetcher.data.outcome as WisdomOutcomeRecord;
+      setLocalOutcomes((prev) => ({ ...prev, [saved.query_id]: saved }));
+      setOutcomeSavedSuccess(true);
+      const timer = setTimeout(() => setOutcomeSavedSuccess(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [outcomeFetcher.data]);
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
@@ -228,15 +376,58 @@ export default function SettingsPage() {
     }
   };
 
+  const openDetailModal = (q: WisdomQueryRecord) => {
+    setSelectedDetailQuery(q);
+    setShowEvidence(false);
+    setOutcomeSavedSuccess(false);
+    const existing = localOutcomes[q.id] ?? q.outcome;
+    if (existing) {
+      setFormActionTaken(existing.action_taken);
+      setFormActualResult(existing.actual_result);
+      setFormFeedbackRating(existing.feedback_rating || 5);
+      setFormUserNotes(existing.user_notes || "");
+      setFormOccurredAt(existing.occurred_at ? existing.occurred_at.split("T")[0] : "");
+    } else {
+      setFormActionTaken(true);
+      setFormActualResult("accurate_success");
+      setFormFeedbackRating(5);
+      setFormUserNotes("");
+      setFormOccurredAt(new Date().toISOString().split("T")[0]);
+    }
+  };
+
+  const handleSaveOutcome = (queryId: string) => {
+    outcomeFetcher.submit(
+      {
+        queryId,
+        actionTaken: formActionTaken === null ? "" : String(formActionTaken),
+        actualResult: formActualResult || "",
+        feedbackRating: String(formFeedbackRating),
+        userNotes: formUserNotes,
+        occurredAt: formOccurredAt,
+      },
+      { method: "post", action: "/api/wisdom-outcome" }
+    );
+  };
+
   const filteredQueries = wisdomQueries.filter((q) => {
     const isBookmarked = localBookmarks[q.id] ?? q.is_bookmarked;
     if (showBookmarkedOnly && !isBookmarked) return false;
     if (activeIntent !== "all" && q.intent_category !== activeIntent) return false;
+
+    const outcome = localOutcomes[q.id] ?? q.outcome;
+    if (outcomeFilter === "tracked" && !outcome) return false;
+    if (outcomeFilter === "pending" && !!outcome) return false;
+
     return true;
   });
 
   const bookmarkedTotalCount = wisdomQueries.filter(
     (q) => (localBookmarks[q.id] ?? q.is_bookmarked)
+  ).length;
+
+  const trackedTotalCount = wisdomQueries.filter(
+    (q) => Boolean(localOutcomes[q.id] ?? q.outcome)
   ).length;
 
   const birthDateBE = (() => {
@@ -466,50 +657,148 @@ export default function SettingsPage() {
       )}
 
       {/* 2. แท็บคลังปัญญาของฉัน (PHASE C, D, E, F) */}
+      {/* 2. แท็บคลังปัญญาของฉัน (STEP 4.2 & 4.3 Outcome Tracking & Personal Wisdom) */}
       {activeTab === "wisdom" && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          {/* Subheader and Controls */}
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-              <div>
-                <h2 className="text-[#F8F6F1] font-display text-lg font-bold flex items-center gap-2">
-                  <span>🧠</span>
-                  <span>{t("common:settings.wisdom_title", "คลังปัญญา & ประวัติคำทำนาย")}</span>
-                </h2>
-                <p className="text-xs text-[#94A3B8]">
-                  บันทึกประวัติคำถาม, ผลพยากรณ์, และจังหวะเวลาเฉพาะตัวคุณ
-                </p>
-              </div>
+          {/* Subheader and Title */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <div>
+              <h2 className="text-[#F8F6F1] font-display text-lg sm:text-xl font-bold flex items-center gap-2">
+                <span>🧠</span>
+                <span>{t("common:settings.wisdom_title", "คลังปัญญา & ประวัติคำทำนาย")}</span>
+              </h2>
+              <p className="text-xs text-[#94A3B8]">
+                บันทึกประวัติคำถาม, ผลพยากรณ์, และวงจรการติดตามผลจริงสู่ปัญญาเฉพาะตน
+              </p>
+            </div>
 
-              {/* Bookmark vs All toggle */}
-              <div className="flex items-center gap-1 bg-[#0A1628]/70 border border-white/10 p-1 rounded-xl self-start sm:self-auto">
-                <button
-                  type="button"
-                  onClick={() => setShowBookmarkedOnly(false)}
-                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
-                    !showBookmarkedOnly
-                      ? "bg-[#C6A96B] text-[#0A1628]"
-                      : "text-[#C6B79F] hover:text-white"
-                  }`}
-                >
-                  ทั้งหมด ({wisdomQueries.length})
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowBookmarkedOnly(true)}
-                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all flex items-center gap-1 ${
-                    showBookmarkedOnly
-                      ? "bg-amber-400 text-[#0A1628]"
-                      : "text-[#C6B79F] hover:text-white"
-                  }`}
-                >
-                  <span>★</span>
-                  <span>บุ๊กมาร์ก ({bookmarkedTotalCount})</span>
-                </button>
+            {/* Bookmark Filter Switch */}
+            <div className="flex items-center gap-1 bg-[#0A1628]/70 border border-white/10 p-1 rounded-xl self-start sm:self-auto">
+              <button
+                type="button"
+                onClick={() => setShowBookmarkedOnly(false)}
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                  !showBookmarkedOnly
+                    ? "bg-[#C6A96B] text-[#0A1628]"
+                    : "text-[#C6B79F] hover:text-white"
+                }`}
+              >
+                ทั้งหมด ({wisdomQueries.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowBookmarkedOnly(true)}
+                className={`px-3 py-1 text-xs font-bold rounded-lg transition-all flex items-center gap-1 ${
+                  showBookmarkedOnly
+                    ? "bg-amber-400 text-[#0A1628]"
+                    : "text-[#C6B79F] hover:text-white"
+                }`}
+              >
+                <span>★</span>
+                <span>บุ๊กมาร์ก ({bookmarkedTotalCount})</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Personal Wisdom Hub Banner & Metrics (STEP 4.3) */}
+          <div className="rounded-3xl border border-[#C6A96B]/30 bg-gradient-to-br from-[#0A1628] via-[#0D1C34] to-[#020617] p-5 sm:p-6 shadow-xl space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-white/10 pb-3">
+              <div className="space-y-0.5">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+                  PERSONAL WISDOM MEMORY
+                </span>
+                <h3 className="text-sm sm:text-base font-bold text-[#F8F6F1] flex items-center gap-2">
+                  <span>🏛️</span>
+                  <span>วงจรตกผลึกปัญญา (Outcome & Wisdom Loop)</span>
+                </h3>
+              </div>
+              <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-[#C6A96B]/10 border border-[#C6A96B]/30 text-[10px] sm:text-[11px] font-medium text-[#D9BC82] overflow-x-auto max-w-full">
+                <span>Prediction → Decision → Action → Outcome → Feedback → Wisdom</span>
               </div>
             </div>
 
-            {/* Category Filter Chips (horizontal scroll on mobile) */}
+            {/* 4 KPI Metrics */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+                <p className="text-[11px] text-[#94A3B8]">อัตราความแม่นยำ</p>
+                <p className="text-xl sm:text-2xl font-black text-emerald-400 font-display">
+                  {wisdomStats.trackedOutcomes > 0 ? `${wisdomStats.successRate}%` : "—"}
+                </p>
+                <p className="text-[10px] text-[#64748B]">จากผลลัพธ์ที่ตรงตามคาด</p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+                <p className="text-[11px] text-[#94A3B8]">การลงมือทำจริง</p>
+                <p className="text-xl sm:text-2xl font-black text-amber-300 font-display">
+                  {wisdomStats.actionTakenCount} <span className="text-xs font-normal text-[#94A3B8]">/ {wisdomStats.trackedOutcomes} ครั้ง</span>
+                </p>
+                <p className="text-[10px] text-[#64748B]">ทำตามจังหวะเวลาที่แนะ</p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+                <p className="text-[11px] text-[#94A3B8]">ติดตามผลแล้ว</p>
+                <p className="text-xl sm:text-2xl font-black text-[#F8F6F1] font-display">
+                  {trackedTotalCount} <span className="text-xs font-normal text-[#94A3B8]">/ {wisdomQueries.length} คำถาม</span>
+                </p>
+                <p className="text-[10px] text-[#64748B]">
+                  {wisdomQueries.length - trackedTotalCount > 0
+                    ? `รอติดตามผลอีก ${wisdomQueries.length - trackedTotalCount} รายการ`
+                    : "ติดตามผลครบถ้วน"}
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1">
+                <p className="text-[11px] text-[#94A3B8]">ความพึงพอใจเฉลี่ย</p>
+                <p className="text-xl sm:text-2xl font-black text-amber-400 font-display flex items-center gap-1">
+                  <span>{wisdomStats.trackedOutcomes > 0 ? wisdomStats.averageRating.toFixed(1) : "—"}</span>
+                  <span className="text-sm font-normal text-amber-300/80">★</span>
+                </p>
+                <p className="text-[10px] text-[#64748B]">ประเมินคุณภาพย้อนหลัง</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Filter Bar: Outcome Status & Categories */}
+          <div className="space-y-2.5">
+            {/* Outcome Filter Pills */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+              <span className="text-[11px] text-[#94A3B8] mr-1 font-bold whitespace-nowrap">สถานะผลลัพธ์:</span>
+              <button
+                type="button"
+                onClick={() => setOutcomeFilter("all")}
+                className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap border transition-all ${
+                  outcomeFilter === "all"
+                    ? "bg-[#C6A96B]/20 border-[#C6A96B] text-[#F8F6F1]"
+                    : "bg-[#0A1628]/60 border-white/10 text-[#94A3B8] hover:text-white"
+                }`}
+              >
+                ทั้งหมด ({wisdomQueries.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setOutcomeFilter("tracked")}
+                className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap border transition-all flex items-center gap-1 ${
+                  outcomeFilter === "tracked"
+                    ? "bg-emerald-500/20 border-emerald-400 text-emerald-300"
+                    : "bg-[#0A1628]/60 border-white/10 text-[#94A3B8] hover:text-emerald-300"
+                }`}
+              >
+                <span>🎯 ติดตามผลแล้ว ({trackedTotalCount})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setOutcomeFilter("pending")}
+                className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap border transition-all flex items-center gap-1 ${
+                  outcomeFilter === "pending"
+                    ? "bg-amber-500/20 border-amber-400 text-amber-300"
+                    : "bg-[#0A1628]/60 border-white/10 text-[#94A3B8] hover:text-amber-300"
+                }`}
+              >
+                <span>⏳ รอติดตามผล ({wisdomQueries.length - trackedTotalCount})</span>
+              </button>
+            </div>
+
+            {/* Category Filter Chips */}
             <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 no-scrollbar -mx-1 px-1">
               {Object.entries(INTENT_META).map(([key, meta]) => {
                 const isSelected = activeIntent === key;
@@ -552,6 +841,9 @@ export default function SettingsPage() {
               {filteredQueries.map((item) => {
                 const isBookmarked = localBookmarks[item.id] ?? item.is_bookmarked;
                 const meta = INTENT_META[item.intent_category] || INTENT_META.general;
+                const outcome = localOutcomes[item.id] ?? item.outcome;
+                const outcomeMeta = outcome?.actual_result ? ACTUAL_RESULT_META[outcome.actual_result] : null;
+
                 const dateStr = new Date(item.created_at).toLocaleString("th-TH", {
                   day: "numeric",
                   month: "short",
@@ -563,10 +855,7 @@ export default function SettingsPage() {
                 return (
                   <div
                     key={item.id}
-                    onClick={() => {
-                      setSelectedDetailQuery(item);
-                      setShowEvidence(false);
-                    }}
+                    onClick={() => openDetailModal(item)}
                     className="group relative cursor-pointer rounded-2xl border border-white/10 bg-[#0A1628]/70 hover:border-[#C6A96B]/40 hover:bg-[#0A1628]/90 transition-all p-4 sm:p-5 shadow-lg space-y-3"
                   >
                     {/* Top Row: Meta Badge, Date, Bookmark button */}
@@ -625,13 +914,53 @@ export default function SettingsPage() {
                       {item.answer}
                     </p>
 
+                    {/* STEP 4.3 — Outcome Snippet / Personal Wisdom Note */}
+                    {outcome ? (
+                      <div className="space-y-1.5 pt-1">
+                        <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
+                          {outcomeMeta && (
+                            <span className={`px-2 py-0.5 rounded-md border font-bold flex items-center gap-1 ${outcomeMeta.badgeColor}`}>
+                              <span>{outcomeMeta.emoji}</span>
+                              <span>{outcomeMeta.shortLabel}</span>
+                            </span>
+                          )}
+                          <span className={`px-2 py-0.5 rounded-md border text-[10px] font-semibold ${
+                            outcome.action_taken
+                              ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/20"
+                              : "bg-white/5 text-[#94A3B8] border-white/10"
+                          }`}>
+                            {outcome.action_taken ? "⚡ ได้ลงมือทำ" : "⏸ ไม่ได้ลงมือทำ"}
+                          </span>
+                          {typeof outcome.feedback_rating === "number" && (
+                            <span className="text-amber-400 text-xs tracking-tight">
+                              {"★".repeat(outcome.feedback_rating)}
+                            </span>
+                          )}
+                        </div>
+
+                        {outcome.user_notes && (
+                          <div className="rounded-xl bg-[#C6A96B]/10 border border-[#C6A96B]/20 p-2.5 text-xs text-[#E2E8F0] flex items-start gap-2">
+                            <span className="text-[#C6A96B] font-bold shrink-0">💡 ปัญญาที่ได้:</span>
+                            <span className="line-clamp-2 italic">“{outcome.user_notes}”</span>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="pt-0.5">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-amber-400/20 bg-amber-400/5 text-amber-300/90 text-[11px]">
+                          <span>⏳</span>
+                          <span>ยังไม่ได้ติดตามผลจริง — กดเพื่อบันทึกบทเรียนและผลลัพธ์</span>
+                        </span>
+                      </div>
+                    )}
+
                     {/* Footer View Link */}
                     <div className="pt-1 flex items-center justify-between text-[11px]">
                       <span className="text-emerald-400/80 font-medium truncate max-w-[70%]">
                         ✓ {item.actionable || "มีข้อแนะนำที่ทำได้ทันที"}
                       </span>
                       <span className="text-[#C6A96B] group-hover:underline font-bold flex items-center gap-0.5">
-                        <span>ดูคำทำนายฉบับเต็ม</span>
+                        <span>ดูรายละเอียด & ติดตามผล</span>
                         <span>→</span>
                       </span>
                     </div>
@@ -649,12 +978,16 @@ export default function SettingsPage() {
                 <h3 className="text-base sm:text-lg font-bold text-[#F8F6F1]">
                   {showBookmarkedOnly
                     ? "ยังไม่มีคำถามที่บุ๊กมาร์กไว้"
+                    : outcomeFilter === "tracked"
+                    ? "ยังไม่มีคำถามที่บันทึกผลลัพธ์แล้ว"
+                    : outcomeFilter === "pending"
+                    ? "ไม่มีคำถามที่รอการติดตามผล"
                     : activeIntent !== "all"
                     ? "ไม่พบคำถามในหมวดหมู่นี้"
                     : "ยังไม่มีบันทึกคำถาม"}
                 </h3>
                 <p className="text-xs text-[#94A3B8] max-w-xs mx-auto">
-                  {showBookmarkedOnly || activeIntent !== "all"
+                  {showBookmarkedOnly || activeIntent !== "all" || outcomeFilter !== "all"
                     ? "ลองเลือกดูหมวดอื่น หรือกดดูทั้งหมด"
                     : "ลองถามเรื่องแรกของคุณได้เลย ระบบจะบันทึกคำทำนายและจังหวะเวลาไว้ในคลังปัญญานี้โดยอัตโนมัติ"}
                 </p>
@@ -671,7 +1004,7 @@ export default function SettingsPage() {
             </div>
           )}
 
-          {/* PHASE D — Detail Modal (Reads from immutable stored snapshot) */}
+          {/* PHASE D — Detail Modal with Outcome Tracking & Personal Wisdom Form */}
           {selectedDetailQuery && (
             <div
               className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
@@ -774,7 +1107,7 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                {/* Level 2: Evidence Snapshot Accordion (Plain language, no raw jargon) */}
+                {/* Level 2: Evidence Snapshot Accordion */}
                 {selectedDetailQuery.evidence_snapshot && selectedDetailQuery.evidence_snapshot.length > 0 && (
                   <div className="pt-2 border-t border-white/8">
                     <button
@@ -799,10 +1132,187 @@ export default function SettingsPage() {
                   </div>
                 )}
 
-                {/* Snapshot Immutability Disclaimer */}
-                <div className="rounded-xl bg-white/5 border border-white/5 p-2.5 text-center">
+                {/* ========================================================================= */}
+                {/* STEP 4.3 — OUTCOME TRACKING & PERSONAL WISDOM FORM */}
+                {/* Loop: Prediction → Decision → Action → Outcome → Feedback → Wisdom */}
+                {/* ========================================================================= */}
+                <div className="rounded-2xl border border-[#C6A96B]/40 bg-gradient-to-br from-[#0B172B] to-[#040A14] p-4 sm:p-5 space-y-4 shadow-inner">
+                  <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+                        STEP 4.3 — OUTCOME TRACKING
+                      </p>
+                      <h4 className="text-sm font-bold text-[#F8F6F1] flex items-center gap-1.5">
+                        <span>📝</span>
+                        <span>บันทึกผลลัพธ์ & ตกผลึกปัญญา</span>
+                      </h4>
+                    </div>
+                    {(localOutcomes[selectedDetailQuery.id] ?? selectedDetailQuery.outcome) && (
+                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold">
+                        ✓ บันทึกผลแล้ว
+                      </span>
+                    )}
+                  </div>
+
+                  {outcomeSavedSuccess && (
+                    <div className="p-3 rounded-xl bg-emerald-500/20 border border-emerald-400 text-emerald-300 text-xs font-bold flex items-center gap-2 animate-in fade-in duration-200">
+                      <span>✓</span>
+                      <span>บันทึกผลลัพธ์และตกผลึกปัญญาเข้าสู่ระบบเรียบร้อยแล้ว</span>
+                    </div>
+                  )}
+
+                  {/* 1. Action Taken Toggle */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#D9CDB7] block">
+                      1. คุณได้ตัดสินใจลงมือทำตามคำแนะนำหรือไม่?
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setFormActionTaken(true)}
+                        className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                          formActionTaken === true
+                            ? "bg-emerald-500/20 text-emerald-300 border-emerald-400 shadow-sm shadow-emerald-500/20"
+                            : "bg-white/5 text-[#94A3B8] border-white/10 hover:text-white"
+                        }`}
+                      >
+                        <span>✓</span>
+                        <span>ลงมือทำตามจังหวะเวลา</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormActionTaken(false)}
+                        className={`p-2.5 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+                          formActionTaken === false
+                            ? "bg-rose-500/20 text-rose-300 border-rose-400 shadow-sm shadow-rose-500/20"
+                            : "bg-white/5 text-[#94A3B8] border-white/10 hover:text-white"
+                        }`}
+                      >
+                        <span>✕</span>
+                        <span>ไม่ได้ทำ / เปลี่ยนแผน</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* 2. Actual Result 5 Selectable Chips */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#D9CDB7] block">
+                      2. ผลลัพธ์ที่เกิดขึ้นจริงเป็นอย่างไร?
+                    </label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {(Object.entries(ACTUAL_RESULT_META) as [ActualResult, typeof ACTUAL_RESULT_META[ActualResult]][]).map(
+                        ([key, meta]) => {
+                          const isSelected = formActualResult === key;
+                          return (
+                            <button
+                              key={key}
+                              type="button"
+                              onClick={() => setFormActualResult(key)}
+                              className={`p-2.5 rounded-xl border text-left transition-all space-y-0.5 ${
+                                isSelected
+                                  ? `${meta.color} border-current ring-1 ring-current/40 shadow-sm`
+                                  : "bg-white/[0.03] border-white/10 text-[#94A3B8] hover:text-white hover:border-white/20"
+                              }`}
+                            >
+                              <div className="flex items-center gap-1.5 font-bold text-xs text-white">
+                                <span>{meta.emoji}</span>
+                                <span>{meta.shortLabel}</span>
+                              </div>
+                              <p className="text-[10px] text-[#94A3B8] leading-tight">
+                                {meta.description}
+                              </p>
+                            </button>
+                          );
+                        }
+                      )}
+                    </div>
+                  </div>
+
+                  {/* 3. Feedback Rating (1-5 Stars) */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-[#D9CDB7]">
+                        3. ให้คะแนนความสอดคล้อง / ความพึงพอใจ:
+                      </label>
+                      <span className="text-xs font-bold text-amber-400">
+                        {formFeedbackRating} / 5 ดาว
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          type="button"
+                          onClick={() => setFormFeedbackRating(star)}
+                          className={`w-9 h-9 rounded-xl border flex items-center justify-center text-base transition-all ${
+                            star <= formFeedbackRating
+                              ? "bg-amber-400/20 border-amber-400/60 text-amber-300 scale-105"
+                              : "bg-white/5 border-white/10 text-[#64748B] hover:text-white"
+                          }`}
+                        >
+                          ★
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* 4. Personal Wisdom Notes */}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-[#D9CDB7] block">
+                      4. บันทึกบทเรียน & ตกผลึกปัญญาเฉพาะตัวคุณ (Personal Wisdom):
+                    </label>
+                    <textarea
+                      rows={3}
+                      value={formUserNotes}
+                      onChange={(e) => setFormUserNotes(e.target.value)}
+                      placeholder="บันทึกสิ่งที่ได้เรียนรู้จากเหตุการณ์นี้ ความรู้สึก หรือข้อสังเกตเรื่องจังหวะเวลาเฉพาะตัวคุณ เพื่อสะสมเป็นปัญญาชีวิต..."
+                      className="w-full bg-[#0A1628] border border-[#C6A96B]/30 rounded-xl p-3 text-xs text-[#F8F6F1] placeholder-[#64748B] focus:outline-none focus:border-[#C6A96B]"
+                    />
+                  </div>
+
+                  {/* 5. Occurred Date */}
+                  <div className="space-y-1">
+                    <label className="text-[11px] text-[#94A3B8] block">
+                      วันที่เกิดผลลัพธ์จริง (ไม่บังคับ):
+                    </label>
+                    <input
+                      type="date"
+                      value={formOccurredAt}
+                      onChange={(e) => setFormOccurredAt(e.target.value)}
+                      className="bg-[#0A1628] border border-white/10 rounded-xl px-3 py-1.5 text-xs text-[#F8F6F1] focus:outline-none focus:border-[#C6A96B]"
+                    />
+                  </div>
+
+                  {/* Save Outcome Button */}
+                  <div className="pt-2 flex items-center justify-between gap-2">
+                    <button
+                      type="button"
+                      disabled={outcomeFetcher.state === "submitting"}
+                      onClick={() => handleSaveOutcome(selectedDetailQuery.id)}
+                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] font-bold text-xs hover:brightness-110 active:scale-[0.99] disabled:opacity-50 transition-all flex items-center justify-center gap-2 shadow-lg shadow-[#C6A96B]/20"
+                    >
+                      {outcomeFetcher.state === "submitting" ? (
+                        <>
+                          <span className="animate-spin text-sm">⏳</span>
+                          <span>กำลังบันทึกปัญญา...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>💾</span>
+                          <span>บันทึกผลลัพธ์และตกผลึกปัญญา</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {/* Snapshot Immutability & Engine Safety Note */}
+                <div className="rounded-xl bg-white/5 border border-white/5 p-2.5 text-center space-y-0.5">
                   <p className="text-[10px] text-[#64748B]">
                     🔒 บันทึกความทรงจำจาก Snapshot ณ เวลาที่ถาม (ไม่เปลี่ยนแปลงตามการอัปเดตระบบ)
+                  </p>
+                  <p className="text-[10px] text-[#C6A96B]/80 font-medium">
+                    ✦ การบันทึกผลลัพธ์ใช้สร้างคลังปัญญาเฉพาะตน โดยไม่เปลี่ยนแปลงหลักการพยากรณ์หลักของระบบ
                   </p>
                 </div>
 
