@@ -57,6 +57,12 @@ export interface PredictionResult {
     weight: "primary" | "supporting"
   }>
 
+  // Memory & snapshot properties (STEP 4.1 & 4.2)
+  engineSnapshot?: Record<string, any>
+  predictionScore?: number
+  queryId?: string
+  isBookmarked?: boolean
+
   // Error state
   error?: string
 }
@@ -412,5 +418,7 @@ export async function orchestratePrediction(
     bestWindow,
     actionable,
     evidenceChain,
+    engineSnapshot: snap,
+    predictionScore: snap.horaOverallScore,
   };
 }

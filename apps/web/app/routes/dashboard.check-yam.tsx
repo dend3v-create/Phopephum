@@ -9,9 +9,11 @@
  */
 
 import { json } from "@remix-run/cloudflare";
-import { useLoaderData, useActionData, useNavigation, Form, Link, useRevalidator } from "@remix-run/react";
+import { useLoaderData, useActionData, useNavigation, Form, Link, useRevalidator, useFetcher } from "@remix-run/react";
 import type { LoaderFunctionArgs, ActionFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
+import { createSupabaseClient } from "~/services/supabase.server";
+import { saveWisdomQuery } from "~/services/wisdom.server";
 import {
   getCurrentYam,
   calculateKarnchata,
@@ -136,6 +138,31 @@ export async function action({ request, context }: ActionFunctionArgs) {
     now
   );
 
+  // 3. Auto-save valid prediction to Unified Wisdom Memory (STEP 4.1 & 4.2)
+  if (prediction && prediction.answer && !prediction.error) {
+    try {
+      const { supabase } = createSupabaseClient(request, env);
+      const saved = await saveWisdomQuery(supabase, user.id, {
+        question: prediction.question,
+        intentCategory: prediction.intentCategory,
+        contextType: "horary",
+        confidence: prediction.confidence,
+        answer: prediction.answer,
+        actionable: prediction.actionable,
+        bestWindow: prediction.bestWindow,
+        predictionScore: prediction.predictionScore,
+        evidenceSnapshot: prediction.evidenceChain,
+        engineSnapshot: prediction.engineSnapshot,
+      });
+      if (saved?.id) {
+        prediction.queryId = saved.id;
+        prediction.isBookmarked = saved.is_bookmarked;
+      }
+    } catch (saveErr) {
+      console.warn("[dashboard.check-yam] Auto-save wisdom query failed:", saveErr);
+    }
+  }
+
   return json<{ error?: string; prediction?: PredictionResult }>({ prediction });
 }
 
@@ -199,6 +226,25 @@ export default function CheckYamPage() {
 
   const isSubmitting = navigation.state === "submitting" || navigation.state === "loading";
   const prediction = actionData?.prediction;
+
+  const bookmarkFetcher = useFetcher<{ success?: boolean; result?: { is_bookmarked: boolean } }>();
+  const [bookmarked, setBookmarked] = useState(false);
+
+  useEffect(() => {
+    if (prediction?.queryId) {
+      setBookmarked(Boolean(prediction.isBookmarked));
+    }
+  }, [prediction?.queryId, prediction?.isBookmarked]);
+
+  const handleToggleBookmark = () => {
+    if (!prediction?.queryId) return;
+    const nextState = !bookmarked;
+    setBookmarked(nextState);
+    bookmarkFetcher.submit(
+      { queryId: prediction.queryId, desiredState: String(nextState) },
+      { method: "post", action: "/api/wisdom-bookmark" }
+    );
+  };
 
   // Auto-revalidate live clock data every 60s
   useEffect(() => {
@@ -346,6 +392,22 @@ export default function CheckYamPage() {
               >
                 {prediction.confidence === "high" ? "สูงมาก" : prediction.confidence === "medium" ? "ปานกลาง" : "แนะนำสังเกตการณ์"}
               </span>
+
+              {prediction.queryId && (
+                <button
+                  type="button"
+                  onClick={handleToggleBookmark}
+                  title={bookmarked ? "ยกเลิกบุ๊กมาร์ก" : "บันทึกในบุ๊กมาร์ก"}
+                  className={`px-2 py-0.5 rounded-md border text-xs font-bold transition-all flex items-center gap-1 ${
+                    bookmarked
+                      ? "bg-amber-400/20 text-amber-300 border-amber-400/40"
+                      : "bg-white/5 text-[#94A3B8] border-white/10 hover:text-white"
+                  }`}
+                >
+                  <span>{bookmarked ? "★" : "☆"}</span>
+                  <span className="hidden sm:inline text-[10px]">{bookmarked ? "บันทึกแล้ว" : "บุ๊กมาร์ก"}</span>
+                </button>
+              )}
             </div>
           </div>
 
@@ -421,6 +483,22 @@ export default function CheckYamPage() {
                   ))}
                 </div>
               )}
+            </div>
+          )}
+
+          {prediction.queryId && (
+            <div className="pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3 text-xs text-[#94A3B8]">
+              <div className="flex items-center gap-2 text-emerald-400 font-medium">
+                <span>✓</span>
+                <span>บันทึกในคลังปัญญาของคุณแล้ว</span>
+              </div>
+              <Link
+                to="/dashboard/settings?tab=wisdom"
+                className="text-[#C6A96B] hover:text-[#D9BC82] underline font-medium flex items-center gap-1 transition-colors"
+              >
+                <span>🧠 ดูประวัติคำถามทั้งหมด</span>
+                <span>→</span>
+              </Link>
             </div>
           )}
 

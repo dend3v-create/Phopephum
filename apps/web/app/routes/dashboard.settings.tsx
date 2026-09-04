@@ -1,13 +1,14 @@
 import { json, redirect } from "@remix-run/cloudflare";
-import { Form, useLoaderData, useNavigation, useActionData } from "@remix-run/react";
+import { Form, useLoaderData, useNavigation, useActionData, Link, useFetcher, useSearchParams } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
+import { getWisdomHistory, toggleWisdomBookmark, type WisdomQueryRecord } from "~/services/wisdom.server";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
 import type { Env } from "~/env.server";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "~/lib/i18n/i18n.server";
 
@@ -23,6 +24,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
   let profile = await getProfile(user.id, request, env);
+
+  const url = new URL(request.url);
+  const initialTab = url.searchParams.get("tab") || "personal";
 
   const locale = await i18next.getLocale(request);
   const currentLocale = locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "th-TH";
@@ -60,10 +64,23 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const commissionRate = profile?.plan === 'imperial' ? 10 : profile?.plan === 'pro' ? 5 : 3;
 
+  // STEP 4.2 — Load Wisdom Queries history
+  let wisdomQueries: WisdomQueryRecord[] = [];
+  let wisdomError: string | null = null;
+  try {
+    wisdomQueries = await getWisdomHistory(supabase, user.id, { limit: 100 });
+  } catch (wErr) {
+    console.warn("[dashboard.settings] Failed to load wisdom queries:", wErr);
+    wisdomError = "ไม่สามารถเชื่อมต่อคลังปัญญาได้ในขณะนี้";
+  }
+
   return json({
     user,
     profile,
     currentLocale,
+    initialTab,
+    wisdomQueries,
+    wisdomError,
     wallet: {
       balance: Number(profile?.wallet_balance || 0),
       history: walletHistory || [],
@@ -82,6 +99,24 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const formType = String(formData.get("formType") ?? "personal");
 
   const { supabase } = createSupabaseClient(request, env);
+
+  // STEP 4.2 — Toggle Bookmark Action
+  if (formType === "toggleBookmark") {
+    const queryId = String(formData.get("queryId") ?? "").trim();
+    if (!queryId) return json({ error: "queryId is required" }, { status: 400 });
+
+    const desiredStateRaw = formData.get("desiredState");
+    const desiredState =
+      desiredStateRaw !== null && desiredStateRaw !== undefined
+        ? desiredStateRaw === "true" || desiredStateRaw === "1"
+        : undefined;
+
+    const result = await toggleWisdomBookmark(supabase, user.id, queryId, desiredState);
+    if (!result) {
+      return json({ error: "Failed to update bookmark" }, { status: 500 });
+    }
+    return json({ success: true, bookmark: result });
+  }
 
   if (formType === "personal") {
     const displayName = String(formData.get("displayName") ?? "");
@@ -123,14 +158,86 @@ export async function action({ request, context }: ActionFunctionArgs) {
   return json({ error: "Invalid action" }, { status: 400 });
 }
 
+const INTENT_META: Record<string, { label: string; emoji: string; color: string }> = {
+  all:          { label: "ทั้งหมด", emoji: "✦", color: "text-[#C6A96B] border-[#C6A96B]/40 bg-[#C6A96B]/10" },
+  timing:       { label: "จังหวะเวลา", emoji: "✈️", color: "text-amber-400 border-amber-400/30 bg-amber-400/10" },
+  finance:      { label: "การเงิน",  emoji: "💰", color: "text-emerald-400 border-emerald-400/30 bg-emerald-400/10" },
+  relationship: { label: "ความรัก",      emoji: "💛", color: "text-rose-400 border-rose-400/30 bg-rose-400/10" },
+  lost:         { label: "ค้นหาของ",     emoji: "🔍", color: "text-sky-400 border-sky-400/30 bg-sky-400/10" },
+  career:       { label: "การงาน",    emoji: "💼", color: "text-indigo-400 border-indigo-400/30 bg-indigo-400/10" },
+  health:       { label: "สุขภาพ", emoji: "🌿", color: "text-teal-400 border-teal-400/30 bg-teal-400/10" },
+  general:      { label: "ทั่วไป",      emoji: "✦",  color: "text-[#C6A96B] border-[#C6A96B]/30 bg-[#C6A96B]/10" },
+};
+
 export default function SettingsPage() {
-  const { profile, wallet, currentLocale } = useLoaderData<typeof loader>();
+  const { profile, wallet, currentLocale, initialTab, wisdomQueries, wisdomError } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
   const { t } = useTranslation(["common"]);
 
-  const [activeTab, setActiveTab] = useState("personal");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(initialTab || "personal");
+
+  // Wisdom Tab filters & states
+  const [activeIntent, setActiveIntent] = useState("all");
+  const [showBookmarkedOnly, setShowBookmarkedOnly] = useState(false);
+  const [selectedDetailQuery, setSelectedDetailQuery] = useState<WisdomQueryRecord | null>(null);
+  const [showEvidence, setShowEvidence] = useState(false);
+  const [copiedQueryId, setCopiedQueryId] = useState<string | null>(null);
+
+  // Optimistic bookmark tracking
+  const [localBookmarks, setLocalBookmarks] = useState<Record<string, boolean>>({});
+  const bookmarkFetcher = useFetcher<any>();
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam && (tabParam === "personal" || tabParam === "wisdom" || tabParam === "affiliate")) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab);
+    setSearchParams((prev) => {
+      const next = new URLSearchParams(prev);
+      next.set("tab", tab);
+      return next;
+    }, { replace: true });
+  };
+
+  const handleToggleBookmark = (q: WisdomQueryRecord, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const currentStatus = localBookmarks[q.id] ?? q.is_bookmarked;
+    const nextStatus = !currentStatus;
+    setLocalBookmarks((prev) => ({ ...prev, [q.id]: nextStatus }));
+
+    bookmarkFetcher.submit(
+      { queryId: q.id, desiredState: String(nextStatus) },
+      { method: "post", action: "/api/wisdom-bookmark" }
+    );
+  };
+
+  const handleCopyAnswer = (text: string, id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (typeof navigator !== "undefined") {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopiedQueryId(id);
+        setTimeout(() => setCopiedQueryId(null), 2000);
+      });
+    }
+  };
+
+  const filteredQueries = wisdomQueries.filter((q) => {
+    const isBookmarked = localBookmarks[q.id] ?? q.is_bookmarked;
+    if (showBookmarkedOnly && !isBookmarked) return false;
+    if (activeIntent !== "all" && q.intent_category !== activeIntent) return false;
+    return true;
+  });
+
+  const bookmarkedTotalCount = wisdomQueries.filter(
+    (q) => (localBookmarks[q.id] ?? q.is_bookmarked)
+  ).length;
 
   const birthDateBE = (() => {
     if (!profile?.birth_date) return { day: "", month: "", year: "" };
@@ -174,7 +281,7 @@ export default function SettingsPage() {
       {/* Navigation tabs */}
       <div className="flex border-b border-white/5 bg-[#0A1628]/45 p-1 rounded-2xl border border-[#D9BC82]/10 gap-1 w-full">
         <button
-          onClick={() => setActiveTab("personal")}
+          onClick={() => handleTabChange("personal")}
           className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "personal"
               ? "bg-[#D9BC82] text-[#0A1628]"
@@ -184,7 +291,29 @@ export default function SettingsPage() {
           {t("common:settings.personal_tab", "ข้อมูลส่วนตัว")}
         </button>
         <button
-          onClick={() => setActiveTab("affiliate")}
+          onClick={() => handleTabChange("wisdom")}
+          className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
+            activeTab === "wisdom"
+              ? "bg-[#D9BC82] text-[#0A1628]"
+              : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
+          }`}
+        >
+          <span>🧠</span>
+          <span>{t("common:settings.wisdom_tab", "คลังปัญญาของฉัน")}</span>
+          {wisdomQueries.length > 0 && (
+            <span
+              className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+                activeTab === "wisdom"
+                  ? "bg-[#0A1628]/20 text-[#0A1628]"
+                  : "bg-[#C6A96B]/20 text-[#C6A96B]"
+              }`}
+            >
+              {wisdomQueries.length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => handleTabChange("affiliate")}
           className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "affiliate"
               ? "bg-[#D9BC82] text-[#0A1628]"
@@ -336,7 +465,386 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* 2. แท็บ Affiliate & E-Wallet */}
+      {/* 2. แท็บคลังปัญญาของฉัน (PHASE C, D, E, F) */}
+      {activeTab === "wisdom" && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Subheader and Controls */}
+          <div className="space-y-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div>
+                <h2 className="text-[#F8F6F1] font-display text-lg font-bold flex items-center gap-2">
+                  <span>🧠</span>
+                  <span>{t("common:settings.wisdom_title", "คลังปัญญา & ประวัติคำทำนาย")}</span>
+                </h2>
+                <p className="text-xs text-[#94A3B8]">
+                  บันทึกประวัติคำถาม, ผลพยากรณ์, และจังหวะเวลาเฉพาะตัวคุณ
+                </p>
+              </div>
+
+              {/* Bookmark vs All toggle */}
+              <div className="flex items-center gap-1 bg-[#0A1628]/70 border border-white/10 p-1 rounded-xl self-start sm:self-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowBookmarkedOnly(false)}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                    !showBookmarkedOnly
+                      ? "bg-[#C6A96B] text-[#0A1628]"
+                      : "text-[#C6B79F] hover:text-white"
+                  }`}
+                >
+                  ทั้งหมด ({wisdomQueries.length})
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowBookmarkedOnly(true)}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all flex items-center gap-1 ${
+                    showBookmarkedOnly
+                      ? "bg-amber-400 text-[#0A1628]"
+                      : "text-[#C6B79F] hover:text-white"
+                  }`}
+                >
+                  <span>★</span>
+                  <span>บุ๊กมาร์ก ({bookmarkedTotalCount})</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Category Filter Chips (horizontal scroll on mobile) */}
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1.5 no-scrollbar -mx-1 px-1">
+              {Object.entries(INTENT_META).map(([key, meta]) => {
+                const isSelected = activeIntent === key;
+                return (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => setActiveIntent(key)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap transition-all border ${
+                      isSelected
+                        ? "bg-[#C6A96B]/20 border-[#C6A96B] text-[#F8F6F1] shadow-sm shadow-[#C6A96B]/20"
+                        : "bg-[#0A1628]/60 border-white/10 text-[#94A3B8] hover:text-[#F8F6F1] hover:border-white/20"
+                    }`}
+                  >
+                    <span>{meta.emoji}</span>
+                    <span>{meta.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Error Alert */}
+          {wisdomError && (
+            <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs text-rose-300 flex items-center justify-between">
+              <span>{wisdomError}</span>
+              <button
+                type="button"
+                onClick={() => window.location.reload()}
+                className="underline font-bold hover:text-white"
+              >
+                ลองใหม่
+              </button>
+            </div>
+          )}
+
+          {/* Query List */}
+          {filteredQueries.length > 0 ? (
+            <div className="space-y-3">
+              {filteredQueries.map((item) => {
+                const isBookmarked = localBookmarks[item.id] ?? item.is_bookmarked;
+                const meta = INTENT_META[item.intent_category] || INTENT_META.general;
+                const dateStr = new Date(item.created_at).toLocaleString("th-TH", {
+                  day: "numeric",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+
+                return (
+                  <div
+                    key={item.id}
+                    onClick={() => {
+                      setSelectedDetailQuery(item);
+                      setShowEvidence(false);
+                    }}
+                    className="group relative cursor-pointer rounded-2xl border border-white/10 bg-[#0A1628]/70 hover:border-[#C6A96B]/40 hover:bg-[#0A1628]/90 transition-all p-4 sm:p-5 shadow-lg space-y-3"
+                  >
+                    {/* Top Row: Meta Badge, Date, Bookmark button */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${meta.color}`}
+                        >
+                          <span>{meta.emoji}</span>
+                          <span>{meta.label}</span>
+                        </span>
+                        <span className="text-[11px] text-[#64748B]">{dateStr}</span>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => handleToggleBookmark(item, e)}
+                        title={isBookmarked ? "ยกเลิกบุ๊กมาร์ก" : "บันทึกในบุ๊กมาร์ก"}
+                        className={`p-1.5 rounded-lg border transition-all ${
+                          isBookmarked
+                            ? "bg-amber-400/20 text-amber-300 border-amber-400/40"
+                            : "bg-white/5 text-[#64748B] border-white/10 hover:text-white hover:border-white/20"
+                        }`}
+                      >
+                        <span className="text-sm leading-none">{isBookmarked ? "★" : "☆"}</span>
+                      </button>
+                    </div>
+
+                    {/* Question */}
+                    <div>
+                      <h3 className="text-sm sm:text-base font-bold text-[#F8F6F1] group-hover:text-[#C6A96B] transition-colors leading-snug">
+                        “{item.question}”
+                      </h3>
+                    </div>
+
+                    {/* Best Window or Score Pill */}
+                    {(item.best_window?.timeRange || typeof item.prediction_score === "number") && (
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        {item.best_window?.timeRange && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-amber-400/30 bg-amber-400/10 text-amber-300 text-[11px] font-medium">
+                            <span>⏳ ช่วงเวลา:</span>
+                            <span className="font-bold text-white">{item.best_window.timeRange}</span>
+                          </span>
+                        )}
+                        {typeof item.prediction_score === "number" && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border border-emerald-400/30 bg-emerald-400/10 text-emerald-300 text-[11px] font-medium">
+                            <span>พลังงาน:</span>
+                            <span className="font-bold text-white">{item.prediction_score}/100</span>
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Answer Preview */}
+                    <p className="text-xs sm:text-sm text-[#94A3B8] line-clamp-2 leading-relaxed">
+                      {item.answer}
+                    </p>
+
+                    {/* Footer View Link */}
+                    <div className="pt-1 flex items-center justify-between text-[11px]">
+                      <span className="text-emerald-400/80 font-medium truncate max-w-[70%]">
+                        ✓ {item.actionable || "มีข้อแนะนำที่ทำได้ทันที"}
+                      </span>
+                      <span className="text-[#C6A96B] group-hover:underline font-bold flex items-center gap-0.5">
+                        <span>ดูคำทำนายฉบับเต็ม</span>
+                        <span>→</span>
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            /* Empty State */
+            <div className="rounded-3xl border border-dashed border-[#C6A96B]/20 bg-slate-950/40 p-8 sm:p-10 text-center space-y-4">
+              <div className="w-14 h-14 mx-auto rounded-full bg-[#C6A96B]/10 border border-[#C6A96B]/20 flex items-center justify-center text-2xl">
+                🧠
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-base sm:text-lg font-bold text-[#F8F6F1]">
+                  {showBookmarkedOnly
+                    ? "ยังไม่มีคำถามที่บุ๊กมาร์กไว้"
+                    : activeIntent !== "all"
+                    ? "ไม่พบคำถามในหมวดหมู่นี้"
+                    : "ยังไม่มีบันทึกคำถาม"}
+                </h3>
+                <p className="text-xs text-[#94A3B8] max-w-xs mx-auto">
+                  {showBookmarkedOnly || activeIntent !== "all"
+                    ? "ลองเลือกดูหมวดอื่น หรือกดดูทั้งหมด"
+                    : "ลองถามเรื่องแรกของคุณได้เลย ระบบจะบันทึกคำทำนายและจังหวะเวลาไว้ในคลังปัญญานี้โดยอัตโนมัติ"}
+                </p>
+              </div>
+              <div className="pt-2">
+                <Link
+                  to="/dashboard/check-yam"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] font-bold text-xs sm:text-sm shadow-lg shadow-[#C6A96B]/20 hover:brightness-110 active:scale-95 transition-all"
+                >
+                  <span>🔎</span>
+                  <span>หาฤกษ์ให้ฉัน</span>
+                </Link>
+              </div>
+            </div>
+          )}
+
+          {/* PHASE D — Detail Modal (Reads from immutable stored snapshot) */}
+          {selectedDetailQuery && (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+              onClick={() => setSelectedDetailQuery(null)}
+            >
+              <div
+                className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl border border-[#C6A96B]/30 bg-[#0A1628] p-5 sm:p-7 shadow-2xl space-y-5"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Modal Header */}
+                <div className="flex items-start justify-between gap-3 border-b border-white/10 pb-4">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-xs font-bold px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${
+                          (INTENT_META[selectedDetailQuery.intent_category] || INTENT_META.general).color
+                        }`}
+                      >
+                        <span>{(INTENT_META[selectedDetailQuery.intent_category] || INTENT_META.general).emoji}</span>
+                        <span>{(INTENT_META[selectedDetailQuery.intent_category] || INTENT_META.general).label}</span>
+                      </span>
+                      <span className="text-[11px] text-[#64748B]">
+                        {new Date(selectedDetailQuery.created_at).toLocaleString("th-TH", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
+                    <h3 className="text-base sm:text-lg font-bold text-[#F8F6F1]">
+                      “{selectedDetailQuery.question}”
+                    </h3>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setSelectedDetailQuery(null)}
+                    className="p-1.5 rounded-full bg-white/5 border border-white/10 text-[#94A3B8] hover:text-white hover:bg-white/10 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                {/* Score & Best Window Row */}
+                {(selectedDetailQuery.best_window?.timeRange || typeof selectedDetailQuery.prediction_score === "number") && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {selectedDetailQuery.best_window?.timeRange && (
+                      <div className="p-3 rounded-xl border border-amber-400/30 bg-amber-400/10 space-y-0.5">
+                        <p className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                          ⏳ ช่วงเวลาทองที่แนะนำ
+                        </p>
+                        <p className="text-sm font-bold text-white">
+                          {selectedDetailQuery.best_window.timeRange}
+                        </p>
+                        {selectedDetailQuery.best_window.description && (
+                          <p className="text-[11px] text-amber-200/80">
+                            {selectedDetailQuery.best_window.description}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {typeof selectedDetailQuery.prediction_score === "number" && (
+                      <div className="p-3 rounded-xl border border-emerald-400/30 bg-emerald-400/10 space-y-0.5">
+                        <p className="text-[10px] font-bold text-emerald-300 uppercase tracking-wider">
+                          ✦ คะแนนพลังงาน
+                        </p>
+                        <p className="text-sm font-bold text-white">
+                          {selectedDetailQuery.prediction_score} / 100
+                        </p>
+                        <p className="text-[11px] text-emerald-200/80">
+                          ความสอดคล้อง: {selectedDetailQuery.confidence === "high" ? "สูงมาก" : selectedDetailQuery.confidence === "medium" ? "ปานกลาง" : "แนะนำสังเกตการณ์"}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Main Stored Answer (Plain Thai) */}
+                <div className="space-y-2">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+                    ✦ คำแนะนำสำหรับคุณ
+                  </p>
+                  <p className="text-sm sm:text-base text-[#F8F6F1] leading-relaxed whitespace-pre-line">
+                    {selectedDetailQuery.answer}
+                  </p>
+                </div>
+
+                {/* Actionable Advice */}
+                <div className="p-4 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 flex items-start gap-3">
+                  <span className="text-emerald-400 text-base mt-0.5">✓</span>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-0.5">
+                      ข้อแนะนำที่ทำได้ทันที
+                    </p>
+                    <p className="text-xs sm:text-sm text-[#E2E8F0] font-medium leading-snug">
+                      {selectedDetailQuery.actionable}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Level 2: Evidence Snapshot Accordion (Plain language, no raw jargon) */}
+                {selectedDetailQuery.evidence_snapshot && selectedDetailQuery.evidence_snapshot.length > 0 && (
+                  <div className="pt-2 border-t border-white/8">
+                    <button
+                      type="button"
+                      onClick={() => setShowEvidence(!showEvidence)}
+                      className="flex items-center justify-between w-full text-left py-1 text-xs font-bold text-[#94A3B8] hover:text-[#C6A96B] transition-colors"
+                    >
+                      <span>🔍 ดูปัจจัยพลังงานเชิงลึก (Evidence Chain)</span>
+                      <span>{showEvidence ? "▲ ย่อ" : "▼ ขยาย"}</span>
+                    </button>
+
+                    {showEvidence && (
+                      <div className="mt-2 space-y-2 pl-2 border-l-2 border-[#C6A96B]/30 animate-fade-up">
+                        {selectedDetailQuery.evidence_snapshot.map((item, idx) => (
+                          <div key={idx} className="text-xs space-y-0.5">
+                            <span className="font-bold text-[#C6A96B]">{item.source}:</span>
+                            <p className="text-[#CBD5E1]">{item.finding}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Snapshot Immutability Disclaimer */}
+                <div className="rounded-xl bg-white/5 border border-white/5 p-2.5 text-center">
+                  <p className="text-[10px] text-[#64748B]">
+                    🔒 บันทึกความทรงจำจาก Snapshot ณ เวลาที่ถาม (ไม่เปลี่ยนแปลงตามการอัปเดตระบบ)
+                  </p>
+                </div>
+
+                {/* Modal Footer Controls */}
+                <div className="flex items-center justify-between gap-3 pt-2 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={(e) => handleToggleBookmark(selectedDetailQuery, e)}
+                    className={`px-3 py-1.5 rounded-xl border text-xs font-bold flex items-center gap-1.5 transition-all ${
+                      (localBookmarks[selectedDetailQuery.id] ?? selectedDetailQuery.is_bookmarked)
+                        ? "bg-amber-400/20 text-amber-300 border-amber-400/40"
+                        : "bg-white/5 text-[#94A3B8] border-white/10 hover:text-white"
+                    }`}
+                  >
+                    <span>{(localBookmarks[selectedDetailQuery.id] ?? selectedDetailQuery.is_bookmarked) ? "★" : "☆"}</span>
+                    <span>{(localBookmarks[selectedDetailQuery.id] ?? selectedDetailQuery.is_bookmarked) ? "บุ๊กมาร์กแล้ว" : "บุ๊กมาร์ก"}</span>
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={(e) => handleCopyAnswer(selectedDetailQuery.answer, selectedDetailQuery.id, e)}
+                      className="px-3 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-xs font-medium text-[#D9CDB7] transition-colors"
+                    >
+                      {copiedQueryId === selectedDetailQuery.id ? "✓ คัดลอกแล้ว" : "คัดลอกคำแนะนำ"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedDetailQuery(null)}
+                      className="px-4 py-1.5 rounded-xl bg-[#C6A96B] text-[#0A1628] font-bold text-xs hover:brightness-110 transition-all"
+                    >
+                      ปิด
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 3. แท็บ Affiliate & E-Wallet */}
       {activeTab === "affiliate" && (
         <div className="space-y-6 animate-in fade-in duration-300">
           
