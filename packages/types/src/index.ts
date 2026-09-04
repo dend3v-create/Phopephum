@@ -434,4 +434,58 @@ export interface PersonalWisdomIntelligence {
   lastUpdated: string;
 }
 
+// ─── STEP 5.1 — Personal Auspicious Calendar Data Contracts ──────────────────
+
+export type CalendarEnergyLevel = "golden" | "favorable" | "neutral" | "caution" | "avoid";
+
+export interface CalendarTimeWindow {
+  id: string;
+  startTime: string; // "HH:mm"
+  endTime: string;   // "HH:mm"
+  level: CalendarEnergyLevel;
+  score: number;     // 0 - 100
+  title: string;
+  suitableFor: string[];
+  cautions: string[];
+  plainAdvice: string;
+  isGoldenWindow: boolean;
+}
+
+export interface CalendarDomainScore {
+  domain: "career" | "finance" | "relationship" | "wellness";
+  label: string;
+  score: number; // 0 - 100
+  verdict: string;
+  icon: string;
+}
+
+export interface CalendarDayIntelligence {
+  date: string; // "YYYY-MM-DD"
+  lunarDayInfo: {
+    lunarDateStr: string;
+    moonPhase: string;
+    isWanPhra: boolean;
+    dayOfWeekThai: string;
+  };
+  overallScore: number; // 0 - 100
+  dailyTheme: string;
+  dailySummary: string;
+  goldenWindow: CalendarTimeWindow | null;
+  timelineWindows: CalendarTimeWindow[];
+  domainScores: CalendarDomainScore[];
+  hasPersonalContext: boolean;
+  personalNote?: string;
+}
+
+export interface CalendarMonthDayOverview {
+  date: string; // "YYYY-MM-DD"
+  day: number;
+  overallScore: number;
+  hasGoldenWindow: boolean;
+  isWanPhra: boolean;
+  dominantEnergy: CalendarEnergyLevel;
+  appointmentCount: number;
+}
+
+
 

@@ -5,9 +5,17 @@ import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { Card } from "~/components/ui/Card";
 import { calculatePhopephum, getThaiBaseNumbers, THAI_MONTH_NAMES } from "@phopephum/engine";
+import {
+  calculateDayIntelligence,
+  calculateMonthOverview,
+} from "~/services/calendarIntelligence.server";
+import type {
+  CalendarDayIntelligence,
+  CalendarMonthDayOverview,
+} from "@phopephum/types";
 import type { Env } from "~/env.server";
 import { useState, useMemo, useEffect } from "react";
-import { Compass, Calendar as CalendarIcon, Clock, CheckCircle2, AlertTriangle, Star, Save, ExternalLink, ListTodo } from "lucide-react";
+import { Compass, Calendar as CalendarIcon, Clock, CheckCircle2, AlertTriangle, Star, Save, ExternalLink, ListTodo, Sparkles } from "lucide-react";
 
 export const meta: MetaFunction = () => [
   { title: "ปฏิทินสำเร็จ 100 ปี & วางแผนฤกษ์มงคล — PhopePhum" },
@@ -104,28 +112,45 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .order("event_date", { ascending: true })
     .order("event_time", { ascending: true });
 
+  const profileContext = profile ? {
+    birthDate: profile.birth_date,
+    birthTime: profile.birth_time,
+    birthPlace: profile.birth_place,
+    displayName: profile.display_name,
+  } : null;
+
+  const monthOverview = calculateMonthOverview(year, month, profileContext, appointments || []);
+  const monthOverviewMap = new Map<string, CalendarMonthDayOverview>();
+  for (const mo of monthOverview) {
+    monthOverviewMap.set(mo.date, mo);
+  }
+
   const calendarDays = [];
   for (let d = 1; d <= daysInMonth; d++) {
     const dateStr = `${year}-${String(month).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
     const lunar = getThaiBaseNumbers(dateStr);
-    
-    // กรองนัดหมายของวันนี้
     const dayAppointments = (appointments || []).filter(a => a.event_date === dateStr);
+    const dayOverview = monthOverviewMap.get(dateStr);
     
     calendarDays.push({ 
       day: d, 
       dateStr,
       appointments: dayAppointments,
+      hasGoldenWindow: dayOverview?.hasGoldenWindow ?? false,
+      dominantEnergy: dayOverview?.dominantEnergy ?? "neutral",
+      dayScore: dayOverview?.overallScore ?? 60,
       ...lunar 
     });
   }
 
-  // ── 2. วางแผนฤกษ์มงคล (Timing Advisor) ──
-  const eventDate = url.searchParams.get("eventDate");
+  // ── 2. วางแผนฤกษ์มงคล (Timing Advisor & Day Intelligence) ──
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const eventDate = url.searchParams.get("eventDate") || todayStr;
   const eventTime = url.searchParams.get("eventTime") || "12:00";
   const eventType = url.searchParams.get("eventType") || "negotiation";
   const appointmentTitle = url.searchParams.get("title") || "";
   
+  const dayIntelligence = await calculateDayIntelligence(eventDate, profileContext);
   let advisorResult = null;
 
   if (profile?.birth_date && eventDate) {
@@ -229,7 +254,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     eventType,
     appointmentTitle,
     advisorResult,
-    appointments: appointments || []
+    appointments: appointments || [],
+    dayIntelligence,
+    monthOverview,
   });
 }
 
@@ -237,11 +264,21 @@ export default function DashboardCalendar() {
   const { 
     year, month, calendarDays, firstDayOfWeek, 
     eventDate, eventTime, eventType, appointmentTitle,
-    advisorResult, profile, appointments 
+    advisorResult, profile, appointments,
+    dayIntelligence, monthOverview,
   } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const navigation = useNavigation();
   const isSaving = navigation.state !== "idle" && navigation.formData?.get("intent") === "save_appointment";
+
+  const [selectedTime, setSelectedTime] = useState(eventTime);
+  const [selectedEventType, setSelectedEventType] = useState(eventType);
+  const [selectedTitle, setSelectedTitle] = useState(appointmentTitle);
+  const [showPlannerForm, setShowPlannerForm] = useState(false);
+
+  useEffect(() => {
+    setSelectedTime(eventTime);
+  }, [eventTime]);
 
   const beYear = year + 543;
 
@@ -331,9 +368,16 @@ export default function DashboardCalendar() {
                   to={`?year=${year}&month=${month}&eventDate=${day.dateStr}&eventTime=${eventTime}&eventType=${eventType}&title=${encodeURIComponent(appointmentTitle)}`}
                   className={`relative aspect-square md:aspect-video border-b border-r border-white/5 p-2 transition-all hover:bg-[#C9A96E]/10 group ${day.isWanPhra ? "bg-[#C9A96E]/5" : ""} ${eventDate === day.dateStr ? "bg-[#C9A96E]/20 ring-1 ring-inset ring-gold-liquid/50" : ""}`}
                 >
-                  <span className={`text-xs sm:text-sm font-bold ${day.weekDay === 0 ? "text-rose-400/80" : "text-[#F8F6F1]/60"} group-hover:text-[#F8F6F1] transition-colors`}>
-                    {day.day}
-                  </span>
+                  <div className="flex items-center justify-between">
+                    <span className={`text-xs sm:text-sm font-bold ${day.weekDay === 0 ? "text-rose-400/80" : "text-[#F8F6F1]/60"} group-hover:text-[#F8F6F1] transition-colors`}>
+                      {day.day}
+                    </span>
+                    {day.hasGoldenWindow && (
+                      <span className="text-[10px] text-amber-300 font-bold leading-none" title="มีช่วงเวลาทองคำ (Golden Window)">
+                        ⭐
+                      </span>
+                    )}
+                  </div>
 
                   <div className="mt-1 flex flex-col gap-0.5">
                     <span className={`text-[10px] md:text-xs font-sans-thai leading-tight ${day.isWanPhra ? "text-amber-400 font-bold drop-shadow-md" : "text-[#D9CDB7]/80"}`}>
@@ -410,170 +454,309 @@ export default function DashboardCalendar() {
           </div>
         </div>
 
-        {/* ── Right: Success Timing Advisor (1/3 width) ── */}
+        {/* ── Right: Personal Auspicious Day Intelligence (1/3 width) ── */}
         <div className="space-y-6">
-          <Card className="p-6 border-2 border-[#C9A96E]/30 bg-gradient-to-b from-[#0a2240] to-[#020617] rounded-3xl shadow-xl">
-            <h3 className="font-display font-black text-gold-liquid text-lg mb-4 flex items-center gap-2">
-              <Compass className="w-5 h-5 animate-spin-slow" /> วางแผนฤกษ์มงคล
-            </h3>
+          {/* Day Intelligence Card */}
+          {dayIntelligence && (
+            <Card className="p-6 border-2 border-[#C9A96E]/40 bg-gradient-to-br from-[#0a2240] via-[#0d1f38] to-[#020617] rounded-3xl shadow-2xl space-y-5 relative overflow-hidden">
+              <div
+                className="absolute -top-24 -right-24 w-72 h-72 rounded-full pointer-events-none opacity-20 blur-3xl"
+                style={{ background: "radial-gradient(circle, #C6A96B 0%, transparent 70%)" }}
+              />
 
-            {profile?.birth_date ? (
-              <Form method="get" className="space-y-4 font-sans-thai">
-                {/* Keep current month view params */}
-                <input type="hidden" name="month" value={month} />
-                <input type="hidden" name="year" value={year} />
-
-                <div className="space-y-1">
-                  <label className="text-[11px] text-[#C6B79F] uppercase font-bold tracking-wider">ชื่องานนัดหมาย</label>
-                  <input
-                    name="title"
-                    type="text"
-                    defaultValue={appointmentTitle}
-                    placeholder="เช่น นัดเซ็นสัญญากับลูกค้า"
-                    className="w-full bg-[#020617]/70 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-3.5 py-2 text-xs focus:outline-none focus:border-gold-liquid"
-                  />
+              {/* 1. Day Header */}
+              <div className="border-b border-white/10 pb-4 space-y-1 relative z-10">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+                    DAILY AUSPICIOUS INTELLIGENCE
+                  </span>
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 text-emerald-300">
+                    {dayIntelligence.overallScore}% พลังงานเกื้อหนุน
+                  </span>
                 </div>
 
-                <div className="space-y-1">
-                  <label className="text-[11px] text-[#C6B79F] uppercase font-bold tracking-wider">ประเภทกิจกรรม</label>
-                  <select
-                    name="eventType"
-                    defaultValue={eventType}
-                    className="w-full bg-[#020617]/70 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-gold-liquid"
-                  >
-                    {EVENT_TYPES.map(e => (
-                      <option key={e.id} value={e.id} className="bg-[#020617]">{e.label}</option>
-                    ))}
-                  </select>
-                </div>
+                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                  <span>{dayIntelligence.lunarDayInfo.dayOfWeekThai}</span>
+                  <span className="text-xs text-[#94A3B8] font-normal">
+                    ({new Date(dayIntelligence.date).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })})
+                  </span>
+                </h3>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="space-y-1">
-                    <label className="text-[11px] text-[#C6B79F] uppercase font-bold tracking-wider">วันที่ทำนัด</label>
-                    <input
-                      name="eventDate"
-                      type="date"
-                      defaultValue={eventDate || ""}
-                      required
-                      className="w-full bg-[#020617]/70 border border-[#C9A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-gold-liquid"
-                    />
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-[11px] text-[#C6B79F] uppercase font-bold tracking-wider">เวลาที่เริ่มนัด</label>
-                    <input
-                      name="eventTime"
-                      type="time"
-                      defaultValue={eventTime}
-                      className="w-full bg-[#020617]/70 border border-[#C9A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-gold-liquid"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="w-full py-3 rounded-xl text-xs font-black text-cosmic-950 bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] transition-all hover:scale-102 active:scale-98 shadow-md"
-                >
-                  🚀 ตรวจสอบคะแนนฤกษ์สำเร็จ
-                </button>
-              </Form>
-            ) : (
-              <div className="text-center py-6 space-y-3">
-                <p className="text-xs text-[#C6B79F] font-sans-thai">กรุณาตั้งค่าข้อมูลวันเกิดในโปรไฟล์ก่อนใช้งานฤกษ์สำเร็จเฉพาะบุคคล</p>
-                <Link to="/dashboard/settings" className="inline-block text-xs font-black text-[#C9A96E] hover:underline font-sans-thai">
-                  ไปที่ตั้งค่าดวงเกิด →
-                </Link>
+                <p className="text-xs text-amber-300/90 font-medium">
+                  ✦ {dayIntelligence.lunarDayInfo.lunarDateStr} · {dayIntelligence.lunarDayInfo.moonPhase}
+                  {dayIntelligence.lunarDayInfo.isWanPhra && " (วันพระ)"}
+                </p>
               </div>
-            )}
 
-            {/* Display advisor calculations */}
-            {advisorResult && (
-              <div className="mt-5 pt-4 border-t border-[#C9A96B]/20 space-y-4 animate-fade-up">
-                
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-[#94A3B8] font-bold">ความสำเร็จที่คาดหวัง:</span>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-4 h-4 ${
-                          i < Math.round(advisorResult.score / 20) 
-                            ? "text-yellow-400 fill-yellow-400" 
-                            : "text-white/10"
-                        }`}
-                      />
-                    ))}
-                    <span className="text-sm font-black text-[#F8F6F1] ml-1.5">{advisorResult.score}%</span>
+              {/* 2. Daily Theme & Plain Summary */}
+              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2 relative z-10">
+                <p className="text-[11px] font-bold text-[#C6A96B] uppercase tracking-wider">
+                  ธีมพลังงานประจำวัน:
+                </p>
+                <p className="text-sm font-bold text-[#F8F6F1] leading-snug">
+                  “{dayIntelligence.dailyTheme}”
+                </p>
+                <p className="text-xs text-[#94A3B8] leading-relaxed">
+                  {dayIntelligence.dailySummary}
+                </p>
+                {dayIntelligence.personalNote && (
+                  <div className="pt-2 border-t border-white/5 text-xs text-[#D9BC82] flex items-start gap-1.5">
+                    <span>💡</span>
+                    <span>{dayIntelligence.personalNote}</span>
                   </div>
-                </div>
+                )}
+              </div>
 
-                <div className="rounded-2xl p-4 bg-white/5 border border-white/10 space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-[11px] font-black text-gold-300 tracking-wider">ยามปกครอง:</span>
-                    <span className="text-xs font-bold text-[#F8F6F1]">{advisorResult.yamName} ({advisorResult.timeLabel})</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-[11px] font-black text-gold-300 tracking-wider">สภาวะทักษา:</span>
-                    <span className={`text-[10px] font-black px-1.5 py-0.5 rounded border ${
-                      advisorResult.status === "excellent" ? "text-emerald-400 border-emerald-500/25 bg-emerald-500/5" :
-                      advisorResult.status === "warning" ? "text-rose-400 border-rose-500/25 bg-rose-500/5" :
-                      "text-sky-300 border-sky-500/25 bg-sky-500/5"
-                    }`}>
-                      ยาม{advisorResult.bhop}
+              {/* 3. ⭐ GOLDEN WINDOW SPOTLIGHT */}
+              {dayIntelligence.goldenWindow && (
+                <div className="p-4 rounded-2xl border-2 border-amber-400/40 bg-gradient-to-r from-amber-500/15 via-[#C6A96B]/15 to-transparent relative z-10 space-y-3 shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xl">⭐</span>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest text-amber-300">
+                          GOLDEN WINDOW OF THE DAY
+                        </span>
+                        <h4 className="text-sm sm:text-base font-bold text-white">
+                          {dayIntelligence.goldenWindow.startTime} – {dayIntelligence.goldenWindow.endTime} น.
+                        </h4>
+                      </div>
+                    </div>
+                    <span className="text-xs font-black text-amber-300 bg-amber-400/20 border border-amber-400/30 px-2.5 py-1 rounded-full">
+                      {dayIntelligence.goldenWindow.score}/100
                     </span>
                   </div>
+
+                  {/* Chips */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {dayIntelligence.goldenWindow.suitableFor.map((item, idx) => (
+                      <span
+                        key={idx}
+                        className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/10 text-[#F8F6F1] border border-white/10 font-medium"
+                      >
+                        ✓ {item}
+                      </span>
+                    ))}
+                  </div>
+
+                  <p className="text-xs text-[#CBD5E1] leading-relaxed">
+                    {dayIntelligence.goldenWindow.plainAdvice}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedTime(dayIntelligence.goldenWindow!.startTime);
+                      setShowPlannerForm(true);
+                    }}
+                    className="w-full py-2 rounded-xl text-xs font-bold text-[#020617] transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                    style={{ background: "linear-gradient(135deg, #C6A96B 0%, #F2D49B 100%)" }}
+                  >
+                    <span>✨ ใช้นัดหมายช่วงเวลานี้</span>
+                  </button>
+                </div>
+              )}
+
+              {/* 4. Timeline of the Day (8 slots) */}
+              <div className="space-y-2 relative z-10">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">
+                    ไทม์ไลน์ช่วงเวลาตลอดวัน:
+                  </span>
+                  <span className="text-[10px] text-[#64748B]">คลิกเพื่อเลือกเวลา</span>
                 </div>
 
-                <div className={`p-3.5 rounded-xl border text-xs sm:text-[13px] font-sans-thai leading-relaxed ${
-                  advisorResult.status === "warning"
-                    ? "bg-rose-500/5 border-rose-500/25 text-rose-300"
-                    : "bg-[#C9A96E]/5 border-[#C9A96E]/20 text-[#D9CDB7]"
-                }`}>
-                  {advisorResult.advice}
+                <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1 no-scrollbar">
+                  {dayIntelligence.timelineWindows.map((win) => {
+                    const isSelected = selectedTime === win.startTime;
+                    return (
+                      <button
+                        key={win.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedTime(win.startTime);
+                          setShowPlannerForm(true);
+                        }}
+                        className={`w-full text-left p-2.5 rounded-xl border text-xs transition-all flex items-center justify-between ${
+                          isSelected
+                            ? "bg-[#C6A96B]/20 border-[#C6A96B] text-white"
+                            : win.level === "golden"
+                            ? "bg-amber-500/10 border-amber-500/30 text-amber-200 hover:bg-amber-500/20"
+                            : win.level === "favorable"
+                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-200 hover:bg-emerald-500/20"
+                            : win.level === "caution" || win.level === "avoid"
+                            ? "bg-rose-500/10 border-rose-500/20 text-rose-300 hover:bg-rose-500/20"
+                            : "bg-white/5 border-white/5 text-[#CBD5E1] hover:bg-white/10"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold font-mono text-[11px]">
+                            {win.startTime}–{win.endTime}
+                          </span>
+                          <span className="text-[11px] truncate max-w-[130px]">{win.suitableFor[0] || win.title}</span>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {win.isGoldenWindow && <span className="text-xs">⭐</span>}
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/30">
+                            {win.score}%
+                          </span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 5. 4 Life Domains */}
+              <div className="space-y-2 relative z-10">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">
+                  ความสอดคล้อง 4 มิติชีวิต:
+                </span>
+                <div className="grid grid-cols-2 gap-2">
+                  {dayIntelligence.domainScores.map((dm) => (
+                    <div key={dm.domain} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="flex items-center gap-1 font-bold text-white text-[11px]">
+                          <span>{dm.icon}</span>
+                          <span>{dm.label.split("&")[0]}</span>
+                        </span>
+                        <span className="text-[10px] font-bold text-amber-300">{dm.score}%</span>
+                      </div>
+                      <p className="text-[10px] text-[#94A3B8] leading-tight line-clamp-1">{dm.verdict}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* 6. Toggle Appointment Planner */}
+              <div className="pt-2 border-t border-white/10 relative z-10 space-y-3">
+                <div className="flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setShowPlannerForm(!showPlannerForm)}
+                    className="text-xs font-bold text-[#C6A96B] hover:underline flex items-center gap-1"
+                  >
+                    <span>{showPlannerForm ? "▲ ย่อแบบฟอร์มนัดหมาย" : "▼ เปิดแบบฟอร์มนัดหมายฤกษ์สำเร็จ"}</span>
+                  </button>
+
+                  <Link
+                    to={`/dashboard/check-yam?mode=compare&date=${eventDate}`}
+                    className="text-[11px] text-[#94A3B8] hover:text-white underline flex items-center gap-1"
+                  >
+                    <span>⚖️ เปรียบเทียบ 3 ช่วงเวลา</span>
+                  </Link>
                 </div>
 
-                {/* ── Action Buttons ── */}
-                <div className="grid grid-cols-1 gap-2 pt-2">
-                  <Form method="post">
-                    <input type="hidden" name="intent" value="save_appointment" />
-                    <input type="hidden" name="title" value={appointmentTitle} />
-                    <input type="hidden" name="eventType" value={eventType} />
-                    <input type="hidden" name="eventDate" value={eventDate ?? ""} />
-                    <input type="hidden" name="eventTime" value={eventTime} />
-                    <input type="hidden" name="score" value={advisorResult.score} />
-                    <input type="hidden" name="verdict" value={advisorResult.verdict} />
-                    <input type="hidden" name="advice" value={advisorResult.advice} />
-                    <input type="hidden" name="yamName" value={advisorResult.yamName} />
-                    <input type="hidden" name="bhop" value={advisorResult.bhop} />
-                    
+                {/* Form Embedded */}
+                {showPlannerForm && (
+                  <Form method="get" className="space-y-3 pt-2 animate-in fade-in duration-200">
+                    <input type="hidden" name="month" value={month} />
+                    <input type="hidden" name="year" value={year} />
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-[#C6B79F] font-bold">ชื่องานนัดหมาย:</label>
+                      <input
+                        name="title"
+                        type="text"
+                        value={selectedTitle}
+                        onChange={(e) => setSelectedTitle(e.target.value)}
+                        placeholder="เช่น นัดเซ็นสัญญากับลูกค้า"
+                        className="w-full bg-[#020617]/70 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#C6A96B]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <label className="text-[11px] text-[#C6B79F] font-bold">ประเภทกิจกรรม:</label>
+                        <select
+                          name="eventType"
+                          value={selectedEventType}
+                          onChange={(e) => setSelectedEventType(e.target.value)}
+                          className="w-full bg-[#020617]/70 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2 py-2 text-xs outline-none focus:border-[#C6A96B]"
+                        >
+                          {EVENT_TYPES.map((e) => (
+                            <option key={e.id} value={e.id} className="bg-[#020617]">
+                              {e.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="text-[11px] text-[#C6B79F] font-bold">เวลาที่เริ่มนัด:</label>
+                        <input
+                          name="eventTime"
+                          type="time"
+                          value={selectedTime}
+                          onChange={(e) => setSelectedTime(e.target.value)}
+                          className="w-full bg-[#020617]/70 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2 py-2 text-xs outline-none focus:border-[#C6A96B]"
+                        />
+                      </div>
+                    </div>
+
+                    <input type="hidden" name="eventDate" value={eventDate} />
+
                     <button
                       type="submit"
-                      disabled={isSaving}
-                      className="w-full py-2.5 rounded-xl text-xs font-bold text-[#F8F6F1] bg-white/10 hover:bg-white/20 border border-white/10 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                      className="w-full py-2.5 rounded-xl text-xs font-black text-cosmic-950 bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] transition-all hover:scale-[1.01] active:scale-[0.99] shadow-md flex items-center justify-center gap-1.5"
                     >
-                      {isSaving ? (
-                        <span className="animate-pulse">กำลังบันทึก...</span>
-                      ) : (
-                        <>
-                          <Save className="w-4 h-4" /> บันทึกลงระบบ PhopePhum
-                        </>
-                      )}
+                      <span>🚀 ตรวจสอบคะแนนฤกษ์สำเร็จเฉพาะตน</span>
                     </button>
                   </Form>
+                )}
 
-                  <a 
-                    href={getGoogleCalendarUrl(appointmentTitle, eventDate!, eventTime, advisorResult.advice)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full py-2.5 rounded-xl text-xs font-bold text-[#020617] bg-[#F8F6F1] hover:bg-white transition-all flex items-center justify-center gap-2"
-                  >
-                    <img src="https://www.gstatic.com/calendar/images/dynamiclogo_2020q4/calendar_15_2x.png" className="w-4 h-4" alt="Google Calendar" />
-                    เพิ่มใน Google Calendar
-                  </a>
-                </div>
+                {/* Display advisor result (if submitted) */}
+                {advisorResult && (
+                  <div className="pt-3 border-t border-white/10 space-y-3 animate-fade-up">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-[#94A3B8] font-bold">คะแนนฤกษ์สำเร็จ:</span>
+                      <span className="text-sm font-black text-amber-300">{advisorResult.score}%</span>
+                    </div>
 
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-[#CBD5E1] leading-relaxed">
+                      {advisorResult.advice}
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="grid grid-cols-2 gap-2 pt-1">
+                      <Form method="post">
+                        <input type="hidden" name="intent" value="save_appointment" />
+                        <input type="hidden" name="title" value={selectedTitle || appointmentTitle} />
+                        <input type="hidden" name="eventType" value={selectedEventType} />
+                        <input type="hidden" name="eventDate" value={eventDate} />
+                        <input type="hidden" name="eventTime" value={selectedTime} />
+                        <input type="hidden" name="score" value={advisorResult.score} />
+                        <input type="hidden" name="verdict" value={advisorResult.verdict} />
+                        <input type="hidden" name="advice" value={advisorResult.advice} />
+                        <input type="hidden" name="yamName" value={advisorResult.yamName} />
+                        <input type="hidden" name="bhop" value={advisorResult.bhop} />
+
+                        <button
+                          type="submit"
+                          disabled={isSaving}
+                          className="w-full py-2 rounded-xl text-xs font-bold text-[#F8F6F1] bg-white/10 hover:bg-white/20 border border-white/10 transition-all flex items-center justify-center gap-1.5"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          <span>บันทึกนัดหมาย</span>
+                        </button>
+                      </Form>
+
+                      <a
+                        href={getGoogleCalendarUrl(selectedTitle || appointmentTitle, eventDate, selectedTime, advisorResult.advice)}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="py-2 rounded-xl text-xs font-bold text-[#020617] bg-[#F8F6F1] hover:bg-white transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>Google Sync</span>
+                      </a>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </Card>
+            </Card>
+          )}
         </div>
 
       </div>
