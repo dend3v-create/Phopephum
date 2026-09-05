@@ -1,314 +1,422 @@
-import React, { useEffect, useState } from 'react';
+/**
+ * dashboard.tsx — Horoscope & Yam Screen (Tab 2)
+ * ============================================================================
+ * Astral Imperial Thai Astrology & AtthaKarn Wheel
+ * Features:
+ *  - 7 Base 9 Root Authentic Chart (ผังเลข 7 ตัว 9 ฐาน)
+ *  - 8-Slot Daytime/Nighttime Yam Clock
+ *  - Age Transit Cycle (วัยจร / ปีจร)
+ */
+
+import React, { useEffect, useState } from "react";
 import {
-  View, Text, StyleSheet, ScrollView,
-  SafeAreaView, ActivityIndicator, RefreshControl,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
   TouchableOpacity,
-} from 'react-native';
-import { supabase } from '../../lib/supabase';
-import { Ionicons } from '@expo/vector-icons';
+  SafeAreaView,
+  RefreshControl,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import {
+  calculateSevenBase,
+  calculateAgeCycle,
   getCurrentYam,
-  calculateMoonPhase,
-  calculateKarnchata,
-  calculateRahu,
-  calculateHoraTaynoo,
-  PLANET_INFO,
-} from '@phopephum/engine';
-import { useRouter } from 'expo-router';
+  getThaiBaseNumbers,
+} from "@phopephum/engine";
+import { ASTRAL_THEME } from "../../constants/theme";
+import { useAuthStore } from "../../store/authStore";
+import { ProtectedScreen } from "../../components/ProtectedScreen";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-const LEVEL_STYLE: Record<string, { color: string; bg: string; border: string }> = {
-  excellent: { color: '#34D399', bg: 'rgba(52, 211, 153, 0.1)', border: 'rgba(52, 211, 153, 0.3)' },
-  very_good: { color: '#38BDF8', bg: 'rgba(56, 189, 248, 0.1)', border: 'rgba(56, 189, 248, 0.3)' },
-  good:      { color: '#FBBF24', bg: 'rgba(251, 191, 36, 0.1)', border: 'rgba(251, 191, 36, 0.3)' },
-  bad:       { color: '#FB7185', bg: 'rgba(251, 113, 133, 0.1)', border: 'rgba(251, 113, 133, 0.3)' },
-};
-
-const STAR_TH: Record<number, string> = { 1: "อาทิตย์", 2: "จันทร์", 3: "อังคาร", 4: "พุธ", 5: "พฤหัส", 6: "ศุกร์", 7: "เสาร์" };
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
-export default function DashboardScreen() {
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+export default function HoroscopeScreen() {
+  const router = useRouter();
+  const { profile, fetchProfile } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
   const [now, setNow] = useState(new Date());
-  const router = useRouter();
 
   useEffect(() => {
-    fetchData();
-    const timer = setInterval(() => {
-      setNow(new Date());
-    }, 60000);
+    const timer = setInterval(() => setNow(new Date()), 60000);
     return () => clearInterval(timer);
   }, []);
 
-  async function fetchData() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', user.id)
-      .single();
-
-    setProfile(profileData);
-    setLoading(false);
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchProfile();
+    setNow(new Date());
     setRefreshing(false);
+  };
+
+  const birthDateStr = profile?.birth_date;
+  const birthTimeStr = profile?.birth_time || "06:00";
+
+  let thaiBase: any = null;
+  let chartRows: number[][] = [];
+  let ageCycle: any = null;
+
+  if (birthDateStr) {
+    try {
+      thaiBase = getThaiBaseNumbers(birthDateStr, birthTimeStr);
+      const [b1, b2, b3] = calculateSevenBase(thaiBase.dayNum, thaiBase.monthNum, thaiBase.yearNum);
+      const b4 = b1.map((v: number, i: number) => v + b2[i] + b3[i]);
+      chartRows = [b1, b2, b3, b4];
+
+      const bDate = new Date(birthDateStr);
+      const birthYear = bDate.getFullYear();
+      const currentYear = now.getFullYear();
+      const currentAge = Math.max(1, currentYear - birthYear);
+      ageCycle = calculateAgeCycle(currentAge, thaiBase.dayNum);
+    } catch {
+      // Non-blocking calculation fallback
+    }
   }
 
-  const yam = getCurrentYam();
-  const moon = calculateMoonPhase();
-  const karnchata = calculateKarnchata(now);
-  const rahu = calculateRahu(now);
-  const hora = calculateHoraTaynoo({ dateAsked: now });
+  const currentYam = getCurrentYam();
 
-  const dateStr = now.toLocaleDateString('th-TH', {
-    weekday: 'long', day: 'numeric', month: 'long',
-  });
-
-  const timeStr = now.toLocaleTimeString('th-TH', {
-    hour: '2-digit', minute: '2-digit',
-  });
-
-  const ls = LEVEL_STYLE[yam.travelAuspiciousness.level] ?? LEVEL_STYLE.good;
-
-  if (loading) {
-    return (
+  return (
+    <ProtectedScreen>
       <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#C6A96B" style={{ marginTop: 80 }} />
-      </SafeAreaView>
-    );
-  }
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchData(); }} tintColor="#C6A96B" />}
-      >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={{ flex: 1, marginRight: 8 }}>
-            <Text style={styles.dateText}>{dateStr}</Text>
-            <Text style={styles.welcomeText} numberOfLines={1}>สวัสดี, {profile?.display_name || 'คุณ'}</Text>
-          </View>
-          <View style={styles.headerBadges}>
-            <View style={styles.inkBadge}>
-              <Text style={styles.inkBadgeText}>⏳ {profile?.plan === 'imperial' ? '♾️' : (profile?.time_sands ?? 0)}</Text>
-            </View>
-            <View style={styles.timeBadge}>
-               <View style={styles.pulseDot} />
-               <Text style={styles.timeText}>{timeStr}</Text>
-            </View>
-          </View>
-        </View>
-
-        {/* ฤกษ์ยาม Hero Card */}
-        <TouchableOpacity 
-          style={styles.heroCard}
-          onPress={() => router.push('/check-yam' as any)}
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={ASTRAL_THEME.colors.gold}
+            />
+          }
         >
-          <View style={styles.heroHeader}>
-            <Text style={styles.heroLabel}>✦ ฤกษ์ยามขณะนี้</Text>
-            <View style={[styles.badge, { backgroundColor: ls.bg, borderColor: ls.border }]}>
-               <Text style={[styles.badgeText, { color: ls.color }]}>{yam.travelAuspiciousness.label}</Text>
+          {/* Top Title */}
+          <View style={styles.header}>
+            <Text style={styles.headerTitle}>ผังดวงชะตา & ฤกษ์ยาม</Text>
+            <Text style={styles.headerSubtitle}>เลข 7 ตัว 9 ฐาน & พลังงานกาลเวลา</Text>
+          </View>
+
+          {/* If No Birth Data Configured */}
+          {!birthDateStr ? (
+            <View style={styles.card}>
+              <View style={styles.emptyState}>
+                <Ionicons name="calendar-outline" size={48} color={ASTRAL_THEME.colors.gold} />
+                <Text style={styles.emptyTitle}>ยังไม่ได้ระบุวันเกิด</Text>
+                <Text style={styles.emptyDesc}>
+                  กรุณาระบุวันเดือนปีและเวลาเกิด เพื่อคำนวณผังดวง 7 ตัว 9 ฐาน และวัยจรเฉพาะบุคคล
+                </Text>
+                <TouchableOpacity
+                  style={styles.actionBtn}
+                  onPress={() => router.push("/edit-profile")}
+                >
+                  <Text style={styles.actionBtnText}>กรอกข้อมูลวันเกิด →</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          ) : (
+            <>
+              {/* User Birth Summary Card */}
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.sectionTitle}>📅 ข้อมูลดวงชะตากำเนิด</Text>
+                  <TouchableOpacity onPress={() => router.push("/edit-profile")}>
+                    <Text style={styles.editLink}>แก้ไข</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.metaGrid}>
+                  <View style={styles.metaBox}>
+                    <Text style={styles.metaLabel}>วันเกิดสากล</Text>
+                    <Text style={styles.metaValue}>{birthDateStr}</Text>
+                  </View>
+                  <View style={styles.metaBox}>
+                    <Text style={styles.metaLabel}>เวลาเกิด</Text>
+                    <Text style={styles.metaValue}>{birthTimeStr} น.</Text>
+                  </View>
+                  <View style={styles.metaBox}>
+                    <Text style={styles.metaLabel}>จันทรคติไทย</Text>
+                    <Text style={styles.metaValue}>
+                      {thaiBase?.dayName || "วันมงคล"} {thaiBase?.moonPhase || ""}
+                    </Text>
+                  </View>
+                  <View style={styles.metaBox}>
+                    <Text style={styles.metaLabel}>ปีนักษัตร</Text>
+                    <Text style={styles.metaValue}>{thaiBase?.zodiacName || "ปีระกา"}</Text>
+                  </View>
+                </View>
+              </View>
+
+              {/* 7 Base Chart Grid (ผังเลข 7 ตัว) */}
+              {chartRows.length > 0 && (
+                <View style={styles.card}>
+                  <Text style={styles.sectionTitle}>✦ ผังเลข 7 ตัว 9 ฐาน (Emperor Chart)</Text>
+                  <Text style={styles.sectionDesc}>
+                    โครงสร้างพลังงานจักรพรรดิ ฐานกำเนิดและผลรวมกำลังดาว
+                  </Text>
+
+                  {/* Matrix Render */}
+                  <View style={styles.matrixContainer}>
+                    {chartRows.map((row: number[], rIdx: number) => (
+                      <View key={`row-${rIdx}`} style={styles.matrixRow}>
+                        <Text style={styles.rowHeader}>
+                          {rIdx === 0 ? "วัน" : rIdx === 1 ? "เดือน" : rIdx === 2 ? "ปี" : "ฐานรวม"}
+                        </Text>
+                        {row.map((cell: number, cIdx: number) => (
+                          <View
+                            key={`cell-${rIdx}-${cIdx}`}
+                            style={[
+                              styles.matrixCell,
+                              rIdx === 3 && styles.matrixCellHighlight,
+                            ]}
+                          >
+                            <Text
+                              style={[
+                                styles.cellNumber,
+                                rIdx === 3 && styles.cellNumberHighlight,
+                              ]}
+                            >
+                              {cell}
+                            </Text>
+                          </View>
+                        ))}
+                      </View>
+                    ))}
+                  </View>
+                </View>
+              )}
+
+              {/* Transit Cycle Card (วัยจร / ปีจร) */}
+              {ageCycle && (
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.sectionTitle}>🌀 วัยจร & ปีจรปัจจุบัน</Text>
+                    <View style={styles.badgeGold}>
+                      <Text style={styles.badgeGoldText}>อายุ {ageCycle.age || ageCycle.currentAge || 1} ปี</Text>
+                    </View>
+                  </View>
+
+                  <Text style={styles.transitPhaseTitle}>
+                    {ageCycle.transitName || ageCycle.phaseName || "ช่วงเวลาเสวยอายุแห่งปัญญา"}
+                  </Text>
+                  <Text style={styles.transitDesc}>
+                    {ageCycle.description ||
+                      ageCycle.interpretation ||
+                      "พลังงานดาวจรหนุนนำด้านการงานและการเงิน ควรเน้นการสร้างสัมพันธภาพและวิสัยทัศน์ระยะยาว"}
+                  </Text>
+                </View>
+              )}
+            </>
+          )}
+
+          {/* Real-Time Yam AtthaKarn Wheel */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.sectionTitle}>🔮 ยามอัฏฐกาลขณะนี้</Text>
+              <Text style={styles.liveClock}>
+                {now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
+              </Text>
+            </View>
+
+            <View style={styles.yamHighlightBox}>
+              <Text style={styles.yamHighlightName}>ยาม{currentYam?.yamName || "สุริยัน"}</Text>
+              <Text style={styles.yamHighlightMeaning}>
+                {currentYam?.travelAuspiciousness?.description ||
+                  currentYam?.prediction?.auspicious ||
+                  "ยามดีมีลาภผล พึงทำการด้วยความรอบคอบและศรัทธา"}
+              </Text>
             </View>
           </View>
-          <Text style={styles.heroTitle}>{yam.yamName}</Text>
-          <Text style={styles.heroSub}>
-            ยาม {yam.yamNumber} · {yam.period === 'day' ? 'กลางวัน' : 'กลางคืน'}
-            {moon.isWanPhra ? ' · 🔆 วันพระ' : ` · จันทร์ ${Math.round(moon.illumination)}%`}
-          </Text>
-          {yam.prediction?.shouldDo && (
-            <Text style={styles.heroDesc} numberOfLines={2}>{yam.prediction.shouldDo}</Text>
-          )}
-          <View style={styles.heroFooter}>
-            <Text style={styles.heroFooterText}>เช็คทุกฤกษ์ยาม</Text>
-            <Ionicons name="arrow-forward" size={14} color="#C6A96B" />
-          </View>
-        </TouchableOpacity>
-
-        {/* Grid Tools */}
-        <Text style={styles.sectionTitle}>✦ เครื่องมือพยากรณ์</Text>
-        <View style={styles.grid}>
-          <ToolCard 
-            title="ยามอัฐกาล"
-            sub={yam.yamName}
-            info={`ยาม ${yam.yamNumber}`}
-            icon="sunny-outline"
-            color="#C6A96B"
-            onPress={() => router.push('/check-yam' as any)}
-          />
-          <ToolCard 
-            title="กาลชะตา"
-            sub={karnchata.yamYaiName}
-            info={`ดาว ${STAR_TH[karnchata.dayStarNumber] || karnchata.dayStarNumber}`}
-            icon="hourglass-outline"
-            color="#38BDF8"
-            onPress={() => router.push('/check-yam' as any)}
-          />
-          <ToolCard 
-            title="พรายกระซิบ"
-            sub={PLANET_INFO[hora.yamPlanet]?.thai || String(hora.yamPlanet)}
-            info={`ยาม ${hora.yamAsked}`}
-            icon="sparkles-outline"
-            color="#818CF8"
-            onPress={() => router.push('/check-yam' as any)}
-          />
-          <ToolCard 
-            title="ราหูค้นทรัพย์"
-            sub={rahu?.summary.overall_verdict || 'ระวัง'}
-            info={rahu ? `${rahu.main_block.start_time}-${rahu.main_block.end_time}` : '-'}
-            icon="moon-outline"
-            color={rahu?.is_current_moment_good ? '#34D399' : '#FB7185'}
-            onPress={() => router.push('/check-yam' as any)}
-          />
-        </View>
-
-        {/* Analysis Tools */}
-        <Text style={styles.sectionTitle}>✦ วิเคราะห์ดวงชะตา</Text>
-        <View style={styles.list}>
-          <AnalysisRow 
-            title="ตั้งดวงชะตา"
-            sub="เลข ๗ ตัว ผังจักรพรรดิ"
-            icon="compass-outline"
-            color="#4B6FAE"
-            onPress={() => router.push('/horoscope' as any)}
-          />
-          <AnalysisRow 
-            title="มหาทักษา / มหาภูติ"
-            sub="พยากรณ์ชีวิตและธาตุกำเนิด"
-            icon="star-half-outline"
-            color="#C6A96B"
-            onPress={() => router.push('/mahathaksa' as any)}
-          />
-        </View>
-
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </ProtectedScreen>
   );
 }
-
-function ToolCard({ title, sub, info, icon, color, onPress }: any) {
-  return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
-      <Ionicons name={icon} size={20} color={color} style={{ marginBottom: 8 }} />
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={[styles.cardSub, { color }]}>{sub}</Text>
-      <Text style={styles.cardInfo}>{info}</Text>
-    </TouchableOpacity>
-  );
-}
-
-function AnalysisRow({ title, sub, icon, color, onPress }: any) {
-  return (
-    <TouchableOpacity style={styles.row} onPress={onPress}>
-      <View style={[styles.rowIcon, { backgroundColor: color + '20', borderColor: color + '40' }]}>
-        <Ionicons name={icon} size={20} color={color} />
-      </View>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.rowTitle}>{title}</Text>
-        <Text style={styles.rowSub}>{sub}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={16} color="#94A3B8" />
-    </TouchableOpacity>
-  );
-}
-
-// ─── Styles ───────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#020617' },
-  scrollContent: { padding: 20, paddingBottom: 40 },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 24,
+  container: {
+    flex: 1,
+    backgroundColor: ASTRAL_THEME.colors.bg,
   },
-  dateText: { color: '#94A3B8', fontSize: 13, marginBottom: 4 },
-  welcomeText: { color: '#F8F6F1', fontSize: 22, fontWeight: 'bold' },
-  headerBadges: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  scrollContent: {
+    paddingHorizontal: ASTRAL_THEME.spacing.md,
+    paddingTop: ASTRAL_THEME.spacing.sm,
+    paddingBottom: ASTRAL_THEME.spacing.xl,
+    gap: ASTRAL_THEME.spacing.md,
+  },
+  header: {
+    paddingVertical: ASTRAL_THEME.spacing.xs,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.gold,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: ASTRAL_THEME.colors.textMuted,
+    marginTop: 2,
+  },
+  card: {
+    backgroundColor: ASTRAL_THEME.colors.bgCard,
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.bgCardBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.lg,
+    padding: ASTRAL_THEME.spacing.md,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.text,
+  },
+  sectionDesc: {
+    fontSize: 11,
+    color: ASTRAL_THEME.colors.textMuted,
+    marginBottom: 12,
+  },
+  editLink: {
+    fontSize: 13,
+    color: ASTRAL_THEME.colors.gold,
+    fontWeight: "600",
+  },
+  metaGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  metaBox: {
+    flex: 1,
+    minWidth: "45%",
+    backgroundColor: "rgba(2, 6, 23, 0.4)",
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.bgCardBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    padding: 10,
+  },
+  metaLabel: {
+    fontSize: 10,
+    color: ASTRAL_THEME.colors.textDim,
+  },
+  metaValue: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: ASTRAL_THEME.colors.goldLight,
+    marginTop: 2,
+  },
+  matrixContainer: {
     gap: 6,
   },
-  inkBadge: {
-    backgroundColor: 'rgba(198, 169, 107, 0.1)',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(198, 169, 107, 0.3)',
+  matrixRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
   },
-  inkBadgeText: {
-    color: '#C6A96B',
+  rowHeader: {
+    width: 44,
+    fontSize: 11,
+    color: ASTRAL_THEME.colors.textMuted,
+    fontWeight: "600",
+  },
+  matrixCell: {
+    flex: 1,
+    aspectRatio: 1,
+    backgroundColor: "rgba(2, 6, 23, 0.5)",
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.bgCardBorder,
+    borderRadius: 6,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  matrixCellHighlight: {
+    backgroundColor: ASTRAL_THEME.colors.goldGlow,
+    borderColor: ASTRAL_THEME.colors.goldBorder,
+  },
+  cellNumber: {
     fontSize: 13,
-    fontWeight: 'bold',
+    fontWeight: "600",
+    color: ASTRAL_THEME.colors.text,
   },
-  timeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(77, 184, 160, 0.1)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+  cellNumberHighlight: {
+    color: ASTRAL_THEME.colors.goldLight,
+    fontWeight: "700",
+  },
+  badgeGold: {
+    backgroundColor: ASTRAL_THEME.colors.goldGlow,
     borderWidth: 1,
-    borderColor: 'rgba(77, 184, 160, 0.3)',
+    borderColor: ASTRAL_THEME.colors.goldBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.full,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
   },
-  pulseDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#4DB8A0',
-    marginRight: 8,
+  badgeGoldText: {
+    color: ASTRAL_THEME.colors.gold,
+    fontSize: 11,
+    fontWeight: "600",
   },
-  timeText: { color: '#4DB8A0', fontSize: 14, fontWeight: 'bold' },
-  heroCard: {
-    backgroundColor: 'rgba(10, 22, 40, 0.8)',
-    borderRadius: 24,
-    padding: 20,
+  transitPhaseTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.goldLight,
+    marginTop: 4,
+  },
+  transitDesc: {
+    fontSize: 12,
+    color: ASTRAL_THEME.colors.textMuted,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  liveClock: {
+    fontSize: 13,
+    color: ASTRAL_THEME.colors.textMuted,
+  },
+  yamHighlightBox: {
+    backgroundColor: ASTRAL_THEME.colors.goldGlow,
     borderWidth: 1,
-    borderColor: 'rgba(198, 169, 107, 0.2)',
-    marginBottom: 24,
+    borderColor: ASTRAL_THEME.colors.goldBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    padding: ASTRAL_THEME.spacing.md,
+    marginTop: 6,
   },
-  heroHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 },
-  heroLabel: { color: '#C6A96B', fontSize: 12, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 1 },
-  badge: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 20, borderWidth: 1 },
-  badgeText: { fontSize: 11, fontWeight: 'bold' },
-  heroTitle: { color: '#F8F6F1', fontSize: 30, fontWeight: 'bold', marginBottom: 4 },
-  heroSub: { color: '#C6B79F', fontSize: 14, marginBottom: 12 },
-  heroDesc: { color: '#94A3B8', fontSize: 14, lineHeight: 22, marginBottom: 16 },
-  heroFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  heroFooterText: { color: '#C6A96B', fontSize: 14, fontWeight: 'bold' },
-  sectionTitle: { color: '#C6A96B', fontSize: 13, fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 16, marginTop: 8 },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 24 },
-  card: {
-    backgroundColor: 'rgba(10, 22, 40, 0.5)',
-    width: '48%',
-    padding: 16,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+  yamHighlightName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.gold,
   },
-  cardTitle: { color: '#F8F6F1', fontSize: 14, fontWeight: 'bold', marginBottom: 4 },
-  cardSub: { fontSize: 13, fontWeight: 'bold', marginBottom: 2 },
-  cardInfo: { color: '#C6B79F', fontSize: 12 },
-  list: { gap: 10 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(10, 22, 40, 0.5)',
-    padding: 14,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-    gap: 12,
+  yamHighlightMeaning: {
+    fontSize: 12,
+    color: ASTRAL_THEME.colors.text,
+    lineHeight: 18,
+    marginTop: 4,
   },
-  rowIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center', borderWidth: 1 },
-  rowTitle: { color: '#F8F6F1', fontSize: 15, fontWeight: 'bold' },
-  rowSub: { color: '#C6B79F', fontSize: 13, marginTop: 2 },
+  emptyState: {
+    alignItems: "center",
+    paddingVertical: ASTRAL_THEME.spacing.lg,
+    gap: 8,
+  },
+  emptyTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.text,
+  },
+  emptyDesc: {
+    fontSize: 12,
+    color: ASTRAL_THEME.colors.textMuted,
+    textAlign: "center",
+    lineHeight: 18,
+    paddingHorizontal: 16,
+  },
+  actionBtn: {
+    backgroundColor: ASTRAL_THEME.colors.gold,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    marginTop: 8,
+  },
+  actionBtnText: {
+    color: ASTRAL_THEME.colors.bg,
+    fontSize: 13,
+    fontWeight: "700",
+  },
 });

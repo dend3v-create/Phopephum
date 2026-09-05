@@ -1466,16 +1466,16 @@ export const YAM_PREDICTIONS: YamPrediction[] = [
 
 /**
  * หาวันในสัปดาห์จาก Date object (ทางโหราศาสตร์)
- * กฎ: เปลี่ยนวันเวลา 06:00 น.
- * ถ้าเป็นเวลา 00:00 - 05:59 จะถือว่าเป็น "วันก่อนหน้า"
+ * กฎ: เปลี่ยนวันเวลา 06:01 น.
+ * ถ้าเป็นเวลา 00:00 - 06:00 จะถือว่าเป็น "วันก่อนหน้า"
  */
 export function getDayOfWeek(date: Date): DayOfWeek {
   const hour = date.getHours()
   const minute = date.getMinutes()
   const totalMinutes = hour * 60 + minute
 
-  // ถ้าเวลาก่อน 06:00 น. (360 นาที)
-  if (totalMinutes < 360) {
+  // ถ้าเวลาก่อน 06:01 น. (361 นาที)
+  if (totalMinutes < 361) {
     // ถอยหลังไป 1 วัน
     const yesterday = new Date(date.getTime() - 24 * 60 * 60 * 1000)
     const days: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']

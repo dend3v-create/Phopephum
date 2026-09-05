@@ -25,7 +25,12 @@ export type AlertType =
   | "auth_error"              // Auth ระบบมีปัญหา
   | "quota_exceeded"          // ใช้เกิน quota (warning)
   | "health_check_failed"     // Health check ล้มเหลว
-  | "unhandled_error";        // Error ที่ไม่ได้ handle
+  | "unhandled_error"         // Error ที่ไม่ได้ handle
+  | "financial_reconciliation_mismatch" // ยอดเงินไม่ตรง (INV-07)
+  | "sands_ledger_discrepancy"          // ยอดทรายไม่ตรงกับ Ledger (ECON-03)
+  | "webhook_replay_anomaly"            // Webhook ผิดปกติ
+  | "payout_settlement_failed"          // โอนเงิน Partner ล้มเหลว
+  | "security_cross_tenant_attempt";    // การพยายามเข้าถึงข้ามบัญชี
 
 export interface AlertPayload {
   type: AlertType;
@@ -84,6 +89,11 @@ const ALERT_TYPE_LABEL: Record<AlertType, string> = {
   quota_exceeded:        "ใช้เกิน Quota",
   health_check_failed:   "Health Check ล้มเหลว",
   unhandled_error:       "Unhandled Error",
+  financial_reconciliation_mismatch: "ยอดเงินไม่ตรง (Reconciliation Mismatch)",
+  sands_ledger_discrepancy: "ยอดทรายไม่ตรงกับ Ledger (Sands Discrepancy)",
+  webhook_replay_anomaly: "พบ Webhook ซ้ำซ้อนผิดปกติ (Webhook Anomaly)",
+  payout_settlement_failed: "โอนเงิน Partner ล้มเหลว (Payout Failed)",
+  security_cross_tenant_attempt: "ตรวจพบการเข้าถึงข้ามบัญชี (Security Breach Attempt)",
 };
 
 // ─── LINE push ───────────────────────────────────────────────────────────────
@@ -261,7 +271,7 @@ export async function sendAdminAlert(
   // ── Cooldown check via KV ─────────────────────────────────────────────────
   const kvKey = `alert:cooldown:${payload.type}`;
   try {
-    if (env.KV_CACHE) {
+    if (env.KV_CACHE && typeof env.KV_CACHE.get === "function") {
       const last = await env.KV_CACHE.get(kvKey);
       if (last) {
         console.log(`[Alert] Cooldown active for ${payload.type}, skipping`);

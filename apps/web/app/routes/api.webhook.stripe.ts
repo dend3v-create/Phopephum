@@ -3,11 +3,14 @@ import { getStripeService } from "~/services/payment.server";
 import { createServiceRoleClient } from "~/services/supabase.server";
 import { sendPaymentSuccessEmail } from "~/services/resend.server";
 import { notifyPaymentSuccess } from "~/services/line.server";
+import { processSubscriptionCommission, processRefundClawback } from "~/services/partner.server";
 import type { Env } from "~/env.server";
 
 /**
  * API: POST /api/webhook/stripe
  * รับสัญญาณจาก Stripe Webhook
+ * เชื่อมต่อ: Subscription Payment -> Winning Attribution -> Commission Plan -> Holding -> Partner Ledger
+ * พร้อมระบบ Refund Clawback อัตโนมัติเมื่อเกิดการคืนเงิน
  */
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -22,12 +25,21 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const payload = await request.text();
     const event = await stripe.constructEvent(payload, signature, env.STRIPE_WEBHOOK_SECRET);
 
-    console.log(`[Stripe Webhook] Received event: ${event.type}`);
+    console.log(`[Stripe Webhook] Received event: ${event.type}, id: ${event.id}`);
 
-    if (event.type === "checkout.session.completed") {
+    // 1. จัดการเหตุการณ์ชำระเงินสำเร็จ (First Payment & Subscription Renewals)
+    if (event.type === "checkout.session.completed" || event.type === "invoice.payment_succeeded") {
       const session = event.data.object as any;
-      const { userId, planId, referralCode } = session.metadata;
-      const amount = session.amount_total / 100;
+      const metadata = session.metadata || {};
+      const userId = metadata.userId || session.client_reference_id;
+      const planId = metadata.planId || "pro_monthly";
+      const amount = (session.amount_total || session.amount_paid || 0) / 100;
+      const paymentId = session.payment_intent || session.id || event.id;
+
+      if (!userId) {
+        console.warn(`[Stripe Webhook] Skipping event ${event.id}: No userId found in metadata`);
+        return new Response("No userId found", { status: 200 });
+      }
 
       const supabase = createServiceRoleClient(env);
 
@@ -36,6 +48,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
         free: "free",
         basic: "basic",
         pro: "premium",
+        pro_monthly: "premium",
+        pro_annual: "premium",
         imperial: "lifetime",
       };
       const subscriptionTier = planMapping[planId] || "basic";
@@ -79,35 +93,38 @@ export async function action({ request, context }: ActionFunctionArgs) {
         expiresAt: expiresAt.toISOString()
       }).catch(e => console.error("LINE error:", e));
 
-      // 5. คำนวณ Affiliate Commission
-      if (referralCode) {
-        const { data: referrer } = await supabase
-          .from("profiles")
-          .select("id, plan, wallet_balance")
-          .eq("referral_code", referralCode)
-          .single();
+      // 5. ประมวลผลและคำนวณคอมมิชชันผ่าน Commission Engine ขั้นสูง (Idempotent + Atomic)
+      // กฎเหล็ก: ห้ามอ่าน referralCode จาก metadata/cookie โดยตรง
+      // ระบบจะค้นหา Winning Converted Attribution ที่แท้จริงจากฐานข้อมูลเท่านั้น
+      const commResult = await processSubscriptionCommission({
+        paymentId,
+        payerUserId: userId,
+        planCode: planId,
+        grossAmountThb: amount,
+        vatRate: 0.07, // dynamic VAT rate
+        idempotencyKey: `comm_stripe:${event.id}:${userId}`,
+        env,
+      });
 
-        if (referrer) {
-          const rate = referrer.plan === 'imperial' ? 0.10 : referrer.plan === 'pro' ? 0.05 : 0.03;
-          const commission = amount * rate;
+      console.log(`[Stripe Webhook] Commission processed for user ${userId}:`, commResult);
+    }
 
-          if (commission > 0) {
-            await supabase
-              .from("profiles")
-              .update({ wallet_balance: (Number(referrer.wallet_balance || 0) + commission) })
-              .eq("id", referrer.id);
+    // 2. จัดการเหตุการณ์คืนเงิน / ยกเลิก (Charge Refunded & Subscription Deleted)
+    else if (event.type === "charge.refunded") {
+      const charge = event.data.object as any;
+      const paymentId = charge.payment_intent || charge.id;
+      const refundReason = charge.refunds?.data?.[0]?.reason || "Stripe customer refund";
 
-            await supabase
-              .from("wallet_transactions")
-              .insert({
-                user_id: referrer.id,
-                amount: commission,
-                type: "commission",
-                description: `ค่าแนะนำจากสมาชิกใหม่ สมัครแพ็กเกจ ${planId.toUpperCase()}`
-              });
-          }
-        }
-      }
+      console.log(`[Stripe Webhook] Processing refund clawback for payment: ${paymentId}`);
+
+      const clawbackResult = await processRefundClawback({
+        paymentId,
+        reason: refundReason,
+        idempotencyKey: `refund_clawback:${event.id}:${paymentId}`,
+        env,
+      });
+
+      console.log(`[Stripe Webhook] Refund clawback result:`, clawbackResult);
     }
 
     return new Response("OK", { status: 200 });
@@ -117,3 +134,4 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return new Response(`Webhook Error: ${error.message}`, { status: 400 });
   }
 }
+

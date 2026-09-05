@@ -26,7 +26,7 @@ const PRIMARY_NAV = [
 const SECONDARY_NAV = [
   { to: "/dashboard/reports", labelKey: "reports", defaultLabel: "รายงานชีวิต", icon: "reports" },
   { to: "/dashboard/planner", labelKey: "planner", defaultLabel: "แผนงาน TQM", icon: "journal" },
-  { to: "/dashboard/community", labelKey: "community", defaultLabel: "ชะตาพันธมิตร", icon: "community" },
+  { to: "/dashboard/partner", labelKey: "partner", defaultLabel: "ระบบพันธมิตร (Partner)", icon: "community" },
 ] as const;
 
 const PRO_TOOLS = [
@@ -367,16 +367,22 @@ export function DesktopSidebar({
           )}
 
           {/* Sands of Time Token Progress */}
-          <div
-            className="px-3 py-1.5 rounded-xl border"
+          <Link
+            to="/dashboard/upgrade?tab=sands"
+            onClick={onCloseMobileDrawer}
+            className="block px-3 py-1.5 rounded-xl border transition-all hover:border-[#C6A96B]/40 hover:bg-[#C6A96B]/[0.08]"
             style={{ background: "rgba(198,169,107,0.05)", borderColor: "rgba(198,169,107,0.15)" }}
+            title={!isPro ? "คลิกเพื่อเติมละอองทรายกาลเวลา" : undefined}
           >
             <div className="flex justify-between items-center text-[10px] font-bold text-[#C6A96B]">
               <span className="tracking-wider">⏳ {t("sands_of_time", "ทรายกาลเวลา")}</span>
               {isPro ? (
                 <span className="text-[10px] uppercase font-extrabold">{t("unlimited", "UNLIMITED")}</span>
               ) : (
-                <span className="font-mono">{timeSands}</span>
+                <span className="font-mono flex items-center gap-1">
+                  <span>{timeSands}</span>
+                  <span className="text-[9px] text-[#C6A96B]/70 font-normal hover:underline">+ เติม</span>
+                </span>
               )}
             </div>
             {!isPro && (
@@ -387,7 +393,7 @@ export function DesktopSidebar({
                 />
               </div>
             )}
-          </div>
+          </Link>
 
           {/* User info & Controls */}
           <div className="flex items-center justify-between pt-1">

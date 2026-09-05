@@ -4,7 +4,13 @@ import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remi
 import { useState, useRef, useEffect } from "react";
 import { requireMinPlan } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
-import { calculateMoonPhase, calculateAtthakarn } from "@phopephum/engine";
+import {
+  calculateMoonPhase,
+  calculateAtthakarn,
+  getAstrologicalDate,
+  getAstrologicalDateStr,
+  getAstrologicalThaiFormattedDate,
+} from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import { Calendar, BookOpen, Zap, Target, Heart, Plus, Save, CheckCircle, Smile } from "lucide-react";
@@ -17,7 +23,7 @@ export const meta: MetaFunction = () => [
   { title: "TQM Planner — PhopePhum" },
 ];
 
-const TODAY = () => new Date().toISOString().split("T")[0]!;
+const TODAY = () => getAstrologicalDateStr();
 
 // 16 ยาม (8 กลางวัน + 8 กลางคืน) - ยามละ 90 นาที (1.5 ชม.)
 const YAM_SLOTS = [
@@ -89,7 +95,8 @@ const DAY_NAMES = ["อาทิตย์", "จันทร์", "อังค�
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const { user } = await requireMinPlan("basic", request, env);
-  const todayDate = TODAY();
+  const now = new Date();
+  const todayDate = getAstrologicalDateStr(now);
 
   const locale = await i18next.getLocale(request);
   const currentLocale = locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "th-TH";
@@ -103,7 +110,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .single();
 
   const moon = calculateMoonPhase();
-  const dayOfWeek = new Date().getDay();
+  const dayOfWeek = getAstrologicalDate(now).getUTCDay();
   const dayName = DAY_NAMES[dayOfWeek]!;
   
   // Calculate rulers for all 16 slots
@@ -116,9 +123,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     };
   });
 
-  const formattedDate = new Date().toLocaleDateString(currentLocale, {
-    day: "numeric", month: "long", year: "numeric"
-  });
+  const formattedDate = getAstrologicalThaiFormattedDate(now, currentLocale);
 
   return json({ 
     plan, 

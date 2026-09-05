@@ -1,10 +1,11 @@
 import { json, redirect } from "@remix-run/cloudflare";
-import { Form, Link, useActionData, useNavigation } from "@remix-run/react";
-import type { ActionFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
+import { Form, Link, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
+import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { signUp } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import { notifyNewRegistration } from "~/services/line.server";
-import { createSupabaseClient, createServiceRoleClient } from "~/services/supabase.server";
+import { createServiceRoleClient } from "~/services/supabase.server";
+import { convertAttributionOnSignup, getReferralCodeFromRequest } from "~/services/attribution.server";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
@@ -15,6 +16,19 @@ export const meta: MetaFunction = () => [
   { title: "สมัครสมาชิก — PhopePhum" },
 ];
 
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const initialReferralCode = getReferralCodeFromRequest(request) || "";
+  const initialPlan = url.searchParams.get("plan") || "";
+  const initialTab = url.searchParams.get("tab") || "";
+
+  return json({
+    initialReferralCode,
+    initialPlan,
+    initialTab,
+  });
+}
+
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const formData = await request.formData();
@@ -24,6 +38,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const fullName = String(formData.get("fullName") ?? "");
   const displayName = String(formData.get("displayName") ?? "");
   const referralCode = String(formData.get("referralCode") ?? "");
+  const plan = String(formData.get("plan") ?? "");
+  const tab = String(formData.get("tab") ?? "");
   
   const birthDateRaw = String(formData.get("birthDate") ?? "");
   const birthTime = String(formData.get("birthTime") ?? "");
@@ -71,6 +87,23 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (user) {
     await logEvent(request, env, EVENTS.USER_REGISTERED, { method: "email" });
 
+    // แปลงผล Referral Attribution แบบ Atomic (Persist ลง profiles + referral_attributions)
+    try {
+      const attrResult = await convertAttributionOnSignup({
+        userId: user.id,
+        request,
+        manualPartnerCode: referralCode || null,
+        env,
+      });
+      if (attrResult.headers) {
+        for (const [key, val] of attrResult.headers.entries()) {
+          headers.append(key, val);
+        }
+      }
+    } catch (attrErr) {
+      console.error("[register] convertAttributionOnSignup error:", attrErr);
+    }
+
     // สร้าง subscription_request และส่ง LINE notification
     try {
       const supabase = createServiceRoleClient(env);
@@ -82,7 +115,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
         .insert({
           user_id: user.id,
           type: "registration",
-          plan: isAdmin ? "imperial" : "basic",
+          plan: isAdmin ? "imperial" : (plan || "basic"),
           status: isAdmin ? "approved" : "pending",
           created_at: now,
           approved_at: isAdmin ? now : null
@@ -102,20 +135,33 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
   }
 
+  if (plan) {
+    const targetUrl = tab === "sands"
+      ? `/dashboard/upgrade?tab=sands&plan=${plan}`
+      : `/dashboard/upgrade?plan=${plan}`;
+    return redirect(targetUrl, { headers });
+  }
+
   return redirect("/dashboard", { headers });
 }
 
 export default function RegisterPage() {
+  const { initialReferralCode, initialPlan, initialTab } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
 
-  // ดึงค่าแนะนำจาก URL ?ref=CODE
-  const [refParam, setRefParam] = useState("");
+  // ดึงค่าแนะนำจาก URL หรือ Loader (30-day Cookie)
+  const [refParam, setRefParam] = useState(initialReferralCode || "");
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    setRefParam(urlParams.get("ref") || "");
-  }, []);
+    const queryRef = urlParams.get("ref");
+    if (queryRef) {
+      setRefParam(queryRef);
+    } else if (initialReferralCode) {
+      setRefParam(initialReferralCode);
+    }
+  }, [initialReferralCode]);
 
   return (
     <Card glow className="max-w-xl mx-auto my-8">
@@ -126,9 +172,19 @@ export default function RegisterPage() {
         <p className="text-[#C6B79F] text-sm">
           ปัญญาศาสตร์ เลข 7 ตัว 9 ฐาน + ยามอัฏฐกาลเฉพาะบุคคล
         </p>
+
+        {initialPlan && (
+          <div className="inline-flex items-center gap-2 mt-4 px-3.5 py-1 rounded-full bg-[#C6A96B]/10 border border-[#C6A96B]/30 text-xs text-[#C6A96B] font-semibold">
+            <span>✦</span>
+            <span>แพ็กเกจที่เลือก: <strong className="uppercase">{initialPlan}</strong> (จะพาไปชำระเงินหลังลงทะเบียน)</span>
+          </div>
+        )}
       </div>
 
       <Form method="post" className="flex flex-col gap-6">
+        <input type="hidden" name="plan" value={initialPlan || ""} />
+        <input type="hidden" name="tab" value={initialTab || ""} />
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
             name="fullName"

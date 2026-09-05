@@ -65,7 +65,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   // 4. ตรวจสอบทรายกาลเวลา (Sands of Time)
   const userPlan = getUserPlan(profile);
-  const isPremium = userPlan === "imperial" || profile?.role === "admin" || profile?.role === "operator";
+  const isPremium = userPlan === "master" || profile?.role === "admin" || profile?.role === "operator";
   const currentSands = profile?.time_sands ?? 0;
 
   if (!isPremium && currentSands <= 0) {
@@ -139,15 +139,21 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` }, { status: 500 });
     }
 
-    // 8. หักทรายกาลเวลา หากไม่ใช่ผู้ใช้ VIP (ทรายไหลลดลง 1 เม็ด)
+    // 8. หักทรายกาลเวลาอย่างปลอดภัยผ่าน Atomic Function (Ledger Source of Truth)
     if (!isPremium) {
-      const { error: decrementError } = await supabase
-        .from("profiles")
-        .update({ time_sands: currentSands - 1 })
-        .eq("id", user.id);
+      const { debitSandsAtomic } = await import("~/services/rewards.server");
+      const debitRes = await debitSandsAtomic({
+        userId: user.id,
+        amount: 1,
+        activityType: "ai_report_redeem",
+        referenceId: report.id,
+        description: `สร้างรายงานดวงดาว ${backendReportType}`,
+        metadata: { reportType: backendReportType },
+        env,
+      });
 
-      if (decrementError) {
-        console.error("[api.reports] Failed to decrement time_sands:", decrementError);
+      if (!debitRes.success) {
+        console.warn("[api.reports] Debit sands warning:", debitRes.error);
       }
     }
 

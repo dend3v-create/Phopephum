@@ -9,6 +9,7 @@ import { json } from "@remix-run/cloudflare";
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import { getProfile, requireAuth } from "~/services/auth.server";
 import { calculateDayIntelligence } from "~/services/calendarIntelligence.server";
+import { getAstrologicalDateStr } from "@phopephum/engine";
 import type { Env } from "~/env.server";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -17,7 +18,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const profile = await getProfile(user.id, request, env);
 
   const url = new URL(request.url);
-  const dateStr = url.searchParams.get("date") || new Date().toISOString().split("T")[0];
+  const dateStr = url.searchParams.get("date") || getAstrologicalDateStr();
 
   try {
     const dayIntelligence = await calculateDayIntelligence(dateStr, profile ? {

@@ -166,9 +166,9 @@ export function calculateHoraThaiNu(now: Date): HoraThaiNuResult {
   const second = now.getSeconds();
   const totalMinutesOfDay = hour * 60 + minute + second / 60;
 
-  // วันโหราศาสตร์เริ่ม 06:00 น. — ก่อน 06:00 นับเป็นคืนของวันก่อน
+  // วันโหราศาสตร์เริ่ม 06:01 น. — ก่อน 06:01 นับเป็นคืนของวันก่อน
   let astroDay: Date;
-  if (hour < 6) {
+  if (hour < 6 || (hour === 6 && minute < 1)) {
     astroDay = new Date(now);
     astroDay.setDate(astroDay.getDate() - 1);
   } else {

@@ -327,18 +327,31 @@ body {
   --tw-gradient-to: #F5EFE6 var(--tw-gradient-to-position) !important;
 }
 
-/* ── White opacity backgrounds → keep as subtle white ── */
-[data-theme="light"] .bg-white\/5         { background-color: rgba(255, 255, 255, 0.50) !important; }
-[data-theme="light"] .bg-white\/8         { background-color: rgba(255, 255, 255, 0.60) !important; }
-[data-theme="light"] .bg-white\/10        { background-color: rgba(255, 255, 255, 0.65) !important; }
-[data-theme="light"] .bg-white\/15        { background-color: rgba(255, 255, 255, 0.72) !important; }
-[data-theme="light"] .bg-white\/20        { background-color: rgba(255, 255, 255, 0.80) !important; }
+/* ── White opacity backgrounds → subtle warm parchment in light mode ── */
+[data-theme="light"] .bg-white\/2         { background-color: rgba(246, 242, 236, 0.40) !important; }
+[data-theme="light"] .bg-white\/3         { background-color: rgba(246, 242, 236, 0.55) !important; }
+[data-theme="light"] .bg-white\/5         { background-color: rgba(242, 237, 229, 0.75) !important; }
+[data-theme="light"] .bg-white\/6         { background-color: rgba(242, 237, 229, 0.80) !important; }
+[data-theme="light"] .bg-white\/8         { background-color: rgba(238, 232, 222, 0.85) !important; }
+[data-theme="light"] .bg-white\/10        { background-color: rgba(235, 228, 216, 0.90) !important; }
+[data-theme="light"] .bg-white\/15        { background-color: rgba(230, 222, 208, 0.92) !important; }
+[data-theme="light"] .bg-white\/20        { background-color: rgba(225, 216, 200, 0.95) !important; }
 
 /* ── Text Colors ── */
+
+/* Universal text-white → dark charcoal in light mode */
+[data-theme="light"] .text-white          { color: var(--text-body) !important; }
+[data-theme="light"] .hover\:text-white:hover { color: var(--text-body) !important; }
 
 /* Body: white → slate */
 [data-theme="light"] .text-\[\#F8F6F1\]   { color: var(--text-body) !important; }
 [data-theme="light"] .text-\[\#F3EFE8\]   { color: var(--text-body) !important; }
+[data-theme="light"] .text-\[\#E2E8F0\]   { color: var(--text-body) !important; }
+[data-theme="light"] .text-\[\#E5E7EB\]   { color: var(--text-body) !important; }
+[data-theme="light"] .text-\[\#F1F5F9\]   { color: var(--text-body) !important; }
+[data-theme="light"] .text-\[\#CBD5E1\]   { color: #334155 !important; }
+[data-theme="light"] .text-slate-100      { color: var(--text-body) !important; }
+[data-theme="light"] .text-slate-200      { color: #334155 !important; }
 
 /* #F8F6F1 opacity variants — ชื่อภพเรือน, ฐาน labels, hint text */
 [data-theme="light"] .text-\[\#F8F6F1\]\/10 { color: rgba(29, 41, 57, 0.15) !important; }
@@ -365,7 +378,7 @@ body {
 [data-theme="light"] .text-\[\#D9CDB7\]   { color: #475467 !important; }
 
 /* Cool muted → darker slate for contrast on white bg */
-[data-theme="light"] .text-\[\#94A3B8\]   { color: #64748B !important; }
+[data-theme="light"] .text-\[\#94A3B8\]   { color: #475467 !important; }
 [data-theme="light"] .text-\[\#8A8070\]   { color: #64748B !important; }
 
 /* #C6B79F / #D9CDB7 opacity variants */
@@ -375,19 +388,19 @@ body {
 [data-theme="light"] .text-\[\#D9CDB7\]\/70 { color: rgba(71, 84, 103, 0.75) !important; }
 
 /* #6D8FC7 / #4B6FAE opacity variants → keep mystic blue but slightly darken */
-[data-theme="light"] .text-\[\#6D8FC7\]\/70 { color: rgba(61, 83, 97, 0.76) !important; }
-[data-theme="light"] .text-\[\#6D8FC7\]\/90 { color: rgba(61, 83, 97, 0.92) !important; }
-[data-theme="light"] .text-\[\#4B6FAE\]\/80 { color: rgba(61, 83, 97, 0.85) !important; }
+[data-theme="light"] .text-\[\#6D8FC7\]\/70 { color: rgba(43, 68, 110, 0.82) !important; }
+[data-theme="light"] .text-\[\#6D8FC7\]\/90 { color: rgba(43, 68, 110, 0.95) !important; }
+[data-theme="light"] .text-\[\#4B6FAE\]\/80 { color: rgba(43, 68, 110, 0.88) !important; }
 
 /* #D9CDB7 opacity variants */
 [data-theme="light"] .text-\[\#D9CDB7\]\/40 { color: rgba(71, 84, 103, 0.45) !important; }
 [data-theme="light"] .text-\[\#D9CDB7\]\/70 { color: rgba(71, 84, 103, 0.76) !important; }
 [data-theme="light"] .text-\[\#D9CDB7\]\/80 { color: rgba(71, 84, 103, 0.85) !important; }
 
-/* #94A3B8 opacity variants — muted (use darker slate base #64748B) */
-[data-theme="light"] .text-\[\#94A3B8\]\/40 { color: rgba(100, 116, 139, 0.65) !important; }
-[data-theme="light"] .text-\[\#94A3B8\]\/50 { color: rgba(100, 116, 139, 0.75) !important; }
-[data-theme="light"] .text-\[\#94A3B8\]\/60 { color: rgba(100, 116, 139, 0.82) !important; }
+/* #94A3B8 opacity variants — muted (use darker slate base #475467) */
+[data-theme="light"] .text-\[\#94A3B8\]\/40 { color: rgba(71, 84, 103, 0.65) !important; }
+[data-theme="light"] .text-\[\#94A3B8\]\/50 { color: rgba(71, 84, 103, 0.75) !important; }
+[data-theme="light"] .text-\[\#94A3B8\]\/60 { color: rgba(71, 84, 103, 0.85) !important; }
 
 /* #C6B79F opacity variants */
 [data-theme="light"] .text-\[\#C6B79F\]\/50 { color: rgba(71, 84, 103, 0.55) !important; }
@@ -401,33 +414,62 @@ body {
 [data-theme="light"] .text-\[\#020617\]\/70 { color: rgba(29, 41, 57, 0.78) !important; }
 
 /* Rose/amber/sky semantic — ให้อ่านได้ชัดบน bg ขาว */
+[data-theme="light"] .text-rose-100       { color: #9F1239 !important; }
+[data-theme="light"] .text-rose-200       { color: #9F1239 !important; }
 [data-theme="light"] .text-rose-300\/80   { color: rgba(190, 60, 60, 0.85) !important; }
 [data-theme="light"] .text-rose-400\/80   { color: rgba(190, 60, 60, 0.85) !important; }
+[data-theme="light"] .text-amber-100      { color: #8C5600 !important; }
+[data-theme="light"] .text-amber-200      { color: #8C5600 !important; }
 [data-theme="light"] .text-amber-400\/80  { color: rgba(160, 100, 0, 0.88) !important; }
+[data-theme="light"] .text-emerald-100    { color: #065F46 !important; }
+[data-theme="light"] .text-emerald-200    { color: #065F46 !important; }
 
 /* Sky blue → mystic */
 [data-theme="light"] .text-\[\#38BDF8\]   { color: var(--accent-blue-hi) !important; }
 
-/* ── Borders: white opacity → slate opacity ── */
-[data-theme="light"] .border-white\/5     { border-color: rgba(61, 83, 97, 0.08) !important; }
-[data-theme="light"] .border-white\/8     { border-color: rgba(61, 83, 97, 0.10) !important; }
-[data-theme="light"] .border-white\/10    { border-color: rgba(61, 83, 97, 0.12) !important; }
-[data-theme="light"] .border-white\/15    { border-color: rgba(61, 83, 97, 0.16) !important; }
-[data-theme="light"] .border-white\/20    { border-color: rgba(61, 83, 97, 0.20) !important; }
-[data-theme="light"] .border-white\/25    { border-color: rgba(61, 83, 97, 0.25) !important; }
-[data-theme="light"] .border-white\/30    { border-color: rgba(61, 83, 97, 0.30) !important; }
+/* ── Badges with solid colored backgrounds must keep pure white text ── */
+[data-theme="light"] .bg-\[\#4B6FAE\] .text-white,
+[data-theme="light"] .bg-\[\#4B6FAE\].text-white,
+[data-theme="light"] .bg-\[\#4B6FAE\] .text-\[\#F8F6F1\],
+[data-theme="light"] .bg-\[\#4B6FAE\].text-\[\#F8F6F1\],
+[data-theme="light"] .bg-emerald-500 .text-white,
+[data-theme="light"] .bg-emerald-500.text-white,
+[data-theme="light"] .bg-emerald-600 .text-white,
+[data-theme="light"] .bg-emerald-600.text-white,
+[data-theme="light"] .bg-rose-500 .text-white,
+[data-theme="light"] .bg-rose-500.text-white,
+[data-theme="light"] .bg-rose-600 .text-white,
+[data-theme="light"] .bg-rose-600.text-white,
+[data-theme="light"] .bg-blue-600 .text-white,
+[data-theme="light"] .bg-blue-600.text-white,
+[data-theme="light"] .bg-indigo-600 .text-white,
+[data-theme="light"] .bg-indigo-600.text-white,
+[data-theme="light"] .bg-black .text-white,
+[data-theme="light"] .bg-black.text-white {
+  color: #FFFFFF !important;
+}
+
+/* ── Borders: white opacity → soft gold / taupe contrast in light mode ── */
+[data-theme="light"] .border-white\/5     { border-color: rgba(198, 169, 107, 0.18) !important; }
+[data-theme="light"] .border-white\/8     { border-color: rgba(198, 169, 107, 0.22) !important; }
+[data-theme="light"] .border-white\/10    { border-color: rgba(198, 169, 107, 0.25) !important; }
+[data-theme="light"] .border-white\/15    { border-color: rgba(198, 169, 107, 0.30) !important; }
+[data-theme="light"] .border-white\/18    { border-color: rgba(198, 169, 107, 0.32) !important; }
+[data-theme="light"] .border-white\/20    { border-color: rgba(198, 169, 107, 0.35) !important; }
+[data-theme="light"] .border-white\/25    { border-color: rgba(198, 169, 107, 0.40) !important; }
+[data-theme="light"] .border-white\/30    { border-color: rgba(198, 169, 107, 0.45) !important; }
 
 /* ── Border Gold (#C6A96B) in Light Mode ── */
 [data-theme="light"] .border-\[\#C6A96B\]     { border-color: #A68444 !important; }
-[data-theme="light"] .border-\[\#C6A96B\]\/10 { border-color: rgba(166, 132, 68, 0.12) !important; }
-[data-theme="light"] .border-\[\#C6A96B\]\/15 { border-color: rgba(166, 132, 68, 0.18) !important; }
-[data-theme="light"] .border-\[\#C6A96B\]\/20 { border-color: rgba(166, 132, 68, 0.22) !important; }
-[data-theme="light"] .border-\[\#C6A96B\]\/25 { border-color: rgba(166, 132, 68, 0.28) !important; }
-[data-theme="light"] .border-\[\#C6A96B\]\/30 { border-color: rgba(166, 132, 68, 0.32) !important; }
-[data-theme="light"] .border-\[\#C6A96B\]\/35 { border-color: rgba(166, 132, 68, 0.38) !important; }
-[data-theme="light"] .border-\[\#C6A96B\]\/40 { border-color: rgba(166, 132, 68, 0.42) !important; }
-[data-theme="light"] .border-\[\#C6A96B\]\/50 { border-color: rgba(166, 132, 68, 0.50) !important; }
-[data-theme="light"] .border-\[\#C6A96B\]\/60 { border-color: rgba(166, 132, 68, 0.60) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/10 { border-color: rgba(166, 132, 68, 0.16) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/15 { border-color: rgba(166, 132, 68, 0.22) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/20 { border-color: rgba(166, 132, 68, 0.28) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/25 { border-color: rgba(166, 132, 68, 0.32) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/30 { border-color: rgba(166, 132, 68, 0.38) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/35 { border-color: rgba(166, 132, 68, 0.42) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/40 { border-color: rgba(166, 132, 68, 0.48) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/50 { border-color: rgba(166, 132, 68, 0.55) !important; }
+[data-theme="light"] .border-\[\#C6A96B\]\/60 { border-color: rgba(166, 132, 68, 0.65) !important; }
 
 /* ── Text Gold (#C6A96B / #D9BC82) in Light Mode ── */
 [data-theme="light"] .text-\[\#C6A96B\]     { color: #8C6D2D !important; }
@@ -623,15 +665,33 @@ body {
 [data-theme="light"] .border-slate-800     { border-color: rgba(61,83,97,0.16) !important; }
 
 /* ── Tailwind Gradient from/to dark color → ivory in light mode ── */
-[data-theme="light"] .from-\[\#0B1528\] { --tw-gradient-from: #F9F7F3 !important; }
-[data-theme="light"] .from-\[\#0A1628\] { --tw-gradient-from: #F5F0ED !important; }
-[data-theme="light"] .from-\[\#071427\] { --tw-gradient-from: #F5F0ED !important; }
-[data-theme="light"] .from-\[\#0A2240\] { --tw-gradient-from: #F5F0ED !important; }
-[data-theme="light"] .from-\[\#0c2240\] { --tw-gradient-from: #F9F7F3 !important; }
-[data-theme="light"] .from-\[\#0C2240\] { --tw-gradient-from: #F9F7F3 !important; }
-[data-theme="light"] .to-\[\#020617\]   { --tw-gradient-to: #ECE5DF !important; }
-[data-theme="light"] .to-\[\#071427\]   { --tw-gradient-to: #F0EBE7 !important; }
-[data-theme="light"] .via-\[\#0A2240\]  { --tw-gradient-via: rgba(245,240,237,0.80) !important; }
+[data-theme="light"] .from-\[\#0B1528\],
+[data-theme="light"] .from-\[\#0A1628\],
+[data-theme="light"] .from-\[\#0A1628\]\/80,
+[data-theme="light"] .from-\[\#071427\],
+[data-theme="light"] .from-\[\#0A2240\],
+[data-theme="light"] .from-\[\#0A2240\]\/80,
+[data-theme="light"] .from-\[\#0A2240\]\/90,
+[data-theme="light"] .from-\[\#0a2240\],
+[data-theme="light"] .from-\[\#0D223F\],
+[data-theme="light"] .from-\[\#0c2240\],
+[data-theme="light"] .from-\[\#0C2240\],
+[data-theme="light"] .from-\[\#0B172B\],
+[data-theme="light"] .from-\[\#020617\]   { --tw-gradient-from: #FFFFFF !important; }
+
+[data-theme="light"] .via-\[\#0D1C34\],
+[data-theme="light"] .via-\[\#0A1628\],
+[data-theme="light"] .via-\[\#0A1628\]\/40,
+[data-theme="light"] .via-\[\#0A1628\]\/80,
+[data-theme="light"] .via-\[\#0A1628\]\/90,
+[data-theme="light"] .via-\[\#0A2240\],
+[data-theme="light"] .via-\[\#0d1f38\],
+[data-theme="light"] .via-\[\#091C36\]    { --tw-gradient-via: #FAF8F5 !important; }
+
+[data-theme="light"] .to-\[\#020617\],
+[data-theme="light"] .to-\[\#040A14\],
+[data-theme="light"] .to-\[\#071427\],
+[data-theme="light"] .to-\[\#0A1628\]     { --tw-gradient-to: #F5F0ED !important; }
 
 /* ══════════════════════════════════════════════════════════════
    LIGHT MODE — Tailwind @theme token overrides
@@ -683,10 +743,10 @@ body {
 [data-theme="light"] .bg-\[\#020617\]\/70 { background-color: rgba(249,247,243,0.75) !important; }
 [data-theme="light"] .bg-\[\#020617\]\/80 { background-color: rgba(249,247,243,0.85) !important; }
 
-/* ── bg-white very-low opacity → subtle ivory on light bg ── */
-[data-theme="light"] .bg-white\/2  { background-color: rgba(255,255,255,0.25) !important; }
-[data-theme="light"] .bg-white\/3  { background-color: rgba(255,255,255,0.30) !important; }
-[data-theme="light"] .bg-white\/6  { background-color: rgba(255,255,255,0.50) !important; }
+/* ── Score Ring SVG track in light mode ── */
+[data-theme="light"] svg circle[stroke="rgba(255,255,255,0.07)"] {
+  stroke: rgba(198, 169, 107, 0.20) !important;
+}
 
 /* ── Yellow / amber low opacity → readable dark amber ── */
 [data-theme="light"] .text-yellow-100     { color: #7A5200 !important; }
@@ -694,7 +754,7 @@ body {
 [data-theme="light"] .text-yellow-300     { color: #7A5200 !important; }
 
 /* ── Muted text: #94A3B8 → darker slate for WCAG AA on white ── */
-[data-theme="light"] .text-\[\#94A3B8\]   { color: #64748B !important; }
+[data-theme="light"] .text-\[\#94A3B8\]   { color: #475467 !important; }
 
 /* ── Remove glow effects in light mode — prevents blurry text ── */
 [data-theme="light"] .glow-gold   { text-shadow: none !important; }
@@ -711,8 +771,33 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Horanu loading overlay ── */
+/* ── Overlays & dark badges ── */
 [data-theme="light"] .bg-black\/50 { background-color: rgba(29,41,57,0.45) !important; }
+[data-theme="light"] .bg-black\/40 { background-color: rgba(245, 240, 230, 0.90) !important; color: #1D2939 !important; }
+[data-theme="light"] .bg-black\/30 { background-color: rgba(245, 240, 230, 0.75) !important; color: #1D2939 !important; }
+[data-theme="light"] .bg-black\/20 { background-color: rgba(245, 240, 230, 0.60) !important; color: #1D2939 !important; }
+[data-theme="light"] .bg-black\/10 { background-color: rgba(245, 240, 230, 0.40) !important; color: #1D2939 !important; }
+[data-theme="light"] .bg-black\/5  { background-color: rgba(245, 240, 230, 0.30) !important; color: #1D2939 !important; }
+
+/* ── Specific Amber / Yellow opacity variants for light theme contrast ── */
+[data-theme="light"] .text-amber-300\/90,
+[data-theme="light"] .text-amber-300\/80 { color: #8C5600 !important; }
+[data-theme="light"] .text-amber-400\/90,
+[data-theme="light"] .text-amber-400\/80 { color: #7A4600 !important; }
+
+/* ── Yam Celestial Observatory Dial ── */
+.yam-celestial-dial {
+  background-color: #020617;
+}
+.yam-celestial-backdrop {
+  background: radial-gradient(circle at 50% 50%, rgba(75, 111, 174, 0.22) 0%, rgba(2, 6, 23, 0.98) 80%);
+}
+[data-theme="light"] .yam-celestial-dial {
+  background-color: #FAF7F2 !important;
+}
+[data-theme="light"] .yam-celestial-backdrop {
+  background: radial-gradient(circle at 50% 50%, rgba(198, 169, 107, 0.22) 0%, rgba(246, 241, 232, 0.98) 80%) !important;
+}
 
 /* ── Liquid Gold Overlay ── */
 .liquid-gold-overlay {

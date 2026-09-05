@@ -35,7 +35,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const personLimit = getPersonLimit(profile);
   const currentCount = people?.length ?? 0;
-  const hasReachedLimit = currentCount >= personLimit;
+  const hasReachedLimit = personLimit !== null && currentCount >= personLimit;
 
   return json({
     profile,
@@ -63,13 +63,15 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   if (actionType === "create") {
     // 1. เช็คลิมิตจำนวนคน
-    const { count } = await supabase
-      .from("customers")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", user.id);
+    if (personLimit !== null) {
+      const { count } = await supabase
+        .from("customers")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.id);
 
-    if ((count ?? 0) >= personLimit) {
-      return json({ error: `ไม่สามารถเพิ่มได้เนื่องจากสิทธิ์ของคุณจำกัดไว้ที่ ${personLimit} โปรไฟล์ กรุณาอัปเกรดแผนสมาชิก` }, { status: 403 });
+      if ((count ?? 0) >= personLimit) {
+        return json({ error: `ไม่สามารถเพิ่มได้เนื่องจากสิทธิ์ของคุณจำกัดไว้ที่ ${personLimit} โปรไฟล์ กรุณาอัปเกรดแผนสมาชิก` }, { status: 403 });
+      }
     }
 
     const name = String(formData.get("name") ?? "").trim();
@@ -261,7 +263,7 @@ export default function PeopleProfilesPage() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-4 h-4">
               <path d="M12 5v14M5 12h14" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-            เพิ่มบุคคลใหม่ ({currentCount}/{personLimit === 9999 ? "∞" : personLimit})
+            เพิ่มบุคคลใหม่ ({currentCount}/{personLimit === null ? "∞" : personLimit})
           </button>
         )}
       </div>
@@ -351,7 +353,7 @@ export default function PeopleProfilesPage() {
       )}
 
       {/* โควตาแผงเตือนกรณีใช้เวอร์ชั่นจำกัด */}
-      {hasReachedLimit && personLimit < 9999 && (
+      {hasReachedLimit && personLimit !== null && (
         <Card className="border-[#C6A96B]/20 bg-gradient-to-r from-amber-500/5 to-yellow-600/5 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <p className="text-[#C6A96B] font-bold text-sm">✦ คุณใช้โควตาโปรไฟล์บุคคลครบแล้ว ({currentCount}/{personLimit} คน)</p>

@@ -42,14 +42,14 @@ function getBKKMinutes(date: Date): number {
 }
 
 /**
- * หาวันทางโหราศาสตร์ (เปลี่ยนวันตอน 06:00 น. ตามคำขอผู้ใช้)
+ * หาวันทางโหราศาสตร์ (เปลี่ยนวันตอน 06:01 น. ตามระบบยามอัฐกาล)
  */
 function getAstrologicalBKKDay(date: Date): number {
   const bkkDate = new Date(date.getTime() + (date.getTimezoneOffset() + 420) * 60000);
   const totalMin = bkkDate.getHours() * 60 + bkkDate.getMinutes();
   
-  // ถ้าก่อน 06:00 น. (360 นาที) ให้ถอยหลังไป 1 วัน
-  if (totalMin < 360) {
+  // ถ้าก่อน 06:01 น. (361 นาที) ให้ถอยหลังไป 1 วัน
+  if (totalMin < 361) {
     const yesterday = new Date(bkkDate.getTime() - 24 * 60 * 60 * 1000);
     return yesterday.getDay();
   }

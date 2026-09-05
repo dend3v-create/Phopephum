@@ -13,7 +13,11 @@
     "dev:mobile": "turbo run dev --filter=@phopephum/mobile",
     "deploy:web": "turbo run deploy --filter=@phopephum/web",
     "deploy:workers": "turbo run deploy --filter=@phopephum/workers-ai-proxy",
-    "deploy": "bash deploy.sh"
+    "deploy": "bash deploy.sh",
+    "ci:verify": "turbo run lint typecheck test",
+    "ci:financial-gate": "tsx scripts/ci-gate-financial-regression.ts",
+    "ci:partner-gate": "tsx scripts/test-phase7-2-partner-financial-integrity.ts",
+    "ci:post-deploy": "tsx scripts/ci-post-deploy-verify.ts"
   },
   "workspaces": [
     "apps/*",
@@ -24,6 +28,7 @@
     "@types/node": "^22",
     "@types/pg": "^8.20.0",
     "pg": "^8.22.0",
+    "tsx": "^4.23.13",
     "turbo": "^2.3.3",
     "typescript": "^5.7.3"
   },

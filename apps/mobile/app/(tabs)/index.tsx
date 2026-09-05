@@ -1,338 +1,429 @@
-import React, { useEffect, useState } from 'react';
-import { 
-  View, Text, StyleSheet, ScrollView, 
-  TouchableOpacity, SafeAreaView, ImageBackground 
-} from 'react-native';
-import { supabase } from '../../lib/supabase';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+/**
+ * index.tsx — Home Screen (Tab 1)
+ * ============================================================================
+ * Astral Imperial Home Screen
+ * Features:
+ *  - Live Yam AtthaKarn Clock & Status
+ *  - Real-time Moon Phase & Cosmic Energy
+ *  - Dynamic Sands of Time Token Badge
+ *  - Quick Access Action Grid
+ */
+
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  RefreshControl,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { getCurrentYam, calculateMoonPhase } from "@phopephum/engine";
+import { ASTRAL_THEME } from "../../constants/theme";
+import { useAuthStore } from "../../store/authStore";
+import { useSandsStore } from "../../store/sandsStore";
+import { ProtectedScreen } from "../../components/ProtectedScreen";
 
 export default function HomeScreen() {
-  const [profile, setProfile] = useState<any>(null);
   const router = useRouter();
+  const { profile, user, fetchProfile } = useAuthStore();
+  const { balance, fetchBalance } = useSandsStore();
+  const [refreshing, setRefreshing] = useState(false);
+  const [now, setNow] = useState(new Date());
 
+  // Live timer tick every 30 seconds for Yam countdown
   useEffect(() => {
-    fetchProfile();
+    const timer = setInterval(() => setNow(new Date()), 30000);
+    return () => clearInterval(timer);
   }, []);
 
-  async function fetchProfile() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', user.id)
-        .single();
-      setProfile(data);
+  useEffect(() => {
+    if (user?.id) {
+      fetchBalance(user.id);
     }
-  }
+  }, [user?.id]);
 
-  const isPro = profile?.plan === 'imperial';
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      fetchProfile(),
+      user?.id ? fetchBalance(user.id) : Promise.resolve(),
+    ]);
+    setNow(new Date());
+    setRefreshing(false);
+  };
+
+  // Pure Engine Astronomical Calculations
+  const currentYam = getCurrentYam();
+  const moonPhase = calculateMoonPhase(now);
+
+  const planName = (profile?.plan || profile?.subscription || "free").toUpperCase();
+  const isPremium = planName === "PRO" || planName === "IMPERIAL" || planName === "MASTER";
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        
-        {/* Logo & Brand */}
-        <View style={styles.brandContainer}>
-          <View style={styles.logoSymbol}>
-            <Text style={styles.logoLetter}>P</Text>
-          </View>
-          <View>
-            <Text style={styles.brandTitle}>PhopePhum</Text>
-            <Text style={styles.brandSub}>Wisdom Guidance OS</Text>
-          </View>
-        </View>
-
-        {/* Welcome */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.welcomeText}>ยินดีต้อนรับ,</Text>
-            <Text style={styles.nameText}>{profile?.display_name || 'ผู้ใช้งาน'}</Text>
-          </View>
-          <TouchableOpacity 
-            style={styles.profileBtn}
-            onPress={() => router.push('/(tabs)/settings')}
-          >
-            <Ionicons name="person-circle-outline" size={32} color="#C6A96B" />
-          </TouchableOpacity>
-        </View>
-
-        {/* Pro Banner / Membership Card */}
-        <TouchableOpacity 
-          style={[styles.planCard, isPro && styles.planCardPro]}
-          onPress={() => !isPro && router.push('/dashboard/upgrade' as any)}
+    <ProtectedScreen>
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={ASTRAL_THEME.colors.gold}
+            />
+          }
         >
-          <View style={styles.planHeader}>
-            <Text style={styles.planLabel}>แพ็กเกจปัจจุบัน</Text>
-            <View style={[styles.planBadge, { backgroundColor: isPro ? '#C6A96B20' : '#4B6FAE20' }]}>
-              <Text style={[styles.planBadgeText, { color: isPro ? '#C6A96B' : '#4B6FAE' }]}>
-                {isPro ? '✦ IMPERIAL' : 'FREE'}
+          {/* Header Bar */}
+          <View style={styles.topBar}>
+            <View>
+              <Text style={styles.brandTitle}>PHOPEPHUM</Text>
+              <Text style={styles.brandSubtitle}>Living Wisdom Operating System</Text>
+            </View>
+
+            {/* Sands Balance Badge */}
+            <TouchableOpacity
+              style={styles.sandsBadge}
+              onPress={() => router.push("/(tabs)/settings")}
+            >
+              <Text style={styles.sandsIcon}>⏳</Text>
+              <Text style={styles.sandsText}>{balance ?? profile?.time_sands ?? 0} Sands</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* User Welcome Greeting */}
+          <View style={styles.welcomeSection}>
+            <Text style={styles.welcomeGreeting}>สวัสดีกาลเวลา,</Text>
+            <Text style={styles.welcomeName}>
+              {profile?.full_name || profile?.display_name || "ปัญญาชน"}
+            </Text>
+          </View>
+
+          {/* Live Yam Widget */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <View style={styles.badgeGold}>
+                <Text style={styles.badgeGoldText}>🔮 ยามอัฏฐกาลปัจจุบัน</Text>
+              </View>
+              <Text style={styles.timeText}>
+                {now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
               </Text>
             </View>
-          </View>
-          <Text style={styles.planTitle}>{isPro ? 'สมาชิกพรีเมียม' : 'สมาชิกทั่วไป'}</Text>
-          
-          {/* Sands of Time Token Display */}
-          <View style={styles.inkContainer}>
-            <View style={styles.inkHeader}>
-              <Text style={styles.inkText}>⏳ ทรายกาลเวลา (Sands of Time)</Text>
-              <Text style={styles.inkValue}>{isPro ? '♾️ ไม่จำกัด' : `${profile?.time_sands ?? 0} / 15`}</Text>
-            </View>
-            {!isPro && (
-              <View style={styles.progressBarBg}>
-                <View style={[styles.progressBarFill, { width: `${Math.min(100, (((profile?.time_sands ?? 0) / 15) * 100))}%` }]} />
+
+            <Text style={styles.yamTitle}>ยาม{currentYam?.yamName || "มงคล"}</Text>
+            <Text style={styles.yamDescription}>
+              {currentYam?.travelAuspiciousness?.description ||
+                currentYam?.prediction?.auspicious ||
+                "ช่วงเวลาแห่งพลังบวกและการเริ่มต้นทำสิ่งมงคล"}
+            </Text>
+
+            <View style={styles.divider} />
+
+            <View style={styles.yamFooter}>
+              <View style={styles.yamMetaItem}>
+                <Text style={styles.metaLabel}>ช่วงเวลา</Text>
+                <Text style={styles.metaValue}>{currentYam?.period === "day" ? "กลางวัน" : "กลางคืน"}</Text>
               </View>
-            )}
+              <View style={styles.yamMetaItem}>
+                <Text style={styles.metaLabel}>ลำดับยาม</Text>
+                <Text style={styles.metaValue}>ยามที่ {currentYam?.yamNumber || 1}</Text>
+              </View>
+              <View style={styles.yamMetaItem}>
+                <Text style={styles.metaLabel}>ความมงคล</Text>
+                <Text style={[styles.metaValue, { color: ASTRAL_THEME.colors.gold }]}>
+                  {currentYam?.travelAuspiciousness?.label || "ดี (✓)"}
+                </Text>
+              </View>
+            </View>
           </View>
 
-          {!isPro && (
-            <Text style={styles.upgradeText}>ปลดล็อกเครื่องมือพยากรณ์ขั้นสูง →</Text>
-          )}
-        </TouchableOpacity>
+          {/* Moon Phase & Cosmic Energy Card */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <View style={styles.badgeMystic}>
+                <Text style={styles.badgeMysticText}>🌙 พลังงานจันทรคติ</Text>
+              </View>
+              <Text style={styles.moonPhaseText}>{moonPhase?.moonPhase || "ขึ้น ๑๕ ค่ำ"}</Text>
+            </View>
 
-        {/* Quick Menu */}
-        <Text style={styles.sectionTitle}>เมนูแนะนำ</Text>
-        <View style={styles.grid}>
-          <MenuCard 
-            icon="planet-outline" 
-            title="ดวงชะตา" 
-            desc="เช็คฤกษ์ยาม & วัน"
-            color="#C6A96B" 
-            onPress={() => router.push('/(tabs)/dashboard')} 
-          />
-          <MenuCard 
-            icon="sparkles-outline" 
-            title="รายงาน AI" 
-            desc="วิเคราะห์รายวัน"
-            color="#818CF8" 
-            onPress={() => router.push('/(tabs)/report')} 
-          />
-          <MenuCard 
-            icon="calendar-outline" 
-            title="วางแผนชีวิต" 
-            desc="บันทึก & เป้าหมาย"
-            color="#34D399" 
-            onPress={() => router.push('/(tabs)/planner')} 
-          />
-          <MenuCard 
-            icon="book-outline" 
-            title="วิธีใช้งาน" 
-            desc="คู่มือเริ่มต้น"
-            color="#94A3B8" 
-            onPress={() => router.push('/how-to-use')} 
-          />
-        </View>
+            <Text style={styles.moonAdvice}>
+              {moonPhase?.guidance || "จิตใจสงบนิ่ง เหมาะแก่การเจริญปัญญาและตัดสินใจเรื่องสำคัญ"}
+            </Text>
+          </View>
 
-        {/* Bottom decorative */}
-        <View style={styles.footer}>
-          <Text style={styles.footerText}>© 2025 PhopePhum · Wisdom Guidance</Text>
-        </View>
+          {/* Membership Status Card */}
+          <TouchableOpacity
+            style={[styles.card, styles.membershipCard]}
+            onPress={() => router.push("/(tabs)/settings")}
+          >
+            <View style={styles.membershipRow}>
+              <View>
+                <Text style={styles.membershipLabel}>สถานะสมาชิกปัจจุบัน</Text>
+                <Text style={styles.membershipPlan}>
+                  {isPremium ? `✦ ${planName} MEMBER` : "FREE TIER"}
+                </Text>
+              </View>
+              <View style={styles.upgradeBtn}>
+                <Text style={styles.upgradeBtnText}>
+                  {isPremium ? "ดูสิทธิ์ใช้งาน →" : "อัปเกรดแผน →"}
+                </Text>
+              </View>
+            </View>
+          </TouchableOpacity>
 
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
+          {/* Quick Actions Grid */}
+          <Text style={styles.sectionHeader}>เมนูแนะนำ</Text>
+          <View style={styles.grid}>
+            <TouchableOpacity
+              style={styles.gridCard}
+              onPress={() => router.push("/(tabs)/dashboard")}
+            >
+              <Ionicons name="planet-outline" size={28} color={ASTRAL_THEME.colors.gold} />
+              <Text style={styles.gridCardTitle}>ผังดวง 7 ตัว</Text>
+              <Text style={styles.gridCardDesc}>เลข 7 ตัว 9 ฐาน & วัยจร</Text>
+            </TouchableOpacity>
 
-function MenuCard({ icon, title, desc, color, onPress }: any) {
-  return (
-    <TouchableOpacity style={styles.card} onPress={onPress}>
-      <View style={[styles.iconBox, { backgroundColor: color + '15' }]}>
-        <Ionicons name={icon} size={24} color={color} />
-      </View>
-      <Text style={styles.cardTitle}>{title}</Text>
-      <Text style={styles.cardDesc}>{desc}</Text>
-    </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.gridCard}
+              onPress={() => router.push("/(tabs)/report")}
+            >
+              <Ionicons name="sparkles-outline" size={28} color={ASTRAL_THEME.colors.gold} />
+              <Text style={styles.gridCardTitle}>รายงาน AI</Text>
+              <Text style={styles.gridCardDesc}>วิเคราะห์ชีวิตเชิงลึก 6 ด้าน</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.gridCard}
+              onPress={() => router.push("/(tabs)/planner")}
+            >
+              <Ionicons name="calendar-outline" size={28} color={ASTRAL_THEME.colors.gold} />
+              <Text style={styles.gridCardTitle}>วางแผน TQM</Text>
+              <Text style={styles.gridCardDesc}>ไพ่พลังงาน & บันทึกกาล</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.gridCard}
+              onPress={() => router.push("/(tabs)/settings")}
+            >
+              <Ionicons name="hourglass-outline" size={28} color={ASTRAL_THEME.colors.gold} />
+              <Text style={styles.gridCardTitle}>เติมทรายกาล</Text>
+              <Text style={styles.gridCardDesc}>พร้อมเพย์ QR ทันที</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </ProtectedScreen>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#020617',
+    backgroundColor: ASTRAL_THEME.colors.bg,
   },
   scrollContent: {
-    padding: 24,
+    paddingHorizontal: ASTRAL_THEME.spacing.md,
+    paddingTop: ASTRAL_THEME.spacing.sm,
+    paddingBottom: ASTRAL_THEME.spacing.xl,
+    gap: ASTRAL_THEME.spacing.md,
   },
-  brandContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    marginBottom: 32,
-    marginTop: 8,
-  },
-  logoSymbol: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(198, 169, 107, 0.3)',
-    backgroundColor: 'rgba(198, 169, 107, 0.05)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  logoLetter: {
-    color: '#C6A96B',
-    fontSize: 18,
-    fontWeight: 'bold',
+  topBar: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: ASTRAL_THEME.spacing.xs,
   },
   brandTitle: {
-    color: '#F8F6F1',
-    fontSize: 18,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
+    fontSize: 20,
+    fontWeight: "800",
+    color: ASTRAL_THEME.colors.gold,
+    letterSpacing: 1.5,
   },
-  brandSub: {
-    color: '#C6A96B',
-    fontSize: 9,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    opacity: 0.6,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  welcomeText: {
-    color: '#94A3B8',
-    fontSize: 13,
-  },
-  nameText: {
-    color: '#F8F6F1',
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 2,
-  },
-  profileBtn: {
-    padding: 4,
-  },
-  planCard: {
-    backgroundColor: 'rgba(10, 22, 40, 0.5)',
-    borderWidth: 1,
-    borderColor: 'rgba(75, 111, 174, 0.2)',
-    borderRadius: 24,
-    padding: 24,
-    marginBottom: 32,
-  },
-  planCardPro: {
-    borderColor: 'rgba(198, 169, 107, 0.3)',
-    backgroundColor: 'rgba(198, 169, 107, 0.05)',
-  },
-  planHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  planLabel: {
-    color: '#C6B79F',
+  brandSubtitle: {
     fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
+    color: ASTRAL_THEME.colors.textMuted,
   },
-  planBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  planBadgeText: {
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  planTitle: {
-    color: '#F8F6F1',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  upgradeText: {
-    color: '#C6A96B',
-    fontSize: 12,
-    marginTop: 16,
-    fontWeight: '600',
-  },
-  inkContainer: {
-    marginTop: 16,
-    paddingTop: 14,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.06)',
-  },
-  inkHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  inkText: {
-    color: '#C6B79F',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  inkValue: {
-    color: '#C6A96B',
-    fontSize: 13,
-    fontWeight: 'bold',
-  },
-  progressBarBg: {
-    width: '100%',
-    height: 4,
-    backgroundColor: '#020617',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  progressBarFill: {
-    height: '100%',
-    backgroundColor: '#C6A96B',
-    borderRadius: 2,
-  },
-  sectionTitle: {
-    color: '#C6A96B',
-    fontSize: 11,
-    fontWeight: 'bold',
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-    marginBottom: 16,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-  },
-  card: {
-    backgroundColor: 'rgba(10, 22, 40, 0.5)',
-    width: '48%',
-    padding: 20,
-    borderRadius: 24,
+  sandsBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: ASTRAL_THEME.colors.bgCard,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
+    borderColor: ASTRAL_THEME.colors.goldBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.full,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    gap: 6,
   },
-  iconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  cardTitle: {
-    color: '#F8F6F1',
+  sandsIcon: {
     fontSize: 14,
-    fontWeight: 'bold',
   },
-  cardDesc: {
-    color: '#C6B79F',
-    fontSize: 11,
+  sandsText: {
+    color: ASTRAL_THEME.colors.goldLight,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  welcomeSection: {
     marginTop: 4,
   },
-  footer: {
-    marginTop: 40,
-    alignItems: 'center',
-    paddingBottom: 20,
+  welcomeGreeting: {
+    fontSize: 14,
+    color: ASTRAL_THEME.colors.textMuted,
   },
-  footerText: {
-    color: '#94A3B8',
-    fontSize: 10,
-    opacity: 0.4,
+  welcomeName: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.text,
+  },
+  card: {
+    backgroundColor: ASTRAL_THEME.colors.bgCard,
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.bgCardBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.lg,
+    padding: ASTRAL_THEME.spacing.md,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  badgeGold: {
+    backgroundColor: ASTRAL_THEME.colors.goldGlow,
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.goldBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  badgeGoldText: {
+    color: ASTRAL_THEME.colors.gold,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  badgeMystic: {
+    backgroundColor: ASTRAL_THEME.colors.mysticMuted,
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.mysticLight,
+    borderRadius: ASTRAL_THEME.borderRadius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  badgeMysticText: {
+    color: ASTRAL_THEME.colors.mysticLight,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  timeText: {
+    color: ASTRAL_THEME.colors.textMuted,
+    fontSize: 13,
+  },
+  yamTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.goldLight,
+    marginTop: 4,
+  },
+  yamDescription: {
+    fontSize: 13,
+    color: ASTRAL_THEME.colors.textMuted,
+    marginTop: 4,
+    lineHeight: 19,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: ASTRAL_THEME.colors.bgCardBorder,
+    marginVertical: 12,
+  },
+  yamFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  yamMetaItem: {
+    alignItems: "center",
+  },
+  metaLabel: {
+    fontSize: 11,
+    color: ASTRAL_THEME.colors.textDim,
+  },
+  metaValue: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: ASTRAL_THEME.colors.text,
+    marginTop: 2,
+  },
+  moonPhaseText: {
+    color: ASTRAL_THEME.colors.textMuted,
+    fontSize: 13,
+    fontWeight: "500",
+  },
+  moonAdvice: {
+    fontSize: 13,
+    color: ASTRAL_THEME.colors.textMuted,
+    lineHeight: 20,
+  },
+  membershipCard: {
+    borderLeftWidth: 3,
+    borderLeftColor: ASTRAL_THEME.colors.gold,
+  },
+  membershipRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  membershipLabel: {
+    fontSize: 12,
+    color: ASTRAL_THEME.colors.textMuted,
+  },
+  membershipPlan: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.gold,
+    marginTop: 2,
+  },
+  upgradeBtn: {
+    backgroundColor: ASTRAL_THEME.colors.goldGlow,
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.goldBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  upgradeBtnText: {
+    color: ASTRAL_THEME.colors.goldLight,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  sectionHeader: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.text,
+    marginTop: 4,
+  },
+  grid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: ASTRAL_THEME.spacing.md,
+  },
+  gridCard: {
+    flex: 1,
+    minWidth: "45%",
+    backgroundColor: ASTRAL_THEME.colors.bgCard,
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.bgCardBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.lg,
+    padding: ASTRAL_THEME.spacing.md,
+    alignItems: "flex-start",
+    gap: 6,
+  },
+  gridCardTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.text,
+  },
+  gridCardDesc: {
+    fontSize: 11,
+    color: ASTRAL_THEME.colors.textMuted,
   },
 });

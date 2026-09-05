@@ -1,338 +1,362 @@
-import React, { useEffect, useState, useCallback } from 'react';
+/**
+ * planner.tsx — TQM Planner Screen (Tab 4)
+ * ============================================================================
+ * Astral Imperial Life Governance & Daily Ritual
+ * Features:
+ *  - Daily Energy Card Draw (POST /api/daily-card)
+ *  - 3 Core Intention Priorities
+ *  - Evening Reflection Journal (POST /api/journal-save)
+ */
+
+import React, { useEffect, useState } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  SafeAreaView, ActivityIndicator, RefreshControl,
-  TextInput, Alert, KeyboardAvoidingView, Platform,
-} from 'react-native';
-import { supabase } from '../../lib/supabase';
-import { Ionicons } from '@expo/vector-icons';
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface DailyPlan {
-  id: string;
-  date: string;
-  intention: string | null;
-  priorities: string[] | null;
-  reflection: string | null;
-  energy_level: number | null;
-}
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function todayISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-}
-
-function formatThaiDate(isoDate: string) {
-  const [y, m, d] = isoDate.split('-').map(Number);
-  const be = y + 543;
-  const months = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
-  return `${d} ${months[m - 1]} ${be}`;
-}
-
-const ENERGY_LABELS = ['', '😞 ต่ำมาก', '😕 ต่ำ', '😐 ปานกลาง', '😊 ดี', '⚡ ดีมาก'];
-
-// ─── Component ────────────────────────────────────────────────────────────────
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  TextInput,
+  SafeAreaView,
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { ASTRAL_THEME } from "../../constants/theme";
+import { useAuthStore } from "../../store/authStore";
+import { useSandsStore } from "../../store/sandsStore";
+import { pullDailyCardApi, saveDailyJournalApi } from "../../services/api";
+import { ProtectedScreen } from "../../components/ProtectedScreen";
 
 export default function PlannerScreen() {
-  const [plan, setPlan] = useState<DailyPlan | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const { user } = useAuthStore();
+  const { balance, fetchBalance } = useSandsStore();
+  const [intention, setIntention] = useState("");
+  const [priority1, setPriority1] = useState("");
+  const [priority2, setPriority2] = useState("");
+  const [priority3, setPriority3] = useState("");
+  const [reflection, setReflection] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [dailyCard, setDailyCard] = useState<any>(null);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Form state
-  const [intention, setIntention] = useState('');
-  const [priorities, setPriorities] = useState(['', '', '']);
-  const [reflection, setReflection] = useState('');
-  const [energyLevel, setEnergyLevel] = useState(3);
+  const todayStr = new Date().toISOString().slice(0, 10);
 
-  const today = todayISO();
-
-  useEffect(() => {
-    fetchPlan();
-  }, []);
-
-  async function fetchPlan() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
-
-    const { data } = await supabase
-      .from('daily_plans')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('date', today)
-      .single();
-
-    if (data) {
-      setPlan(data);
-      setIntention(data.intention ?? '');
-      setPriorities([
-        data.priorities?.[0] ?? '',
-        data.priorities?.[1] ?? '',
-        data.priorities?.[2] ?? '',
-      ]);
-      setReflection(data.reflection ?? '');
-      setEnergyLevel(data.energy_level ?? 3);
-    }
-    setLoading(false);
-    setRefreshing(false);
-  }
-
-  async function handleSave() {
-    setSaving(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
-
-      const filteredPriorities = priorities.filter((p) => p.trim() !== '');
-      const payload = {
-        user_id: user.id,
-        date: today,
-        intention: intention.trim() || null,
-        priorities: filteredPriorities.length > 0 ? filteredPriorities : null,
-        reflection: reflection.trim() || null,
-        energy_level: energyLevel,
-      };
-
-      const { error } = await supabase
-        .from('daily_plans')
-        .upsert(payload, { onConflict: 'user_id,date' });
-
-      if (error) throw error;
-
-      await fetchPlan();
-      Alert.alert('บันทึกแล้ว', 'แผนวันนี้ถูกบันทึกเรียบร้อย');
-    } catch (e: any) {
-      Alert.alert('เกิดข้อผิดพลาด', e?.message ?? 'กรุณาลองใหม่');
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  const onRefresh = useCallback(() => {
+  const onRefresh = async () => {
     setRefreshing(true);
-    fetchPlan();
-  }, []);
+    if (user?.id) await fetchBalance(user.id);
+    setRefreshing(false);
+  };
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#C9A96E" style={{ marginTop: 80 }} />
-      </SafeAreaView>
-    );
-  }
+  const handleDrawCard = async () => {
+    setIsDrawing(true);
+    try {
+      const res = await pullDailyCardApi();
+      if (res.success && res.card) {
+        setDailyCard(res.card);
+        Alert.alert("จับไพ่พลังงานสำเร็จ ✨", "พลังงานประจำวันพร้อมคำแนะนำได้รับการเปิดเผยแล้ว");
+        if (user?.id) fetchBalance(user.id);
+      } else {
+        Alert.alert("ไม่สามารถเปิดไพ่ได้", res.error || "กรุณาลองใหม่อีกครั้ง");
+      }
+    } catch (err: any) {
+      Alert.alert("เกิดข้อผิดพลาด", err?.message || "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    } finally {
+      setIsDrawing(false);
+    }
+  };
+
+  const handleSaveJournal = async () => {
+    if (!intention && !priority1 && !reflection) {
+      Alert.alert("แจ้งเตือน", "กรุณากรอกเจตจำนงหรือบันทึกประจำวันอย่างน้อย 1 รายการ");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const res = await saveDailyJournalApi({
+        date: todayStr,
+        intention,
+        priorities: [priority1, priority2, priority3].filter(Boolean),
+        reflection,
+      });
+
+      if (res.success) {
+        Alert.alert("บันทึกสำเร็จ", "บันทึกกาลเวลาและเป้าหมายประจำวันลงสู่ระบบแล้ว");
+      } else {
+        Alert.alert("ไม่สามารถบันทึกได้", res.error || "กรุณาลองใหม่อีกครั้ง");
+      }
+    } catch (err: any) {
+      Alert.alert("เกิดข้อผิดพลาด", err?.message || "เชื่อมต่อเซิร์ฟเวอร์ไม่ได้");
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+    <ProtectedScreen>
+      <SafeAreaView style={styles.container}>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C9A96E" />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={ASTRAL_THEME.colors.gold}
+            />
           }
-          keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
-          <View style={styles.headerRow}>
+          <View style={styles.header}>
             <View>
-              <Text style={styles.headerTitle}>วางแผนชีวิต</Text>
-              <Text style={styles.headerDate}>{formatThaiDate(today)}</Text>
+              <Text style={styles.headerTitle}>วางแผนชีวิต TQM</Text>
+              <Text style={styles.headerSubtitle}>ตั้งเจตจำนง จัดลำดับความสำคัญ และบันทึกกาล</Text>
             </View>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>{plan ? '✓ มีแผนแล้ว' : '+ ใหม่'}</Text>
+            <View style={styles.dateBadge}>
+              <Text style={styles.dateText}>{todayStr}</Text>
             </View>
           </View>
 
-          {/* Energy Level */}
-          <Text style={styles.fieldLabel}>พลังงานวันนี้</Text>
-          <View style={styles.energyRow}>
-            {[1, 2, 3, 4, 5].map((level) => (
-              <TouchableOpacity
-                key={level}
-                style={[styles.energyButton, energyLevel === level && styles.energyButtonActive]}
-                onPress={() => setEnergyLevel(level)}
-              >
-                <Text style={[styles.energyNum, energyLevel === level && styles.energyNumActive]}>
-                  {level}
+          {/* Daily Card Draw Section */}
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Text style={styles.sectionTitle}>🎴 ไพ่พลังงานประจำวัน (Daily Ritual)</Text>
+            </View>
+
+            {dailyCard ? (
+              <View style={styles.cardResultBox}>
+                <Text style={styles.cardResultName}>{dailyCard.title || "ไพ่แห่งปัญญาและความเพียร"}</Text>
+                <Text style={styles.cardResultDesc}>
+                  {dailyCard.meaning || "วันแห่งการลงมือทำด้วยความประณีต ผลลัพธ์จะงอกเงยตามสัจจะแห่งเหตุปัจจัย"}
                 </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-          <Text style={styles.energyLabel}>{ENERGY_LABELS[energyLevel]}</Text>
-
-          {/* Intention */}
-          <Text style={styles.fieldLabel}>☽ เจตนาวันนี้</Text>
-          <TextInput
-            style={styles.textInput}
-            value={intention}
-            onChangeText={setIntention}
-            placeholder="วันนี้ฉันตั้งใจจะ..."
-            placeholderTextColor="#4A3F32"
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
-          />
-
-          {/* Priorities */}
-          <Text style={styles.fieldLabel}>✦ สิ่งสำคัญ 3 อย่าง</Text>
-          {[0, 1, 2].map((i) => (
-            <View key={i} style={styles.priorityRow}>
-              <View style={styles.priorityNumber}>
-                <Text style={styles.priorityNumText}>{i + 1}</Text>
               </View>
-              <TextInput
-                style={styles.priorityInput}
-                value={priorities[i]}
-                onChangeText={(text) => {
-                  const next = [...priorities];
-                  next[i] = text;
-                  setPriorities(next);
-                }}
-                placeholder={`สิ่งสำคัญที่ ${i + 1}`}
-                placeholderTextColor="#4A3F32"
-              />
-            </View>
-          ))}
-
-          {/* Reflection */}
-          <Text style={styles.fieldLabel}>◈ ทบทวนตนเอง</Text>
-          <TextInput
-            style={[styles.textInput, { minHeight: 100 }]}
-            value={reflection}
-            onChangeText={setReflection}
-            placeholder="วันนี้ฉันได้เรียนรู้อะไร..."
-            placeholderTextColor="#4A3F32"
-            multiline
-            textAlignVertical="top"
-          />
-
-          {/* Save Button */}
-          <TouchableOpacity
-            style={[styles.saveButton, saving && styles.saveButtonDisabled]}
-            onPress={handleSave}
-            disabled={saving}
-            activeOpacity={0.8}
-          >
-            {saving ? (
-              <ActivityIndicator size="small" color="#020617" />
             ) : (
-              <>
-                <Ionicons name="checkmark-circle" size={20} color="#020617" />
-                <Text style={styles.saveButtonText}>บันทึกแผนวันนี้</Text>
-              </>
+              <View style={styles.drawPlaceholder}>
+                <Text style={styles.drawDesc}>
+                  เปิดรับพลังงานและคำชี้แนะประจำวัน เพื่อกำหนดทิศทางการกระทำอย่างรู้เท่าทัน
+                </Text>
+                <TouchableOpacity
+                  style={[styles.drawBtn, isDrawing && styles.btnDisabled]}
+                  disabled={isDrawing}
+                  onPress={handleDrawCard}
+                >
+                  {isDrawing ? (
+                    <ActivityIndicator size="small" color={ASTRAL_THEME.colors.bg} />
+                  ) : (
+                    <Text style={styles.drawBtnText}>จับไพ่พลังงานประจำวัน ✨</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
             )}
-          </TouchableOpacity>
+          </View>
 
+          {/* Intention & Priorities Input */}
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>🎯 เจตจำนง & 3 สิ่งสำคัญวันนี้</Text>
+            <Text style={styles.sectionDesc}>โฟกัสพลังงานของคุณไปที่สิ่งที่มีคุณค่าแท้จริง</Text>
+
+            <Text style={styles.inputLabel}>เจตจำนงหลัก (Core Intention)</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="เช่น มีสติและใจเย็นในการเจรจางาน..."
+              placeholderTextColor={ASTRAL_THEME.colors.textDim}
+              value={intention}
+              onChangeText={setIntention}
+            />
+
+            <Text style={[styles.inputLabel, { marginTop: 12 }]}>ลำดับความสำคัญ (Top 3 Priorities)</Text>
+            <TextInput
+              style={styles.textInput}
+              placeholder="1. งานสำคัญลำดับแรก"
+              placeholderTextColor={ASTRAL_THEME.colors.textDim}
+              value={priority1}
+              onChangeText={setPriority1}
+            />
+            <TextInput
+              style={[styles.textInput, { marginTop: 6 }]}
+              placeholder="2. งานสำคัญลำดับสอง"
+              placeholderTextColor={ASTRAL_THEME.colors.textDim}
+              value={priority2}
+              onChangeText={setPriority2}
+            />
+            <TextInput
+              style={[styles.textInput, { marginTop: 6 }]}
+              placeholder="3. งานสำคัญลำดับสาม"
+              placeholderTextColor={ASTRAL_THEME.colors.textDim}
+              value={priority3}
+              onChangeText={setPriority3}
+            />
+          </View>
+
+          {/* Evening Reflection Journal */}
+          <View style={styles.card}>
+            <Text style={styles.sectionTitle}>🌙 ทบทวนกาลเวลา (Evening Reflection)</Text>
+            <Text style={styles.sectionDesc}>บันทึกสิ่งที่ได้เรียนรู้ ความสำเร็จ หรือข้อปรับปรุง</Text>
+
+            <TextInput
+              style={[styles.textInput, styles.textArea]}
+              placeholder="บันทึกความรู้สึก บทเรียน หรือสิ่งที่ขอบคุณในวันนี้..."
+              placeholderTextColor={ASTRAL_THEME.colors.textDim}
+              multiline
+              numberOfLines={4}
+              value={reflection}
+              onChangeText={setReflection}
+            />
+
+            <TouchableOpacity
+              style={[styles.saveBtn, isSaving && styles.btnDisabled]}
+              disabled={isSaving}
+              onPress={handleSaveJournal}
+            >
+              {isSaving ? (
+                <ActivityIndicator size="small" color={ASTRAL_THEME.colors.bg} />
+              ) : (
+                <Text style={styles.saveBtnText}>บันทึกกาลเวลา 💾</Text>
+              )}
+            </TouchableOpacity>
+          </View>
         </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ProtectedScreen>
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0806' },
-  scrollContent: { padding: 20, paddingBottom: 48 },
-
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 28,
+  container: {
+    flex: 1,
+    backgroundColor: ASTRAL_THEME.colors.bg,
   },
-  headerTitle: { color: '#F8F6F1', fontSize: 22, fontWeight: 'bold' },
-  headerDate: { color: '#C6B79F', fontSize: 12, marginTop: 2 },
-  statusBadge: {
-    backgroundColor: 'rgba(201,169,110,0.12)',
+  scrollContent: {
+    paddingHorizontal: ASTRAL_THEME.spacing.md,
+    paddingTop: ASTRAL_THEME.spacing.sm,
+    paddingBottom: ASTRAL_THEME.spacing.xl,
+    gap: ASTRAL_THEME.spacing.md,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: ASTRAL_THEME.spacing.xs,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.gold,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: ASTRAL_THEME.colors.textMuted,
+    marginTop: 2,
+  },
+  dateBadge: {
+    backgroundColor: ASTRAL_THEME.colors.bgCard,
     borderWidth: 1,
-    borderColor: 'rgba(201,169,110,0.3)',
-    paddingHorizontal: 12,
+    borderColor: ASTRAL_THEME.colors.goldBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.full,
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 20,
   },
-  statusText: { color: '#C9A96E', fontSize: 11, fontWeight: 'bold' },
-
-  fieldLabel: {
-    color: '#C6B79F',
+  dateText: {
+    color: ASTRAL_THEME.colors.goldLight,
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  card: {
+    backgroundColor: ASTRAL_THEME.colors.bgCard,
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.bgCardBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.lg,
+    padding: ASTRAL_THEME.spacing.md,
+  },
+  cardHeader: {
+    marginBottom: 6,
+  },
+  sectionTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.text,
+  },
+  sectionDesc: {
     fontSize: 11,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 8,
-    marginTop: 20,
+    color: ASTRAL_THEME.colors.textMuted,
+    marginTop: 2,
+    marginBottom: 10,
   },
-
-  energyRow: { flexDirection: 'row', gap: 10, marginBottom: 6 },
-  energyButton: {
-    flex: 1,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: '#15120F',
+  drawPlaceholder: {
+    alignItems: "center",
+    paddingVertical: 10,
+    gap: 10,
+  },
+  drawDesc: {
+    fontSize: 12,
+    color: ASTRAL_THEME.colors.textMuted,
+    textAlign: "center",
+    lineHeight: 18,
+  },
+  drawBtn: {
+    backgroundColor: ASTRAL_THEME.colors.gold,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  drawBtnText: {
+    color: ASTRAL_THEME.colors.bg,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  cardResultBox: {
+    backgroundColor: ASTRAL_THEME.colors.goldGlow,
     borderWidth: 1,
-    borderColor: '#2A2018',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: ASTRAL_THEME.colors.goldBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    padding: 12,
+    marginTop: 6,
   },
-  energyButtonActive: {
-    backgroundColor: 'rgba(201,169,110,0.15)',
-    borderColor: '#C9A96E',
+  cardResultName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.goldLight,
   },
-  energyNum: { color: '#C6B79F', fontSize: 16, fontWeight: 'bold' },
-  energyNumActive: { color: '#C9A96E' },
-  energyLabel: { color: '#C9A96E', fontSize: 12, textAlign: 'center', marginTop: 4 },
-
+  cardResultDesc: {
+    fontSize: 12,
+    color: ASTRAL_THEME.colors.text,
+    lineHeight: 18,
+    marginTop: 4,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: ASTRAL_THEME.colors.goldLight,
+    marginBottom: 4,
+  },
   textInput: {
-    backgroundColor: '#15120F',
+    backgroundColor: "rgba(2, 6, 23, 0.6)",
     borderWidth: 1,
-    borderColor: '#2A2018',
-    borderRadius: 16,
-    padding: 16,
-    color: '#F8F6F1',
-    fontSize: 14,
-    lineHeight: 22,
+    borderColor: ASTRAL_THEME.colors.bgCardBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    color: ASTRAL_THEME.colors.text,
+    fontSize: 13,
+  },
+  textArea: {
     minHeight: 80,
+    textAlignVertical: "top",
   },
-
-  priorityRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginBottom: 8 },
-  priorityNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: 'rgba(201,169,110,0.12)',
-    borderWidth: 1,
-    borderColor: 'rgba(201,169,110,0.3)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexShrink: 0,
+  saveBtn: {
+    backgroundColor: ASTRAL_THEME.colors.gold,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginTop: 12,
   },
-  priorityNumText: { color: '#C9A96E', fontSize: 13, fontWeight: 'bold' },
-  priorityInput: {
-    flex: 1,
-    backgroundColor: '#15120F',
-    borderWidth: 1,
-    borderColor: '#2A2018',
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    color: '#F8F6F1',
-    fontSize: 14,
+  btnDisabled: {
+    opacity: 0.6,
   },
-
-  saveButton: {
-    marginTop: 32,
-    backgroundColor: '#C9A96E',
-    borderRadius: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 16,
+  saveBtnText: {
+    color: ASTRAL_THEME.colors.bg,
+    fontSize: 13,
+    fontWeight: "700",
   },
-  saveButtonDisabled: { opacity: 0.6 },
-  saveButtonText: { color: '#020617', fontSize: 16, fontWeight: 'bold' },
 });

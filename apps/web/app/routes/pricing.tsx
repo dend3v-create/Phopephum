@@ -1,31 +1,42 @@
 import { json } from "@remix-run/cloudflare";
 import { Link, useLoaderData } from "@remix-run/react";
+import { useState } from "react";
 import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { getUser } from "~/services/auth.server";
+import { SANDS_REFILL_PACKS } from "~/lib/plans";
 import type { Env } from "~/env.server";
 
 export const meta: MetaFunction = () => [
-  { title: "ราคาสมาชิก — PhopePhum Wisdom Guidance" },
-  { name: "description", content: "เริ่มต้นฟรีหรืออัปเกรดเป็นระดับต่างๆ รับคำแนะนำ AI วิเคราะห์ดวงชะตา และปฏิทินพลังงานรายวัน เริ่มต้นเพียง ฿59/เดือน" },
+  { title: "ราคาสมาชิก & ปัญญาบารมี — PhopePhum Wisdom Guidance" },
+  { name: "description", content: "เริ่มต้นฟรีหรืออัปเกรดเป็นระดับต่างๆ รับคำแนะนำ AI วิเคราะห์ดวงชะตา และปฏิทินพลังงานรายวัน เริ่มต้นเพียง ฿89/เดือน หรือเติมละอองทรายกาลเวลาตามต้องการ" },
   { property: "og:type", content: "website" },
   { property: "og:url", content: "https://phopephum.com/pricing" },
-  { property: "og:title", content: "ราคาสมาชิก — PhopePhum" },
+  { property: "og:title", content: "ราคาสมาชิก & ปัญญาบารมี — PhopePhum" },
   { property: "og:description", content: "ที่ปรึกษาชีวิตส่วนตัว เริ่มฟรี หรือยกระดับสู่สัจธรรมชีวิตดวงดาว" },
   { property: "og:image", content: "https://phopephum.com/favicon.svg" },
-  { name: "keywords", content: "สมัครสมาชิกภพภูมิ, ราคาภพภูมิ, PhopePhum Wisdom, ที่ปรึกษาชีวิต AI" },
+  { name: "keywords", content: "สมัครสมาชิกภพภูมิ, ราคาภพภูมิ, PhopePhum Wisdom, ที่ปรึกษาชีวิต AI, ทรายกาลเวลา" },
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await getUser(request, env);
-  return json({ isLoggedIn: !!user });
+  const url = new URL(request.url);
+  const showUpgradeBanner = url.searchParams.get("upgrade") === "1";
+  const requiredPlan = url.searchParams.get("require") || null;
+
+  return json({
+    isLoggedIn: !!user,
+    showUpgradeBanner,
+    requiredPlan,
+  });
 }
 
-// ─── Plan definitions (4 plans aligned with DB & Upgrade page) ─────────────────────────────────────────
+// ─── Plan definitions ─────────────────────────────────────────────────────────────
 
-const PLANS = [
+const MONTHLY_PLANS = [
   {
     tier: "FREE",
+    id: "free",
     name: "เริ่มต้น",
     subtitle: "สัมผัสภูมิปัญญา",
     price: "0",
@@ -45,18 +56,19 @@ const PLANS = [
       { text: "ระบบวิเคราะห์จรแบบสมบูรณ์",       included: false },
       { text: "ส่งออกรายงาน PDF พรีเมียม",        included: false },
     ],
-    note: "* ต้องรอการอนุมัติจากแอดมินก่อนเข้าใช้งาน",
+    note: "* สมาชิกทดลองใช้งานฟรีตลอดชีพ",
   },
   {
     tier: "BASIC",
+    id: "basic",
     name: "Basic Sage",
     subtitle: "ยกระดับการพยากรณ์เบื้องต้น",
-    price: "59",
-    priceLabel: "59",
+    price: "89",
+    priceLabel: "89",
     priceNote: "/ เดือน",
     tag: null,
     style: "basic" as const,
-    ctaLabel: "เริ่มใช้ Basic ฿59/เดือน",
+    ctaLabel: "เริ่มใช้ Basic ฿89/เดือน",
     ctaLoggedIn: "/dashboard/upgrade?plan=basic",
     ctaGuest: "/register?plan=basic",
     features: [
@@ -65,21 +77,22 @@ const PLANS = [
       { text: "Life Report 1 ครั้ง/เดือน",          included: true },
       { text: "ปฏิทินพลังงานรายวัน",                included: true },
       { text: "Wisdom AI (จำกัด 10 ครั้ง/เดือน)",   included: true },
-      { text: "ระบบวิเคราะห์จรแบบสมบูรณ์",       included: false },
+      { text: "บันทึกดวงตนเอง + 3 โปรไฟล์",        included: true },
       { text: "ส่งออกรายงาน PDF พรีเมียม",        included: false },
     ],
     note: null,
   },
   {
     tier: "PRO",
+    id: "pro",
     name: "Professional Master",
     subtitle: "ที่ปรึกษาชีวิตเต็มประสิทธิภาพ",
-    price: "259",
-    priceLabel: "259",
+    price: "289",
+    priceLabel: "289",
     priceNote: "/ เดือน",
     tag: "แนะนำ",
     style: "pro" as const,
-    ctaLabel: "เริ่มใช้ Pro ฿259/เดือน",
+    ctaLabel: "เริ่มใช้ Pro ฿289/เดือน",
     ctaLoggedIn: "/dashboard/upgrade?plan=pro",
     ctaGuest: "/register?plan=pro",
     features: [
@@ -88,32 +101,69 @@ const PLANS = [
       { text: "Life Report 15 ครั้ง/เดือน",         included: true },
       { text: "บันทึกดวงผู้อื่น 15 รายชื่อ",          included: true },
       { text: "Wisdom AI ไม่จำกัด",                 included: true },
-      { text: "ปฏิทินร้อยปีดวงดาวเชิงลึก",          included: true },
-      { text: "ส่งออกรายงาน PDF พรีเมียม",        included: false },
+      { text: "ปฏิทิน 100 ปีดวงดาวเชิงลึก",          included: true },
+      { text: "รับ Sands +150 ละอองทราย/เดือน",   included: true },
     ],
     note: null,
   },
   {
     tier: "IMPERIAL",
+    id: "imperial",
     name: "Imperial Emperor",
     subtitle: "ที่สุดแห่งสัจธรรมพลังจักรวาล",
     price: "789",
     priceLabel: "789",
-    priceNote: "/ เดือน",
+    priceNote: "ตลอดชีพ",
     tag: "สัจจะสูงสุด",
     style: "imperial" as const,
-    ctaLabel: "เริ่มใช้ Imperial ฿789/เดือน",
+    ctaLabel: "เริ่มใช้ Imperial ฿789 ตลอดชีพ",
     ctaLoggedIn: "/dashboard/upgrade?plan=imperial",
     ctaGuest: "/register?plan=imperial",
     features: [
-      { text: "ทุกฟีเจอร์ในระบบไม่จำกัด",            included: true },
+      { text: "ทุกฟีเจอร์ในระบบไม่จำกัดตลอดชีพ",     included: true },
       { text: "ดวงสมพงษ์ & ปฏิทิน 100 ปี",           included: true },
       { text: "Life Report ไม่จำกัดครั้ง",           included: true },
       { text: "Export รายงาน PDF พรีเมียม",          included: true },
       { text: "Wisdom AI แบบ Real-time",            included: true },
-      { text: "สิทธิ์เข้ากลุ่มปัญญาชนพิเศษ",          included: true },
+      { text: "รับ Sands +500 ละอองทรายโบนัส",     included: true },
     ],
     note: null,
+  },
+] as const;
+
+const ANNUAL_PLANS = [
+  {
+    ...MONTHLY_PLANS[0],
+  },
+  {
+    ...MONTHLY_PLANS[1],
+  },
+  {
+    tier: "PRO",
+    id: "pro_annual",
+    name: "Professional Master (รายปี)",
+    subtitle: "คุ้มค่าที่สุดสำหรับมืออาชีพ (ประหยัด ~20%)",
+    price: "2790",
+    priceLabel: "2,790",
+    priceNote: "/ ปี (~฿232.50/ด.)",
+    tag: "คุ้มค่าสูงสุด",
+    style: "pro" as const,
+    ctaLabel: "เริ่มใช้ Pro รายปี ฿2,790/ปี",
+    ctaLoggedIn: "/dashboard/upgrade?plan=pro_annual",
+    ctaGuest: "/register?plan=pro_annual",
+    features: [
+      { text: "สิทธิ์ Pro ครบถ้วนตลอด 1 ปีเต็ม",      included: true },
+      { text: "ยามอัฏฐกาลล่วงหน้า 7 วัน",          included: true },
+      { text: "ระบบวิเคราะห์จรแบบสมบูรณ์",        included: true },
+      { text: "Life Report 15 ครั้ง/เดือน",         included: true },
+      { text: "บันทึกดวงผู้อื่น 15 รายชื่อ",          included: true },
+      { text: "Wisdom AI ไม่จำกัด",                 included: true },
+      { text: "รับ Sands โบนัสพิเศษ +1,800 เม็ด",   included: true },
+    ],
+    note: "* ประหยัดกว่าการจ่ายรายเดือนถึง ฿678/ปี",
+  },
+  {
+    ...MONTHLY_PLANS[3],
   },
 ] as const;
 
@@ -123,17 +173,18 @@ const COMPARE_ROWS = [
   { label: "เส้นทางชีวิต & รายงาน",       free: "ภาพรวม",    basic: "1 ครั้ง/ด.",  pro: "15 ครั้ง/ด.", imperial: "✅ ไม่จำกัด" },
   { label: "Wisdom AI",                 free: "3/เดือน",   basic: "10/เดือน",  pro: "✅ ไม่จำกัด",  imperial: "✅ ไม่จำกัด" },
   { label: "ยามและปฏิทินพลังงาน",        free: "—",         basic: "วันนี้",     pro: "7 วันล่วงหน้า", imperial: "100 ปีดาราศาสตร์" },
-  { label: "บันทึกดวงผู้อื่น",            free: "—",         basic: "—",         pro: "15 รายชื่อ",  imperial: "✅ ไม่จำกัด" },
+  { label: "บันทึกดวงผู้อื่น",            free: "—",         basic: "3 รายชื่อ",  pro: "15 รายชื่อ",  imperial: "✅ ไม่จำกัด" },
+  { label: "Sands of Time รวมในแพ็ก",   free: "—",         basic: "+50/ด.",    pro: "+150/ด.",    imperial: "+500 ทันที" },
   { label: "ส่งออกรายงาน PDF",          free: "—",         basic: "—",         pro: "—",          imperial: "✅ พรีเมียม" },
 ];
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Page Component ───────────────────────────────────────────────────────────
 
 export default function PricingPage() {
-  const { isLoggedIn } = useLoaderData<typeof loader>();
-  const showUpgradeBanner = typeof window !== "undefined"
-    ? new URLSearchParams(window.location.search).get("upgrade") === "1"
-    : false;
+  const { isLoggedIn, showUpgradeBanner, requiredPlan } = useLoaderData<typeof loader>();
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "annual">("monthly");
+
+  const plans = billingCycle === "monthly" ? MONTHLY_PLANS : ANNUAL_PLANS;
 
   return (
     <main className="relative min-h-screen overflow-hidden pb-24" style={{ background: "var(--bg-base)" }}>
@@ -157,19 +208,19 @@ export default function PricingPage() {
 
         {/* ── Upgrade Banner ── */}
         {showUpgradeBanner && (
-          <div className="mb-10 rounded-2xl border border-[#C6A96B]/30 px-5 py-4 text-center"
-            style={{ background: "rgba(198,169,107,0.07)" }}>
+          <div className="mb-10 rounded-2xl border border-[#C6A96B]/30 px-5 py-4 text-center animate-in fade-in duration-300"
+            style={{ background: "rgba(198,169,107,0.08)" }}>
             <p className="text-[#C6A96B] text-sm font-semibold">
-              ✦ เนื้อหานี้สำหรับสมาชิกที่ได้รับการอัปเดตแพ็กเกจเท่านั้น — อัปเกรดด้านล่างเพื่อปลดล็อก
+              ✦ ฟังก์ชันนี้สำหรับสมาชิกแผน {requiredPlan ? requiredPlan.toUpperCase() : "พรีเมียม"} ขึ้นไป — เลือกแพ็กเกจด้านล่างเพื่อปลดล็อกได้ทันที
             </p>
           </div>
         )}
 
         {/* ── Header ── */}
-        <div className="text-center mb-16">
+        <div className="text-center mb-10">
           <div className="flex items-center justify-center gap-2 mb-4">
             <span className="text-[#C6A96B] text-sm">✦</span>
-            <span className="font-display text-[#F8F6F1] font-bold text-xl">PhopePhum</span>
+            <span className="font-display text-[#F8F6F1] font-bold text-xl tracking-wider">PHOPEPHUM</span>
           </div>
           <h1 className="font-display text-4xl sm:text-5xl font-bold text-[#F8F6F1] mb-4 leading-tight">
             เลือกแผนที่ใช่สำหรับคุณ
@@ -180,18 +231,106 @@ export default function PricingPage() {
           </p>
         </div>
 
+        {/* ── Billing Cycle Toggle ── */}
+        <div className="flex justify-center mb-12">
+          <div className="inline-flex p-1.5 rounded-2xl border border-white/10 bg-[#0B1528]/80 backdrop-blur-md shadow-xl">
+            <button
+              type="button"
+              onClick={() => setBillingCycle("monthly")}
+              className={`px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+                billingCycle === "monthly"
+                  ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-lg shadow-[#C6A96B]/20"
+                  : "text-[#94A3B8] hover:text-[#F8F6F1]"
+              }`}
+            >
+              รายเดือน (Monthly)
+            </button>
+            <button
+              type="button"
+              onClick={() => setBillingCycle("annual")}
+              className={`px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
+                billingCycle === "annual"
+                  ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-lg shadow-[#C6A96B]/20"
+                  : "text-[#94A3B8] hover:text-[#F8F6F1]"
+              }`}
+            >
+              <span>รายปี (Annual)</span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                ประหยัด ~20%
+              </span>
+            </button>
+          </div>
+        </div>
+
         {/* ── Pricing Cards — 4 plans ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {PLANS.map((plan) => (
-            <PricingCard key={plan.tier} plan={plan} isLoggedIn={isLoggedIn} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+          {plans.map((plan) => (
+            <PricingCard key={plan.id} plan={plan} isLoggedIn={isLoggedIn} />
           ))}
         </div>
 
+        {/* ── Sands Micro-Economy Top-Up Showcase ── */}
+        <div className="mb-20 max-w-4xl mx-auto rounded-3xl border border-[#C6A96B]/30 p-8 sm:p-10 relative overflow-hidden"
+          style={{ background: "linear-gradient(180deg, rgba(11,21,40,0.85) 0%, rgba(2,6,23,0.95) 100%)", backdropFilter: "blur(24px)" }}>
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/30 bg-amber-400/10 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2">
+              <span>⏳</span>
+              <span>Sands of Time Micro-Economy</span>
+            </div>
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#F8F6F1]">
+              หรือเติมเฉพาะ ละอองทรายกาลเวลา ตามต้องการ
+            </h2>
+            <p className="text-sm text-[#94A3B8] mt-2 max-w-lg mx-auto">
+              ใช้สำหรับแลกรับ AI Report ฉบับเต็ม หรือเปิดสิทธิ์การวิเคราะห์พิเศษเฉพาะครั้ง โดยไม่ต้องสมัครรายเดือน
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {Object.values(SANDS_REFILL_PACKS).map((pack) => (
+              <div
+                key={pack.id}
+                className={`relative flex flex-col rounded-2xl border p-5 transition-all duration-300 ${
+                  pack.popular
+                    ? "border-[#C6A96B] bg-[#C6A96B]/[0.08] shadow-xl shadow-[#C6A96B]/15 sm:-translate-y-1"
+                    : "border-white/10 bg-white/[0.02]"
+                }`}
+              >
+                {pack.popular && (
+                  <span className="absolute -top-3 right-4 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-md">
+                    ยอดนิยม
+                  </span>
+                )}
+                <div className="text-2xl mb-2">⏳</div>
+                <h3 className="font-display text-base font-bold text-[#F8F6F1]">{pack.name}</h3>
+                <p className="text-xs text-[#C6A96B] font-semibold mt-0.5">{pack.bonusText}</p>
+
+                <div className="my-3 pt-2 border-t border-white/10">
+                  <span className="text-2xl font-extrabold text-[#F8F6F1]">฿{pack.priceThb}</span>
+                  <span className="text-[10px] text-[#94A3B8] block mt-0.5">
+                    (~฿{pack.pricePerUnit.toFixed(2)} / ละอองทราย)
+                  </span>
+                </div>
+
+                <Link
+                  to={isLoggedIn ? `/dashboard/upgrade?tab=sands&plan=${pack.id}` : `/register?tab=sands&plan=${pack.id}`}
+                  className={`w-full py-2.5 rounded-xl text-xs font-bold text-center mt-auto transition-all ${
+                    pack.popular
+                      ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-md shadow-[#C6A96B]/20 hover:opacity-95"
+                      : "border border-white/20 text-[#F8F6F1] hover:bg-white/5"
+                  }`}
+                >
+                  เติม {pack.sandsAmount} ทราย →
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+
         {/* ── Comparison Table ── */}
-        <div className="mb-16 max-w-4xl mx-auto">
+        <div className="mb-20 max-w-4xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-px flex-1" style={{ background: "rgba(198,169,107,0.2)" }} />
-            <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase whitespace-nowrap">เปรียบเทียบฟีเจอร์</p>
+            <p className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase whitespace-nowrap">เปรียบเทียบฟีเจอร์อย่างละเอียด</p>
             <div className="h-px flex-1" style={{ background: "rgba(198,169,107,0.2)" }} />
           </div>
 
@@ -222,9 +361,9 @@ export default function PricingPage() {
         {/* ── Trust signals ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16">
           {[
-            { icon: "🔒", title: "ปลอดภัย 100%", desc: "ข้อมูลวันเกิดของคุณเข้ารหัสและไม่ถูกแชร์" },
-            { icon: "⚡", title: "ยกเลิกได้ทุกเมื่อ", desc: "ไม่มีสัญญาผูกมัด ยกเลิกก่อนรอบถัดไปได้เสมอ" },
-            { icon: "✦", title: "ภูมิปัญญาแท้ดั้งเดิม", desc: "ขับเคลื่อนด้วยศาสตร์โบราณที่ถูกพิสูจน์มาหลายศตวรรษ" },
+            { icon: "🔒", title: "ปลอดภัย 100%", desc: "ชำระเงินผ่าน Omise (Opn Payments) ด้วย PromptPay QR หรือบัตรเครดิตมาตรฐานระดับโลก" },
+            { icon: "⚡", title: "ปลดล็อกทันที", desc: "ระบบ Atomic Webhook ยืนยันยอดและเปิดสิทธิ์ทันทีภายในไม่กี่วินาที" },
+            { icon: "✦", title: "ภูมิปัญญาแท้ดั้งเดิม", desc: "เลข 7 ตัว 9 ฐาน + อัฏฐกาลที่แม่นยำ พร้อมการผสาน AI อัจฉริยะ" },
           ].map(({ icon, title, desc }) => (
             <div key={title} className="text-center p-5 rounded-2xl border border-white/5"
               style={{ backdropFilter: "blur(12px)", background: "var(--card-dark-bg)" }}>
@@ -245,8 +384,8 @@ export default function PricingPage() {
           <div className="space-y-4">
             {[
               { q: "ยกเลิกการสมัครสมาชิกได้ตอนไหน?", a: "ยกเลิกได้ทุกเมื่อก่อนรอบบิลถัดไป ไม่มีสัญญาผูกมัดหรือค่าบริการยกเลิกเพิ่มเติม" },
-              { q: "ช่องทางการชำระเงินรองรับแบบไหนบ้าง?", a: "เรารองรับบัตรเครดิต/เดบิต และ QR PromptPay ผ่าน Stripe ที่ปลอดภัยระดับสากล" },
-              { q: "มีทรายกาลเวลา (Sands of Time) ให้ใช้เท่าไรในแต่ละแผน?", a: "ผู้ใช้ทุกคนจะได้รับแต้มทรายกาลเวลาในการใช้งานแตกต่างกัน โดยระดับ Imperial และ Pro จะได้รับโควตาขนาดใหญ่ที่สุด" },
+              { q: "ช่องทางการชำระเงินรองรับแบบไหนบ้าง?", a: "เรารองรับ Thai PromptPay QR ทุกธนาคาร และบัตรเครดิต/เดบิต ผ่านเกตเวย์ Omise (Opn Payments) ที่มีความปลอดภัยระดับสากล" },
+              { q: "ละอองทรายกาลเวลา (Sands of Time) คืออะไรและหมดอายุไหม?", a: "ละอองทรายกาลเวลาเป็นหน่วยแต้มปัญญาสำหรับแลกรับบทวิเคราะห์เชิงลึก โดยละอองทรายที่ซื้อเพิ่มจะไม่มีวันหมดอายุ และจะถูกเก็บสะสมไว้ในบัญชีของคุณตลอดไป" },
             ].map(({ q, a }) => (
               <div key={q} className="rounded-xl border border-white/5 px-5 py-4"
                 style={{ background: "var(--card-dark-bg)" }}>
@@ -265,7 +404,7 @@ export default function PricingPage() {
           "@context": "https://schema.org",
           "@type": "Product",
           "name": "PhopePhum Wisdom Guidance",
-          "offers": PLANS.map(p => ({
+          "offers": [...MONTHLY_PLANS, ...ANNUAL_PLANS].map(p => ({
             "@type": "Offer",
             "name": p.name,
             "price": p.price,
@@ -277,13 +416,13 @@ export default function PricingPage() {
   );
 }
 
-// ─── PricingCard ──────────────────────────────────────────────────────────────
+// ─── PricingCard Component ───────────────────────────────────────────────────
 
 function PricingCard({
   plan,
   isLoggedIn,
 }: {
-  plan: typeof PLANS[number];
+  plan: typeof MONTHLY_PLANS[number] | typeof ANNUAL_PLANS[number];
   isLoggedIn: boolean;
 }) {
   const isFree      = plan.style === "free";
@@ -327,7 +466,7 @@ function PricingCard({
       {/* Tag */}
       {plan.tag && (
         <div className="absolute -top-3.5 left-1/2 -translate-x-1/2">
-          <span className="px-4 py-1 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase"
+          <span className="px-4 py-1 rounded-full text-[10px] font-bold tracking-[0.2em] uppercase shadow-md"
             style={{ 
               background: isImperial ? "linear-gradient(135deg, #4B6FAE, #6D8FC7)" : "linear-gradient(135deg, #C6A96B, #D9BC82)", 
               color: "#020617" 

@@ -116,7 +116,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     .single();
 
   const plan = getUserPlan(profile);
-  const isPremium = plan === "pro" || plan === "imperial";
+  const isPremium = plan === "pro" || plan === "master";
   const currentSands = profile?.time_sands ?? 0;
 
   if (!isPremium && currentSands <= 0) {
@@ -135,7 +135,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     .gte("created_at", startOfDay.toISOString());
 
   const limit = getAiReportLimit(profile);
-  if (reportsCount && reportsCount >= limit) {
+  if (limit !== null && reportsCount && reportsCount >= limit) {
     return json({ error: `คุณสร้างบทวิเคราะห์ประเภทนี้ครบกำหนด ${limit} ครั้งของวันนี้แล้ว กรุณากลับมาใหม่ในวันถัดไป` });
   }
 
@@ -208,15 +208,21 @@ export async function action({ request, context }: ActionFunctionArgs) {
       return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` });
     }
 
-    // 5. Decrement Sands of Time if not premium
+    // 5. Decrement Sands of Time safely via Atomic RPC
     if (!isPremium) {
-      const { error: decrementError } = await supabase
-        .from("profiles")
-        .update({ time_sands: currentSands - 1 })
-        .eq("id", user.id);
-      
-      if (decrementError) {
-        console.error("Failed to decrement time_sands:", decrementError);
+      const { debitSandsAtomic } = await import("~/services/rewards.server");
+      const debitRes = await debitSandsAtomic({
+        userId: user.id,
+        amount: 1,
+        activityType: "ai_report_redeem",
+        referenceId: report.id,
+        description: `สร้างรายงานดวงดาว ${reportType}`,
+        metadata: { reportType },
+        env,
+      });
+
+      if (!debitRes.success) {
+        console.warn("[dashboard.reports.new] Debit sands warning:", debitRes.error);
       }
     }
 

@@ -50,7 +50,7 @@ export function AppTopBar({
 
         {/* Sands of Time Token Badge */}
         <Link
-          to="/dashboard/settings"
+          to="/dashboard/upgrade?tab=sands"
           className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-bold transition-all active:scale-95 border"
           style={{
             background: "rgba(198, 169, 107, 0.08)",

@@ -1,4 +1,6 @@
-import type { MetaFunction } from "@remix-run/cloudflare";
+import type { MetaFunction, LoaderFunctionArgs } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
+import { captureReferralClick } from "~/services/attribution.server";
 import { ThemeToggle } from "~/components/ThemeToggle";
 import { Link } from "@remix-run/react";
 import { useT } from "~/i18n/context";
@@ -23,6 +25,26 @@ export const meta: MetaFunction = () => [
   { name: "keywords", content: "ภพภูมิ, PhopePhum, Wisdom Guidance, ที่ปรึกษาชีวิต, ดูดวง, เส้นทางชีวิต, พลังงานวัน, ดวงชาตา, AI ดูดวง, วางแผนชีวิต" },
   { name: "author", content: "Wisdom Guidance" },
 ];
+
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  const ref = url.searchParams.get("ref");
+  const campaign = url.searchParams.get("c") || url.searchParams.get("utm_campaign") || null;
+  const env = context.cloudflare.env;
+
+  if (ref) {
+    const { headers } = await captureReferralClick({
+      request,
+      partnerCode: ref,
+      campaignCode: campaign,
+      env,
+    });
+    return json({ ok: true }, { headers });
+  }
+
+  return json({ ok: true });
+}
+
 
 const STARS = [
   { x: 8,  y: 12, s: 1.5, delay: 0,   blue: false },

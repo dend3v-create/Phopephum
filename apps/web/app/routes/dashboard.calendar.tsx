@@ -4,7 +4,13 @@ import type { LoaderFunctionArgs, ActionFunctionArgs, MetaFunction } from "@remi
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { Card } from "~/components/ui/Card";
-import { calculatePhopephum, getThaiBaseNumbers, THAI_MONTH_NAMES } from "@phopephum/engine";
+import {
+  calculatePhopephum,
+  getThaiBaseNumbers,
+  THAI_MONTH_NAMES,
+  getAstrologicalDate,
+  getAstrologicalDateStr,
+} from "@phopephum/engine";
 import {
   calculateDayIntelligence,
   calculateMonthOverview,
@@ -91,10 +97,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const url = new URL(request.url);
   const now = new Date();
+  const astroNow = getAstrologicalDate(now);
   
   // ── 1. ปฏิทินจันทรคติรายเดือน ──
-  const year = parseInt(url.searchParams.get("year") || String(now.getFullYear()));
-  const month = parseInt(url.searchParams.get("month") || String(now.getMonth() + 1));
+  const year = parseInt(url.searchParams.get("year") || String(astroNow.getUTCFullYear()));
+  const month = parseInt(url.searchParams.get("month") || String(astroNow.getUTCMonth() + 1));
 
   const daysInMonth = new Date(year, month, 0).getDate();
   const firstDayOfWeek = new Date(year, month - 1, 1).getDay();
@@ -144,7 +151,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   // ── 2. วางแผนฤกษ์มงคล (Timing Advisor & Day Intelligence) ──
-  const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+  const todayStr = getAstrologicalDateStr(now);
   const eventDate = url.searchParams.get("eventDate") || todayStr;
   const eventTime = url.searchParams.get("eventTime") || "12:00";
   const eventType = url.searchParams.get("eventType") || "negotiation";
@@ -348,39 +355,39 @@ export default function DashboardCalendar() {
         
         {/* ── Left/Middle: Lunar Calendar View (2/3 width) ── */}
         <div className="lg:col-span-2 space-y-6">
-          <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
-            <div className="grid grid-cols-7 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
+          <Card className="p-0 overflow-hidden border-slate-200 dark:border-[#C9A96E]/20 shadow-xl bg-white/95 dark:bg-slate-900/40 backdrop-blur-md">
+            <div className="grid grid-cols-7 border-b border-slate-200 dark:border-[#C9A96E]/20 bg-amber-50/50 dark:bg-[#C9A96E]/5">
               {["อา.", "จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส."].map((d, i) => (
-                <div key={i} className={`py-2 sm:py-3 text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest font-sans-thai ${i === 0 ? "text-rose-400" : i === 6 ? "text-sky-400" : "text-[#F3D68B]"}`}>
+                <div key={i} className={`py-2 sm:py-3 text-center text-[10px] sm:text-xs font-bold uppercase tracking-wider sm:tracking-widest font-sans-thai ${i === 0 ? "text-rose-600 dark:text-rose-400" : i === 6 ? "text-sky-600 dark:text-sky-400" : "text-amber-800 dark:text-[#F3D68B]"}`}>
                   {d}
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7 bg-slate-950/15">
+            <div className="grid grid-cols-7 bg-slate-100/40 dark:bg-slate-950/15">
               {Array.from({ length: firstDayOfWeek }).map((_, i) => (
-                <div key={`pad-${i}`} className="aspect-square md:aspect-video border-b border-r border-white/5 bg-slate-950/50" />
+                <div key={`pad-${i}`} className="aspect-square md:aspect-video border-b border-r border-slate-200/60 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50" />
               ))}
 
               {calendarDays.map((day) => (
                 <Link 
                   key={day.day}
                   to={`?year=${year}&month=${month}&eventDate=${day.dateStr}&eventTime=${eventTime}&eventType=${eventType}&title=${encodeURIComponent(appointmentTitle)}`}
-                  className={`relative aspect-square md:aspect-video border-b border-r border-white/5 p-1 sm:p-2 transition-all hover:bg-[#C9A96E]/10 group ${day.isWanPhra ? "bg-[#C9A96E]/5" : ""} ${eventDate === day.dateStr ? "bg-[#C9A96E]/20 ring-1 ring-inset ring-gold-liquid/50" : ""}`}
+                  className={`relative aspect-square md:aspect-video border-b border-r border-slate-200/60 dark:border-white/5 p-1 sm:p-2 transition-all hover:bg-amber-100/40 dark:hover:bg-[#C9A96E]/10 group ${day.isWanPhra ? "bg-amber-50/60 dark:bg-[#C9A96E]/5" : ""} ${eventDate === day.dateStr ? "bg-amber-100/80 dark:bg-[#C9A96E]/20 ring-2 ring-inset ring-amber-600 dark:ring-gold-liquid/50 font-bold" : ""}`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className={`text-[11px] sm:text-sm font-bold ${day.weekDay === 0 ? "text-rose-400/80" : "text-[#F8F6F1]/60"} group-hover:text-[#F8F6F1] transition-colors`}>
+                    <span className={`text-[11px] sm:text-sm font-bold ${day.weekDay === 0 ? "text-rose-600 dark:text-rose-400/80" : "text-slate-800 dark:text-[#F8F6F1]/60"} group-hover:text-slate-950 dark:group-hover:text-[#F8F6F1] transition-colors`}>
                       {day.day}
                     </span>
                     {day.hasGoldenWindow && (
-                      <span className="text-[10px] text-amber-300 font-bold leading-none" title="มีช่วงเวลาทองคำ (Golden Window)">
+                      <span className="text-[10px] text-amber-600 dark:text-amber-300 font-bold leading-none" title="มีช่วงเวลาทองคำ (Golden Window)">
                         ⭐
                       </span>
                     )}
                   </div>
 
                   <div className="mt-1 flex flex-col gap-0.5">
-                    <span className={`text-[10px] md:text-xs font-sans-thai leading-tight ${day.isWanPhra ? "text-amber-400 font-bold drop-shadow-md" : "text-[#D9CDB7]/80"}`}>
+                    <span className={`text-[10px] md:text-xs font-sans-thai leading-tight ${day.isWanPhra ? "text-amber-700 dark:text-amber-400 font-bold drop-shadow-sm" : "text-slate-600 dark:text-[#D9CDB7]/80"}`}>
                       {day.moonPhase}
                     </span>
                   </div>
@@ -390,7 +397,7 @@ export default function DashboardCalendar() {
                     {day.appointments.map((apt: any) => (
                       <div 
                         key={apt.id} 
-                        className={`w-1.5 h-1.5 rounded-full ${apt.score >= 80 ? "bg-emerald-400" : apt.score >= 60 ? "bg-sky-400" : "bg-rose-400"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${apt.score >= 80 ? "bg-emerald-500" : apt.score >= 60 ? "bg-sky-500" : "bg-rose-500"}`}
                         title={apt.title}
                       />
                     ))}
@@ -403,7 +410,7 @@ export default function DashboardCalendar() {
               ))}
 
               {Array.from({ length: (7 - (firstDayOfWeek + calendarDays.length) % 7) % 7 }).map((_, i) => (
-                <div key={`pad-last-${i}`} className="aspect-square md:aspect-video border-b border-r border-white/5 bg-slate-950/50" />
+                <div key={`pad-last-${i}`} className="aspect-square md:aspect-video border-b border-r border-slate-200/60 dark:border-white/5 bg-slate-50 dark:bg-slate-950/50" />
               ))}
             </div>
           </Card>
@@ -458,49 +465,49 @@ export default function DashboardCalendar() {
         <div className="space-y-6">
           {/* Day Intelligence Card */}
           {dayIntelligence && (
-            <Card className="p-6 border-2 border-[#C9A96E]/40 bg-gradient-to-br from-[#0a2240] via-[#0d1f38] to-[#020617] rounded-3xl shadow-2xl space-y-5 relative overflow-hidden">
+            <Card className="p-6 border-2 border-slate-200 dark:border-[#C9A96E]/40 bg-white/95 dark:bg-gradient-to-br dark:from-[#0a2240] dark:via-[#0d1f38] dark:to-[#020617] rounded-3xl shadow-xl space-y-5 relative overflow-hidden">
               <div
                 className="absolute -top-24 -right-24 w-72 h-72 rounded-full pointer-events-none opacity-20 blur-3xl"
                 style={{ background: "radial-gradient(circle, #C6A96B 0%, transparent 70%)" }}
               />
 
               {/* 1. Day Header */}
-              <div className="border-b border-white/10 pb-4 space-y-1 relative z-10">
+              <div className="border-b border-black/5 dark:border-white/10 pb-4 space-y-1 relative z-10">
                 <div className="flex items-center justify-between gap-2">
-                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8C6D2D] dark:text-[#C6A96B]">
                     DAILY AUSPICIOUS INTELLIGENCE
                   </span>
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-400/30 bg-emerald-500/10 text-emerald-300">
+                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
                     {dayIntelligence.overallScore}% พลังงานเกื้อหนุน
                   </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <span>{dayIntelligence.lunarDayInfo.dayOfWeekThai}</span>
-                  <span className="text-xs text-[#94A3B8] font-normal">
+                  <span className="text-xs text-slate-500 dark:text-[#94A3B8] font-normal">
                     ({new Date(dayIntelligence.date).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })})
                   </span>
                 </h3>
 
-                <p className="text-xs text-amber-300/90 font-medium">
+                <p className="text-xs text-amber-800 dark:text-amber-300/90 font-semibold">
                   ✦ {dayIntelligence.lunarDayInfo.lunarDateStr} · {dayIntelligence.lunarDayInfo.moonPhase}
                   {dayIntelligence.lunarDayInfo.isWanPhra && " (วันพระ)"}
                 </p>
               </div>
 
               {/* 2. Daily Theme & Plain Summary */}
-              <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 space-y-2 relative z-10">
-                <p className="text-[11px] font-bold text-[#C6A96B] uppercase tracking-wider">
+              <div className="p-4 rounded-2xl bg-amber-50/40 dark:bg-white/[0.03] border border-amber-200/40 dark:border-white/10 space-y-2 relative z-10 shadow-sm">
+                <p className="text-[11px] font-bold text-[#8C6D2D] dark:text-[#C6A96B] uppercase tracking-wider">
                   ธีมพลังงานประจำวัน:
                 </p>
-                <p className="text-sm font-bold text-[#F8F6F1] leading-snug">
+                <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1] leading-snug">
                   “{dayIntelligence.dailyTheme}”
                 </p>
-                <p className="text-xs text-[#94A3B8] leading-relaxed">
+                <p className="text-xs text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                   {dayIntelligence.dailySummary}
                 </p>
                 {dayIntelligence.personalNote && (
-                  <div className="pt-2 border-t border-white/5 text-xs text-[#D9BC82] flex items-start gap-1.5">
+                  <div className="pt-2 border-t border-black/5 dark:border-white/5 text-xs text-amber-800 dark:text-[#D9BC82] flex items-start gap-1.5 font-medium">
                     <span>💡</span>
                     <span>{dayIntelligence.personalNote}</span>
                   </div>
@@ -514,15 +521,15 @@ export default function DashboardCalendar() {
                     <div className="flex items-center gap-2">
                       <span className="text-xl">⭐</span>
                       <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-amber-300">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-300">
                           GOLDEN WINDOW OF THE DAY
                         </span>
-                        <h4 className="text-sm sm:text-base font-bold text-white">
+                        <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
                           {dayIntelligence.goldenWindow.startTime} – {dayIntelligence.goldenWindow.endTime} น.
                         </h4>
                       </div>
                     </div>
-                    <span className="text-xs font-black text-amber-300 bg-amber-400/20 border border-amber-400/30 px-2.5 py-1 rounded-full">
+                    <span className="text-xs font-black text-amber-800 dark:text-amber-300 bg-amber-400/20 border border-amber-400/30 px-2.5 py-1 rounded-full">
                       {dayIntelligence.goldenWindow.score}/100
                     </span>
                   </div>
@@ -532,14 +539,14 @@ export default function DashboardCalendar() {
                     {dayIntelligence.goldenWindow.suitableFor.map((item, idx) => (
                       <span
                         key={idx}
-                        className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/10 text-[#F8F6F1] border border-white/10 font-medium"
+                        className="text-[11px] px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-slate-800 dark:text-[#F8F6F1] border border-black/10 dark:border-white/10 font-medium"
                       >
                         ✓ {item}
                       </span>
                     ))}
                   </div>
 
-                  <p className="text-xs text-[#CBD5E1] leading-relaxed">
+                  <p className="text-xs text-slate-700 dark:text-[#CBD5E1] leading-relaxed font-medium">
                     {dayIntelligence.goldenWindow.plainAdvice}
                   </p>
 
@@ -560,10 +567,10 @@ export default function DashboardCalendar() {
               {/* 4. Timeline of the Day (8 slots) */}
               <div className="space-y-2 relative z-10">
                 <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#C6A96B] dark:text-[#94A3B8]">
                     ไทม์ไลน์ช่วงเวลาตลอดวัน:
                   </span>
-                  <span className="text-[10px] text-[#64748B]">คลิกเพื่อเลือกเวลา</span>
+                  <span className="text-[10px] text-slate-600 dark:text-[#64748B]">คลิกเพื่อเลือกเวลา</span>
                 </div>
 
                 <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1 no-scrollbar">
@@ -579,26 +586,26 @@ export default function DashboardCalendar() {
                         }}
                         className={`w-full text-left p-2.5 rounded-xl border text-xs transition-all flex items-center justify-between ${
                           isSelected
-                            ? "bg-[#C6A96B]/20 border-[#C6A96B] text-white"
+                            ? "bg-[#C6A96B]/20 border-[#C6A96B] text-slate-900 dark:text-white"
                             : win.level === "golden"
-                            ? "bg-amber-500/10 border-amber-500/30 text-amber-200 hover:bg-amber-500/20"
+                            ? "bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200 hover:bg-amber-500/20"
                             : win.level === "favorable"
-                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-200 hover:bg-emerald-500/20"
+                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-500/20"
                             : win.level === "caution" || win.level === "avoid"
-                            ? "bg-rose-500/10 border-rose-500/20 text-rose-300 hover:bg-rose-500/20"
-                            : "bg-white/5 border-white/5 text-[#CBD5E1] hover:bg-white/10"
+                            ? "bg-rose-500/10 border-rose-500/20 text-rose-900 dark:text-rose-300 hover:bg-rose-500/20"
+                            : "bg-white/5 border-black/10 dark:border-white/5 text-slate-800 dark:text-[#CBD5E1] hover:bg-white/10"
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           <span className="font-bold font-mono text-[11px]">
                             {win.startTime}–{win.endTime}
                           </span>
-                          <span className="text-[11px] truncate max-w-[130px]">{win.suitableFor[0] || win.title}</span>
+                          <span className="text-[11px] truncate max-w-[130px] font-medium">{win.suitableFor[0] || win.title}</span>
                         </div>
 
                         <div className="flex items-center gap-1.5 shrink-0">
                           {win.isGoldenWindow && <span className="text-xs">⭐</span>}
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/30">
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/10 dark:bg-black/30 text-slate-900 dark:text-white border border-black/5 dark:border-white/5">
                             {win.score}%
                           </span>
                         </div>
@@ -610,20 +617,20 @@ export default function DashboardCalendar() {
 
               {/* 5. 4 Life Domains */}
               <div className="space-y-2 relative z-10">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#94A3B8]">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#C6A96B] dark:text-[#94A3B8]">
                   ความสอดคล้อง 4 มิติชีวิต:
                 </span>
                 <div className="grid grid-cols-2 gap-2">
                   {dayIntelligence.domainScores.map((dm) => (
-                    <div key={dm.domain} className="p-2.5 rounded-xl bg-white/[0.02] border border-white/5 space-y-1">
+                    <div key={dm.domain} className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 space-y-1">
                       <div className="flex items-center justify-between text-xs">
-                        <span className="flex items-center gap-1 font-bold text-white text-[11px]">
+                        <span className="flex items-center gap-1 font-bold text-slate-900 dark:text-white text-[11px]">
                           <span>{dm.icon}</span>
                           <span>{dm.label.split("&")[0]}</span>
                         </span>
-                        <span className="text-[10px] font-bold text-amber-300">{dm.score}%</span>
+                        <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300">{dm.score}%</span>
                       </div>
-                      <p className="text-[10px] text-[#94A3B8] leading-tight line-clamp-1">{dm.verdict}</p>
+                      <p className="text-[10px] text-slate-600 dark:text-[#94A3B8] leading-tight line-clamp-1">{dm.verdict}</p>
                     </div>
                   ))}
                 </div>

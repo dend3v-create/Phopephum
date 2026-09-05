@@ -1,11 +1,14 @@
 import Stripe from "stripe";
+import { SUBSCRIPTION_PLANS } from "../lib/plans";
 
 export const PLAN_PRICES: Record<string, number> = {
   free: 0,
-  basic: 59,
-  pro: 259,
-  imperial: 789,
+  basic: SUBSCRIPTION_PLANS.basic.priceThb,
+  pro: SUBSCRIPTION_PLANS.pro.priceThb,
+  pro_annual: SUBSCRIPTION_PLANS.pro_annual.priceThb,
+  imperial: SUBSCRIPTION_PLANS.imperial.priceThb,
 };
+
 
 /**
  * Stripe Service Wrapper

@@ -1,0 +1,54 @@
+name: "Deploy — Preview (Cloudflare Pages Preview)"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: ["main"]
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview-deploy:
+    name: "Build & Deploy Preview"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "📦 Install PNPM"
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+          run_install: false
+
+      - name: "⚙️ Setup Node.js 20.x"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: "📥 Install Dependencies"
+        run: pnpm install --frozen-lockfile
+
+      - name: "🛡️ Gate 1-4: CI Validation & Financial Invariant Check"
+        run: |
+          pnpm typecheck
+          pnpm exec tsx scripts/ci-gate-financial-regression.ts
+
+      - name: "🔨 Build Web Preview"
+        run: pnpm build
+
+      - name: "☁️ Deploy to Cloudflare Pages (Preview Branch)"
+        id: cloudflare_preview
+        working-directory: apps/web
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx wrangler pages deploy build/client \
+            --project-name=phopephum-web \
+            --branch=pr-${{ github.event.pull_request.number }} \
+            --commit-dirty=true

@@ -266,11 +266,9 @@ export default function YamPage() {
   const [now, setNow] = useState<Date>(new Date());
   
   // React states for tab controllers & interactive form
-  const [activeTab, setActiveTab] = useState<"live" | "ashta" | "doctrine" | "finder" | "grid" | "compare">("live");
+  const [activeTab, setActiveTab] = useState<"live" | "ashta" | "finder" | "grid" | "compare">("live");
   const [activeInquiry, setActiveInquiry] = useState<"news" | "sickness" | "lostItem" | "travel" | "bestTime">("news");
   const [ashtaInquiry, setAshtaInquiry] = useState<"news" | "sickness" | "lostItem" | "travel" | "bestTime">("news");
-  const [doctrineYamFilter, setDoctrineYamFilter] = useState<number | "all">("all");
-  const [doctrineSearch, setDoctrineSearch] = useState<string>("");
 
   // Manual Ashta Calculator states
   const [ashtaDay, setAshtaDay] = useState<number>(() => new Date().getDate());
@@ -629,13 +627,13 @@ export default function YamPage() {
       </div>
 
       {/* Tab Selectors */}
-      <div className="flex flex-wrap bg-[#0A1628]/60 p-1.5 rounded-2xl border border-[#D9BC82]/15 gap-1.5 w-full relative shadow-md">
+      <div className="flex flex-wrap bg-white/90 dark:bg-[#0A1628]/60 p-1.5 rounded-2xl border border-amber-200/60 dark:border-[#D9BC82]/15 gap-1.5 w-full relative shadow-sm dark:shadow-md">
         <button
           onClick={() => setActiveTab("live")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "live"
-              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
-              : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
+              ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-md dark:from-[#C6A96B] dark:to-[#D9BC82] dark:text-[#0A1628] dark:shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
+              : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 dark:text-[#94A3B8] dark:hover:text-[#F8F6F1] dark:hover:bg-white/5"
           }`}
         >
           ⏱️ ยามสดขณะนี้
@@ -644,28 +642,18 @@ export default function YamPage() {
           onClick={() => setActiveTab("ashta")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "ashta"
-              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
-              : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
+              ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-md dark:from-[#C6A96B] dark:to-[#D9BC82] dark:text-[#0A1628] dark:shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
+              : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 dark:text-[#94A3B8] dark:hover:text-[#F8F6F1] dark:hover:bg-white/5"
           }`}
         >
           🔮 คำนวณยามดี
         </button>
         <button
-          onClick={() => setActiveTab("doctrine")}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
-            activeTab === "doctrine"
-              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
-              : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
-          }`}
-        >
-          📖 คัมภีร์ทำนาย ๔ ด้าน
-        </button>
-        <button
           onClick={() => setActiveTab("finder")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "finder"
-              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
-              : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
+              ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-md dark:from-[#C6A96B] dark:to-[#D9BC82] dark:text-[#0A1628] dark:shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
+              : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 dark:text-[#94A3B8] dark:hover:text-[#F8F6F1] dark:hover:bg-white/5"
           }`}
         >
           ✨ คำนวณฤกษ์มีชัย
@@ -674,10 +662,10 @@ export default function YamPage() {
           onClick={() => isLocked ? null : setActiveTab("compare")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "compare"
-              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
+              ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-md dark:from-[#C6A96B] dark:to-[#D9BC82] dark:text-[#0A1628] dark:shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
               : isLocked
-              ? "text-[#94A3B8]/40 cursor-not-allowed"
-              : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
+              ? "text-slate-400 dark:text-[#94A3B8]/40 cursor-not-allowed"
+              : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 dark:text-[#94A3B8] dark:hover:text-[#F8F6F1] dark:hover:bg-white/5"
           }`}
           title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
@@ -687,10 +675,10 @@ export default function YamPage() {
           onClick={() => isLocked ? null : setActiveTab("grid")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "grid"
-              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
+              ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-md dark:from-[#C6A96B] dark:to-[#D9BC82] dark:text-[#0A1628] dark:shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
               : isLocked
-              ? "text-[#94A3B8]/40 cursor-not-allowed"
-              : "text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/5"
+              ? "text-slate-400 dark:text-[#94A3B8]/40 cursor-not-allowed"
+              : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 dark:text-[#94A3B8] dark:hover:text-[#F8F6F1] dark:hover:bg-white/5"
           }`}
           title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
@@ -708,36 +696,33 @@ export default function YamPage() {
       {activeTab === "live" && (
         <div className="space-y-6 animate-fade-in">
           {/* Main Live Card — Living Cosmic Magazine Layout */}
-          <Card className="overflow-hidden border-[#D9BC82]/15 bg-[#0A1628]/40 p-0 shadow-[0_0_30px_rgba(217,188,130,0.06)]">
+          <Card className="overflow-hidden border-slate-200 dark:border-[#D9BC82]/15 bg-white/95 dark:bg-[#0A1628]/40 p-0 shadow-xl">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-0">
               
               {/* ฝั่งซ้าย: โลกคอสมิกแห่งดวงดาวและอวกาศ */}
-              <div className="relative md:col-span-5 h-64 md:h-auto min-h-[260px] bg-slate-950 flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-[#D9BC82]/10">
+              <div className="yam-celestial-dial relative md:col-span-5 h-64 md:h-auto min-h-[260px] flex flex-col items-center justify-center overflow-hidden border-b md:border-b-0 md:border-r border-slate-200 dark:border-[#D9BC82]/10">
                 <div 
-                  className="absolute inset-0 bg-gradient-to-tr from-[#020617] via-[#091C36] to-[#020617] opacity-90"
-                  style={{
-                    backgroundImage: `radial-gradient(circle at 50% 50%, rgba(75, 111, 174, 0.22) 0%, rgba(2, 6, 23, 0.98) 80%)`
-                  }}
+                  className="yam-celestial-backdrop absolute inset-0 opacity-90"
                 />
                 
                 {/* Cosmic Starfield Sparkles */}
                 <div className="absolute inset-0 opacity-40">
-                  <div className="absolute top-10 left-10 w-1 h-1 bg-white rounded-full animate-ping" style={{ animationDuration: "3s" }} />
-                  <div className="absolute top-32 right-12 w-1.5 h-1.5 bg-[#D9BC82] rounded-full animate-ping" style={{ animationDuration: "4s", animationDelay: "1s" }} />
+                  <div className="absolute top-10 left-10 w-1 h-1 bg-amber-600 dark:bg-white rounded-full animate-ping" style={{ animationDuration: "3s" }} />
+                  <div className="absolute top-32 right-12 w-1.5 h-1.5 bg-[#8C6D2D] dark:bg-[#D9BC82] rounded-full animate-ping" style={{ animationDuration: "4s", animationDelay: "1s" }} />
                   <div className="absolute bottom-12 left-16 w-1.5 h-1.5 bg-[#4B6FAE] rounded-full animate-ping" style={{ animationDuration: "5s", animationDelay: "2s" }} />
                 </div>
 
                 {/* Spinning Rings */}
-                <div className="absolute w-44 h-44 rounded-full border border-[#D9BC82]/10 animate-spin opacity-50" style={{ animationDuration: "50s" }} />
-                <div className="absolute w-36 h-36 rounded-full border border-dashed border-[#4B6FAE]/20 animate-spin opacity-60" style={{ animationDuration: "30s", animationDirection: "reverse" }} />
+                <div className="absolute w-44 h-44 rounded-full border border-amber-600/20 dark:border-[#D9BC82]/10 animate-spin opacity-50" style={{ animationDuration: "50s" }} />
+                <div className="absolute w-36 h-36 rounded-full border border-dashed border-[#4B6FAE]/30 dark:border-[#4B6FAE]/20 animate-spin opacity-60" style={{ animationDuration: "30s", animationDirection: "reverse" }} />
 
                 {/* Giant Floating Star Symbol */}
                 <div className="relative flex flex-col items-center justify-center animate-float">
-                  <div className="absolute w-20 h-20 bg-[#D9BC82]/10 rounded-full blur-xl animate-pulse-subtle" />
-                  <span className="text-8xl text-[#D9BC82] leading-none drop-shadow-[0_0_15px_rgba(217,188,130,0.4)] select-none font-serif">
+                  <div className="absolute w-20 h-20 bg-amber-400/20 dark:bg-[#D9BC82]/10 rounded-full blur-xl animate-pulse-subtle" />
+                  <span className="text-8xl text-amber-800 dark:text-[#D9BC82] leading-none drop-shadow-[0_0_15px_rgba(217,188,130,0.4)] select-none font-serif">
                     {symbol}
                   </span>
-                  <span className="text-[12px] text-[#D9BC82] font-bold uppercase tracking-[0.3em] mt-3.5 bg-slate-950/80 px-3 py-0.5 rounded-full border border-[#D9BC82]/25 backdrop-blur">
+                  <span className="text-[12px] text-amber-900 dark:text-[#D9BC82] font-bold uppercase tracking-[0.3em] mt-3.5 bg-white/90 dark:bg-slate-950/80 px-3 py-0.5 rounded-full border border-amber-300/50 dark:border-[#D9BC82]/25 backdrop-blur shadow-sm">
                     {data.yamName} เจ้าครองยาม
                   </span>
                 </div>
@@ -746,33 +731,33 @@ export default function YamPage() {
               {/* ฝั่งขวา: รายละเอียดกระแสพลังงานยาม */}
               <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between space-y-6">
                 <div>
-                  <span className="text-xs text-[#D9BC82] font-bold uppercase tracking-widest block mb-1">
+                  <span className="text-xs text-[#8C6D2D] dark:text-[#D9BC82] font-bold uppercase tracking-widest block mb-1">
                     🪐 กระแสพลังยามมงคลขณะนี้
                   </span>
-                  <h2 className="font-display text-4xl sm:text-5xl font-black text-[#F8F6F1] tracking-wide mt-1 drop-shadow-[0_0_12px_rgba(248,246,241,0.15)]">
+                  <h2 className="font-display text-4xl sm:text-5xl font-black text-slate-900 dark:text-[#F8F6F1] tracking-wide mt-1">
                     ยาม{data.yamName}
                   </h2>
                   <div className="flex gap-2 items-center mt-3 flex-wrap">
-                    <span className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-xs font-bold text-[#F8F6F1]">
+                    <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-white/20 text-xs font-bold text-slate-800 dark:text-[#F8F6F1]">
                       ยามใหญ่ที่ {data.yamNumber} (1.5 ชม.)
                     </span>
-                    <span className="px-3 py-1 rounded-full bg-[#4B6FAE]/20 border border-[#4B6FAE]/30 text-xs font-bold text-[#D9CDB7]">
+                    <span className="px-3 py-1 rounded-full bg-[#4B6FAE]/15 dark:bg-[#4B6FAE]/20 border border-[#4B6FAE]/30 text-xs font-bold text-[#3D5361] dark:text-[#D9CDB7]">
                       {PERIOD_LABEL[data.period]}
                     </span>
-                    <span className="px-3 py-1 rounded-full bg-[#D9BC82]/20 border border-[#D9BC82]/30 text-xs font-bold text-[#D9BC82]">
+                    <span className="px-3 py-1 rounded-full bg-amber-500/15 dark:bg-[#D9BC82]/20 border border-amber-500/30 dark:border-[#D9BC82]/30 text-xs font-bold text-amber-800 dark:text-[#D9BC82]">
                       {PHASE_LABEL[data.phase]}
                     </span>
                   </div>
                 </div>
 
                 {/* Progress Meter */}
-                <div className="p-4 rounded-2xl bg-black/30 border border-white/10 space-y-3">
+                <div className="p-4 rounded-2xl bg-amber-50/40 dark:bg-black/30 border border-amber-200/50 dark:border-white/10 space-y-3">
                   <div className="flex justify-between items-baseline text-xs font-bold uppercase tracking-wider">
-                    <span className="text-[#D9CDB7]">ยามใหญ่ ({yamStart.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} - {yamEnd.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.)</span>
-                    <span className="text-[#D9BC82] font-display text-sm">เหลืออีก {remMin} นาที</span>
+                    <span className="text-slate-700 dark:text-[#D9CDB7]">ยามใหญ่ ({yamStart.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} - {yamEnd.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.)</span>
+                    <span className="text-amber-800 dark:text-[#D9BC82] font-display text-sm">เหลืออีก {remMin} นาที</span>
                   </div>
                   
-                  <div className="h-2 w-full bg-[#1E293B]/60 rounded-full overflow-hidden border border-white/5 p-0.5">
+                  <div className="h-2 w-full bg-slate-200 dark:bg-[#1E293B]/60 rounded-full overflow-hidden border border-slate-300/40 dark:border-white/5 p-0.5">
                     <div 
                       className="h-full bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] rounded-full shadow-[0_0_12px_rgba(198,169,107,0.5)] transition-all duration-1000"
                       style={{ width: `${(1 - remaining / windowMs) * 100}%` }}
@@ -781,18 +766,18 @@ export default function YamPage() {
                 </div>
 
                 {/* Astronomical Boundaries */}
-                <div className="flex justify-between items-center pt-4 border-t border-white/10">
+                <div className="flex justify-between items-center pt-4 border-t border-slate-200 dark:border-white/10">
                   <div className="space-y-1">
-                    <span className="text-[12px] text-[#D9CDB7] uppercase tracking-widest block font-bold">ขอบข่ายท้องฟ้า</span>
-                    <div className="flex gap-4 text-xs font-semibold text-[#F8F6F1]">
+                    <span className="text-[12px] text-slate-500 dark:text-[#D9CDB7] uppercase tracking-widest block font-bold">ขอบข่ายท้องฟ้า</span>
+                    <div className="flex gap-4 text-xs font-semibold text-slate-900 dark:text-[#F8F6F1]">
                       <span className="flex items-center gap-1.5">☀️ ขึ้น {sunrise.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</span>
                       <span className="flex items-center gap-1.5">☀️ ตก {sunset.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-1.5 bg-green-500/10 border border-green-500/25 px-2.5 py-1 rounded-full">
-                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full animate-ping" />
-                    <span className="text-[11px] font-bold text-green-400 tracking-widest uppercase">LIVE</span>
+                    <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-ping" />
+                    <span className="text-[11px] font-bold text-green-700 dark:text-green-400 tracking-widest uppercase">LIVE</span>
                   </div>
                 </div>
               </div>
@@ -800,28 +785,28 @@ export default function YamPage() {
           </Card>
 
           {/* 🔮 อัฏฐกาลชั้นฉายประจำช่วงเวลานี้ (Current Active Sub-period Prophecy) */}
-          <Card className="relative overflow-hidden border-[#D9BC82]/30 bg-gradient-to-br from-[#0A2240]/80 via-[#0A1628]/90 to-[#020617] p-6 shadow-[0_0_30px_rgba(217,188,130,0.1)]">
+          <Card className="relative overflow-hidden border-slate-200 dark:border-[#D9BC82]/30 bg-white/95 dark:bg-gradient-to-br dark:from-[#0A2240]/80 dark:via-[#0A1628]/90 dark:to-[#020617] p-6 shadow-xl">
             <div className="absolute top-0 right-0 w-64 h-64 bg-[#D9BC82]/10 rounded-full blur-3xl pointer-events-none" />
             
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-white/10">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-black/5 dark:border-white/10">
               <div className="flex items-center gap-2.5">
                 <span className="text-2xl">🔮</span>
                 <div>
-                  <h3 className="text-base font-bold text-[#F8F6F1] flex items-center gap-2">
+                  <h3 className="text-base font-bold text-slate-900 dark:text-[#F8F6F1] flex items-center gap-2">
                     <span>อัฏฐกาลชั้นฉายขณะนี้</span>
-                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#D9BC82]/20 border border-[#D9BC82]/30 text-[#D9BC82] font-bold">
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-amber-500/15 dark:bg-[#D9BC82]/20 border border-amber-500/30 dark:border-[#D9BC82]/30 text-amber-800 dark:text-[#D9BC82] font-bold">
                       {PHASE_LABEL[data.phase]}
                     </span>
                   </h3>
-                  <p className="text-xs text-[#94A3B8] mt-0.5">
+                  <p className="text-xs text-slate-500 dark:text-[#94A3B8] mt-0.5 font-medium">
                     ช่วงเวลาย่อย 30 นาที ({currentSubYamStart.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} - {currentSubYamEnd.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.)
                   </p>
                 </div>
               </div>
               
               <div className="text-right shrink-0">
-                <span className="text-[12px] text-[#94A3B8] uppercase font-bold block">เวลานับถอยหลังชั้นฉาย</span>
-                <span className="text-lg font-display font-black text-[#D9BC82] tabular-nums">
+                <span className="text-[12px] text-slate-500 dark:text-[#94A3B8] uppercase font-bold block">เวลานับถอยหลังชั้นฉาย</span>
+                <span className="text-lg font-display font-black text-amber-800 dark:text-[#D9BC82] tabular-nums">
                   {currentSubRemMin} นาที {String(currentSubRemSec).padStart(2, "0")} วิ
                 </span>
               </div>
@@ -841,15 +826,15 @@ export default function YamPage() {
                       key={item.phaseKey}
                       className={`p-3 rounded-xl border transition-all ${
                         isActive
-                          ? "bg-[#D9BC82]/20 border-[#D9BC82] shadow-[0_0_15px_rgba(217,188,130,0.2)] text-[#F8F6F1]"
-                          : "bg-black/20 border-white/5 text-[#94A3B8]"
+                          ? "bg-amber-100/80 dark:bg-[#D9BC82]/20 border-amber-500/50 dark:border-[#D9BC82] shadow-sm text-slate-900 dark:text-[#F8F6F1]"
+                          : "bg-slate-100/60 dark:bg-black/20 border-slate-200 dark:border-white/5 text-slate-600 dark:text-[#94A3B8]"
                       }`}
                     >
                       <div className="flex items-center justify-center gap-1 font-bold mb-1">
-                        {isActive && <span className="w-2 h-2 rounded-full bg-green-400 animate-ping" />}
-                        <span className={isActive ? "text-[#D9BC82]" : ""}>{item.label}</span>
+                        {isActive && <span className="w-2 h-2 rounded-full bg-green-500 animate-ping" />}
+                        <span className={isActive ? "text-amber-900 dark:text-[#D9BC82]" : ""}>{item.label}</span>
                       </div>
-                      <p className={`text-[12px] line-clamp-2 leading-relaxed ${isActive ? "text-[#F8F6F1] font-medium" : "text-[#94A3B8]/70"}`}>
+                      <p className={`text-[12px] line-clamp-2 leading-relaxed ${isActive ? "text-slate-900 dark:text-[#F8F6F1] font-medium" : "text-slate-500 dark:text-[#94A3B8]/70"}`}>
                         {item.desc || "–"}
                       </p>
                     </div>
@@ -860,20 +845,20 @@ export default function YamPage() {
 
             {/* Main Prophecy Quote Box */}
             {liveChanChaiSub && (
-              <div className="mt-2 p-4 rounded-xl bg-black/40 border border-[#D9BC82]/20 space-y-2">
+              <div className="mt-2 p-4 rounded-xl bg-amber-50/70 dark:bg-black/40 border border-amber-200/70 dark:border-[#D9BC82]/20 space-y-2 shadow-sm">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="text-[#8C6D2D] dark:text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <span>📜</span> คำพยากรณ์คัมภีร์ชั้นฉาย
                   </span>
                   <span className={`px-2.5 py-0.5 rounded-full font-bold text-[12px] ${
                     liveChanChaiSub.quality === "good"
-                      ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                      : "bg-red-500/10 text-rose-300 border border-red-500/20"
+                      ? "bg-green-500/10 text-green-700 dark:text-green-400 border border-green-500/20"
+                      : "bg-red-500/10 text-rose-700 dark:text-rose-300 border border-red-500/20"
                   }`}>
                     {liveChanChaiSub.quality === "good" ? "✅ ช่วงมงคลให้คุณ" : "⚠️ ช่วงควรระวังเป็นพิเศษ"}
                   </span>
                 </div>
-                <p className="text-base sm:text-lg font-bold text-[#F8F6F1] leading-relaxed italic">
+                <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#F8F6F1] leading-relaxed italic">
                   "{liveChanChaiSub.text}"
                 </p>
               </div>
@@ -964,22 +949,22 @@ export default function YamPage() {
 
           {/* 💬 ถาม-ตอบยามอัฏฐกาล & ชั้นฉาย (Mobile-Friendly Interactive Q&A) */}
           {liveChanChaiItem && (
-            <Card className="p-5 bg-gradient-to-br from-[#0A2240]/90 via-[#0A1628]/80 to-[#020617] border-[#D9BC82]/30 shadow-xl relative overflow-hidden">
+            <Card className="p-5 bg-white/95 dark:bg-gradient-to-br dark:from-[#0A2240]/90 dark:via-[#0A1628]/80 dark:to-[#020617] border-slate-200 dark:border-[#D9BC82]/30 shadow-xl relative overflow-hidden">
               <div className="absolute top-0 right-0 w-40 h-40 bg-[#D9BC82]/5 rounded-full blur-3xl pointer-events-none" />
               
-              <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3 mb-4">
+              <div className="flex items-center justify-between gap-2 border-b border-black/5 dark:border-white/10 pb-3 mb-4">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">💬</span>
                   <div>
-                    <h3 className="font-display text-base font-bold text-[#F8F6F1]">
+                    <h3 className="font-display text-base font-bold text-slate-900 dark:text-[#F8F6F1]">
                       ถาม-ตอบยามอัฏฐกาล & ชั้นฉาย
                     </h3>
-                    <p className="text-[12px] text-[#D9BC82]">
+                    <p className="text-[12px] text-[#8C6D2D] dark:text-[#D9BC82] font-medium">
                       กดเลือกเรื่องที่ต้องการตรวจ เพื่อดูคำทำนายเจาะลึกเฉพาะเรื่องทันที
                     </p>
                   </div>
                 </div>
-                <span className="px-2.5 py-1 rounded-full bg-[#D9BC82]/15 text-[#D9BC82] text-[11px] font-bold border border-[#D9BC82]/30 shrink-0">
+                <span className="px-2.5 py-1 rounded-full bg-amber-500/15 dark:bg-[#D9BC82]/15 text-amber-800 dark:text-[#D9BC82] text-[11px] font-bold border border-amber-500/30 dark:border-[#D9BC82]/30 shrink-0">
                   ยาม{data.yamName} ({PHASE_LABEL[data.phase]})
                 </span>
               </div>
@@ -999,23 +984,23 @@ export default function YamPage() {
                     onClick={() => setActiveInquiry(item.id as any)}
                     className={`p-2.5 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${
                       activeInquiry === item.id
-                        ? "bg-[#D9BC82] text-[#0A1628] border-[#D9BC82] font-black shadow-[0_0_15px_rgba(217,188,130,0.3)] scale-[1.02]"
-                        : "bg-black/30 border-white/10 text-[#D9CDB7] hover:border-[#D9BC82]/40 hover:text-[#F8F6F1]"
+                        ? "bg-[#D9BC82] text-slate-950 border-[#D9BC82] font-black shadow-md scale-[1.02]"
+                        : "bg-white/70 dark:bg-black/30 border-slate-200 dark:border-white/10 text-slate-700 dark:text-[#D9CDB7] hover:border-[#D9BC82]/40 hover:text-slate-950 dark:hover:text-[#F8F6F1]"
                     }`}
                   >
                     <span className="text-base mb-0.5">{item.icon}</span>
                     <span className="text-[12px] font-bold">{item.label}</span>
                     <span className={`text-[10px] mt-0.5 truncate max-w-full ${
-                      activeInquiry === item.id ? "text-[#0A1628]/80 font-medium" : "text-[#94A3B8]"
+                      activeInquiry === item.id ? "text-slate-950/80 font-medium" : "text-slate-500 dark:text-[#94A3B8]"
                     }`}>{item.q}</span>
                   </button>
                 ))}
               </div>
 
               {/* Inquiry Answer Box */}
-              <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2 animate-fade-in">
-                <div className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
-                  <span className="text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
+              <div className="p-4 rounded-xl bg-amber-50/70 dark:bg-black/40 border border-amber-200/70 dark:border-white/10 space-y-2 animate-fade-in shadow-sm">
+                <div className="flex items-center justify-between text-xs border-b border-amber-200/40 dark:border-white/5 pb-2">
+                  <span className="text-[#8C6D2D] dark:text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <span>💡</span> คำพยากรณ์สำหรับคำถาม: {
                       activeInquiry === "news" ? "เรื่องที่ได้ยิน (ข่าวกาลกิณี/มงคล)" :
                       activeInquiry === "sickness" ? "คนเจ็บไข้ (พยากรณ์โรค)" :
@@ -1023,17 +1008,17 @@ export default function YamPage() {
                       activeInquiry === "travel" ? "การเดินทาง 3 ช่วงระยะ" : "เวลามงคลที่ดีที่สุดประจำยาม"
                     }
                   </span>
-                  <span className="text-[11px] text-[#94A3B8]">
+                  <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
                     ตามคัมภีร์อัฏฐกาล 7 ยาม
                   </span>
                 </div>
 
                 {activeInquiry === "news" && (
                   <div className="space-y-1">
-                    <p className="text-base font-bold text-yellow-100 leading-relaxed">
+                    <p className="text-base font-bold text-slate-900 dark:text-yellow-100 leading-relaxed">
                       "{liveChanChaiItem.news}"
                     </p>
-                    <p className="text-xs text-[#94A3B8]">
+                    <p className="text-xs text-slate-600 dark:text-[#94A3B8]">
                       {liveChanChaiItem.news.includes("จริง") ? "✓ ข้อมูลหรือข่าวสารที่ได้ยินในยามนี้ มีน้ำหนักความจริงสูง" : "✕ ควรฟังหูไว้หู อย่าเพิ่งปักใจเชื่อในทันที"}
                     </p>
                   </div>
@@ -1041,10 +1026,10 @@ export default function YamPage() {
 
                 {activeInquiry === "sickness" && (
                   <div className="space-y-1">
-                    <p className="text-base font-bold text-rose-200 leading-relaxed">
+                    <p className="text-base font-bold text-rose-900 dark:text-rose-200 leading-relaxed">
                       "{liveChanChaiItem.sickness}"
                     </p>
-                    <p className="text-xs text-[#94A3B8]">
+                    <p className="text-xs text-slate-600 dark:text-[#94A3B8]">
                       การดูแลรักษาพยาบาลในยามนี้ควรปฏิบัติตามคำแนะนำของแพทย์อย่างเคร่งครัด
                     </p>
                   </div>
@@ -1052,10 +1037,10 @@ export default function YamPage() {
 
                 {activeInquiry === "lostItem" && (
                   <div className="space-y-1">
-                    <p className="text-base font-bold text-amber-200 leading-relaxed">
+                    <p className="text-base font-bold text-amber-900 dark:text-amber-200 leading-relaxed">
                       "{liveChanChaiItem.lostItem}"
                     </p>
-                    <p className="text-xs text-[#94A3B8]">
+                    <p className="text-xs text-slate-600 dark:text-[#94A3B8]">
                       คำแนะนำสถานที่ค้นหาตามธาตุและทิศทางของดาวเจ้ายาม
                     </p>
                   </div>
@@ -1130,45 +1115,45 @@ export default function YamPage() {
           {liveChanChaiItem && (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
               {/* เรื่องที่ได้ยิน */}
-              <Card className="p-4 bg-[#0A1628]/40 border-white/10">
+              <Card className="p-4 bg-amber-50/80 dark:bg-[#0A1628]/40 border-amber-200/70 dark:border-white/10 shadow-sm">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-base">🚩</span>
-                  <span className="text-[11px] font-bold text-[#D9BC82] uppercase tracking-wider">เรื่องที่ได้ยิน</span>
+                  <span className="text-[11px] font-bold text-amber-900 dark:text-[#D9BC82] uppercase tracking-wider">เรื่องที่ได้ยิน</span>
                 </div>
-                <p className="text-xs sm:text-sm text-yellow-100 font-semibold leading-relaxed line-clamp-3">
+                <p className="text-xs sm:text-sm text-slate-900 dark:text-yellow-100 font-semibold leading-relaxed line-clamp-3">
                   {liveChanChaiItem.news}
                 </p>
               </Card>
 
               {/* คนเจ็บไข้ */}
-              <Card className="p-4 bg-[#0A1628]/40 border-white/10">
+              <Card className="p-4 bg-rose-50/80 dark:bg-[#0A1628]/40 border-rose-200/70 dark:border-white/10 shadow-sm">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-base">🏥</span>
-                  <span className="text-[11px] font-bold text-rose-300 uppercase tracking-wider">คนเจ็บไข้</span>
+                  <span className="text-[11px] font-bold text-rose-800 dark:text-rose-300 uppercase tracking-wider">คนเจ็บไข้</span>
                 </div>
-                <p className="text-xs sm:text-sm text-rose-100 font-semibold leading-relaxed line-clamp-3">
+                <p className="text-xs sm:text-sm text-rose-950 dark:text-rose-100 font-semibold leading-relaxed line-clamp-3">
                   {liveChanChaiItem.sickness}
                 </p>
               </Card>
 
               {/* ของหาย */}
-              <Card className="p-4 bg-[#0A1628]/40 border-white/10">
+              <Card className="p-4 bg-sky-50/80 dark:bg-[#0A1628]/40 border-sky-200/70 dark:border-white/10 shadow-sm">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-base">🔍</span>
-                  <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">ของหาย</span>
+                  <span className="text-[11px] font-bold text-sky-800 dark:text-amber-300 uppercase tracking-wider">ของหาย</span>
                 </div>
-                <p className="text-xs sm:text-sm text-amber-100 font-semibold leading-relaxed line-clamp-3">
+                <p className="text-xs sm:text-sm text-slate-900 dark:text-amber-100 font-semibold leading-relaxed line-clamp-3">
                   {liveChanChaiItem.lostItem}
                 </p>
               </Card>
 
               {/* เวลาที่ดี */}
-              <Card className="p-4 bg-[#0A1628]/40 border-white/10">
+              <Card className="p-4 bg-amber-50/80 dark:bg-[#0A1628]/40 border-amber-200/70 dark:border-white/10 shadow-sm">
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="text-base">⭐</span>
-                  <span className="text-[11px] font-bold text-[#D9BC82] uppercase tracking-wider">เวลาที่ดี</span>
+                  <span className="text-[11px] font-bold text-amber-900 dark:text-[#D9BC82] uppercase tracking-wider">เวลาที่ดี</span>
                 </div>
-                <p className="text-sm text-[#D9BC82] font-black leading-relaxed">
+                <p className="text-sm text-amber-900 dark:text-[#D9BC82] font-black leading-relaxed">
                   {liveChanChaiItem.bestTime}
                 </p>
               </Card>
@@ -1188,59 +1173,59 @@ export default function YamPage() {
         return (
           <div className="space-y-6 animate-fade-in">
             {/* Input form */}
-            <Card className="bg-[#0A1628]/40 border-white/5 p-5">
-              <h3 className="font-display text-sm font-bold text-[#F8F6F1] mb-4 border-b border-white/5 pb-2 flex items-center gap-1.5">
+            <Card className="bg-white/95 dark:bg-[#0A1628]/40 border-amber-200/60 dark:border-white/5 p-5 shadow-sm">
+              <h3 className="font-display text-sm font-bold text-slate-900 dark:text-[#F8F6F1] mb-4 border-b border-amber-200/40 dark:border-white/5 pb-2 flex items-center gap-1.5">
                 <span>🔮</span> ระบบคำนวณยามอัฏฐกาลอัตโนมัติ (Ashta-Kala manual calculator)
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                 <div className="space-y-1.5">
-                  <label className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider">1. เลือกวัน (พ.ศ.) *</label>
+                  <label className="text-xs text-slate-600 dark:text-[#94A3B8] font-bold uppercase tracking-wider">1. เลือกวัน (พ.ศ.) *</label>
                   <div className="grid grid-cols-3 gap-1">
                     <select 
                       value={ashtaDay} 
                       onChange={(e) => setAshtaDay(Number(e.target.value))}
-                      className="bg-slate-950/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-1.5 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
+                      className="bg-white dark:bg-slate-950/40 border border-amber-200/60 dark:border-[#D9BC82]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-1.5 py-2.5 text-xs focus:border-amber-500 dark:focus:border-[#D9BC82]/50 outline-none shadow-sm"
                     >
                       {Array.from({ length: 31 }).map((_, i) => (
-                        <option key={i + 1} value={i + 1} className="bg-[#020617]">{i + 1}</option>
+                        <option key={i + 1} value={i + 1} className="bg-white text-slate-900 dark:bg-[#020617] dark:text-[#F8F6F1]">{i + 1}</option>
                       ))}
                     </select>
                     <select 
                       value={ashtaMonth} 
                       onChange={(e) => setAshtaMonth(Number(e.target.value))}
-                      className="bg-slate-950/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-1.5 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
+                      className="bg-white dark:bg-slate-950/40 border border-amber-200/60 dark:border-[#D9BC82]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-1.5 py-2.5 text-xs focus:border-amber-500 dark:focus:border-[#D9BC82]/50 outline-none shadow-sm"
                     >
                       {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                        <option key={i + 1} value={i + 1} className="bg-[#020617]">{m}</option>
+                        <option key={i + 1} value={i + 1} className="bg-white text-slate-900 dark:bg-[#020617] dark:text-[#F8F6F1]">{m}</option>
                       ))}
                     </select>
                     <select 
                       value={ashtaYear} 
                       onChange={(e) => setAshtaYear(Number(e.target.value))}
-                      className="bg-slate-950/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-1.5 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
+                      className="bg-white dark:bg-slate-950/40 border border-amber-200/60 dark:border-[#D9BC82]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-1.5 py-2.5 text-xs focus:border-amber-500 dark:focus:border-[#D9BC82]/50 outline-none shadow-sm"
                     >
                       {Array.from({ length: 21 }).map((_, i) => {
                         const y = 2560 + i;
-                        return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
+                        return <option key={y} value={y} className="bg-white text-slate-900 dark:bg-[#020617] dark:text-[#F8F6F1]">{y}</option>;
                       })}
                     </select>
                   </div>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider">2. ใส่เวลา (ชั่วโมง:นาที) *</label>
+                  <label className="text-xs text-slate-600 dark:text-[#94A3B8] font-bold uppercase tracking-wider">2. ใส่เวลา (ชั่วโมง:นาที) *</label>
                   <div className="flex gap-2">
                     <input
                       type="time"
                       value={ashtaTime}
                       onChange={(e) => setAshtaTime(e.target.value)}
-                      className="flex-1 bg-[#1E293B]/40 border border-[#D9BC82]/20 rounded-xl px-3 py-2 text-[#F8F6F1] font-display text-sm focus:border-[#D9BC82]/50 outline-none transition-all"
+                      className="flex-1 bg-white dark:bg-[#1E293B]/40 border border-amber-200/60 dark:border-[#D9BC82]/20 rounded-xl px-3 py-2 text-slate-900 dark:text-[#F8F6F1] font-display text-sm focus:border-amber-500 dark:focus:border-[#D9BC82]/50 outline-none transition-all shadow-sm"
                     />
                     <button
                       type="button"
                       onClick={handleSetAshtaNow}
-                      className="px-3 py-2 rounded-xl text-[13px] font-bold uppercase tracking-widest transition-all bg-[#D9BC82]/10 border border-[#D9BC82]/20 text-[#D9BC82] hover:bg-[#D9BC82]/20"
+                      className="px-3 py-2 rounded-xl text-[13px] font-bold uppercase tracking-widest transition-all bg-amber-500/15 dark:bg-[#D9BC82]/10 border border-amber-500/30 dark:border-[#D9BC82]/20 text-amber-900 dark:text-[#D9BC82] hover:bg-amber-500/25 dark:hover:bg-[#D9BC82]/20"
                     >
                       ปัจจุบัน
                     </button>
@@ -1249,7 +1234,7 @@ export default function YamPage() {
 
                 <button
                   onClick={handleAshtaCalculate}
-                  className="py-2.5 rounded-xl bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] font-bold text-xs tracking-widest uppercase hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shadow-[0_0_15px_rgba(198,169,107,0.15)]"
+                  className="py-2.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white dark:from-[#C6A96B] dark:to-[#D9BC82] dark:text-[#0A1628] font-bold text-xs tracking-widest uppercase hover:brightness-105 active:scale-[0.99] transition-all flex items-center justify-center gap-1.5 shadow-md dark:shadow-[0_0_15px_rgba(198,169,107,0.15)]"
                 >
                   คำนวณยามอัฏฐกาล ✨
                 </button>
@@ -1257,37 +1242,37 @@ export default function YamPage() {
             </Card>
 
             <div className="text-center">
-              <span className="text-[13px] font-bold uppercase tracking-widest px-4 py-1 rounded-full bg-[#D9BC82]/10 border border-[#D9BC82]/20 text-[#D9BC82]">
+              <span className="text-[13px] font-bold uppercase tracking-widest px-4 py-1 rounded-full bg-amber-500/15 dark:bg-[#D9BC82]/10 border border-amber-500/30 dark:border-[#D9BC82]/20 text-amber-900 dark:text-[#D9BC82]">
                 วัน{targetDayTh} — {periodLabel}
               </span>
             </div>
 
             {/* 4-card summary grid */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="p-4 rounded-2xl text-center bg-[#1E293B]/20 border border-white/5 shadow-inner">
-                <span className="text-[12px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ยามที่</span>
-                <span className="text-3xl font-black text-[#D9BC82]">{ashtaResult.yamNumber}</span>
+              <div className="p-4 rounded-2xl text-center bg-white/95 dark:bg-[#1E293B]/20 border border-amber-200/60 dark:border-white/5 shadow-sm">
+                <span className="text-[12px] text-slate-500 dark:text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ยามที่</span>
+                <span className="text-3xl font-black text-amber-800 dark:text-[#D9BC82]">{ashtaResult.yamNumber}</span>
               </div>
 
-              <div className="p-4 rounded-2xl text-center bg-[#1E293B]/20 border border-white/5 shadow-inner">
-                <span className="text-[12px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ชื่อยาม</span>
-                <span className="text-base font-bold text-[#F8F6F1]">{ashtaResult.yamName}</span>
+              <div className="p-4 rounded-2xl text-center bg-white/95 dark:bg-[#1E293B]/20 border border-amber-200/60 dark:border-white/5 shadow-sm">
+                <span className="text-[12px] text-slate-500 dark:text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ชื่อยาม</span>
+                <span className="text-base font-bold text-slate-900 dark:text-[#F8F6F1]">{ashtaResult.yamName}</span>
               </div>
 
-              <div className="p-4 rounded-2xl text-center bg-[#1E293B]/20 border border-white/5 shadow-inner">
-                <span className="text-[12px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ดาวเสวยยาม</span>
-                <span className="text-base font-bold text-[#D9BC82] flex items-center justify-center gap-1">
+              <div className="p-4 rounded-2xl text-center bg-white/95 dark:bg-[#1E293B]/20 border border-amber-200/60 dark:border-white/5 shadow-sm">
+                <span className="text-[12px] text-slate-500 dark:text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ดาวเสวยยาม</span>
+                <span className="text-base font-bold text-amber-800 dark:text-[#D9BC82] flex items-center justify-center gap-1">
                   <span>{symbol}</span>
                   <span>{ashtaResult.yamName}</span>
                 </span>
               </div>
 
-              <div className="p-4 rounded-2xl text-center bg-[#1E293B]/20 border border-white/5 shadow-inner">
-                <span className="text-[12px] text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ช่วงเวลายาม</span>
-                <span className="text-xs font-bold text-[#F8F6F1] block">
+              <div className="p-4 rounded-2xl text-center bg-white/95 dark:bg-[#1E293B]/20 border border-amber-200/60 dark:border-white/5 shadow-sm">
+                <span className="text-[12px] text-slate-500 dark:text-[#94A3B8] uppercase tracking-widest block mb-2 font-bold">ช่วงเวลายาม</span>
+                <span className="text-xs font-bold text-slate-900 dark:text-[#F8F6F1] block">
                   {new Date(ashtaResult.date).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} น.
                 </span>
-                <span className="text-[12px] text-[#94A3B8] block mt-0.5">
+                <span className="text-[12px] text-slate-500 dark:text-[#94A3B8] block mt-0.5">
                   ({PHASE_LABEL[ashtaResult.phase]})
                 </span>
               </div>
@@ -1295,20 +1280,20 @@ export default function YamPage() {
 
             {/* 🔮 อัฏฐกาลชั้นฉายประจำช่วงเวลาที่คำนวณ */}
             {ashtaChanChaiSub && (
-              <Card className="p-5 bg-gradient-to-br from-[#0A2240] to-[#020617] border-[#D9BC82]/30 space-y-2">
+              <Card className="p-5 bg-white/95 dark:bg-gradient-to-br dark:from-[#0A2240] dark:to-[#020617] border-amber-200/60 dark:border-[#D9BC82]/30 space-y-2 shadow-sm">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <span className="text-amber-800 dark:text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
                     <span>🔮</span> คำพยากรณ์อัฏฐกาลชั้นฉาย ({PHASE_LABEL[ashtaResult.phase]})
                   </span>
                   <span className={`px-2.5 py-0.5 rounded-full font-bold text-[12px] ${
                     ashtaChanChaiSub.quality === "good"
-                      ? "bg-green-500/10 text-green-400 border border-green-500/20"
-                      : "bg-red-500/10 text-rose-300 border border-red-500/20"
+                      ? "bg-green-500/10 text-emerald-800 dark:text-green-400 border border-green-500/20"
+                      : "bg-red-500/10 text-rose-700 dark:text-rose-300 border border-red-500/20"
                   }`}>
                     {ashtaChanChaiSub.quality === "good" ? "✅ ช่วงมงคลให้คุณ" : "⚠️ ช่วงควรระวังเป็นพิเศษ"}
                   </span>
                 </div>
-                <p className="text-base sm:text-lg font-bold text-[#F8F6F1] leading-relaxed italic">
+                <p className="text-base sm:text-lg font-bold text-slate-800 dark:text-[#F8F6F1] leading-relaxed italic">
                   "{ashtaChanChaiSub.text}"
                 </p>
               </Card>
@@ -1316,22 +1301,22 @@ export default function YamPage() {
 
             {/* 💬 ถาม-ตอบยามอัฏฐกาล & ชั้นฉาย (Mobile-Friendly Interactive Q&A for calculated time) */}
             {ashtaChanChaiItem && (
-              <Card className="p-5 bg-gradient-to-br from-[#0A2240]/90 via-[#0A1628]/80 to-[#020617] border-[#D9BC82]/30 shadow-xl relative overflow-hidden">
+              <Card className="p-5 bg-white/95 dark:bg-gradient-to-br dark:from-[#0A2240]/90 dark:via-[#0A1628]/80 dark:to-[#020617] border-amber-200/60 dark:border-[#D9BC82]/30 shadow-xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-40 h-40 bg-[#D9BC82]/5 rounded-full blur-3xl pointer-events-none" />
                 
-                <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3 mb-4">
+                <div className="flex items-center justify-between gap-2 border-b border-amber-200/50 dark:border-white/10 pb-3 mb-4">
                   <div className="flex items-center gap-2">
                     <span className="text-xl">💬</span>
                     <div>
-                      <h3 className="font-display text-base font-bold text-[#F8F6F1]">
+                      <h3 className="font-display text-base font-bold text-slate-900 dark:text-[#F8F6F1]">
                         ถาม-ตอบยามอัฏฐกาล & ชั้นฉาย
                       </h3>
-                      <p className="text-[12px] text-[#D9BC82]">
+                      <p className="text-[12px] text-amber-800/90 dark:text-[#D9BC82]">
                         กดเลือกเรื่องที่ต้องการตรวจ สำหรับยามที่คำนวณนี้
                       </p>
                     </div>
                   </div>
-                  <span className="px-2.5 py-1 rounded-full bg-[#D9BC82]/15 text-[#D9BC82] text-[11px] font-bold border border-[#D9BC82]/30 shrink-0">
+                  <span className="px-2.5 py-1 rounded-full bg-amber-500/15 dark:bg-[#D9BC82]/15 text-amber-900 dark:text-[#D9BC82] text-[11px] font-bold border border-amber-500/25 dark:border-[#D9BC82]/30 shrink-0">
                     ยาม{ashtaResult.yamName} ({PHASE_LABEL[ashtaResult.phase]})
                   </span>
                 </div>
@@ -1351,23 +1336,23 @@ export default function YamPage() {
                       onClick={() => setAshtaInquiry(item.id as any)}
                       className={`p-2.5 rounded-xl border flex flex-col items-center justify-center text-center transition-all ${
                         ashtaInquiry === item.id
-                          ? "bg-[#D9BC82] text-[#0A1628] border-[#D9BC82] font-black shadow-[0_0_15px_rgba(217,188,130,0.3)] scale-[1.02]"
-                          : "bg-black/30 border-white/10 text-[#D9CDB7] hover:border-[#D9BC82]/40 hover:text-[#F8F6F1]"
+                          ? "bg-amber-600 text-white dark:bg-[#D9BC82] dark:text-[#0A1628] border-amber-600 dark:border-[#D9BC82] font-black shadow-[0_0_15px_rgba(217,188,130,0.3)] scale-[1.02]"
+                          : "bg-amber-50/60 dark:bg-black/30 border-amber-200/60 dark:border-white/10 text-slate-700 dark:text-[#D9CDB7] hover:border-amber-400 dark:hover:border-[#D9BC82]/40 hover:text-slate-900 dark:hover:text-[#F8F6F1]"
                       }`}
                     >
                       <span className="text-base mb-0.5">{item.icon}</span>
                       <span className="text-[12px] font-bold">{item.label}</span>
                       <span className={`text-[10px] mt-0.5 truncate max-w-full ${
-                        ashtaInquiry === item.id ? "text-[#0A1628]/80 font-medium" : "text-[#94A3B8]"
+                        ashtaInquiry === item.id ? "text-amber-100 dark:text-[#0A1628]/80 font-medium" : "text-slate-500 dark:text-[#94A3B8]"
                       }`}>{item.q}</span>
                     </button>
                   ))}
                 </div>
 
                 {/* Inquiry Answer Box */}
-                <div className="p-4 rounded-xl bg-black/40 border border-white/10 space-y-2 animate-fade-in">
-                  <div className="flex items-center justify-between text-xs border-b border-white/5 pb-2">
-                    <span className="text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
+                <div className="p-4 rounded-xl bg-amber-50/70 dark:bg-black/40 border border-amber-200/60 dark:border-white/10 space-y-2 animate-fade-in">
+                  <div className="flex items-center justify-between text-xs border-b border-amber-200/50 dark:border-white/5 pb-2">
+                    <span className="text-amber-800 dark:text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
                       <span>💡</span> คำพยากรณ์สำหรับคำถาม: {
                         ashtaInquiry === "news" ? "เรื่องที่ได้ยิน (ข่าวกาลกิณี/มงคล)" :
                         ashtaInquiry === "sickness" ? "คนเจ็บไข้ (พยากรณ์โรค)" :
@@ -1375,17 +1360,17 @@ export default function YamPage() {
                         ashtaInquiry === "travel" ? "การเดินทาง 3 ช่วงระยะ" : "เวลามงคลที่ดีที่สุดประจำยาม"
                       }
                     </span>
-                    <span className="text-[11px] text-[#94A3B8]">
+                    <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
                       ตามคัมภีร์อัฏฐกาล 7 ยาม
                     </span>
                   </div>
 
                   {ashtaInquiry === "news" && (
                     <div className="space-y-1">
-                      <p className="text-base font-bold text-yellow-100 leading-relaxed">
+                      <p className="text-base font-bold text-slate-900 dark:text-yellow-100 leading-relaxed">
                         "{ashtaChanChaiItem.news}"
                       </p>
-                      <p className="text-xs text-[#94A3B8]">
+                      <p className="text-xs text-slate-600 dark:text-[#94A3B8]">
                         {ashtaChanChaiItem.news.includes("จริง") ? "✓ ข้อมูลหรือข่าวสารที่ได้ยินในยามนี้ มีน้ำหนักความจริงสูง" : "✕ ควรฟังหูไว้หู อย่าเพิ่งปักใจเชื่อในทันที"}
                       </p>
                     </div>
@@ -1393,10 +1378,10 @@ export default function YamPage() {
 
                   {ashtaInquiry === "sickness" && (
                     <div className="space-y-1">
-                      <p className="text-base font-bold text-rose-200 leading-relaxed">
+                      <p className="text-base font-bold text-rose-700 dark:text-rose-200 leading-relaxed">
                         "{ashtaChanChaiItem.sickness}"
                       </p>
-                      <p className="text-xs text-[#94A3B8]">
+                      <p className="text-xs text-slate-600 dark:text-[#94A3B8]">
                         การดูแลรักษาพยาบาลในยามนี้ควรปฏิบัติตามคำแนะนำของแพทย์อย่างเคร่งครัด
                       </p>
                     </div>
@@ -1404,10 +1389,10 @@ export default function YamPage() {
 
                   {ashtaInquiry === "lostItem" && (
                     <div className="space-y-1">
-                      <p className="text-base font-bold text-amber-200 leading-relaxed">
+                      <p className="text-base font-bold text-amber-800 dark:text-amber-200 leading-relaxed">
                         "{ashtaChanChaiItem.lostItem}"
                       </p>
-                      <p className="text-xs text-[#94A3B8]">
+                      <p className="text-xs text-slate-600 dark:text-[#94A3B8]">
                         คำแนะนำสถานที่ค้นหาตามธาตุและทิศทางของดาวเจ้ายาม
                       </p>
                     </div>
@@ -1418,43 +1403,43 @@ export default function YamPage() {
                       {/* 🚗 การออกเดินทางไกล (คัมภีร์ยามอัฏฐกาล ๔ ด้าน) */}
                       {ashtaChanChaiItem.longDistanceTravel && (
                         <div className="space-y-1.5">
-                          <span className="text-[12px] font-bold text-[#D9BC82] uppercase tracking-wider block flex items-center gap-1.5">
+                          <span className="text-[12px] font-bold text-amber-800 dark:text-[#D9BC82] uppercase tracking-wider block flex items-center gap-1.5">
                             <span>🚗</span> การออกเดินทางไกล (คัมภีร์ยามอัฏฐกาล ๔ ด้าน)
                           </span>
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                            <div className={`p-2.5 rounded-lg border text-xs ${ashtaResult.phase === "start" ? "bg-[#D9BC82]/15 border-[#D9BC82]" : "bg-white/[0.02] border-white/5"}`}>
-                              <span className="font-bold text-[#D9BC82] block mb-1">ยามต้น (0 - 30 นาทีแรก)</span>
-                              <p className="text-[#F8F6F1] leading-relaxed">{ashtaChanChaiItem.longDistanceTravel.start}</p>
+                            <div className={`p-2.5 rounded-lg border text-xs ${ashtaResult.phase === "start" ? "bg-amber-100/70 dark:bg-[#D9BC82]/15 border-amber-400 dark:border-[#D9BC82]" : "bg-white/70 dark:bg-white/[0.02] border-amber-200/40 dark:border-white/5"}`}>
+                              <span className="font-bold text-amber-800 dark:text-[#D9BC82] block mb-1">ยามต้น (0 - 30 นาทีแรก)</span>
+                              <p className="text-slate-800 dark:text-[#F8F6F1] leading-relaxed">{ashtaChanChaiItem.longDistanceTravel.start}</p>
                             </div>
-                            <div className={`p-2.5 rounded-lg border text-xs ${ashtaResult.phase === "middle" ? "bg-[#D9BC82]/15 border-[#D9BC82]" : "bg-white/[0.02] border-white/5"}`}>
-                              <span className="font-bold text-[#D9BC82] block mb-1">ยามกลาง (31 - 60 นาที)</span>
-                              <p className="text-[#F8F6F1] leading-relaxed">{ashtaChanChaiItem.longDistanceTravel.middle}</p>
+                            <div className={`p-2.5 rounded-lg border text-xs ${ashtaResult.phase === "middle" ? "bg-amber-100/70 dark:bg-[#D9BC82]/15 border-amber-400 dark:border-[#D9BC82]" : "bg-white/70 dark:bg-white/[0.02] border-amber-200/40 dark:border-white/5"}`}>
+                              <span className="font-bold text-amber-800 dark:text-[#D9BC82] block mb-1">ยามกลาง (31 - 60 นาที)</span>
+                              <p className="text-slate-800 dark:text-[#F8F6F1] leading-relaxed">{ashtaChanChaiItem.longDistanceTravel.middle}</p>
                             </div>
-                            <div className={`p-2.5 rounded-lg border text-xs ${ashtaResult.phase === "end" ? "bg-[#D9BC82]/15 border-[#D9BC82]" : "bg-white/[0.02] border-white/5"}`}>
-                              <span className="font-bold text-[#D9BC82] block mb-1">ยามปลาย (61 - 90 นาทีสุดท้าย)</span>
-                              <p className="text-[#F8F6F1] leading-relaxed">{ashtaChanChaiItem.longDistanceTravel.end}</p>
+                            <div className={`p-2.5 rounded-lg border text-xs ${ashtaResult.phase === "end" ? "bg-amber-100/70 dark:bg-[#D9BC82]/15 border-amber-400 dark:border-[#D9BC82]" : "bg-white/70 dark:bg-white/[0.02] border-amber-200/40 dark:border-white/5"}`}>
+                              <span className="font-bold text-amber-800 dark:text-[#D9BC82] block mb-1">ยามปลาย (61 - 90 นาทีสุดท้าย)</span>
+                              <p className="text-slate-800 dark:text-[#F8F6F1] leading-relaxed">{ashtaChanChaiItem.longDistanceTravel.end}</p>
                             </div>
                           </div>
                         </div>
                       )}
 
                       {/* 📜 คำกลอนชั้นฉาย / ยามเดินทาง */}
-                      <div className="space-y-1.5 pt-2 border-t border-white/5">
-                        <span className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider block flex items-center gap-1">
+                      <div className="space-y-1.5 pt-2 border-t border-amber-200/50 dark:border-white/5">
+                        <span className="text-[11px] font-bold text-slate-500 dark:text-[#94A3B8] uppercase tracking-wider block flex items-center gap-1">
                           <span>📜</span> คำกลอนชั้นฉายประจำยาม
                         </span>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                          <div className="p-2 rounded-lg bg-black/20 border border-white/5 text-[11px]">
-                            <span className="font-semibold text-[#D9CDB7] block mb-0.5">ยามต้น:</span>
-                            <p className="text-[#94A3B8] italic">{ashtaChanChaiItem.travel.start}</p>
+                          <div className="p-2 rounded-lg bg-white/80 dark:bg-black/20 border border-amber-200/40 dark:border-white/5 text-[11px]">
+                            <span className="font-semibold text-amber-800 dark:text-[#D9CDB7] block mb-0.5">ยามต้น:</span>
+                            <p className="text-slate-600 dark:text-[#94A3B8] italic">{ashtaChanChaiItem.travel.start}</p>
                           </div>
-                          <div className="p-2 rounded-lg bg-black/20 border border-white/5 text-[11px]">
-                            <span className="font-semibold text-[#D9CDB7] block mb-0.5">ยามกลาง:</span>
-                            <p className="text-[#94A3B8] italic">{ashtaChanChaiItem.travel.middle}</p>
+                          <div className="p-2 rounded-lg bg-white/80 dark:bg-black/20 border border-amber-200/40 dark:border-white/5 text-[11px]">
+                            <span className="font-semibold text-amber-800 dark:text-[#D9CDB7] block mb-0.5">ยามกลาง:</span>
+                            <p className="text-slate-600 dark:text-[#94A3B8] italic">{ashtaChanChaiItem.travel.middle}</p>
                           </div>
-                          <div className="p-2 rounded-lg bg-black/20 border border-white/5 text-[11px]">
-                            <span className="font-semibold text-[#D9CDB7] block mb-0.5">ยามปลาย:</span>
-                            <p className="text-[#94A3B8] italic">{ashtaChanChaiItem.travel.end}</p>
+                          <div className="p-2 rounded-lg bg-white/80 dark:bg-black/20 border border-amber-200/40 dark:border-white/5 text-[11px]">
+                            <span className="font-semibold text-amber-800 dark:text-[#D9CDB7] block mb-0.5">ยามปลาย:</span>
+                            <p className="text-slate-600 dark:text-[#94A3B8] italic">{ashtaChanChaiItem.travel.end}</p>
                           </div>
                         </div>
                       </div>
@@ -1464,12 +1449,12 @@ export default function YamPage() {
                   {ashtaInquiry === "bestTime" && (
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-[#94A3B8]">เวลาที่ดีที่สุดของยามนี้คือ:</span>
-                        <span className="px-3 py-1 rounded-lg bg-[#D9BC82]/20 text-[#D9BC82] font-black border border-[#D9BC82]/40 text-sm">
+                        <span className="text-xs text-slate-600 dark:text-[#94A3B8]">เวลาที่ดีที่สุดของยามนี้คือ:</span>
+                        <span className="px-3 py-1 rounded-lg bg-amber-500/15 dark:bg-[#D9BC82]/20 text-amber-900 dark:text-[#D9BC82] font-black border border-amber-500/30 dark:border-[#D9BC82]/40 text-sm">
                           {ashtaChanChaiItem.bestTime}
                         </span>
                       </div>
-                      <p className="text-xs text-[#D9CDB7] leading-relaxed">
+                      <p className="text-xs text-slate-600 dark:text-[#D9CDB7] leading-relaxed">
                         หากต้องการนัดหมาย เจรจาสำคัญ หรือออกเดินทาง แนะนำให้เจาะจงเลือกช่วงเวลา <strong>{ashtaChanChaiItem.bestTime}</strong> ของยามนี้เพื่อให้เกิดผลสำเร็จสูงสุด
                       </p>
                     </div>
@@ -1477,436 +1462,15 @@ export default function YamPage() {
                 </div>
               </Card>
             )}
-
-            {/* 4-Pillar Prediction Cards */}
-            {ashtaChanChaiItem && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-base">🚩</span>
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#D9BC82]">เรื่องที่ได้ยิน (ข่าวกาลกิณี/มงคล)</span>
-                  </div>
-                  <p className="text-sm sm:text-base leading-relaxed text-yellow-100 font-semibold">{ashtaChanChaiItem.news}</p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-base">🏥</span>
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-rose-300">คนเจ็บไข้</span>
-                  </div>
-                  <p className="text-sm sm:text-base leading-relaxed text-yellow-100 font-semibold">{ashtaChanChaiItem.sickness}</p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-base">🔍</span>
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-amber-300">ของหาย</span>
-                  </div>
-                  <p className="text-sm sm:text-base leading-relaxed text-yellow-100 font-semibold">{ashtaChanChaiItem.lostItem}</p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white/5 border border-white/5">
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <span className="text-base">⭐</span>
-                    <span className="text-[12px] font-bold uppercase tracking-wider text-[#D9BC82]">เวลาที่ดีที่สุด</span>
-                  </div>
-                  <p className="text-sm sm:text-base leading-relaxed text-[#D9BC82] font-black">
-                    {ashtaChanChaiItem.bestTime}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Travel timing guide — all 3 sub-yam */}
-            {ashtaChanChaiItem && (
-              <div className="p-4 rounded-2xl space-y-2 bg-[#0A1628]/40 border border-white/5">
-                <span className="text-[12px] font-bold uppercase tracking-widest text-[#94A3B8] block">🕐 การเดินทางตามช่วงยามทั้ง 3 ระยะ</span>
-                {[
-                  { label: "ยามต้น (0 - 30 นาทีแรก)", val: ashtaChanChaiItem.travel.start, phase: "start" },
-                  { label: "ยามกลาง (31 - 60 นาที)", val: ashtaChanChaiItem.travel.middle, phase: "middle" },
-                  { label: "ยามปลาย (61 - 90 นาทีสุดท้าย)", val: ashtaChanChaiItem.travel.end, phase: "end" },
-                ].map((t, i) => {
-                  const isActive = ashtaResult.phase === t.phase;
-                  return (
-                    <div key={i} className="flex gap-2 items-start rounded-xl px-2.5 py-2 transition-all"
-                      style={isActive ? { background: "rgba(198,169,107,0.12)", border: "1px solid rgba(217,188,130,0.25)" } : {}}>
-                      <span className={`text-[12px] font-black uppercase tracking-wider shrink-0 pt-0.5 ${
-                        isActive ? "text-[#D9BC82]" : "text-[#94A3B8]"
-                      }`}>{t.label}{isActive ? " ◀" : ""}</span>
-                      <p className={`text-[13px] leading-relaxed ${
-                        isActive ? "text-[#F8F6F1]" : "text-[#94A3B8]"
-                      }`}>{t.val}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Best time highlight */}
-            {ashtaChanChaiItem?.bestTime && (
-              <div className="p-4 rounded-2xl flex items-center gap-3 bg-gradient-to-r from-[#C6A96B]/15 to-[#D9BC82]/5 border border-[#D9BC82]/30 shadow-[0_0_20px_rgba(217,188,130,0.08)]">
-                <span className="text-xl">⭐</span>
-                <div>
-                  <span className="text-[12px] text-[#D9BC82] font-bold uppercase tracking-widest block">เวลามงคลที่ดีที่สุดประจำยาม</span>
-                  <p className="text-sm text-[#D9BC82] font-bold mt-0.5">{ashtaChanChaiItem.bestTime}</p>
-                </div>
-              </div>
-            )}
           </div>
         );
       })()}
 
-      {/* 📖 ฐานข้อมูลคัมภีร์การใช้ยามอัฏฐกาลทำนาย ๔ ด้าน (หน้า ๔๗๑-๔๗๔) */}
-      {activeTab === "doctrine" && (
-        <div className="space-y-6 animate-fade-in">
-          {/* Header Banner */}
-          <Card className="p-6 bg-gradient-to-br from-[#0A2240] via-[#0A1628] to-[#020617] border-[#D9BC82]/30 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-[#D9BC82]/5 rounded-full blur-3xl pointer-events-none" />
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b border-white/10 pb-5">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">📖</span>
-                  <span className="text-xs font-bold text-[#D9BC82] uppercase tracking-widest">
-                    คัมภีร์ตำราโบราณ (ฉบับสมบูรณ์ หน้า ๔๗๑-๔๗๔)
-                  </span>
-                </div>
-                <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#F8F6F1]">
-                  การใช้ยามอัฏฐกาลทำนาย
-                </h2>
-                <p className="text-sm text-[#D9CDB7] font-medium">
-                  เรื่องข่าวสาร · การเจ็บไข้ได้ป่วย · ของหาย · การออกเดินทางไกล ๓ ระยะ
-                </p>
-              </div>
-
-              <div className="px-4 py-2 rounded-xl bg-[#D9BC82]/10 border border-[#D9BC82]/20 text-right">
-                <span className="text-[11px] text-[#D9BC82] font-bold uppercase tracking-wider block">ความแม่นยำทางสถิติ</span>
-                <span className="text-xs text-[#F8F6F1] font-medium">๗ เจ้ายาม × ๔ ศาสตร์พยากรณ์</span>
-              </div>
-            </div>
-
-            <p className="text-xs sm:text-sm text-[#94A3B8] mt-4 leading-relaxed bg-black/30 p-3.5 rounded-xl border border-white/5">
-              💡 <strong>หลักการใช้:</strong> ยามอัฏฐกาลนี้ ใช้บอกเวลาที่ดีและร้ายในแต่ละวัน เมื่อต้องการทราบเหตุการณ์ที่เกิดขึ้นในขณะนั้น (ขณะที่ผู้มาได้พยากรณ์ถามและบอก) ว่าจะเป็นอย่างไรบ้าง ท่านได้สรุปถึงข่าวที่ได้ยิน, การเจ็บไข้ได้ป่วย, ของหาย ตลอดจนเวลาของการออกเดินทางไกลไว้โดยสรุปง่ายๆ
-            </p>
-          </Card>
-
-          {/* Quick Filter Bar */}
-          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
-            {/* Filter chips */}
-            <div className="flex flex-wrap gap-1.5 flex-1">
-              <button
-                type="button"
-                onClick={() => setDoctrineYamFilter("all")}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all ${
-                  doctrineYamFilter === "all"
-                    ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_10px_rgba(217,188,130,0.3)] font-black"
-                    : "bg-white/5 text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/10"
-                }`}
-              >
-                ทั้งหมด (๗ ยาม)
-              </button>
-              {ATTHAKARN_CHAN_CHAI_TABLE.map((yam) => (
-                <button
-                  key={yam.yamNumber}
-                  type="button"
-                  onClick={() => setDoctrineYamFilter(yam.yamNumber)}
-                  className={`px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1 transition-all ${
-                    doctrineYamFilter === yam.yamNumber
-                      ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_10px_rgba(217,188,130,0.3)] font-black"
-                      : "bg-white/5 text-[#94A3B8] hover:text-[#F8F6F1] hover:bg-white/10"
-                  }`}
-                >
-                  <span>{yam.planetSymbol}</span>
-                  <span>ยาม {yam.yamNumber} ({yam.nameDay})</span>
-                </button>
-              ))}
-            </div>
-
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64 shrink-0">
-              <input
-                type="text"
-                value={doctrineSearch}
-                onChange={(e) => setDoctrineSearch(e.target.value)}
-                placeholder="ค้นหาคำทำนาย..."
-                className="w-full bg-slate-950/50 border border-white/10 rounded-xl px-3 py-1.5 pl-8 text-xs text-[#F8F6F1] placeholder-[#94A3B8]/60 focus:border-[#D9BC82]/50 outline-none"
-              />
-              <span className="absolute left-2.5 top-2 text-xs text-[#94A3B8]">🔍</span>
-              {doctrineSearch && (
-                <button
-                  type="button"
-                  onClick={() => setDoctrineSearch("")}
-                  className="absolute right-2.5 top-1.5 text-xs text-[#94A3B8] hover:text-[#F8F6F1]"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* 7 Yam Doctrine Cards Grid */}
-          <div className="space-y-6">
-            {ATTHAKARN_CHAN_CHAI_TABLE
-              .filter((yam) => {
-                if (doctrineYamFilter !== "all" && yam.yamNumber !== doctrineYamFilter) return false;
-                if (!doctrineSearch) return true;
-                const q = doctrineSearch.toLowerCase();
-                return (
-                  yam.nameDay.toLowerCase().includes(q) ||
-                  yam.nameNight.toLowerCase().includes(q) ||
-                  yam.planetNameThai.toLowerCase().includes(q) ||
-                  yam.news.toLowerCase().includes(q) ||
-                  yam.sickness.toLowerCase().includes(q) ||
-                  yam.lostItem.toLowerCase().includes(q) ||
-                  yam.bestTime.toLowerCase().includes(q) ||
-                  yam.longDistanceTravel.start.toLowerCase().includes(q) ||
-                  yam.longDistanceTravel.middle.toLowerCase().includes(q) ||
-                  yam.longDistanceTravel.end.toLowerCase().includes(q) ||
-                  yam.travel.start.toLowerCase().includes(q) ||
-                  yam.travel.middle.toLowerCase().includes(q) ||
-                  yam.travel.end.toLowerCase().includes(q)
-                );
-              })
-              .map((yam) => {
-                return (
-                  <Card
-                    key={yam.yamNumber}
-                    className="p-6 bg-[#0A1628]/50 border-[#D9BC82]/20 hover:border-[#D9BC82]/40 transition-all shadow-xl space-y-5 relative overflow-hidden"
-                  >
-                    {/* Ambient Glow */}
-                    <div 
-                      className="absolute -right-12 -top-12 w-36 h-36 rounded-full blur-3xl opacity-15 pointer-events-none"
-                      style={{ backgroundColor: yam.planetColor }}
-                    />
-
-                    {/* Card Top Title */}
-                    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
-                      <div className="flex items-center gap-3">
-                        <div 
-                          className="w-12 h-12 rounded-2xl flex items-center justify-center font-serif text-2xl font-black shadow-inner border"
-                          style={{
-                            backgroundColor: `${yam.planetColor}18`,
-                            borderColor: `${yam.planetColor}40`,
-                            color: yam.planetColor,
-                          }}
-                        >
-                          {yam.planetSymbol}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-black px-2 py-0.5 rounded-full bg-[#D9BC82]/15 text-[#D9BC82] border border-[#D9BC82]/30">
-                              ยาม {yam.yamNumber}
-                            </span>
-                            <span className="text-xs text-[#94A3B8]">({yam.planetNameThai})</span>
-                          </div>
-                          <h3 className="font-display text-xl font-bold text-[#F8F6F1] mt-0.5">
-                            ยาม {yam.nameDay} <span className="text-sm font-normal text-[#94A3B8]">(กลางวัน)</span> · ยาม {yam.nameNight} <span className="text-sm font-normal text-[#94A3B8]">(กลางคืน)</span>
-                          </h3>
-                        </div>
-                      </div>
-
-                      {/* Best Time Badge */}
-                      <div className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#C6A96B]/20 to-[#D9BC82]/10 border border-[#D9BC82]/30 text-right">
-                        <span className="text-[10px] text-[#D9BC82] font-bold uppercase tracking-wider block">เวลาที่ดีที่สุดของยามนี้</span>
-                        <span className="text-sm font-black text-[#D9BC82]">{yam.bestTime}</span>
-                      </div>
-                    </div>
-
-                    {/* 4 Pillars Prophecy Grid */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                      {/* 1. เรื่องที่ได้ยิน */}
-                      <div className="p-4 rounded-xl bg-black/35 border border-white/5 space-y-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-base">🚩</span>
-                          <span className="text-xs font-bold text-[#D9BC82] uppercase tracking-wider">เรื่องที่ได้ยิน (ข่าวสาร)</span>
-                        </div>
-                        <p className="text-sm text-yellow-100 font-semibold leading-relaxed">
-                          "{yam.news}"
-                        </p>
-                      </div>
-
-                      {/* 2. คนเจ็บไข้ */}
-                      <div className="p-4 rounded-xl bg-black/35 border border-white/5 space-y-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-base">🏥</span>
-                          <span className="text-xs font-bold text-rose-300 uppercase tracking-wider">คนเจ็บไข้ (พยากรณ์โรค)</span>
-                        </div>
-                        <p className="text-sm text-rose-100 font-semibold leading-relaxed">
-                          "{yam.sickness}"
-                        </p>
-                      </div>
-
-                      {/* 3. ของหาย */}
-                      <div className="p-4 rounded-xl bg-black/35 border border-white/5 space-y-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-base">🔍</span>
-                          <span className="text-xs font-bold text-amber-300 uppercase tracking-wider">ของหาย (แหล่งที่ซ่อน)</span>
-                        </div>
-                        <p className="text-sm text-amber-100 font-semibold leading-relaxed">
-                          "{yam.lostItem}"
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* 4. การออกเดินทางไกล 3 ช่วงเวลา (หน้า ๔๗๑-๔๗๔) */}
-                    <div className="p-4 rounded-xl bg-black/40 border border-[#D9BC82]/20 space-y-2.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-[#D9BC82] font-bold uppercase tracking-wider flex items-center gap-1.5">
-                          <span>🚗</span> การออกเดินทางไกล ๓ ช่วงเวลา (ช่วงละ ๓๐ นาที)
-                        </span>
-                        <span className="text-[11px] text-[#94A3B8]">
-                          เวลาดีที่สุด: <strong className="text-[#D9BC82]">{yam.bestTime}</strong>
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
-                        {/* ยามต้น */}
-                        <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-[#D9BC82]">ยามต้น (0 - 30 นาที)</span>
-                            {yam.bestTime.includes("ยามต้น") && (
-                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-green-500/20 text-green-400 font-bold border border-green-500/30">
-                                ดีเลิศ ⭐
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[#F8F6F1] font-medium leading-relaxed">
-                            {yam.longDistanceTravel.start}
-                          </p>
-                        </div>
-
-                        {/* ยามกลาง */}
-                        <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-[#D9BC82]">ยามกลาง (31 - 60 นาที)</span>
-                            {yam.bestTime.includes("ยามกลาง") && (
-                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-green-500/20 text-green-400 font-bold border border-green-500/30">
-                                ดีเลิศ ⭐
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[#F8F6F1] font-medium leading-relaxed">
-                            {yam.longDistanceTravel.middle}
-                          </p>
-                        </div>
-
-                        {/* ยามปลาย */}
-                        <div className="p-3 rounded-lg bg-white/[0.02] border border-white/5 space-y-1">
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-[#D9BC82]">ยามปลาย (61 - 90 นาที)</span>
-                            {yam.bestTime.includes("ยามปลาย") && (
-                              <span className="text-[10px] px-1.5 py-0.2 rounded bg-green-500/20 text-green-400 font-bold border border-green-500/30">
-                                ดีเลิศ ⭐
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[#F8F6F1] font-medium leading-relaxed">
-                            {yam.longDistanceTravel.end}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* 5. คำกลอนชั้นฉายประจำยาม */}
-                    <div className="p-3.5 rounded-xl bg-black/20 border border-white/5 space-y-1.5">
-                      <span className="text-[11px] font-bold text-[#94A3B8] uppercase tracking-wider block flex items-center gap-1.5">
-                        <span>📜</span> คำกลอนชั้นฉายประจำยาม (ยามอัฏฐกาลชั้นฉาย)
-                      </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[12px]">
-                        <div className="p-2 rounded-lg bg-black/30 border border-white/5">
-                          <span className="text-[#D9CDB7] font-semibold block mb-0.5">ยามต้น:</span>
-                          <p className="text-[#94A3B8] italic">{yam.travel.start}</p>
-                        </div>
-                        <div className="p-2 rounded-lg bg-black/30 border border-white/5">
-                          <span className="text-[#D9CDB7] font-semibold block mb-0.5">ยามกลาง:</span>
-                          <p className="text-[#94A3B8] italic">{yam.travel.middle}</p>
-                        </div>
-                        <div className="p-2 rounded-lg bg-black/30 border border-white/5">
-                          <span className="text-[#D9CDB7] font-semibold block mb-0.5">ยามปลาย:</span>
-                          <p className="text-[#94A3B8] italic">{yam.travel.end}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </Card>
-                );
-              })}
-          </div>
-
-          {/* 📜 สรุปเกณฑ์เวลาและหมายเหตุคัมภีร์ (หน้า ๔๗๔) */}
-          <Card className="p-6 bg-gradient-to-br from-[#0A2240] via-[#0A1628] to-[#020617] border-[#D9BC82]/30 shadow-2xl space-y-4">
-            <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-              <span className="text-xl">📜</span>
-              <div>
-                <h3 className="font-display text-lg font-bold text-[#F8F6F1]">
-                  หมายเหตุ & สรุปเกณฑ์เวลาที่ดีของแต่ละยาม (หน้า ๔๗๔)
-                </h3>
-                <p className="text-xs text-[#D9BC82]">
-                  สูตรเลือกเวลาเมื่อจำเป็นต้องออกเดินทางหรือทำธุระสำคัญ
-                </p>
-              </div>
-            </div>
-
-            <p className="text-xs sm:text-sm text-[#94A3B8] leading-relaxed">
-              ในยามหนึ่งๆ จะมี <strong>๑ ชั่วโมง ๓๐ นาที</strong> แบ่งออกเป็น <strong>๓ ตอน</strong> คือ <strong>ยามต้น</strong>, <strong>ยามกลาง</strong>, และ <strong>ยามปลาย</strong> ยามละ <strong>๓๐ นาที</strong> โดยกำหนดเวลาที่ดีของแต่ละยามเอาไว้ เมื่อมีความจำเป็นต้องออกเดินทางหรือทำธุระใด เพื่อให้เกิดผลดี ท่านให้เลือกเวลาในช่วงที่ดีของแต่ละยามดังนี้ คือ:
-            </p>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2">
-              <div className="p-4 rounded-xl bg-black/40 border border-[#D9BC82]/20 flex items-start gap-3">
-                <span className="text-xl">☀️</span>
-                <div>
-                  <span className="text-xs font-bold text-[#F8F6F1] block">
-                    ยาม ๑ (สุริชะ, ระวิ) และ ยาม ๒ (จันเทา, ศะศิ)
-                  </span>
-                  <p className="text-sm font-black text-[#D9BC82] mt-0.5">
-                    เวลาที่ดี คือ <span className="underline decoration-[#D9BC82]">ยามกลาง</span> (นาทีที่ 31-60)
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-black/40 border border-[#D9BC82]/20 flex items-start gap-3">
-                <span className="text-xl">⚔️</span>
-                <div>
-                  <span className="text-xs font-bold text-[#F8F6F1] block">
-                    ยาม ๓ (ภุมมะ, ภุมโม) และ ยาม ๖ (ศุกระ, ศุโกร)
-                  </span>
-                  <p className="text-sm font-black text-[#D9BC82] mt-0.5">
-                    เวลาที่ดี คือ <span className="underline decoration-[#D9BC82]">ยามปลาย</span> (นาทีที่ 61-90)
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-black/40 border border-[#D9BC82]/20 flex items-start gap-3">
-                <span className="text-xl">💼</span>
-                <div>
-                  <span className="text-xs font-bold text-[#F8F6F1] block">
-                    ยาม ๔ (พุธะ, พุโธ) และ ยาม ๗ (เสารี, โสโร)
-                  </span>
-                  <p className="text-sm font-black text-[#D9BC82] mt-0.5">
-                    เวลาที่ดี คือ <span className="underline decoration-[#D9BC82]">ยามกลาง และ ยามปลาย</span> (นาทีที่ 31-90)
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-black/40 border border-[#D9BC82]/20 flex items-start gap-3">
-                <span className="text-xl">🎓</span>
-                <div>
-                  <span className="text-xs font-bold text-[#F8F6F1] block">
-                    ยาม ๕ (ครู, ชีโว)
-                  </span>
-                  <p className="text-sm font-black text-[#D9BC82] mt-0.5">
-                    เวลาที่ดี คือ <span className="underline decoration-[#D9BC82]">ยามต้น</span> (นาทีที่ 0-30)
-                  </p>
-                </div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
       {/* ✨ INTERACTIVE AUSPICIOUS FINDER VIEW */}
       {activeTab === "finder" && (
         <div className="space-y-6">
-          <Card className="bg-[#0A1628]/40 border-white/5 p-6">
-            <h3 className="font-display text-lg font-bold text-[#F8F6F1] mb-5 border-b border-white/5 pb-2">
+          <Card className="bg-white/95 dark:bg-[#0A1628]/40 border-amber-200/50 dark:border-white/5 p-6 shadow-sm">
+            <h3 className="font-display text-lg font-bold text-slate-900 dark:text-[#F8F6F1] mb-5 border-b border-amber-200/40 dark:border-white/5 pb-2">
               🧭 ระบบวิเคราะห์เลือกฤกษ์ยามอัจฉริยะ
             </h3>
             
@@ -1926,8 +1490,8 @@ export default function YamPage() {
                       onClick={() => setSelectedTopic(topic.id as any)}
                       className={`py-3 px-2 rounded-xl border flex flex-col items-center justify-center gap-1.5 transition-all active:scale-[0.97] ${
                         selectedTopic === topic.id
-                          ? "bg-[#D9BC82]/15 border-[#D9BC82]/40 text-[#D9BC82] shadow-[0_0_12px_rgba(217,188,130,0.1)] font-bold"
-                          : "bg-white/5 border-transparent text-[#94A3B8] hover:border-white/10 hover:text-[#F8F6F1]"
+                          ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white font-bold shadow-sm dark:bg-[#D9BC82]/15 dark:border-[#D9BC82]/40 dark:text-[#D9BC82] dark:shadow-[0_0_12px_rgba(217,188,130,0.1)]"
+                          : "bg-amber-50/70 border-amber-200/50 text-slate-700 hover:border-amber-300 hover:text-slate-900 dark:bg-white/5 dark:border-transparent dark:text-[#94A3B8] dark:hover:border-white/10 dark:hover:text-[#F8F6F1]"
                       }`}
                     >
                       <span className="text-lg">{topic.icon}</span>
@@ -1938,34 +1502,34 @@ export default function YamPage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-xs font-bold text-[#D9BC82] uppercase tracking-wider block">2. เลือกวัน (พ.ศ.)</label>
+                <label className="text-xs font-bold text-amber-900 dark:text-[#D9BC82] uppercase tracking-wider block">2. เลือกวัน (พ.ศ.)</label>
                 <div className="grid grid-cols-3 gap-1.5">
                   <select 
                     value={finderDay} 
                     onChange={(e) => setFinderDay(Number(e.target.value))}
-                    className="bg-slate-950/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
+                    className="bg-white dark:bg-slate-950/40 border border-amber-200/60 dark:border-[#D9BC82]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-amber-500 dark:focus:border-[#D9BC82]/50 outline-none shadow-sm"
                   >
                     {Array.from({ length: 31 }).map((_, i) => (
-                      <option key={i + 1} value={i + 1} className="bg-[#020617]">{i + 1}</option>
+                      <option key={i + 1} value={i + 1} className="bg-white text-slate-900 dark:bg-[#020617] dark:text-[#F8F6F1]">{i + 1}</option>
                     ))}
                   </select>
                   <select 
                     value={finderMonth} 
                     onChange={(e) => setFinderMonth(Number(e.target.value))}
-                    className="bg-slate-950/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
+                    className="bg-white dark:bg-slate-950/40 border border-amber-200/60 dark:border-[#D9BC82]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-amber-500 dark:focus:border-[#D9BC82]/50 outline-none shadow-sm"
                   >
                     {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                      <option key={i + 1} value={i + 1} className="bg-[#020617]">{m}</option>
+                      <option key={i + 1} value={i + 1} className="bg-white text-slate-900 dark:bg-[#020617] dark:text-[#F8F6F1]">{m}</option>
                     ))}
                   </select>
                   <select 
                     value={finderYear} 
                     onChange={(e) => setFinderYear(Number(e.target.value))}
-                    className="bg-slate-950/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
+                    className="bg-white dark:bg-slate-950/40 border border-amber-200/60 dark:border-[#D9BC82]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-amber-500 dark:focus:border-[#D9BC82]/50 outline-none shadow-sm"
                   >
                     {Array.from({ length: 21 }).map((_, i) => {
                       const y = 2560 + i;
-                      return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
+                      return <option key={y} value={y} className="bg-white text-slate-900 dark:bg-[#020617] dark:text-[#F8F6F1]">{y}</option>;
                     })}
                   </select>
                 </div>
@@ -1974,14 +1538,14 @@ export default function YamPage() {
                   <button
                     type="button"
                     onClick={handleSetToday}
-                    className="py-1.5 px-3 rounded-lg border border-white/5 bg-white/5 text-[13px] font-bold text-[#94A3B8] hover:bg-white/10 hover:text-[#F8F6F1] transition-all"
+                    className="py-1.5 px-3 rounded-lg border border-amber-200/50 dark:border-white/5 bg-amber-50/70 dark:bg-white/5 text-[13px] font-bold text-slate-700 dark:text-[#94A3B8] hover:bg-amber-100/70 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-[#F8F6F1] transition-all"
                   >
                     📅 วันนี้
                   </button>
                   <button
                     type="button"
                     onClick={handleSetTomorrow}
-                    className="py-1.5 px-3 rounded-lg border border-white/5 bg-white/5 text-[13px] font-bold text-[#94A3B8] hover:bg-white/10 hover:text-[#F8F6F1] transition-all"
+                    className="py-1.5 px-3 rounded-lg border border-amber-200/50 dark:border-white/5 bg-amber-50/70 dark:bg-white/5 text-[13px] font-bold text-slate-700 dark:text-[#94A3B8] hover:bg-amber-100/70 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-[#F8F6F1] transition-all"
                   >
                     📅 พรุ่งนี้
                   </button>
@@ -1989,22 +1553,22 @@ export default function YamPage() {
               </div>
 
               <div className="space-y-3">
-                <label className="text-xs font-bold text-[#D9BC82] uppercase tracking-wider block">3. ใส่เวลา</label>
+                <label className="text-xs font-bold text-amber-900 dark:text-[#D9BC82] uppercase tracking-wider block">3. ใส่เวลา</label>
                 <div className="relative">
                   <input
                     type="time"
                     value={finderTime}
                     onChange={(e) => setFinderTime(e.target.value)}
-                    className="w-full bg-[#1E293B]/40 border border-white/10 rounded-xl px-4 py-3 text-[#F8F6F1] font-display text-lg focus:border-[#D9BC82]/40 outline-none transition-all"
+                    className="w-full bg-white dark:bg-[#1E293B]/40 border border-amber-200/60 dark:border-white/10 rounded-xl px-4 py-3 text-slate-900 dark:text-[#F8F6F1] font-display text-lg focus:border-amber-500 dark:focus:border-[#D9BC82]/40 outline-none transition-all shadow-sm"
                   />
                 </div>
-                <span className="text-[13px] text-[#94A3B8] block italic">*ใช้คำนวณสลับยามอัฏฐกาล 1.5 ชม. ตามดาราศาสตร์จริง</span>
+                <span className="text-[13px] text-slate-500 dark:text-[#94A3B8] block italic">*ใช้คำนวณสลับยามอัฏฐกาล 1.5 ชม. ตามดาราศาสตร์จริง</span>
               </div>
             </div>
 
             <button
               onClick={handleCalculateFinder}
-              className="w-full py-3.5 mt-6 rounded-xl bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#0A1628] font-bold text-sm tracking-widest uppercase hover:brightness-105 active:scale-[0.99] transition-all shadow-[0_0_24px_rgba(198,169,107,0.15)] flex items-center justify-center gap-2"
+              className="w-full py-3.5 mt-6 rounded-xl bg-gradient-to-r from-amber-600 to-amber-500 text-white dark:from-[#C6A96B] dark:to-[#D9BC82] dark:text-[#0A1628] font-bold text-sm tracking-widest uppercase hover:brightness-105 active:scale-[0.99] transition-all shadow-md dark:shadow-[0_0_24px_rgba(198,169,107,0.15)] flex items-center justify-center gap-2"
             >
               คำนวณเวลาที่เหมาะที่สุด ✨
             </button>
@@ -2012,25 +1576,25 @@ export default function YamPage() {
 
           {calculatedResult ? (
             <div className="space-y-6 animate-fade-in">
-              <Card className="bg-[#0A1628]/40 border-[#D9BC82]/15 overflow-hidden">
-                <div className="p-4 bg-[#D9BC82]/5 border-b border-[#D9BC82]/10 flex items-center gap-2">
-                  <span className="text-[#D9BC82]">🏆</span>
-                  <span className="text-xs font-bold text-[#D9BC82] uppercase tracking-widest">ผลลัพธ์แนะนำจากการคำนวณ</span>
+              <Card className="bg-white/95 dark:bg-[#0A1628]/40 border border-amber-200/60 dark:border-[#D9BC82]/15 overflow-hidden shadow-sm">
+                <div className="p-4 bg-amber-500/10 dark:bg-[#D9BC82]/5 border-b border-amber-200/60 dark:border-[#D9BC82]/10 flex items-center gap-2">
+                  <span className="text-amber-800 dark:text-[#D9BC82]">🏆</span>
+                  <span className="text-xs font-bold text-amber-900 dark:text-[#D9BC82] uppercase tracking-widest">ผลลัพธ์แนะนำจากการคำนวณ</span>
                 </div>
 
                 <div className="p-6 flex flex-col md:flex-row items-center md:items-stretch gap-6">
-                  <div className="flex flex-col items-center justify-center text-center p-5 bg-black/30 rounded-2xl border border-white/5 w-full md:w-48 shrink-0">
-                    <span className="text-[13px] text-[#94A3B8] uppercase font-bold block mb-1">คะแนนความเหมาะสม</span>
-                    <div className="flex items-baseline gap-1 mt-1 text-[#D9BC82]">
+                  <div className="flex flex-col items-center justify-center text-center p-5 bg-amber-50/70 dark:bg-black/30 rounded-2xl border border-amber-200/60 dark:border-white/5 w-full md:w-48 shrink-0">
+                    <span className="text-[13px] text-slate-600 dark:text-[#94A3B8] uppercase font-bold block mb-1">คะแนนความเหมาะสม</span>
+                    <div className="flex items-baseline gap-1 mt-1 text-amber-800 dark:text-[#D9BC82]">
                       <span className="text-5xl font-display font-bold">{calculatedResult.advice.score.toFixed(1)}</span>
-                      <span className="text-sm text-[#94A3B8]">/10</span>
+                      <span className="text-sm text-slate-500 dark:text-[#94A3B8]">/10</span>
                     </div>
-                    <div className="flex gap-0.5 mt-2 text-[#D9BC82]">
+                    <div className="flex gap-0.5 mt-2 text-amber-600 dark:text-[#D9BC82]">
                       {Array.from({ length: 5 }).map((_, i) => {
                         const starVal = i + 1;
                         const scoreHalf = calculatedResult.advice.score / 2;
                         return (
-                          <span key={i} className="text-sm drop-shadow-[0_0_4px_rgba(217,188,130,0.5)]">
+                          <span key={i} className="text-sm drop-shadow-sm dark:drop-shadow-[0_0_4px_rgba(217,188,130,0.5)]">
                             {starVal <= scoreHalf ? "★" : starVal - 0.5 <= scoreHalf ? "⯪" : "☆"}
                           </span>
                         );
@@ -2038,10 +1602,10 @@ export default function YamPage() {
                     </div>
                     <span className={`text-xs font-bold mt-3 px-3 py-0.5 rounded-full ${
                       calculatedResult.advice.score >= 8.5
-                        ? "bg-[#D9BC82]/15 text-[#D9BC82]"
+                        ? "bg-amber-500/15 text-amber-900 dark:bg-[#D9BC82]/15 dark:text-[#D9BC82]"
                         : calculatedResult.advice.score >= 6.5
-                        ? "bg-[#4B6FAE]/15 text-[#4B6FAE]"
-                        : "bg-red-400/10 text-red-400"
+                        ? "bg-sky-500/15 text-sky-800 dark:bg-[#4B6FAE]/15 dark:text-[#4B6FAE]"
+                        : "bg-red-500/15 text-red-700 dark:bg-red-400/10 dark:text-red-400"
                     }`}>
                       {calculatedResult.advice.ratingText}
                     </span>
@@ -2049,22 +1613,22 @@ export default function YamPage() {
 
                   <div className="flex-1 space-y-4">
                     <div className="space-y-1">
-                      <div className="flex items-center gap-1.5 text-xs text-[#94A3B8] font-bold">
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-[#94A3B8] font-bold">
                         <span>🕒</span> ช่วงเวลาที่ดีที่สุดของยามนี้
                       </div>
-                      <h4 className="font-display text-2xl font-bold text-[#F8F6F1]">{calculatedResult.timeLabel}</h4>
+                      <h4 className="font-display text-2xl font-bold text-slate-900 dark:text-[#F8F6F1]">{calculatedResult.timeLabel}</h4>
                       <div className="flex gap-2 mt-1">
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[13px] font-bold text-[#D9BC82]">
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-[12px] font-bold text-amber-900 dark:bg-white/5 dark:border-white/10 dark:text-[#D9BC82]">
                           ยาม{PHASE_LABEL[calculatedResult.phase]}
                         </span>
-                        <span className="px-2 py-0.5 rounded bg-white/5 border border-white/10 text-[13px] font-bold text-[#94A3B8]">
+                        <span className="px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-[12px] font-bold text-slate-700 dark:text-[#94A3B8]">
                           ดาว{calculatedResult.yamName} ({PLANET_SYMBOLS[calculatedResult.yamName]})
                         </span>
                       </div>
                     </div>
 
-                    <div className="p-4 bg-[#D9BC82]/5 rounded-xl border border-[#D9BC82]/10">
-                      <p className="text-sm text-[#D9CDB7] leading-relaxed">
+                    <div className="p-4 bg-amber-50/70 dark:bg-[#D9BC82]/5 rounded-xl border border-amber-200/60 dark:border-[#D9BC82]/10">
+                      <p className="text-sm text-slate-800 dark:text-[#D9CDB7] leading-relaxed">
                         {calculatedResult.advice.description}
                       </p>
                     </div>
@@ -2073,42 +1637,42 @@ export default function YamPage() {
               </Card>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-[#10B981]/5 border-[#10B981]/15 p-5">
-                  <div className="flex items-center gap-2 text-[#10B981] font-bold text-xs uppercase tracking-wider mb-3">
+                <Card className="bg-emerald-50/70 dark:bg-[#10B981]/5 border border-emerald-200/70 dark:border-[#10B981]/15 p-5 shadow-sm">
+                  <div className="flex items-center gap-2 text-emerald-800 dark:text-[#10B981] font-bold text-xs uppercase tracking-wider mb-3">
                     <span className="text-base">✓</span> วันนี้ควรทำอะไร
                   </div>
                   <ul className="space-y-2">
                     {calculatedResult.advice.shouldDo.map((item: string, i: number) => (
-                      <li key={i} className="text-xs text-[#D9CDB7] leading-relaxed flex items-start gap-1.5">
-                        <span className="text-[#10B981] shrink-0 mt-0.5">•</span>
+                      <li key={i} className="text-xs text-slate-800 dark:text-[#D9CDB7] leading-relaxed flex items-start gap-1.5">
+                        <span className="text-emerald-600 dark:text-[#10B981] shrink-0 mt-0.5">•</span>
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
                 </Card>
 
-                <Card className="bg-red-500/5 border-red-500/15 p-5">
-                  <div className="flex items-center gap-2 text-red-400 font-bold text-xs uppercase tracking-wider mb-3">
+                <Card className="bg-rose-50/70 dark:bg-red-500/5 border border-rose-200/70 dark:border-red-500/15 p-5 shadow-sm">
+                  <div className="flex items-center gap-2 text-rose-800 dark:text-red-400 font-bold text-xs uppercase tracking-wider mb-3">
                     <span className="text-base">✕</span> สิ่งที่ควรเลี่ยง
                   </div>
                   <ul className="space-y-2">
                     {calculatedResult.advice.shouldAvoid.map((item: string, i: number) => (
-                      <li key={i} className="text-xs text-[#D9CDB7] leading-relaxed flex items-start gap-1.5">
-                        <span className="text-red-400 shrink-0 mt-0.5">•</span>
+                      <li key={i} className="text-xs text-slate-800 dark:text-[#D9CDB7] leading-relaxed flex items-start gap-1.5">
+                        <span className="text-rose-600 dark:text-red-400 shrink-0 mt-0.5">•</span>
                         <span>{item}</span>
                       </li>
                     ))}
                   </ul>
                 </Card>
 
-                <Card className="bg-[#4B6FAE]/5 border-[#4B6FAE]/15 p-5 flex flex-col justify-between">
-                  <div className="flex items-center gap-2 text-[#4B6FAE] font-bold text-xs uppercase tracking-wider mb-3">
+                <Card className="bg-sky-50/70 dark:bg-[#4B6FAE]/5 border border-sky-200/70 dark:border-[#4B6FAE]/15 p-5 shadow-sm flex flex-col justify-between">
+                  <div className="flex items-center gap-2 text-sky-800 dark:text-[#4B6FAE] font-bold text-xs uppercase tracking-wider mb-3">
                     <span className="text-base">💬</span> คำแนะนำการใช้คำพูด
                   </div>
-                  <div className="p-3 bg-[#4B6FAE]/10 rounded-xl rounded-tl-none border border-[#4B6FAE]/20 text-xs italic text-[#D9CDB7] leading-relaxed relative my-auto shadow-inner">
+                  <div className="p-3 bg-sky-100/70 dark:bg-[#4B6FAE]/10 rounded-xl rounded-tl-none border border-sky-300/60 dark:border-[#4B6FAE]/20 text-xs italic text-slate-900 dark:text-[#D9CDB7] leading-relaxed relative my-auto shadow-sm">
                     "{calculatedResult.advice.speechTemplate}"
                   </div>
-                  <p className="text-[13px] text-[#94A3B8] italic mt-3 text-right">
+                  <p className="text-[13px] text-slate-500 dark:text-[#94A3B8] italic mt-3 text-right">
                     *เจรจาด้วยน้ำเสียงนุ่มนวล มุ่งมั่นและจริงใจ
                   </p>
                 </Card>
@@ -2128,7 +1692,7 @@ export default function YamPage() {
       {/* 📅 WATCH GRID VIEW (กระดานตารางยาม 8x7) */}
       {activeTab === "grid" && (
         <div className="space-y-6">
-          <div className="flex bg-[#0A1628]/60 p-1 rounded-2xl border border-white/5 gap-1 w-full max-w-md mx-auto">
+          <div className="flex bg-amber-100/60 dark:bg-[#0A1628]/60 p-1 rounded-2xl border border-amber-200/60 dark:border-white/5 gap-1 w-full max-w-md mx-auto shadow-sm">
             <button
               onClick={() => {
                 setGridPeriod("day");
@@ -2137,8 +1701,8 @@ export default function YamPage() {
               }}
               className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase transition-all ${
                 gridPeriod === "day"
-                  ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_8px_rgba(217,188,130,0.2)]"
-                  : "text-[#94A3B8] hover:text-[#F8F6F1]"
+                  ? "bg-amber-600 text-white dark:bg-[#D9BC82] dark:text-[#0A1628] shadow-sm dark:shadow-[0_0_8px_rgba(217,188,130,0.2)] font-black"
+                  : "text-slate-600 hover:text-slate-900 dark:text-[#94A3B8] dark:hover:text-[#F8F6F1]"
               }`}
             >
               ☀️ ยามกลางวัน (06:01 - 18:00)
@@ -2151,8 +1715,8 @@ export default function YamPage() {
               }}
               className={`flex-1 py-2 rounded-xl text-xs font-bold uppercase transition-all ${
                 gridPeriod === "night"
-                  ? "bg-[#D9BC82] text-[#0A1628] shadow-[0_0_8px_rgba(217,188,130,0.2)]"
-                  : "text-[#94A3B8] hover:text-[#F8F6F1]"
+                  ? "bg-amber-600 text-white dark:bg-[#D9BC82] dark:text-[#0A1628] shadow-sm dark:shadow-[0_0_8px_rgba(217,188,130,0.2)] font-black"
+                  : "text-slate-600 hover:text-slate-900 dark:text-[#94A3B8] dark:hover:text-[#F8F6F1]"
               }`}
             >
               🌙 ยามกลางคืน (18:01 - 06:00)
@@ -2160,18 +1724,18 @@ export default function YamPage() {
           </div>
 
           {/* 8x7 Watch Grid Table */}
-          <Card className="p-0 overflow-hidden bg-[#0A1628]/40 border-white/5">
+          <Card className="p-0 overflow-hidden bg-white/95 dark:bg-[#0A1628]/40 border border-amber-200/60 dark:border-white/5 shadow-md">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse min-w-[760px]">
                 <thead>
                   {/* Row 1: กลางวัน / กลางคืน + 8 ช่วงเวลายามใหญ่ */}
-                  <tr className="border-b border-white/10 bg-[#0A2240]/80 text-[#D9BC82]">
-                    <th className="p-2.5 text-xs font-bold text-center border-r border-white/10 w-24 bg-[#0A1628]/90">
+                  <tr className="border-b border-amber-200/60 dark:border-white/10 bg-amber-100/80 dark:bg-[#0A2240]/80">
+                    <th className="p-2.5 text-xs font-bold text-center border-r border-amber-200/60 dark:border-white/10 w-24 bg-amber-200/80 dark:bg-[#0A1628]/90 text-amber-950 dark:text-[#D9BC82]">
                       {gridPeriod === "day" ? "กลางวัน" : "กลางคืน"}
                     </th>
                     {(gridPeriod === "day" ? DAY_GRID_HEADER_TIMES : NIGHT_GRID_HEADER_TIMES).map((item, i) => (
-                      <th key={i} className="p-2 text-center border-r border-white/10 last:border-r-0 bg-[#0A2240]/60">
-                        <span className="text-xs font-bold text-[#F8F6F1] font-mono block">
+                      <th key={i} className="p-2 text-center border-r border-amber-200/50 dark:border-white/10 last:border-r-0 bg-amber-100/50 dark:bg-[#0A2240]/60">
+                        <span className="text-xs font-bold text-slate-900 dark:text-[#F8F6F1] font-mono block">
                           {item.major}
                         </span>
                       </th>
@@ -2179,17 +1743,17 @@ export default function YamPage() {
                   </tr>
 
                   {/* Row 2: วัน + 24 ช่วงเวลาย่อย (ต้น กลาง ปลาย) */}
-                  <tr className="border-b border-white/10 bg-[#0A1628]/90">
-                    <th className="p-2 text-xs font-bold text-center text-[#F8F6F1] border-r border-white/10 bg-white/[0.04]">
+                  <tr className="border-b border-amber-200/60 dark:border-white/10 bg-amber-50/90 dark:bg-[#0A1628]/90">
+                    <th className="p-2 text-xs font-bold text-center text-slate-900 dark:text-[#F8F6F1] border-r border-amber-200/50 dark:border-white/10 bg-amber-100/70 dark:bg-white/[0.04]">
                       วัน
                     </th>
                     {(gridPeriod === "day" ? DAY_GRID_HEADER_TIMES : NIGHT_GRID_HEADER_TIMES).map((item, i) => (
-                      <th key={i} className="p-1 border-r border-white/10 last:border-r-0 bg-[#0A1628]/80">
+                      <th key={i} className="p-1 border-r border-amber-200/40 dark:border-white/10 last:border-r-0 bg-amber-50/50 dark:bg-[#0A1628]/80">
                         <div className="grid grid-cols-3 gap-0.5 text-center">
                           {item.subs.map((subTime, sIdx) => (
                             <div
                               key={sIdx}
-                              className="bg-black/30 rounded px-0.5 py-1 text-[11px] font-mono text-[#D9CDB7] font-semibold"
+                              className="bg-white dark:bg-black/30 border border-amber-200/50 dark:border-transparent rounded px-0.5 py-1 text-[11px] font-mono text-slate-800 dark:text-[#D9CDB7] font-semibold"
                             >
                               {subTime}
                             </div>
@@ -2206,8 +1770,8 @@ export default function YamPage() {
                     const subTable = gridPeriod === "day" ? yamDaySubTable[dayNameEn] : yamNightSubTable[dayNameEn];
 
                     return (
-                      <tr key={dIdx} className="border-b border-white/5 hover:bg-white/[0.01]">
-                        <td className="p-3 text-xs font-bold text-[#F8F6F1] bg-white/[0.01] border-r border-white/5 text-center">
+                      <tr key={dIdx} className="border-b border-amber-200/40 dark:border-white/5 hover:bg-amber-50/40 dark:hover:bg-white/[0.01]">
+                        <td className="p-3 text-xs font-bold text-slate-900 dark:text-[#F8F6F1] bg-amber-50/30 dark:bg-white/[0.01] border-r border-amber-200/40 dark:border-white/5 text-center">
                           {dayName}
                         </td>
                         
@@ -2218,20 +1782,20 @@ export default function YamPage() {
                             <td
                               key={yIdx}
                               onClick={() => handleGridCellClick(dayName, yIdx + 1)}
-                              className={`p-2 text-center cursor-pointer transition-all border-r border-white/5 select-none align-top ${
+                              className={`p-2 text-center cursor-pointer transition-all border-r border-amber-200/40 dark:border-white/5 select-none align-top ${
                                 isSelected
-                                  ? "bg-[#D9BC82]/15 text-[#D9BC82] ring-1 ring-inset ring-[#D9BC82]"
-                                  : "hover:bg-white/5"
+                                  ? "bg-amber-100/70 text-amber-900 dark:bg-[#D9BC82]/15 dark:text-[#D9BC82] ring-1 ring-inset ring-amber-500 dark:ring-[#D9BC82]"
+                                  : "hover:bg-amber-50/60 dark:hover:bg-white/5"
                               }`}
                             >
                               <div className="text-xs font-bold flex flex-col items-center gap-1 min-w-[70px]">
-                                <span className="text-base text-[#D9BC82]" style={{ fontFamily: "serif" }}>
+                                <span className="text-base text-amber-700 dark:text-[#D9BC82]" style={{ fontFamily: "serif" }}>
                                   {PLANET_SYMBOLS[yamName] || "✦"}
                                 </span>
-                                <span className={`text-[13px] font-bold ${isSelected ? "text-[#D9BC82]" : "text-[#D9CDB7]"}`}>
+                                <span className={`text-[13px] font-bold ${isSelected ? "text-amber-900 dark:text-[#D9BC82]" : "text-slate-800 dark:text-[#D9CDB7]"}`}>
                                   {yamName}
                                 </span>
-                                <div className="grid grid-cols-3 gap-0.5 w-full mt-1 border-t border-white/10 pt-1">
+                                <div className="grid grid-cols-3 gap-0.5 w-full mt-1 border-t border-amber-200/40 dark:border-white/10 pt-1">
                                   {(["ต้น","กลาง","ปลาย"] as const).map((phase, pIdx) => {
                                     const isGood = subTable[yIdx]?.[pIdx] ?? false;
 
@@ -2240,8 +1804,8 @@ export default function YamPage() {
                                         key={phase}
                                         className={`flex flex-col items-center justify-center py-1 px-0.5 rounded text-[10px] ${
                                           isGood
-                                            ? "bg-green-500/15 text-green-400 border border-green-500/25 font-bold"
-                                            : "bg-red-500/10 text-rose-300 border border-red-500/20 font-medium"
+                                            ? "bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-green-500/15 dark:text-green-400 dark:border-green-500/25 font-bold"
+                                            : "bg-rose-100 text-rose-900 border border-rose-200 dark:bg-red-500/10 dark:text-rose-300 dark:border-red-500/20 font-medium"
                                         }`}
                                       >
                                         <span className="text-[9px] opacity-75">{phase}</span>
@@ -2266,51 +1830,51 @@ export default function YamPage() {
           {gridDetailAdvice && (
             <div className="space-y-4 animate-fade-in">
               <div className="text-center md:text-left">
-                <span className="text-xs text-[#94A3B8] font-bold block">รายละเอียดช่วงยามที่เลือก</span>
-                <h3 className="font-display text-xl font-bold text-[#D9BC82] mt-0.5">
+                <span className="text-xs text-slate-500 dark:text-[#94A3B8] font-bold block">รายละเอียดช่วงยามที่เลือก</span>
+                <h3 className="font-display text-xl font-bold text-amber-800 dark:text-[#D9BC82] mt-0.5">
                   วัน{selectedGridCell?.dayName} · ยามที่ {selectedGridCell?.yamNumber} · ยาม{gridDetailAdvice.yamName} ({gridDetailAdvice.timeLabel})
                 </h3>
               </div>
 
               {/* Chan Chai 3-Phases Box */}
               {gridDetailAdvice.chanChaiItem && (
-                <Card className="p-5 bg-gradient-to-br from-[#0A2240] to-[#020617] border-[#D9BC82]/30">
-                  <span className="text-xs font-bold text-[#D9BC82] uppercase tracking-wider block mb-3">
+                <Card className="p-5 bg-white/95 dark:bg-gradient-to-br dark:from-[#0A2240] dark:to-[#020617] border border-amber-200/60 dark:border-[#D9BC82]/30 shadow-md">
+                  <span className="text-xs font-bold text-amber-800 dark:text-[#D9BC82] uppercase tracking-wider block mb-3">
                     🔮 อัฏฐกาลชั้นฉายประจำยาม{gridDetailAdvice.yamName} (3 ช่วงย่อย)
                   </span>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div className="p-3 bg-black/30 rounded-xl border border-white/5">
+                    <div className="p-3 bg-amber-50/70 dark:bg-black/30 rounded-xl border border-amber-200/50 dark:border-white/5">
                       <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="font-bold text-[#D9BC82]">ยามต้น (0-30 น.)</span>
-                        <span className={gridDetailAdvice.chanChaiItem.chanChai.start.quality === "good" ? "text-green-400" : "text-rose-300"}>
+                        <span className="font-bold text-amber-800 dark:text-[#D9BC82]">ยามต้น (0-30 น.)</span>
+                        <span className={gridDetailAdvice.chanChaiItem.chanChai.start.quality === "good" ? "text-emerald-700 dark:text-green-400 font-bold" : "text-rose-700 dark:text-rose-300 font-bold"}>
                           {gridDetailAdvice.chanChaiItem.chanChai.start.quality === "good" ? "✓ มงคล" : "✕ ระวัง"}
                         </span>
                       </div>
-                      <p className="text-xs text-[#F8F6F1] leading-relaxed">
+                      <p className="text-xs text-slate-800 dark:text-[#F8F6F1] leading-relaxed">
                         {gridDetailAdvice.chanChaiItem.chanChai.start.text}
                       </p>
                     </div>
 
-                    <div className="p-3 bg-black/30 rounded-xl border border-white/5">
+                    <div className="p-3 bg-amber-50/70 dark:bg-black/30 rounded-xl border border-amber-200/50 dark:border-white/5">
                       <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="font-bold text-[#D9BC82]">ยามกลาง (31-60 น.)</span>
-                        <span className={gridDetailAdvice.chanChaiItem.chanChai.middle.quality === "good" ? "text-green-400" : "text-rose-300"}>
+                        <span className="font-bold text-amber-800 dark:text-[#D9BC82]">ยามกลาง (31-60 น.)</span>
+                        <span className={gridDetailAdvice.chanChaiItem.chanChai.middle.quality === "good" ? "text-emerald-700 dark:text-green-400 font-bold" : "text-rose-700 dark:text-rose-300 font-bold"}>
                           {gridDetailAdvice.chanChaiItem.chanChai.middle.quality === "good" ? "✓ มงคล" : "✕ ระวัง"}
                         </span>
                       </div>
-                      <p className="text-xs text-[#F8F6F1] leading-relaxed">
+                      <p className="text-xs text-slate-800 dark:text-[#F8F6F1] leading-relaxed">
                         {gridDetailAdvice.chanChaiItem.chanChai.middle.text}
                       </p>
                     </div>
 
-                    <div className="p-3 bg-black/30 rounded-xl border border-white/5">
+                    <div className="p-3 bg-amber-50/70 dark:bg-black/30 rounded-xl border border-amber-200/50 dark:border-white/5">
                       <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="font-bold text-[#D9BC82]">ยามปลาย (61-90 น.)</span>
-                        <span className={gridDetailAdvice.chanChaiItem.chanChai.end.quality === "good" ? "text-green-400" : "text-rose-300"}>
+                        <span className="font-bold text-amber-800 dark:text-[#D9BC82]">ยามปลาย (61-90 น.)</span>
+                        <span className={gridDetailAdvice.chanChaiItem.chanChai.end.quality === "good" ? "text-emerald-700 dark:text-green-400 font-bold" : "text-rose-700 dark:text-rose-300 font-bold"}>
                           {gridDetailAdvice.chanChaiItem.chanChai.end.quality === "good" ? "✓ มงคล" : "✕ ระวัง"}
                         </span>
                       </div>
-                      <p className="text-xs text-[#F8F6F1] leading-relaxed">
+                      <p className="text-xs text-slate-800 dark:text-[#F8F6F1] leading-relaxed">
                         {gridDetailAdvice.chanChaiItem.chanChai.end.text}
                       </p>
                     </div>
@@ -2320,51 +1884,51 @@ export default function YamPage() {
 
               {/* 4 Topic Cards */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="bg-[#D9BC82]/5 border-[#D9BC82]/10 p-5">
+                <Card className="bg-white/95 dark:bg-[#D9BC82]/5 border border-amber-200/60 dark:border-[#D9BC82]/10 p-5 shadow-sm">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-xs font-bold text-[#D9BC82] uppercase tracking-wider">💖 ด้านความรัก & ง้อแฟน</span>
-                    <span className="text-xs font-bold text-[#D9BC82] bg-[#D9BC82]/10 px-2 py-0.5 rounded-full">{gridDetailAdvice.love.score.toFixed(1)} /10</span>
+                    <span className="text-xs font-bold text-rose-700 dark:text-[#D9BC82] uppercase tracking-wider">💖 ด้านความรัก & ง้อแฟน</span>
+                    <span className="text-xs font-bold text-amber-900 dark:text-[#D9BC82] bg-amber-500/15 dark:bg-[#D9BC82]/10 px-2 py-0.5 rounded-full">{gridDetailAdvice.love.score.toFixed(1)} /10</span>
                   </div>
-                  <p className="text-sm text-[#F8F6F1] leading-relaxed mb-3">{gridDetailAdvice.love.description}</p>
-                  <div className="space-y-1 pt-2 border-t border-white/5">
-                    <span className="text-[12px] text-[#94A3B8] font-bold uppercase block">คำพูดมัดใจ:</span>
-                    <p className="text-xs italic text-[#F8F6F1]">"{gridDetailAdvice.love.speechTemplate}"</p>
+                  <p className="text-sm text-slate-800 dark:text-[#F8F6F1] leading-relaxed mb-3">{gridDetailAdvice.love.description}</p>
+                  <div className="space-y-1 pt-2 border-t border-amber-200/40 dark:border-white/5">
+                    <span className="text-[12px] text-slate-500 dark:text-[#94A3B8] font-bold uppercase block">คำพูดมัดใจ:</span>
+                    <p className="text-xs italic text-slate-700 dark:text-[#F8F6F1]">"{gridDetailAdvice.love.speechTemplate}"</p>
                   </div>
                 </Card>
 
-                <Card className="bg-amber-500/5 border-amber-500/10 p-5">
+                <Card className="bg-white/95 dark:bg-amber-500/5 border border-amber-200/60 dark:border-amber-500/10 p-5 shadow-sm">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-xs font-bold text-amber-500 uppercase tracking-wider">💰 ด้านการเงิน & ค้าขาย</span>
-                    <span className="text-xs font-bold text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded-full">{gridDetailAdvice.trade.score.toFixed(1)} /10</span>
+                    <span className="text-xs font-bold text-amber-800 dark:text-amber-500 uppercase tracking-wider">💰 ด้านการเงิน & ค้าขาย</span>
+                    <span className="text-xs font-bold text-amber-900 dark:text-amber-500 bg-amber-500/15 dark:bg-amber-500/10 px-2 py-0.5 rounded-full">{gridDetailAdvice.trade.score.toFixed(1)} /10</span>
                   </div>
-                  <p className="text-sm text-[#F8F6F1] leading-relaxed mb-3">{gridDetailAdvice.trade.description}</p>
-                  <div className="space-y-1 pt-2 border-t border-white/5">
-                    <span className="text-[12px] text-[#94A3B8] font-bold uppercase block">คำพูดกระตุ้นยอดขาย:</span>
-                    <p className="text-xs italic text-[#F8F6F1]">"{gridDetailAdvice.trade.speechTemplate}"</p>
+                  <p className="text-sm text-slate-800 dark:text-[#F8F6F1] leading-relaxed mb-3">{gridDetailAdvice.trade.description}</p>
+                  <div className="space-y-1 pt-2 border-t border-amber-200/40 dark:border-white/5">
+                    <span className="text-[12px] text-slate-500 dark:text-[#94A3B8] font-bold uppercase block">คำพูดกระตุ้นยอดขาย:</span>
+                    <p className="text-xs italic text-slate-700 dark:text-[#F8F6F1]">"{gridDetailAdvice.trade.speechTemplate}"</p>
                   </div>
                 </Card>
 
-                <Card className="bg-[#4B6FAE]/5 border-[#4B6FAE]/10 p-5">
+                <Card className="bg-white/95 dark:bg-[#4B6FAE]/5 border border-amber-200/60 dark:border-[#4B6FAE]/10 p-5 shadow-sm">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-xs font-bold text-[#4B6FAE] uppercase tracking-wider">🗣️ ด้านการงาน & เจรจา</span>
-                    <span className="text-xs font-bold text-[#4B6FAE] bg-[#4B6FAE]/10 px-2 py-0.5 rounded-full">{gridDetailAdvice.negotiate.score.toFixed(1)} /10</span>
+                    <span className="text-xs font-bold text-sky-800 dark:text-[#4B6FAE] uppercase tracking-wider">🗣️ ด้านการงาน & เจรจา</span>
+                    <span className="text-xs font-bold text-sky-900 dark:text-[#4B6FAE] bg-sky-500/15 dark:bg-[#4B6FAE]/10 px-2 py-0.5 rounded-full">{gridDetailAdvice.negotiate.score.toFixed(1)} /10</span>
                   </div>
-                  <p className="text-sm text-[#F8F6F1] leading-relaxed mb-3">{gridDetailAdvice.negotiate.description}</p>
-                  <div className="space-y-1 pt-2 border-t border-white/5">
-                    <span className="text-[12px] text-[#94A3B8] font-bold uppercase block">คำพูดเจรจาธุรกิจ:</span>
-                    <p className="text-xs italic text-[#F8F6F1]">"{gridDetailAdvice.negotiate.speechTemplate}"</p>
+                  <p className="text-sm text-slate-800 dark:text-[#F8F6F1] leading-relaxed mb-3">{gridDetailAdvice.negotiate.description}</p>
+                  <div className="space-y-1 pt-2 border-t border-amber-200/40 dark:border-white/5">
+                    <span className="text-[12px] text-slate-500 dark:text-[#94A3B8] font-bold uppercase block">คำพูดเจรจาธุรกิจ:</span>
+                    <p className="text-xs italic text-slate-700 dark:text-[#F8F6F1]">"{gridDetailAdvice.negotiate.speechTemplate}"</p>
                   </div>
                 </Card>
 
-                <Card className="bg-green-500/5 border-green-500/10 p-5">
+                <Card className="bg-white/95 dark:bg-green-500/5 border border-amber-200/60 dark:border-green-500/10 p-5 shadow-sm">
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-xs font-bold text-green-400 uppercase tracking-wider">✈️ ฤกษ์สัญจร & เดินทาง</span>
-                    <span className="text-xs font-bold text-green-400 bg-green-400/10 px-2 py-0.5 rounded-full">{gridDetailAdvice.travel.score.toFixed(1)} /10</span>
+                    <span className="text-xs font-bold text-emerald-800 dark:text-green-400 uppercase tracking-wider">✈️ ฤกษ์สัญจร & เดินทาง</span>
+                    <span className="text-xs font-bold text-emerald-900 dark:text-green-400 bg-emerald-500/15 dark:bg-green-400/10 px-2 py-0.5 rounded-full">{gridDetailAdvice.travel.score.toFixed(1)} /10</span>
                   </div>
-                  <p className="text-sm text-[#F8F6F1] leading-relaxed mb-3">{gridDetailAdvice.travel.description}</p>
-                  <div className="space-y-1.5 pt-2 border-t border-white/5">
-                    <span className="text-[12px] text-green-400/70 font-bold block">ควรทำ: {gridDetailAdvice.travel.shouldDo.join(" · ")}</span>
-                    <span className="text-[12px] text-red-400/70 font-bold block">ควรเลี่ยง: {gridDetailAdvice.travel.shouldAvoid.join(" · ")}</span>
+                  <p className="text-sm text-slate-800 dark:text-[#F8F6F1] leading-relaxed mb-3">{gridDetailAdvice.travel.description}</p>
+                  <div className="space-y-1.5 pt-2 border-t border-amber-200/40 dark:border-white/5">
+                    <span className="text-[12px] text-emerald-800 dark:text-green-400/70 font-bold block">ควรทำ: {gridDetailAdvice.travel.shouldDo.join(" · ")}</span>
+                    <span className="text-[12px] text-rose-700 dark:text-red-400/70 font-bold block">ควรเลี่ยง: {gridDetailAdvice.travel.shouldAvoid.join(" · ")}</span>
                   </div>
                 </Card>
               </div>

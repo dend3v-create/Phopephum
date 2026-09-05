@@ -1052,131 +1052,131 @@ export default function HoroscopePage() {
                 type="button"
                 onClick={() => setShowNatalLagna(!showNatalLagna)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showNatalLagna ? "bg-[#C6A96B]/10 border-[#C6A96B]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#C6B79F]"
+                  showNatalLagna ? "bg-[#C6A96B]/15 border-[#C6A96B]/50 text-slate-900 dark:text-[#F8F6F1] font-bold" : "bg-black/[0.02] dark:bg-transparent border-black/10 dark:border-white/5 text-slate-700 dark:text-[#C6B79F] hover:border-[#C6A96B]/40"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
                   <span className="text-[11px] font-bold bg-[#C6A96B] text-[#020617] px-1.5 py-[0.5px] rounded-full border border-[#C6A96B]/60 leading-none">ล</span>
                   <span>ลัคนาเกิด</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showNatalLagna ? "bg-[#C6A96B] shadow-[0_0_8px_#C6A96B]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showNatalLagna ? "bg-[#C6A96B] shadow-[0_0_8px_#C6A96B]" : "bg-slate-300 dark:bg-white/10 border border-slate-400/30 dark:border-transparent"}`} />
               </button>
               <button
                 type="button"
                 onClick={() => setShowTransitLagna(!showTransitLagna)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showTransitLagna ? "bg-[#4B6FAE]/10 border-[#4B6FAE]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#C6B79F]"
+                  showTransitLagna ? "bg-[#4B6FAE]/15 border-[#4B6FAE]/50 text-slate-900 dark:text-[#F8F6F1] font-bold" : "bg-black/[0.02] dark:bg-transparent border-black/10 dark:border-white/5 text-slate-700 dark:text-[#C6B79F] hover:border-[#4B6FAE]/40"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[11px] font-bold bg-[#4B6FAE] text-[#F8F6F1] px-1 py-[0.5px] rounded-full border border-[#4B6FAE]/60 leading-none animate-pulse">ลจ</span>
+                  <span className="text-[11px] font-bold bg-[#4B6FAE] text-white px-1 py-[0.5px] rounded-full border border-[#4B6FAE]/60 leading-none animate-pulse">ลจ</span>
                   <span>ลัคนาจร</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showTransitLagna ? "bg-[#4B6FAE] shadow-[0_0_8px_#4B6FAE]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showTransitLagna ? "bg-[#4B6FAE] shadow-[0_0_8px_#4B6FAE]" : "bg-slate-300 dark:bg-white/10 border border-slate-400/30 dark:border-transparent"}`} />
               </button>
               <button
                 type="button"
                 onClick={() => setShowTaksaJorn(!showTaksaJorn)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showTaksaJorn ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#C6B79F]"
+                  showTaksaJorn ? "bg-[#C9A96E]/15 border-[#C9A96E]/50 text-slate-900 dark:text-[#F8F6F1] font-bold" : "bg-black/[0.02] dark:bg-transparent border-black/10 dark:border-white/5 text-slate-700 dark:text-[#C6B79F] hover:border-[#C9A96E]/40"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-bold text-[#C9A96E] bg-white/5 px-1.5 py-[0.5px] rounded border border-white/10 leading-none">ท</span>
+                  <span className="text-[13px] font-bold text-amber-700 dark:text-[#C9A96E] bg-black/5 dark:bg-white/5 px-1.5 py-[0.5px] rounded border border-black/10 dark:border-white/10 leading-none">ท</span>
                   <span>ทักษาจร</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showTaksaJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showTaksaJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-slate-300 dark:bg-white/10 border border-slate-400/30 dark:border-transparent"}`} />
               </button>
               <button
                 type="button"
                 onClick={() => setShowMahaJorn(!showMahaJorn)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showMahaJorn ? "bg-[#4B6FAE]/10 border-[#4B6FAE]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#C6B79F]"
+                  showMahaJorn ? "bg-[#4B6FAE]/15 border-[#4B6FAE]/50 text-slate-900 dark:text-[#F8F6F1] font-bold" : "bg-black/[0.02] dark:bg-transparent border-black/10 dark:border-white/5 text-slate-700 dark:text-[#C6B79F] hover:border-[#4B6FAE]/40"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <span className="text-[13px] font-bold text-[#4B6FAE] bg-white/5 px-1.5 py-[0.5px] rounded border border-white/10 leading-none">ม</span>
+                  <span className="text-[13px] font-bold text-blue-700 dark:text-[#4B6FAE] bg-black/5 dark:bg-white/5 px-1.5 py-[0.5px] rounded border border-black/10 dark:border-white/10 leading-none">ม</span>
                   <span>มหาภูติจร</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showMahaJorn ? "bg-[#4B6FAE] shadow-[0_0_8px_#4B6FAE]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showMahaJorn ? "bg-[#4B6FAE] shadow-[0_0_8px_#4B6FAE]" : "bg-slate-300 dark:bg-white/10 border border-slate-400/30 dark:border-transparent"}`} />
               </button>
               <button
                 type="button"
                 onClick={() => setShowVayaJorn(!showVayaJorn)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showVayaJorn ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#C6B79F]"
+                  showVayaJorn ? "bg-[#C9A96E]/15 border-[#C9A96E]/50 text-slate-900 dark:text-[#F8F6F1] font-bold" : "bg-black/[0.02] dark:bg-transparent border-black/10 dark:border-white/5 text-slate-700 dark:text-[#C6B79F] hover:border-[#C9A96E]/40"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse" />
                   <span>วัยจร</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showVayaJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showVayaJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-slate-300 dark:bg-white/10 border border-slate-400/30 dark:border-transparent"}`} />
               </button>
               <button
                 type="button"
                 onClick={() => setShowYearlyJorn(!showYearlyJorn)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showYearlyJorn ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#C6B79F]"
+                  showYearlyJorn ? "bg-[#C9A96E]/15 border-[#C9A96E]/50 text-slate-900 dark:text-[#F8F6F1] font-bold" : "bg-black/[0.02] dark:bg-transparent border-black/10 dark:border-white/5 text-slate-700 dark:text-[#C6B79F] hover:border-[#C9A96E]/40"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#4B6FAE]" />
                   <span>ปีจร</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showYearlyJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showYearlyJorn ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-slate-300 dark:bg-white/10 border border-slate-400/30 dark:border-transparent"}`} />
               </button>
               <button
                 type="button"
                 onClick={() => setShowMonthlyJorn(!showMonthlyJorn)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showMonthlyJorn ? "bg-[#4B6FAE]/12 border-[#6D8FC7]/35 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#C6B79F]"
+                  showMonthlyJorn ? "bg-[#4B6FAE]/15 border-[#6D8FC7]/50 text-slate-900 dark:text-[#F8F6F1] font-bold" : "bg-black/[0.02] dark:bg-transparent border-black/10 dark:border-white/5 text-slate-700 dark:text-[#C6B79F] hover:border-[#6D8FC7]/40"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#6D8FC7]" />
                   <span>เดือนจร</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showMonthlyJorn ? "bg-[#6D8FC7] shadow-[0_0_8px_rgba(109,143,199,0.6)]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showMonthlyJorn ? "bg-[#6D8FC7] shadow-[0_0_8px_rgba(109,143,199,0.6)]" : "bg-slate-300 dark:bg-white/10 border border-slate-400/30 dark:border-transparent"}`} />
               </button>
               <button
                 type="button"
                 onClick={() => setShowDailyJorn(!showDailyJorn)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showDailyJorn ? "bg-white/6 border-white/18 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#C6B79F]"
+                  showDailyJorn ? "bg-white/6 border-black/15 dark:border-white/18 text-slate-900 dark:text-[#F8F6F1] font-bold" : "bg-black/[0.02] dark:bg-transparent border-black/10 dark:border-white/5 text-slate-700 dark:text-[#C6B79F] hover:border-black/20"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#9AB3D9]" />
                   <span>วันจร</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showDailyJorn ? "bg-[#9AB3D9]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showDailyJorn ? "bg-[#9AB3D9]" : "bg-slate-300 dark:bg-white/10 border border-slate-400/30 dark:border-transparent"}`} />
               </button>
               <button
                 type="button"
                 onClick={() => setShowAgeRange(!showAgeRange)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showAgeRange ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#C6B79F]"
+                  showAgeRange ? "bg-[#C9A96E]/15 border-[#C9A96E]/50 text-slate-900 dark:text-[#F8F6F1] font-bold" : "bg-black/[0.02] dark:bg-transparent border-black/10 dark:border-white/5 text-slate-700 dark:text-[#C6B79F] hover:border-[#C9A96E]/40"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#C6A96B]/50" />
                   <span>ช่วงอายุ (วัยจร)</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showAgeRange ? "bg-[#C6A96B]/70" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showAgeRange ? "bg-[#C6A96B]/70" : "bg-slate-300 dark:bg-white/10 border border-slate-400/30 dark:border-transparent"}`} />
               </button>
               <button
                 type="button"
                 onClick={() => setShowHouseNames(!showHouseNames)}
                 className={`flex items-center justify-between px-3 py-2 rounded-xl border transition-all hover:scale-[1.01] active:scale-[0.99] ${
-                  showHouseNames ? "bg-[#C9A96E]/10 border-[#C9A96E]/40 text-[#F8F6F1]" : "bg-transparent border-white/5 text-[#C6B79F]"
+                  showHouseNames ? "bg-[#C9A96E]/15 border-[#C9A96E]/50 text-slate-900 dark:text-[#F8F6F1] font-bold" : "bg-black/[0.02] dark:bg-transparent border-black/10 dark:border-white/5 text-slate-700 dark:text-[#C6B79F] hover:border-[#C9A96E]/40"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#C6A96B]/60" />
                   <span>ชื่อภพเรือน (35 ภพ)</span>
                 </span>
-                <span className={`w-2 h-2 rounded-full transition-all ${showHouseNames ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-white/10"}`} />
+                <span className={`w-2 h-2 rounded-full transition-all ${showHouseNames ? "bg-[#C9A96E] shadow-[0_0_8px_#C9A96E]" : "bg-slate-300 dark:bg-white/10 border border-slate-400/30 dark:border-transparent"}`} />
               </button>
             </div>
           </Card>

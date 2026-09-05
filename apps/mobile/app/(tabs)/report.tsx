@@ -1,259 +1,382 @@
-import React, { useEffect, useState, useCallback } from 'react';
+/**
+ * report.tsx — AI Reports Screen (Tab 3)
+ * ============================================================================
+ * Astral Imperial AI Astrological Reports
+ * Features:
+ *  - 6 Domain Deep Life Reports (Life, Yearly, Monthly, Relationship, Career, Health)
+ *  - Thin Client Generation via POST /api/reports
+ *  - Secure Markdown Reader with Anti-Screenshot / Anti-Copy Protection
+ */
+
+import React, { useEffect, useState, useCallback } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-  SafeAreaView, ActivityIndicator, RefreshControl, Alert,
-} from 'react-native';
-import { supabase } from '../../lib/supabase';
-import { Ionicons } from '@expo/vector-icons';
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+  ActivityIndicator,
+  RefreshControl,
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { supabase } from "../../lib/supabase";
+import { ASTRAL_THEME } from "../../constants/theme";
+import { useAuthStore } from "../../store/authStore";
+import { useSandsStore } from "../../store/sandsStore";
+import { generateAiReportApi } from "../../services/api";
+import { ProtectedScreen } from "../../components/ProtectedScreen";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface Report {
+interface ReportRecord {
   id: string;
   report_type: string;
   created_at: string;
   content?: string;
 }
 
-// ─── Constants ───────────────────────────────────────────────────────────────
-
-const REPORT_TYPES: { key: string; label: string; icon: string; desc: string }[] = [
-  { key: 'life_overview',     label: 'ภาพรวมชีวิต',     icon: '☽', desc: 'วิเคราะห์ดวงชะตาและบุคลิกภาพจากเลข 7 ตัว' },
-  { key: 'yearly_forecast',   label: 'พยากรณ์รายปี',    icon: '⟁', desc: 'แนวโน้มและโอกาสในปีนี้' },
-  { key: 'monthly_forecast',  label: 'พยากรณ์รายเดือน', icon: '◐', desc: 'พลังงานและเหตุการณ์สำคัญในเดือนนี้' },
-  { key: 'relationship',      label: 'ความสัมพันธ์',    icon: '♡', desc: 'ความรักและมิตรภาพ' },
-  { key: 'career',            label: 'การงาน-การเงิน',  icon: '✦', desc: 'เส้นทางอาชีพและโชคลาภ' },
-  { key: 'health',            label: 'สุขภาพ',          icon: '◈', desc: 'พลังกายและจิตใจ' },
+const REPORT_TYPES = [
+  { key: "life_overview", label: "ภาพรวมชีวิต", icon: "compass-outline", desc: "ผังดวง 7 ตัว บุคลิกภาพ และเข็มทิศชีวิต" },
+  { key: "yearly_forecast", label: "พยากรณ์รายปี", icon: "calendar-outline", desc: "แนวโน้ม วัยจร และจังหวะก้าวสำคัญของปี" },
+  { key: "monthly_forecast", label: "พยากรณ์รายเดือน", icon: "moon-outline", desc: "พลังงานดาวจร และโอกาสในรอบเดือนนี้" },
+  { key: "relationship", label: "ความสัมพันธ์", icon: "heart-outline", desc: "ความรัก มิตรภาพ และคู่ครองสมพงษ์" },
+  { key: "career", label: "การงาน & การเงิน", icon: "briefcase-outline", desc: "ทิศทางอาชีพ ธุรกิจ และการสะสมโภคทรัพย์" },
+  { key: "health", label: "สุขภาพ & สมดุล", icon: "fitness-outline", desc: "พลังงานธาตุ การดูแลร่างกายและจิตใจ" },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export default function ReportScreen() {
-  const [reports, setReports] = useState<Report[]>([]);
+  const { profile, user, fetchProfile } = useAuthStore();
+  const { balance, fetchBalance } = useSandsStore();
+  const [reports, setReports] = useState<ReportRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [generating, setGenerating] = useState<string | null>(null);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [profile, setProfile] = useState<any>(null);
+  const [generatingKey, setGeneratingKey] = useState<string | null>(null);
+  const [selectedReport, setSelectedReport] = useState<ReportRecord | null>(null);
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user?.id]);
 
-  async function fetchData() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return;
+  const fetchData = async () => {
+    if (!user?.id) return;
 
-    const [{ data: profileData }, { data: reportData }] = await Promise.all([
-      supabase.from('profiles').select('*').eq('id', user.id).single(),
-      supabase.from('ai_reports')
-        .select('id, report_type, created_at, content')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(20),
-    ]);
-
-    setProfile(profileData);
-    setReports(reportData ?? []);
-    setLoading(false);
-    setRefreshing(false);
-  }
-
-  async function handleGenerate(reportType: string) {
-    if (!profile) return;
-    if (generating) return;
-
-    setGenerating(reportType);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      const { data, error } = await supabase
+        .from("ai_reports")
+        .select("id, report_type, created_at, content")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(20);
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw new Error('No session');
+      if (!error && data) {
+        setReports(data as ReportRecord[]);
+      }
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
 
-      // Call the web API endpoint
-      const response = await fetch(
-        `${process.env.EXPO_PUBLIC_APP_URL ?? 'https://phopephum.com'}/api/reports`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-          body: JSON.stringify({ report_type: reportType }),
-        }
-      );
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await Promise.all([
+      fetchProfile(),
+      user?.id ? fetchBalance(user.id) : Promise.resolve(),
+      fetchData(),
+    ]);
+  }, [user?.id]);
 
-      if (!response.ok) {
-        const err = await response.json().catch(() => ({}));
-        throw new Error((err as any)?.error ?? 'เกิดข้อผิดพลาด');
+  const handleGenerate = async (reportType: string) => {
+    if (!profile?.birth_date) {
+      Alert.alert("กรุณากรอกวันเกิด", "จำเป็นต้องมีข้อมูลวันเกิดในหน้าโปรไฟล์เพื่อคำนวณรายงานดวงชะตา");
+      return;
+    }
+
+    setGeneratingKey(reportType);
+
+    try {
+      const res = await generateAiReportApi(reportType);
+
+      if (!res.success) {
+        Alert.alert("ไม่สามารถสร้างรายงานได้", res.error || "กรุณาลองใหม่อีกครั้ง");
+        return;
       }
 
-      await fetchData();
-      Alert.alert('สำเร็จ', 'สร้างรายงานเรียบร้อยแล้ว');
-    } catch (e: any) {
-      Alert.alert('เกิดข้อผิดพลาด', e?.message ?? 'กรุณาลองใหม่อีกครั้ง');
+      Alert.alert("สำเร็จ", "วิเคราะห์และสร้างรายงานปัญญาญาณเรียบร้อยแล้ว");
+      if (user?.id) fetchBalance(user.id);
+      fetchData();
+    } catch (err: any) {
+      Alert.alert("เกิดข้อผิดพลาด", err?.message || "ไม่สามารถติดต่อเซิร์ฟเวอร์ได้");
     } finally {
-      setGenerating(null);
+      setGeneratingKey(null);
     }
-  }
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchData();
-  }, []);
-
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <ActivityIndicator size="large" color="#C9A96E" style={{ marginTop: 80 }} />
-      </SafeAreaView>
-    );
-  }
+  };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#C9A96E" />
-        }
-      >
-        {/* Section: Generate */}
-        <Text style={styles.sectionTitle}>✦ สร้างรายงาน AI</Text>
-        <View style={styles.generateGrid}>
-          {REPORT_TYPES.map((rt) => (
-            <TouchableOpacity
-              key={rt.key}
-              style={styles.generateCard}
-              onPress={() => handleGenerate(rt.key)}
-              disabled={!!generating}
-              activeOpacity={0.7}
-            >
-              {generating === rt.key ? (
-                <ActivityIndicator size="small" color="#C9A96E" />
-              ) : (
-                <Text style={styles.generateIcon}>{rt.icon}</Text>
-              )}
-              <Text style={styles.generateLabel}>{rt.label}</Text>
-              <Text style={styles.generateDesc} numberOfLines={2}>{rt.desc}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+    <ProtectedScreen>
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={ASTRAL_THEME.colors.gold}
+            />
+          }
+        >
+          {/* Header */}
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.headerTitle}>รายงานปัญญาญาณ AI</Text>
+              <Text style={styles.headerSubtitle}>วิเคราะห์ดวงชะตาเชิงลึกผ่าน AI Astrological Engine</Text>
+            </View>
+            <View style={styles.balanceBadge}>
+              <Text style={styles.balanceText}>⏳ {balance} Sands</Text>
+            </View>
+          </View>
 
-        {/* Section: History */}
-        {reports.length > 0 && (
-          <>
-            <Text style={[styles.sectionTitle, { marginTop: 8 }]}>◈ ประวัติรายงาน</Text>
+          {/* Report Catalog */}
+          <Text style={styles.sectionHeader}>เลือกประเภทรายงานที่ต้องการ</Text>
+          <View style={styles.catalogGrid}>
+            {REPORT_TYPES.map((type) => {
+              const isGenerating = generatingKey === type.key;
+              return (
+                <View key={type.key} style={styles.reportCard}>
+                  <View style={styles.reportIconBox}>
+                    <Ionicons name={type.icon as any} size={24} color={ASTRAL_THEME.colors.gold} />
+                  </View>
+                  <Text style={styles.reportCardTitle}>{type.label}</Text>
+                  <Text style={styles.reportCardDesc}>{type.desc}</Text>
+
+                  <TouchableOpacity
+                    style={[styles.generateBtn, isGenerating && styles.btnDisabled]}
+                    disabled={isGenerating}
+                    onPress={() => handleGenerate(type.key)}
+                  >
+                    {isGenerating ? (
+                      <ActivityIndicator size="small" color={ASTRAL_THEME.colors.bg} />
+                    ) : (
+                      <Text style={styles.generateBtnText}>สร้างรายงาน ✨</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
+          </View>
+
+          {/* Past Reports History */}
+          <Text style={styles.sectionHeader}>ประวัติรายงานของคุณ</Text>
+
+          {loading ? (
+            <ActivityIndicator size="small" color={ASTRAL_THEME.colors.gold} style={{ marginVertical: 20 }} />
+          ) : reports.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyText}>ยังไม่มีรายงานที่สร้างไว้</Text>
+              <Text style={styles.emptySub}>เลือกประเภทรายงานด้านบนเพื่อเริ่มการวิเคราะห์</Text>
+            </View>
+          ) : (
             <View style={styles.historyList}>
-              {reports.map((report) => {
-                const rt = REPORT_TYPES.find((r) => r.key === report.report_type);
-                const isExpanded = expandedId === report.id;
+              {reports.map((r) => {
+                const matchedType = REPORT_TYPES.find((t) => t.key === r.report_type);
+                const isSelected = selectedReport?.id === r.id;
+
                 return (
                   <TouchableOpacity
-                    key={report.id}
-                    style={styles.reportCard}
-                    onPress={() => setExpandedId(isExpanded ? null : report.id)}
-                    activeOpacity={0.8}
+                    key={r.id}
+                    style={[styles.historyCard, isSelected && styles.historyCardExpanded]}
+                    onPress={() => setSelectedReport(isSelected ? null : r)}
                   >
-                    <View style={styles.reportCardHeader}>
-                      <View style={styles.reportCardLeft}>
-                        <Text style={styles.reportCardIcon}>{rt?.icon ?? '◈'}</Text>
-                        <View>
-                          <Text style={styles.reportCardLabel}>{rt?.label ?? report.report_type}</Text>
-                          <Text style={styles.reportCardDate}>
-                            {new Date(report.created_at).toLocaleDateString('th-TH', {
-                              day: 'numeric', month: 'long', year: 'numeric',
-                            })}
-                          </Text>
-                        </View>
+                    <View style={styles.historyHeader}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.historyTitle}>{matchedType?.label || r.report_type}</Text>
+                        <Text style={styles.historyDate}>
+                          {new Date(r.created_at).toLocaleDateString("th-TH", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </Text>
                       </View>
                       <Ionicons
-                        name={isExpanded ? 'chevron-up' : 'chevron-down'}
-                        size={18}
-                        color="#C6B79F"
+                        name={isSelected ? "chevron-up" : "chevron-down"}
+                        size={20}
+                        color={ASTRAL_THEME.colors.textMuted}
                       />
                     </View>
-                    {isExpanded && report.content && (
-                      <Text style={styles.reportContent}>{report.content}</Text>
+
+                    {isSelected && r.content && (
+                      <View style={styles.reportContentBox}>
+                        <View style={styles.divider} />
+                        <Text style={styles.reportContentText}>{r.content}</Text>
+                      </View>
                     )}
                   </TouchableOpacity>
                 );
               })}
             </View>
-          </>
-        )}
-
-        {reports.length === 0 && (
-          <View style={styles.emptyState}>
-            <Text style={styles.emptyIcon}>◐</Text>
-            <Text style={styles.emptyText}>ยังไม่มีรายงาน{'\n'}กดสร้างรายงานด้านบน</Text>
-          </View>
-        )}
-      </ScrollView>
-    </SafeAreaView>
+          )}
+        </ScrollView>
+      </SafeAreaView>
+    </ProtectedScreen>
   );
 }
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0806' },
-  scrollContent: { padding: 20, paddingBottom: 40 },
-  sectionTitle: {
-    color: '#F8F6F1',
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginBottom: 12,
+  container: {
+    flex: 1,
+    backgroundColor: ASTRAL_THEME.colors.bg,
   },
-  generateGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 28,
+  scrollContent: {
+    paddingHorizontal: ASTRAL_THEME.spacing.md,
+    paddingTop: ASTRAL_THEME.spacing.sm,
+    paddingBottom: ASTRAL_THEME.spacing.xl,
+    gap: ASTRAL_THEME.spacing.md,
   },
-  generateCard: {
-    width: '47%',
-    backgroundColor: '#15120F',
-    borderRadius: 16,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: ASTRAL_THEME.spacing.xs,
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.gold,
+  },
+  headerSubtitle: {
+    fontSize: 12,
+    color: ASTRAL_THEME.colors.textMuted,
+    marginTop: 2,
+  },
+  balanceBadge: {
+    backgroundColor: ASTRAL_THEME.colors.bgCard,
     borderWidth: 1,
-    borderColor: '#2A2018',
-    padding: 16,
-    alignItems: 'flex-start',
+    borderColor: ASTRAL_THEME.colors.goldBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.full,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  balanceText: {
+    color: ASTRAL_THEME.colors.goldLight,
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  sectionHeader: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.text,
+    marginTop: 6,
+  },
+  catalogGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: ASTRAL_THEME.spacing.sm,
+  },
+  reportCard: {
+    flex: 1,
+    minWidth: "47%",
+    backgroundColor: ASTRAL_THEME.colors.bgCard,
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.bgCardBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.lg,
+    padding: ASTRAL_THEME.spacing.md,
     gap: 6,
   },
-  generateIcon: { fontSize: 22, color: '#C9A96E' },
-  generateLabel: { color: '#F8F6F1', fontSize: 13, fontWeight: 'bold' },
-  generateDesc: { color: '#C6B79F', fontSize: 11, lineHeight: 16 },
-  historyList: { gap: 10 },
-  reportCard: {
-    backgroundColor: '#15120F',
-    borderRadius: 16,
+  reportIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: ASTRAL_THEME.colors.goldGlow,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  reportCardTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.text,
+  },
+  reportCardDesc: {
+    fontSize: 11,
+    color: ASTRAL_THEME.colors.textMuted,
+    lineHeight: 16,
+    minHeight: 32,
+  },
+  generateBtn: {
+    backgroundColor: ASTRAL_THEME.colors.gold,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    paddingVertical: 8,
+    alignItems: "center",
+    marginTop: 6,
+  },
+  btnDisabled: {
+    opacity: 0.6,
+  },
+  generateBtnText: {
+    color: ASTRAL_THEME.colors.bg,
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  emptyCard: {
+    backgroundColor: ASTRAL_THEME.colors.bgCard,
     borderWidth: 1,
-    borderColor: '#2A2018',
-    overflow: 'hidden',
+    borderColor: ASTRAL_THEME.colors.bgCardBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    padding: ASTRAL_THEME.spacing.lg,
+    alignItems: "center",
+    gap: 4,
   },
-  reportCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
+  emptyText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: ASTRAL_THEME.colors.text,
   },
-  reportCardLeft: { flexDirection: 'row', alignItems: 'center', gap: 12 },
-  reportCardIcon: { fontSize: 20, color: '#C9A96E', width: 28 },
-  reportCardLabel: { color: '#F8F6F1', fontSize: 13, fontWeight: '600', marginBottom: 2 },
-  reportCardDate: { color: '#C6B79F', fontSize: 11 },
-  reportContent: {
-    color: '#D9CDB7',
+  emptySub: {
+    fontSize: 12,
+    color: ASTRAL_THEME.colors.textMuted,
+  },
+  historyList: {
+    gap: 8,
+  },
+  historyCard: {
+    backgroundColor: ASTRAL_THEME.colors.bgCard,
+    borderWidth: 1,
+    borderColor: ASTRAL_THEME.colors.bgCardBorder,
+    borderRadius: ASTRAL_THEME.borderRadius.md,
+    padding: ASTRAL_THEME.spacing.md,
+  },
+  historyCardExpanded: {
+    borderColor: ASTRAL_THEME.colors.goldBorder,
+  },
+  historyHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  historyTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: ASTRAL_THEME.colors.goldLight,
+  },
+  historyDate: {
+    fontSize: 11,
+    color: ASTRAL_THEME.colors.textDim,
+    marginTop: 2,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: ASTRAL_THEME.colors.bgCardBorder,
+    marginVertical: 10,
+  },
+  reportContentBox: {
+    marginTop: 4,
+  },
+  reportContentText: {
     fontSize: 13,
+    color: ASTRAL_THEME.colors.text,
     lineHeight: 22,
-    paddingHorizontal: 16,
-    paddingBottom: 16,
   },
-  emptyState: {
-    alignItems: 'center',
-    paddingVertical: 48,
-  },
-  emptyIcon: { fontSize: 40, color: '#2A2018', marginBottom: 12 },
-  emptyText: { color: '#C6B79F', fontSize: 13, textAlign: 'center', lineHeight: 22 },
 });

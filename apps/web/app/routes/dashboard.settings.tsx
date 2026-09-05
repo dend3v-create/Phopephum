@@ -16,7 +16,19 @@ import {
   type OutcomeStatus,
 } from "~/services/wisdom.server";
 import { generatePersonalWisdomIntelligence } from "~/services/wisdomIntelligence.server";
-import type { PersonalWisdomIntelligence, TimingReminderSettings } from "@phopephum/types";
+import {
+  getTodaySandsSummary,
+  getSandsLedgerHistory,
+  spendSandsForFeature,
+  SANDS_REDEMPTION_CATALOG,
+} from "~/services/rewards.server";
+import type {
+  PersonalWisdomIntelligence,
+  TimingReminderSettings,
+  SandsDailySummary,
+  SandsLedgerEntry,
+  SandsRedemptionItem,
+} from "@phopephum/types";
 import { DEFAULT_TIMING_REMINDER_SETTINGS } from "@phopephum/types";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
@@ -118,6 +130,27 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     wisdomError = "ไม่สามารถเชื่อมต่อคลังปัญญาได้ในขณะนี้";
   }
 
+  // PHASE 6.4 — Sands of Time Economy: Load daily summary and ledger audit history
+  let sandsSummary: SandsDailySummary = {
+    currentBalance: profile?.time_sands ?? 0,
+    todayEarned: 0,
+    dailyCap: 15,
+    remainingDailyQuota: 15,
+    isDailyCapReached: false,
+  };
+  let sandsLedgerHistory: SandsLedgerEntry[] = [];
+
+  try {
+    const [summary, history] = await Promise.all([
+      getTodaySandsSummary(user.id, env),
+      getSandsLedgerHistory(user.id, env, 30),
+    ]);
+    sandsSummary = summary;
+    sandsLedgerHistory = history;
+  } catch (sErr) {
+    console.warn("[dashboard.settings] Failed to load sands summary:", sErr);
+  }
+
   return json({
     user,
     profile,
@@ -127,6 +160,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     wisdomStats,
     wisdomIntelligence,
     wisdomError,
+    sandsSummary,
+    sandsLedgerHistory,
+    sandsRedemptionCatalog: SANDS_REDEMPTION_CATALOG,
     wallet: {
       balance: Number(profile?.wallet_balance || 0),
       history: walletHistory || [],
@@ -145,6 +181,36 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const formType = String(formData.get("formType") ?? "personal");
 
   const { supabase } = createSupabaseClient(request, env);
+
+  // PHASE 6.4 — Redeem Feature with Sands of Time Action
+  if (formType === "redeemSandsFeature") {
+    const catalogItemId = String(formData.get("itemId") ?? "").trim();
+    const item = SANDS_REDEMPTION_CATALOG.find((i) => i.id === catalogItemId);
+    if (!item) {
+      return json({ error: "ไม่พบรายการสิทธิ์ที่ต้องการแลก" }, { status: 400 });
+    }
+
+    const refId = `redeem:${item.id}:${user.id}:${Date.now()}`;
+    const res = await spendSandsForFeature({
+      userId: user.id,
+      amount: item.sandsCost,
+      activityType: item.activityType,
+      referenceId: refId,
+      description: `แลกรับสิทธิ์ ${item.title}`,
+      env,
+    });
+
+    if (!res.success) {
+      return json({ error: res.error || "ละอองทรายกาลเวลาไม่เพียงพอ" }, { status: 400 });
+    }
+
+    return json({
+      success: true,
+      redeemedItem: item,
+      message: `แลกรับสิทธิ์ "${item.title}" สำเร็จ! ยอดทรายคงเหลือ ${res.newBalance} เม็ด`,
+      newBalance: res.newBalance,
+    });
+  }
 
   // STEP 4.2 — Toggle Bookmark Action
   if (formType === "toggleBookmark") {
@@ -318,6 +384,9 @@ export default function SettingsPage() {
     wisdomStats,
     wisdomIntelligence,
     wisdomError,
+    sandsSummary,
+    sandsLedgerHistory,
+    sandsRedemptionCatalog,
   } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
@@ -326,6 +395,7 @@ export default function SettingsPage() {
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(initialTab || "personal");
+  const sandsFetcher = useFetcher<any>();
 
   // Wisdom Tab filters & states
   const [activeIntent, setActiveIntent] = useState("all");
@@ -544,6 +614,26 @@ export default function SettingsPage() {
           )}
         </button>
         <button
+          onClick={() => handleTabChange("sands")}
+          className={`shrink-0 sm:flex-1 py-2 px-3 sm:px-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 ${
+            activeTab === "sands"
+              ? "bg-[#D9BC82] text-[#0A1628]"
+              : "border-transparent text-[#C6B79F] hover:text-[#F8F6F1]"
+          }`}
+        >
+          <span>🏖️</span>
+          <span>ทรายกาลเวลา</span>
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded-full font-black ${
+              activeTab === "sands"
+                ? "bg-[#0A1628]/20 text-[#0A1628]"
+                : "bg-[#C6A96B]/20 text-[#C6A96B]"
+            }`}
+          >
+            {sandsSummary.currentBalance}
+          </span>
+        </button>
+        <button
           onClick={() => handleTabChange("affiliate")}
           className={`shrink-0 sm:flex-1 py-2 px-3 sm:px-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all ${
             activeTab === "affiliate"
@@ -752,18 +842,18 @@ export default function SettingsPage() {
           </div>
 
           {/* Personal Wisdom Hub Banner & Metrics (STEP 4.3) */}
-          <div className="rounded-3xl border border-[#C6A96B]/30 bg-gradient-to-br from-[#0A1628] via-[#0D1C34] to-[#020617] p-4 sm:p-6 shadow-xl space-y-4 w-full max-w-full overflow-hidden">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 border-b border-white/10 pb-3">
+          <div className="rounded-3xl border border-slate-200 dark:border-[#C6A96B]/30 bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5F0ED] dark:from-[#0A1628] dark:via-[#0D1C34] dark:to-[#020617] p-4 sm:p-6 shadow-xl space-y-4 w-full max-w-full overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 border-b border-black/5 dark:border-white/10 pb-3">
               <div className="space-y-0.5 min-w-0">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8C6D2D] dark:text-[#C6A96B]">
                   PERSONAL WISDOM MEMORY
                 </span>
-                <h3 className="text-sm sm:text-base font-bold text-[#F8F6F1] flex items-center gap-1.5 flex-wrap">
+                <h3 className="text-sm sm:text-base font-bold text-slate-900 dark:text-[#F8F6F1] flex items-center gap-1.5 flex-wrap">
                   <span>🏛️</span>
                   <span>วงจรตกผลึกปัญญา (Outcome & Wisdom Loop)</span>
                 </h3>
               </div>
-              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C6A96B]/10 border border-[#C6A96B]/30 text-[10px] sm:text-[11px] font-medium text-[#D9BC82] overflow-x-auto max-w-full whitespace-nowrap no-scrollbar self-start sm:self-auto">
+              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/30 text-[10px] sm:text-[11px] font-semibold text-[#8C6D2D] dark:text-[#D9BC82] overflow-x-auto max-w-full whitespace-nowrap no-scrollbar self-start sm:self-auto">
                 <span className="hidden xs:inline">Prediction → Decision → Action → Outcome → Feedback → Wisdom</span>
                 <span className="xs:hidden">วงจรตกผลึก 6 ขั้นตอน</span>
               </div>
@@ -771,48 +861,48 @@ export default function SettingsPage() {
 
             {/* 4 KPI Metrics */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1 min-w-0 overflow-hidden">
-                <p className="text-[10px] sm:text-[11px] text-[#94A3B8] truncate">อัตราความแม่นยำ</p>
-                <p className="text-lg sm:text-2xl font-black text-emerald-400 font-display">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/80 dark:bg-white/[0.03] border border-black/5 dark:border-white/10 shadow-sm space-y-1 min-w-0 overflow-hidden">
+                <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-[#94A3B8] font-medium truncate">อัตราความแม่นยำ</p>
+                <p className="text-lg sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 font-display">
                   {wisdomStats.trackedOutcomes > 0 ? `${wisdomStats.successRate}%` : "—"}
                 </p>
-                <p className="text-[9px] sm:text-[10px] text-[#64748B] truncate">จากผลลัพธ์ที่ตรงตามคาด</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-500 dark:text-[#64748B] truncate">จากผลลัพธ์ที่ตรงตามคาด</p>
               </div>
 
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1 min-w-0 overflow-hidden">
-                <p className="text-[10px] sm:text-[11px] text-[#94A3B8] truncate">การลงมือทำจริง</p>
-                <p className="text-lg sm:text-2xl font-black text-amber-300 font-display">
-                  {wisdomStats.actionTakenCount} <span className="text-[10px] sm:text-xs font-normal text-[#94A3B8]">/ {wisdomStats.trackedOutcomes}</span>
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/80 dark:bg-white/[0.03] border border-black/5 dark:border-white/10 shadow-sm space-y-1 min-w-0 overflow-hidden">
+                <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-[#94A3B8] font-medium truncate">การลงมือทำจริง</p>
+                <p className="text-lg sm:text-2xl font-black text-amber-600 dark:text-amber-300 font-display">
+                  {wisdomStats.actionTakenCount} <span className="text-[10px] sm:text-xs font-normal text-slate-500 dark:text-[#94A3B8]">/ {wisdomStats.trackedOutcomes}</span>
                 </p>
-                <p className="text-[9px] sm:text-[10px] text-[#64748B] truncate">ทำตามจังหวะเวลา</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-500 dark:text-[#64748B] truncate">ทำตามจังหวะเวลา</p>
               </div>
 
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1 min-w-0 overflow-hidden">
-                <p className="text-[10px] sm:text-[11px] text-[#94A3B8] truncate">ติดตามผลแล้ว</p>
-                <p className="text-lg sm:text-2xl font-black text-[#F8F6F1] font-display">
-                  {trackedTotalCount} <span className="text-[10px] sm:text-xs font-normal text-[#94A3B8]">/ {wisdomQueries.length}</span>
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/80 dark:bg-white/[0.03] border border-black/5 dark:border-white/10 shadow-sm space-y-1 min-w-0 overflow-hidden">
+                <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-[#94A3B8] font-medium truncate">ติดตามผลแล้ว</p>
+                <p className="text-lg sm:text-2xl font-black text-slate-900 dark:text-[#F8F6F1] font-display">
+                  {trackedTotalCount} <span className="text-[10px] sm:text-xs font-normal text-slate-500 dark:text-[#94A3B8]">/ {wisdomQueries.length}</span>
                 </p>
-                <p className="text-[9px] sm:text-[10px] text-[#64748B] truncate">
+                <p className="text-[9px] sm:text-[10px] text-slate-500 dark:text-[#64748B] truncate">
                   {wisdomQueries.length - trackedTotalCount > 0
                     ? `รออีก ${wisdomQueries.length - trackedTotalCount} รายการ`
                     : "ติดตามผลครบ"}
                 </p>
               </div>
 
-              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1 min-w-0 overflow-hidden">
-                <p className="text-[10px] sm:text-[11px] text-[#94A3B8] truncate">ความพึงพอใจเฉลี่ย</p>
-                <p className="text-lg sm:text-2xl font-black text-amber-400 font-display flex items-center gap-1">
+              <div className="p-3 sm:p-3.5 rounded-2xl bg-white/80 dark:bg-white/[0.03] border border-black/5 dark:border-white/10 shadow-sm space-y-1 min-w-0 overflow-hidden">
+                <p className="text-[10px] sm:text-[11px] text-slate-600 dark:text-[#94A3B8] font-medium truncate">ความพึงพอใจเฉลี่ย</p>
+                <p className="text-lg sm:text-2xl font-black text-amber-600 dark:text-amber-400 font-display flex items-center gap-1">
                   <span>{wisdomStats.trackedOutcomes > 0 ? wisdomStats.averageRating.toFixed(1) : "—"}</span>
-                  <span className="text-xs sm:text-sm font-normal text-amber-300/80">★</span>
+                  <span className="text-xs sm:text-sm font-normal text-amber-500">★</span>
                 </p>
-                <p className="text-[9px] sm:text-[10px] text-[#64748B] truncate">ประเมินย้อนหลัง</p>
+                <p className="text-[9px] sm:text-[10px] text-slate-500 dark:text-[#64748B] truncate">ประเมินย้อนหลัง</p>
               </div>
             </div>
           </div>
 
           {/* STEP 4.5 — Personal Wisdom Intelligence Hub */}
           {wisdomIntelligence && (
-            <div className="rounded-3xl border border-[#C6A96B]/30 bg-[#0A1628]/80 backdrop-blur-xl p-5 sm:p-7 shadow-2xl space-y-6 relative overflow-hidden">
+            <div className="rounded-3xl border border-slate-200 dark:border-[#C6A96B]/30 bg-white/95 dark:bg-[#0A1628]/80 backdrop-blur-xl p-5 sm:p-7 shadow-xl space-y-6 relative overflow-hidden">
               {/* Subtle background glow */}
               <div
                 className="absolute -top-24 -right-24 w-80 h-80 rounded-full pointer-events-none opacity-20 blur-3xl"
@@ -820,21 +910,21 @@ export default function SettingsPage() {
               />
 
               {/* Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-white/10 pb-4 relative z-10">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-black/5 dark:border-white/10 pb-4 relative z-10">
                 <div className="flex items-center gap-3">
                   <span className="text-2xl sm:text-3xl">✨</span>
                   <div>
-                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8C6D2D] dark:text-[#C6A96B]">
                       PERSONAL WISDOM INTELLIGENCE
                     </span>
-                    <h3 className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                       <span>ปัญญาเฉพาะตน & การสังเคราะห์จังหวะชีวิต</span>
                       {wisdomIntelligence.hasSufficientData ? (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 font-bold">
                           ✓ ตกผลึกพร้อม
                         </span>
                       ) : (
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-bold">
                           ⏳ กำลังสะสมข้อมูล ({wisdomIntelligence.sampleCount}/{wisdomIntelligence.threshold})
                         </span>
                       )}
@@ -842,32 +932,32 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="text-[11px] text-[#94A3B8] self-start sm:self-auto">
+                <div className="text-[11px] text-slate-500 dark:text-[#94A3B8] self-start sm:self-auto font-medium">
                   <span>อัปเดต: {new Date(wisdomIntelligence.lastUpdated).toLocaleDateString("th-TH")}</span>
                 </div>
               </div>
 
               {/* AI Synthesized Executive Summary */}
-              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/10 space-y-3 relative z-10">
+              <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/40 dark:bg-gradient-to-br dark:from-white/[0.04] dark:to-white/[0.01] border border-amber-200/50 dark:border-white/10 space-y-3 relative z-10 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <span className="text-xs font-bold text-[#C6A96B] uppercase tracking-wider">
+                  <span className="text-xs font-bold text-[#8C6D2D] dark:text-[#C6A96B] uppercase tracking-wider">
                     ✦ บทสรุปปัญญาสำหรับคุณ (Executive Insight)
                   </span>
                 </div>
-                <p className="text-sm sm:text-base text-[#F8F6F1] font-sans leading-relaxed font-medium">
+                <p className="text-sm sm:text-base text-slate-800 dark:text-[#F8F6F1] font-sans leading-relaxed font-medium">
                   {wisdomIntelligence.summary}
                 </p>
 
                 {/* Progress bar if insufficient data */}
                 {!wisdomIntelligence.hasSufficientData && (
-                  <div className="pt-2 space-y-1.5 border-t border-white/5">
-                    <div className="flex items-center justify-between text-[11px] text-[#94A3B8]">
+                  <div className="pt-2 space-y-1.5 border-t border-black/5 dark:border-white/5">
+                    <div className="flex items-center justify-between text-[11px] text-slate-600 dark:text-[#94A3B8] font-medium">
                       <span>ความพร้อมของข้อมูลในการตรวจจับแพทเทิร์นส่วนตัว</span>
-                      <span className="font-bold text-amber-300">
+                      <span className="font-bold text-amber-700 dark:text-amber-300">
                         {wisdomIntelligence.sampleCount} / {wisdomIntelligence.threshold} ครั้ง
                       </span>
                     </div>
-                    <div className="w-full h-2 rounded-full bg-white/10 overflow-hidden">
+                    <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-white/10 overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-amber-400 to-[#C6A96B] rounded-full transition-all duration-500"
                         style={{
@@ -884,25 +974,25 @@ export default function SettingsPage() {
                 {wisdomIntelligence.patterns.map((p, idx) => (
                   <div
                     key={idx}
-                    className="p-4 rounded-2xl border border-white/10 bg-white/[0.02] hover:border-[#C6A96B]/30 hover:bg-white/[0.04] transition-all flex flex-col justify-between gap-3 shadow-md"
+                    className="p-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/80 dark:bg-white/[0.02] hover:border-[#C6A96B]/40 hover:shadow-md transition-all flex flex-col justify-between gap-3 shadow-sm"
                   >
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-xl">{p.icon || "💡"}</span>
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-white/5 text-[#CBD5E1] border border-white/10">
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-[#CBD5E1] border border-slate-200 dark:border-white/10">
                           {p.confidence}% สอดคล้อง
                         </span>
                       </div>
                       <div>
-                        <p className="text-[11px] font-bold text-[#94A3B8]">{p.title}</p>
-                        <p className="text-sm font-bold text-[#F8F6F1] mt-0.5">{p.highlight}</p>
+                        <p className="text-[11px] font-bold text-slate-500 dark:text-[#94A3B8]">{p.title}</p>
+                        <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1] mt-0.5">{p.highlight}</p>
                       </div>
-                      <p className="text-xs text-[#94A3B8] leading-relaxed">{p.description}</p>
+                      <p className="text-xs text-slate-600 dark:text-[#94A3B8] leading-relaxed">{p.description}</p>
                     </div>
 
-                    <div className="pt-2 border-t border-white/5 flex items-center justify-between text-[10px] text-[#64748B]">
+                    <div className="pt-2 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-[10px] text-slate-500 dark:text-[#64748B]">
                       <span>บันทึก {p.sampleCount} ครั้ง</span>
-                      <span className="text-emerald-400 font-medium">✓ วิเคราะห์เฉพาะตน</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">✓ วิเคราะห์เฉพาะตน</span>
                     </div>
                   </div>
                 ))}
@@ -910,15 +1000,15 @@ export default function SettingsPage() {
 
               {/* Action Recommendations */}
               {wisdomIntelligence.actionRecommendations && wisdomIntelligence.actionRecommendations.length > 0 && (
-                <div className="p-4 rounded-2xl bg-[#C6A96B]/5 border border-[#C6A96B]/20 space-y-2.5 relative z-10">
-                  <p className="text-xs font-bold text-[#C6A96B] uppercase tracking-wider flex items-center gap-1.5">
+                <div className="p-4 rounded-2xl bg-amber-50/60 dark:bg-[#C6A96B]/5 border border-amber-200/60 dark:border-[#C6A96B]/20 space-y-2.5 relative z-10 shadow-sm">
+                  <p className="text-xs font-bold text-[#8C6D2D] dark:text-[#C6A96B] uppercase tracking-wider flex items-center gap-1.5">
                     <span>⚡</span>
                     <span>คำแนะนำเชิงปฏิบัติการเพื่อยกระดับการตัดสินใจ (Actionable Guidance)</span>
                   </p>
-                  <ul className="space-y-1.5 text-xs text-[#CBD5E1]">
+                  <ul className="space-y-1.5 text-xs text-slate-700 dark:text-[#CBD5E1]">
                     {wisdomIntelligence.actionRecommendations.map((rec, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <span className="text-[#C6A96B] font-bold shrink-0">✦</span>
+                        <span className="text-[#8C6D2D] dark:text-[#C6A96B] font-bold shrink-0">✦</span>
                         <span>{rec}</span>
                       </li>
                     ))}
@@ -1845,6 +1935,223 @@ export default function SettingsPage() {
               </div>
             </form>
           </Card>
+        </div>
+      )}
+
+      {/* PHASE 6.4 — แท็บทรายกาลเวลา (Sands of Time Economy & Personal Space) */}
+      {activeTab === "sands" && (
+        <div className="space-y-6 animate-in fade-in duration-300">
+          {/* Header Banner */}
+          <div className="p-6 rounded-2xl bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5F0ED] dark:from-[#0A1628]/80 dark:via-[#0A1628]/40 dark:to-[#020617] border border-slate-200 dark:border-[#C6A96B]/25 relative overflow-hidden shadow-xl">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🏖️</span>
+                  <h2 className="text-xl font-bold font-display text-slate-900 dark:text-[#F8F6F1]">
+                    ละอองทรายกาลเวลา (Sands of Time)
+                  </h2>
+                  <span className="text-[11px] font-bold text-[#8C6D2D] dark:text-[#C6A96B] px-2.5 py-0.5 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/30">
+                    Loyalty & Wisdom Unit
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-[#D9CDB7]/80 leading-relaxed italic max-w-xl">
+                  “เม็ดทรายไม่ได้ซื้อเวลา แต่สะท้อนเวลาที่คุณลงทุนให้กับตัวเอง — จากเวลา สู่การลงมือทำ สู่ประสบการณ์ สู่ปัญญา”
+                </p>
+              </div>
+
+              {/* Sands Balance Indicator */}
+              <div className="bg-white/90 dark:bg-[#020617]/70 border border-[#C6A96B]/40 rounded-2xl p-4 text-center md:text-right min-w-[170px] shrink-0 shadow-sm">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-[#94A3B8]">
+                  ละอองทรายคงเหลือ
+                </p>
+                <div className="text-3xl font-black font-display text-[#8C6D2D] dark:text-[#C6A96B] flex items-center justify-center md:justify-end gap-1.5 mt-1">
+                  <span>⏳</span>
+                  <span>{sandsSummary.currentBalance}</span>
+                  <span className="text-xs font-normal text-slate-500 dark:text-[#94A3B8]">เม็ด</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Daily Ritual Engagement Progress */}
+            <div className="mt-6 pt-5 border-t border-black/5 dark:border-[#C6A96B]/15 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-3 bg-white/80 dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-xl shadow-sm">
+                <span className="text-[11px] text-slate-600 dark:text-[#94A3B8] font-medium block">วันนี้สะสมแล้ว (Daily Rituals)</span>
+                <span className="text-lg font-bold text-slate-900 dark:text-[#F8F6F1]">
+                  {sandsSummary.todayEarned} <span className="text-xs font-normal text-slate-500 dark:text-[#94A3B8]">/ {sandsSummary.dailyCap} เม็ด</span>
+                </span>
+                <div className="w-full bg-slate-200 dark:bg-slate-800/60 rounded-full h-1.5 mt-2 overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-[#4B6FAE] to-[#C6A96B] h-full rounded-full transition-all duration-500"
+                    style={{
+                      width: `${Math.min(100, (sandsSummary.todayEarned / sandsSummary.dailyCap) * 100)}%`,
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 bg-white/80 dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-xl shadow-sm">
+                <span className="text-[11px] text-slate-600 dark:text-[#94A3B8] font-medium block">โควตาที่สะสมได้อีกวันนี้</span>
+                <span className={`text-lg font-bold ${sandsSummary.isDailyCapReached ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                  {sandsSummary.remainingDailyQuota} <span className="text-xs font-normal text-slate-500 dark:text-[#94A3B8]">เม็ด</span>
+                </span>
+                <p className="text-[10px] text-slate-500 dark:text-[#94A3B8]/70 mt-1 font-medium">
+                  {sandsSummary.isDailyCapReached ? "ครบเพดานสัจจะประจำวันแล้ว" : "ทำสัจจะบารมีเช้า-ค่ำเพื่อรับเพิ่ม"}
+                </p>
+              </div>
+
+              <div className="p-3 bg-white/80 dark:bg-white/[0.02] border border-black/5 dark:border-white/5 rounded-xl shadow-sm flex items-center justify-between">
+                <div>
+                  <span className="text-[11px] text-slate-600 dark:text-[#94A3B8] font-medium block">สถานะเพดานประจำวัน</span>
+                  <span className={`text-xs font-bold ${sandsSummary.isDailyCapReached ? "text-amber-600 dark:text-amber-400" : "text-emerald-600 dark:text-emerald-400"}`}>
+                    {sandsSummary.isDailyCapReached ? "🔒 ชนเพดาน 15/วัน" : "🔓 เปิดรับสัจจะบารมี"}
+                  </span>
+                </div>
+                <span className="text-2xl">{sandsSummary.isDailyCapReached ? "⌛" : "✨"}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Feedback messages from Sands Fetcher */}
+          {sandsFetcher.data?.message && (
+            <div className={`p-4 rounded-xl text-xs font-semibold border ${
+              sandsFetcher.data?.success
+                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30"
+                : "bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30"
+            }`}>
+              ✦ {sandsFetcher.data.message || sandsFetcher.data.error}
+            </div>
+          )}
+
+          {/* Redemption Showcase Catalog */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-display text-lg font-bold text-slate-900 dark:text-[#F8F6F1] flex items-center gap-2">
+                <span>🎁</span>
+                <span>แลกรับประสบการณ์ & สิทธิประโยชน์ (Redemption Catalog)</span>
+              </h3>
+              <p className="text-xs text-slate-600 dark:text-[#94A3B8]">
+                นำละอองทรายกาลเวลาไปปลดล็อกความรู้และรายงานวิเคราะห์วิถีดวงดาวระดับลึก
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {sandsRedemptionCatalog.map((item: SandsRedemptionItem) => {
+                const canAfford = sandsSummary.currentBalance >= item.sandsCost;
+                return (
+                  <Card
+                    key={item.id}
+                    className="bg-white/85 dark:bg-[#0A1628]/35 border-slate-200 dark:border-[#C6A96B]/15 p-5 space-y-3 relative overflow-hidden backdrop-blur-md hover:border-[#C6A96B]/35 transition-all shadow-sm"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="text-2xl">{item.icon}</span>
+                        <div>
+                          <h4 className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1] flex items-center gap-2">
+                            <span>{item.title}</span>
+                            {item.badge && (
+                              <span className="text-[10px] font-semibold text-[#8C6D2D] dark:text-[#C6A96B] bg-[#C6A96B]/15 border border-[#C6A96B]/30 px-2 py-0.5 rounded-full">
+                                {item.badge}
+                              </span>
+                            )}
+                          </h4>
+                          <p className="text-xs text-slate-600 dark:text-[#94A3B8] mt-0.5">{item.description}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 border-t border-black/5 dark:border-white/5 flex items-center justify-between">
+                      <div className="text-xs">
+                        <span className="text-slate-500 dark:text-[#94A3B8]">ใช้ทราย: </span>
+                        <strong className="text-[#8C6D2D] dark:text-[#C6A96B] font-display text-sm">{item.sandsCost} เม็ด</strong>
+                      </div>
+
+                      <sandsFetcher.Form method="post">
+                        <input type="hidden" name="formType" value="redeemSandsFeature" />
+                        <input type="hidden" name="itemId" value={item.id} />
+                        <Button
+                          type="submit"
+                          disabled={!canAfford || sandsFetcher.state === "submitting"}
+                          className={`text-xs font-bold px-4 py-1.5 rounded-xl transition-all ${
+                            canAfford
+                              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-slate-950 hover:scale-[1.02] shadow-md shadow-[#C6A96B]/10"
+                              : "bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-[#94A3B8] cursor-not-allowed border border-slate-200 dark:border-white/10"
+                          }`}
+                        >
+                          {canAfford ? "แลกสิทธิ์ ⏳" : "ทรายไม่พอ"}
+                        </Button>
+                      </sandsFetcher.Form>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Ledger Audit History */}
+          <div className="space-y-4 pt-4">
+            <h3 className="font-display text-lg font-bold text-[#F8F6F1] flex items-center gap-2">
+              <span>📜</span>
+              <span>ประวัติการเดินของเข็มทราย (Audit Ledger)</span>
+            </h3>
+
+            {sandsLedgerHistory.length === 0 ? (
+              <Card className="bg-[#0A1628]/20 border-white/5 p-8 text-center text-xs text-[#94A3B8]">
+                ยังไม่มีบันทึกการเคลื่อนไหวของละอองทราย เริ่มต้นบันทึกความตั้งใจยามเช้าหรือเปิดไพ่สำรวจดวงดาวเพื่อเริ่มสะสม!
+              </Card>
+            ) : (
+              <Card className="bg-[#0A1628]/35 border-[#C6A96B]/10 p-4 overflow-x-auto">
+                <table className="w-full text-left text-xs text-[#D9CDB7]">
+                  <thead>
+                    <tr className="border-b border-[#C6A96B]/15 text-[#94A3B8] font-bold text-[11px]">
+                      <th className="pb-2.5">เวลาที่บันทึก</th>
+                      <th className="pb-2.5">กิจกรรม / เหตุผล</th>
+                      <th className="pb-2.5">หมวดหมู่</th>
+                      <th className="pb-2.5 text-right">จำนวน</th>
+                      <th className="pb-2.5 text-right">ยอดคงเหลือ</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {sandsLedgerHistory.map((tx) => (
+                      <tr key={tx.id} className="hover:bg-white/5 transition-colors">
+                        <td className="py-2.5 text-[11px] text-[#94A3B8] whitespace-nowrap">
+                          {new Date(tx.createdAt).toLocaleString("th-TH", {
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </td>
+                        <td className="py-2.5 font-medium text-[#F8F6F1]">
+                          {tx.description || tx.activityType}
+                        </td>
+                        <td className="py-2.5">
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                            tx.rewardClass === "community"
+                              ? "bg-purple-500/10 text-purple-300 border border-purple-500/20"
+                              : tx.rewardClass === "wisdom"
+                              ? "bg-sky-500/10 text-sky-300 border border-sky-500/20"
+                              : tx.rewardClass === "spend"
+                              ? "bg-rose-500/10 text-rose-300 border border-rose-500/20"
+                              : "bg-[#C6A96B]/10 text-[#C6A96B] border border-[#C6A96B]/20"
+                          }`}>
+                            {tx.rewardClass}
+                          </span>
+                        </td>
+                        <td className={`py-2.5 text-right font-bold ${
+                          tx.amount > 0 ? "text-emerald-400" : "text-rose-400"
+                        }`}>
+                          {tx.amount > 0 ? `+${tx.amount}` : tx.amount}
+                        </td>
+                        <td className="py-2.5 text-right text-[#C6A96B] font-display font-semibold">
+                          {tx.balanceAfter}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </Card>
+            )}
+          </div>
         </div>
       )}
     </div>

@@ -1,18 +1,26 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import { ASTRAL_THEME } from "../../constants/theme";
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
+        headerShown: false,
         tabBarStyle: {
-          backgroundColor: "#15120F",
-          borderTopColor: "#2A2018",
+          backgroundColor: ASTRAL_THEME.colors.bg,
+          borderTopColor: ASTRAL_THEME.colors.bgCardBorder,
+          borderTopWidth: 1,
+          height: 60,
+          paddingBottom: 8,
+          paddingTop: 6,
         },
-        tabBarActiveTintColor: "#C9A96E",
-        tabBarInactiveTintColor: "#C6B79F",
-        headerStyle: { backgroundColor: "#0A0806" },
-        headerTintColor: "#C9A96E",
+        tabBarActiveTintColor: ASTRAL_THEME.colors.gold,
+        tabBarInactiveTintColor: ASTRAL_THEME.colors.textMuted,
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "500",
+        },
       }}
     >
       <Tabs.Screen
@@ -20,7 +28,7 @@ export default function TabLayout() {
         options={{
           title: "หน้าหลัก",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
+            <Ionicons name="compass-outline" size={size} color={color} />
           ),
         }}
       />
@@ -29,7 +37,7 @@ export default function TabLayout() {
         options={{
           title: "ดวงชะตา",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="planet" size={size} color={color} />
+            <Ionicons name="planet-outline" size={size} color={color} />
           ),
         }}
       />
@@ -38,25 +46,25 @@ export default function TabLayout() {
         options={{
           title: "รายงาน AI",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="sparkles" size={size} color={color} />
+            <Ionicons name="sparkles-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="planner"
         options={{
-          title: "วางแผน",
+          title: "วางแผนชีวิต",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="calendar" size={size} color={color} />
+            <Ionicons name="calendar-outline" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
-          title: "ตั้งค่า",
+          title: "โปรไฟล์",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="settings" size={size} color={color} />
+            <Ionicons name="person-circle-outline" size={size} color={color} />
           ),
         }}
       />

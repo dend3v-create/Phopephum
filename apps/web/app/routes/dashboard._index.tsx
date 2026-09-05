@@ -5,94 +5,42 @@ import { requireAuth, getProfile } from "~/services/auth.server";
 import {
   getCurrentYam,
   calculateMoonPhase,
-  getSunTimes,
-  getYamPrediction,
   calculatePhopephum,
+  getAstrologicalDateStr,
+  getAstrologicalThaiFormattedDate,
 } from "@phopephum/engine";
 import { checkAndAwardDailyLogin } from "~/services/rewards.server";
 import { generateDailyAdvice } from "~/services/dailyAdvisor.server";
+import { calculateDayIntelligence } from "~/services/calendarIntelligence.server";
+import { generatePersonalWisdomIntelligence } from "~/services/wisdomIntelligence.server";
+import { createSupabaseClient } from "~/services/supabase.server";
 import type { Env } from "~/env.server";
+import type {
+  CalendarDayIntelligence,
+  PersonalWisdomIntelligence,
+} from "@phopephum/types";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "~/lib/i18n/i18n.server";
-import { createSupabaseClient } from "~/services/supabase.server";
 
 export const meta: MetaFunction = () => [
   { title: "วันนี้ — PhopePhum" },
-  { name: "description", content: "ดูพลังงานประจำวัน ช่วงเวลาทอง และคำแนะนำส่วนตัวที่ PhopePhum" },
+  {
+    name: "description",
+    content: "สรุปจังหวะพลังงานประจำวัน ช่วงเวลาทอง และปัญญาชีวิตเฉพาะตนที่ PhopePhum",
+  },
 ];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-interface GoldenWindow {
-  startTime: string;   // "HH:mm"
-  endTime: string;     // "HH:mm"
-  yamName: string;
-  description: string;
-  score: number;       // 0–100
-}
-
-// ─── Helper: get best auspicious windows for the day ─────────────────────────
-function getGoldenWindows(targetDate: Date): GoldenWindow[] {
-  const sunTimes = getSunTimes(targetDate);
-  const sunrise = sunTimes.sunrise;
-  const sunset = sunTimes.sunset;
-
-  const dayMs = sunset.getTime() - sunrise.getTime();
-  const daySlotMs = dayMs / 8;
-
-  const windows: GoldenWindow[] = [];
-
-  for (let i = 0; i < 8; i++) {
-    const startTime = new Date(sunrise.getTime() + i * daySlotMs);
-    const endTime = new Date(sunrise.getTime() + (i + 1) * daySlotMs);
-    const midTime = new Date(startTime.getTime() + daySlotMs / 2);
-    const result = getYamPrediction(midTime);
-    const level = result.travelAuspiciousness.level;
-    const score =
-      level === "excellent" ? 92 :
-      level === "very_good" ? 78 :
-      level === "good"      ? 60 : 25;
-
-    const fmt = (d: Date) =>
-      `${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
-
-    windows.push({
-      startTime: fmt(startTime),
-      endTime: fmt(endTime),
-      yamName: result.yamName,
-      description: result.travelAuspiciousness.description,
-      score,
-    });
-  }
-
-  return windows
-    .filter((w) => w.score >= 60)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 3);
-}
-
-// ─── Helper: derive daily score from advice ───────────────────────────────────
-function getDailyScore(
-  dailyAdvice: ReturnType<typeof generateDailyAdvice> | null,
-  yamLevel: string
-): number {
-  if (!dailyAdvice) return 50;
-
-  const statusScore = (s: string) =>
-    s === "excellent" ? 35 : s === "good" ? 25 : 10;
-
-  const base =
-    statusScore(dailyAdvice.work.status) +
-    statusScore(dailyAdvice.wealth.status) +
-    statusScore(dailyAdvice.love.status) +
-    statusScore(dailyAdvice.health.status);
-
-  const yamBonus =
-    yamLevel === "excellent" ? 10 :
-    yamLevel === "very_good" ? 6 :
-    yamLevel === "good"       ? 2 : -5;
-
-  return Math.min(100, Math.max(0, base + yamBonus));
+interface TodayAppointment {
+  id: string;
+  title: string;
+  event_type: string;
+  event_date: string;
+  event_time: string;
+  score: number;
+  verdict: string;
+  advice: string;
 }
 
 // ─── Helper: derive Do / Avoid lists from dailyAdvice ────────────────────────
@@ -109,52 +57,52 @@ function getDoAvoidLists(
 
   const DO_LABELS: Record<string, Record<string, string>> = {
     th: {
-      work_excellent: "เจรจาธุรกิจ / เสนองาน",
-      work_good: "ลงมือทำงานตามแผน",
-      wealth_excellent: "ลงทุน / จัดการการเงิน",
-      wealth_good: "วางแผนงบประมาณ",
-      love_excellent: "นัดหมายพิเศษ / สร้างความประทับใจ",
+      work_excellent: "เจรจาธุรกิจ / เสนองานสำคัญ",
+      work_good: "ลงมือทำงานตามแผนที่วางไว้",
+      wealth_excellent: "ลงทุน / จัดการการเงินและสภาพคล่อง",
+      wealth_good: "วางแผนงบประมาณและรายจ่าย",
+      love_excellent: "นัดหมายพิเศษ / สื่อสารสร้างความประทับใจ",
       love_good: "สื่อสารความรู้สึกอย่างตรงไปตรงมา",
-      health_good: "ออกกำลังกายเบาๆ / ดูแลสุขภาพ",
+      health_good: "ออกกำลังกายเบาๆ / พักผ่อนเติมพลัง",
     },
     en: {
-      work_excellent: "Business negotiation / Pitching",
+      work_excellent: "Business negotiation / Key proposals",
       work_good: "Execute planned tasks",
-      wealth_excellent: "Invest / Manage finances",
-      wealth_good: "Budget planning",
-      love_excellent: "Special dates / Making impressions",
-      love_good: "Open communication",
-      health_good: "Light exercise / Self-care",
+      wealth_excellent: "Invest / Manage financial flow",
+      wealth_good: "Budget and expense planning",
+      love_excellent: "Special meetings / Meaningful connections",
+      love_good: "Open and honest communication",
+      health_good: "Light exercise / Rest and recharge",
     },
     zh: {
-      work_excellent: "商务谈判 / 提案",
+      work_excellent: "商务谈判 / 重要提案",
       work_good: "按计划执行任务",
-      wealth_excellent: "投资 / 理财管理",
-      wealth_good: "预算规划",
-      love_excellent: "特别约会 / 制造惊喜",
-      love_good: "坦诚沟通",
-      health_good: "轻运动 / 自我保健",
+      wealth_excellent: "投资 / 理财与现金流管理",
+      wealth_good: "预算与支出规划",
+      love_excellent: "特别约会 / 建立良好沟通",
+      love_good: "坦诚交流表达想法",
+      health_good: "轻度运动 / 休息恢复活力",
     },
   };
 
   const AVOID_LABELS: Record<string, Record<string, string>> = {
     th: {
-      work_warning: "เสนอโครงการใหม่ / เริ่มงานใหญ่",
-      wealth_warning: "ลงทุนกะทันหัน / เซ็นเอกสารสำคัญ",
-      love_warning: "พูดคุยเรื่องขัดแย้งเก่า",
-      health_warning: "ออกกำลังกายหักโหม / นอนดึก",
+      work_warning: "ตัดสินใจเปลี่ยนแผนกะทันหัน",
+      wealth_warning: "ลงทุนเสี่ยงสูง / เซ็นเอกสารผูกพันการเงิน",
+      love_warning: "หยิบยกเรื่องขัดแย้งเดิมมาโต้เถียง",
+      health_warning: "ทำงานหักโหมติดต่อกันเกินกำลัง",
     },
     en: {
-      work_warning: "New project proposals / Major decisions",
-      wealth_warning: "Impulse investing / Signing important docs",
-      love_warning: "Revisiting past conflicts",
-      health_warning: "Intense exercise / Late nights",
+      work_warning: "Sudden plan changes or hasty pivots",
+      wealth_warning: "High-risk spending / Binding contracts",
+      love_warning: "Rehashing past conflicts",
+      health_warning: "Overworking without adequate rest",
     },
     zh: {
-      work_warning: "新项目提案 / 重大决策",
-      wealth_warning: "冲动投资 / 签署重要文件",
-      love_warning: "翻旧账 / 重提旧矛盾",
-      health_warning: "剧烈运动 / 熬夜",
+      work_warning: "仓促改变既定计划",
+      wealth_warning: "高风险投资 / 签署重大财务合约",
+      love_warning: "翻旧账或引发争执",
+      health_warning: "过度劳累缺少休息",
     },
   };
 
@@ -190,38 +138,93 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const { supabase } = createSupabaseClient(request, env);
 
   const loginReward = await checkAndAwardDailyLogin(user.id, env).catch(() => ({
-    success: false, earned: 0, message: "", newBalance: 0,
+    success: false,
+    earned: 0,
+    message: "",
+    newBalance: 0,
   }));
 
   const profile = await getProfile(user.id, request, env);
   const now = new Date();
   const locale = await i18next.getLocale(request);
+  const currentLocale = locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "th-TH";
 
-  // ── Live engine data ──
+  // คำนวณวันที่ตามโหราศาสตร์ไทย (ระบบยามอัฐกาล ตัดวันใหม่ที่ 06:01 น.)
+  const bkkDateStr = getAstrologicalDateStr(now);
+  const thaiDateLabel = getAstrologicalThaiFormattedDate(now, currentLocale);
+
+  // ── 1. Live Yam & Moon ──
   const yam = getCurrentYam();
   const moon = calculateMoonPhase();
-  const goldenWindows = getGoldenWindows(now);
 
-  // ── Daily Advice (from PhopephumResult via Taksa) ──
+  // ── 2. Profile Context ──
+  const profileContext = profile
+    ? {
+        birthDate: profile.birth_date,
+        birthTime: profile.birth_time,
+        birthPlace: profile.birth_place,
+        displayName: profile.display_name,
+      }
+    : null;
+
+  // ── 3. STEP 5.1 Calendar Intelligence (Daily Theme, Golden Window, 4 Domains) ──
+  const dayIntelligence: CalendarDayIntelligence =
+    await calculateDayIntelligence(bkkDateStr, profileContext);
+
+  // ── 4. STEP 4.5 Personal Wisdom Intelligence ──
+  let wisdomIntelligence: PersonalWisdomIntelligence | null = null;
+  try {
+    wisdomIntelligence = await generatePersonalWisdomIntelligence({
+      userId: user.id,
+      supabase,
+      userName: profile?.display_name || undefined,
+    });
+  } catch (err) {
+    console.warn("Wisdom Intelligence loader error:", err);
+  }
+
+  // ── 5. Today's Appointments ──
+  const { data: todayAppointmentsData } = await supabase
+    .from("appointments")
+    .select("*")
+    .eq("user_id", user.id)
+    .eq("event_date", bkkDateStr)
+    .order("event_time", { ascending: true });
+
+  const todayAppointments: TodayAppointment[] = (todayAppointmentsData || []).map(
+    (a: any) => ({
+      id: a.id,
+      title: a.title,
+      event_type: a.event_type,
+      event_date: a.event_date,
+      event_time: a.event_time,
+      score: a.score,
+      verdict: a.verdict,
+      advice: a.advice,
+    })
+  );
+
+  // ── 6. Daily Advice (Phopephum Taksa detail) ──
   let dailyAdvice = null;
   if (profile?.birth_date) {
     try {
-      const phResult = await calculatePhopephum({
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time || "12:00",
-        birthPlace: profile.birth_place || "กรุงเทพมหานคร",
-      }, now);
+      const phResult = await calculatePhopephum(
+        {
+          birthDate: profile.birth_date,
+          birthTime: profile.birth_time || "12:00",
+          birthPlace: profile.birth_place || "กรุงเทพมหานคร",
+        },
+        now
+      );
       dailyAdvice = generateDailyAdvice(phResult, locale);
     } catch (err) {
       console.error("Daily advice error:", err);
     }
   }
 
-  const yamLevel = yam.travelAuspiciousness.level;
-  const dailyScore = getDailyScore(dailyAdvice, yamLevel);
   const { doList, avoidList } = getDoAvoidLists(dailyAdvice, locale);
 
-  // ── Compute Yam end-time ISO from sunTimes ──
+  // ── 7. Yam countdown ISO ──
   const sunTimes = yam.sunTimes;
   const isDayPeriod = yam.period === "day";
   const slotStart = isDayPeriod ? sunTimes.sunrise : sunTimes.sunset;
@@ -232,16 +235,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const yamEndTime = new Date(slotStart.getTime() + yam.yamNumber * slotMs);
   const yamEndTimeISO = yamEndTime.toISOString();
 
-  // ── Check if login reward should be shown ──
-  const todayDateStr = now.toISOString().split("T")[0]!;
-  const { data: dailyPlan } = await supabase
-    .from("daily_plans")
-    .select("daily_card, daily_card_reading")
-    .eq("user_id", user.id)
-    .eq("date", todayDateStr)
-    .single();
-
-  // ── Admin pending count ──
+  // ── 8. Admin Pending Count ──
   let pendingCount = 0;
   if (profile?.role === "admin" || profile?.role === "operator") {
     const { count } = await supabase
@@ -252,26 +246,32 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   }
 
   return json({
-    user, profile, loginReward, pendingCount, dailyPlan,
+    user,
+    profile,
+    loginReward,
+    pendingCount,
     now: now.toISOString(),
+    bkkDateStr,
+    thaiDateLabel,
     yamEndTimeISO,
     yam: {
-      name:    yam.yamName,
-      level:   yamLevel,
-      label:   yam.travelAuspiciousness.label,
-      ticks:   yam.travelAuspiciousness.ticks,
+      name: yam.yamName,
+      level: yam.travelAuspiciousness.level,
+      label: yam.travelAuspiciousness.label,
+      ticks: yam.travelAuspiciousness.ticks,
       shouldDo: yam.prediction?.shouldDo ?? "",
     },
     moon: {
-      phase:        moon.moonPhase,
+      phase: moon.moonPhase,
       illumination: moon.illumination,
-      isWanPhra:    moon.isWanPhra,
+      isWanPhra: moon.isWanPhra,
     },
-    goldenWindows,
-    dailyScore,
+    dayIntelligence,
+    wisdomIntelligence,
+    todayAppointments,
+    dailyAdvice,
     doList,
     avoidList,
-    dailyAdvice,
   });
 }
 
@@ -283,179 +283,66 @@ function ScoreRing({ score }: { score: number }) {
   const offset = circumference - (score / 100) * circumference;
 
   const color =
-    score >= 80 ? "#4ADE80" :
-    score >= 60 ? "#C6A96B" :
-    score >= 40 ? "#F59E0B" : "#F87171";
+    score >= 80
+      ? "#10B981"
+      : score >= 65
+      ? "#C6A96B"
+      : score >= 50
+      ? "#F59E0B"
+      : "#EF4444";
 
   const label =
-    score >= 80 ? "ดีมาก" :
-    score >= 60 ? "ดี" :
-    score >= 40 ? "ปานกลาง" : "ควรระวัง";
+    score >= 80
+      ? "ส่งเสริมดีเยี่ยม"
+      : score >= 65
+      ? "ราบรื่นคล่องตัว"
+      : score >= 50
+      ? "ปานกลาง"
+      : "ควรเน้นรอบคอบ";
 
   return (
-    <div className="flex flex-col items-center gap-1">
-      <div className="relative w-32 h-32">
+    <div className="flex flex-col items-center gap-1 shrink-0">
+      <div className="relative w-28 h-28 sm:w-32 sm:h-32">
         <svg viewBox="0 0 128 128" className="w-full h-full -rotate-90">
-          {/* Track */}
           <circle
-            cx="64" cy="64" r={radius}
+            cx="64"
+            cy="64"
+            r={radius}
             fill="none"
-            stroke="rgba(255,255,255,0.07)"
+            className="score-track"
+            stroke="rgba(255,255,255,0.08)"
             strokeWidth="10"
           />
-          {/* Progress */}
           <circle
-            cx="64" cy="64" r={radius}
+            cx="64"
+            cy="64"
+            r={radius}
             fill="none"
             stroke={color}
             strokeWidth="10"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            style={{ transition: "stroke-dashoffset 1.2s cubic-bezier(0.34,1.56,0.64,1)" }}
+            style={{
+              transition: "stroke-dashoffset 1.2s cubic-bezier(0.34,1.56,0.64,1)",
+            }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="font-display font-black text-3xl leading-none text-[#F8F6F1]">
             {score}
           </span>
-          <span className="text-[10px] text-[#C6B79F] tracking-wider">/100</span>
+          <span className="text-[10px] text-[#C6B79F] tracking-wider mt-0.5">
+            /100
+          </span>
         </div>
       </div>
       <span
-        className="text-sm font-bold tracking-wide"
+        className="text-xs sm:text-sm font-bold tracking-wide"
         style={{ color }}
       >
         {label}
       </span>
-    </div>
-  );
-}
-
-function GoldenWindowCard({
-  window: w,
-  isTop,
-}: {
-  window: GoldenWindow;
-  isTop: boolean;
-}) {
-  return (
-    <div
-      className={`rounded-2xl px-4 py-3.5 border transition-all ${
-        isTop
-          ? "border-[#C6A96B]/50 bg-gradient-to-br from-[#C6A96B]/12 to-[#4B6FAE]/8 shadow-lg shadow-[#C6A96B]/10"
-          : "border-white/10 bg-white/4"
-      }`}
-    >
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-2">
-            {isTop && <span className="text-[#F2D49B] text-base">⭐</span>}
-            <span className="font-display text-lg font-extrabold text-[#F8F6F1] tracking-tight">
-              {w.startTime} – {w.endTime}
-            </span>
-          </div>
-          <p className="text-xs text-[#C6B79F] mt-0.5 line-clamp-1">{w.description}</p>
-        </div>
-        {/* Score bar */}
-        <div className="flex flex-col items-end gap-1 ml-3 shrink-0">
-          <span className="text-xs font-black tabular-nums" style={{
-            color: w.score >= 80 ? "#4ADE80" : w.score >= 60 ? "#C6A96B" : "#F59E0B"
-          }}>
-            {w.score}%
-          </span>
-          <div className="w-14 h-1.5 rounded-full bg-white/10 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-700"
-              style={{
-                width: `${w.score}%`,
-                background: w.score >= 80 ? "#4ADE80" : w.score >= 60 ? "#C6A96B" : "#F59E0B",
-              }}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function AdviceSection({
-  doList,
-  avoidList,
-  locale,
-}: {
-  doList: string[];
-  avoidList: string[];
-  locale: string;
-}) {
-  const doLabel = locale === "en" ? "Good for today" : locale === "zh" ? "今日宜" : "วันนี้เหมาะกับ";
-  const avoidLabel = locale === "en" ? "Avoid today" : locale === "zh" ? "今日忌" : "ควรเลี่ยง";
-
-  return (
-    <div className="space-y-3.5">
-      {doList.length > 0 && (
-        <div
-          className="rounded-2xl px-5 py-4 border border-emerald-500/25 bg-emerald-500/6"
-        >
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-3">
-            ✓ {doLabel}
-          </p>
-          <ul className="space-y-2">
-            {doList.map((item, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-sm text-[#E2E8F0]">
-                <span className="text-emerald-400 mt-0.5 text-xs shrink-0">●</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {avoidList.length > 0 && (
-        <div
-          className="rounded-2xl px-5 py-4 border border-rose-500/20 bg-rose-500/5"
-        >
-          <p className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-400 mb-3">
-            ✕ {avoidLabel}
-          </p>
-          <ul className="space-y-2">
-            {avoidList.map((item, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-sm text-[#E2E8F0]">
-                <span className="text-rose-400 mt-0.5 text-xs shrink-0">●</span>
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function DomainAdviceRow({
-  label,
-  status,
-  title,
-}: {
-  label: string;
-  status: "excellent" | "good" | "warning";
-  title: string;
-}) {
-  const icon = status === "excellent" ? "✦" : status === "good" ? "•" : "△";
-  const color =
-    status === "excellent" ? "text-emerald-400" :
-    status === "good"      ? "text-[#C6A96B]" :
-    "text-amber-400";
-
-  return (
-    <div className="flex items-start gap-3 py-2.5 border-b border-white/5 last:border-0">
-      <span className={`${color} text-xs mt-0.5 w-3 shrink-0 font-bold`}>{icon}</span>
-      <div className="min-w-0">
-        <span className="text-[10px] font-black uppercase tracking-widest text-[#94A3B8] block leading-none mb-0.5">
-          {label}
-        </span>
-        <p className="text-sm text-[#E2E8F0] leading-snug">{title}</p>
-      </div>
     </div>
   );
 }
@@ -473,23 +360,26 @@ function LoginRewardToast({
   }, [onClose]);
 
   return (
-    <div
-      className="fixed top-16 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none md:top-4"
-    >
+    <div className="fixed top-16 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none md:top-4">
       <div
-        className="flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-2xl pointer-events-auto animate-fade-up"
-        style={{
-          background: "rgba(2,6,23,0.95)",
-          backdropFilter: "blur(24px)",
-          borderColor: "rgba(198,169,107,0.4)",
-        }}
+        className="flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-2xl pointer-events-auto animate-fade-up card-glass-premium"
+        style={{ borderColor: "rgba(198,169,107,0.4)" }}
       >
         <div className="text-2xl">⏳</div>
         <div>
-          <p className="text-sm font-bold text-[#C6A96B]">+{reward.earned} ทรายกาลเวลา</p>
-          <p className="text-xs text-[#94A3B8]">{reward.message} · คงเหลือ {reward.newBalance}</p>
+          <p className="text-sm font-bold text-[#C6A96B]">
+            +{reward.earned} ทรายกาลเวลา
+          </p>
+          <p className="text-xs text-[#94A3B8]">
+            {reward.message} · คงเหลือ {reward.newBalance}
+          </p>
         </div>
-        <button onClick={onClose} className="ml-2 text-[#64748B] hover:text-white text-xs">✕</button>
+        <button
+          onClick={onClose}
+          className="ml-2 text-[#64748B] hover:text-white text-xs"
+        >
+          ✕
+        </button>
       </div>
     </div>
   );
@@ -501,34 +391,48 @@ export default function TodayScreen() {
   const { revalidate } = useRevalidator();
   const { t, i18n } = useTranslation("common");
 
-  const { profile, loginReward, pendingCount, goldenWindows, dailyScore,
-          doList, avoidList, dailyAdvice, yam, moon, yamEndTimeISO } = d;
+  const {
+    profile,
+    loginReward,
+    pendingCount,
+    bkkDateStr,
+    thaiDateLabel: initialDateLabel,
+    yam,
+    moon,
+    yamEndTimeISO,
+    dayIntelligence,
+    wisdomIntelligence,
+    todayAppointments,
+    doList,
+    avoidList,
+  } = d;
 
   const displayName = profile?.display_name ?? t("auth.user", "คุณ");
-  const isPro = profile?.role === "admin" || profile?.role === "operator" ||
-                profile?.plan === "imperial" || profile?.plan === "pro";
-  const hasBirth = !!(profile?.birth_date);
   const locale = i18n.language;
 
   // ── Live date label ──
-  const [dateLabel, setDateLabel] = useState("");
+  const [dateLabel, setDateLabel] = useState(initialDateLabel || "");
   const [greeting, setGreeting] = useState("");
   const [showReward, setShowReward] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
 
   useEffect(() => {
-    const h = new Date().getHours();
+    const now = new Date();
+    const h = now.getHours();
+    const m = now.getMinutes();
     setGreeting(
-      h < 5  ? "ราตรีสวัสดิ์" :
-      h < 12 ? "อรุณสวัสดิ์" :
-      h < 17 ? "สวัสดีตอนบ่าย" :
-      "สวัสดีตอนเย็น"
+      h < 6 || (h === 6 && m < 1)
+        ? "ราตรีสวัสดิ์"
+        : h < 12
+        ? "อรุณสวัสดิ์"
+        : h < 17
+        ? "สวัสดีตอนบ่าย"
+        : "สวัสดีตอนเย็น"
     );
 
-    const thaiLocale = locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "th-TH";
-    setDateLabel(new Date().toLocaleDateString(thaiLocale, {
-      weekday: "long", day: "numeric", month: "long", year: "numeric"
-    }));
+    const thaiLocale =
+      locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "th-TH";
+    setDateLabel(getAstrologicalThaiFormattedDate(now, thaiLocale));
 
     if (loginReward?.success && loginReward.earned > 0) {
       setShowReward(true);
@@ -540,7 +444,10 @@ export default function TodayScreen() {
     if (!yamEndTimeISO) return;
     const update = () => {
       const diff = new Date(yamEndTimeISO).getTime() - Date.now();
-      if (diff <= 0) { setTimeLeft(""); return; }
+      if (diff <= 0) {
+        setTimeLeft("");
+        return;
+      }
       const min = Math.floor(diff / 60_000);
       const sec = Math.floor((diff % 60_000) / 1000);
       setTimeLeft(`${min}:${String(sec).padStart(2, "0")}`);
@@ -550,24 +457,28 @@ export default function TodayScreen() {
     return () => clearInterval(id);
   }, [yamEndTimeISO]);
 
-  // Periodic revalidation
+  // Periodic revalidation every 60s
   useEffect(() => {
     const id = setInterval(revalidate, 60_000);
     return () => clearInterval(id);
   }, [revalidate]);
 
   const yamLevelColor =
-    yam.level === "excellent" ? "#4ADE80" :
-    yam.level === "very_good" ? "#60A5FA" :
-    yam.level === "good"      ? "#C6A96B" : "#F87171";
+    yam.level === "excellent"
+      ? "#10B981"
+      : yam.level === "very_good"
+      ? "#60A5FA"
+      : yam.level === "good"
+      ? "#C6A96B"
+      : "#F87171";
 
-  const titleLabel = locale === "en" ? "Today" : locale === "zh" ? "今日" : "วันนี้";
-  const yourDayLabel = locale === "en" ? "Your Day" : locale === "zh" ? "今日运势" : "วันนี้ของคุณ";
-  const goldenTimeLabel = locale === "en" ? "Golden Windows" : locale === "zh" ? "今日吉时" : "ช่วงเวลาทอง";
-  const findTimingLabel = locale === "en" ? "🔎 Find My Best Time" : locale === "zh" ? "🔎 为我寻找吉时" : "🔎 หาฤกษ์ให้ฉัน";
+  const goldenWindow = dayIntelligence.goldenWindow;
 
   return (
-    <div className="max-w-xl mx-auto space-y-5 pt-1 px-3 sm:px-4" style={{ paddingBottom: "calc(80px + env(safe-area-inset-bottom, 0px))" }}>
+    <div
+      className="max-w-2xl mx-auto space-y-6 pt-1 px-3 sm:px-4"
+      style={{ paddingBottom: "calc(84px + env(safe-area-inset-bottom, 0px))" }}
+    >
       {/* ── Login Reward Toast ── */}
       {showReward && loginReward && (
         <LoginRewardToast
@@ -578,7 +489,10 @@ export default function TodayScreen() {
 
       {/* ── Admin Pending Badge ── */}
       {pendingCount > 0 && (
-        <Link to="/admin/approvals" className="flex items-center justify-between px-5 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-bold hover:bg-amber-500/15 transition-colors">
+        <Link
+          to="/admin/approvals"
+          className="flex items-center justify-between px-5 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm font-bold hover:bg-amber-500/15 transition-colors"
+        >
           <span>⚡ มี {pendingCount} คำขออนุมัติรอดำเนินการ</span>
           <span className="text-xs">→</span>
         </Link>
@@ -586,15 +500,19 @@ export default function TodayScreen() {
 
       {/* ── HEADER ── */}
       <div className="pt-1 animate-fade-up">
-        <p
-          className="text-[11px] font-black uppercase tracking-[0.25em] text-[#C6A96B] opacity-80 mb-0.5 min-h-[14px]"
-          suppressHydrationWarning
-        >
-          {greeting}
-        </p>
-        <h1 className="font-display text-3xl font-extrabold text-[#F8F6F1] leading-tight">
-          {titleLabel}{" "}
-          <span className="text-[#C6A96B]">{displayName}</span>
+        <div className="flex items-center justify-between">
+          <p
+            className="text-[11px] font-black uppercase tracking-[0.25em] text-[#C6A96B] min-h-[14px]"
+            suppressHydrationWarning
+          >
+            {greeting}
+          </p>
+          <span className="text-[11px] font-semibold text-[#C6B79F] px-2.5 py-0.5 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/10">
+            {dayIntelligence.lunarDayInfo.lunarDateStr}
+          </span>
+        </div>
+        <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-[#F8F6F1] leading-tight mt-1">
+          วันนี้ของ <span className="text-[#C6A96B]">{displayName}</span>
         </h1>
         <p
           className="text-xs text-[#94A3B8] mt-1 tracking-wide min-h-[16px]"
@@ -604,158 +522,436 @@ export default function TodayScreen() {
         </p>
       </div>
 
-      {/* ── CARD 1: วันนี้ของคุณ (Daily Energy Score) ── */}
-      <div
-        className="rounded-3xl p-6 border border-[#C6A96B]/25 overflow-hidden relative animate-fade-up"
-        style={{
-          background: "linear-gradient(135deg, rgba(10,34,64,0.7) 0%, rgba(2,6,23,0.9) 100%)",
-          backdropFilter: "blur(24px)",
-        }}
-      >
-        {/* Cosmic decorative glow */}
-        <div className="absolute -top-8 -right-8 w-40 h-40 rounded-full blur-2xl pointer-events-none opacity-40"
-          style={{ background: "radial-gradient(circle, #C6A96B40 0%, transparent 70%)" }} />
+      {/* ── CARD 1: HERO - สรุปพลังงานและธีมประจำวัน (The Daily Theme & Energy) ── */}
+      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/30 overflow-hidden relative animate-fade-up card-glass-premium shadow-xl">
+        <div
+          className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-40"
+          style={{
+            background: "radial-gradient(circle, #C6A96B50 0%, transparent 70%)",
+          }}
+        />
 
-        <div className="relative flex items-center gap-6">
-          <ScoreRing score={dailyScore} />
-          <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#C6A96B] mb-1">
-              {yourDayLabel}
+        <div className="relative flex flex-col sm:flex-row items-center sm:items-start gap-5 sm:gap-6">
+          <ScoreRing score={dayIntelligence.overallScore} />
+
+          <div className="flex-1 min-w-0 text-center sm:text-left">
+            <span className="inline-block text-[10px] font-black uppercase tracking-[0.22em] text-[#C6A96B] mb-1">
+              DAILY THEME
+            </span>
+            <h2 className="font-display text-lg sm:text-xl font-black text-[#F8F6F1] leading-snug">
+              {dayIntelligence.dailyTheme}
+            </h2>
+            <p className="text-xs sm:text-sm text-[#CBD5E1] mt-2 leading-relaxed">
+              {dayIntelligence.dailySummary}
             </p>
 
-            {/* Current Yam Live Badge */}
-            <div className="flex items-center gap-2 mb-3">
-              <div
-                className="w-2 h-2 rounded-full animate-pulse shrink-0"
-                style={{ background: yamLevelColor }}
-              />
-              <span className="text-xs text-[#C6B79F] font-semibold truncate">
-                ยามปัจจุบัน:{" "}
-                <span className="font-bold" style={{ color: yamLevelColor }}>
-                  {yam.name}
+            {/* Live Yam and Moon Status Bar */}
+            <div className="mt-4 pt-3 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <div
+                  className="w-2 h-2 rounded-full animate-pulse shrink-0"
+                  style={{ background: yamLevelColor }}
+                />
+                <span className="text-[#C6B79F] font-semibold">
+                  ยามขณะนี้:{" "}
+                  <span className="font-bold" style={{ color: yamLevelColor }}>
+                    {yam.name}
+                  </span>
                 </span>
-              </span>
-              <span
-                className="text-[10px] text-[#64748B] font-mono ml-auto shrink-0 min-w-[40px] text-right"
-                suppressHydrationWarning
-              >
-                {timeLeft}
-              </span>
-            </div>
-
-            {/* Moon Phase */}
-            <div className="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
-              <span>{moon.isWanPhra ? "🙏" : "🌙"}</span>
-              <span>
-                {moon.phase}
-                {moon.isWanPhra && (
-                  <span className="ml-1 text-amber-400 font-bold">วันพระ</span>
+                {timeLeft && (
+                  <span
+                    className="text-[10px] text-[#94A3B8] font-mono"
+                    suppressHydrationWarning
+                  >
+                    (เหลือ {timeLeft})
+                  </span>
                 )}
-              </span>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
+                <span>{moon.isWanPhra ? "🙏" : "🌙"}</span>
+                <span>{moon.phase}</span>
+                {moon.isWanPhra && (
+                  <span className="text-amber-400 font-bold ml-1 bg-amber-400/10 px-1.5 py-0.5 rounded">
+                    วันพระ
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
-
-        {/* Domain Advice Preview (work, wealth, love, health) */}
-        {dailyAdvice && (
-          <div className="mt-5 pt-4 border-t border-white/8 space-y-0">
-            <DomainAdviceRow
-              label={locale === "en" ? "Career" : locale === "zh" ? "事业" : "การงาน"}
-              status={dailyAdvice.work.status}
-              title={dailyAdvice.work.title}
-            />
-            <DomainAdviceRow
-              label={locale === "en" ? "Wealth" : locale === "zh" ? "财运" : "การเงิน"}
-              status={dailyAdvice.wealth.status}
-              title={dailyAdvice.wealth.title}
-            />
-            <DomainAdviceRow
-              label={locale === "en" ? "Relationships" : locale === "zh" ? "感情" : "ความรัก"}
-              status={dailyAdvice.love.status}
-              title={dailyAdvice.love.title}
-            />
-            <DomainAdviceRow
-              label={locale === "en" ? "Health" : locale === "zh" ? "健康" : "สุขภาพ"}
-              status={dailyAdvice.health.status}
-              title={dailyAdvice.health.title}
-            />
-          </div>
-        )}
-
-        {!hasBirth && (
-          <div className="mt-4 pt-3 border-t border-white/8">
-            <p className="text-xs text-[#94A3B8] text-center">
-              <Link to="/dashboard/settings" className="text-[#C6A96B] font-bold underline underline-offset-2">
-                ใส่วันเกิดของคุณ
-              </Link>{" "}
-              เพื่อดูพลังงานประจำวันที่แม่นยำ
-            </p>
-          </div>
-        )}
       </div>
 
-      {/* ── CARD 2: ช่วงเวลาทอง (Golden Windows) ── */}
-      <div
-        className="rounded-3xl p-5 border border-[#C6A96B]/20 animate-fade-up"
-        style={{
-          background: "rgba(10,34,64,0.55)",
-          backdropFilter: "blur(20px)",
-        }}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#C6A96B]">
-            ⭐ {goldenTimeLabel}
+      {/* ── CARD 2: ⭐ GOLDEN WINDOW SPOTLIGHT ── */}
+      {goldenWindow && (
+        <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/50 overflow-hidden relative animate-fade-up card-glass-gold shadow-lg shadow-[#C6A96B]/10">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">⭐</span>
+              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#F2D49B]">
+                ช่วงเวลาทองคำสูงสุดของวัน
+              </p>
+            </div>
+            <span className="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+              คะแนน {goldenWindow.score}%
+            </span>
+          </div>
+
+          <div className="mt-2 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
+            <div>
+              <span className="font-display text-2xl sm:text-3xl font-extrabold text-[#F8F6F1] tracking-tight">
+                {goldenWindow.startTime} – {goldenWindow.endTime} น.
+              </span>
+              <p className="text-xs sm:text-sm text-[#E2E8F0] mt-1.5 leading-relaxed">
+                {goldenWindow.plainAdvice}
+              </p>
+            </div>
+          </div>
+
+          {/* Suitable activities tags */}
+          {goldenWindow.suitableFor && goldenWindow.suitableFor.length > 0 && (
+            <div className="mt-4 flex flex-wrap gap-1.5">
+              {goldenWindow.suitableFor.map((act, i) => (
+                <span
+                  key={i}
+                  className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 text-[#F8F6F1] border border-white/15"
+                >
+                  ✓ {act}
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* CTA: ใช้นัดหมายช่วงเวลานี้ */}
+          <div className="mt-5 pt-4 border-t border-[#C6A96B]/25 flex items-center justify-between">
+            <p className="text-xs text-[#C6B79F]">
+              ใช้จังหวะเวลานี้ให้เกิดประโยชน์สูงสุด
+            </p>
+            <Link
+              to={`/dashboard/calendar?date=${bkkDateStr}&time=${goldenWindow.startTime}`}
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-[#020617] bg-gradient-to-r from-[#C6A96B] via-[#F2D49B] to-[#C6A96B] hover:opacity-95 active:scale-95 transition-all shadow-md shadow-[#C6A96B]/20"
+            >
+              <span>✨ ใช้นัดหมายช่วงนี้</span>
+              <span>→</span>
+            </Link>
+          </div>
+        </div>
+      )}
+
+      {/* ── CARD 3: 4 LIFE DOMAINS & DO/AVOID GUIDANCE ── */}
+      <div className="rounded-3xl p-5 sm:p-6 border border-white/10 animate-fade-up card-glass space-y-5">
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#C6A96B]">
+            จังหวะพลังงาน 4 มิติชีวิต
           </p>
           <Link
-            to="/dashboard/check-yam"
-            className="text-[10px] text-[#64748B] hover:text-[#C6A96B] font-bold transition-colors"
+            to="/dashboard/calendar"
+            className="text-xs text-[#94A3B8] hover:text-[#C6A96B] font-semibold transition-colors"
           >
-            ดูทั้งหมด →
+            ดูผังทั้งวัน →
           </Link>
         </div>
 
-        <div className="space-y-2.5">
-          {goldenWindows.length > 0 ? (
-            goldenWindows.map((w, i) => (
-              <GoldenWindowCard key={i} window={w} isTop={i === 0} />
-            ))
-          ) : (
-            <p className="text-sm text-[#64748B] text-center py-4">
-              ยังไม่มีช่วงเวลาทองในวันนี้
-            </p>
+        {/* 4 Domains Bar Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          {dayIntelligence.domainScores.map((domain, idx) => (
+            <div
+              key={idx}
+              className="p-3.5 rounded-2xl border border-white/8 bg-white/4 space-y-2"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-base">{domain.icon}</span>
+                  <span className="text-xs font-bold text-[#F8F6F1]">
+                    {domain.label}
+                  </span>
+                </div>
+                <span
+                  className="text-xs font-black tabular-nums"
+                  style={{
+                    color:
+                      domain.score >= 80
+                        ? "#10B981"
+                        : domain.score >= 60
+                        ? "#C6A96B"
+                        : "#F59E0B",
+                  }}
+                >
+                  {domain.score}%
+                </span>
+              </div>
+              <div className="w-full h-1.5 rounded-full bg-white/10 overflow-hidden">
+                <div
+                  className="h-full rounded-full transition-all duration-700"
+                  style={{
+                    width: `${domain.score}%`,
+                    background:
+                      domain.score >= 80
+                        ? "#10B981"
+                        : domain.score >= 60
+                        ? "#C6A96B"
+                        : "#F59E0B",
+                  }}
+                />
+              </div>
+              <p className="text-[11px] text-[#CBD5E1] line-clamp-1">
+                {domain.verdict}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Do & Avoid lists */}
+        <div className="pt-3 border-t border-white/8 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {doList.length > 0 && (
+            <div className="p-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/8">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-2">
+                ✓ วันนี้ส่งเสริม
+              </p>
+              <ul className="space-y-1.5">
+                {doList.slice(0, 3).map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-xs text-[#E2E8F0]"
+                  >
+                    <span className="text-emerald-400 mt-0.5 text-[10px]">●</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {avoidList.length > 0 && (
+            <div className="p-3.5 rounded-2xl border border-rose-500/20 bg-rose-500/8">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-400 mb-2">
+                ✕ ควรหลีกเลี่ยง / รอบคอบ
+              </p>
+              <ul className="space-y-1.5">
+                {avoidList.slice(0, 3).map((item, i) => (
+                  <li
+                    key={i}
+                    className="flex items-start gap-2 text-xs text-[#E2E8F0]"
+                  >
+                    <span className="text-rose-400 mt-0.5 text-[10px]">●</span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       </div>
 
-      {/* ── CARD 3: วันนี้เหมาะกับ / ควรเลี่ยง ── */}
-      <div
-        className="rounded-3xl p-5 border border-white/10 animate-fade-up"
-        style={{
-          background: "rgba(10,34,64,0.45)",
-          backdropFilter: "blur(20px)",
-        }}
-      >
-        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[#94A3B8] mb-4">
-          📋 {locale === "en" ? "Today's Guidance" : locale === "zh" ? "今日建议" : "คำแนะนำประจำวัน"}
-        </p>
-        <AdviceSection doList={doList} avoidList={avoidList} locale={locale} />
+      {/* ── CARD 4: 🧠 PERSONAL WISDOM REFLECTION (ปัญญาชีวิตเฉพาะตน) ── */}
+      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/25 animate-fade-up card-glass space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🧠</span>
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#C6A96B]">
+              ปัญญาชีวิตเฉพาะตน (PERSONAL WISDOM)
+            </p>
+          </div>
+          <Link
+            to="/dashboard/settings?tab=wisdom"
+            className="text-xs text-[#94A3B8] hover:text-[#C6A96B] font-semibold transition-colors"
+          >
+            คลังปัญญา →
+          </Link>
+        </div>
+
+        {wisdomIntelligence && wisdomIntelligence.hasSufficientData ? (
+          <div className="space-y-3">
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+              <p className="text-xs sm:text-sm text-[#F8F6F1] leading-relaxed italic">
+                "{wisdomIntelligence.summary}"
+              </p>
+            </div>
+
+            {/* Top Pattern Highlight */}
+            {wisdomIntelligence.patterns && wisdomIntelligence.patterns.length > 0 && (
+              <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-[#C6A96B]/10 border border-[#C6A96B]/25 text-xs text-[#F2D49B]">
+                <span className="text-base">
+                  {wisdomIntelligence.patterns[0].icon || "⚡"}
+                </span>
+                <span className="font-bold">
+                  {wisdomIntelligence.patterns[0].title}:{" "}
+                  {wisdomIntelligence.patterns[0].highlight}
+                </span>
+              </div>
+            )}
+
+            {/* Quick Stats Chips */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] text-[#94A3B8]">
+              <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
+                ถามแล้ว {wisdomIntelligence.stats.totalQueries} ครั้ง
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10">
+                ติดตามผล {wisdomIntelligence.stats.trackedOutcomes} ครั้ง
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/25 font-bold">
+                ความแม่นยำ {wisdomIntelligence.stats.successRate}%
+              </span>
+            </div>
+          </div>
+        ) : (
+          <div className="p-4 rounded-2xl bg-white/4 border border-white/8 flex flex-col sm:flex-row items-center sm:items-start gap-4">
+            <div className="text-3xl sm:text-2xl">🌱</div>
+            <div className="space-y-1 text-center sm:text-left">
+              <p className="text-xs sm:text-sm font-bold text-[#F8F6F1]">
+                เริ่มสะสมสถิติจังหวะชีวิตของคุณ
+              </p>
+              <p className="text-xs text-[#94A3B8] leading-relaxed">
+                เมื่อคุณสอบถามฤกษ์และบันทึกผลลัพธ์หลังลงมือทำ
+                ระบบจะวิเคราะห์และสะท้อนช่วงเวลาที่ดีที่สุดเฉพาะตัวคุณที่นี่
+              </p>
+            </div>
+            <Link
+              to="/dashboard/settings?tab=wisdom"
+              className="mt-2 sm:mt-0 sm:ml-auto shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold text-[#C6A96B] border border-[#C6A96B]/40 bg-[#C6A96B]/10 hover:bg-[#C6A96B]/20 transition-all"
+            >
+              ดูสถิติ
+            </Link>
+          </div>
+        )}
       </div>
 
-      {/* ── CTA: หาฤกษ์ให้ฉัน ── */}
-      <Link
-        to="/dashboard/check-yam"
-        className="block w-full text-center font-display font-black text-lg tracking-wide py-5 rounded-2xl transition-all active:scale-[0.98] hover:scale-[1.01] shadow-xl shadow-[#C6A96B]/20 animate-fade-up"
-        style={{
-          background: "linear-gradient(135deg, #C6A96B 0%, #F2D49B 50%, #C6A96B 100%)",
-          color: "#020617",
-          minHeight: "56px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        {findTimingLabel}
-      </Link>
+      {/* ── CARD 5: 📅 TODAY'S APPOINTMENTS (นัดหมายวันนี้) ── */}
+      <div className="rounded-3xl p-5 sm:p-6 border border-white/10 animate-fade-up card-glass space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📅</span>
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#C6A96B]">
+              นัดหมายและกิจกรรมวันนี้
+            </p>
+          </div>
+          <Link
+            to={`/dashboard/calendar?date=${bkkDateStr}`}
+            className="text-xs text-[#94A3B8] hover:text-[#C6A96B] font-semibold transition-colors"
+          >
+            + เพิ่มนัดหมาย →
+          </Link>
+        </div>
+
+        {todayAppointments.length > 0 ? (
+          <div className="space-y-2.5">
+            {todayAppointments.map((app) => (
+              <div
+                key={app.id}
+                className="flex items-center justify-between p-3.5 rounded-2xl border border-white/8 bg-white/4 hover:bg-white/7 transition-all"
+              >
+                <div className="min-w-0 pr-3">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-[#C6A96B]">
+                      {app.event_time} น.
+                    </span>
+                    <span className="text-xs font-bold text-[#F8F6F1] truncate">
+                      {app.title}
+                    </span>
+                  </div>
+                  {app.advice && (
+                    <p className="text-[11px] text-[#94A3B8] mt-1 line-clamp-1">
+                      {app.advice}
+                    </p>
+                  )}
+                </div>
+
+                <div className="shrink-0 flex items-center gap-2">
+                  <span
+                    className="px-2.5 py-1 rounded-full text-[11px] font-black"
+                    style={{
+                      backgroundColor:
+                        app.score >= 80
+                          ? "rgba(16,185,129,0.15)"
+                          : "rgba(198,169,107,0.15)",
+                      color: app.score >= 80 ? "#10B981" : "#C6A96B",
+                      border: `1px solid ${
+                        app.score >= 80
+                          ? "rgba(16,185,129,0.3)"
+                          : "rgba(198,169,107,0.3)"
+                      }`,
+                    }}
+                  >
+                    {app.score}%
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-4 rounded-2xl bg-white/4 border border-white/8 text-center space-y-2">
+            <p className="text-xs text-[#94A3B8]">
+              ยังไม่มีนัดหมายที่ลงบันทึกไว้ในวันนี้
+            </p>
+            <Link
+              to={`/dashboard/calendar?date=${bkkDateStr}${
+                goldenWindow ? `&time=${goldenWindow.startTime}` : ""
+              }`}
+              className="inline-block text-xs font-bold text-[#C6A96B] hover:underline"
+            >
+              + วางแผนนัดหมายใหม่สำหรับวันนี้
+            </Link>
+          </div>
+        )}
+      </div>
+
+      {/* ── QUICK ACTION HUB: 3 ESSENTIAL ACTIONS ── */}
+      <div className="pt-2 animate-fade-up space-y-3">
+        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-center text-[#94A3B8]">
+          เครื่องมือตัดสินใจด่วน
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <Link
+            to="/dashboard/check-yam"
+            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-[#C6A96B]/40 bg-gradient-to-br from-[#C6A96B]/15 to-[#4B6FAE]/10 hover:border-[#C6A96B] transition-all group active:scale-95 text-left sm:text-center"
+          >
+            <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
+              ⚡
+            </span>
+            <div>
+              <p className="text-xs font-black text-[#F8F6F1]">ถามฤกษ์ด่วน</p>
+              <p className="text-[10px] text-[#C6B79F] mt-0.5">
+                ประเมินจังหวะเวลานี้
+              </p>
+            </div>
+            <span className="sm:hidden text-xs text-[#C6A96B]">→</span>
+          </Link>
+
+          <Link
+            to="/dashboard/calendar"
+            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-white/10 bg-white/5 hover:border-[#C6A96B]/50 transition-all group active:scale-95 text-left sm:text-center card-glass"
+          >
+            <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
+              📅
+            </span>
+            <div>
+              <p className="text-xs font-black text-[#F8F6F1]">ปฏิทินทั้งเดือน</p>
+              <p className="text-[10px] text-[#94A3B8] mt-0.5">
+                วางแผนล่วงหน้า 100 ปี
+              </p>
+            </div>
+            <span className="sm:hidden text-xs text-[#94A3B8]">→</span>
+          </Link>
+
+          <Link
+            to="/dashboard/horoscope"
+            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-white/10 bg-white/5 hover:border-[#C6A96B]/50 transition-all group active:scale-95 text-left sm:text-center card-glass"
+          >
+            <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
+              🛡️
+            </span>
+            <div>
+              <p className="text-xs font-black text-[#F8F6F1]">
+                ผังดวงจักรพรรดิ
+              </p>
+              <p className="text-[10px] text-[#94A3B8] mt-0.5">
+                ตรวจดวงชะตาเลข 7 ตัว
+              </p>
+            </div>
+            <span className="sm:hidden text-xs text-[#94A3B8]">→</span>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }

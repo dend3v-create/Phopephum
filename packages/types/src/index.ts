@@ -527,3 +527,590 @@ export const DEFAULT_TIMING_REMINDER_SETTINGS: TimingReminderSettings = {
   appointmentLeadMinutes: 30,
   enableLineNotify: false,
 };
+
+// ─── STEP 6: Economic, Membership & Sands Architecture ────────────────────────
+export type CanonicalPlan = "free" | "premium" | "pro" | "master";
+export type LegacyPlan = "basic" | "imperial" | "lifetime";
+export type MembershipPlan = CanonicalPlan | LegacyPlan;
+
+export type MembershipStatus = "active" | "expired" | "pending" | "canceled";
+
+export type SandsRewardClass = "daily_ritual" | "wisdom" | "community" | "spend" | "adjustment";
+
+export type SandsActivityType =
+  // Daily Rituals
+  | "daily_login"
+  | "checkin"
+  | "intention"
+  | "reflection"
+  | "golden_window_action"
+  // Wisdom
+  | "outcome_tracking"
+  | "meaningful_feedback"
+  | "streak_7d"
+  // Community
+  | "referral_signup"
+  | "friend_first_action"
+  | "creator_contribution"
+  // Spend / Redemption / Purchase
+  | "ai_report_redeem"
+  | "timing_comparison_redeem"
+  | "wisdom_deep_dive"
+  | "calendar_lookahead"
+  | "consultation_voucher"
+  | "sands_purchase"
+  // Adjustment
+  | "admin_adjustment";
+
+export interface SandsLedgerEntry {
+  id: string;
+  userId: string;
+  amount: number; // positive = earn, negative = spend
+  balanceBefore: number;
+  balanceAfter: number;
+  rewardClass: SandsRewardClass;
+  activityType: SandsActivityType;
+  referenceId?: string | null;
+  description?: string | null;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+}
+
+export interface SandsDailySummary {
+  currentBalance: number;
+  todayEarned: number;
+  dailyCap: number;
+  remainingDailyQuota: number;
+  isDailyCapReached: boolean;
+}
+
+export interface SandsRedemptionItem {
+  id: string;
+  title: string;
+  description: string;
+  sandsCost: number;
+  activityType: SandsActivityType;
+  eligiblePlans: CanonicalPlan[];
+  icon: string;
+  badge?: string;
+  isCampaignBenefit?: boolean;
+}
+
+export type PaymentProviderType = "stripe" | "opn" | "gbprimepay" | "promptpay" | "manual_slip";
+export type PaymentStatus = "pending" | "paid" | "failed" | "refunded";
+
+export interface PaymentTransaction {
+  id: string;
+  userId: string;
+  provider: PaymentProviderType;
+  providerTransactionId?: string | null;
+  planId: string;
+  amount: number;
+  currency: string;
+  status: PaymentStatus;
+  metadata?: Record<string, unknown>;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EntitlementPolicy {
+  plan: CanonicalPlan;
+  maxDailyAppointments: number;
+  maxSavedCustomers: number;
+  maxTimingComparisons: number;
+  aiReportsMonthlyQuota: number;
+  calendarLookaheadDays: number;
+  canExportWhitelabelPdf: boolean;
+  canUseTimingReminders: boolean;
+  canAccessPersonalPatterns: boolean;
+}
+
+// ─── STEP 6.5: Affiliate & Partner Economy Contracts (V3 Architecture) ───────
+export type PartnerEntityType = "individual" | "corporate";
+export type PartnerTier = "affiliate" | "creator" | "partner_pro" | "institutional" | "master";
+export type PartnerStatus = "active" | "suspended" | "pending_kyc";
+export type PartnerVerificationStatus = "unverified" | "pending_review" | "verified" | "rejected";
+
+export interface PartnerTermsVersion {
+  version: string;
+  title: string;
+  documentUrl: string;
+  documentChecksum: string;
+  effectiveFrom: string;
+  isActive: boolean;
+}
+
+export interface PartnerTermsAcceptance {
+  id: string;
+  partnerId: string;
+  termsVersion: string;
+  ipHash: string;
+  userAgentHash: string;
+  acceptedAt: string;
+}
+
+export interface PartnerEntity {
+  id: string;
+  userId: string;
+  partnerCode: string;
+  tierCode: PartnerTier;
+  status: PartnerStatus;
+  verificationStatus: PartnerVerificationStatus;
+  
+  // 3-Balance Model + Clawback Debt (Materialized Cache from partner_ledger)
+  holdingBalance: number;
+  availableBalance: number;
+  payoutPendingBalance: number;
+  clawbackPendingBalance?: number;
+  
+  totalEarned: number;
+  totalWithdrawn: number;
+  lifetimeReferredCount: number;
+  retentionPolicy: string;
+  retentionUntil?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Backwards compatibility alias
+export type PartnerProfileRecord = PartnerEntity & {
+  tier: PartnerTier;
+  commissionRate: number;
+  bankName?: string | null;
+  bankAccountNo?: string | null;
+  bankAccountName?: string | null;
+  promptpayId?: string | null;
+  taxId?: string | null;
+  legalName?: string | null;
+  entityType?: PartnerEntityType | null;
+  isVatRegistered?: boolean;
+};
+
+export interface PartnerTaxProfile {
+  id: string;
+  partnerId: string;
+  entityType: PartnerEntityType;
+  taxId: string;
+  legalName: string;
+  registeredAddress: Record<string, unknown>;
+  isVatRegistered: boolean;
+  withholdingTaxExempt: boolean;
+  taxDocumentUrl?: string | null;
+  verificationNotes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PartnerPayoutDestination {
+  id: string;
+  partnerId: string;
+  payoutMethod: "bank_transfer" | "promptpay";
+  bankCode: string;
+  accountNumber: string;
+  accountName: string;
+  promptpayId?: string | null;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface TaxRule {
+  ruleCode: string;
+  description: string;
+  entityType: "individual" | "corporate" | "any";
+  withholdingRate: number;
+  minThresholdThb: number;
+  requiresTaxCertificate: boolean;
+  isActive: boolean;
+  effectiveFrom: string;
+  effectiveTo?: string | null;
+}
+
+export interface CommissionPlan {
+  id: string;
+  planCode: string;
+  planName: string;
+  planType: "recurring" | "first_month_only" | "campaign_promotional";
+  holdingPeriodDays: number;
+  isActive: boolean;
+  effectiveFrom: string;
+  effectiveTo?: string | null;
+}
+
+export interface CommissionPlanAssignment {
+  id: string;
+  assignmentScope: "tier" | "partner" | "campaign";
+  tierCode?: PartnerTier | null;
+  partnerId?: string | null;
+  campaignCode?: string | null;
+  planId: string;
+  priority: number;
+  effectiveFrom: string;
+  effectiveTo?: string | null;
+}
+
+export interface CommissionRateRule {
+  id: string;
+  planId: string;
+  subscriptionPlanCode: string;
+  ratePercentage: number;
+  fixedBonusThb: number;
+}
+
+export interface CommissionEvent {
+  id: string;
+  partnerId: string;
+  referredUserId: string;
+  subscriptionPaymentId: string;
+  subscriptionPlanCode: string;
+  grossAmountThb: number;
+  vatRate: number;
+  vatAmountThb: number;
+  commissionableAmountThb: number;
+  planIdApplied: string;
+  commissionRateApplied: number;
+  commissionAmountThb: number;
+  status: "holding" | "cleared" | "clawback_refunded" | "void";
+  holdingUntil: string;
+  idempotencyKey: string;
+  createdAt: string;
+}
+
+export interface PartnerCommissionItem {
+  id: string;
+  subscriptionPaymentId: string;
+  subscriptionPlanCode: string;
+  planName?: string;
+  maskedBuyerName: string; // Masked for privacy (e.g. "User #***8492" - NO PII)
+  grossAmountThb: number;
+  vatRate: number;
+  vatAmountThb: number;
+  commissionableAmountThb: number;
+  commissionRateApplied: number;
+  commissionAmountThb: number;
+  status: "holding" | "cleared" | "clawback_refunded" | "void";
+  holdingUntil: string;
+  isHoldingExpired: boolean;
+  createdAt: string;
+}
+
+export interface PartnerReferralPerformance {
+  totalClicks: number;
+  totalConverted: number;
+  conversionRate: number;
+  activeReferralsCount: number;
+  topCampaigns: Array<{ campaignCode: string; clicks: number; conversions: number }>;
+  recentReferrals: Array<{
+    maskedName: string;
+    tierOrPlan: string;
+    joinedAt: string;
+  }>;
+}
+
+export type PartnerLedgerEntryType =
+  | "commission_holding_in"
+  | "commission_cleared"
+  | "commission_clawback"
+  | "payout_reserved"
+  | "payout_settled"
+  | "payout_rejected"
+  | "manual_adjustment"
+  // Legacy compatibility types
+  | "commission_earned"
+  | "holding_cleared"
+  | "payout_requested"
+  | "payout_refund_reversal";
+
+export interface PartnerLedgerEntry {
+  id: string;
+  partnerId: string;
+  entryType: PartnerLedgerEntryType;
+  amount: number;
+  holdingBalanceBefore: number;
+  holdingBalanceAfter: number;
+  availableBalanceBefore: number;
+  availableBalanceAfter: number;
+  payoutPendingBefore: number;
+  payoutPendingAfter: number;
+  referenceType: string;
+  referenceId: string;
+  idempotencyKey: string;
+  notes?: string | null;
+  description?: string | null;
+  createdAt: string;
+  
+  // Legacy aliases
+  status?: string;
+  balanceBefore?: number;
+  balanceAfter?: number;
+  referredUserId?: string | null;
+  holdingUntil?: string | null;
+}
+
+export type PayoutRequestStatus =
+  | "pending_review"
+  | "approved"
+  | "processing"
+  | "reconciling"
+  | "completed"
+  | "rejected"
+  | "failed"
+  | "cancelled"
+  | "manual_review"
+  | "pending"; // Legacy alias
+
+export type PayoutRetryClassification =
+  | "SAFE_TO_RETRY"
+  | "WAIT_FOR_PROVIDER"
+  | "MANUAL_REVIEW"
+  | "FINAL_FAILURE"
+  | "COMPLETED";
+
+export interface PayoutRequest {
+  id: string;
+  requestNumber: string;
+  partnerId: string;
+  requestedAmountThb: number;
+  taxRuleCodeApplied: string;
+  withholdingRateApplied: number;
+  withholdingTaxAmountThb: number;
+  netPayoutAmountThb: number;
+  destinationSnapshot: Record<string, unknown>;
+  status: PayoutRequestStatus;
+  rejectionReason?: string | null;
+  failureCode?: string | null;
+  failureMessage?: string | null;
+  failedAt?: string | null;
+  omiseTransferId?: string | null;
+  reviewedBy?: string | null;
+  reviewedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Backwards compatibility alias
+export type PayoutRequestRecord = PayoutRequest & {
+  amount: number;
+  whtAmount: number;
+  netPayout: number;
+  bankInfo: {
+    bankName: string;
+    accountNo: string;
+    accountName: string;
+    taxId?: string;
+  };
+};
+
+export interface PayoutTransaction {
+  id: string;
+  payoutRequestId: string;
+  actualTransferredAmountThb: number;
+  transferBankRef: string;
+  transferProofFileUrl: string;
+  whtCertificateNumber?: string | null;
+  transferredAt: string;
+  settledBy: string;
+  notes?: string | null;
+}
+
+export interface PartnerBenefit {
+  id: string;
+  partnerId: string;
+  benefitType: "consultation_discount" | "report_unlock_subsidy" | "workshop_access";
+  title: string;
+  description: string;
+  sandsRedeemCost: number;
+  benefitReferenceValueThb: number; // Closed-loop non-monetary reference value, NOT exchange rate
+  partnerSubsidyBudgetThb: number;
+  isActive: boolean;
+  expiresAt?: string | null;
+}
+
+// ─── PARTNER ONBOARDING & FINANCIAL ELIGIBILITY TYPES (STEP 7.2D.2) ───────────
+
+export type PartnerOnboardingStep =
+  | "applied"
+  | "profile_complete"
+  | "tax_profile_complete"
+  | "payout_destination_complete"
+  | "terms_accepted"
+  | "active";
+
+export type PartnerOnboardingStatus =
+  | "applied"
+  | "profile_complete"
+  | "tax_profile_complete"
+  | "payout_destination_complete"
+  | "terms_accepted"
+  | "active"
+  | "suspended"
+  | "rejected";
+
+export type PartnerEligibilityOperation = "referral" | "commission" | "payout";
+
+export interface PartnerEligibilityResult {
+  eligible: boolean;
+  partnerId: string;
+  partnerCode: string;
+  status: PartnerOnboardingStatus;
+  operation: PartnerEligibilityOperation;
+  missingRequirements: string[];
+  termsStatus: {
+    accepted: boolean;
+    activeVersion: string;
+    acceptedVersion?: string;
+  };
+  taxProfileValid: boolean;
+  payoutDestinationValid: boolean;
+  reason?: string;
+}
+
+// ─── FINANCIAL RECONCILIATION TYPES & CONTRACTS (STEP 7.2E) ─────────────────
+
+export interface FinancialReconciliationConfig {
+  reconcilingSlaHours: number; // Configurable SLA (Default: 48)
+  holdingMaturityPeriodDays: number; // Default: 14
+  holdingClearanceGraceHours: number; // Default: 2
+  minimumPayoutThresholdThb: number; // Default: 500.00
+  batchClearanceLimit: number; // Default: 100
+  maxAllowedDiscrepancyDeltaThb: number; // Strictly 0.00 (Zero Drift)
+}
+
+export type DiscrepancyCode =
+  | "DISC-01" // ORPHANED_COMMISSION
+  | "DISC-02" // MISSING_COMMISSION
+  | "DISC-03" // COMMISSION_AMOUNT_MISMATCH
+  | "DISC-04" // HOLDING_OVERDUE_CLEARANCE
+  | "DISC-05" // ORPHANED_OMISE_TRANSFER
+  | "DISC-06" // TRANSFER_SETTLEMENT_MISSING
+  | "DISC-07" // LEDGER_DRIFT_DETECTED
+  | "DISC-08"; // RECONCILING_SLA_EXCEEDED
+
+export type DiscrepancySeverity = "yellow" | "red";
+
+export interface ReconciliationRunRecord {
+  id: string;
+  runType: "hourly_surveillance" | "daily_deep_reconciliation" | "manual_audit";
+  status: "green" | "yellow" | "red";
+  totalPaymentsChecked: number;
+  totalCommissionsChecked: number;
+  totalTransfersChecked: number;
+  totalPartnersChecked: number;
+  discrepancyCount: number;
+  summaryMetadata: Record<string, unknown>;
+  startedAt: string;
+  completedAt: string;
+  createdAt: string;
+}
+
+export interface ReconciliationDiscrepancyRecord {
+  id: string;
+  runId: string;
+  discrepancyCode: DiscrepancyCode;
+  severity: DiscrepancySeverity;
+  partnerId?: string | null;
+  partnerCode?: string | null;
+  referenceTable?: string | null;
+  referenceId?: string | null;
+  expectedValue?: number | null;
+  actualValue?: number | null;
+  deltaThb?: number | null;
+  status: "open" | "investigating" | "resolved" | "dismissed";
+  resolutionNotes?: string | null;
+  resolvedBy?: string | null;
+  createdAt: string;
+  resolvedAt?: string | null;
+}
+
+// ─── PARTNER STATEMENT & 50 TAWI REPORTING TYPES (STEP 7.2F) ─────────────────
+
+export interface PartnerStatementLineItem {
+  id: string;
+  timestamp: string;
+  entryType: string;
+  description: string;
+  planCode?: string | null;
+  grossAmountThb?: number | null;
+  vatBaseThb?: number | null;
+  commissionRate?: number | null;
+  grossCommissionThb?: number | null;
+  holdingDeltaThb: number;
+  availableDeltaThb: number;
+  payoutPendingDeltaThb: number;
+  clawbackDebtDeltaThb: number;
+  whtRate?: number | null;
+  whtAmountThb?: number | null;
+  netPayoutThb?: number | null;
+  referenceId?: string | null;
+  referenceType?: string | null;
+  runningHoldingBalance: number;
+  runningAvailableBalance: number;
+}
+
+export interface PartnerMonthlyStatement {
+  partnerId: string;
+  partnerCode: string;
+  tierCode: string;
+  periodYear: number;
+  periodMonth: number;
+  periodLabel: string;
+  openingHoldingBalance: number;
+  openingAvailableBalance: number;
+  totalNewCommissionEarned: number;
+  totalHoldingReleased: number;
+  totalHoldingRefunded: number;
+  totalPayoutsReserved: number;
+  totalPayoutReversals: number;
+  totalClawbackOffset: number;
+  closingHoldingBalance: number;
+  closingAvailableBalance: number;
+  lineItems: PartnerStatementLineItem[];
+  generatedAt: string;
+}
+
+export interface Wht50TawiCertificateRecord {
+  payoutRequestId: string;
+  requestNumber: string;
+  partnerId: string;
+  partnerCode: string;
+  taxId: string;
+  legalName: string;
+  entityType: "individual" | "corporate";
+  registeredAddress?: Record<string, unknown>;
+  paymentDate: string;
+  incomeType: "commission_income" | "service_fee";
+  grossAmountThb: number;
+  whtRateApplied: number;
+  whtAmountThb: number;
+  netPaidAmountThb: number;
+  whtCertificateNumber?: string | null;
+  omiseTransferId?: string | null;
+}
+
+export interface Wht50TawiReport {
+  periodYear: number;
+  periodMonth: number;
+  periodLabel: string;
+  totalCertificatesCount: number;
+  totalGrossIncomeThb: number;
+  totalWhtRemittedThb: number;
+  totalNetPaidThb: number;
+  records: Wht50TawiCertificateRecord[];
+  generatedAt: string;
+}
+
+export interface FinanceOperationsSummary {
+  activePartnersCount: number;
+  totalHoldingBalanceThb: number;
+  totalAvailableBalanceThb: number;
+  totalPayoutPendingThb: number;
+  totalLifetimeEarnedThb: number;
+  totalLifetimeWithdrawnThb: number;
+  pendingPayoutRequestsCount: number;
+  pendingPayoutAmountThb: number;
+  lastReconciliationStatus: "green" | "yellow" | "red";
+  openDiscrepanciesCount: number;
+}
+
+
+

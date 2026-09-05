@@ -1,0 +1,56 @@
+name: "CI — PhopePhum v3 Quality & Invariant Gate"
+
+on:
+  pull_request:
+    branches: ["main", "phopephum"]
+  push:
+    branches: ["feature/**", "hotfix/**", "staging", "develop"]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: "Gates 1-5: Lint, Typecheck, Tests, Financial Gate, Build"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: "📥 Checkout Repository"
+        uses: actions/checkout@v4
+
+      - name: "📦 Install PNPM"
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.0
+          run_install: false
+
+      - name: "⚙️ Setup Node.js 20.x"
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: "📥 Install Dependencies"
+        run: pnpm install --frozen-lockfile
+
+      - name: "🛡️ Gate 1: Code Quality & Linting"
+        run: pnpm lint
+        continue-on-error: false
+
+      - name: "🛡️ Gate 2: Full Monorepo Typecheck (8 Packages)"
+        run: pnpm typecheck
+        continue-on-error: false
+
+      - name: "🛡️ Gate 3: Engine Calculation & Unit Tests"
+        run: pnpm test
+        continue-on-error: false
+
+      - name: "🏛️ Gate 4: Financial & Economic Invariants Gate (INV-01..07, Sands, SSoT)"
+        run: pnpm exec tsx scripts/ci-gate-financial-regression.ts
+        continue-on-error: false
+
+      - name: "🔨 Gate 5: Production Monorepo Build"
+        run: pnpm build
+        continue-on-error: false

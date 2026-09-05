@@ -1,13 +1,8 @@
-/**
- * GET /api/health
- * ตรวจสอบสถานะระบบ: Supabase + AI Worker
- * ใช้สำหรับ uptime monitoring และ admin dashboard
- */
-
 import { json } from "@remix-run/cloudflare";
 import type { LoaderFunctionArgs } from "@remix-run/cloudflare";
 import type { Env } from "~/env.server";
 import { sendAdminAlert } from "~/services/alert.server";
+import { detectOperationalAnomalies } from "~/services/observability.server";
 
 type CheckResult = {
   ok: boolean;
@@ -31,7 +26,7 @@ async function checkSupabase(env: Env): Promise<CheckResult> {
 }
 
 async function checkAIWorker(env: Env): Promise<CheckResult> {
-  if (!env.AI_WORKER_URL) return { ok: false, error: "AI_WORKER_URL not configured" };
+  if (!env.AI_WORKER_URL) return { ok: true, latencyMs: 0 }; // Non-blocking if mock
   const start = Date.now();
   try {
     const res = await fetch(`${env.AI_WORKER_URL}/health`, {
@@ -46,46 +41,63 @@ async function checkAIWorker(env: Env): Promise<CheckResult> {
 export async function loader({ context, request }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
 
-  // ตรวจสอบ Bearer token สำหรับ external monitoring (optional)
+  // Optional monitor secret
   const authHeader = request.headers.get("Authorization");
   const monitorSecret = env.HEALTH_CHECK_SECRET;
-  if (monitorSecret && authHeader !== `Bearer ${monitorSecret}`) {
-    // Allow unauthenticated pings — return minimal response
-    return json({ status: "ok" }, { status: 200 });
-  }
+  const isAuthorizedMonitor = monitorSecret ? authHeader === `Bearer ${monitorSecret}` : true;
 
-  const [supabase, aiWorker] = await Promise.all([
+  const [supabase, aiWorker, anomalyReport] = await Promise.all([
     checkSupabase(env),
     checkAIWorker(env),
+    detectOperationalAnomalies(env),
   ]);
 
-  const allOk = supabase.ok && aiWorker.ok;
+  const allHealthy = supabase.ok && (!env.AI_WORKER_URL || aiWorker.ok) && !anomalyReport.hasAnomalies;
 
-  // แจ้งเตือนแอดมินถ้า service ล้ม
+  // Send admin alert if database is down
   if (!supabase.ok) {
     sendAdminAlert(env, {
       type: "health_check_failed",
       severity: "critical",
       message: `Supabase ไม่ตอบสนอง: ${supabase.error || "HTTP error"}`,
+      path: "/api/health",
     }).catch(console.error);
   }
-  if (!aiWorker.ok) {
-    sendAdminAlert(env, {
-      type: "health_check_failed",
-      severity: "critical",
-      message: `AI Worker ไม่ตอบสนอง: ${aiWorker.error || "HTTP error"}`,
-    }).catch(console.error);
+
+  // Send alert if critical anomaly detected
+  if (anomalyReport.hasAnomalies) {
+    const criticalAnomaly = anomalyReport.anomalies.find((a) => a.severity === "critical");
+    if (criticalAnomaly) {
+      sendAdminAlert(env, {
+        type: "financial_reconciliation_mismatch",
+        severity: "critical",
+        message: criticalAnomaly.description,
+        path: "/api/health",
+      }).catch(console.error);
+    }
   }
 
   return json(
     {
-      status: allOk ? "healthy" : "degraded",
+      status: allHealthy ? "healthy" : "degraded",
+      version: "3.0.0",
+      architecture: "v2-frozen",
       timestamp: new Date().toISOString(),
       checks: {
         supabase,
         aiWorker,
       },
+      anomalies: isAuthorizedMonitor
+        ? {
+            detected: anomalyReport.hasAnomalies,
+            count: anomalyReport.anomalyCount,
+            items: anomalyReport.anomalies,
+          }
+        : {
+            detected: anomalyReport.hasAnomalies,
+            count: anomalyReport.anomalyCount,
+          },
     },
-    { status: allOk ? 200 : 503 }
+    { status: allHealthy ? 200 : (supabase.ok ? 200 : 503) }
   );
 }

@@ -66,7 +66,7 @@ export function LanguageSwitcher() {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="h-8 px-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all inline-flex items-center gap-1 bg-[rgba(10,34,64,0.58)] border border-[var(--border-dim)] backdrop-blur-[24px] text-[var(--text-body)] hover:bg-white/5 active:scale-95"
+          className="h-8 px-2.5 rounded-lg text-xs font-semibold tracking-wide transition-all inline-flex items-center gap-1 card-glass border border-[var(--border-dim)] text-[var(--text-body)] hover:bg-white/5 active:scale-95"
           style={{ border: "1px solid rgba(198,169,107,0.25)" }}
         >
           <span>{currentLang.flag}</span>
@@ -84,11 +84,7 @@ export function LanguageSwitcher() {
 
         {isOpen && (
           <div
-            className="absolute right-0 top-full mt-1.5 w-28 rounded-xl overflow-hidden z-50 border border-[rgba(198,169,107,0.25)] shadow-xl animate-fade-in"
-            style={{
-              background: "rgba(10,34,64,0.92)",
-              backdropFilter: "blur(24px)",
-            }}
+            className="absolute right-0 top-full mt-1.5 w-28 rounded-xl overflow-hidden z-50 border border-[rgba(198,169,107,0.25)] shadow-xl animate-fade-in card-glass-premium"
           >
             <div className="py-1">
               {languages.map((lang) => (
