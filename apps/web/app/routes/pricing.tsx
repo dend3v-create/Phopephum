@@ -5,6 +5,7 @@ import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { getUser } from "~/services/auth.server";
 import { SANDS_REFILL_PACKS } from "~/lib/plans";
 import type { Env } from "~/env.server";
+import { AstralIcon } from "~/components/ui/AstralIcon";
 
 export const meta: MetaFunction = () => [
   { title: "ราคาสมาชิก & ปัญญาบารมี — PhopePhum Wisdom Guidance" },
@@ -233,14 +234,14 @@ export default function PricingPage() {
 
         {/* ── Billing Cycle Toggle ── */}
         <div className="flex justify-center mb-12">
-          <div className="inline-flex p-1.5 rounded-2xl border border-white/10 bg-[#0B1528]/80 backdrop-blur-md shadow-xl">
+          <div className="inline-flex p-1.5 rounded-2xl border border-slate-300/80 dark:border-white/10 bg-slate-100/95 dark:bg-[#0B1528]/80 backdrop-blur-md shadow-lg">
             <button
               type="button"
               onClick={() => setBillingCycle("monthly")}
               className={`px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all ${
                 billingCycle === "monthly"
                   ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-lg shadow-[#C6A96B]/20"
-                  : "text-[#94A3B8] hover:text-[#F8F6F1]"
+                  : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-[#F8F6F1]"
               }`}
             >
               รายเดือน (Monthly)
@@ -251,12 +252,16 @@ export default function PricingPage() {
               className={`px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-2 ${
                 billingCycle === "annual"
                   ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-lg shadow-[#C6A96B]/20"
-                  : "text-[#94A3B8] hover:text-[#F8F6F1]"
+                  : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-[#F8F6F1]"
               }`}
             >
               <span>รายปี (Annual)</span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                ประหยัด ~20%
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-colors ${
+                billingCycle === "annual"
+                  ? "bg-[#020617]/20 text-[#020617]"
+                  : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
+              }`}>
+                ประหยัด -20%
               </span>
             </button>
           </div>
@@ -270,17 +275,16 @@ export default function PricingPage() {
         </div>
 
         {/* ── Sands Micro-Economy Top-Up Showcase ── */}
-        <div className="mb-20 max-w-4xl mx-auto rounded-3xl border border-[#C6A96B]/30 p-8 sm:p-10 relative overflow-hidden"
-          style={{ background: "linear-gradient(180deg, rgba(11,21,40,0.85) 0%, rgba(2,6,23,0.95) 100%)", backdropFilter: "blur(24px)" }}>
+        <div className="mb-20 max-w-4xl mx-auto rounded-3xl border border-[#C6A96B]/30 p-8 sm:p-10 relative overflow-hidden bg-gradient-to-b from-white/95 via-[#FAF8F5]/95 to-[#F5EFE6]/95 dark:from-[#0B1528]/85 dark:to-[#020617]/95 backdrop-blur-xl shadow-xl">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-amber-400/30 bg-amber-400/10 text-amber-300 text-xs font-bold uppercase tracking-wider mb-2">
-              <span>⏳</span>
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-300 text-xs font-bold uppercase tracking-wider mb-2.5">
+              <AstralIcon name="sandglass" size="xs" variant="gold" glow />
               <span>Sands of Time Micro-Economy</span>
             </div>
-            <h2 className="font-display text-2xl sm:text-3xl font-bold text-[#F8F6F1]">
+            <h2 className="font-display text-2xl sm:text-3xl font-bold text-slate-900 dark:text-[#F8F6F1]">
               หรือเติมเฉพาะ ละอองทรายกาลเวลา ตามต้องการ
             </h2>
-            <p className="text-sm text-[#94A3B8] mt-2 max-w-lg mx-auto">
+            <p className="text-sm text-slate-600 dark:text-[#94A3B8] mt-2 max-w-lg mx-auto leading-relaxed">
               ใช้สำหรับแลกรับ AI Report ฉบับเต็ม หรือเปิดสิทธิ์การวิเคราะห์พิเศษเฉพาะครั้ง โดยไม่ต้องสมัครรายเดือน
             </p>
           </div>
@@ -291,8 +295,8 @@ export default function PricingPage() {
                 key={pack.id}
                 className={`relative flex flex-col rounded-2xl border p-5 transition-all duration-300 ${
                   pack.popular
-                    ? "border-[#C6A96B] bg-[#C6A96B]/[0.08] shadow-xl shadow-[#C6A96B]/15 sm:-translate-y-1"
-                    : "border-white/10 bg-white/[0.02]"
+                    ? "border-[#C6A96B] bg-[#C6A96B]/10 dark:bg-[#C6A96B]/[0.08] shadow-xl shadow-[#C6A96B]/15 sm:-translate-y-1"
+                    : "border-slate-200 dark:border-white/10 bg-white/80 dark:bg-white/[0.02]"
                 }`}
               >
                 {pack.popular && (
@@ -300,13 +304,15 @@ export default function PricingPage() {
                     ยอดนิยม
                   </span>
                 )}
-                <div className="text-2xl mb-2">⏳</div>
-                <h3 className="font-display text-base font-bold text-[#F8F6F1]">{pack.name}</h3>
-                <p className="text-xs text-[#C6A96B] font-semibold mt-0.5">{pack.bonusText}</p>
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#C6A96B]/15 border border-[#C6A96B]/30 mb-2.5 shrink-0">
+                  <AstralIcon name="sandglass" size="md" variant="gold" glow />
+                </div>
+                <h3 className="font-display text-base font-bold text-slate-900 dark:text-[#F8F6F1]">{pack.name}</h3>
+                <p className="text-xs text-[#8C6D2D] dark:text-[#C6A96B] font-semibold mt-0.5">{pack.bonusText}</p>
 
-                <div className="my-3 pt-2 border-t border-white/10">
-                  <span className="text-2xl font-extrabold text-[#F8F6F1]">฿{pack.priceThb}</span>
-                  <span className="text-[10px] text-[#94A3B8] block mt-0.5">
+                <div className="my-3 pt-2 border-t border-slate-200 dark:border-white/10">
+                  <span className="text-2xl font-extrabold text-slate-900 dark:text-[#F8F6F1]">฿{pack.priceThb}</span>
+                  <span className="text-[10px] text-slate-500 dark:text-[#94A3B8] block mt-0.5">
                     (~฿{pack.pricePerUnit.toFixed(2)} / ละอองทราย)
                   </span>
                 </div>
@@ -316,7 +322,7 @@ export default function PricingPage() {
                   className={`w-full py-2.5 rounded-xl text-xs font-bold text-center mt-auto transition-all ${
                     pack.popular
                       ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-md shadow-[#C6A96B]/20 hover:opacity-95"
-                      : "border border-white/20 text-[#F8F6F1] hover:bg-white/5"
+                      : "border border-slate-300 dark:border-white/20 text-slate-800 dark:text-[#F8F6F1] bg-white/60 dark:bg-transparent hover:bg-slate-100 dark:hover:bg-white/5"
                   }`}
                 >
                   เติม {pack.sandsAmount} ทราย →

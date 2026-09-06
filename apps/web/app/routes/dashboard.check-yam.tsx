@@ -42,6 +42,7 @@ import type { Env } from "~/env.server";
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "~/lib/i18n/i18n.server";
+import { AstralIcon } from "~/components/ui/AstralIcon";
 
 export const meta: MetaFunction = () => [
   { title: "ถามฤกษ์ & ไขคำถาม ๔ ศาสตร์ — PhopePhum" },
@@ -601,7 +602,7 @@ export default function CheckYamPage() {
       <div className="space-y-2.5">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold uppercase tracking-wider text-[#C6A96B] flex items-center gap-1.5">
-            <span>🏛️</span>
+            <AstralIcon name="portal" size="xs" variant="gold" />
             <span>เลือกเข้าสู่ ๔ ศาสตร์พยากรณ์หลัก (Direct Engine Portals)</span>
           </span>
           <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
@@ -614,7 +615,9 @@ export default function CheckYamPage() {
           <div className="rounded-2xl p-4 border border-amber-300/60 dark:border-amber-400/25 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-white/95 dark:from-[#0A1A2F]/95 dark:to-[#071324] shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xl">🎯</span>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-amber-500/15 border border-amber-500/30">
+                  <AstralIcon name="horanu" size="sm" variant="amber" glow />
+                </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
                   ผังดวง ๑๒ ภพ
                 </span>
@@ -648,7 +651,9 @@ export default function CheckYamPage() {
           <div className="rounded-2xl p-4 border border-sky-300/60 dark:border-sky-400/25 bg-gradient-to-b from-sky-500/10 via-sky-500/5 to-white/95 dark:from-[#0A1A2F]/95 dark:to-[#071324] shadow-sm hover:shadow-md hover:border-sky-400 transition-all flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xl">⏰</span>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-sky-500/15 border border-sky-500/30">
+                  <AstralIcon name="yam" size="sm" variant="sky" glow />
+                </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-800 dark:text-sky-300 border border-sky-500/30">
                   ๘ ยาม ๙๐ นาที
                 </span>
@@ -682,7 +687,9 @@ export default function CheckYamPage() {
           <div className="rounded-2xl p-4 border border-purple-300/60 dark:border-purple-400/25 bg-gradient-to-b from-purple-500/10 via-purple-500/5 to-white/95 dark:from-[#0A1A2F]/95 dark:to-[#071324] shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xl">📅</span>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-purple-500/15 border border-purple-500/30">
+                  <AstralIcon name="timeline" size="sm" variant="mystic" glow />
+                </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-800 dark:text-purple-300 border border-purple-500/30">
                   ยามซอยรายชั่วโมง
                 </span>
@@ -716,7 +723,9 @@ export default function CheckYamPage() {
           <div className="rounded-2xl p-4 border border-emerald-300/60 dark:border-emerald-400/25 bg-gradient-to-b from-emerald-500/10 via-emerald-500/5 to-white/95 dark:from-[#0A1A2F]/95 dark:to-[#071324] shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col justify-between space-y-3">
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xl">🧭</span>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-500/15 border border-emerald-500/30">
+                  <AstralIcon name="sub-yam" size="sm" variant="emerald" glow />
+                </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
                   ๙ ฤกษ์ย่อย ๑๐ นาที
                 </span>
@@ -766,7 +775,7 @@ export default function CheckYamPage() {
                 : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
             }`}
           >
-            <span>⚡</span>
+            <AstralIcon name="spark" size="xs" />
             <span>ถามเรื่องทันที</span>
           </button>
           <button
@@ -778,7 +787,7 @@ export default function CheckYamPage() {
                 : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
             }`}
           >
-            <span>⚖️</span>
+            <AstralIcon name="balance" size="xs" />
             <span>เปรียบเทียบ 3 ช่วงเวลา (A / B / C)</span>
           </button>
         </div>

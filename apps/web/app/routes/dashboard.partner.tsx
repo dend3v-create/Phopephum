@@ -386,15 +386,15 @@ export default function PartnerPortalPage() {
   return (
     <div className="space-y-6 pb-16">
       {/* ── 1. Top Hero Header: Astral Imperial Flow ── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0B1528]/95 via-[#070F1E]/90 to-[#020617] border border-[#C6A96B]/30 p-6 md:p-8 backdrop-blur-xl shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFE6] dark:from-[#0B1528]/95 dark:via-[#070F1E]/90 dark:to-[#020617] border border-[#C6A96B]/30 p-6 md:p-8 backdrop-blur-xl shadow-xl">
         <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#4B6FAE]/15 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#C6A96B]/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
             <div className="flex flex-wrap items-center gap-2.5 mb-2.5">
-              <span className="px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-[#C6A96B]/20 text-[#D9BC82] border border-[#C6A96B]/40 flex items-center gap-1.5 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-[#D9BC82]" />
+              <span className="px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-amber-500/15 dark:bg-[#C6A96B]/20 text-amber-900 dark:text-[#D9BC82] border border-amber-500/30 dark:border-[#C6A96B]/40 flex items-center gap-1.5 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-[#D9BC82]" />
                 {tier === "master" ? "👑 Master Partner (25%)" : tier === "creator" ? "✨ Creator Partner (15%)" : "🌟 Affiliate Partner (7%)"}
               </span>
 
@@ -405,26 +405,26 @@ export default function PartnerPortalPage() {
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold font-serif text-[#F8F6F1] tracking-wide">
-              ศูนย์ปฏิบัติการพันธมิตร <span className="text-[#C6A96B] font-light text-xl md:text-2xl">/ Partner Portal</span>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold font-serif text-slate-900 dark:text-[#F8F6F1] tracking-wide">
+              ศูนย์ปฏิบัติการพันธมิตร <span className="text-[#8C6D2D] dark:text-[#C6A96B] font-light text-xl md:text-2xl">/ Partner Portal</span>
             </h1>
-            <p className="text-slate-400 text-sm mt-1 max-w-2xl font-light">
+            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1 max-w-2xl font-light">
               ระบบบริหารจัดการรายได้ ผลตอบแทน และการบอกต่อแบบ Single Source of Truth ตรวจสอบความถูกต้องทางการเงินได้ 100%
             </p>
           </div>
 
           {/* Quick Share Code & Link */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/10 backdrop-blur-md">
-            <div className="px-3 py-1.5 bg-white/5 rounded-lg border border-white/5 flex items-center justify-between gap-3">
-              <span className="text-xs text-slate-400">รหัสของคุณ:</span>
-              <span className="font-mono font-bold text-[#D9BC82] text-sm tracking-wider">{partnerCode}</span>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-slate-100/90 dark:bg-black/40 p-3 rounded-xl border border-slate-200 dark:border-white/10 backdrop-blur-md">
+            <div className="px-3 py-1.5 bg-white dark:bg-white/5 rounded-lg border border-slate-300/80 dark:border-white/5 flex items-center justify-between gap-3">
+              <span className="text-xs text-slate-600 dark:text-slate-400">รหัสของคุณ:</span>
+              <span className="font-mono font-bold text-amber-800 dark:text-[#D9BC82] text-sm tracking-wider">{partnerCode}</span>
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="p-1 text-slate-400 hover:text-white transition-colors"
+                className="p-1 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
                 title="คัดลอกรหัส"
               >
-                {copiedCode ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                {copiedCode ? <Check className="w-4 h-4 text-emerald-500 dark:text-emerald-400" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
 
@@ -432,16 +432,16 @@ export default function PartnerPortalPage() {
               type="button"
               variant="outline"
               onClick={handleCopyLink}
-              className="border-[#C6A96B]/50 hover:bg-[#C6A96B]/20 text-[#D9BC82] text-xs py-2 px-3.5 flex items-center justify-center gap-2"
+              className="border-[#C6A96B]/50 bg-[#C6A96B] hover:bg-[#D9BC82] text-slate-950 font-bold text-xs py-2 px-3.5 flex items-center justify-center gap-2 shadow-sm"
             >
               {copiedLink ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-400" />
+                  <Check className="w-4 h-4 text-emerald-900" />
                   <span>คัดลอกลิงก์แล้ว!</span>
                 </>
               ) : (
                 <>
-                  <Share2 className="w-4 h-4 text-[#D9BC82]" />
+                  <Share2 className="w-4 h-4 text-slate-950" />
                   <span>คัดลอกลิงก์แนะนำ</span>
                 </>
               )}
@@ -465,14 +465,14 @@ export default function PartnerPortalPage() {
 
         {/* Versioned Terms Acceptance Banner (INV-PARTNER-23) */}
         {termsStatus && !termsStatus.accepted && (
-          <div className="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm flex flex-col md:flex-row md:items-center justify-between gap-3 backdrop-blur-md">
+          <div className="mt-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 text-amber-900 dark:text-amber-200 text-sm flex flex-col md:flex-row md:items-center justify-between gap-3 backdrop-blur-md">
             <div className="flex items-start gap-2.5">
-              <ShieldCheck className="w-5 h-5 text-[#D9BC82] shrink-0 mt-0.5" />
+              <ShieldCheck className="w-5 h-5 text-[#8C6D2D] dark:text-[#D9BC82] shrink-0 mt-0.5" />
               <div>
-                <div className="font-semibold text-[#F8F6F1]">
+                <div className="font-semibold text-slate-900 dark:text-[#F8F6F1]">
                   จำเป็นต้องยอมรับข้อตกลงพันธมิตรล่าสุด ({termsStatus.activeVersion})
                 </div>
-                <div className="text-xs text-slate-400 mt-0.5">
+                <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
                   {termsStatus.termsTitle || "ข้อกำหนดและเงื่อนไขโปรแกรมพันธมิตร PhopePhum"} เพื่อรักษาสิทธิ์ในการเบิกถอนคอมมิชชัน
                 </div>
               </div>
@@ -485,7 +485,7 @@ export default function PartnerPortalPage() {
                   href={termsStatus.documentUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-xs text-[#D9BC82] underline hover:text-white px-2.5 py-1.5"
+                  className="text-xs text-[#8C6D2D] dark:text-[#D9BC82] underline font-medium px-2.5 py-1.5"
                 >
                   อ่านข้อตกลง PDF
                 </a>
@@ -493,7 +493,7 @@ export default function PartnerPortalPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[#C6A96B] hover:bg-[#D9BC82] text-slate-950 font-bold text-xs px-4 py-1.5"
+                className="bg-[#C6A96B] hover:bg-[#D9BC82] text-slate-950 font-bold text-xs px-4 py-1.5 shadow-sm"
               >
                 {isSubmitting ? "กำลังบันทึก..." : "ยอมรับข้อตกลง"}
               </Button>
@@ -505,8 +505,8 @@ export default function PartnerPortalPage() {
       {/* ── 2. UX HIERARCHY LEVEL 1: สถานะการเงิน & ความพร้อมถอน (Financial Status) ── */}
       <div className="space-y-3">
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-[#C6A96B]" />
+          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <Wallet className="w-4 h-4 text-[#8C6D2D] dark:text-[#C6A96B]" />
             ระดับที่ 1 — สถานะการเงิน & ยอดคงเหลือ (Financial Status)
           </h2>
           <span className="text-xs text-slate-500">Source of Truth: partner_entities</span>
@@ -514,24 +514,24 @@ export default function PartnerPortalPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Balance 1: Available Balance (พร้อมถอน) */}
-          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#0D241C]/90 to-[#05130E]/95 border border-emerald-500/30 p-5 shadow-lg backdrop-blur-md">
-            <div className="flex items-center justify-between text-xs text-emerald-400 font-medium mb-2">
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-50/90 to-white/95 dark:from-[#0D241C]/90 dark:to-[#05130E]/95 border border-emerald-400/40 dark:border-emerald-500/30 p-5 shadow-sm dark:shadow-lg backdrop-blur-md">
+            <div className="flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
-                <Wallet className="w-4 h-4 text-emerald-400" />
+                <Wallet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 พร้อมถอน (Available)
               </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
             </div>
-            <div className="text-2xl lg:text-3xl font-bold font-mono text-emerald-200 tracking-tight">
+            <div className="text-2xl lg:text-3xl font-bold font-mono text-emerald-700 dark:text-emerald-200 tracking-tight">
               ฿{availableBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
             </div>
-            <div className="mt-3 flex items-center justify-between pt-2 border-t border-emerald-500/15">
-              <span className="text-[11px] text-emerald-400/80">ขั้นต่ำ ฿500</span>
+            <div className="mt-3 flex items-center justify-between pt-2 border-t border-emerald-200 dark:border-emerald-500/15">
+              <span className="text-[11px] text-emerald-700 dark:text-emerald-400/80 font-medium">ขั้นต่ำ ฿500</span>
               <Button
                 type="button"
                 onClick={() => setIsPayoutModalOpen(true)}
                 disabled={availableBalance < 500}
-                className="text-xs py-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                className="text-xs py-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 ขอถอนเงิน
               </Button>
@@ -539,62 +539,62 @@ export default function PartnerPortalPage() {
           </div>
 
           {/* Balance 2: Holding Balance (รอปลดล็อก 14 วัน) */}
-          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#241F0D]/90 to-[#141005]/95 border border-amber-500/30 p-5 shadow-lg backdrop-blur-md">
-            <div className="flex items-center justify-between text-xs text-amber-400 font-medium mb-2">
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-50/90 to-white/95 dark:from-[#241F0D]/90 dark:to-[#141005]/95 border border-amber-400/40 dark:border-amber-500/30 p-5 shadow-sm dark:shadow-lg backdrop-blur-md">
+            <div className="flex items-center justify-between text-xs text-amber-800 dark:text-amber-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-amber-400" />
+                <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                 รอปลดล็อก (Holding 14D)
               </span>
-              <span className="text-[11px] text-amber-400/70 font-mono">14 วัน</span>
+              <span className="text-[11px] text-amber-700 dark:text-amber-400/70 font-mono font-bold">14 วัน</span>
             </div>
-            <div className="text-2xl lg:text-3xl font-bold font-mono text-amber-200 tracking-tight">
+            <div className="text-2xl lg:text-3xl font-bold font-mono text-amber-700 dark:text-amber-200 tracking-tight">
               ฿{holdingBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
             </div>
-            <div className="mt-3 text-[11px] text-amber-400/70 pt-2 border-t border-amber-500/15">
+            <div className="mt-3 text-[11px] text-amber-700 dark:text-amber-400/70 pt-2 border-t border-amber-200 dark:border-amber-500/15 font-medium">
               โอนเข้า Available อัตโนมัติเมื่อครบ 14 วัน
             </div>
           </div>
 
           {/* Balance 3: Payout Pending (กำลังโอน) */}
-          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#0D1D2C]/90 to-[#060F17]/95 border border-sky-500/30 p-5 shadow-lg backdrop-blur-md">
-            <div className="flex items-center justify-between text-xs text-sky-400 font-medium mb-2">
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-sky-50/90 to-white/95 dark:from-[#0D1D2C]/90 dark:to-[#060F17]/95 border border-sky-400/40 dark:border-sky-500/30 p-5 shadow-sm dark:shadow-lg backdrop-blur-md">
+            <div className="flex items-center justify-between text-xs text-sky-800 dark:text-sky-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
-                <Send className="w-4 h-4 text-sky-400" />
+                <Send className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                 กำลังดำเนินการ (In-Flight)
               </span>
-              <span className="text-[11px] text-sky-400/70">คิวธนาคาร</span>
+              <span className="text-[11px] text-sky-700 dark:text-sky-400/70 font-bold">คิวธนาคาร</span>
             </div>
-            <div className="text-2xl lg:text-3xl font-bold font-mono text-sky-200 tracking-tight">
+            <div className="text-2xl lg:text-3xl font-bold font-mono text-sky-700 dark:text-sky-200 tracking-tight">
               ฿{payoutPendingBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
             </div>
-            <div className="mt-3 text-[11px] text-sky-400/70 pt-2 border-t border-sky-500/15">
+            <div className="mt-3 text-[11px] text-sky-700 dark:text-sky-400/70 pt-2 border-t border-sky-200 dark:border-sky-500/15 font-medium">
               อยู่ระหว่างตรวจสอบ / รอผล Settlement
             </div>
           </div>
 
           {/* Balance 4: Clawback Debt & Lifetime Earned */}
-          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[#1F1116]/90 to-[#0D070A]/95 border border-pink-500/30 p-5 shadow-lg backdrop-blur-md">
-            <div className="flex items-center justify-between text-xs text-pink-400 font-medium mb-2">
+          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-50/90 to-white/95 dark:from-[#1F1116]/90 dark:to-[#0D070A]/95 border border-rose-400/40 dark:border-pink-500/30 p-5 shadow-sm dark:shadow-lg backdrop-blur-md">
+            <div className="flex items-center justify-between text-xs text-rose-800 dark:text-pink-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
-                <Coins className="w-4 h-4 text-pink-400" />
+                <Coins className="w-4 h-4 text-rose-600 dark:text-pink-400" />
                 หนี้รอหักกลบ (Clawback)
               </span>
-              <span className="font-mono text-xs text-pink-300">฿{clawbackDebt.toFixed(2)}</span>
+              <span className="text-[11px] text-rose-700 dark:text-pink-400/80 font-mono font-bold">฿{clawbackDebt.toFixed(2)}</span>
             </div>
-            <div className="text-xs text-slate-400 mb-1">รายได้รวมสะสมตลอดชีพ</div>
-            <div className="text-xl lg:text-2xl font-bold font-mono text-[#D9BC82]">
+            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">รายได้รวมสะสมตลอดชีพ</div>
+            <div className="text-xl lg:text-2xl font-bold font-mono text-amber-700 dark:text-[#D9BC82] tracking-tight">
               ฿{totalEarned.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
             </div>
-            <div className="mt-2 text-[11px] text-slate-400 pt-1.5 border-t border-pink-500/15 flex justify-between">
+            <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 flex justify-between pt-1 border-t border-rose-200 dark:border-white/5">
               <span>ถอนแล้วสะสม:</span>
-              <span className="font-mono text-slate-300">฿{totalWithdrawn.toLocaleString()}</span>
+              <span className="font-mono text-slate-700 dark:text-slate-300 font-bold">฿{totalWithdrawn.toLocaleString()}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ── 3. Navigation Tabs (3 Main Layers) ── */}
-      <div className="flex items-center gap-2 border-b border-white/10 pb-2 overflow-x-auto no-scrollbar">
+      {/* ── 3. Navigation Tabs ── */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
         <button
           type="button"
           onClick={() => setActiveTab("overview")}
@@ -687,32 +687,32 @@ export default function PartnerPortalPage() {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-5 rounded-2xl bg-[#0A1628]/70 border border-white/10 backdrop-blur-md">
-                <div className="text-xs text-slate-400 mb-1">ยอดคลิกลิงก์ทั้งหมด (Attribution Clicks)</div>
-                <div className="text-3xl font-bold font-mono text-[#F8F6F1]">
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#0A1628]/70 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
+                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">ยอดคลิกลิงก์ทั้งหมด (Attribution Clicks)</div>
+                <div className="text-3xl font-bold font-mono text-slate-900 dark:text-[#F8F6F1]">
                   {referralPerformance.totalClicks.toLocaleString()}
                 </div>
-                <div className="mt-2 text-xs text-sky-400 flex items-center gap-1">
+                <div className="mt-2 text-xs text-sky-700 dark:text-sky-400 flex items-center gap-1 font-medium">
                   <Sparkles className="w-3.5 h-3.5" /> First-Touch Attribution Engine
                 </div>
               </div>
 
-              <div className="p-5 rounded-2xl bg-[#0A1628]/70 border border-white/10 backdrop-blur-md">
-                <div className="text-xs text-slate-400 mb-1">สมาชิกที่สมัครสำเร็จ (Conversions)</div>
-                <div className="text-3xl font-bold font-mono text-emerald-400">
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#0A1628]/70 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
+                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">สมาชิกที่สมัครสำเร็จ (Conversions)</div>
+                <div className="text-3xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
                   {referralPerformance.totalConverted.toLocaleString()}
                 </div>
-                <div className="mt-2 text-xs text-emerald-300 flex items-center gap-1">
+                <div className="mt-2 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-1 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5" /> ผูกมิตรกับบัญชีของคุณตลอดชีพ
                 </div>
               </div>
 
-              <div className="p-5 rounded-2xl bg-[#0A1628]/70 border border-white/10 backdrop-blur-md">
-                <div className="text-xs text-slate-400 mb-1">อัตราความสำเร็จ (Conversion Rate)</div>
-                <div className="text-3xl font-bold font-mono text-[#D9BC82]">
+              <div className="p-5 rounded-2xl bg-white dark:bg-[#0A1628]/70 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
+                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">อัตราความสำเร็จ (Conversion Rate)</div>
+                <div className="text-3xl font-bold font-mono text-amber-700 dark:text-[#D9BC82]">
                   {referralPerformance.conversionRate}%
                 </div>
-                <div className="mt-2 text-xs text-slate-400 flex items-center gap-1">
+                <div className="mt-2 text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1">
                   สมาชิกปัจจุบัน {referralPerformance.activeReferralsCount} ท่าน
                 </div>
               </div>
@@ -722,46 +722,52 @@ export default function PartnerPortalPage() {
           {/* Campaign Generator & Tier Details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Tier Perks Card */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-[#0B1528] to-[#040914] border border-[#C6A96B]/20 shadow-xl space-y-4">
+            <div className="p-6 rounded-2xl bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFE6] dark:from-[#0B1528] dark:to-[#040914] border border-[#C6A96B]/30 shadow-md space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
-                  <Award className="w-5 h-5 text-[#D9BC82]" />
+                <h3 className="text-base font-semibold text-slate-900 dark:text-[#F8F6F1] flex items-center gap-2">
+                  <Award className="w-5 h-5 text-amber-600 dark:text-[#D9BC82]" />
                   ลำดับขั้นและสิทธิประโยชน์พันธมิตร
                 </h3>
-                <span className="text-xs text-[#D9BC82] font-mono font-bold">คอมมิชชัน {commissionRate}%</span>
+                <span className="text-xs text-amber-800 dark:text-[#D9BC82] font-mono font-bold">คอมมิชชัน {commissionRate}%</span>
               </div>
 
-              <p className="text-xs text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 ท่านได้รับส่วนแบ่งรายได้ต่อเนื่องทุกเดือน (Recurring Commission) ตลอดระยะเวลาที่ผู้ถูกแนะนำยังคงสมัครใช้งานแพ็กเกจ Pro หรือ Imperial
               </p>
 
               <div className="space-y-2.5 pt-2">
                 <div className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
-                  tier === "affiliate" ? "bg-[#C6A96B]/15 border-[#C6A96B]/40 text-[#D9BC82]" : "bg-white/5 border-white/5 text-slate-400"
+                  tier === "affiliate"
+                    ? "bg-amber-100/70 dark:bg-[#C6A96B]/15 border-amber-300 dark:border-[#C6A96B]/40 text-amber-900 dark:text-[#D9BC82]"
+                    : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400"
                 }`}>
                   <div>
                     <span className="font-bold">Affiliate Level</span>
-                    <p className="text-[11px] text-slate-400">สมาชิกทั่วไป แนะนำเพื่อนและกัลยาณมิตร</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">สมาชิกทั่วไป แนะนำเพื่อนและกัลยาณมิตร</p>
                   </div>
                   <span className="font-mono font-bold">7% ทุกออเดอร์</span>
                 </div>
 
                 <div className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
-                  tier === "creator" ? "bg-[#C6A96B]/15 border-[#C6A96B]/40 text-[#D9BC82]" : "bg-white/5 border-white/5 text-slate-400"
+                  tier === "creator"
+                    ? "bg-amber-100/70 dark:bg-[#C6A96B]/15 border-amber-300 dark:border-[#C6A96B]/40 text-amber-900 dark:text-[#D9BC82]"
+                    : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400"
                 }`}>
                   <div>
                     <span className="font-bold">Creator Level</span>
-                    <p className="text-[11px] text-slate-400">คอนเทนต์ครีเอเตอร์ / โหราจารย์ผู้แบ่งปัน</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">คอนเทนต์ครีเอเตอร์ / โหราจารย์ผู้แบ่งปัน</p>
                   </div>
                   <span className="font-mono font-bold">15% ทุกออเดอร์</span>
                 </div>
 
                 <div className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
-                  tier === "master" ? "bg-[#C6A96B]/15 border-[#C6A96B]/40 text-[#D9BC82]" : "bg-white/5 border-white/5 text-slate-400"
+                  tier === "master"
+                    ? "bg-amber-100/70 dark:bg-[#C6A96B]/15 border-amber-300 dark:border-[#C6A96B]/40 text-amber-900 dark:text-[#D9BC82]"
+                    : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400"
                 }`}>
                   <div>
                     <span className="font-bold">Master / Institutional</span>
-                    <p className="text-[11px] text-slate-400">คุรุผู้เจริญญาณ / สำนักโหราศาสตร์พันธมิตร</p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">คุรุผู้เจริญญาณ / สำนักโหราศาสตร์พันธมิตร</p>
                   </div>
                   <span className="font-mono font-bold">25% ทุกออเดอร์</span>
                 </div>
@@ -769,36 +775,36 @@ export default function PartnerPortalPage() {
             </div>
 
             {/* Campaign Generator & Link Share */}
-            <div className="p-6 rounded-2xl bg-[#0A1628]/80 border border-white/10 space-y-4">
-              <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-sky-400" />
+            <div className="p-6 rounded-2xl bg-white dark:bg-[#0A1628]/80 border border-slate-200 dark:border-white/10 shadow-md space-y-4">
+              <h3 className="text-base font-semibold text-slate-900 dark:text-[#F8F6F1] flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-sky-600 dark:text-sky-400" />
                 สร้างลิงก์แคมเปญเฉพาะกิจ (Custom Campaign Link)
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 ระบุชื่อแคมเปญ (เช่น tiktok, line_oa, live_stream) เพื่อแยกวัดผลประสิทธิภาพของแต่ละช่องทาง
               </p>
 
               <div>
-                <label className="text-xs text-slate-300 font-medium mb-1.5 block">ชื่อแคมเปญ / Channel Tag:</label>
+                <label className="text-xs text-slate-700 dark:text-slate-300 font-medium mb-1.5 block">ชื่อแคมเปญ / Channel Tag:</label>
                 <div className="flex gap-2">
                   <Input
                     type="text"
                     value={customCampaign}
                     onChange={(e) => setCustomCampaign(e.target.value)}
                     placeholder="เช่น facebook_group, youtube"
-                    className="bg-black/50 border-white/15 text-xs"
+                    className="bg-slate-50 dark:bg-black/50 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl px-3 py-2 focus:ring-1 focus:ring-[#C6A96B]"
                   />
                   <Button
                     type="button"
                     onClick={handleCopyLink}
-                    className="bg-[#C6A96B] hover:bg-[#D9BC82] text-black font-semibold text-xs py-2 px-4 shrink-0"
+                    className="bg-[#C6A96B] hover:bg-[#D9BC82] text-slate-950 font-bold text-xs py-2 px-4 shrink-0 rounded-xl shadow-sm"
                   >
                     {copiedLink ? "คัดลอกแล้ว!" : "คัดลอก"}
                   </Button>
                 </div>
               </div>
 
-              <div className="p-3 rounded-xl bg-black/40 border border-white/5 text-xs font-mono text-slate-300 break-all select-all">
+              <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-black/40 border border-[#C6A96B]/30 dark:border-white/5 text-xs font-mono text-slate-800 dark:text-[#D9BC82] break-all select-all">
                 {dynamicReferralLink}
               </div>
             </div>

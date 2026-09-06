@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ThemeToggle } from "~/components/ThemeToggle";
 import { TimingReminderBell } from "~/components/timing/TimingReminderBell";
+import { AstralIcon } from "~/components/ui/AstralIcon";
 
 export interface DesktopSidebarProps {
   displayName: string;
@@ -375,7 +376,10 @@ export function DesktopSidebar({
             title={!isPro ? "คลิกเพื่อเติมละอองทรายกาลเวลา" : undefined}
           >
             <div className="flex justify-between items-center text-[10px] font-bold text-[#C6A96B]">
-              <span className="tracking-wider">⏳ {t("sands_of_time", "ทรายกาลเวลา")}</span>
+              <span className="tracking-wider flex items-center gap-1.5">
+                <AstralIcon name="sandglass" size="xs" variant="gold" />
+                <span>{t("sands_of_time", "ทรายกาลเวลา")}</span>
+              </span>
               {isPro ? (
                 <span className="text-[10px] uppercase font-extrabold">{t("unlimited", "UNLIMITED")}</span>
               ) : (

@@ -11,7 +11,7 @@ declare module "@remix-run/cloudflare" {
 
 export default defineConfig({
   server: {
-    port: 8080,
+    port: 8081,
   },
   plugins: [
     cloudflareDevProxyVitePlugin(),

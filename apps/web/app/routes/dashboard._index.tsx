@@ -22,6 +22,7 @@ import type {
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "~/lib/i18n/i18n.server";
+import { AstralIcon } from "~/components/ui/AstralIcon";
 
 export const meta: MetaFunction = () => [
   { title: "วันนี้ — PhopePhum" },
@@ -365,7 +366,9 @@ function LoginRewardToast({
         className="flex items-center gap-3 px-5 py-3.5 rounded-2xl border shadow-2xl pointer-events-auto animate-fade-up card-glass-premium"
         style={{ borderColor: "rgba(198,169,107,0.4)" }}
       >
-        <div className="text-2xl">⏳</div>
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-[#C6A96B]/15 border border-[#C6A96B]/30 shrink-0">
+          <AstralIcon name="sandglass" size="md" variant="gold" glow />
+        </div>
         <div>
           <p className="text-sm font-bold text-[#C6A96B]">
             +{reward.earned} ทรายกาลเวลา
@@ -631,7 +634,8 @@ export default function TodayScreen() {
               to={`/dashboard/calendar?date=${bkkDateStr}&time=${goldenWindow.startTime}`}
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-[#020617] bg-gradient-to-r from-[#C6A96B] via-[#F2D49B] to-[#C6A96B] hover:opacity-95 active:scale-95 transition-all shadow-md shadow-[#C6A96B]/20"
             >
-              <span>✨ ใช้นัดหมายช่วงนี้</span>
+              <AstralIcon name="spark" size="xs" />
+              <span>ใช้นัดหมายช่วงนี้</span>
               <span>→</span>
             </Link>
           </div>
@@ -661,8 +665,22 @@ export default function TodayScreen() {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="text-base">{domain.icon}</span>
-                  <span className="text-xs font-bold text-[#F8F6F1]">
+                  <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 dark:border-white/15 shrink-0">
+                    <AstralIcon
+                      name={domain.domain}
+                      size="xs"
+                      variant={
+                        domain.domain === "career"
+                          ? "amber"
+                          : domain.domain === "finance"
+                          ? "gold"
+                          : domain.domain === "relationship"
+                          ? "rose"
+                          : "emerald"
+                      }
+                    />
+                  </div>
+                  <span className="text-xs font-bold text-slate-900 dark:text-[#F8F6F1]">
                     {domain.label}
                   </span>
                 </div>
@@ -747,7 +765,9 @@ export default function TodayScreen() {
       <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/25 animate-fade-up card-glass space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg">🧠</span>
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-[#C6A96B]/15 border border-[#C6A96B]/30 shrink-0">
+              <AstralIcon name="wisdom" size="xs" variant="gold" glow />
+            </div>
             <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#C6A96B]">
               ปัญญาชีวิตเฉพาะตน (PERSONAL WISDOM)
             </p>
@@ -796,12 +816,14 @@ export default function TodayScreen() {
           </div>
         ) : (
           <div className="p-4 rounded-2xl bg-white/4 border border-white/8 flex flex-col sm:flex-row items-center sm:items-start gap-4">
-            <div className="text-3xl sm:text-2xl">🌱</div>
+            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#C6A96B]/10 border border-[#C6A96B]/25 shrink-0">
+              <AstralIcon name="spark" size="md" variant="gold" glow />
+            </div>
             <div className="space-y-1 text-center sm:text-left">
-              <p className="text-xs sm:text-sm font-bold text-[#F8F6F1]">
+              <p className="text-xs sm:text-sm font-bold text-slate-900 dark:text-[#F8F6F1]">
                 เริ่มสะสมสถิติจังหวะชีวิตของคุณ
               </p>
-              <p className="text-xs text-[#94A3B8] leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-[#94A3B8] leading-relaxed">
                 เมื่อคุณสอบถามฤกษ์และบันทึกผลลัพธ์หลังลงมือทำ
                 ระบบจะวิเคราะห์และสะท้อนช่วงเวลาที่ดีที่สุดเฉพาะตัวคุณที่นี่
               </p>
@@ -816,11 +838,13 @@ export default function TodayScreen() {
         )}
       </div>
 
-      {/* ── CARD 5: 📅 TODAY'S APPOINTMENTS (นัดหมายวันนี้) ── */}
+      {/* ── CARD 5: TODAY'S APPOINTMENTS (นัดหมายวันนี้) ── */}
       <div className="rounded-3xl p-5 sm:p-6 border border-white/10 animate-fade-up card-glass space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-lg">📅</span>
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 shrink-0">
+              <AstralIcon name="calendar" size="xs" variant="gold" />
+            </div>
             <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#C6A96B]">
               นัดหมายและกิจกรรมวันนี้
             </p>
