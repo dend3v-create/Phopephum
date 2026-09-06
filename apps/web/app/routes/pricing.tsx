@@ -6,6 +6,7 @@ import { getUser } from "~/services/auth.server";
 import { SANDS_REFILL_PACKS } from "~/lib/plans";
 import type { Env } from "~/env.server";
 import { AstralIcon } from "~/components/ui/AstralIcon";
+import { PublicLayout } from "~/components/public/PublicLayout";
 
 export const meta: MetaFunction = () => [
   { title: "ราคาสมาชิก & ปัญญาบารมี — PhopePhum Wisdom Guidance" },
@@ -188,17 +189,8 @@ export default function PricingPage() {
   const plans = billingCycle === "monthly" ? MONTHLY_PLANS : ANNUAL_PLANS;
 
   return (
-    <main className="relative min-h-screen overflow-hidden pb-24" style={{ background: "var(--bg-base)" }}>
-
-      {/* ── Cosmic atmosphere ── */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute w-[800px] h-[800px] -top-80 left-1/2 -translate-x-1/2 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(75,111,174,0.13) 0%, transparent 65%)" }} />
-        <div className="absolute w-[600px] h-[600px] -bottom-40 -right-40 rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(198,169,107,0.08) 0%, transparent 65%)" }} />
-      </div>
-
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-16 sm:py-24">
+    <PublicLayout isLoggedIn={isLoggedIn}>
+      <div className="relative z-10 max-w-6xl mx-auto px-4 py-12 sm:py-16">
 
         {/* Back nav */}
         <div className="mb-8">
@@ -418,7 +410,7 @@ export default function PricingPage() {
           }))
         }) }}
       />
-    </main>
+    </PublicLayout>
   );
 }
 

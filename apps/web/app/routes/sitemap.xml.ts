@@ -5,9 +5,16 @@ export async function loader({ request }: LoaderFunctionArgs) {
   
   const pages = [
     { loc: "/", changefreq: "daily", priority: "1.0" },
-    { loc: "/pricing", changefreq: "weekly", priority: "0.8" },
-    { loc: "/login", changefreq: "monthly", priority: "0.5" },
-    { loc: "/register", changefreq: "monthly", priority: "0.5" },
+    { loc: "/features", changefreq: "weekly", priority: "0.9" },
+    { loc: "/how-it-works", changefreq: "weekly", priority: "0.8" },
+    { loc: "/pricing", changefreq: "weekly", priority: "0.9" },
+    { loc: "/security", changefreq: "monthly", priority: "0.7" },
+    { loc: "/faq", changefreq: "weekly", priority: "0.8" },
+    { loc: "/terms", changefreq: "monthly", priority: "0.5" },
+    { loc: "/privacy", changefreq: "monthly", priority: "0.5" },
+    { loc: "/refund", changefreq: "monthly", priority: "0.5" },
+    { loc: "/login", changefreq: "monthly", priority: "0.6" },
+    { loc: "/register", changefreq: "monthly", priority: "0.7" },
   ];
 
   const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
