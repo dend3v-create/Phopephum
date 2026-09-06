@@ -120,28 +120,28 @@ export default function FaqPage() {
       
       {/* Header */}
       <section className="pt-16 pb-12 px-4 sm:px-6 max-w-4xl mx-auto text-center">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 text-[#8C6D2D] dark:text-[#D9BC82] text-xs font-semibold uppercase tracking-wider mb-4">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-600/30 bg-amber-50/80 dark:bg-amber-500/10 text-[#8C6D2D] dark:text-[#D9BC82] text-xs font-semibold uppercase tracking-wider mb-4 shadow-xs">
           <AstralIcon name="portal" size="sm" />
           <span>HELP CENTER & FAQ</span>
         </div>
         <h1 className="font-display text-4xl sm:text-5xl font-bold text-slate-900 dark:text-[#F8F6F1] mb-4">
           คำถามที่พบบ่อย (FAQ)
         </h1>
-        <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300">
+        <p className="text-base sm:text-lg text-slate-700 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
           คำตอบชัดเจนในทุกมิติ ทั้งการใช้งาน ความแม่นยำของศาสตร์ แพ็กเกจสมาชิก และความปลอดภัย
         </p>
 
         {/* Category Filters */}
-        <div className="flex flex-wrap justify-center gap-2 mt-8">
+        <div className="flex flex-wrap justify-center gap-2.5 mt-8">
           {categories.map((cat) => (
             <button
               key={cat.id}
               type="button"
               onClick={() => setActiveCategory(cat.id)}
-              className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
+              className={`px-4.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
                 activeCategory === cat.id
-                  ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-md shadow-[#C6A96B]/20"
-                  : "bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:bg-slate-50"
+                  ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-md shadow-[#C6A96B]/25 border border-amber-400/40"
+                  : "bg-white dark:bg-white/5 border border-slate-200/90 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:text-[#8C6D2D] dark:hover:text-[#C6A96B] hover:border-[#C6A96B]/40 hover:bg-amber-50/30 dark:hover:bg-white/10 shadow-xs"
               }`}
             >
               {cat.label}
@@ -158,20 +158,20 @@ export default function FaqPage() {
             return (
               <div
                 key={faq.id}
-                className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-white/[0.03] overflow-hidden transition-colors"
+                className="rounded-2xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-white/[0.03] shadow-xs hover:shadow-md hover:border-[#C6A96B]/40 overflow-hidden transition-all"
               >
                 <button
                   type="button"
                   onClick={() => toggleItem(faq.id)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-display font-bold text-base text-slate-900 dark:text-[#F8F6F1] hover:text-[#8C6D2D] dark:hover:text-[#C6A96B] transition-colors"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between gap-4 font-display font-bold text-base sm:text-lg text-slate-900 dark:text-[#F8F6F1] hover:text-[#8C6D2D] dark:hover:text-[#C6A96B] transition-colors"
                 >
                   <span>{faq.q}</span>
-                  <span className={`text-xl transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}>
+                  <span className={`text-xl font-bold text-[#8C6D2D] dark:text-[#C6A96B] transition-transform duration-200 shrink-0 ${isOpen ? "rotate-45" : ""}`}>
                     +
                   </span>
                 </button>
                 {isOpen && (
-                  <div className="px-6 pb-5 text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-white/5 pt-3 animate-in fade-in duration-200">
+                  <div className="px-6 pb-6 pt-4 text-sm sm:text-base text-slate-700 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-white/5 bg-slate-50/60 dark:bg-white/[0.01] animate-in fade-in duration-200">
                     {faq.a}
                   </div>
                 )}
@@ -180,16 +180,16 @@ export default function FaqPage() {
           })}
         </div>
 
-        <div className="mt-14 p-8 rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/[0.02] text-center">
+        <div className="mt-14 p-8 rounded-3xl border border-slate-200/90 dark:border-white/10 bg-white/95 dark:bg-white/[0.02] shadow-sm text-center">
           <h3 className="font-display font-bold text-xl text-slate-900 dark:text-[#F8F6F1] mb-2">
             ยังมีคำถามอื่นๆ ที่ไม่พบคำตอบ?
           </h3>
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
+          <p className="text-sm text-slate-700 dark:text-slate-400 mb-6">
             ทีมงานและผู้เชี่ยวชาญด้านระบบของเราพร้อมให้ความช่วยเหลือตลอดเวลา
           </p>
           <a
             href="mailto:support@phopephum.com"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold border border-slate-300 dark:border-white/15 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold border border-slate-300/90 dark:border-white/15 text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shadow-xs"
           >
             <span>ติดต่อฝ่ายสนับสนุน support@phopephum.com</span>
             <span>→</span>
