@@ -1,5 +1,5 @@
 import { json } from "@remix-run/cloudflare";
-import { Form, useActionData, useNavigation, useLoaderData, useSubmit } from "@remix-run/react";
+import { useActionData, useNavigation, useLoaderData, useSubmit } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile, requireMinPlan } from "~/services/auth.server";
 import { calculateKarnchata, calculatePhopephum, gregorianToThaiLunarV3 } from "@phopephum/engine";
@@ -7,444 +7,722 @@ import { STAR_NAMES } from "@phopephum/types";
 import type { Env } from "~/env.server";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import type { PredCategory, KarnchataReading } from "~/services/karnchata-prediction.server";
+
+// ─── Client-safe inline copies (no server import) ─────────────────────────────
+const CATEGORY_LABELS: Record<PredCategory, string> = {
+  news:     "ข่าวสาร / เรื่องที่ได้ยิน",
+  lost:     "ของหาย / สิ่งสูญหาย",
+  health:   "ผู้ป่วย / สุขภาพ",
+  travel:   "การเดินทาง",
+  work:     "การงาน / การเจรจา",
+  wealth:   "การเงิน / โชคลาภ",
+  love:     "ความรัก / ความสัมพันธ์",
+  obstacle: "อุปสรรค / ปัญหา",
+  general:  "ทั่วไป / สอบถามชะตา",
+};
+
+function detectCategory(q: string): PredCategory {
+  const s = q.toLowerCase();
+  if (s.match(/ของหาย|สูญหาย|หายไป/)) return "lost";
+  if (s.match(/เจ็บ|ป่วย|รักษา|หมอ|โรค|สุขภาพ/)) return "health";
+  if (s.match(/เดินทาง|เดิน|ออกไป|ทาง|ทิศ/)) return "travel";
+  if (s.match(/ข่าว|ได้ยิน|บอก|พูด|จริงไหม/)) return "news";
+  if (s.match(/งาน|เจรจา|สัญญา|ธุรกิจ|สมัคร/)) return "work";
+  if (s.match(/เงิน|ลงทุน|ทรัพย์|โชค|รวย|กำไร/)) return "wealth";
+  if (s.match(/รัก|แฟน|คนรัก|สัมพันธ์|แต่งงาน/)) return "love";
+  if (s.match(/ปัญหา|อุปสรรค|ขัดข้อง|ติดขัด/)) return "obstacle";
+  return "general";
+}
 
 export const meta: MetaFunction = () => [
   { title: "ทำนายกาลชะตา V2.0 — PhopePhum" },
-  { name: "description", content: "วิเคราะห์รหัสชะตาชีวิตระดับวินาทีด้วย 7 ตัว 9 ฐาน ผสมผสานระบบ Q&A แชทอัจฉริยะแบบเรียลไทม์" },
+  { name: "description", content: "วิเคราะห์กาลชะตาชีวิตด้วยระบบยามอัฏฐกาล พร้อมคำแนะนำตัดสินใจอัตโนมัติ" },
 ];
+
+// ─── Types ─────────────────────────────────────────────────────────────────────
+
+interface QuestionRecord {
+  id: string;
+  timestamp: string;
+  question: string;
+  category: PredCategory;
+  tabMode: "daily" | "hourly" | "minute";
+  yamName: string;
+  yamPhase: string;
+  reading: KarnchataReading;
+}
+
+// ─── Loader ────────────────────────────────────────────────────────────────────
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const { user, profile } = await requireMinPlan("basic", request, env);
-
+  const { profile } = await requireMinPlan("basic", request, env);
   const now = new Date();
   const initialResult = calculateKarnchata(now);
-
-  let phopephumResult = null;
-  if (profile?.birth_date) {
-    try {
-      phopephumResult = await calculatePhopephum({
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time || "12:00",
-        birthPlace: profile.birth_place || "กรุงเทพมหานคร",
-      }, now);
-    } catch (e) { /* fallback */ }
-  }
-
   const thaiDateLabel = now.toLocaleDateString("th-TH", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
-
   let lunarInfo: { moonPhaseText: string; isWaxing: boolean; lunarDay: number; thaiMonthName: string } | null = null;
   try {
     const lunar = gregorianToThaiLunarV3(now);
     lunarInfo = { moonPhaseText: lunar.moonPhaseText, isWaxing: lunar.isWaxing, lunarDay: lunar.lunarDay, thaiMonthName: lunar.thaiMonthName };
-  } catch (e) { /* fallback */ }
-
-  return json({ profile, initialResult, phopephumResult, thaiDateLabel, lunarInfo, currentTime: now.toISOString() });
+  } catch (e) { /* */ }
+  return json({ profile, initialResult, thaiDateLabel, lunarInfo, currentTime: now.toISOString() });
 }
+
+// ─── Action ────────────────────────────────────────────────────────────────────
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const user = await requireAuth(request, env);
+  await requireAuth(request, env);
   const formData = await request.formData();
-  const timeMode = formData.get("timeMode") as "live" | "custom";
+  const intent = formData.get("intent") as string;
 
   let targetDate = new Date();
+  const timeMode = formData.get("timeMode") as "live" | "custom";
   if (timeMode === "custom") {
     const tDay = Number(formData.get("customDay"));
     const tMonth = Number(formData.get("customMonth"));
     const tYear = Number(formData.get("customYear"));
-    const tYearCE = tYear - 543;
     const timeStr = String(formData.get("customTime") || "12:00");
     const [th, tmin] = timeStr.split(":").map(Number);
     if (tDay && tMonth && tYear) {
-      targetDate = new Date(Date.UTC(tYearCE, tMonth - 1, tDay, th - 7, tmin, 0));
+      targetDate = new Date(Date.UTC(tYear - 543, tMonth - 1, tDay, th - 7, tmin, 0));
     }
   }
 
   const result = calculateKarnchata(targetDate);
-  let phopephumResult = null;
-  const profile = await getProfile(user.id, request, env);
-  if (profile?.birth_date) {
-    try {
-      phopephumResult = await calculatePhopephum({
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time || "12:00",
-        birthPlace: profile.birth_place || "กรุงเทพมหานคร",
-      }, targetDate);
-    } catch (e) { /* fallback */ }
-  }
-
   let lunarInfo: { moonPhaseText: string; isWaxing: boolean; lunarDay: number; thaiMonthName: string } | null = null;
   try {
     const lunar = gregorianToThaiLunarV3(targetDate);
     lunarInfo = { moonPhaseText: lunar.moonPhaseText, isWaxing: lunar.isWaxing, lunarDay: lunar.lunarDay, thaiMonthName: lunar.thaiMonthName };
-  } catch (e) { /* fallback */ }
+  } catch (e) { /* */ }
+  const thaiDateLabel = targetDate.toLocaleDateString("th-TH", {
+    weekday: "long", day: "numeric", month: "long", year: "numeric",
+  });
 
-  return json({ result, phopephumResult, lunarInfo, timeMode });
+  if (intent === "predict") {
+    const question = String(formData.get("question") || "");
+    const categoryRaw = formData.get("category") as PredCategory | null;
+    const category: PredCategory = categoryRaw ?? detectCategory(question);
+
+    const bkkHour = (targetDate.getUTCHours() + 7) % 24;
+    const isDaytime = bkkHour >= 6 && bkkHour < 18;
+    const bkkMinOfDay = bkkHour * 60 + targetDate.getUTCMinutes();
+    const minuteInYam = bkkMinOfDay % 90;
+    const yamPhase = minuteInYam < 30 ? "ต้น" : minuteInYam < 60 ? "กลาง" : "ปลาย";
+
+    const _SEQ = [6, 1, 2, 3, 4, 7, 5, 8] as const;
+    const _BHOP = ["บริวาร","อายุ","เดช","ศรี","มูละ","อุตสาหะ","มนตรี","กาลกิณี"] as const;
+    const yaiN = result.yamYaiNumber || 1;
+    const dayStarN = result.dayStarNumber || 1;
+    const si = _SEQ.indexOf(yaiN as typeof _SEQ[number]);
+    const dayStarPos = _SEQ.indexOf(dayStarN as typeof _SEQ[number]);
+    let taksaQuality = "อุตสาหะ";
+    if (si !== -1 && dayStarPos !== -1) {
+      const qualIdx = (si - dayStarPos + 8) % 8;
+      taksaQuality = _BHOP[qualIdx] ?? "อุตสาหะ";
+    }
+
+    const reading = generateKarnchataReading({
+      yamYaiNum: result.yamYaiNumber,
+      yamPhase: yamPhase as "ต้น" | "กลาง" | "ปลาย",
+      taksaQuality,
+      isDaytime,
+      category,
+      question,
+    });
+
+    return json({ result, lunarInfo, timeMode, thaiDateLabel, intent: "predict", reading, question, category });
+  }
+
+  return json({ result, lunarInfo, timeMode, thaiDateLabel, intent: "refresh", reading: null, question: "", category: "general" as PredCategory });
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
+// ─── Constants ─────────────────────────────────────────────────────────────────
 
-const CATEGORIES = [
-  { id: "work",     icon: "💼", label: "การงาน & เจรจา",       questions: ["การเจรจาตกลงทางธุรกิจในยามนี้จะประสบความสำเร็จหรือไม่?", "สภาพแวดล้อมหรือโอกาสความก้าวหน้าในยามนี้มีลักษณะอย่างไร?", "อยากเริ่มต้นโครงการงานใหม่ในนาทีนี้ควรทำทันทีหรือควรรอ?"] },
-  { id: "wealth",   icon: "💎", label: "การเงิน & โชคลาภ",     questions: ["จังหวะนี้เหมาะกับการเสี่ยงโชคหรือลงทุนหรือไม่?", "เงินที่รอคอยอยู่จะได้รับภายในระยะเวลาอันใกล้นี้ไหม?", "ควรระมัดระวังการใช้จ่ายหรือจะเสียทรัพย์ในยามนี้หรือไม่?"] },
-  { id: "love",     icon: "💖", label: "ความรัก & เมตตา",      questions: ["คนที่นึกถึงตอนนี้เขามีความรู้สึกอย่างไรกับเรา?", "การปรับความเข้าใจหรือสารภาพรักในเวลานี้จะราบรื่นไหม?", "ผู้ใหญ่หรือผู้บังคับบัญชาจะเมตตาเอ็นดูเราหรือไม่ในจังหวะนี้?"] },
-  { id: "health",   icon: "💊", label: "สุขภาพ & เจ็บไข้",    questions: ["อาการป่วยที่เป็นอยู่จะทุเลาลงหรือต้องระวังภาวะแทรกซ้อน?", "ควรไปพบแพทย์หรือเปลี่ยนวิธีการรักษาในเวลานี้หรือไม่?", "คนป่วยที่นึกถึงมีเกณฑ์ฟื้นตัวในทิศทางใด?"] },
-  { id: "travel",   icon: "🧭", label: "การเดินทาง & ทิศมงคล", questions: ["การเดินทางไปทิศ...ในยามนี้จะปลอดภัยและราบรื่นไหม?", "ควรหลีกเลี่ยงการเดินทางไปยังทิศใดเพื่อป้องกันอุปสรรค?", "จะพบโชคลาภหรือคนช่วยเหลือระหว่างการเดินทางหรือไม่?"] },
-  { id: "obstacle", icon: "⚠️", label: "อุปสรรค & แก้เคล็ด",  questions: ["ปัญหาที่กำลังเผชิญหน้าอยู่จะมีทางออกหรือมีคนช่วยไหม?", "มีสิ่งใดที่กำลังขัดขวางความสำเร็จและควรแก้เคล็ดอย่างไร?", "ของที่สูญหายจะได้คืนหรือไม่ หรือควรค้นหาในทิศใด?"] },
-];
-
-const BHOP_NATAL_NAMES = [
-  ["อัตตะ","หินะ","ธนัง","ปิตา","มาตา","โภคา","มัชฌิมา"],
-  ["ตนุ","กฎุมภะ","สหัชชะ","พันธุ","ปุตตะ","อริ","ปัตนิ"],
-  ["มรณะ","ศุภะ","กัมมะ","ลาภะ","พยายะ","ทาสา","ทาสี"],
-];
-const BASE4_POWER_NAMES: Record<number, string> = {
-  3:"อังคารเล็ก", 4:"พุธเล็ก", 5:"พฤหัสเล็ก", 6:"พระอาทิตย์", 7:"เสาร์เล็ก",
-  8:"อังคารใหญ่", 9:"พระเกตุ", 10:"พระเสาร์", 11:"ราชาโชค", 12:"พระราหู",
-  13:"มหาอุจ", 14:"จักรพรรดิ", 15:"พระจันทร์", 16:"โสฬสมงคล",
-  17:"พุธใหญ่", 18:"มหาจักรพรรดิ์", 19:"พระพฤหัส", 20:"เสาร์ใหญ่", 21:"พระศุกร์",
-};
-const BHOP_8_NAMES = ["อาตมะ","ทาสา","สิทธิโชค","โภคทรัพย์","โจร","อุบาทว์","อุปถัมภ์"];
-const BHOP_9_NAMES = ["อัตตะ","สักกะ","ญาติ","ธนัง","เคหัง","นาวัง","ภริยัง"];
-const PLANET_COLORS_BY_NUM: Record<number, string> = {
-  1:"#EF4444", 2:"#FBBF24", 3:"#F97316", 4:"#10B981", 5:"#F59E0B", 6:"#EC4899", 7:"#8B5CF6",
-};
 const CHALDEAN_SEQ = [7, 5, 3, 1, 6, 4, 2] as const;
 const _SEQ = [6, 1, 2, 3, 4, 7, 5, 8] as const;
 const _BHOP = ["บริวาร","อายุ","เดช","ศรี","มูละ","อุตสาหะ","มนตรี","กาลกิณี"] as const;
-const THAI_NUMS = ["๑","๒","๓","๔","๕","๖","๗","๘","๙"] as const;
 
-const TAKSA_PLAN_ADVICE: Record<string, { emoji: string; th: string; level: 0|1|2|3 }> = {
-  "บริวาร":  { emoji: "👥", th: "ประชุม บริหารทีม รับสั่งการ",           level: 2 },
-  "อายุ":    { emoji: "🧘", th: "ดูแลสุขภาพ พักฟื้น ออกกำลังกาย",       level: 2 },
-  "เดช":     { emoji: "⚡", th: "ตัดสินใจ เจรจาดีล ปิดสัญญา",           level: 3 },
-  "ศรี":     { emoji: "💰", th: "ลงทุน ทำธุรกรรม รับโชคลาภ",            level: 3 },
-  "มูละ":    { emoji: "🌱", th: "วางรากฐาน ริเริ่มโครงการระยะยาว",      level: 3 },
-  "อุตสาหะ": { emoji: "💪", th: "ทำงานหนัก ขยัน ทุ่มเทความพยายาม",      level: 2 },
-  "มนตรี":   { emoji: "🤝", th: "ใช้เส้นสาย หาพันธมิตร เจรจาชั้นสูง",  level: 3 },
-  "กาลกิณี": { emoji: "⚠️", th: "ระวัง! หลีกเลี่ยงการตัดสินใจสำคัญ",   level: 0 },
+const CATEGORY_ICONS: Record<PredCategory, string> = {
+  news: "📢", lost: "🔍", health: "💊", travel: "🧭",
+  work: "💼", wealth: "💎", love: "💖", obstacle: "⚠️", general: "✨",
 };
 
-const QUALITY_SCORES: Record<string, { trade: number; love: number; wealth: number; danger: number }> = {
-  "บริวาร":  { trade: 65, love: 68, wealth: 60, danger: 15 },
-  "อายุ":    { trade: 55, love: 72, wealth: 55, danger: 12 },
-  "เดช":     { trade: 95, love: 60, wealth: 80, danger: 5  },
-  "ศรี":     { trade: 75, love: 88, wealth: 95, danger: 5  },
-  "มูละ":    { trade: 80, love: 58, wealth: 90, danger: 8  },
-  "อุตสาหะ": { trade: 72, love: 56, wealth: 65, danger: 12 },
-  "มนตรี":   { trade: 90, love: 82, wealth: 75, danger: 5  },
-  "กาลกิณี": { trade: 20, love: 22, wealth: 15, danger: 85 },
+const QUICK_QUESTIONS: Record<PredCategory, string[]> = {
+  news:     ["ข่าวที่ได้ยินเชื่อถือได้ไหม?", "เรื่องที่คนเล่าเป็นความจริงไหม?"],
+  lost:     ["ของที่หายจะได้คืนไหม?", "ควรหาของในที่ไหน?"],
+  health:   ["คนป่วยจะฟื้นตัวได้ไหม?", "ควรรีบพาไปหาหมอไหม?"],
+  travel:   ["ออกเดินทางตอนนี้ปลอดภัยไหม?", "ควรไปทิศไหนดี?"],
+  work:     ["การเจรจาธุรกิจวันนี้จะสำเร็จไหม?", "ควรเซ็นสัญญาตอนนี้ไหม?"],
+  wealth:   ["จังหวะนี้เหมาะลงทุนไหม?", "เงินที่รอจะมาถึงไหม?"],
+  love:     ["คนที่นึกถึงมีความรู้สึกอย่างไร?", "การสารภาพรักตอนนี้จะราบรื่นไหม?"],
+  obstacle: ["ปัญหาที่เผชิญอยู่จะคลี่คลายไหม?", "ควรตัดสินใจเดินหน้าหรือรอก่อน?"],
+  general:  ["ดวงชะตาในยามนี้เป็นอย่างไร?", "จังหวะนี้ควรทำอะไร?"],
 };
 
-const YAM_DESC: Record<number, { subtitle: string; desc: string; decision: string }> = {
-  1: { subtitle:"อำนาจ/ผู้นำ",         desc:"ช่วงเวลาแห่งอำนาจบารมี เหมาะสำหรับการเป็นผู้นำ ตัดสินใจเด็ดขาด",                    decision:"เจรจากับผู้ใหญ่ ผู้มีอำนาจ หรือออกคำสั่งสำคัญได้ผลดีมาก" },
-  2: { subtitle:"ความรู้สึก/ครอบครัว", desc:"ช่วงเวลาแห่งความรู้สึก เหมาะสำหรับการดูแลครอบครัว สร้างความสัมพันธ์",              decision:"เจรจาด้วยความอ่อนโยน ดูแลคนรัก หรือแก้ปัญหาครอบครัว" },
-  3: { subtitle:"พลังงาน/ความกล้า",    desc:"ช่วงเวลาแห่งพลังงาน เหมาะสำหรับงานที่ต้องใช้กำลังและความกล้าหาญ",                 decision:"เริ่มงานที่ต้องพลังงานสูง แต่ระวังอารมณ์ร้อนและการทะเลาะวิวาท" },
-  4: { subtitle:"สติปัญญา/การสื่อสาร", desc:"ช่วงเวลาแห่งสติปัญญา เหมาะสำหรับการเรียนรู้ เจรจาต่อรอง และงานสื่อสาร",         decision:"เซ็นสัญญา เจรจาสัญญา หรือนำเสนองานสำคัญ" },
-  5: { subtitle:"ปัญญา/โชคลาภ",        desc:"ช่วงเวลาแห่งปัญญาและโชคลาภ เหมาะสำหรับการขอพร ขยายกิจการ ลงทุน",               decision:"ลงทุน ขยายธุรกิจ หรือขอพรสิ่งศักดิ์สิทธิ์" },
-  6: { subtitle:"ความรัก/ศิลปะ",       desc:"ช่วงเวลาแห่งความรักและศิลปะ เหมาะสำหรับการสารภาพรัก สร้างมิตรภาพ และความงาม", decision:"สารภาพรัก สร้างมิตรภาพ หรืองานสร้างสรรค์ศิลปะ" },
-  7: { subtitle:"ความมั่นคง/อดทน",     desc:"ช่วงเวลาแห่งความมั่นคง เหมาะสำหรับงานระยะยาว วางรากฐาน ปฏิบัติงานที่อดทน",    decision:"งานระยะยาว วางรากฐาน หรือสิ่งที่ต้องอดทนรอผล" },
+// คำแนะนำตัดสินใจตาม Taksa × ดาว
+const TAKSA_DECISION: Record<string, { icon: string; title: string; actions: string[]; avoid: string[] }> = {
+  "เดช":     { icon: "⚡", title: "เวลาแห่งอำนาจและการตัดสินใจ", actions: ["ปิดดีล / เซ็นสัญญา", "เจรจาต่อรอง ยืนยันข้อตกลง", "ออกคำสั่ง / ตัดสินใจเด็ดขาด"], avoid: ["ผัดวันประกันพรุ่ง", "ยอมแพ้ต่ออุปสรรค"] },
+  "ศรี":     { icon: "💰", title: "เวลาแห่งโชคลาภและทรัพย์สิน", actions: ["ลงทุน / ทำธุรกรรมการเงิน", "เปิดตัวสินค้า / โปรโมท", "รับของขวัญหรือโอนเงิน"], avoid: ["กู้หนี้ยืมสิน", "ซื้อขายของที่ไม่จำเป็น"] },
+  "มูละ":    { icon: "🌱", title: "เวลาแห่งการวางรากฐาน", actions: ["เริ่มโครงการระยะยาว", "วางแผน / ออกแบบกลยุทธ์", "ลงทุนระยะยาว / ซื้ออสังหา"], avoid: ["หวังผลเร็ว", "ตัดสินใจโดยไม่มีแผน"] },
+  "มนตรี":   { icon: "🤝", title: "เวลาแห่งพันธมิตรและเส้นสาย", actions: ["ติดต่อผู้ใหญ่ / หาพันธมิตร", "ประสานงาน / สร้าง Network", "ขอคำปรึกษาจากผู้เชี่ยวชาญ"], avoid: ["ตัดสินใจคนเดียว", "ทำงานโดดเดี่ยว"] },
+  "บริวาร":  { icon: "👥", title: "เวลาแห่งทีมและกลุ่มคน", actions: ["ประชุมกลุ่ม / มอบหมายงาน", "รับฟังความคิดเห็นทีม", "จัดกิจกรรมสร้างทีม"], avoid: ["ทำคนเดียว", "ตัดสินใจโดยไม่ปรึกษาทีม"] },
+  "อายุ":    { icon: "🧘", title: "เวลาแห่งสุขภาพและการพักฟื้น", actions: ["พักผ่อน / ดูแลสุขภาพ", "ออกกำลังกาย / นั่งสมาธิ", "ตรวจสุขภาพประจำปี"], avoid: ["ทำงานหนักเกินไป", "ละเลยการนอน"] },
+  "อุตสาหะ": { icon: "💪", title: "เวลาแห่งความพยายามและทุ่มเท", actions: ["ทำงานที่ต้องใช้ความพยายาม", "ฝึกฝนทักษะใหม่", "แก้ปัญหาที่ยากด้วยความอดทน"], avoid: ["รอโชคลอย", "ท้อแท้เร็ว"] },
+  "กาลกิณี": { icon: "⚠️", title: "ช่วงระวัง — หลีกเลี่ยงการตัดสินใจสำคัญ", actions: ["รอและสังเกตการณ์", "เตรียมตัวรับมือปัญหา", "ดูแลตัวเองให้ปลอดภัย"], avoid: ["เซ็นสัญญาสำคัญ", "ลงทุนก้อนใหญ่", "ตัดสินใจแบบรีบร้อน"] },
 };
 
-const YAM_OMEN: Record<number, string> = {
-  1: "อาทิตย์อวสาน ยาตราทำการ มิตีหนักหนา ได้เมื่อช่างทอง จำลองพระสิทธา แค้นเคืองหนักหนา มยุรากลืนแหวน",
-  2: "จันทร์สาดแสงฉาย เมตตาอภัย สมบัติงามดี มีมิตรสหาย กายใจสบาย พ้นภัยพิบัติ ประกาศเกียรติยศ",
-  3: "อังคารเดินทาง ระวางอันตราย อย่าไปทิศตะวันออก โลหกิจเจริญ เผ็ดร้อนเกริ่นกราย ชนะศัตรูได้",
-  4: "พุธทรงปรีชา วาจาว่องไว พ่อค้าโชคดี มีกำไรงาม เจรจาสำเร็จ เลิศทางสติปัญญา ค้าขายวันนี้",
-  5: "พฤหัสบดีโชค ปลดโศกทุกข์พ้น ทรัพย์สมบัติล้น ผลบุญส่งเสริม เพิ่มพูนความเจริญ เกริ่นชื่อเสียงดี",
-  6: "ศุกร์งามพริ้งเพรา เสน่ห์เพริดแพร้ว รักหวานชื่นชม สมหวังทุกสิ่ง ยิ่งเมตตาดี มีสุขสมบูรณ์",
-  7: "เสาร์หนักขวาง ระวางสิ่งร้าย อย่างระวังภัย ใจอดทนดี มีความมั่นคง คงชนะอุปสรรค พรากจากเสนียด",
+const YAM_DECISION: Record<number, { what: string; why: string; best: string }> = {
+  1: { what: "เจรจากับผู้มีอำนาจ ออกคำสั่ง ตัดสินใจที่ต้องใช้อำนาจ", why: "ดาวอาทิตย์ให้อำนาจบารมี ผู้ใหญ่มีบทบาทสำคัญ ข่าวสารที่ได้ยินเชื่อถือได้", best: "ยามกลาง" },
+  2: { what: "ดูแลครอบครัว สร้างความสัมพันธ์ งานสร้างสรรค์และความรู้สึก", why: "ดาวจันทร์เน้นอารมณ์และความสัมพันธ์ ข้อมูลยังไม่ชัด ต้องใช้ความรู้สึก", best: "ยามกลาง" },
+  3: { what: "งานที่ต้องใช้พลังงานสูง กีฬา การออกกำลัง งานใช้แรง", why: "ดาวอังคารให้พลังงานและความกล้า แต่ระวังอารมณ์ร้อน ยามปลายให้ผลดีสุด", best: "ยามปลาย" },
+  4: { what: "เซ็นสัญญา เจรจาต่อรอง นำเสนองาน สื่อสารสำคัญ", why: "ดาวพุธเสริมสติปัญญาและการสื่อสาร ข่าวสารที่ได้ยินเชื่อถือได้", best: "ยามกลาง" },
+  5: { what: "ลงทุน ขยายกิจการ พบปะผู้ใหญ่ ขอพรสิ่งศักดิ์สิทธิ์", why: "ดาวพฤหัสให้โชคลาภและปัญญา ยามต้นให้ผลดีสุด ต้องรีบทำทันที", best: "ยามต้น" },
+  6: { what: "ความรักและความสัมพันธ์ งานศิลปะ สร้างมิตรภาพ ความงาม", why: "ดาวศุกร์เสริมเสน่ห์และความรัก ยามปลายให้ผลดีสุด", best: "ยามปลาย" },
+  7: { what: "งานระยะยาว วางรากฐาน งานที่ต้องอดทนและมั่นคง", why: "ดาวเสาร์ให้ความมั่นคงระยะยาว ข่าวสารเชื่อถือได้ ยามกลางให้ผลดีสุด", best: "ยามกลาง" },
 };
 
-// ─── Chart Component ──────────────────────────────────────────────────────────
+// ─── Prediction Card ────────────────────────────────────────────────────────────
 
-function NineBaseChart({
-  chart,
-  hoverNum,
-  setHoverNum,
-  title,
-  subtitle,
-  base1Label = "ฐาน๑",
-}: {
-  chart: number[][];
-  hoverNum: number | null;
-  setHoverNum: (n: number | null) => void;
-  title: string;
-  subtitle: string;
-  base1Label?: string;
-}) {
-  const connectionItems = useMemo(() => {
-    if (hoverNum === null) return [];
-    const items: Array<{ rIdx: number; colIdx: number; bhopName: string; baseThai: string }> = [];
-    chart.forEach((row, rIdx) => {
-      if (!Array.isArray(row)) return;
-      const colIdx = row.indexOf(hoverNum);
-      if (colIdx !== -1) {
-        let bhopName = "";
-        if (rIdx < 3) bhopName = BHOP_NATAL_NAMES[rIdx]?.[colIdx] ?? "";
-        else if (rIdx === 7) bhopName = BHOP_8_NAMES[colIdx] ?? "";
-        else if (rIdx === 8) bhopName = BHOP_9_NAMES[colIdx] ?? "";
-        items.push({ rIdx, colIdx, bhopName, baseThai: THAI_NUMS[rIdx] });
-      }
-    });
-    return items;
-  }, [hoverNum, chart]);
+function PredictionCard({ reading, onClose }: { reading: KarnchataReading; onClose?: () => void }) {
+  const isGood = reading.score >= 65;
+  const isDanger = reading.dangerScore >= 65;
 
   return (
-    <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8 relative">
-      <div className="flex items-center gap-3 mb-5">
-        <div className="flex-1">
-          <h3 className="text-base font-bold text-[#F8F6F1]">{title}</h3>
-          <p className="text-xs text-[#C6B79F] mt-0.5">{subtitle}</p>
-        </div>
-        {hoverNum !== null && (
-          <button type="button" onClick={() => setHoverNum(null)} className="shrink-0 text-xs text-[#C6B79F] hover:text-[#F8F6F1] border border-white/10 px-3 py-1 rounded-lg">✕ ล้าง</button>
-        )}
-      </div>
-
-      {hoverNum !== null && (
-        <div className="mb-4 bg-[#071427]/75 border border-[#C6A96B]/30 rounded-xl p-3 animate-in fade-in">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center font-display font-bold ring-2 ring-[#C6A96B] text-[#F8F6F1]">{hoverNum}</div>
-            <p className="text-sm font-bold text-[#C6A96B]">ดาว {STAR_NAMES[hoverNum as keyof typeof STAR_NAMES]}</p>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {connectionItems.map((occ, i) => (
-              <div key={i} className="bg-[#071427]/75 border border-[#C6A96B]/12 rounded px-2 py-1 text-[10px] text-[#F8F6F1]">
-                <span className="text-[#C6A96B] font-bold">ฐาน{occ.baseThai}</span> {occ.bhopName}
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <Card className="border-[#C6A96B]/30 bg-gradient-to-br from-[#0A1628] to-[#020617] p-5 sm:p-6 relative overflow-hidden">
+        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[#C6A96B]/4 blur-3xl pointer-events-none" />
+        <div className="relative z-10">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-3 mb-4">
+            <div>
+              <span className="text-[#C6A96B] text-[10px] tracking-widest uppercase font-bold block mb-1">
+                {CATEGORY_ICONS[reading.category]} {reading.categoryLabel} · ผลพยากรณ์
+              </span>
+              <h3 className="text-lg sm:text-xl font-display font-black text-[#F8F6F1] leading-snug">
+                {reading.verdict}
+              </h3>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <div className="text-center">
+                <div className={`text-2xl font-display font-black ${isDanger ? "text-red-400" : isGood ? "text-[#C6A96B]" : "text-[#D9BC82]"}`}>{reading.score}</div>
+                <div className="text-[10px] text-[#C6B79F] font-bold">มงคล</div>
               </div>
-            ))}
+              {onClose && (
+                <button onClick={onClose} className="text-[#C6B79F] hover:text-[#F8F6F1] transition-colors">✕</button>
+              )}
+            </div>
+          </div>
+
+          {/* Badges */}
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            <span className="bg-[#C6A96B]/10 border border-[#C6A96B]/30 text-[#C6A96B] text-[10px] font-bold px-2.5 py-1 rounded-full">ยาม{reading.yamYaiName}</span>
+            <span className="bg-white/5 border border-white/10 text-[#F8F6F1] text-[10px] font-bold px-2.5 py-1 rounded-full">ยาม{reading.yamPhase}</span>
+            <span className={`border text-[10px] font-bold px-2.5 py-1 rounded-full ${
+              reading.taksaQuality === "กาลกิณี" ? "border-red-500/30 bg-red-500/5 text-red-400" :
+              reading.taksaQuality === "เดช" || reading.taksaQuality === "ศรี" ? "border-[#C6A96B]/30 bg-[#C6A96B]/5 text-[#C6A96B]" :
+              "border-white/10 bg-white/5 text-[#C6B79F]"
+            }`}>{TAKSA_DECISION[reading.taksaQuality]?.icon} ทักษา{reading.taksaQuality}</span>
+          </div>
+
+          {/* Detail */}
+          <div className="bg-[#020617]/60 border border-white/5 rounded-xl p-4 mb-3">
+            <p className="text-sm text-[#D9CDB7] leading-relaxed">{reading.detail}</p>
+          </div>
+
+          {/* Advice + Warning */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="bg-[#071427]/60 border border-[#C6A96B]/15 rounded-xl p-3">
+              <p className="text-[10px] text-[#C6A96B] font-bold mb-1.5">✦ ควรทำ</p>
+              <p className="text-xs text-[#D9CDB7] leading-relaxed">{reading.advice}</p>
+            </div>
+            {reading.warning ? (
+              <div className="bg-[#1A0A0A]/60 border border-red-500/20 rounded-xl p-3">
+                <p className="text-[10px] text-red-400 font-bold mb-1.5">⚠️ ระวัง</p>
+                <p className="text-xs text-[#D9CDB7] leading-relaxed">{reading.warning}</p>
+              </div>
+            ) : (
+              <div className="bg-[#071E3D]/60 border border-[#6D8FC7]/15 rounded-xl p-3">
+                <p className="text-[10px] text-[#6D8FC7] font-bold mb-1.5">🕐 เวลามงคล</p>
+                <p className="text-xs text-[#D9CDB7] leading-relaxed">{reading.auspiciousTime}</p>
+              </div>
+            )}
           </div>
         </div>
-      )}
-
-      <div className="overflow-x-auto">
-        <div className="min-w-[340px] space-y-1.5">
-          {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((rIdx) => {
-            const rowData = chart[rIdx] ?? [];
-            if (rowData.length === 0) return null;
-            const label = rIdx === 0 ? base1Label : `ฐาน${THAI_NUMS[rIdx]}`;
-            const isBase4 = rIdx === 3;
-
-            if (isBase4) {
-              return (
-                <div key={rIdx} className="flex items-stretch gap-2 bg-[#0A2240]/25 border border-[#6D8FC7]/15 rounded-xl py-1 px-1">
-                  <div className="w-16 shrink-0 flex items-center justify-end">
-                    <span className="text-[13px] sm:text-[14px] font-extrabold text-[#6D8FC7]">{label}</span>
-                  </div>
-                  <div className="flex-1 grid grid-cols-7 gap-1">
-                    {rowData.map((s, cIdx) => (
-                      <div key={cIdx} className="relative flex flex-col items-center justify-center rounded-lg border py-1.5 px-0.5 min-h-[50px] sm:min-h-[64px] bg-[#071E3D]/75 border-[#6D8FC7]/22 hover:border-[#C6A96B]/30 transition-all">
-                        <span className="font-display text-[19px] sm:text-[24px] text-[#F8F6F1] font-bold leading-none">{s}</span>
-                        <span className="text-[9.5px] sm:text-[11px] text-[#F8F6F1]/70 truncate w-full text-center px-1 mt-0.5 font-bold">{BASE4_POWER_NAMES[s]}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div key={rIdx} className="flex items-stretch gap-2">
-                <div className="w-16 shrink-0 flex items-center justify-end">
-                  <span className="text-[13px] sm:text-[14px] font-extrabold text-[#C6A96B]">{label}</span>
-                </div>
-                <div className="flex-1 grid grid-cols-7 gap-1">
-                  {rowData.map((s, cIdx) => {
-                    const bhopName = rIdx < 3 ? (BHOP_NATAL_NAMES[rIdx]?.[cIdx] ?? "") : rIdx === 7 ? BHOP_8_NAMES[cIdx] : rIdx === 8 ? BHOP_9_NAMES[cIdx] : "";
-                    const isActive = hoverNum === s;
-                    return (
-                      <button key={cIdx} onClick={() => setHoverNum(isActive ? null : s)}
-                        className={`relative flex flex-col items-center justify-center rounded-lg border py-1.5 px-0.5 min-h-[50px] sm:min-h-[64px] transition-all duration-200 ${
-                          isActive
-                            ? "bg-[#0A1A30]/90 border-[#C6A96B]/60 shadow-[0_0_16px_rgba(198,169,107,0.22),inset_0_1px_0_rgba(198,169,107,0.10)] scale-[1.06] z-10"
-                            : "bg-[#071427]/75 border-[#C6A96B]/18 hover:border-[#C6A96B]/32"
-                        }`}>
-                        <span className={`font-display text-[19px] sm:text-[24px] leading-none text-[#F8F6F1] ${isActive ? "font-black" : "font-bold"}`}>{s}</span>
-                        {bhopName && <span className="text-[9.5px] sm:text-[11px] text-[#F8F6F1]/70 truncate w-full text-center px-1 mt-1 leading-tight font-bold">{bhopName}</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-// ─── Score Bar ────────────────────────────────────────────────────────────────
-
-function ScoreBar({ label, value, colorClass }: { label: string; value: number; colorClass: string }) {
-  return (
-    <div className="flex flex-col items-center bg-[#020617] border border-white/5 rounded-2xl p-4">
-      <span className="text-xs text-[#C6B79F] font-bold mb-1">{label}</span>
-      <span className={`text-2xl font-display font-bold ${colorClass}`}>{value}%</span>
-      <div className="w-full mt-2 h-1.5 bg-white/5 rounded-full overflow-hidden">
-        <div className={`h-full rounded-full ${colorClass.replace("text-", "bg-")}`} style={{ width: `${value}%` }} />
-      </div>
+      </Card>
     </div>
   );
 }
 
-// ─── Summary Card (Section 1) ─────────────────────────────────────────────────
+// ─── Decision Guidance Card ────────────────────────────────────────────────────
 
-function SummaryCard({
-  title,
-  starName,
-  starNum,
-  quality,
-  yamDesc,
-  omen,
-  scores,
-  extraInfo,
+function DecisionGuidance({
+  yamNum,
+  taksaQuality,
+  yamPhase,
+  yamName,
+  label,
 }: {
-  title: string;
-  starName: string;
-  starNum: number;
-  quality: string;
-  yamDesc: { subtitle: string; desc: string; decision: string };
-  omen?: string;
-  scores: { trade: number; love: number; wealth: number; danger: number };
-  extraInfo?: React.ReactNode;
+  yamNum: number;
+  taksaQuality: string;
+  yamPhase: string;
+  yamName: string;
+  label: string;
 }) {
-  const advice = TAKSA_PLAN_ADVICE[quality];
-  const levelColor = advice?.level === 3 ? "text-[#C6A96B] border-[#C6A96B]/40" : advice?.level === 0 ? "text-[#6D8FC7] border-[#6D8FC7]/40" : "text-[#D9BC82] border-[#D9BC82]/40";
+  const yamDec = YAM_DECISION[yamNum] ?? YAM_DECISION[1];
+  const taksaDec = TAKSA_DECISION[taksaQuality];
+  const isAuspicious = yamPhase === yamDec.best;
+  const isDanger = taksaQuality === "กาลกิณี";
 
   return (
-    <Card className="border-[#C6A96B]/20 bg-[#020617] p-6 sm:p-8 relative overflow-hidden">
-      <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[#C6A96B]/3 blur-3xl pointer-events-none" />
-      <div className="relative z-10">
-        <div className="flex items-start justify-between mb-5 gap-4">
-          <div>
-            <span className="text-[#C6A96B] text-xs tracking-widest uppercase font-bold block mb-1">✦ {title}</span>
-            <h2 className="text-3xl sm:text-4xl font-display font-black text-[#F8F6F1] leading-none">
-              {starName}
-              <span className="text-lg ml-3 text-[#C6B79F]">({starNum})</span>
-            </h2>
-            <p className="text-sm text-[#C6B79F] mt-1">{yamDesc.subtitle}</p>
-          </div>
-          {advice && (
-            <div className={`shrink-0 border rounded-2xl px-4 py-2 text-center ${levelColor}`}>
-              <p className="text-lg">{advice.emoji}</p>
-              <p className="text-xs font-bold">{quality}</p>
-              <p className="text-[10px] opacity-70">ระดับ {advice.level}/3</p>
-            </div>
-          )}
+    <Card className={`p-5 sm:p-6 border ${isDanger ? "border-red-500/20 bg-[#1A0A0A]/80" : "border-[#C6A96B]/20 bg-[#0A1628]"}`}>
+      {/* Title */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <span className="text-[#C6A96B] text-[10px] tracking-widest uppercase font-bold block mb-0.5">{label} — คำแนะนำตัดสินใจ</span>
+          <h3 className="text-base font-display font-black text-[#F8F6F1]">
+            ยาม{yamName} · ยาม{yamPhase}
+            <span className={`ml-2 text-xs font-bold ${isAuspicious ? "text-[#C6A96B]" : "text-[#C6B79F]"}`}>
+              {isAuspicious ? "✨ ช่วงดีที่สุด" : `ช่วงดีที่สุดคือ ${yamDec.best}`}
+            </span>
+          </h3>
         </div>
-
-        <div className="bg-[#0A1628] border border-white/5 rounded-2xl p-4 mb-5">
-          <p className="text-sm text-[#D9CDB7] leading-relaxed mb-3">{yamDesc.desc}</p>
-          <div className="border-t border-white/5 pt-3">
-            <p className="text-xs text-[#C6A96B] font-bold mb-1">🎯 คำแนะนำสำหรับการตัดสินใจ</p>
-            <p className="text-sm text-[#F8F6F1] leading-relaxed">{yamDesc.decision}</p>
-          </div>
-          {advice && (
-            <div className="border-t border-white/5 pt-3 mt-3">
-              <p className="text-xs text-[#C6B79F] font-bold mb-1">✦ กิจกรรมเหมาะสม</p>
-              <p className="text-sm text-[#D9CDB7]">{advice.th}</p>
-            </div>
-          )}
-          {omen && (
-            <p className="text-xs text-[#C6B79F] italic mt-3 border-t border-white/5 pt-3">"{omen}"</p>
-          )}
-        </div>
-
-        {extraInfo && <div className="mb-5">{extraInfo}</div>}
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <ScoreBar label="การค้า"  value={scores.trade}  colorClass="text-[#C6A96B]" />
-          <ScoreBar label="ความรัก" value={scores.love}   colorClass="text-[#D9BC82]" />
-          <ScoreBar label="โชคลาภ" value={scores.wealth}  colorClass="text-[#C6A96B]" />
-          <ScoreBar label="ภัยอันตราย" value={scores.danger} colorClass="text-[#6D8FC7]" />
-        </div>
+        {taksaDec && (
+          <span className={`shrink-0 text-2xl`}>{taksaDec.icon}</span>
+        )}
       </div>
+
+      {/* Main guidance */}
+      <div className={`rounded-xl p-4 mb-4 border ${isAuspicious && !isDanger ? "bg-[#C6A96B]/5 border-[#C6A96B]/20" : isDanger ? "bg-red-500/5 border-red-500/20" : "bg-white/3 border-white/5"}`}>
+        <p className="text-[10px] font-bold mb-2 text-[#C6B79F] uppercase tracking-wider">⏱ ตอนนี้เหมาะกับ</p>
+        <p className="text-sm font-bold text-[#F8F6F1] mb-1">{taksaDec?.title ?? yamDec.what}</p>
+        <p className="text-xs text-[#C6B79F] leading-relaxed">{yamDec.why}</p>
+      </div>
+
+      {/* Taksa actions */}
+      {taksaDec && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="bg-[#071427]/60 border border-[#C6A96B]/10 rounded-xl p-3">
+            <p className="text-[10px] text-[#C6A96B] font-bold mb-2 uppercase tracking-wider">✦ ควรทำตอนนี้</p>
+            <ul className="space-y-1">
+              {taksaDec.actions.map((a, i) => (
+                <li key={i} className="text-xs text-[#D9CDB7] flex items-start gap-1.5">
+                  <span className="text-[#C6A96B] shrink-0 mt-0.5">›</span>
+                  <span>{a}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className={`rounded-xl p-3 border ${isDanger ? "bg-red-500/5 border-red-500/15" : "bg-[#071E3D]/60 border-[#6D8FC7]/10"}`}>
+            <p className={`text-[10px] font-bold mb-2 uppercase tracking-wider ${isDanger ? "text-red-400" : "text-[#6D8FC7]"}`}>⚠️ ควรหลีกเลี่ยง</p>
+            <ul className="space-y-1">
+              {taksaDec.avoid.map((a, i) => (
+                <li key={i} className="text-xs text-[#D9CDB7] flex items-start gap-1.5">
+                  <span className={`shrink-0 mt-0.5 ${isDanger ? "text-red-400" : "text-[#6D8FC7]"}`}>✕</span>
+                  <span>{a}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </Card>
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// ─── Smart Question Box ────────────────────────────────────────────────────────
+
+function QuestionBox({
+  tabMode,
+  onSubmit,
+  isLoading,
+  label,
+  yamName,
+  yamPhase,
+}: {
+  tabMode: "daily" | "hourly" | "minute";
+  onSubmit: (q: string, cat: PredCategory, tab: "daily" | "hourly" | "minute") => void;
+  isLoading: boolean;
+  label: string;
+  yamName: string;
+  yamPhase: string;
+}) {
+  const [question, setQuestion] = useState("");
+  const [category, setCategory] = useState<PredCategory>("general");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const ta = textareaRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = `${Math.min(ta.scrollHeight, 200)}px`;
+  }, [question]);
+
+  useEffect(() => {
+    if (question.length > 5) {
+      const detected = detectCategory(question);
+      if (detected !== "general") setCategory(detected);
+    }
+  }, [question]);
+
+  const cats = Object.entries(CATEGORY_LABELS) as [PredCategory, string][];
+
+  return (
+    <div className="bg-[#071427]/80 border border-[#C6A96B]/15 rounded-2xl p-4 sm:p-5">
+      {/* Label */}
+      <div className="flex items-center gap-2 mb-3">
+        <div className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse shadow-[0_0_6px_rgba(198,169,107,0.6)]" />
+        <span className="text-xs font-bold text-[#C6A96B]">ถามกาลชะตา — {label}</span>
+        <span className="text-[10px] text-[#C6B79F] ml-auto">ยาม{yamName} · {yamPhase}</span>
+      </div>
+
+      {/* Category chips */}
+      <div className="flex flex-wrap gap-1 mb-3">
+        {cats.map(([id, label]) => (
+          <button key={id} type="button" onClick={() => setCategory(id)}
+            className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all ${
+              category === id
+                ? "bg-[#C6A96B] text-[#020617] border-[#C6A96B]"
+                : "border-white/10 text-[#C6B79F] hover:text-[#F8F6F1]"
+            }`}>
+            {CATEGORY_ICONS[id]} {label.split("/")[0].trim()}
+          </button>
+        ))}
+      </div>
+
+      {/* Quick questions */}
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {QUICK_QUESTIONS[category]?.map((q, i) => (
+          <button key={i} type="button" onClick={() => setQuestion(q)}
+            className="text-[10px] text-[#C6B79F] bg-[#020617] border border-white/8 hover:border-[#C6A96B]/40 hover:text-[#C6A96B] px-3 py-1.5 rounded-xl transition-all text-left">
+            {q}
+          </button>
+        ))}
+      </div>
+
+      {/* Textarea + Send */}
+      <div className="relative">
+        <textarea
+          ref={textareaRef}
+          value={question}
+          onChange={e => setQuestion(e.target.value)}
+          placeholder="พิมพ์คำถามของคุณ... เช่น ควรออกเดินทางตอนนี้ไหม?"
+          className="w-full bg-[#020617] border border-white/10 focus:border-[#C6A96B]/40 rounded-xl px-4 py-3 text-sm text-[#F8F6F1] outline-none resize-none min-h-[52px] max-h-[200px] pr-24 placeholder-[#C6B79F]/40 transition-all"
+          rows={2}
+          onKeyDown={e => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              if (question.trim()) onSubmit(question.trim(), category, tabMode);
+            }
+          }}
+        />
+        <button
+          type="button"
+          disabled={!question.trim() || isLoading}
+          onClick={() => { if (question.trim()) onSubmit(question.trim(), category, tabMode); }}
+          className="absolute right-2 bottom-2 px-4 py-1.5 rounded-lg bg-[#C6A96B] text-[#020617] font-bold text-xs hover:bg-[#D9BC82] disabled:opacity-40 transition-all"
+        >
+          {isLoading ? "⏳" : "พยากรณ์ →"}
+        </button>
+      </div>
+      <p className="text-[10px] text-[#C6B79F]/50 mt-1.5 px-1">Enter ส่งคำถาม · Shift+Enter ขึ้นบรรทัดใหม่</p>
+    </div>
+  );
+}
+
+// ─── History Strip ──────────────────────────────────────────────────────────────
+
+function HistoryStrip({ history, onSelect, onClear }: {
+  history: QuestionRecord[];
+  onSelect: (r: QuestionRecord) => void;
+  onClear: () => void;
+}) {
+  if (history.length === 0) return null;
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="bg-[#020617]/60 border border-white/5 rounded-xl p-3">
+      <div className="flex items-center justify-between">
+        <button onClick={() => setOpen(o => !o)} className="flex items-center gap-2 text-xs font-bold text-[#C6B79F] hover:text-[#F8F6F1]">
+          <span>📜 ประวัติคำถาม ({history.length})</span>
+          <span>{open ? "▲" : "▼"}</span>
+        </button>
+        <button onClick={onClear} className="text-[10px] text-[#C6B79F] hover:text-red-400 transition-colors">ล้าง</button>
+      </div>
+      {open && (
+        <div className="mt-3 space-y-1.5 max-h-60 overflow-y-auto">
+          {history.map(r => (
+            <button key={r.id} onClick={() => onSelect(r)}
+              className="w-full text-left p-2.5 rounded-xl bg-[#071427]/60 border border-white/5 hover:border-[#C6A96B]/20 transition-all group">
+              <div className="flex items-center gap-2">
+                <span className="shrink-0">{CATEGORY_ICONS[r.category]}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-bold text-[#F8F6F1] truncate group-hover:text-[#C6A96B]">{r.question}</p>
+                  <div className="flex gap-2 mt-0.5">
+                    <span className="text-[10px] text-[#C6B79F]">{r.timestamp}</span>
+                    <span className="text-[10px] text-[#C6A96B] font-bold">{r.yamName} · {r.yamPhase}</span>
+                    <span className={`text-[10px] font-bold ml-auto ${r.reading.score >= 65 ? "text-[#C6A96B]" : "text-[#6D8FC7]"}`}>{r.reading.score}%</span>
+                  </div>
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Yam Table Row ──────────────────────────────────────────────────────────────
+
+function YamTableRow({
+  timeStr,
+  starNum,
+  quality,
+  isCurrentYam,
+  isCurrent,
+  label,
+  expanded,
+  onToggle,
+}: {
+  timeStr: string;
+  starNum: number;
+  quality: string;
+  isCurrentYam: boolean;
+  isCurrent?: boolean;
+  label?: string | number;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const adv = TAKSA_DECISION[quality];
+  const yamDec = YAM_DECISION[starNum] ?? YAM_DECISION[1];
+  const isDanger = quality === "กาลกิณี";
+  const isGood = adv?.actions !== undefined && !isDanger;
+
+  return (
+    <div>
+      <button onClick={onToggle}
+        className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs transition-all ${
+          isCurrentYam || isCurrent
+            ? "bg-[#C6A96B]/10 border-[#C6A96B]/40"
+            : isDanger ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20"
+            : "bg-[#071427]/60 border-white/5 hover:border-[#C6A96B]/20"
+        }`}>
+        {label !== undefined && (
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] shrink-0 ${isCurrentYam || isCurrent ? "bg-[#C6A96B] text-[#020617]" : "bg-white/5 text-[#C6B79F]"}`}>{label}</span>
+        )}
+        <span className="font-mono text-[#C6B79F] text-[11px] shrink-0 w-26">{timeStr}</span>
+        <span className={`font-bold flex-1 text-left ${isCurrentYam || isCurrent ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>
+          {STAR_NAMES[starNum as keyof typeof STAR_NAMES]}
+        </span>
+        {adv && (
+          <span className={`shrink-0 text-[10px] font-bold flex items-center gap-0.5 ${isDanger ? "text-[#6D8FC7]" : isGood ? "text-[#C6A96B]" : "text-[#C6B79F]"}`}>
+            {adv.icon} {quality}
+          </span>
+        )}
+        <span className="text-[#C6B79F]/40 shrink-0 ml-1">{expanded ? "▲" : "▼"}</span>
+      </button>
+      {expanded && (
+        <div className="px-4 py-3 bg-[#020617]/70 border-x border-b border-white/5 rounded-b-xl space-y-2">
+          <p className="text-xs text-[#D9CDB7] leading-relaxed">{yamDec.why}</p>
+          {adv && (
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <p className="text-[10px] text-[#C6A96B] font-bold mb-1">✦ ควรทำ</p>
+                {adv.actions.slice(0, 2).map((a, i) => <p key={i} className="text-[10px] text-[#D9CDB7]">› {a}</p>)}
+              </div>
+              <div>
+                <p className={`text-[10px] font-bold mb-1 ${isDanger ? "text-red-400" : "text-[#6D8FC7]"}`}>✕ หลีกเลี่ยง</p>
+                {adv.avoid.slice(0, 2).map((a, i) => <p key={i} className="text-[10px] text-[#D9CDB7]">✕ {a}</p>)}
+              </div>
+            </div>
+          )}
+          <p className="text-[10px] text-[#C6A96B] font-bold">⏱ ช่วงดีที่สุด: ยาม{yamDec.best}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── DateTime Picker ────────────────────────────────────────────────────────────
+
+function DateTimePicker({ timeMode, setTimeMode, onSubmit, isLoading }: {
+  timeMode: "live" | "custom";
+  setTimeMode: (m: "live" | "custom") => void;
+  onSubmit: (data: FormData) => void;
+  isLoading: boolean;
+}) {
+  const now = new Date();
+  const nowBKK = new Date(now.getTime() + 7 * 3600 * 1000);
+  const [day, setDay]   = useState(nowBKK.getUTCDate());
+  const [month, setMonth] = useState(nowBKK.getUTCMonth() + 1);
+  const [year, setYear]   = useState(nowBKK.getUTCFullYear() + 543);
+  const [timeStr, setTimeStr] = useState(`${String(nowBKK.getUTCHours()).padStart(2,"0")}:${String(nowBKK.getUTCMinutes()).padStart(2,"0")}`);
+  const MONTHS = ["ม.ค.","ก.พ.","มี.ค.","เม.ย.","พ.ค.","มิ.ย.","ก.ค.","ส.ค.","ก.ย.","ต.ค.","พ.ย.","ธ.ค."];
+  const curYear = nowBKK.getUTCFullYear() + 543;
+
+  const send = (fd: FormData) => onSubmit(fd);
+
+  const apply = () => {
+    const fd = new FormData();
+    fd.append("intent", "refresh"); fd.append("timeMode", "custom");
+    fd.append("customDay", String(day)); fd.append("customMonth", String(month));
+    fd.append("customYear", String(year)); fd.append("customTime", timeStr);
+    send(fd);
+  };
+  const reset = () => {
+    const fd = new FormData(); fd.append("intent", "refresh"); fd.append("timeMode", "live");
+    setTimeMode("live"); send(fd);
+  };
+
+  return (
+    <div className="bg-[#0A1628] border border-white/5 rounded-2xl p-4">
+      <div className="flex bg-[#020617] rounded-xl p-1 gap-1 mb-3">
+        <button onClick={reset} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#C6A96B] text-[#020617]" : "text-[#C6B79F] hover:text-[#F8F6F1]"}`}>⏱ เรียลไทม์</button>
+        <button onClick={() => setTimeMode("custom")} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[#1E1730] text-[#F8F6F1]" : "text-[#C6B79F] hover:text-[#F8F6F1]"}`}>📅 เลือกเวลา</button>
+      </div>
+      {timeMode === "custom" && (
+        <div className="space-y-2">
+          <div className="grid grid-cols-4 gap-2">
+            <div>
+              <label className="text-[10px] text-[#C6B79F] font-bold block mb-1">วัน</label>
+              <select value={day} onChange={e => setDay(Number(e.target.value))} className="w-full bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none">
+                {Array.from({length:31},(_,i)=>i+1).map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] text-[#C6B79F] font-bold block mb-1">เดือน</label>
+              <select value={month} onChange={e => setMonth(Number(e.target.value))} className="w-full bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none">
+                {MONTHS.map((m,i) => <option key={i+1} value={i+1}>{m}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] text-[#C6B79F] font-bold block mb-1">ปี พ.ศ.</label>
+              <select value={year} onChange={e => setYear(Number(e.target.value))} className="w-full bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none">
+                {Array.from({length:10},(_,i)=>curYear-5+i).map(y=><option key={y} value={y}>{y}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="text-[10px] text-[#C6B79F] font-bold block mb-1">เวลา</label>
+              <input type="time" value={timeStr} onChange={e => setTimeStr(e.target.value)} className="w-full bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none" />
+            </div>
+          </div>
+          <button onClick={apply} disabled={isLoading} className="w-full bg-[#C6A96B] text-[#020617] font-bold text-xs py-2 rounded-xl hover:bg-[#D9BC82] disabled:opacity-40 transition-all">
+            {isLoading ? "กำลังคำนวณ..." : "✦ คำนวณกาลชะตา"}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function KarnchataPage() {
-  const { profile, initialResult, phopephumResult: initialPhopephum, thaiDateLabel, lunarInfo: initialLunar } = useLoaderData<typeof loader>();
+  const { initialResult, thaiDateLabel, lunarInfo: initialLunar } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
   const navigation = useNavigation();
+  const isLoading = navigation.state !== "idle";
 
-  const activeResult = actionData?.result || initialResult;
-  const activePhopephum = actionData?.phopephumResult || initialPhopephum;
-  const activeLunar = actionData?.lunarInfo ?? initialLunar;
+  const activeResult = actionData?.result ?? initialResult;
+  const activeLunar  = actionData?.lunarInfo ?? initialLunar;
+  const activeThaiDate = actionData?.thaiDateLabel ?? thaiDateLabel;
 
-  const [hoverNum, setHoverNum] = useState<number | null>(null);
   const [timeMode, setTimeMode] = useState<"live" | "custom">("live");
-  const [selectedCategory, setSelectedCategory] = useState("work");
-  const [time, setTime] = useState<Date>(new Date());
-  const [selectedYamKey, setSelectedYamKey] = useState<string | null>(null);
+  const [time, setTime] = useState(new Date());
   const [activeTab, setActiveTab] = useState<"daily" | "hourly" | "minute">("hourly");
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [history, setHistory] = useState<QuestionRecord[]>([]);
+  const [currentReading, setCurrentReading] = useState<KarnchataReading | null>(null);
+  const [readingFromTab, setReadingFromTab] = useState<"daily" | "hourly" | "minute">("hourly");
 
+  // Load history
   useEffect(() => {
-    const timer = setInterval(() => {
-      setTime(new Date());
-      if (timeMode === "live") {
-        const form = new FormData();
-        form.append("timeMode", "live");
-        submit(form, { method: "post", replace: true });
-      }
-    }, 60000);
-    return () => clearInterval(timer);
-  }, [timeMode, submit]);
-
-  useEffect(() => {
-    const tick = setInterval(() => setTime(new Date()), 1000);
-    return () => clearInterval(tick);
+    try {
+      const s = localStorage.getItem("karnchata_history_v2");
+      if (s) setHistory(JSON.parse(s));
+    } catch { /* */ }
   }, []);
 
-  const formatTime = (date: Date) => date.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
+  const saveHistory = useCallback((records: QuestionRecord[]) => {
+    setHistory(records);
+    try { localStorage.setItem("karnchata_history_v2", JSON.stringify(records.slice(0, 50))); } catch { /* */ }
+  }, []);
+
+  // Handle prediction result
+  useEffect(() => {
+    if (actionData?.intent === "predict" && actionData.reading) {
+      const r = actionData.reading as KarnchataReading;
+      setCurrentReading(r);
+      setReadingFromTab(activeTab);
+      const record: QuestionRecord = {
+        id: Date.now().toString(),
+        timestamp: new Date().toLocaleString("th-TH"),
+        question: actionData.question ?? "",
+        category: actionData.category as PredCategory,
+        tabMode: activeTab,
+        yamName: r.yamYaiName,
+        yamPhase: r.yamPhase,
+        reading: r,
+      };
+      saveHistory([record, ...history]);
+    }
+  }, [actionData]);
+
+  // Live clock
+  useEffect(() => {
+    const t = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+
+  // Auto-refresh
+  useEffect(() => {
+    if (timeMode !== "live") return;
+    const t = setInterval(() => {
+      const fd = new FormData();
+      fd.append("intent", "refresh"); fd.append("timeMode", "live");
+      submit(fd, { method: "post", replace: true });
+    }, 60000);
+    return () => clearInterval(t);
+  }, [timeMode, submit]);
+
+  const formatTime = (d: Date) =>
+    d.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false });
 
   const bkkHour = (time.getUTCHours() + 7) % 24;
   const isDaytime = bkkHour >= 6 && bkkHour < 18;
-  const yamSeq = Math.floor(((bkkHour - 6 + 24) % 24) / 1.5) % 8; // 0-indexed
-  const yaiN = activeResult.yamYaiNumber || 1;
-  const soyN = activeResult.yamSoyNumber || 1;
+  const bkkMinOfDay = bkkHour * 60 + time.getUTCMinutes();
+  const minuteInYam = bkkMinOfDay % 90;
+  const yamPhaseLabel = minuteInYam < 30 ? "ต้น" : minuteInYam < 60 ? "กลาง" : "ปลาย";
+  const soySlot = Math.floor(minuteInYam / 3.75) % 8;
+  const yamSeq = Math.floor(((bkkHour - 6 + 24) % 24) / 1.5) % 8;
 
-  // ยามซอย 3.75 นาที — คำนวณจากนาทีในยามใหญ่ (mod 90)
-  const bkkMinOfDay = ((time.getUTCHours() + 7) % 24) * 60 + time.getUTCMinutes();
-  const minuteInYam = bkkMinOfDay % 90; // 0–89
-  const soySlot = Math.floor(minuteInYam / 3.75) % 8 + 1; // 1-8
-  const secInCycle = (minuteInYam * 60 + time.getUTCSeconds()) % Math.round(3.75 * 60);
-  const cycleSec = Math.round(3.75 * 60);
-  const lagnamPos = secInCycle < cycleSec / 3 ? "ยามต้น" : secInCycle < (cycleSec * 2) / 3 ? "ยามกลาง" : "ยามปลาย";
-
-  // Taksa map (ยามใหญ่ → คุณภาพ)
+  const yaiN = (activeResult.yamYaiNumber ?? 1) as number;
+  const soyN = (activeResult.yamSoyNumber ?? 1) as number;
   const dayStarN = (activeResult.dayStarNumber ?? 1) as number;
-  const _si = _SEQ.indexOf(yaiN as any);
-  const taksaYamMap: Record<string, number> = {};
-  if (_si !== -1) { for (let i = 0; i < 8; i++) { taksaYamMap[_BHOP[i]] = _SEQ[(_si + i) % 8]; } }
 
-  // คุณภาพยามปัจจุบัน
-  const currentYamQuality = useMemo(() => {
-    return Object.entries(taksaYamMap).find(([, num]) => num === yaiN)?.[0] ?? "";
-  }, [taksaYamMap, yaiN]);
+  // Taksa of current yam
+  const dayStarPos8 = _SEQ.indexOf(dayStarN as typeof _SEQ[number]);
+  const yaiPos8 = _SEQ.indexOf(yaiN as typeof _SEQ[number]);
+  const currentTaksa = dayStarPos8 !== -1 && yaiPos8 !== -1
+    ? (_BHOP[(yaiPos8 - dayStarPos8 + 8) % 8] ?? "อุตสาหะ")
+    : "อุตสาหะ";
 
-  // คุณภาพยามซอยปัจจุบัน
-  const currentSoyQuality = useMemo(() => {
-    return Object.entries(taksaYamMap).find(([, num]) => num === soyN)?.[0] ?? "";
-  }, [taksaYamMap, soyN]);
+  const soyPos8 = _SEQ.indexOf(soyN as typeof _SEQ[number]);
+  const currentSoyTaksa = dayStarPos8 !== -1 && soyPos8 !== -1
+    ? (_BHOP[(soyPos8 - dayStarPos8 + 8) % 8] ?? "อุตสาหะ")
+    : "อุตสาหะ";
 
-  // คะแนนตามคุณภาพ
-  const yamScores = QUALITY_SCORES[currentYamQuality] ?? { trade: 50, love: 50, wealth: 50, danger: 20 };
-  const soyScores = QUALITY_SCORES[currentSoyQuality] ?? { trade: 50, love: 50, wealth: 50, danger: 20 };
+  // Day star taksa (for daily)
+  const dayTaksa = "อุตสาหะ"; // day star always maps to itself = อุตสาหะ position
 
-  // ตารางยาม 16 ยาม
+  // Build yam tables
   const dayYamTable = useMemo(() => {
-    const chaldIdx = CHALDEAN_SEQ.indexOf(dayStarN as any);
-    const dayStarPos8 = _SEQ.indexOf(dayStarN as any);
+    const chaldIdx = CHALDEAN_SEQ.indexOf(dayStarN as typeof CHALDEAN_SEQ[number]);
     return Array.from({ length: 16 }, (_, i) => {
       const cIdx = chaldIdx !== -1 ? (chaldIdx + i) % 7 : i % 7;
       const star = CHALDEAN_SEQ[cIdx];
@@ -452,252 +730,156 @@ export default function KarnchataPage() {
       const slot = i % 8;
       const hf = (isDay ? 6 : 18) + slot * 1.5;
       const ef = hf + 1.5;
-      const fmt = (h: number, m: number) => `${String(Math.floor(h) % 24).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-      const timeStr = `${fmt(hf, hf % 1 ? 30 : 0)}–${fmt(ef, ef % 1 ? 30 : 0)}`;
-      const yamStarPos8 = _SEQ.indexOf(star as any);
-      const qualIdx = dayStarPos8 !== -1 && yamStarPos8 !== -1 ? (yamStarPos8 - dayStarPos8 + 8) % 8 : -1;
+      const fmt = (h: number) => `${String(Math.floor(h) % 24).padStart(2, "0")}:${h % 1 ? "30" : "00"}`;
+      const timeStr = `${fmt(hf)}–${fmt(ef)}`;
+      const sp8 = _SEQ.indexOf(star as typeof _SEQ[number]);
+      const qualIdx = dayStarPos8 !== -1 && sp8 !== -1 ? (sp8 - dayStarPos8 + 8) % 8 : -1;
       const quality = qualIdx !== -1 ? (_BHOP[qualIdx] ?? "") : "";
       const bkkH = (time.getUTCHours() + 7) % 24;
       const totalMin = bkkH * 60 + time.getUTCMinutes();
       const slotStartMin = (isDay ? 6 : 18) * 60 + slot * 90;
-      // Fix: night slots after midnight (slotStartMin ≥ 1440 → 00:00–06:00)
-      const isCurrentYam = slotStartMin < 1440
-        ? totalMin >= slotStartMin && totalMin < slotStartMin + 90
-        : totalMin < 360 && totalMin >= slotStartMin - 1440 && totalMin < slotStartMin - 1440 + 90;
-      return { yamNum: slot + 1, isDay, star, timeStr, quality, qualIdx, isCurrentYam };
+      const isCurrentYam = totalMin >= slotStartMin && totalMin < slotStartMin + 90;
+      return { yamNum: slot + 1, isDay, star, timeStr, quality, isCurrentYam };
     });
   }, [activeResult, time]);
 
-  // ตาราง Yam Soy ในยามปัจจุบัน (minute tab Section 3)
   const yamSoyTable = useMemo(() => {
-    const chalIdx = CHALDEAN_SEQ.indexOf(yaiN as any);
+    const chalIdx = CHALDEAN_SEQ.indexOf(yaiN as typeof CHALDEAN_SEQ[number]);
     const yamStartMin = (isDaytime ? 6 : 18) * 60 + yamSeq * 90;
-    const dayStarPos8 = _SEQ.indexOf(dayStarN as any);
     return Array.from({ length: 8 }, (_, i) => {
-      const planet = chalIdx !== -1 ? CHALDEAN_SEQ[(chalIdx + i) % 7] : 1;
+      const planet = chalIdx !== -1 ? CHALDEAN_SEQ[(chalIdx + i) % 7] : (1 as number);
       const slotStartMin = yamStartMin + Math.round(i * 3.75);
-      const slotEndMin = yamStartMin + Math.round((i + 1) * 3.75);
+      const slotEndMin   = yamStartMin + Math.round((i + 1) * 3.75);
       const fmt = (m: number) => `${String(Math.floor(m / 60) % 24).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
       const timeStr = `${fmt(slotStartMin)}–${fmt(slotEndMin)}`;
-      const pos8 = _SEQ.indexOf(planet as any);
+      const pos8 = _SEQ.indexOf(planet as typeof _SEQ[number]);
       const qualIdx = dayStarPos8 !== -1 && pos8 !== -1 ? (pos8 - dayStarPos8 + 8) % 8 : -1;
       const quality = qualIdx !== -1 ? (_BHOP[qualIdx] ?? "") : "";
-      const isCurrent = soySlot - 1 === i;
-      return { slot: i + 1, planet, timeStr, quality, isCurrent };
+      return { slot: i + 1, planet, timeStr, quality, isCurrent: soySlot === i };
     });
-  }, [yaiN, isDaytime, yamSeq, dayStarN, soySlot]);
+  }, [yaiN, isDaytime, yamSeq, dayStarPos8, soySlot, time]);
 
-  // วิเคราะห์ยามดีเด่นของวัน
-  const bestDayYams = useMemo(() => dayYamTable.filter(y => TAKSA_PLAN_ADVICE[y.quality]?.level === 3), [dayYamTable]);
-  const worstDayYam = useMemo(() => dayYamTable.find(y => y.quality === "กาลกิณี"), [dayYamTable]);
+  const handleAsk = useCallback((question: string, cat: PredCategory, tab: "daily" | "hourly" | "minute") => {
+    setActiveTab(tab);
+    setReadingFromTab(tab);
+    const fd = new FormData();
+    fd.append("intent", "predict");
+    fd.append("timeMode", timeMode);
+    fd.append("question", question);
+    fd.append("category", cat);
+    submit(fd, { method: "post" });
+  }, [timeMode, submit]);
 
-  // Daily summary scores (เฉลี่ยจากยามดี)
-  const dailyScores = useMemo(() => {
-    if (bestDayYams.length === 0) return { trade: 50, love: 50, wealth: 50, danger: 30 };
-    const avg = (key: keyof typeof QUALITY_SCORES[string]) =>
-      Math.round(bestDayYams.reduce((s, y) => s + (QUALITY_SCORES[y.quality]?.[key] ?? 50), 0) / bestDayYams.length);
-    return { trade: avg("trade"), love: avg("love"), wealth: avg("wealth"), danger: avg("danger") };
-  }, [bestDayYams]);
+  const handleDateSubmit = useCallback((fd: FormData) => {
+    submit(fd, { method: "post", replace: true });
+  }, [submit]);
 
-  const activeCategory = CATEGORIES.find(c => c.id === selectedCategory);
-
-  // Chat
-  const [chatMessages, setChatMessages] = useState([{ sender: "ai", text: "สวัสดีครับ พร้อมวิเคราะห์จังหวะชีวิตเรียลไทม์แล้วครับ ท่านอยากตรวจสอบเรื่องใด?", time: "" }]);
-  const [userInput, setUserInput] = useState("");
-  const chatEndRef = useRef<HTMLDivElement>(null);
-  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [chatMessages]);
-
-  const doChatFetch = async (q: string) => {
-    setChatMessages(prev => [...prev, { sender: "user", text: q, time: "" }, { sender: "ai", text: "กำลังเชื่อมต่อกระแสญาณ...", time: "" }]);
-    setUserInput("");
-    try {
-      const formData = new FormData();
-      formData.append("question", q);
-      formData.append("category", CATEGORIES.find(c => c.id === selectedCategory)?.label || "ทั่วไป");
-      formData.append("targetDate", time.toISOString());
-      const res = await fetch("/api/karnchata-chat", { method: "POST", body: formData });
-      if (!res.ok) throw new Error("API Error");
-      const reader = res.body?.getReader();
-      const decoder = new TextDecoder();
-      let aiText = "";
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value, { stream: true });
-          for (const line of chunk.split("\n")) {
-            if (line.trim().startsWith("data: ")) {
-              const raw = line.slice(6).trim();
-              if (raw === "[DONE]") break;
-              try { const p = JSON.parse(raw); if (p.text) aiText += p.text; } catch (e) {}
-            }
-          }
-          setChatMessages(prev => { const a = [...prev]; a[a.length - 1] = { sender: "ai", text: aiText, time: "" }; return a; });
-        }
-      }
-    } catch (e) {
-      setChatMessages(prev => { const a = [...prev]; a[a.length - 1] = { sender: "ai", text: "ขออภัยครับ กระแสญาณขัดข้องชั่วคราว", time: "" }; return a; });
-    }
-  };
-
-  const handleSendChat = (e: React.FormEvent) => { e.preventDefault(); if (userInput.trim()) doChatFetch(userInput); };
-
-  const yamDesc = YAM_DESC[yaiN] || YAM_DESC[1];
-  const soyDesc = YAM_DESC[soyN] || YAM_DESC[1];
+  const toggle = (key: string) => setSelectedKey(k => k === key ? null : key);
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-700 pb-20">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="space-y-5 animate-in fade-in duration-700 pb-20">
+
+      {/* ── Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
         <div>
-          <span className="text-[#C6A96B] text-xs tracking-[0.25em] uppercase font-bold block mb-1">✦ คัมภีร์พยากรณ์ลับเฉพาะกาล</span>
-          <h1 className="text-3xl sm:text-4xl font-display font-bold text-[#F8F6F1] mb-2">ทำนายกาลชะตา V2.0</h1>
-          <p className="text-[#D9CDB7] text-sm leading-relaxed max-w-xl">วิเคราะห์รหัสชะตาชีวิตด้วย 7 ตัว 9 ฐาน รายวัน / รายชั่วโมง / รายนาที (3.45 นาที)</p>
+          <span className="text-[#C6A96B] text-[10px] tracking-[0.25em] uppercase font-bold block mb-1">✦ คัมภีร์พยากรณ์กาลชะตา</span>
+          <h1 className="text-3xl font-display font-bold text-[#F8F6F1] mb-1">ทำนายกาลชะตา V2.0</h1>
+          <p className="text-[#D9CDB7] text-sm max-w-lg">วิเคราะห์ชะตาด้วยยามอัฏฐกาล รายวัน · รายชั่วโมง · รายนาที พร้อมคำแนะนำตัดสินใจ</p>
         </div>
-        <div className="bg-[#C6A96B]/8 border border-[#C6A96B]/20 px-5 py-3 rounded-2xl self-start shrink-0">
-          <p className="text-xs text-[#C6A96B] uppercase font-bold">วันกาลชะตา</p>
-          <p className="text-sm font-bold text-[#F8F6F1]">{thaiDateLabel}</p>
-          {activeLunar && <p className="text-xs text-[#C6B79F] mt-0.5">{activeLunar.moonPhaseText} เดือน{activeLunar.thaiMonthName}</p>}
-        </div>
-      </div>
-
-      {/* Time mode toggle */}
-      <div className="bg-[#0A1628]/80 border border-white/5 rounded-2xl p-2">
-        <div className="flex bg-[#020617] rounded-xl p-1 border border-white/5">
-          <button onClick={() => setTimeMode("live")} className={`flex-1 px-4 py-2.5 text-sm font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#1E1730] text-[#F8F6F1]" : "text-[#C6B79F]"}`}>⏱ เรียลไทม์</button>
-          <button onClick={() => setTimeMode("custom")} className={`flex-1 px-4 py-2.5 text-sm font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[#C6A96B] text-[#020617]" : "text-[#C6B79F]"}`}>📅 เลือกวัน/เวลา</button>
+        <div className="bg-[#C6A96B]/8 border border-[#C6A96B]/20 px-4 py-3 rounded-2xl shrink-0">
+          <p className="text-[10px] text-[#C6A96B] uppercase font-bold">วันกาลชะตา</p>
+          <p className="text-sm font-bold text-[#F8F6F1]">{activeThaiDate}</p>
+          {activeLunar && <p className="text-[10px] text-[#C6B79F]">{activeLunar.moonPhaseText} เดือน{activeLunar.thaiMonthName}</p>}
         </div>
       </div>
 
-      {/* Tab selector */}
-      <div className="flex bg-[#0A1628]/60 p-1.5 rounded-2xl border border-white/5 gap-1.5 sticky top-2 z-30 backdrop-blur-xl">
-        {[
-          { id: "daily",  label: "รายวัน",      icon: "📅" },
-          { id: "hourly", label: "รายชั่วโมง",   icon: "⏱" },
-          { id: "minute", label: "รายนาที 3.45", shortLabel: "นาที", icon: "🎯" },
-        ].map((tab) => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id as any)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === tab.id ? "bg-[#C6A96B] text-[#020617]" : "text-[#C6B79F] hover:text-[#F8F6F1]"}`}>
-            <span>{tab.icon}</span>
-            <span className="hidden sm:inline">{tab.label}</span>
-            <span className="sm:hidden">{"shortLabel" in tab ? tab.shortLabel : tab.label}</span>
+      {/* ── Clock Strip ── */}
+      <div className="flex items-center justify-between bg-[#0A1628]/80 border border-white/5 rounded-2xl px-5 py-3">
+        <div className="flex items-center gap-3">
+          <div className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse shadow-[0_0_8px_rgba(198,169,107,0.6)]" />
+          <span className="text-2xl font-display font-black text-[#F8F6F1]">{formatTime(time)}</span>
+        </div>
+        <div className="flex items-center gap-2 text-[10px] font-bold flex-wrap justify-end">
+          <span className={`px-2.5 py-1 rounded-full border ${isDaytime ? "bg-amber-500/10 border-amber-500/30 text-amber-400" : "bg-indigo-500/10 border-indigo-500/30 text-indigo-300"}`}>
+            {isDaytime ? "☀️ กลางวัน" : "🌙 กลางคืน"}
+          </span>
+          <span className="text-[#C6A96B] bg-[#C6A96B]/10 border border-[#C6A96B]/20 px-2.5 py-1 rounded-full">
+            {activeResult.yamYaiName} · ยาม{yamPhaseLabel}
+          </span>
+        </div>
+      </div>
+
+      {/* ── DateTime Picker ── */}
+      <DateTimePicker timeMode={timeMode} setTimeMode={setTimeMode} onSubmit={handleDateSubmit} isLoading={isLoading} />
+
+      {/* ── Tab Selector ── */}
+      <div className="flex bg-[#0A1628]/60 p-1.5 rounded-2xl border border-white/5 gap-1">
+        {([["daily","📅","รายวัน"],["hourly","⏱","รายชั่วโมง"],["minute","🎯","รายนาที"]] as const).map(([id,icon,label]) => (
+          <button key={id} onClick={() => setActiveTab(id)}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === id ? "bg-[#C6A96B] text-[#020617]" : "text-[#C6B79F] hover:text-[#F8F6F1]"}`}>
+            <span>{icon}</span><span>{label}</span>
           </button>
         ))}
       </div>
 
-      {/* ═══════════════ TAB: รายวัน ═══════════════ */}
+      {/* ══════════════════════════════════════════════════════════
+          TAB: รายวัน
+      ══════════════════════════════════════════════════════════ */}
       {activeTab === "daily" && (
-        <>
-          {/* Section 1: สรุปรายวัน */}
-          <SummaryCard
-            title={`สรุปกาลชะตาวันนี้ — ดาวประจำวัน ${STAR_NAMES[dayStarN as keyof typeof STAR_NAMES]}`}
-            starName={STAR_NAMES[dayStarN as keyof typeof STAR_NAMES] ?? ""}
-            starNum={dayStarN}
-            quality={currentYamQuality}
-            yamDesc={yamDesc}
-            omen={YAM_OMEN[yaiN]}
-            scores={dailyScores}
-            extraInfo={
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="bg-[#071427]/75 border border-[#C6A96B]/18 rounded-xl p-4">
-                  <p className="text-xs font-bold text-[#C6A96B] mb-2">✨ ยามดีเด่นวันนี้ (ระดับ 3)</p>
-                  {bestDayYams.length > 0 ? bestDayYams.map(y => (
-                    <div key={y.timeStr} className="flex justify-between text-xs py-1 border-b border-white/5 last:border-0">
-                      <span className="text-[#C6B79F] font-mono">{y.timeStr}</span>
-                      <span className="text-[#C6A96B] font-bold">{y.quality} {TAKSA_PLAN_ADVICE[y.quality]?.emoji}</span>
-                    </div>
-                  )) : <p className="text-xs text-[#C6B79F]">ไม่มีในช่วงนี้</p>}
-                </div>
-                <div className="bg-[#071E3D]/75 border border-[#6D8FC7]/22 rounded-xl p-4">
-                  <p className="text-xs font-bold text-[#6D8FC7] mb-2">⚠️ ยามกาลกิณี (ควรหลีกเลี่ยง)</p>
-                  {worstDayYam ? (
-                    <div>
-                      <p className="text-sm font-bold text-[#4B6FAE]">{worstDayYam.timeStr}</p>
-                      <p className="text-xs text-[#C6B79F] mt-1">{worstDayYam.isDay ? "☀️ กลางวัน" : "🌙 กลางคืน"} — ยามที่ {worstDayYam.yamNum}</p>
-                      <p className="text-xs text-[#6D8FC7]/70 mt-1">หลีกเลี่ยงการตัดสินใจสำคัญ การลงนามสัญญา หรือการเดินทางไกล</p>
-                    </div>
-                  ) : <p className="text-xs text-[#C6B79F]">ไม่พบ</p>}
-                </div>
-              </div>
-            }
+        <div className="space-y-4">
+          {/* Decision Guidance */}
+          <DecisionGuidance
+            yamNum={dayStarN}
+            taksaQuality={dayTaksa}
+            yamPhase={yamPhaseLabel}
+            yamName={STAR_NAMES[dayStarN as keyof typeof STAR_NAMES] ?? ""}
+            label="วันนี้ (รายวัน)"
           />
 
-          {/* Section 2: ผังดวง 9 ฐาน รายวัน */}
-          <NineBaseChart
-            chart={activeResult.dailyChart ?? activeResult.hourlyChart ?? []}
-            hoverNum={hoverNum}
-            setHoverNum={setHoverNum}
-            title="ผังดวงกาลชะตา 9 ฐาน รายวัน"
-            subtitle={`ฐาน๑=ดาวประจำวัน(${STAR_NAMES[dayStarN as keyof typeof STAR_NAMES]}) ฐาน๒=เดือนจันทรคติ(${activeResult.lunarMonthName}) ฐาน๓=ปีนักษัตร`}
-            base1Label="ฐาน๑(วัน)"
+          {/* Question Box */}
+          <QuestionBox
+            tabMode="daily"
+            onSubmit={handleAsk}
+            isLoading={isLoading}
+            label="ถามเรื่องวันนี้"
+            yamName={STAR_NAMES[dayStarN as keyof typeof STAR_NAMES] ?? ""}
+            yamPhase={yamPhaseLabel}
           />
 
-          {/* Section 3: ตารางยาม 16 ยาม */}
-          <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8">
-            <h3 className="text-base font-bold text-[#F8F6F1] mb-2">ตารางกาลชะตา 16 ยาม พร้อมคำอธิบาย</h3>
-            <p className="text-xs text-[#C6B79F] mb-5">กดที่ยามเพื่อดูคำอธิบายและแนวทางการตัดสินใจ — ยามที่ไฮไลต์คือปัจจุบัน</p>
+          {/* Prediction result (if from this tab) */}
+          {currentReading && readingFromTab === "daily" && (
+            <PredictionCard reading={currentReading} onClose={() => setCurrentReading(null)} />
+          )}
 
-            {/* ทักษา 8 ตำแหน่ง */}
-            <div className="bg-[#020617] border border-[#C6A96B]/12 rounded-2xl p-4 mb-6">
-              <p className="text-xs text-[#C6A96B] font-bold mb-3">ระดับทักษาประจำวัน (เรียงตามดาวประจำวัน)</p>
-              <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
-                {_BHOP.map((bhop, idx) => {
-                  const s = _SEQ[(_SEQ.indexOf(dayStarN as any) + idx + 8) % 8] as number;
-                  const isNow = s === yaiN;
-                  const adv = TAKSA_PLAN_ADVICE[bhop];
-                  return (
-                    <div key={bhop} className={`rounded-xl p-2 border text-center transition-colors ${isNow ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "border-[#6D8FC7]/30 bg-[#4B6FAE]/5" : "border-white/5 bg-[#071427]/75"}`}>
-                      <p className={`text-[10px] font-bold ${isNow ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#C6B79F]"}`}>{bhop}</p>
-                      <p className={`text-sm font-display font-black ${isNow ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{s}</p>
-                      <p className="text-[10px]">{adv?.emoji}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+          {/* History */}
+          <HistoryStrip
+            history={history.filter(h => h.tabMode === "daily")}
+            onSelect={r => { setCurrentReading(r.reading); setReadingFromTab("daily"); }}
+            onClear={() => saveHistory(history.filter(h => h.tabMode !== "daily"))}
+          />
 
-            <div className="space-y-6">
-              {[
-                { label: "☀️ กลางวัน (06:00–18:00)", filter: (y: typeof dayYamTable[0]) => y.isDay },
-                { label: "🌙 กลางคืน (18:00–06:00)", filter: (y: typeof dayYamTable[0]) => !y.isDay },
-              ].map(({ label, filter }) => (
-                <div key={label}>
-                  <p className={`text-xs font-bold mb-3 ${label.includes("☀️") ? "text-amber-400/80" : "text-indigo-400/80"}`}>{label}</p>
-                  <div className="space-y-1.5">
-                    {dayYamTable.filter(filter).map(y => {
-                      const yamKey = `${y.isDay ? "day" : "night"}-${y.yamNum}`;
-                      const isEx = selectedYamKey === yamKey;
-                      const adv = TAKSA_PLAN_ADVICE[y.quality];
-                      const desc = YAM_DESC[y.star] || YAM_DESC[1];
+          {/* 16-yam table */}
+          <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-5">
+            <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางกาลชะตา 16 ยาม — กดดูคำแนะนำ</h3>
+            <p className="text-[10px] text-[#C6B79F] mb-4">ยามไฮไลต์คือปัจจุบัน · กดแต่ละยามเพื่อดูสิ่งที่ควรทำ</p>
+            <div className="space-y-4">
+              {[{ label: "☀️ กลางวัน", isDay: true }, { label: "🌙 กลางคืน", isDay: false }].map(({ label: lbl, isDay }) => (
+                <div key={lbl}>
+                  <p className={`text-[10px] font-bold mb-2 ${isDay ? "text-amber-400/80" : "text-indigo-400/80"}`}>{lbl}</p>
+                  <div className="space-y-1">
+                    {dayYamTable.filter(y => y.isDay === isDay).map(y => {
+                      const key = `d-${isDay ? "d" : "n"}-${y.yamNum}`;
                       return (
-                        <div key={yamKey} className="flex flex-col">
-                          <button onClick={() => setSelectedYamKey(isEx ? null : yamKey)}
-                            className={`flex items-center gap-2 p-2.5 rounded-xl border text-xs transition-all ${y.isCurrentYam ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20" : "bg-[#071427]/75 border-[#C6A96B]/10 hover:border-[#C6A96B]/25"}`}>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="font-mono text-[#C6B79F] shrink-0 text-[11px]">{y.timeStr}</span>
-                                <span className={`font-bold truncate ${y.isCurrentYam ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span>
-                                <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#C6B79F]"}`}>{y.quality}</span>
-                              </div>
-                              {adv?.th && <p className="text-[10px] text-[#C6B79F] truncate mt-0.5">{adv.th}</p>}
-                            </div>
-                            <span className="text-[#C6B79F]/50 shrink-0">{isEx ? "▲" : "▼"}</span>
-                          </button>
-                          {isEx && (
-                            <div className="px-4 py-4 bg-[#020617]/60 border-x border-b border-white/5 rounded-b-xl">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-lg">{adv?.emoji}</span>
-                                <p className="text-sm font-bold text-[#C6A96B]">{y.quality} — {adv?.th}</p>
-                              </div>
-                              <p className="text-xs text-[#D9CDB7] leading-relaxed mb-2">{desc.desc}</p>
-                              <div className="bg-[#0A1628] rounded-xl p-3 border border-white/5">
-                                <p className="text-xs text-[#C6A96B] font-bold mb-1">🎯 แนวทางการตัดสินใจในยามนี้</p>
-                                <p className="text-xs text-[#F8F6F1] leading-relaxed">{desc.decision}</p>
-                              </div>
-                              <p className="text-[10px] text-[#C6B79F] italic mt-3">"{YAM_OMEN[y.star] || ""}"</p>
-                            </div>
-                          )}
-                        </div>
+                        <YamTableRow
+                          key={key}
+                          timeStr={y.timeStr}
+                          starNum={y.star}
+                          quality={y.quality}
+                          isCurrentYam={y.isCurrentYam}
+                          label={y.yamNum}
+                          expanded={selectedKey === key}
+                          onToggle={() => toggle(key)}
+                        />
                       );
                     })}
                   </div>
@@ -705,209 +887,130 @@ export default function KarnchataPage() {
               ))}
             </div>
           </Card>
-        </>
+        </div>
       )}
 
-      {/* ═══════════════ TAB: รายชั่วโมง ═══════════════ */}
+      {/* ══════════════════════════════════════════════════════════
+          TAB: รายชั่วโมง
+      ══════════════════════════════════════════════════════════ */}
       {activeTab === "hourly" && (
-        <>
-          {/* Section 1: สรุปยามปัจจุบัน */}
-          <SummaryCard
-            title={`กาลชะตายามปัจจุบัน — ยามที่ ${yamSeq + 1} (${isDaytime ? "กลางวัน" : "กลางคืน"})`}
-            starName={activeResult.yamYaiName}
-            starNum={yaiN}
-            quality={currentYamQuality}
-            yamDesc={yamDesc}
-            omen={YAM_OMEN[yaiN]}
-            scores={yamScores}
-            extraInfo={
-              <div className="flex items-center gap-4">
-                <div className="flex-1">
-                  <p className="text-xs text-[#C6B79F] uppercase font-bold mb-1">เวลาปัจจุบัน</p>
-                  <p className="text-4xl font-display font-black text-[#F8F6F1]">{formatTime(time)}</p>
-                </div>
-                <div className={`border font-bold text-xs px-3 py-1.5 rounded-full ${isDaytime ? "bg-amber-500/10 border-amber-500/30 text-amber-400" : "bg-indigo-500/10 border-indigo-500/30 text-indigo-300"}`}>
-                  {isDaytime ? "☀️ กลางวัน" : "🌙 กลางคืน"}
-                </div>
-              </div>
-            }
+        <div className="space-y-4">
+          {/* Decision Guidance */}
+          <DecisionGuidance
+            yamNum={yaiN}
+            taksaQuality={currentTaksa}
+            yamPhase={yamPhaseLabel}
+            yamName={activeResult.yamYaiName}
+            label="ชั่วโมงนี้ (ยามใหญ่)"
           />
 
-          {/* Section 2: ผังดวง 9 ฐาน รายชั่วโมง */}
-          <NineBaseChart
-            chart={activeResult.hourlyChart ?? []}
-            hoverNum={hoverNum}
-            setHoverNum={setHoverNum}
-            title="ผังดวงกาลชะตา 9 ฐาน รายชั่วโมง"
-            subtitle={`ฐาน๑=ยามใหญ่(${activeResult.yamYaiName}) ฐาน๒=ดาวประจำวัน(${STAR_NAMES[dayStarN as keyof typeof STAR_NAMES]}) ฐาน๓=เดือนจันทรคติ(${activeResult.lunarMonthName})`}
-            base1Label="ฐาน๑(ยาม)"
+          {/* Question Box */}
+          <QuestionBox
+            tabMode="hourly"
+            onSubmit={handleAsk}
+            isLoading={isLoading}
+            label="ถามเรื่องชั่วโมงนี้"
+            yamName={activeResult.yamYaiName}
+            yamPhase={yamPhaseLabel}
           />
 
-          {/* Section 3: ตารางยาม 8 ยาม ช่วงปัจจุบัน */}
-          <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-6 sm:p-8">
-            <h3 className="text-base font-bold text-[#F8F6F1] mb-1">ตารางยาม{isDaytime ? "กลางวัน" : "กลางคืน"} 8 ยาม</h3>
-            <p className="text-xs text-[#C6B79F] mb-5">กดที่ยามเพื่อดูคำอธิบาย — ยามไฮไลต์คือยามปัจจุบัน</p>
-            <div className="space-y-1.5">
+          {/* Prediction result */}
+          {currentReading && readingFromTab === "hourly" && (
+            <PredictionCard reading={currentReading} onClose={() => setCurrentReading(null)} />
+          )}
+
+          {/* History */}
+          <HistoryStrip
+            history={history.filter(h => h.tabMode === "hourly")}
+            onSelect={r => { setCurrentReading(r.reading); setReadingFromTab("hourly"); }}
+            onClear={() => saveHistory(history.filter(h => h.tabMode !== "hourly"))}
+          />
+
+          {/* Yam table */}
+          <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-5">
+            <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยาม{isDaytime ? "กลางวัน" : "กลางคืน"} 8 ยาม</h3>
+            <p className="text-[10px] text-[#C6B79F] mb-4">กดแต่ละยามเพื่อดูคำแนะนำตัดสินใจ</p>
+            <div className="space-y-1">
               {dayYamTable.filter(y => y.isDay === isDaytime).map(y => {
-                const yamKey = `hourly-${y.isDay ? "d" : "n"}-${y.yamNum}`;
-                const isEx = selectedYamKey === yamKey;
-                const adv = TAKSA_PLAN_ADVICE[y.quality];
-                const desc = YAM_DESC[y.star] || YAM_DESC[1];
+                const key = `h-${y.isDay ? "d" : "n"}-${y.yamNum}`;
                 return (
-                  <div key={yamKey} className="flex flex-col">
-                    <button onClick={() => setSelectedYamKey(isEx ? null : yamKey)}
-                      className={`flex items-center gap-2 p-3 rounded-xl border text-xs transition-all ${y.isCurrentYam ? "bg-[#C6A96B]/10 border-[#C6A96B]/40" : adv?.level === 0 ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20" : "bg-[#071427]/75 border-[#C6A96B]/10 hover:border-[#C6A96B]/25"}`}>
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${y.isCurrentYam ? "bg-[#C6A96B] text-[#020617]" : "bg-white/5 text-[#C6B79F]"}`}>{y.yamNum}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[#C6B79F] text-[11px] shrink-0">{y.timeStr}</span>
-                          <span className={`font-bold truncate ${y.isCurrentYam ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[y.star as keyof typeof STAR_NAMES]}</span>
-                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#C6B79F]"}`}>{y.quality} {adv?.emoji}</span>
-                        </div>
-                        {adv?.th && <p className="text-[10px] text-[#C6B79F] truncate mt-0.5">{adv.th}</p>}
-                      </div>
-                      <span className="text-[#C6B79F]/50 text-xs shrink-0">{isEx ? "▲" : "▼"}</span>
-                    </button>
-                    {isEx && (
-                      <div className="px-4 py-4 bg-[#020617]/60 border-x border-b border-white/5 rounded-b-xl">
-                        <p className="text-xs text-[#D9CDB7] leading-relaxed mb-2">{desc.desc}</p>
-                        <div className="bg-[#0A1628] rounded-xl p-3 border border-white/5">
-                          <p className="text-xs text-[#C6A96B] font-bold mb-1">🎯 แนวทางการตัดสินใจ</p>
-                          <p className="text-xs text-[#F8F6F1] leading-relaxed">{desc.decision}</p>
-                        </div>
-                        <p className="text-[10px] text-[#C6B79F] italic mt-2">"{YAM_OMEN[y.star] || ""}"</p>
-                      </div>
-                    )}
-                  </div>
+                  <YamTableRow
+                    key={key}
+                    timeStr={y.timeStr}
+                    starNum={y.star}
+                    quality={y.quality}
+                    isCurrentYam={y.isCurrentYam}
+                    label={y.yamNum}
+                    expanded={selectedKey === key}
+                    onToggle={() => toggle(key)}
+                  />
                 );
               })}
             </div>
           </Card>
-        </>
+        </div>
       )}
 
-      {/* ═══════════════ TAB: รายนาที ═══════════════ */}
+      {/* ══════════════════════════════════════════════════════════
+          TAB: รายนาที
+      ══════════════════════════════════════════════════════════ */}
       {activeTab === "minute" && (
-        <>
-          {/* Section 1: สรุปยามซอยปัจจุบัน */}
-          <SummaryCard
-            title={`ยามซอยที่ ${soySlot} — ${lagnamPos} (ทุก 3.45 นาที)`}
-            starName={activeResult.yamSoyName}
-            starNum={soyN}
-            quality={currentSoyQuality}
-            yamDesc={soyDesc}
-            scores={soyScores}
-            extraInfo={
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-[#071E3D]/75 border border-[#6D8FC7]/22 rounded-xl p-4">
-                  <p className="text-xs text-[#6D8FC7] font-bold mb-1">ยามใหญ่ (ตนุ)</p>
-                  <p className="text-xl font-bold text-[#F8F6F1]">{activeResult.yamYaiName} ({yaiN})</p>
-                  <p className="text-xs text-[#C6B79F] mt-1">{currentYamQuality}</p>
-                </div>
-                <div className="bg-[#020617] border border-white/5 rounded-xl p-4">
-                  <p className="text-xs text-[#C6B79F] font-bold mb-1">เวลาปัจจุบัน</p>
-                  <p className="text-xl font-bold text-[#F8F6F1]">{formatTime(time)}</p>
-                  <p className="text-xs text-[#C6B79F] mt-1">{isDaytime ? "☀️ กลางวัน" : "🌙 กลางคืน"}</p>
-                </div>
-              </div>
-            }
+        <div className="space-y-4">
+          {/* Decision Guidance */}
+          <DecisionGuidance
+            yamNum={soyN}
+            taksaQuality={currentSoyTaksa}
+            yamPhase={yamPhaseLabel}
+            yamName={activeResult.yamSoyName}
+            label="นาทีนี้ (ยามซอย)"
           />
 
-          {/* Section 2: ผังดวง 9 ฐาน รายนาที */}
-          <NineBaseChart
-            chart={activeResult.chart ?? []}
-            hoverNum={hoverNum}
-            setHoverNum={setHoverNum}
-            title="ผังดวงกาลชะตา 9 ฐาน รายนาที"
-            subtitle={`ฐาน๑=ยามซอย(${activeResult.yamSoyName}) ฐาน๒=ยามใหญ่(${activeResult.yamYaiName}) ฐาน๓=ดาวประจำวัน`}
-            base1Label="ฐาน๑(ซอย)"
+          {/* Question Box */}
+          <QuestionBox
+            tabMode="minute"
+            onSubmit={handleAsk}
+            isLoading={isLoading}
+            label="ถามเรื่องนาทีนี้"
+            yamName={activeResult.yamSoyName}
+            yamPhase={yamPhaseLabel}
           />
 
-          {/* Section 3: ตารางยามซอย 8 ช่วง */}
-          <Card className="border-[#6D8FC7]/30 bg-[#0A1628] p-6 sm:p-8">
-            <h3 className="text-base font-bold text-[#F8F6F1] mb-1">ตารางยามซอย 8 ช่วง — ยามใหญ่ {activeResult.yamYaiName}</h3>
-            <p className="text-xs text-[#C6B79F] mb-5">แต่ละซอยกินเวลา 3 นาที 45 วินาที (225 วินาที) — ไฮไลต์คือซอยปัจจุบัน</p>
-            <div className="space-y-1.5">
+          {/* Prediction result */}
+          {currentReading && readingFromTab === "minute" && (
+            <PredictionCard reading={currentReading} onClose={() => setCurrentReading(null)} />
+          )}
+
+          {/* History */}
+          <HistoryStrip
+            history={history.filter(h => h.tabMode === "minute")}
+            onSelect={r => { setCurrentReading(r.reading); setReadingFromTab("minute"); }}
+            onClear={() => saveHistory(history.filter(h => h.tabMode !== "minute"))}
+          />
+
+          {/* Soy table */}
+          <Card className="border-[#6D8FC7]/20 bg-[#0A1628] p-5">
+            <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยามซอย 8 ช่วง — ยามใหญ่ {activeResult.yamYaiName}</h3>
+            <p className="text-[10px] text-[#C6B79F] mb-4">แต่ละซอย 3 นาที 45 วินาที · กดเพื่อดูคำแนะนำ</p>
+            <div className="space-y-1">
               {yamSoyTable.map(soy => {
-                const adv = TAKSA_PLAN_ADVICE[soy.quality];
-                const desc = YAM_DESC[soy.planet] || YAM_DESC[1];
-                const soyKey = `soy-${soy.slot}`;
-                const isEx = selectedYamKey === soyKey;
+                const key = `s-${soy.slot}`;
                 return (
-                  <div key={soy.slot} className="flex flex-col">
-                    <button onClick={() => setSelectedYamKey(isEx ? null : soyKey)}
-                      className={`flex items-center gap-2 p-3 rounded-xl border text-xs transition-all ${soy.isCurrent ? "bg-[#4B6FAE]/10 border-[#4B6FAE]/40" : adv?.level === 0 ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20" : "bg-[#071427]/75 border-[#C6A96B]/10 hover:border-[#C6A96B]/25"}`}>
-                      <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-xs shrink-0 ${soy.isCurrent ? "bg-[#4B6FAE] text-white" : "bg-white/5 text-[#C6B79F]"}`}>{soy.slot}</span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[#C6B79F] text-[11px] shrink-0">{soy.timeStr}</span>
-                          <span className={`font-bold truncate ${soy.isCurrent ? "text-[#6D8FC7]" : "text-[#F8F6F1]"}`}>{STAR_NAMES[soy.planet as keyof typeof STAR_NAMES]}</span>
-                          <span className={`ml-auto shrink-0 font-bold text-[10px] ${adv?.level === 3 ? "text-[#C6A96B]" : adv?.level === 0 ? "text-[#6D8FC7]" : "text-[#C6B79F]"}`}>{soy.quality} {adv?.emoji}</span>
-                        </div>
-                        {adv?.th && <p className="text-[10px] text-[#C6B79F] truncate mt-0.5">{adv.th}</p>}
-                      </div>
-                      <span className="text-[#C6B79F]/50 shrink-0">{isEx ? "▲" : "▼"}</span>
-                    </button>
-                    {isEx && (
-                      <div className="px-4 py-4 bg-[#020617]/60 border-x border-b border-white/5 rounded-b-xl">
-                        <p className="text-xs text-[#D9CDB7] leading-relaxed mb-2">{desc.desc}</p>
-                        <div className="bg-[#0A1628] rounded-xl p-3 border border-white/5">
-                          <p className="text-xs text-[#6D8FC7] font-bold mb-1">🎯 แนวทางการตัดสินใจในซอยนี้</p>
-                          <p className="text-xs text-[#F8F6F1] leading-relaxed">{desc.decision}</p>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <YamTableRow
+                    key={key}
+                    timeStr={soy.timeStr}
+                    starNum={soy.planet}
+                    quality={soy.quality}
+                    isCurrentYam={false}
+                    isCurrent={soy.isCurrent}
+                    label={soy.slot}
+                    expanded={selectedKey === key}
+                    onToggle={() => toggle(key)}
+                  />
                 );
               })}
             </div>
-
-            {/* Q&A Chat */}
-            <div className="mt-8 pt-6 border-t border-white/5">
-              <h3 className="text-sm font-bold text-[#F8F6F1] mb-4">🎯 ถามกระแสญาณ — หมวด</h3>
-              <div className="grid grid-cols-3 gap-2 mb-5">
-                {CATEGORIES.map(cat => (
-                  <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
-                    className={`p-2.5 rounded-xl border flex flex-col items-center gap-1 transition-all ${selectedCategory === cat.id ? "bg-[#071E3D]/75 border-[#6D8FC7]/40" : "bg-[#071427]/75 border-white/5"}`}>
-                    <span className="text-base">{cat.icon}</span>
-                    <span className={`text-[10px] font-bold ${selectedCategory === cat.id ? "text-[#6D8FC7]" : "text-[#C6B79F]"}`}>{cat.label.split(" ")[0]}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="bg-[#020617] border border-white/5 rounded-2xl p-4 mb-4">
-                <p className="text-xs font-bold text-[#C6A96B] mb-3">💡 คำถามแนะนำ</p>
-                <div className="space-y-2">
-                  {activeCategory?.questions.map((q, i) => (
-                    <button key={i} onClick={() => doChatFetch(q)} className="w-full flex gap-2 text-left group">
-                      <span className="text-[#C6A96B] text-sm opacity-60 group-hover:opacity-100 shrink-0">✦</span>
-                      <p className="text-xs text-[#D9CDB7] opacity-70 group-hover:opacity-100">{q}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="bg-[#0A1628] border border-[#C6A96B]/20 rounded-2xl overflow-hidden">
-                <div className="p-3 flex items-center gap-2 border-b border-white/5 bg-[#020617]/40">
-                  <div className="w-2 h-2 rounded-full bg-[#C6A96B] shadow-[0_0_8px_rgba(198,169,107,0.6)] animate-pulse" />
-                  <span className="text-xs font-bold text-[#F8F6F1]">WISDOM GUIDANCE</span>
-                  <button onClick={() => setChatMessages([])} className="ml-auto text-xs text-[#C6B79F] hover:text-[#F8F6F1]">ล้างแชท</button>
-                </div>
-                <div className="overflow-y-auto p-4 space-y-3 h-56">
-                  {chatMessages.map((msg, i) => (
-                    <div key={i} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
-                      {msg.sender === "ai" && <span className="text-[10px] text-[#C6A96B] font-bold uppercase mb-1">✦ WISDOM</span>}
-                      <div className={`max-w-[90%] p-3 rounded-2xl text-xs ${msg.sender === "user" ? "bg-[#0A1628] text-[#F8F6F1] border border-white/10 rounded-tr-none" : "bg-[#020617] text-[#D9CDB7] border border-white/10 rounded-tl-none"}`}>{msg.text}</div>
-                    </div>
-                  ))}
-                  <div ref={chatEndRef} />
-                </div>
-                <form onSubmit={handleSendChat} className="p-3 border-t border-white/5 flex gap-2">
-                  <input type="text" autoComplete="off" value={userInput} onChange={e => setUserInput(e.target.value)} placeholder="พิมพ์คำถาม..." className="flex-1 bg-[#0A1628] border border-white/5 rounded-xl px-3 py-2 text-xs text-[#F8F6F1] outline-none" />
-                  <Button type="submit" disabled={!userInput.trim()} className="px-3 py-2 rounded-xl bg-[#C6B79F] text-[#020617] font-bold hover:bg-[#C6A96B] text-xs">ส่ง</Button>
-                </form>
-              </div>
-            </div>
           </Card>
-        </>
+        </div>
       )}
     </div>
   );
