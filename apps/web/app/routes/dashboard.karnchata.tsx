@@ -413,9 +413,11 @@ export default function KarnchataPage() {
   const yaiN = activeResult.yamYaiNumber || 1;
   const soyN = activeResult.yamSoyNumber || 1;
 
-  // ยามซอย 3.75 นาที
-  const soySlot = Math.floor((time.getUTCMinutes() % 30) / 3.75) + 1; // 1-8
-  const secInCycle = (time.getUTCMinutes() % 30 * 60 + time.getUTCSeconds()) % Math.round(3.75 * 60);
+  // ยามซอย 3.75 นาที — คำนวณจากนาทีในยามใหญ่ (mod 90)
+  const bkkMinOfDay = ((time.getUTCHours() + 7) % 24) * 60 + time.getUTCMinutes();
+  const minuteInYam = bkkMinOfDay % 90; // 0–89
+  const soySlot = Math.floor(minuteInYam / 3.75) % 8 + 1; // 1-8
+  const secInCycle = (minuteInYam * 60 + time.getUTCSeconds()) % Math.round(3.75 * 60);
   const cycleSec = Math.round(3.75 * 60);
   const lagnamPos = secInCycle < cycleSec / 3 ? "ยามต้น" : secInCycle < (cycleSec * 2) / 3 ? "ยามกลาง" : "ยามปลาย";
 
@@ -622,12 +624,12 @@ export default function KarnchataPage() {
 
           {/* Section 2: ผังดวง 9 ฐาน รายวัน */}
           <NineBaseChart
-            chart={activeResult.hourlyChart ?? []}
+            chart={activeResult.dailyChart ?? activeResult.hourlyChart ?? []}
             hoverNum={hoverNum}
             setHoverNum={setHoverNum}
             title="ผังดวงกาลชะตา 9 ฐาน รายวัน"
-            subtitle={`ฐาน๑=ยามใหญ่(${activeResult.yamYaiName}) ฐาน๒=ดาวประจำวัน(${STAR_NAMES[dayStarN as keyof typeof STAR_NAMES]}) ฐาน๓=เดือนจันทรคติ(${activeResult.lunarMonthName})`}
-            base1Label="ฐาน๑(ยาม)"
+            subtitle={`ฐาน๑=ดาวประจำวัน(${STAR_NAMES[dayStarN as keyof typeof STAR_NAMES]}) ฐาน๒=เดือนจันทรคติ(${activeResult.lunarMonthName}) ฐาน๓=ปีนักษัตร`}
+            base1Label="ฐาน๑(วัน)"
           />
 
           {/* Section 3: ตารางยาม 16 ยาม */}
@@ -737,7 +739,7 @@ export default function KarnchataPage() {
             hoverNum={hoverNum}
             setHoverNum={setHoverNum}
             title="ผังดวงกาลชะตา 9 ฐาน รายชั่วโมง"
-            subtitle={`ฐาน๑=ยามใหญ่(${activeResult.yamYaiName}) ฐาน๒=ดาวประจำวัน ฐาน๓=เดือนจันทรคติ(${activeResult.lunarMonthName})`}
+            subtitle={`ฐาน๑=ยามใหญ่(${activeResult.yamYaiName}) ฐาน๒=ดาวประจำวัน(${STAR_NAMES[dayStarN as keyof typeof STAR_NAMES]}) ฐาน๓=เดือนจันทรคติ(${activeResult.lunarMonthName})`}
             base1Label="ฐาน๑(ยาม)"
           />
 

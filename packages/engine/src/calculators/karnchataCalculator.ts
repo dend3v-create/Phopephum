@@ -21,21 +21,60 @@ const PLANET_NAME_DAY: Record<number, string> = {
   1: "สุริชะ", 2: "จันเทา", 3: "ภุมมะ", 4: "พุธะ", 5: "ครู", 6: "ศุกระ", 7: "เสารี",
 };
 
+/** 
+ * แปลง dayOfWeek (JS: 0=อาทิตย์) → Thai star number (1=อาทิตย์)
+ * JS Sunday=0 → Thai 1
+ * JS Monday=1 → Thai 2
+ * ...
+ * JS Saturday=6 → Thai 7
+ */
+function jsDayToThaiStar(jsDay: number): number {
+  return jsDay === 0 ? 1 : jsDay + 1;
+}
+
 export interface KarnchataResult {
   date: Date;
+  // ─── ยามใหญ่ ───────────────────────────────────────────────
   yamYaiName: string;
   yamYaiNumber: number;
+  // ─── ยามซอย (minute) ───────────────────────────────────────
   yamSoyName: string;
   yamSoyNumber: number;
+  // ─── ดาวประจำวัน ────────────────────────────────────────────
   dayStarNumber: number;
+  // ─── เดือนจันทรคติ ──────────────────────────────────────────
   lunarMonth: number;
   lunarMonthName: string;
-  chart: number[][]; // 9 rows of 7 numbers
-  hourlyChart: number[][]; // กาลชะตารายชั่วโมง: ยาม × วัน × เดือน
+  // ─── ผังดวง 3 ระบบ ─────────────────────────────────────────
+  /**
+   * กาลชะตารายวัน:
+   * ฐาน1 = ดาวประจำวัน (วัน)
+   * ฐาน2 = เดือนจันทรคติ
+   * ฐาน3 = ปีนักษัตร (เลขปี พ.ศ. mod 7 → r7_local)
+   */
+  dailyChart: number[][];
+  /**
+   * กาลชะตารายชั่วโมง:
+   * ฐาน1 = ยามใหญ่ (yamYai)
+   * ฐาน2 = ดาวประจำวัน
+   * ฐาน3 = เดือนจันทรคติ
+   */
+  hourlyChart: number[][];
+  /**
+   * กาลชะตารายนาที:
+   * ฐาน1 = ยามซอย (yamSoy)
+   * ฐาน2 = ยามใหญ่ (yamYai)
+   * ฐาน3 = ดาวประจำวัน
+   */
+  chart: number[][];
 }
 
 /**
  * Calculates Karnchata (กาลชะตา) based on current time.
+ * Three distinct calculation systems:
+ * - Daily: uses Day star / Lunar month / Year cycle
+ * - Hourly: uses YamYai / Day star / Lunar month
+ * - Minute: uses YamSoy / YamYai / Day star
  */
 export function calculateKarnchata(date: Date): KarnchataResult {
   // 1. Thai Day (cutoff 06:00 AM)
@@ -44,19 +83,18 @@ export function calculateKarnchata(date: Date): KarnchataResult {
     adjustedDate.setDate(adjustedDate.getDate() - 1);
   }
   const bkkDay = getBKKDay(adjustedDate);
-  const dayName = DAY_INDEX_MAP[bkkDay];
-  // Sunday = 0 in JS Date, but in Thai astrology Sunday = 1
-  const dayStarNumber = bkkDay === 0 ? 1 : bkkDay + 1;
+  const dayStarNumber = jsDayToThaiStar(bkkDay);
 
   // 2. Yam Yai (ยามใหญ่)
   const yamInfo = calculateYam(date);
   const yamYaiName = yamInfo.yamName;
-  const yamYaiNumber = YAM_TO_PLANET[yamYaiName];
+  const yamYaiNumber = YAM_TO_PLANET[yamYaiName] ?? 1;
 
-  // 3. Yam Soy (ยามซอย) — แบ่ง 8 ซอย ต่อ 30 นาที (3.75 นาที/ซอย)
-  // ลำดับยามซอยเริ่มต้นจากดาวยามใหญ่ แล้วเดินตามลำดับกาลเทวี (Chaldean)
-  const minuteOfHour = date.getUTCMinutes();
-  const soyIndex = Math.floor((minuteOfHour % 30) / 3.75); // 0–7
+  // 3. Yam Soy (ยามซอย) — 8 ซอยต่อ 30 นาที → ซอยละ 3.75 นาที
+  // แต่ละยามใหญ่ (90 นาที) มี 24 ซอย (ซอยละ 3.75 นาที) — ใช้ mod 30 นาที เพื่อ index 0–7
+  const bkkMinuteOfDay = ((date.getUTCHours() + 7) % 24) * 60 + date.getUTCMinutes();
+  const minuteInYam = bkkMinuteOfDay % 90; // นาทีที่ตกในยามปัจจุบัน (0–89)
+  const soyIndex = Math.floor(minuteInYam / 3.75) % 8; // 0–7 (แบ่ง 8 ซอยต่อยาม)
 
   const yamYaiChalIdx = CHALDEAN_ARR.indexOf(yamYaiNumber as typeof CHALDEAN_ARR[number]);
   const yamSoyNumber = yamYaiChalIdx !== -1
@@ -64,30 +102,41 @@ export function calculateKarnchata(date: Date): KarnchataResult {
     : yamYaiNumber;
   const yamSoyName = PLANET_NAME_DAY[yamSoyNumber] ?? "สุริชะ";
 
-  // 4. Build the Seven Base Chart (9 Bases)
-  // Rule for Karnchata:
-  // Base 1 (Atta) = Yam Soy
-  // Base 2 (Tanu) = Yam Yai
-  // Base 3 (Morana) = Day Star
-  const b1 = Array.from({ length: 7 }, (_, i) => r7_local(yamSoyNumber + i));
-  const b2 = Array.from({ length: 7 }, (_, i) => r7_local(yamYaiNumber + i));
-  const b3 = Array.from({ length: 7 }, (_, i) => r7_local(dayStarNumber + i));
-
-  const chart = calculateNineBase(b1, b2, b3);
-
-  // 5. กาลชะตารายชั่วโมง (Hourly Horary)
-  // อัตตะ = เลขยามใหญ่ (yamYai planet number)
-  // ตนุ   = เลขดาวประจำวัน
-  // มรณะ  = เลขเดือนจันทรคติ
+  // 4. เดือนจันทรคติ
   const lunar = gregorianToThaiLunarV3(adjustedDate);
   const lunarMonth = lunar.thaiMonth === 88 ? 8 : lunar.thaiMonth; // intercalary → treat as 8
   const lunarMonthName = lunar.thaiMonthName;
 
+  // 5. ปีนักษัตร → r7_local ของปี พ.ศ.
+  const beYear = adjustedDate.getUTCFullYear() + 543;
+  const yearStarNumber = r7_local(beYear);
+
+  // ══════════════════════════════════════════════════════════════
+  // กาลชะตารายวัน (Daily Horary)
+  // ฐาน1 = ดาวประจำวัน, ฐาน2 = เดือนจันทรคติ, ฐาน3 = ปีนักษัตร
+  // ══════════════════════════════════════════════════════════════
+  const d1 = Array.from({ length: 7 }, (_, i) => r7_local(dayStarNumber + i));
+  const d2 = Array.from({ length: 7 }, (_, i) => r7_local(lunarMonth + i));
+  const d3 = Array.from({ length: 7 }, (_, i) => r7_local(yearStarNumber + i));
+  const dailyChart = calculateNineBase(d1, d2, d3);
+
+  // ══════════════════════════════════════════════════════════════
+  // กาลชะตารายชั่วโมง (Hourly Horary)
+  // ฐาน1 = ยามใหญ่ (yamYai), ฐาน2 = ดาวประจำวัน, ฐาน3 = เดือนจันทรคติ
+  // ══════════════════════════════════════════════════════════════
   const h1 = Array.from({ length: 7 }, (_, i) => r7_local(yamYaiNumber + i));
   const h2 = Array.from({ length: 7 }, (_, i) => r7_local(dayStarNumber + i));
   const h3 = Array.from({ length: 7 }, (_, i) => r7_local(lunarMonth + i));
-
   const hourlyChart = calculateNineBase(h1, h2, h3);
+
+  // ══════════════════════════════════════════════════════════════
+  // กาลชะตารายนาที (Minute Horary)
+  // ฐาน1 = ยามซอย (yamSoy), ฐาน2 = ยามใหญ่ (yamYai), ฐาน3 = ดาวประจำวัน
+  // ══════════════════════════════════════════════════════════════
+  const m1 = Array.from({ length: 7 }, (_, i) => r7_local(yamSoyNumber + i));
+  const m2 = Array.from({ length: 7 }, (_, i) => r7_local(yamYaiNumber + i));
+  const m3 = Array.from({ length: 7 }, (_, i) => r7_local(dayStarNumber + i));
+  const chart = calculateNineBase(m1, m2, m3);
 
   return {
     date,
@@ -98,7 +147,8 @@ export function calculateKarnchata(date: Date): KarnchataResult {
     dayStarNumber,
     lunarMonth,
     lunarMonthName,
-    chart,
+    dailyChart,
     hourlyChart,
+    chart,
   };
 }
