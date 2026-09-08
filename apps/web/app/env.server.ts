@@ -36,7 +36,7 @@ export interface Env {
 
   // Cloudflare Bindings
   KV_CACHE: KVNamespace;
-  R2_REPORTS: R2Bucket;
+  R2_REPORTS?: R2Bucket;
 
   ENVIRONMENT: "development" | "production";
 }
