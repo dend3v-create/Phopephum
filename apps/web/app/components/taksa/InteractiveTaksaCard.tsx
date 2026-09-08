@@ -241,14 +241,14 @@ export function InteractiveTaksaCard({
                     </span>
                   </div>
 
-                  {/* Row 4: ทักษาจร (ฟ้า ในธีมมืด / ฟ้าน้ำเงิน ในธีมสว่าง / แดง ถ้ากาลกิณี) — ไม่มีคำว่าจร */}
+                  {/* Row 4: ทักษาจร (ฟ้า ในธีมมืด / ฟ้าน้ำเงิน ในธีมสว่าง / แดง ถ้ากาลกิณี) — แสดง เดชจร, ศรีจร ฯลฯ */}
                   <div className="w-full mt-0.5">
                     <span className={`inline-block w-full text-[11px] md:text-xs font-black py-0.5 px-1 rounded-md text-center truncate ${
                       isKalaTransit
                         ? "bg-rose-600 text-white dark:bg-rose-950/90 dark:text-rose-300 border border-rose-500 shadow-sm animate-pulse"
                         : "bg-sky-100 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-500/40 text-sky-800 dark:text-sky-400"
                     }`}>
-                      {bhopTransit}
+                      {bhopTransit.endsWith("จร") ? bhopTransit : `${bhopTransit}จร`}
                     </span>
                   </div>
                 </button>
@@ -309,7 +309,7 @@ export function InteractiveTaksaCard({
                     ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
                     : "bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-400"
                 }`}>
-                  {bhopTransit}
+                  {bhopTransit.endsWith("จร") ? bhopTransit : `${bhopTransit}จร`}
                 </span>
               </button>
             );
@@ -331,7 +331,7 @@ export function InteractiveTaksaCard({
               <p className="text-xs text-slate-600 dark:text-[#C6B79F] mt-0.5">
                 ดาวประจำทิศ: <strong>ดาว{activeOracle.starName} ({activeOracle.star})</strong> · 
                 กำเนิด: <strong className="text-slate-900 dark:text-white">{activeOracle.bhopNatal}</strong> · 
-                จร: <strong className="text-sky-700 dark:text-sky-400">{activeOracle.bhopTransit}</strong>
+                จร: <strong className="text-sky-700 dark:text-sky-400">{activeOracle.bhopTransit.endsWith("จร") ? activeOracle.bhopTransit : `${activeOracle.bhopTransit}จร`}</strong>
               </p>
             </div>
             <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold self-start sm:self-auto ${

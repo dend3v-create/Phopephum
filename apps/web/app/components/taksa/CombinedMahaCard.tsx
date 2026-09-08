@@ -18,6 +18,17 @@ const MAHA_GRID_3X3: (MahaBhop | null)[][] = [
   ["มรณะ",   "โลกาวินาศ", "อริ" ],
 ];
 
+const THAI_STAR_NUMERALS: Record<number, string> = {
+  1: "๑",
+  2: "๒",
+  3: "๓",
+  4: "๔",
+  5: "๕",
+  6: "๖",
+  7: "๗",
+  8: "๘",
+};
+
 interface CombinedMahaCardProps {
   natal: { cs: number; remainder: number; map: Record<string, number> };
   transit: { cs: number; remainder: number; map: Record<string, number> };
@@ -43,7 +54,7 @@ export function CombinedMahaCard({
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-[#C9A96E] animate-pulse" />
             <p className="text-[14px] font-bold uppercase tracking-widest text-[#B45309] dark:text-[#C9A96E]">
-              ผังมหาภูติ (จ.ศ.{natal.cs} / จร {transit.cs})
+              ผังมหาภูติกำเนิด จ.ศ.{natal.cs} / จร จ.ศ.{transit.cs}
             </p>
           </div>
           <p className="text-slate-600 dark:text-[#C6B79F] text-xs md:text-sm mt-0.5">
@@ -126,10 +137,10 @@ export function CombinedMahaCard({
                     </span>
                   </div>
 
-                  {/* 3. ดาวมหาภูติจร (ด้านล่าง — ไม่มีคำว่า "ดาว" หรือ "จร", ใช้สีฟ้าล้วน) */}
+                  {/* 3. ดาวมหาภูติจร (ด้านล่าง — แสดง เช่น "๗ จร", "๖ จร", "๑ จร" ในโทนสีฟ้า) */}
                   <div className="w-full">
                     <span className="inline-block w-full text-[11px] md:text-xs font-black py-0.5 px-1 rounded-md text-center truncate bg-sky-100 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-500/40 text-sky-800 dark:text-sky-400">
-                      {starTransit}
+                      {THAI_STAR_NUMERALS[starTransit] ?? starTransit} จร
                     </span>
                   </div>
                 </div>
