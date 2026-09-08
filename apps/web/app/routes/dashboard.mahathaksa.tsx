@@ -17,6 +17,7 @@ import type { StarNumber, TaksaMahaResult } from "@phopephum/engine";
 import { HoroscopeInputSchema } from "@phopephum/validators";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
+import { InteractiveTaksaCard } from "~/components/taksa/InteractiveTaksaCard";
 import type { Env } from "~/env.server";
 import { useState, useEffect } from "react";
 
@@ -213,64 +214,6 @@ const ELEMENT_PAIRS = [
 ];
 
 // ─── Components ───────────────────────────────────────────────────────────────
-
-function TaksaGrid({ taksaMaha }: { taksaMaha: any }) {
-  const { taksaNatal, taksaTransit } = taksaMaha;
-  return (
-    <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
-      <div className="p-4 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
-        <p className="text-[14px] font-bold uppercase tracking-widest text-[#C9A96E]">ตารางทักษาคู่ (ทักษากำเนิด / ทักษาจร)</p>
-        <p className="text-[#C6B79F] text-sm mt-0.5">
-          บริวารเกิด: {STAR_NAMES[taksaNatal.bariStar as StarNumber]} ({taksaNatal.bariStar})
-          &nbsp;·&nbsp;
-          บริวารจร: {STAR_NAMES[taksaTransit.bariStar as StarNumber]} ({taksaTransit.bariStar})
-        </p>
-      </div>
-      <div className="p-4">
-        <div className="grid grid-cols-3 gap-2 max-w-sm mx-auto">
-          {TAKSA_GRID_3X3.map((row, rIdx) =>
-            row.map((star, cIdx) => {
-              if (star === null) {
-                return (
-                  <div key="center" className="aspect-square flex flex-col items-center justify-center rounded-2xl border border-[#C9A96E]/20 bg-[#C9A96E]/10 p-2 text-center">
-                    <span className="text-[#C9A96E] text-xs font-bold">อายุย่าง</span>
-                    <span className="font-display text-3xl font-bold text-[#F8F6F1] my-1">{taksaTransit.ageYang}</span>
-                    <span className="text-[#C6B79F] text-xs">ปี</span>
-                  </div>
-                );
-              }
-              const bhopNatal = taksaNatal.map[star] as string;
-              const bhopTransit = taksaTransit.map[star] as string;
-              const isKalaTransit = bhopTransit === "กาลกิณี";
-              const isBariTransit = bhopTransit === "บริวาร";
-              const directionName = STAR_DIRECTIONS[star];
-              return (
-                <div key={`star-${star}`} className="aspect-square flex flex-col items-center justify-between rounded-2xl border border-white/5 bg-slate-900/35 p-1.5 hover:border-[#C9A96E]/30 transition-all relative overflow-hidden">
-                  {/* Direction Label (Tiny) */}
-                  <span className="text-[9px] text-[#C6B79F] font-bold uppercase tracking-tighter text-center leading-none">
-                    {directionName}
-                  </span>
-                  <span className="text-xs font-semibold text-[#C6B79F] leading-none">{bhopNatal ?? "—"}</span>
-                  <div className="flex flex-col items-center my-0.5">
-                    <span className="font-display text-2xl font-bold text-[#F8F6F1] leading-none">{star}</span>
-                    <span className="text-[10px] text-[#C6B79F] mt-0.5 leading-none">{STAR_NAMES[star as StarNumber]}</span>
-                  </div>
-                  <span className={`text-[10px] font-bold leading-none ${
-                    isKalaTransit ? "text-rose-400 bg-red-950/40 border border-red-500/25 px-1 py-0.5 rounded-md"
-                    : isBariTransit ? "text-[#C9A96E] bg-[#C9A96E]/10 border border-[#C9A96E]/20 px-1 py-0.5 rounded-md"
-                    : "text-[#C9A96E]"
-                  }`}>
-                    {bhopTransit ? `${bhopTransit}จร` : "—"}
-                  </span>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-    </Card>
-  );
-}
 
 function TransitDirectionsCard({ taksaMaha }: { taksaMaha: any }) {
   const { taksaTransit } = taksaMaha;
@@ -687,17 +630,17 @@ export default function MahaThaksaPage() {
       {/* ── Result ── */}
       {taksaMaha && (
         <div className="space-y-6">
-          {/* Taksa Grid + Sawai side-by-side on lg */}
+          {/* ── Interactive Taksa Grid with 2-Tone Colors & Direction Oracle ── */}
+          <InteractiveTaksaCard
+            taksaNatal={taksaMaha.taksaNatal}
+            taksaTransit={taksaMaha.taksaTransit}
+          />
+
+          {/* Sawai Card + Element Pairs side-by-side on lg */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <TaksaGrid taksaMaha={taksaMaha} />
             <SawaiCard sawai={sawai} />
+            <ElementPairsCard taksaMaha={taksaMaha} />
           </div>
-
-          {/* Transit Directions Card */}
-          <TransitDirectionsCard taksaMaha={taksaMaha} />
-
-          {/* Element Pairs */}
-          <ElementPairsCard taksaMaha={taksaMaha} />
 
           {/* Alerts */}
           <AlertsPanel taksaMaha={taksaMaha} />

@@ -98,6 +98,28 @@ export const TAKSA_BHOP: TaksaBhop[] = [
  */
 export type TaksaMap = Record<StarNumber, TaksaBhop>;
 
+/**
+ * ข้อมูลทิศประจำดาว 8 ทิศตามผังทักษาครองทิศ (พระคัมภีร์มหาทักษา)
+ */
+export interface TaksaDirectionInfo {
+  star: StarNumber;
+  code: string;
+  paliName: string;
+  thaiName: string;
+  fullName: string;
+}
+
+export const TAKSA_DIRECTIONS: Record<StarNumber, TaksaDirectionInfo> = {
+  1: { star: 1, code: "NE", paliName: "อีสาน", thaiName: "ตะวันออกเฉียงเหนือ", fullName: "อีสาน (ตะวันออกเฉียงเหนือ)" },
+  2: { star: 2, code: "E", paliName: "บูรพา", thaiName: "ตะวันออก", fullName: "บูรพา (ตะวันออก)" },
+  3: { star: 3, code: "SE", paliName: "อาคเนย์", thaiName: "ตะวันออกเฉียงใต้", fullName: "อาคเนย์ (ตะวันออกเฉียงใต้)" },
+  4: { star: 4, code: "S", paliName: "ทักษิณ", thaiName: "ทิศใต้", fullName: "ทักษิณ (ทิศใต้)" },
+  7: { star: 7, code: "SW", paliName: "หรดี", thaiName: "ตะวันตกเฉียงใต้", fullName: "หรดี (ตะวันตกเฉียงใต้)" },
+  5: { star: 5, code: "W", paliName: "ประจิม", thaiName: "ตะวันตก", fullName: "ประจิม (ตะวันตก)" },
+  8: { star: 8, code: "NW", paliName: "พายัพ", thaiName: "ตะวันตกเฉียงเหนือ", fullName: "พายัพ (ตะวันตกเฉียงเหนือ)" },
+  6: { star: 6, code: "N", paliName: "อุดร", thaiName: "ทิศเหนือ", fullName: "อุดร (ทิศเหนือ)" },
+} as const;
+
 /** ผลลัพธ์ทักษากำเนิด */
 export interface TaksaNatalResult {
   map: TaksaMap;

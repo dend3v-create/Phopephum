@@ -27,6 +27,7 @@ import { HoroscopeInputSchema } from "@phopephum/validators";
 import { Input } from "~/components/ui/Input";
 import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
+import { InteractiveTaksaCard } from "~/components/taksa/InteractiveTaksaCard";
 import type { Env } from "~/env.server";
 import type { HoroscopeResult } from "@phopephum/types";
 import type { YamResult } from "@phopephum/engine";
@@ -1601,11 +1602,10 @@ function TaksaMahaSection({
       </div>
 
       {/* ── Taksa & Maha Combined Panels ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <CombinedTaksaCard
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <InteractiveTaksaCard
           taksaNatal={taksaNatal}
           taksaTransit={taksaTransit}
-          taksaMaha={taksaMaha}
         />
         <CombinedMahaCard
           natal={mahaNatal}
@@ -1616,117 +1616,6 @@ function TaksaMahaSection({
         />
       </div>
     </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Combined Taksa Card (กำเนิด + จร ยุบรวมในตารางเดียว)
-// ─────────────────────────────────────────────────────────────────────────────
-
-type GridSlot = StarNumber | null;
-
-const TAKSA_GRID_3X3: GridSlot[][] = [
-  [1, 2, 3],
-  [6, null, 4],
-  [8, 5, 7],
-];
-
-const STAR_DIRECTIONS: Record<number, string> = {
-  1: "ตะวันออกเฉียงเหนือ", // NE
-  2: "ตะวันออก",          // E
-  3: "ตะวันออกเฉียงใต้",    // SE
-  4: "ทิศใต้",           // S
-  7: "ตะวันตกเฉียงใต้",    // SW
-  5: "ตะวันตก",          // W
-  8: "ตะวันตกเฉียงเหนือ",   // NW
-  6: "ทิศเหนือ",          // N
-};
-
-function CombinedTaksaCard({
-  taksaNatal,
-  taksaTransit,
-  taksaMaha,
-}: {
-  taksaNatal: any;
-  taksaTransit: any;
-  taksaMaha: any;
-}) {
-  return (
-    <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
-      <div className="p-4 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
-        <p className="text-[14px] font-bold uppercase tracking-widest text-[#C9A96E]">ตารางทักษาคู่ (ทักษากำเนิด / ทักษาจร)</p>
-        <p className="text-[#C6B79F] text-[14px] mt-0.5">
-          บริวารเกิด: {STAR_NAMES[taksaNatal.bariStar as StarNumber]} ({taksaNatal.bariStar}) · บริวารจร: {STAR_NAMES[taksaTransit.bariStar as StarNumber]} ({taksaTransit.bariStar})
-        </p>
-      </div>
-      <div className="p-4 bg-slate-950/15">
-        <div className="grid grid-cols-3 gap-2 max-w-sm mx-auto">
-          {TAKSA_GRID_3X3.map((row, rIdx) =>
-            row.map((star, cIdx) => {
-              if (star === null) {
-                return (
-                  <div
-                    key={`center-taksa`}
-                    className="aspect-square flex flex-col items-center justify-center rounded-2xl border border-[#C9A96E]/20 bg-[#C9A96E]/10 p-2 text-center"
-                  >
-                    <span className="text-[#C9A96E] text-xs md:text-sm font-bold leading-none">อายุย่าง</span>
-                    <span className="text-[#F8F6F1] font-display text-2xl md:text-3xl font-bold my-1">{taksaTransit.ageYang}</span>
-                    <span className="text-[#C6B79F] text-xs md:text-sm leading-none">ปี</span>
-                  </div>
-                );
-              }
-              const bhopNatal = taksaNatal.map[star] as string | undefined;
-              const bhopTransit = taksaTransit.map[star] as string | undefined;
-              const direction = STAR_DIRECTIONS[star];
-              
-              const isKalaNatal = bhopNatal === "กาลกิณี";
-              const isBariNatal = bhopNatal === "บริวาร";
-              
-              const isKalaTransit = bhopTransit === "กาลกิณี";
-              const isBariTransit = bhopTransit === "บริวาร";
-
-              return (
-                <div
-                  key={`star-combined-${star}`}
-                  className="aspect-square flex flex-col items-center justify-between rounded-2xl border border-white/5 bg-slate-900/35 p-1 relative overflow-hidden transition-all hover:border-[#C9A96E]/30"
-                >
-                  {/* Direction Label (Tiny) */}
-                  <span className="text-[8px] md:text-[9px] text-[#C6B79F] font-bold uppercase tracking-tighter text-center leading-none">
-                    {direction}
-                  </span>
-
-                  {/* ทักษากำเนิด (ด้านบน) */}
-                  <span className="text-[10px] md:text-xs font-semibold leading-none text-[#C6B79F]">
-                    {bhopNatal ?? "—"}
-                  </span>
-
-                  {/* ตัวเลขดาว (ตรงกลาง) */}
-                  <div className="flex flex-col items-center justify-center my-0.5">
-                    <span className="font-display text-2xl md:text-3xl font-bold leading-none text-[#F8F6F1]">
-                      {star}
-                    </span>
-                    <span className="text-[10px] md:text-[11px] text-[#C6B79F] font-medium mt-0.5">
-                      {STAR_NAMES[star as StarNumber]}
-                    </span>
-                  </div>
-
-                  {/* ทักษาจร (ด้านล่าง) */}
-                  <span className={`text-[10px] md:text-xs font-bold leading-none ${
-                    isKalaTransit
-                      ? "text-rose-400 bg-red-950/40 border border-red-500/25 px-1 py-0.5 rounded-md"
-                      : isBariTransit
-                      ? "text-[#C9A96E] bg-[#C9A96E]/10 border border-[#C9A96E]/20 px-1 py-0.5 rounded-md"
-                      : "text-[#C9A96E]"
-                  }`}>
-                    {bhopTransit ? `${bhopTransit}จร` : "—"}
-                  </span>
-                </div>
-              );
-            })
-          )}
-        </div>
-      </div>
-    </Card>
   );
 }
 
@@ -1754,57 +1643,71 @@ function CombinedMahaCard({
   taksaMaha?: any;
 }) {
   return (
-    <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
-      <div className="p-4 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
-        <p className="text-[14px] font-bold uppercase tracking-widest text-[#C9A96E]">มหาภูติกำเนิด จ.ศ.{natal.cs} / จร จ.ศ.{transit.cs}</p>
-        <p className="text-[#C6B79F] text-[14px] mt-0.5">
-          เศษกำเนิด: {natal.remainder} · เศษจร: {transit.remainder}
-        </p>
+    <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-white/95 dark:bg-slate-900/40 backdrop-blur-md">
+      <div className="p-4 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5 dark:bg-[#C9A96E]/10 flex items-center justify-between">
+        <div>
+          <p className="text-[14px] font-bold uppercase tracking-widest text-[#B45309] dark:text-[#C9A96E]">
+            มหาภูติกำเนิด จ.ศ.{natal.cs} / จร จ.ศ.{transit.cs}
+          </p>
+          <p className="text-slate-600 dark:text-[#C6B79F] text-xs md:text-sm mt-0.5">
+            เศษกำเนิด: <strong className="text-amber-700 dark:text-amber-400">{natal.remainder}</strong> · 
+            เศษจร: <strong className="text-sky-700 dark:text-sky-400">{transit.remainder}</strong>
+          </p>
+        </div>
+        <div className="flex items-center gap-2 text-[11px]">
+          <span className="px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-500/40 text-amber-900 dark:text-amber-300 font-bold">
+            กำเนิด
+          </span>
+          <span className="px-2 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950/50 border border-sky-300 dark:border-sky-500/40 text-sky-900 dark:text-sky-300 font-bold">
+            จร
+          </span>
+        </div>
       </div>
-      <div className="p-4 bg-slate-950/15">
-        <div className="grid grid-cols-3 gap-2 max-w-sm mx-auto">
+      <div className="p-4 bg-slate-100/40 dark:bg-slate-950/15">
+        <div className="grid grid-cols-3 gap-2.5 max-w-md mx-auto">
           {MAHA_GRID_3X3.map((row, rIdx) =>
             row.map((bhop, cIdx) => {
               if (bhop === null) {
                 return (
                   <div
                     key={`maha-empty-combined-${rIdx}-${cIdx}`}
-                    className="aspect-square flex items-center justify-center rounded-2xl border border-dashed border-white/5 bg-transparent"
+                    className="min-h-[135px] flex items-center justify-center rounded-2xl border border-dashed border-slate-300 dark:border-white/5 bg-transparent"
                   >
-                    <span className="text-[#C6B79F] text-xs">—</span>
+                    <span className="text-slate-400 dark:text-[#C6B79F] text-xs">—</span>
                   </div>
                 );
               }
               const starNatal = natal.map[bhop] as StarNumber;
               const starTransit = transit.map[bhop] as StarNumber;
-              
+              const isDanger = bhop === "โลกาวินาศ" || bhop === "มรณะ" || bhop === "อริ";
+
               return (
                 <div
                   key={`maha-combined-${bhop}`}
-                  className="aspect-square flex flex-col items-center justify-between rounded-2xl border border-white/5 bg-slate-900/35 p-2 relative overflow-hidden transition-all hover:border-[#C9A96E]/30"
+                  className="min-h-[135px] flex flex-col items-center justify-between rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/60 p-2 relative text-center shadow-sm transition-all hover:border-[#C9A96E]/40"
                 >
-                  {/* ภพมหาภูติกำเนิด (ด้านบน) */}
-                  <span className="text-xs md:text-sm font-bold leading-none text-[#C6B79F]">
-                    {bhop}
+                  {/* ภพมหาภูติกำเนิด (ด้านบน - Amber Gold) */}
+                  <span className="text-[11px] md:text-xs font-bold px-2 py-0.5 rounded-md bg-amber-100 dark:bg-amber-950/50 border border-amber-300 dark:border-amber-500/30 text-amber-900 dark:text-amber-300 leading-none">
+                    [ภพ] {bhop}
                   </span>
 
                   {/* ดาวมหาภูติกำเนิด (ตรงกลาง) */}
                   <div className="flex flex-col items-center justify-center my-0.5">
-                    <span className="font-display text-3xl md:text-4xl font-bold leading-none text-[#F8F6F1]">
+                    <span className="font-display text-2xl md:text-3xl font-bold leading-none text-slate-900 dark:text-[#F8F6F1]">
                       {starNatal}
                     </span>
-                    <span className="text-[14px] md:text-xs text-[#C6B79F] font-medium mt-0.5">
+                    <span className="text-[10px] md:text-[11px] text-slate-600 dark:text-[#C6B79F] font-semibold mt-0.5">
                       {STAR_NAMES[starNatal]}
                     </span>
                   </div>
 
-                  {/* ดาวมหาภูติจร (ด้านล่าง) */}
-                  <span className={`text-xs md:text-sm font-bold leading-none ${
-                    bhop === "โลกาวินาศ"
-                      ? "text-amber-500 bg-amber-950/20 border border-amber-500/30 px-2 py-0.5 rounded-md"
-                      : "text-[#C9A96E]"
+                  {/* ดาวมหาภูติจร (ด้านล่าง - Sky Blue / Danger Rose) */}
+                  <span className={`text-[10px] md:text-[11px] font-black px-2 py-0.5 rounded-md leading-none ${
+                    isDanger
+                      ? "text-rose-900 dark:text-rose-200 bg-rose-100 dark:bg-rose-950/80 border border-rose-400 dark:border-rose-500/70"
+                      : "text-sky-900 dark:text-sky-300 bg-sky-100 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-400/50"
                   }`}>
-                    {starTransit} จร
+                    ดาว {starTransit} จร
                   </span>
                 </div>
               );

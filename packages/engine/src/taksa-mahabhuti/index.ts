@@ -31,7 +31,9 @@ export {
   STAR_POWER,
   ELEMENT_PAIRS,
   MAHA_SEQUENCE,
+  TAKSA_DIRECTIONS,
 } from "./taksa-mahabhuti.types";
+export type { TaksaDirectionInfo } from "./taksa-mahabhuti.types";
 
 // Taksa Calculator (v3 — 9-slot algorithm)
 export {
@@ -64,3 +66,7 @@ export {
 
 // Cross-Check Engine (Main Facade)
 export { calcTaksaMaha, generateAlerts } from "./cross-check-engine";
+
+// Direction Oracle
+export { getDirectionOracle, getAllDirectionsOracle } from "./direction-oracle";
+export type { DirectionRating, DirectionOracleDetail } from "./direction-oracle";
