@@ -1,29 +1,42 @@
 /**
  * dashboard.mahathaksa.tsx
- * มหาทักษาพยากรณ์ — ระบบทักษาดาว 8 ดวง กำเนิด/จร + คำพยากรณ์รายดาว
+ * มหาทักษาพยากรณ์ — ระบบทักษาคู่ครองทิศ และ ผังมหาภูติพยากรณ์สมดุลชีวิต
+ * 
+ * ปรับปรุงตามมาตรฐาน v2:
+ * 1. ใช้ระบบ 2 สีแยก กำเนิด (สีขาว) และ จร (สีฟ้า) ชัดเจน ไม่มีคำว่า "เกิด" หรือ "จร"
+ * 2. กาลกิณี = สีแดง, โลกาวินาศ = สีเหลือง
+ * 3. ตัดสีม่วงและเขียวออกจากธีมมืด เพื่อความพรีเมียมหรูหรา
+ * 4. ตัดคำว่า "ภพ" และ "ดาว" ออกจากผังมหาภูติ
+ * 5. ตัดส่วนที่ไม่จำเป็นออก: "คำพยากรณ์รายดาว", "การแจ้งเตือนชะตา", "ดาวเสวยอายุ+ดาวแทรก", "คู่ธาตุ"
+ * 6. เพิ่มระบบถาม-ตอบเจาะลึกตามหัวข้อที่สนใจ (Auto-expanding Textarea) พร้อมบันทึกประวัติการสนทนา
  */
+
 import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { requireMinPlan, requireAuth } from "~/services/auth.server";
+import { requireAuth } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import {
   calculatePhopephum,
   calcTaksaMaha,
   buddhToCS,
   STAR_NAMES,
+  TAKSA_DIRECTIONS,
+  getDirectionOracle,
 } from "@phopephum/engine";
-import type { StarNumber, TaksaMahaResult } from "@phopephum/engine";
+import type { StarNumber, TaksaMap } from "@phopephum/engine";
 import { HoroscopeInputSchema } from "@phopephum/validators";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import { InteractiveTaksaCard } from "~/components/taksa/InteractiveTaksaCard";
+import { CombinedMahaCard } from "~/components/taksa/CombinedMahaCard";
+import { TaksaConsultationChat } from "~/components/taksa/TaksaConsultationChat";
 import type { Env } from "~/env.server";
 import { useState, useEffect } from "react";
 
 export const meta: MetaFunction = () => [
-  { title: "มหาทักษาพยากรณ์ — PhopePhum" },
-  { name: "description", content: "วิเคราะห์ระบบทักษาดาว 8 ดวง ทักษากำเนิด/ทักษาจร คำพยากรณ์รายดาว และดาวเสวยอายุ" },
+  { title: "มหาทักษาและมหาภูติพยากรณ์ — PhopePhum" },
+  { name: "description", content: "วิเคราะห์ระบบทักษาคู่ครองทิศและผังมหาภูติพยากรณ์สมดุลชีวิต พร้อมระบบปรึกษาดวงชะตารายหัวข้อ" },
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -38,7 +51,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const { createSupabaseClient } = await import("~/services/supabase.server");
   const { supabase } = createSupabaseClient(request, env);
 
-  // ดึงรายชื่อลูกค้าที่บันทึกไว้ เพื่อใช้หาข้อมูลตาม customerId
   const { data: customers } = await supabase
     .from("customers")
     .select("*")
@@ -83,10 +95,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           taksaTransit: phopephumResult.taksaTransit,
           mahaNatal: phopephumResult.mahaNatal,
           mahaTransit: phopephumResult.mahaTransit,
-          elementPairFlags: phopephumResult.crossCheck.elementPairFlags,
-          alerts: phopephumResult.crossCheck.alerts,
         },
-        sawai: taksaMahaFull.sawai,
         birthDate: targetPerson.birth_date,
         birthTime: targetPerson.birth_time || "",
         birthYearThai: birthCE + 543,
@@ -108,6 +117,133 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   try {
     const formData = await request.formData();
+    const intent = formData.get("intent");
+
+    // ── 1. Intent: ถาม-ตอบคำพยากรณ์เจาะลึก ──
+    if (intent === "ask_oracle") {
+      const question = String(formData.get("question") || "").trim();
+      const topic = String(formData.get("topic") || "");
+      const taksaTransitRaw = formData.get("taksaTransit");
+      const taksaNatalRaw = formData.get("taksaNatal");
+      const mahaTransitRaw = formData.get("mahaTransit");
+
+      let transitMap: TaksaMap = {} as TaksaMap;
+      let natalMap: TaksaMap = {} as TaksaMap;
+      let ageYang = 0;
+      let kalaStar: StarNumber = 8;
+      let sriStar: StarNumber = 1;
+      let dechStar: StarNumber = 1;
+      let montriStar: StarNumber = 1;
+      let mahaMap: Record<string, number> = {};
+
+      if (taksaTransitRaw) {
+        try {
+          const parsed = JSON.parse(String(taksaTransitRaw));
+          transitMap = parsed.map || {};
+          ageYang = parsed.ageYang || 0;
+          kalaStar = parsed.kalakiniStar || 8;
+        } catch (e) {
+          console.error("Failed to parse taksaTransit in action", e);
+        }
+      }
+
+      if (taksaNatalRaw) {
+        try {
+          const parsed = JSON.parse(String(taksaNatalRaw));
+          natalMap = parsed.map || {};
+        } catch (e) {
+          console.error("Failed to parse taksaNatal in action", e);
+        }
+      }
+
+      if (mahaTransitRaw) {
+        try {
+          const parsed = JSON.parse(String(mahaTransitRaw));
+          mahaMap = parsed.map || {};
+        } catch (e) {
+          console.error("Failed to parse mahaTransit in action", e);
+        }
+      }
+
+      // หาดาวศรี, เดช, มนตรี, มูละ ประจำปี
+      for (const [starStr, bhop] of Object.entries(transitMap)) {
+        const s = Number(starStr) as StarNumber;
+        if (bhop === "ศรี") sriStar = s;
+        if (bhop === "เดช") dechStar = s;
+        if (bhop === "มนตรี") montriStar = s;
+      }
+
+      const sriDir = TAKSA_DIRECTIONS[sriStar];
+      const dechDir = TAKSA_DIRECTIONS[dechStar];
+      const montriDir = TAKSA_DIRECTIONS[montriStar];
+      const kalaDir = TAKSA_DIRECTIONS[kalaStar];
+
+      // สร้างคำตอบตามหลักวิชาทักษาและมหาภูติ
+      let answer = "";
+
+      const qLower = question.toLowerCase();
+      if (qLower.includes("งาน") || qLower.includes("สัมภาษณ์") || qLower.includes("สมัคร") || topic.includes("งาน")) {
+        answer = `💼 **คำพยากรณ์ด้านการงาน & การสมัครงาน/เจรจา (อายุย่าง ${ageYang} ปี):**\n\n` +
+          `• **ทิศมงคลสูงสุดสำหรับการเสนองาน/เจรจา:** ทิศ${sriDir.paliName} (${sriDir.thaiName} - ดาว${STAR_NAMES[sriStar]}) ซึ่งเป็น **ทิศศรีจร** จะเปิดประตูแห่งโอกาส ความเมตตามหานิยม และผู้ฟังคล้อยตามได้ง่าย\n` +
+          `• **ทิศเสริมอำนาจบารมี/การสอบแข่งขัน:** ทิศ${dechDir.paliName} (${dechDir.thaiName} - ดาว${STAR_NAMES[dechStar]}) เป็น **ทิศเดชจร** ช่วยเสริมความมั่นใจ ชนะคู่แข่ง และสร้างความน่าเชื่อถือระดับผู้บริหาร\n` +
+          `• **ทิศรับผู้ใหญ่อุปถัมภ์:** ทิศ${montriDir.paliName} (${montriDir.thaiName} - ดาว${STAR_NAMES[montriStar]}) เป็น **ทิศมนตรีจร** เหมาะแก่การขอคำปรึกษาหรือขอความอนุเคราะห์จากผู้ใหญ่\n` +
+          `• **⚠️ ทิศที่ควรเลี่ยงในการนัดหมายสำคัญ:** ทิศ${kalaDir.paliName} (${kalaDir.thaiName} - ดาว${STAR_NAMES[kalaStar]}) เนื่องจากเป็น **ทิศกาลกิณีจร** มักมีอุปสรรค ความเข้าใจผิด หรือข้อติดขัดในเอกสาร`;
+      } else if (qLower.includes("เดินทาง") || qLower.includes("อุบัติเหตุ") || qLower.includes("ปลอดภัย") || topic.includes("เดินทาง")) {
+        // หาดาวอายุจร
+        let ayuStar: StarNumber = 1;
+        for (const [sStr, b] of Object.entries(transitMap)) {
+          if (b === "อายุ") ayuStar = Number(sStr) as StarNumber;
+        }
+        const ayuDir = TAKSA_DIRECTIONS[ayuStar];
+
+        answer = `🚗 **คำพยากรณ์การเดินทาง & ความปลอดภัย (อายุย่าง ${ageYang} ปี):**\n\n` +
+          `• **ทิศปลอดภัย ไร้อุปสรรค (ทิศอายุจร):** ทิศ${ayuDir.paliName} (${ayuDir.thaiName} - ดาว${STAR_NAMES[ayuStar]}) เดินทางไปทิศนี้จะได้รับความสงบ ราบรื่น สุขภาพแข็งแรง และคุ้มครองความปลอดภัย\n` +
+          `• **ทิศนำโชคลาภในการเดินทาง (ทิศศรีจร):** ทิศ${sriDir.paliName} (${sriDir.thaiName} - ดาว${STAR_NAMES[sriStar]}) เดินทางไปติดต่องานหรือพักผ่อนจะได้รับข่าวดีและโชคลาภ\n` +
+          `• **⚠️ ทิศที่ต้องระวังเป็นพิเศษ (ทิศกาลกิณีจร):** ทิศ${kalaDir.paliName} (${kalaDir.thaiName} - ดาว${STAR_NAMES[kalaStar]})\n` +
+          `  - ควรตรวจสภาพยานพาหนะ ลมยาง และระบบเบรกก่อนออกเดินทางเสมอ\n` +
+          `  - มีสติ ไม่ขับรถเร็ว และหลีกเลี่ยงการเดินทางยามวิกาลไปยังทิศนี้โดยไม่จำเป็น\n` +
+          `  - หากเลี่ยงไม่ได้ ให้สวดคาถาพาหุงมหากา หรือพกของมงคลสีขาว/ทองเพื่อคุ้มครอง`;
+      } else if (qLower.includes("ค้าขาย") || qLower.includes("เงิน") || qLower.includes("โชค") || qLower.includes("ทรัพย์") || topic.includes("ค้าขาย")) {
+        let mulaStar: StarNumber = 1;
+        for (const [sStr, b] of Object.entries(transitMap)) {
+          if (b === "มูละ") mulaStar = Number(sStr) as StarNumber;
+        }
+        const mulaDir = TAKSA_DIRECTIONS[mulaStar];
+
+        answer = `💰 **คำพยากรณ์การค้าขาย รับทรัพย์ & เสี่ยงโชค (อายุย่าง ${ageYang} ปี):**\n\n` +
+          `• **ทิศมหาเศรษฐีรับทรัพย์ (ทิศศรีจร):** ทิศ${sriDir.paliName} (${sriDir.thaiName} - ดาว${STAR_NAMES[sriStar]}) เหมาะอย่างยิ่งสำหรับการตั้งหน้าร้าน ออกบูธ เจรจาค้าขาย หรือเสี่ยงโชคลาภ\n` +
+          `• **ทิศหลักทรัพย์มั่นคง (ทิศมูละจร):** ทิศ${mulaDir.paliName} (${mulaDir.thaiName} - ดาว${STAR_NAMES[mulaStar]}) เหมาะกับการลงทุนระยะยาว ซื้ออสังหาริมทรัพย์ ที่ดิน หรือเปิดสาขาธุรกิจใหม่\n` +
+          `• **เคล็ดลับการเงินมหาภูติ:** สถิตขุมทรัพย์จรประจำปีช่วยหนุนให้เงินทองไม่รั่วไหล แต่ควรหลีกเลี่ยงการลงทุนสุ่มเสี่ยงกับบุคคลที่มาจากทิศ${kalaDir.paliName} (${kalaDir.thaiName})`;
+      } else if (qLower.includes("โต๊ะ") || qLower.includes("ฮวงจุ้ย") || qLower.includes("เรือน") || qLower.includes("บ้าน") || topic.includes("โต๊ะ")) {
+        answer = `🪑 **คำพยากรณ์จัดโต๊ะทำงาน & ฮวงจุ้ยเคหสถาน (อายุย่าง ${ageYang} ปี):**\n\n` +
+          `• **ทิศหันหน้าโต๊ะทำงานที่ดีที่สุด:** หันหน้าไปทาง **ทิศ${dechDir.paliName} (${dechDir.thaiName})** หรือ **ทิศ${sriDir.paliName} (${sriDir.thaiName})** จะส่งเสริมให้มีความคิดสร้างสรรค์ มีอำนาจคุมงาน และได้รับการสนับสนุนจากผู้ร่วมงาน\n` +
+          `• **ทิศที่ตั้งเก้าอี้พิงหลัง (หลังพิงมั่นคง):** ควรพิงไปทางทิศที่มีดาวมงคล เช่น ทิศ${montriDir.paliName} (${montriDir.thaiName})\n` +
+          `• **❌ ทิศต้องห้ามในการหันหน้าโต๊ะทำงาน:** อย่าหันหน้าตรงไปทาง **ทิศ${kalaDir.paliName} (${kalaDir.thaiName})** ซึ่งเป็นทิศกาลกิณีจร เพราะจะทำให้งานสะดุด เกิดความเครียด และขัดแย้งกับผู้ร่วมงานได้ง่าย`;
+      } else if (qLower.includes("แก้เคล็ด") || qLower.includes("กาลกิณี") || qLower.includes("โลกาวินาศ") || topic.includes("แก้เคล็ด")) {
+        answer = `🛡️ **คำแนะนำการแก้เคล็ดดาวกาลกิณีจร & โลกาวินาศ (อายุย่าง ${ageYang} ปี):**\n\n` +
+          `• **ดาวกาลกิณีจรประจำปีนี้คือ:** ดาว${STAR_NAMES[kalaStar]} (${kalaStar}) สถิตทาง **ทิศ${kalaDir.paliName} (${kalaDir.thaiName})**\n` +
+          `• **การทำบุญเสริมดวงชะตา:**\n` +
+          `  1. ทำบุญบริจาคโลหิต หรือบริจาคโลงศพ/ผ้าห่อศพ เพื่อแก้เคล็ดการสูญเสียหรืออุบัติเหตุ\n` +
+          `  2. ถวายภัตตาหาร หลอดไฟ หรือค่าน้ำค่าไฟแก่วัด เพื่อเปิดแสงสว่างแห่งปัญญา\n` +
+          `  3. ปล่อยปลา หรือไถ่ชีวิตโคกระบือ เพื่อเสริมพลังแห่งชีวิตและความแคล้วคลาด\n` +
+          `• **ข้อควรปฏิบัติ:** หลีกเลี่ยงการสวมเสื้อผ้าสีที่เป็นกาลกิณีในวันสำคัญ และฝึกการแผ่เมตตาในทิศ${kalaDir.paliName}เพื่อเปลี่ยนพลังลบให้เป็นพลังคุ้มครอง`;
+      } else {
+        answer = `🔮 **สรุปภาพรวมชะตาทักษาและมหาภูติ (อายุย่าง ${ageYang} ปี):**\n\n` +
+          `• **บริวารจร:** เริ่มต้นวัฏจักรใหม่ด้วยพลังดาวทักษาจรที่มีชีวิตชีวา\n` +
+          `• **ดาวสิริมงคล (ศรีจร):** ดาว${STAR_NAMES[sriStar]} (${sriStar}) สถิตทาง **ทิศ${sriDir.paliName}** นำพาโชคลาภ เกียรติยศ และความราบรื่น\n` +
+          `• **ดาวเตือนภัย (กาลกิณีจร):** ดาว${STAR_NAMES[kalaStar]} (${kalaStar}) สถิตทาง **ทิศ${kalaDir.paliName}** พึงระวังความใจร้อน เอกสารสัญญา และสุขภาพ\n` +
+          `• **คำแนะนำสำคัญ:** เดินทาง เจรจา หรือลงทุน ให้มุ่งเน้นทิศมงคล (${sriDir.thaiName} / ${dechDir.thaiName}) เป็นหลัก จะพลิกฟื้นและเสริมดวงชะตาให้สำเร็จราบรื่น`;
+      }
+
+      return json({
+        ok: true,
+        answer,
+        question,
+        topic,
+      });
+    }
+
+    // ── 2. Intent: ป้อนวันเกิดคำนวณใหม่ ──
     const bDay = Number(formData.get("birthDay") ?? "0");
     const bMonth = Number(formData.get("birthMonth") ?? "0");
     const bYear = Number(formData.get("birthYear") ?? "0");
@@ -129,13 +265,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const birthCE = new Date(parsed.data.birthDate).getFullYear();
     const phopephumResult = await calculatePhopephum(parsed.data, checkDate);
 
-    const taksaMahaFull = calcTaksaMaha({
-      birthDate: new Date(parsed.data.birthDate + "T12:00:00"),
-      checkDate,
-      csNatal:   buddhToCS(birthCE + 543),
-      csTransit: buddhToCS(checkDate.getFullYear() + 543),
-    });
-
     await logEvent(request, env, EVENTS.CALC_HORA, {
       birthYear: parsed.data.birthDate.split("-")[0],
       source: "mahathaksa",
@@ -147,10 +276,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
         taksaTransit: phopephumResult.taksaTransit,
         mahaNatal: phopephumResult.mahaNatal,
         mahaTransit: phopephumResult.mahaTransit,
-        elementPairFlags: phopephumResult.crossCheck.elementPairFlags,
-        alerts: phopephumResult.crossCheck.alerts,
       },
-      sawai: taksaMahaFull.sawai,
       birthDate: parsed.data.birthDate,
       birthTime: parsed.data.birthTime || "",
       birthYearThai: birthCE + 543,
@@ -163,411 +289,66 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 }
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const TAKSA_GRID_3X3: (StarNumber | null)[][] = [
-  [1, 2, 3],
-  [6, null, 4],
-  [8, 5, 7],
-];
-
-const STAR_DIRECTIONS: Record<number, string> = {
-  1: "ตะวันออกเฉียงเหนือ", // NE
-  2: "ตะวันออก",          // E
-  3: "ตะวันออกเฉียงใต้",    // SE
-  4: "ทิศใต้",           // S
-  7: "ตะวันตกเฉียงใต้",    // SW
-  5: "ตะวันตก",          // W
-  8: "ตะวันตกเฉียงเหนือ",   // NW
-  6: "ทิศเหนือ",          // N
-};
-
-const ELEMENT_ICONS: Record<string, string> = { ไฟ: "🔥", ดิน: "🌿", ลม: "💨", น้ำ: "💧" };
-
-const STAR_CORE_MEANINGS: Record<number, { title: string; element: string; desc: string }> = {
-  1: { title: "ดาวอาทิตย์ (๑)", element: "ไฟ",  desc: "สัญลักษณ์แห่งเกียรติยศ ชื่อเสียง ความเป็นผู้นำ และการแสดงออกถึงศักดิ์ศรีและความคิดสร้างสรรค์ระดับจักรพรรดิ" },
-  2: { title: "ดาวจันทร์ (๒)",   element: "ดิน", desc: "สัญลักษณ์แห่งเสน่ห์เมตตามหานิยม ความอ่อนโยน การบริการ โชคลาภ และวิถีอารมณ์ความรู้สึกที่ละเอียดอ่อน" },
-  3: { title: "ดาวอังคาร (๓)",   element: "ลม",  desc: "สัญลักษณ์แห่งความกล้าหาญ การลงมือทำอย่างรวดเร็ว พลังขับเคลื่อน พละกำลัง และการแข่งขันเพื่อชัยชนะ" },
-  4: { title: "ดาวพุธ (๔)",      element: "น้ำ", desc: "สัญลักษณ์แห่งปัญญาปฏิภาณ ไหวพริบ การสื่อสาร เจรจา การประสานสัมพันธ์อันดี และการค้าขายสร้างรายได้" },
-  5: { title: "ดาวพฤหัสบดี (๕)", element: "ดิน", desc: "สัญลักษณ์แห่งปัญญาญาณอันสูงส่ง ความรู้ คุณธรรม ความมั่นคง ศีลธรรม และผู้ใหญ่อุปถัมภ์คำชูที่เป็นมงคล" },
-  6: { title: "ดาวศุกร์ (๖)",    element: "น้ำ", desc: "สัญลักษณ์แห่งศิลปะ ความรัก โชคลาภการเงิน ความสุขสำราญทางโลก และเสน่ห์ดึงดูดสิ่งสวยงามเข้ามาหาตัว" },
-  7: { title: "ดาวเสาร์ (๗)",    element: "ไฟ",  desc: "สัญลักษณ์แห่งความอดทน ความเพียรพยายาม ภารกิจระยะยาวอันหนักหน่วง และการสร้างรากฐานชีวิตที่ยั่งยืน" },
-  8: { title: "ดาวราหู (๘)",     element: "ลม",  desc: "สัญลักษณ์แห่งความกล้าได้กล้าเสีย การเสี่ยงโชค ทางลัด การพลิกฟื้นดวงชะตา การต่างประเทศ หรือความลุ่มหลงนวัตกรรมใหม่ๆ" },
-};
-
-const TAKSA_QUALITY: Record<string, { tone: "good" | "neutral" | "bad"; desc: string }> = {
-  บริวาร:   { tone: "good",    desc: "มีพลังแห่งความเกื้อหนุนร่วมมือ มีผู้ช่วยงาน ลูกน้อง คนรัก ครอบครัวช่วยส่งเสริมผลักดัน" },
-  อายุ:     { tone: "neutral", desc: "โฟกัสที่การดำเนินชีวิต สุขภาพร่างกาย และการปรับสมดุลวิถีชีวิต" },
-  เดช:      { tone: "good",    desc: "อำนาจบารมีโดดเด่น ชนะอุปสรรค มีเกียรติยศ ได้รับตำแหน่ง คุมงาน คุมคน" },
-  ศรี:      { tone: "good",    desc: "'ปีทองสิริมงคลสูงสุด' มีโชคลาภ ทรัพย์สิน ความสุข ความรักอันหวานชื่น และความราบรื่นในทุกมิติ" },
-  มูละ:     { tone: "good",    desc: "โดดเด่นด้านหลักทรัพย์ มรดก รากฐานมั่นคง การซื้อที่อยู่อาศัย ยานพาหนะ หรือการออมเงิน" },
-  อุตสาหะ:  { tone: "neutral", desc: "เน้นความพากเพียรพยายาม การทำงานหนัก เหนื่อยแต่จะประสบความสำเร็จ" },
-  มนตรี:   { tone: "good",    desc: "ได้รับความเมตตาจากผู้ใหญ่ ครูอาจารย์ มีผู้มีอิทธิพลคอยช่วยเหลือสนับสนุน" },
-  กาลกิณี:  { tone: "bad",     desc: "ระวังการเสียชื่อเสียง ขัดแย้ง คดีความ หรือสุขภาพทรุดโทรม ดำเนินชีวิตด้วยความระมัดระวังสูงสุด" },
-};
-
-const ELEMENT_PAIRS = [
-  { element: "ไฟ",  stars: [1, 7] as [StarNumber, StarNumber], nature: "ชื่อเสียง เกียรติยศ รวดเร็ว รุนแรง" },
-  { element: "ดิน", stars: [2, 5] as [StarNumber, StarNumber], nature: "ความมั่นคง สมบูรณ์ ค่อยเป็นค่อยไป" },
-  { element: "ลม",  stars: [3, 8] as [StarNumber, StarNumber], nature: "ว่องไว กระฉับกระเฉง กล้าแสดงออก" },
-  { element: "น้ำ", stars: [4, 6] as [StarNumber, StarNumber], nature: "ความสุข ครอบครัว สบายๆ เรื่อยๆ" },
-];
-
-// ─── Components ───────────────────────────────────────────────────────────────
-
-function TransitDirectionsCard({ taksaMaha }: { taksaMaha: any }) {
-  const { taksaTransit } = taksaMaha;
-  if (!taksaTransit?.map) return null;
-
-  // Map each direction to its quality
-  const directionsWithQuality = Object.entries(STAR_DIRECTIONS).map(([starStr, dirName]) => {
-    const star = Number(starStr);
-    const quality = taksaTransit.map[star] as string;
-    return {
-      star,
-      dirName,
-      quality,
-    };
-  });
-
-  // Sort order: ศรี, เดช, มนตรี, มูละ, บริวาร, อายุ, อุตสาหะ, กาลกิณี
-  const qualityOrder = ["ศรี", "เดช", "มนตรี", "มูละ", "บริวาร", "อายุ", "อุตสาหะ", "กาลกิณี"];
-  directionsWithQuality.sort((a, b) => {
-    const indexA = qualityOrder.indexOf(a.quality);
-    const indexB = qualityOrder.indexOf(b.quality);
-    return (indexA === -1 ? 99 : indexA) - (indexB === -1 ? 99 : indexB);
-  });
-
-  const qualityColor: Record<string, string> = {
-    ศรี: "text-emerald-400 bg-emerald-950/30 border-emerald-500/30",
-    เดช: "text-amber-400 bg-amber-950/30 border-amber-500/30",
-    มนตรี: "text-sky-400 bg-sky-950/30 border-sky-500/30",
-    มูละ: "text-orange-400 bg-orange-950/30 border-orange-500/30",
-    บริวาร: "text-slate-300 bg-slate-800/30 border-slate-500/20",
-    อายุ: "text-teal-400 bg-teal-950/30 border-teal-500/30",
-    อุตสาหะ: "text-yellow-400 bg-yellow-950/30 border-yellow-500/30",
-    กาลกิณี: "text-rose-400 bg-red-950/40 border-red-500/30",
-  };
-
-  return (
-    <Card className="border-[#C9A96E]/20 bg-gradient-to-br from-[#0A2240]/40 to-[#020617]/90 backdrop-blur-xl p-5 shadow-2xl">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
-        <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold">วิเคราะห์ทิศทักษาจรประจำปี (Yearly Transit Directions)</p>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* ทิศมงคลเด่น */}
-        <div className="space-y-3">
-          <p className="text-xs text-[#C9A96E] font-bold uppercase tracking-wider border-b border-white/5 pb-1 flex items-center gap-1.5">
-            <span>✨</span> ทิศมงคลและนำโชค (เสริมสิริมงคล การเดินทาง ค้าขาย)
-          </p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {directionsWithQuality
-              .filter(d => ["ศรี", "เดช", "มนตรี", "มูละ"].includes(d.quality))
-              .map(d => (
-                <div key={d.star} className={`flex flex-col justify-between p-3 rounded-xl border ${qualityColor[d.quality] || 'border-white/5 bg-white/2'}`}>
-                  <div>
-                    <p className="font-bold text-sm text-[#F8F6F1]">{d.dirName}</p>
-                    <p className="text-[11px] text-[#C6B79F] mt-0.5">ดาว {STAR_NAMES[d.star as StarNumber]} ({d.star})</p>
-                  </div>
-                  <div className="mt-2 flex items-center justify-between border-t border-white/5 pt-1.5">
-                    <span className="text-[10px] text-[#C6B79F] italic">
-                      {d.quality === "ศรี" ? "โชคลาภ เงินทอง"
-                        : d.quality === "เดช" ? "อำนาจ เกียรติยศ"
-                        : d.quality === "มนตรี" ? "ผู้ใหญ่อุปถัมภ์"
-                        : "รากฐาน มั่นคง"}
-                    </span>
-                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-md border border-current bg-black/20 shrink-0">
-                      ทิศ{d.quality}จร
-                    </span>
-                  </div>
-                </div>
-              ))}
-          </div>
-        </div>
-
-        {/* ทิศที่ควรระวัง / ทิศทั่วไป */}
-        <div className="space-y-3">
-          <p className="text-xs text-[#C6B79F] font-bold uppercase tracking-wider border-b border-white/5 pb-1 flex items-center gap-1.5">
-            <span>⚠️</span> ทิศควรหลีกเลี่ยง & ทิศทั่วไป
-          </p>
-          <div className="space-y-2">
-            {/* กาลกิณี */}
-            {directionsWithQuality
-              .filter(d => ["กาลกิณี"].includes(d.quality))
-              .map(d => (
-                <div key={d.star} className={`flex items-center justify-between p-3.5 rounded-xl border ${qualityColor[d.quality]}`}>
-                  <div>
-                    <p className="font-bold text-sm text-[#F8F6F1]">{d.dirName}</p>
-                    <p className="text-[11px] text-rose-300/80 mt-0.5">หลีกเลี่ยงการทำพิธี ตั้งโต๊ะทำงาน หรือเดินทางไปทิศนี้เพื่อป้องกันอุปสรรค</p>
-                  </div>
-                  <span className="text-xs font-bold px-2 py-0.5 rounded-md border border-rose-400 bg-red-950/50 text-rose-400 animate-pulse shrink-0">
-                    ทิศ{d.quality}จร
-                  </span>
-                </div>
-              ))}
-            
-            {/* อื่นๆ: อุตสาหะ, บริวาร, อายุ */}
-            <div className="grid grid-cols-3 gap-2">
-              {directionsWithQuality
-                .filter(d => ["บริวาร", "อายุ", "อุตสาหะ"].includes(d.quality))
-                .map(d => (
-                  <div key={d.star} className="flex flex-col justify-between p-2 rounded-xl border border-white/5 bg-slate-900/40">
-                    <div>
-                      <p className="font-bold text-xs text-[#F8F6F1] truncate">{d.dirName}</p>
-                      <p className="text-[9px] text-[#C6B79F] mt-0.5">ดาว {STAR_NAMES[d.star as StarNumber]}</p>
-                    </div>
-                    <div className="mt-2.5">
-                      <span className={`text-[9px] font-bold px-1 py-0.5 rounded border ${qualityColor[d.quality]}`}>
-                        {d.quality}จร
-                      </span>
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function SawaiCard({ sawai }: { sawai: any }) {
-  if (!sawai) return null;
-
-  const startDate = new Date(sawai.sawaiDateStart);
-  const endDate   = new Date(sawai.sawaiDateEnd);
-  const subStart  = new Date(sawai.subDateStart);
-  const subEnd    = new Date(sawai.subDateEnd);
-  const fmt = (d: Date) => d.toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" });
-
-  const now = new Date();
-  const totalMs = endDate.getTime() - startDate.getTime();
-  const elapsedMs = Math.max(0, now.getTime() - startDate.getTime());
-  const pct = Math.min(100, Math.round((elapsedMs / totalMs) * 100));
-
-  return (
-    <Card className="border-[#C9A96E]/20 bg-gradient-to-br from-[#0A2240]/60 to-[#020617]/90 backdrop-blur-xl p-5">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
-        <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold">ดาวเสวยอายุ + ดาวแทรก</p>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-[#C9A96E]/5 border border-[#C9A96E]/20 rounded-2xl p-4">
-          <p className="text-xs text-[#C6B79F] uppercase tracking-wider mb-1">ดาวเสวยอายุหลัก</p>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#C9A96E]/15 border border-[#C9A96E]/35 flex items-center justify-center font-display text-2xl font-bold text-[#C9A96E]">
-              {sawai.sawaiStar}
-            </div>
-            <div>
-              <p className="text-[#F8F6F1] font-bold text-lg">{sawai.sawaiStarName}</p>
-              <p className="text-xs text-[#C6B79F]">อายุ {sawai.sawaiAgeStart}–{sawai.sawaiAgeEnd} ปี</p>
-            </div>
-          </div>
-          <p className="text-xs text-[#C6B79F] mt-3">{fmt(startDate)} — {fmt(endDate)}</p>
-          <div className="mt-2">
-            <div className="h-1.5 rounded-full bg-white/5 overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-[#C9A96E] to-[#D9BC82]" style={{ width: `${pct}%` }} />
-            </div>
-            <p className="text-[10px] text-[#C6B79F] mt-1 text-right">{pct}% ผ่านไปแล้ว</p>
-          </div>
-        </div>
-        <div className="bg-[#4B6FAE]/5 border border-[#4B6FAE]/20 rounded-2xl p-4">
-          <p className="text-xs text-[#C6B79F] uppercase tracking-wider mb-1">ดาวแทรก (Sub-period)</p>
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-[#4B6FAE]/15 border border-[#4B6FAE]/35 flex items-center justify-center font-display text-2xl font-bold text-[#4B6FAE]">
-              {sawai.subStar}
-            </div>
-            <div>
-              <p className="text-[#F8F6F1] font-bold text-lg">{sawai.subStarName}</p>
-              <p className="text-xs text-[#C6B79F]">{sawai.subDurationDays} วัน</p>
-            </div>
-          </div>
-          <p className="text-xs text-[#C6B79F] mt-3">{fmt(subStart)} — {fmt(subEnd)}</p>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function ElementPairsCard({ taksaMaha }: { taksaMaha: any }) {
-  const flags = taksaMaha.elementPairFlags;
-  if (!flags?.length) return null;
-
-  return (
-    <Card className="border-[#C9A96E]/20 bg-slate-900/40 backdrop-blur-md p-4">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-2 h-2 bg-[#C9A96E] rounded-full" />
-        <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold">คู่ธาตุ (Element Pairs)</p>
-      </div>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {flags.map((flag: any) => (
-          <div
-            key={flag.element}
-            className={`rounded-2xl p-3 border text-center ${
-              flag.isPermanent
-                ? "border-[#C9A96E]/40 bg-[#C9A96E]/10"
-                : flag.inTransit
-                ? "border-sky-500/30 bg-sky-500/5"
-                : "border-white/5 bg-white/2"
-            }`}
-          >
-            <p className="text-2xl mb-1">{ELEMENT_ICONS[flag.element]}</p>
-            <p className="text-xs font-bold text-[#F8F6F1]">ธาตุ{flag.element}</p>
-            <p className="text-[10px] text-[#C6B79F] mt-0.5">{flag.stars[0]} + {flag.stars[1]}</p>
-            {flag.isPermanent && <span className="text-[10px] text-[#C9A96E] font-bold">ถาวร</span>}
-            {!flag.isPermanent && flag.inTransit && <span className="text-[10px] text-sky-400 font-bold">จรปีนี้</span>}
-            {!flag.isPermanent && !flag.inTransit && <span className="text-[10px] text-[#94A3B8]">ไม่เกิด</span>}
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}
-
-function StarPredictionPanel({ star, taksaMaha }: { star: number; taksaMaha: any }) {
-  const { taksaNatal, taksaTransit, mahaTransit } = taksaMaha;
-  const starInfo = STAR_CORE_MEANINGS[star];
-  if (!starInfo) return null;
-
-  const bhopTransit = taksaTransit.map[star] as string;
-  const bhopNatal   = taksaNatal.map[star] as string;
-  const quality = bhopTransit ? TAKSA_QUALITY[bhopTransit] : null;
-
-  let currentMaha: string | null = null;
-  if (mahaTransit?.map) {
-    for (const [bhop, sNum] of Object.entries(mahaTransit.map)) {
-      if (sNum === star) { currentMaha = bhop; break; }
-    }
-  }
-
-  const tone = quality?.tone ?? "neutral";
-
-  return (
-    <Card className={`border p-4 relative overflow-hidden transition-all ${
-      tone === "good"    ? "border-emerald-500/20 bg-emerald-950/10" :
-      tone === "bad"     ? "border-rose-500/20 bg-rose-950/10" :
-                           "border-white/8 bg-slate-900/30"
-    }`}>
-      <div className="absolute top-0 right-0 w-32 h-32 rounded-full blur-3xl -z-10 opacity-20"
-        style={{ background: tone === "good" ? "#10b981" : tone === "bad" ? "#f43f5e" : "#C9A96E" }} />
-
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="flex items-center gap-3">
-          <div className={`w-11 h-11 rounded-xl flex items-center justify-center font-display text-xl font-bold shrink-0 border ${
-            tone === "good" ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-300" :
-            tone === "bad"  ? "bg-rose-500/15 border-rose-500/30 text-rose-300" :
-                              "bg-[#C9A96E]/15 border-[#C9A96E]/30 text-[#C9A96E]"
-          }`}>{star}</div>
-          <div>
-            <p className="text-[#F8F6F1] font-bold text-sm">{starInfo.title}</p>
-            <p className="text-[#C6B79F] text-xs">ธาตุ{starInfo.element} {ELEMENT_ICONS[starInfo.element]}</p>
-          </div>
-        </div>
-        <div className="flex flex-col items-end gap-1.5 shrink-0">
-          {bhopTransit && (
-            <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg border ${
-              bhopTransit === "ศรี"      ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400" :
-              bhopTransit === "กาลกิณี" ? "bg-rose-500/10 border-rose-500/30 text-rose-400" :
-              bhopTransit === "เดช"     ? "bg-amber-500/10 border-amber-500/30 text-amber-400" :
-                                           "bg-slate-900/80 border-[#C9A96E]/25 text-[#C9A96E]"
-            }`}>
-              ทักษาจร: {bhopTransit}
-            </span>
-          )}
-          {currentMaha && (
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg border bg-[#4B6FAE]/10 border-[#4B6FAE]/25 text-[#4B6FAE]">
-              มหาจร: {currentMaha}
-            </span>
-          )}
-        </div>
-      </div>
-
-      <p className="text-[11px] text-[#C6B79F] italic mb-2 leading-relaxed">{starInfo.desc}</p>
-
-      {quality && (
-        <div className={`rounded-xl p-3 text-xs border ${
-          tone === "good" ? "bg-emerald-500/5 border-emerald-500/10 text-emerald-200" :
-          tone === "bad"  ? "bg-rose-500/5 border-rose-500/10 text-rose-200" :
-                            "bg-white/3 border-white/5 text-[#F8F6F1]"
-        }`}>
-          {quality.desc}
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 gap-2 mt-3 text-[11px] text-[#C6B79F]">
-        <div className="bg-slate-950/20 p-2 rounded-xl border border-white/5">
-          <span>ทักษากำเนิด: </span>
-          <span className="font-bold text-[#F8F6F1]">{bhopNatal || "—"}</span>
-        </div>
-        <div className="bg-slate-950/20 p-2 rounded-xl border border-white/5">
-          <span>มหาภูติจร: </span>
-          <span className="font-bold text-[#F8F6F1]">{currentMaha || "—"}</span>
-        </div>
-      </div>
-    </Card>
-  );
-}
-
-function AlertsPanel({ taksaMaha }: { taksaMaha: any }) {
-  const alerts = taksaMaha.alerts;
-  if (!alerts?.length) return null;
-
-  const levelColor: Record<string, string> = {
-    danger: "border-rose-500/40 bg-rose-950/20 text-rose-400",
-    warn:   "border-amber-500/40 bg-amber-950/20 text-amber-400",
-    good:   "border-emerald-500/40 bg-emerald-950/20 text-emerald-400",
-    info:   "border-sky-500/40 bg-sky-950/20 text-sky-400",
-  };
-
-  return (
-    <Card className="border-[#C9A96E]/20 bg-slate-900/40 p-4">
-      <div className="flex items-center gap-2 mb-4">
-        <div className="w-2 h-2 bg-rose-400 rounded-full animate-pulse" />
-        <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold">การแจ้งเตือนชะตา</p>
-      </div>
-      <div className="space-y-2">
-        {alerts.map((a: any, i: number) => (
-          <div key={i} className={`rounded-xl p-3 border text-xs ${levelColor[a.level] ?? levelColor.info}`}>
-            <span className="font-bold">ดาว{a.starName} (ทักษา{a.taksaTransit}จร) — </span>
-            {a.message}
-          </div>
-        ))}
-      </div>
-    </Card>
-  );
-}
+// ─── Component: ฟอร์มป้อนวันเกิด ─────────────────────────────────────────────
 
 function BirthForm() {
-  const now = new Date();
   return (
-    <Card className="border-[#C9A96E]/20 bg-slate-900/40 p-5">
-      <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold mb-4">ป้อนวันเดือนปีเกิด</p>
+    <Card className="border-[#C9A96E]/20 bg-white/90 dark:bg-slate-900/40 backdrop-blur-md p-5 shadow-xl">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="w-2 h-2 rounded-full bg-[#C9A96E] animate-pulse" />
+        <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold">
+          คำนวณชะตาใหม่ / เปลี่ยนวันเกิด
+        </p>
+      </div>
       <Form method="post" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <label className="text-xs text-[#C6B79F] mb-1 block">วัน</label>
-          <input name="birthDay" type="number" min={1} max={31} placeholder="15"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
+          <label className="text-xs text-slate-600 dark:text-[#C6B79F] mb-1 block">วัน</label>
+          <input
+            name="birthDay"
+            type="number"
+            min={1}
+            max={31}
+            placeholder="15"
+            required
+            className="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]"
+          />
         </div>
         <div>
-          <label className="text-xs text-[#C6B79F] mb-1 block">เดือน</label>
-          <input name="birthMonth" type="number" min={1} max={12} placeholder="6"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
+          <label className="text-xs text-slate-600 dark:text-[#C6B79F] mb-1 block">เดือน</label>
+          <input
+            name="birthMonth"
+            type="number"
+            min={1}
+            max={12}
+            placeholder="6"
+            required
+            className="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]"
+          />
         </div>
         <div>
-          <label className="text-xs text-[#C6B79F] mb-1 block">ปี พ.ศ.</label>
-          <input name="birthYear" type="number" min={2400} max={2600} placeholder="2500"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
+          <label className="text-xs text-slate-600 dark:text-[#C6B79F] mb-1 block">ปี พ.ศ.</label>
+          <input
+            name="birthYear"
+            type="number"
+            min={2400}
+            max={2600}
+            placeholder="2524"
+            required
+            className="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]"
+          />
         </div>
         <div>
-          <label className="text-xs text-[#C6B79F] mb-1 block">เวลาเกิด</label>
-          <input name="birthTime" type="time" defaultValue="06:00"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
+          <label className="text-xs text-slate-600 dark:text-[#C6B79F] mb-1 block">เวลาเกิด</label>
+          <input
+            name="birthTime"
+            type="time"
+            defaultValue="06:00"
+            className="w-full bg-slate-50 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]"
+          />
         </div>
-        <div className="col-span-2 sm:col-span-4">
-          <Button type="submit" className="w-full">
-            คำนวณทักษาดาว
+        <div className="col-span-2 sm:col-span-4 mt-1">
+          <Button type="submit" className="w-full py-2.5 rounded-xl font-bold">
+            คำนวณทักษาและมหาภูติ
           </Button>
         </div>
       </Form>
@@ -575,137 +356,101 @@ function BirthForm() {
   );
 }
 
-// ─── Page ─────────────────────────────────────────────────────────────────────
+// ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function MahaThaksaPage() {
   const { profile, initialResult } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
-  const isLoading = navigation.state === "submitting";
+  const isLoading = navigation.state === "submitting" && navigation.formData?.get("intent") !== "ask_oracle";
   const ad = actionData as any;
 
   const [activeResult, setActiveResult] = useState<any>(initialResult);
   useEffect(() => {
-    if (ad && !ad.error) setActiveResult(ad);
+    if (ad && !ad.error && ad.taksaMaha) {
+      setActiveResult(ad);
+    }
   }, [ad]);
 
-  const [selectedStar, setSelectedStar] = useState<number | null>(null);
-
   const taksaMaha = activeResult?.taksaMaha;
-  const sawai = activeResult?.sawai;
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6 pb-12">
       {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-4 border-b border-slate-200/60 dark:border-white/10 pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
-            <p className="text-[#C9A96E] text-[11px] tracking-[0.3em] uppercase font-bold">Taksa System</p>
+            <p className="text-[#C9A96E] text-[11px] tracking-[0.3em] uppercase font-bold">
+              Taksa & Mahabhuti Wisdom
+            </p>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">
-            มหาทักษาพยากรณ์ {activeResult?.customerName ? `(${activeResult.customerName})` : ""}
+          <h1 className="font-display text-2xl sm:text-3xl text-slate-900 dark:text-[#F8F6F1] font-bold">
+            มหาทักษาและมหาภูติพยากรณ์ {activeResult?.customerName ? `(${activeResult.customerName})` : ""}
           </h1>
-          <p className="text-[#C6B79F] text-sm mt-1">วิเคราะห์ระบบทักษาดาว 8 ดวง ทักษากำเนิด + ทักษาจร</p>
+          <p className="text-slate-600 dark:text-[#C6B79F] text-xs md:text-sm mt-1">
+            วิเคราะห์ระบบทักษาคู่ครองทิศ ทักษากำเนิด-ทักษาจร และผังมหาภูติพยากรณ์สมดุลชีวิต
+          </p>
         </div>
         {taksaMaha && (
-          <div className="text-right text-xs text-[#C6B79F] shrink-0">
-            <p>อายุย่าง</p>
-            <p className="font-display text-3xl text-[#C9A96E] font-bold leading-none">{taksaMaha.taksaTransit?.ageYang}</p>
-            <p>ปี</p>
+          <div className="text-right text-xs text-slate-600 dark:text-[#C6B79F] shrink-0 bg-[#C9A96E]/10 border border-[#C9A96E]/30 rounded-2xl px-3.5 py-2">
+            <p className="text-[11px] font-semibold text-[#B45309] dark:text-[#C9A96E]">อายุย่าง</p>
+            <p className="font-display text-2xl sm:text-3xl text-slate-900 dark:text-[#F8F6F1] font-bold leading-none my-0.5">
+              {taksaMaha.taksaTransit?.ageYang}
+            </p>
+            <p className="text-[10px]">ปีบริบูรณ์</p>
           </div>
         )}
       </div>
 
-      {/* ── Error ── */}
+      {/* ── Error Notification ── */}
       {ad?.error && (
-        <div className="bg-rose-950/30 border border-rose-500/30 rounded-2xl p-4 text-rose-400 text-sm">
+        <div className="bg-rose-100 dark:bg-rose-950/30 border border-rose-300 dark:border-rose-500/30 rounded-2xl p-4 text-rose-800 dark:text-rose-400 text-sm">
           {ad.error}
         </div>
       )}
 
-      {/* ── Form (ถ้ายังไม่มีผล) ── */}
+      {/* ── Form (ถ้ายังไม่มีข้อมูลวันเกิด) ── */}
       {!taksaMaha && <BirthForm />}
 
-      {/* ── Result ── */}
+      {/* ── Visual Charts & Consultation ── */}
       {taksaMaha && (
         <div className="space-y-6">
-          {/* ── Interactive Taksa Grid with 2-Tone Colors & Direction Oracle ── */}
-          <InteractiveTaksaCard
+          {/* 1. ตารางทักษาคู่ครองทิศ + ผังมหาภูติ Side-by-Side (2 สีแยก กำเนิด/จร) */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+            <InteractiveTaksaCard
+              taksaNatal={taksaMaha.taksaNatal}
+              taksaTransit={taksaMaha.taksaTransit}
+            />
+            <CombinedMahaCard
+              natal={taksaMaha.mahaNatal}
+              transit={taksaMaha.mahaTransit}
+              birthYearThai={activeResult.birthYearThai}
+              currentYearThai={activeResult.currentYearThai}
+              taksaMaha={taksaMaha}
+            />
+          </div>
+
+          {/* 2. ระบบถาม-ตอบเจาะลึกตามหัวข้อที่สนใจ (Auto-expanding Textarea + History) */}
+          <TaksaConsultationChat
             taksaNatal={taksaMaha.taksaNatal}
             taksaTransit={taksaMaha.taksaTransit}
+            mahaNatal={taksaMaha.mahaNatal}
+            mahaTransit={taksaMaha.mahaTransit}
+            storageKeyId={profile?.id || "guest"}
           />
 
-          {/* Sawai Card + Element Pairs side-by-side on lg */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <SawaiCard sawai={sawai} />
-            <ElementPairsCard taksaMaha={taksaMaha} />
-          </div>
-
-          {/* Alerts */}
-          <AlertsPanel taksaMaha={taksaMaha} />
-
-          {/* Star-by-Star Yearly Prediction */}
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px flex-1 bg-[#C9A96E]/20" />
-              <p className="text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold">คำพยากรณ์รายดาว (ปีนี้)</p>
-              <div className="h-px flex-1 bg-[#C9A96E]/20" />
-            </div>
-
-            {/* Star selector pills */}
-            <div className="flex flex-wrap gap-2 mb-4">
-              <button
-                onClick={() => setSelectedStar(null)}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
-                  selectedStar === null
-                    ? "bg-[#C9A96E] text-[#020617] border-[#C9A96E]"
-                    : "bg-white/5 text-[#94A3B8] border-white/10 hover:border-[#C9A96E]/30"
-                }`}
-              >
-                ทั้งหมด
-              </button>
-              {([1, 2, 3, 4, 5, 6, 7, 8] as StarNumber[]).map(s => {
-                const bhop = taksaMaha.taksaTransit?.map?.[s];
-                const tone = bhop ? (TAKSA_QUALITY[bhop]?.tone ?? "neutral") : "neutral";
-                return (
-                  <button
-                    key={s}
-                    onClick={() => setSelectedStar(prev => prev === s ? null : s)}
-                    className={`px-3 py-1.5 rounded-full text-xs font-bold border transition-all ${
-                      selectedStar === s
-                        ? tone === "good" ? "bg-emerald-500 text-white border-emerald-500"
-                          : tone === "bad" ? "bg-rose-500 text-white border-rose-500"
-                          : "bg-[#C9A96E] text-[#020617] border-[#C9A96E]"
-                        : "bg-white/5 text-[#94A3B8] border-white/10 hover:border-[#C9A96E]/30"
-                    }`}
-                  >
-                    {s} {STAR_NAMES[s as StarNumber]}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {(([1, 2, 3, 4, 5, 6, 7, 8] as StarNumber[])
-                .filter(s => selectedStar === null || s === selectedStar)
-              ).map(s => (
-                <StarPredictionPanel key={s} star={s} taksaMaha={taksaMaha} />
-              ))}
-            </div>
-          </div>
-
-          {/* Re-calculate button */}
+          {/* 3. ฟอร์มป้อนวันเกิดคำนวณชะตาใหม่ */}
           <BirthForm />
         </div>
       )}
 
-      {/* Loading overlay */}
+      {/* Loading Overlay */}
       {isLoading && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-[#020617] border border-[#C9A96E]/30 rounded-2xl p-8 flex flex-col items-center gap-3">
+          <div className="bg-slate-900 border border-[#C9A96E]/30 rounded-2xl p-8 flex flex-col items-center gap-3">
             <div className="w-10 h-10 border-2 border-[#C9A96E]/30 border-t-[#C9A96E] rounded-full animate-spin" />
-            <p className="text-[#C9A96E] text-sm font-bold">กำลังคำนวณทักษาดาว...</p>
+            <p className="text-[#C9A96E] text-sm font-bold">กำลังคำนวณทักษาและมหาภูติ...</p>
           </div>
         </div>
       )}
