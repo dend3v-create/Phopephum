@@ -1,119 +1,216 @@
 /**
  * packages/engine/src/calculators/calculatePhopephumTime.ts
  * คำนวณเวลาทางโหราศาสตร์สำหรับระบบ PhopePhum
- * ครอบคลุม ยามอัฏกาล (90 นาที), ยามซอย (3.45 นาที), ลัคนาเกิด, กาลชะตา
+ * ครอบคลุม ยามอัฏฐกาล 16 ยาม (กลางวัน 8 ยาม / กลางคืน 8 ยาม), ยามซอย (3.45 นาที), ลัคนาเกิด, กาลชะตา
+ * อ้างอิง: ตำรายามอัฏฐกาลหอสมุดแห่งชาติ และ ตำรายามอัฏฐกาล อ.พลูหลวง
  */
 
 import { FateMatrix } from '../types/fateMatrix.js';
 import { PHOPEPHUM_HOUSES } from './calculateJorn.js';
 
-// ลำดับยามอัฏกาล (Chaldean Order) ตามตำรา PhopePhum
-// อาทิตย์ (1), ศุกร์ (6), พุธ (4), จันทร์ (2), เสาร์ (7), พฤหัส (5), อังคาร (3)
-const YAM_ORDER = [1, 6, 4, 2, 7, 5, 3];
+// ลำดับยามอัฏฐกาล ภาคกลางวัน (สูตร +5): สุริชะ(1), ศุกระ(6), พุธะ(4), จันเทา(2), เสารี(7), ครู(5), ภุมมะ(3)
+export const YAM_ORDER_DAY = [1, 6, 4, 2, 7, 5, 3];
+
+// ลำดับยามอัฏฐกาล ภาคกลางคืน (สูตร +4): ระวิ(1), ชีโว(5), ศะศิ(2), ศุโกร(6), ภุมโม(3), โสโร(7), พุทโธ(4)
+export const YAM_ORDER_NIGHT = [1, 5, 2, 6, 3, 7, 4];
+
+// ชื่อยามประจำดาว ภาคกลางวัน
+export const YAM_NAMES_DAY: Record<number, string> = {
+  1: "สุริชะ",
+  2: "จันเทา",
+  3: "ภุมมะ",
+  4: "พุธะ",
+  5: "ครู",
+  6: "ศุกระ",
+  7: "เสารี",
+};
+
+// ชื่อยามประจำดาว ภาคกลางคืน
+export const YAM_NAMES_NIGHT: Record<number, string> = {
+  1: "ระวิ",
+  2: "ศะศิ",
+  3: "ภุมโม",
+  4: "พุทโธ",
+  5: "ชีโว",
+  6: "ศุโกร",
+  7: "โสโร",
+};
+
+// ฤกษ์ 9 หมวด (10 นาทีต่อฤกษ์ ใน 1 ยามใหญ่ 90 นาที)
+export const REKS_NAMES = [
+  "ทาสา", "ทาสี", "กาลกิณี", "สิทธิโชค", "มหาอุจ", "โสฬส", "ทลัทบท", "ธนบดินทร์", "นักพรต"
+];
 
 export interface TimeEngineResult {
-  yamYai: number;      // ดาวประจำยามใหญ่ 90 นาที
-  yamYaiNumber: number; // ลำดับยามที่ 1-8
-  yamSoy: number;      // ดาวประจำยามซอย 3.45 นาที
-  subPeriod: 'early' | 'middle' | 'end'; // 30-min sub period
-  isDay: boolean;
+  yamYai: number;              // ดาวประจำยามใหญ่ 90 นาที (1-7)
+  yamYaiName: string;          // ชื่อยามตามตำรา
+  yamYaiNumber: number;        // ลำดับยาม 1-16 (1-8 กลางวัน, 9-16 กลางคืน)
+  yamPeriodNumber: number;     // ลำดับยามในภาคนั้น (1-8)
+  yamSoy: number;              // ดาวประจำยามซอย 3.45 นาที (1-7)
+  yamSoyNumber: number;        // ลำดับยามซอย 1-24
+  subPeriod: 'early' | 'middle' | 'end'; // 30-min sub period (ยามต้น, ยามกลาง, ยามปลาย)
+  minInYam: number;            // นาทีที่ผ่านไปในยามนั้น (0-90)
+  reksIndex: number;           // 0-8 (ฤกษ์ 10 นาที)
+  reksName: string;            // ชื่อฤกษ์ 9 หมวด
+  isDay: boolean;              // true = กลางวัน, false = กลางคืน
+  dayStar: number;             // ดาวประจำวัน (1=อาทิตย์ ... 7=เสาร์)
 }
 
-function getThaiTime(date: Date) {
-  const bkkMs = date.getTime() + 7 * 3600 * 1000;
-  const bkk = new Date(bkkMs);
+/**
+ * ดึงเวลาในเขตเวลาไทย (Asia/Bangkok) อย่างแม่นยำ ไม่เพี้ยนตามสภาพแวดล้อม Server
+ */
+export function getThaiTime(date: Date) {
+  const parts = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Asia/Bangkok',
+    hourCycle: 'h23',
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric',
+    second: 'numeric',
+    weekday: 'short',
+  }).formatToParts(date);
+
+  const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  const weekdayMap: Record<string, number> = {
+    Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+  };
+
   return {
-    h: bkk.getUTCHours(),
-    m: bkk.getUTCMinutes(),
-    s: bkk.getUTCSeconds(),
-    day: bkk.getUTCDay(),
+    h: parseInt(map.hour ?? '0', 10),
+    m: parseInt(map.minute ?? '0', 10),
+    s: parseInt(map.second ?? '0', 10),
+    day: weekdayMap[map.weekday ?? 'Sun'] ?? 0,
   };
 }
 
 /**
- * คำนวณยามและช่วงเวลา
+ * คำนวณดาวประจำยามใหญ่ 8 ยาม ตามตำราหอสมุดแห่งชาติและพลูหลวง
+ * กฎ: ยามที่ 1 และ ยามที่ 8 จะเป็นดาวประจำวันเสมอ ทั้งกลางวันและกลางคืน
+ */
+export function getYamStar(dayStar: number, yamNumber1to8: number, isDay: boolean): number {
+  if (yamNumber1to8 === 8) {
+    return dayStar; // ยามที่ 8 = ยามที่ 1 (ดาวประจำวัน)
+  }
+  const order = isDay ? YAM_ORDER_DAY : YAM_ORDER_NIGHT;
+  const startIdx = order.indexOf(dayStar);
+  return order[(startIdx + (yamNumber1to8 - 1)) % 7];
+}
+
+/**
+ * คำนวณยามและช่วงเวลาตามระบบ 16 ยาม (กลางวัน 8 ยาม, กลางคืน 8 ยาม)
  */
 export function calculateTimeEngine(date: Date): TimeEngineResult {
   const { h, m, s, day } = getThaiTime(date);
   const totalMinutes = h * 60 + m + s / 60;
   
-  // ตัดวันใหม่ที่ 06:00
-  let adjustedMinutes = totalMinutes - 360;
-  if (adjustedMinutes < 0) adjustedMinutes += 1440;
-  
-  const isDay = adjustedMinutes < 720; // 06:00 - 18:00
-  const minutesInPeriod = isDay ? adjustedMinutes : adjustedMinutes - 720;
-  
-  // ยามใหญ่ 90 นาที
-  const yamYaiNumber = Math.floor(minutesInPeriod / 90) + 1;
-  const minutesInYamYai = minutesInPeriod % 90;
-  
-  // ยามย่อย 30 นาที
-  let subPeriod: 'early' | 'middle' | 'end' = 'early';
-  if (minutesInYamYai >= 60) subPeriod = 'end';
-  else if (minutesInYamYai >= 30) subPeriod = 'middle';
-  
-  // ยามซอย 3.45 นาที (225 วินาที)
-  const yamSoyNumber = Math.floor((minutesInYamYai * 60) / 225) + 1;
-  
-  // หาดาวประจำวัน (อาทิตย์=1 ... เสาร์=7)
+  // วันโหราศาสตร์ไทย ตัดเปลี่ยนวันใหม่ที่ 06:00 น.
   let dayOfWeek = day;
   if (totalMinutes < 360) {
-    dayOfWeek = (dayOfWeek + 6) % 7;
+    dayOfWeek = (dayOfWeek + 6) % 7; // ช่วง 00:00 - 05:59 ถือเป็นวันก่อนหน้า
   }
-  const dayStar = dayOfWeek === 0 ? 1 : dayOfWeek + 1;
+  const dayStar = dayOfWeek === 0 ? 1 : dayOfWeek + 1; // 1=อาทิตย์, ..., 7=เสาร์
+
+  // การแบ่งภาคกลางวันและกลางคืน (ภาคละ 12 ชม. = 720 นาที)
+  // กลางวัน: 06:00:00 - 18:00:00
+  // กลางคืน: 18:00:01 - 05:59:59
+  const isDay = totalMinutes >= 360 && totalMinutes <= 1080;
   
-  // หาดาวประจำยามใหญ่
-  const dayStartIndex = YAM_ORDER.indexOf(dayStar);
-  const yamYaiStar = YAM_ORDER[(dayStartIndex + (yamYaiNumber - 1)) % 7];
-  
-  // หาดาวประจำยามซอย
-  const yamSoyStar = YAM_ORDER[(YAM_ORDER.indexOf(yamYaiStar) + (yamSoyNumber - 1)) % 7];
-  
+  let mInP: number;
+  if (isDay) {
+    mInP = totalMinutes - 360; // 0 ถึง 720 นาที
+  } else if (totalMinutes > 1080) {
+    mInP = totalMinutes - 1080; // 18:00:01 ถึง 24:00 (1 ถึง 360 นาที)
+  } else {
+    mInP = totalMinutes + 360; // 00:00 ถึง 05:59:59 (360 ถึง 719.99 นาที)
+  }
+
+  // ลำดับยามในภาค (ยามที่ 1 - 8) ตามระบบเวลาแท้ของภพภูมิ (ตำรายามอัฏฐกาล 16 ยาม)
+  // ภาคกลางวัน:
+  // ยามที่ ๑: ๐๖.๐๑ – ๐๗.๓๐ น. (นาทีที่ 1 - 90)
+  // ยามที่ ๒: ๐๗.๓๑ – ๐๙.๐๐ น. (นาทีที่ 91 - 180)
+  // ยามที่ ๓: ๐๙.๐๑ – ๑๐.๓๐ น. (นาทีที่ 181 - 270)
+  // ยามที่ ๔: ๑๐.๓๑ – ๑๒.๐๐ น. (นาทีที่ 271 - 360)
+  // ยามที่ ๕: ๑๒.๐๑ – ๑๓.๓๐ น. (นาทีที่ 361 - 450)
+  // ยามที่ ๖: ๑๓.๓๑ – ๑๕.๐๐ น. (นาทีที่ 451 - 540)
+  // ยามที่ ๗: ๑๕.๐๑ – ๑๖.๓๐ น. (นาทีที่ 541 - 630)
+  // ยามที่ ๘: ๑๖.๓๑ – ๑๘.๐๐ น. (นาทีที่ 631 - 720)
+  const yamPeriodNumber = mInP === 0 ? 1 : Math.min(8, Math.ceil(mInP / 90));
+  const yamYaiNumber = isDay ? yamPeriodNumber : yamPeriodNumber + 8;
+
+  // นาทีที่ผ่านไปในยามนั้น (0 - 90 นาที)
+  const minInYam = mInP === 0 ? 0 : (((mInP - 0.0001) % 90) + 0.0001);
+
+  // ช่วงยามย่อย 30 นาที (สอดคล้องกับฐาน 1, ฐาน 2, ฐาน 3)
+  // ยามต้น (early) = นาที 0 - 30 -> ฐาน 1 (ฐานวัน / Row 0)
+  // ยามกลาง (middle) = นาที 30.01 - 60 -> ฐาน 2 (ฐานเดือน / Row 1)
+  // ยามปลาย (end) = นาที 60.01 - 90 -> ฐาน 3 (ฐานปี / Row 2)
+  let subPeriod: 'early' | 'middle' | 'end' = 'early';
+  if (minInYam > 60) {
+    subPeriod = 'end';
+  } else if (minInYam > 30) {
+    subPeriod = 'middle';
+  }
+
+  // ฤกษ์ 10 นาที (0 - 8) ใน 1 ยามใหญ่ 90 นาที
+  const reksIndex = Math.min(8, Math.floor(minInYam / 10));
+  const reksName = REKS_NAMES[reksIndex] || "—";
+
+  // ดาวประจำยามใหญ่ 90 นาที
+  const yamYaiStar = getYamStar(dayStar, yamPeriodNumber, isDay);
+  const yamYaiName = isDay ? YAM_NAMES_DAY[yamYaiStar] : YAM_NAMES_NIGHT[yamYaiStar];
+
+  // ยามซอย 3.45 นาที (225 วินาที = 3.75 นาที) มี 24 ยามซอยใน 1 ยามใหญ่
+  const yamSoyNumber = Math.min(24, Math.floor((minInYam * 60) / 225) + 1);
+  const currentOrder = isDay ? YAM_ORDER_DAY : YAM_ORDER_NIGHT;
+  const yamSoyStar = currentOrder[(currentOrder.indexOf(yamYaiStar) + (yamSoyNumber - 1)) % 7];
+
   return {
     yamYai: yamYaiStar,
-    yamYaiNumber: isDay ? yamYaiNumber : yamYaiNumber + 8,
+    yamYaiName,
+    yamYaiNumber,
+    yamPeriodNumber,
     yamSoy: yamSoyStar,
+    yamSoyNumber,
     subPeriod,
-    isDay
+    minInYam,
+    reksIndex,
+    reksName,
+    isDay,
+    dayStar,
   };
 }
-
-// ฤกษ์ 9 หมวด (10 นาทีต่อฤกษ์ ใน 1 ยามใหญ่ 90 นาที)
-export const REKS_NAMES = [
-  "ทาสา", "ทาสี", "กาลกิณี", "สิทธิโชค", "มหาอุจ", "โโฬส", "ทลัทบท", "ธนบดินทร์", "นักพรต"
-];
 
 /**
  * คำนวณลัคนาเกิด (Birth Ascendant)
  *
  * Algorithm:
- * 1. หายามใหญ่ 90 นาที → ได้ดาวประจำยาม (yamYai)
- * 2. หาช่วงยาม 30 นาที → ยามต้น=ฐาน1(row0), ยามกลาง=ฐาน2(row1), ยามปลาย=ฐาน3(row2)
- * 3. หาฤกษ์ 10 นาที (9 ฤกษ์ใน 1 ยาม) → ได้ดาวประจำฤกษ์
- * 4. ดาวประจำฤกษ์ → column ในแถวนั้น
+ * 1. หายามใหญ่ 90 นาที (ยามอัฏฐกาล) → ได้ดาวประจำยาม (yamYai)
+ * 2. หาช่วงยาม 30 นาที → ยามต้น = ฐาน 1 (Row 0), ยามกลาง = ฐาน 2 (Row 1), ยามปลาย = ฐาน 3 (Row 2)
+ * 3. หา column = ตำแหน่งที่ดาวประจำยาม (yamYai) สถิตอยู่ในแถวนั้น
  */
-export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: number, col: number, houseName: string, star: number, reksName: string, reksIndex: number, yamYaiNumber?: number, subPeriod?: any } {
+export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { 
+  row: number, 
+  col: number, 
+  houseName: string, 
+  star: number, 
+  reksName: string, 
+  reksIndex: number, 
+  yamYaiNumber: number, 
+  yamPeriodNumber: number,
+  yamYaiName: string,
+  subPeriod: 'early' | 'middle' | 'end' 
+} {
   const time = calculateTimeEngine(date);
 
-  // ช่วงยาม 30 นาที บอกฐาน (row)
+  // ช่วงยาม 30 นาที กำหนดแถวฐาน (Row)
   // ยามต้น (early) -> ฐาน 1 (Row 0)
   // ยามกลาง (middle) -> ฐาน 2 (Row 1)
   // ยามปลาย (end) -> ฐาน 3 (Row 2)
   const row = time.subPeriod === 'early' ? 0 : (time.subPeriod === 'middle' ? 1 : 2);
 
-  // คำนวณฤกษ์ 10 นาที (0-8) — ใช้สำหรับแสดงชื่อฤกษ์เท่านั้น
-  const { h, m, day } = getThaiTime(date);
-  const totalMin = h * 60 + m;
-  let adjusted = (totalMin - 360 + 1440) % 1440;
-  const isDay = adjusted < 720;
-  const periodMin = isDay ? adjusted : adjusted - 720;
-  const minInYam = periodMin % 90;
-  const reksIndex = Math.floor(minInYam / 10);
-  const reksName = REKS_NAMES[reksIndex] || "—";
-
-  // column = ตำแหน่งที่ดาวยาม (yamYai) ปรากฏในแถวนั้น
-  // ตามหลักการ: "หาดาวยามในฐาน" ใช้ดาวประจำยาม 90 นาที เป็นตัวกำหนดคอลัมน์
+  // column = ตำแหน่งที่ดาวประจำยาม (yamYai) ปรากฏในแถวฐานนั้น
   const col = matrix[row].indexOf(time.yamYai);
   const safeCol = col === -1 ? 0 : col;
 
@@ -122,9 +219,11 @@ export function calculateLagnaPhopephum(matrix: FateMatrix, date: Date): { row: 
     col: safeCol + 1,
     houseName: PHOPEPHUM_HOUSES[row][safeCol],
     star: time.yamYai,
-    reksName,
-    reksIndex,
+    reksName: time.reksName,
+    reksIndex: time.reksIndex,
     yamYaiNumber: time.yamYaiNumber,
+    yamPeriodNumber: time.yamPeriodNumber,
+    yamYaiName: time.yamYaiName,
     subPeriod: time.subPeriod,
   };
 }

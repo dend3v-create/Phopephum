@@ -50,7 +50,7 @@ export async function calculatePhopephum(input: HoroscopeInput, checkDate: Date 
   const dailyJorn = calculateDailyJorn(matrix, transitThai.dayNum);
   
   const timeStr = (input.birthTime || '12:00').slice(0, 5); // normalize HH:MM:SS → HH:MM
-  const birthDateTime = new Date(`${input.birthDate}T${timeStr}:00`);
+  const birthDateTime = new Date(`${input.birthDate}T${timeStr}:00+07:00`);
   const lagna = calculateLagnaPhopephum(matrix, birthDateTime);
   
   // ลัคนาจร (Progressed Lagna) นับจากลัคนาเกิดตามอายุย่าง
