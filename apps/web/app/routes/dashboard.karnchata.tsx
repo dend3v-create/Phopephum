@@ -8,7 +8,7 @@ import type { Env } from "~/env.server";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import type { PredCategory, KarnchataReading } from "~/services/karnchata-prediction.server";
+import { generateKarnchataReading, type PredCategory, type KarnchataReading } from "~/services/karnchata-prediction.server";
 
 // ─── Client-safe inline copies (no server import) ─────────────────────────────
 const CATEGORY_LABELS: Record<PredCategory, string> = {
