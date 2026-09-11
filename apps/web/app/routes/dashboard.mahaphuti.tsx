@@ -1,6 +1,6 @@
 /**
  * dashboard.mahaphuti.tsx
- * มหาภูติกำเนิด — ระบบมหาภูติ 7 ภพ กำเนิด/จร + วิเคราะห์จิตใจ
+ * มหาภูติกำเนิด — ระบบมหาภูติ 7 ภพ กำเนิด/จร + วิเคราะห์จิตใจ + ช่องสนทนาปัญญามหาภูติ
  */
 import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
@@ -18,7 +18,20 @@ import { HoroscopeInputSchema } from "@phopephum/validators";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import type { Env } from "~/env.server";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { 
+  Send, 
+  Trash2, 
+  Bot, 
+  User, 
+  Sparkles, 
+  ChevronDown, 
+  ChevronUp, 
+  Brain,
+  Compass
+} from "lucide-react";
+import { resolveActiveSubject } from "~/services/activeSubject.server";
+import { ActiveSubjectBanner } from "~/components/subject/ActiveSubjectBanner";
 
 export const meta: MetaFunction = () => [
   { title: "มหาภูติกำเนิด — PhopePhum" },
@@ -31,32 +44,21 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const { getProfile } = await import("~/services/auth.server");
   const profile = await getProfile(user.id, request, env);
 
-  const url = new URL(request.url);
-  const customerId = url.searchParams.get("customerId");
+  const {
+    activeSubject,
+    customers,
+    personLimit,
+    currentCustomerCount,
+    hasReachedLimit,
+  } = await resolveActiveSubject(request, env, user, profile);
 
-  const { createSupabaseClient } = await import("~/services/supabase.server");
-  const { supabase } = createSupabaseClient(request, env);
-
-  // ดึงรายชื่อลูกค้าที่บันทึกไว้ เพื่อใช้หาข้อมูลตาม customerId
-  const { data: customers } = await supabase
-    .from("customers")
-    .select("*")
-    .eq("user_id", user.id);
-
-  let targetPerson = profile;
-  let selectedCust = null;
-  if (customerId && customers) {
-    selectedCust = customers.find(c => c.id === customerId);
-    if (selectedCust) {
-      targetPerson = {
-        id: selectedCust.id,
-        birth_date: selectedCust.birth_date,
-        birth_time: selectedCust.birth_time,
-        birth_place: selectedCust.birth_place,
-        display_name: selectedCust.name,
-      } as any;
-    }
-  }
+  const targetPerson = {
+    id: activeSubject.id,
+    birth_date: activeSubject.birthDate,
+    birth_time: activeSubject.birthTime,
+    birth_place: activeSubject.birthPlace,
+    display_name: activeSubject.name,
+  };
 
   let initialResult: any = null;
   if (targetPerson?.birth_date) {
@@ -90,15 +92,22 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
         birthTime: targetPerson.birth_time || "",
         birthYearThai: birthCE + 543,
         currentYearThai: checkDate.getFullYear() + 543,
-        customerId: customerId || undefined,
-        customerName: selectedCust ? selectedCust.name : undefined,
+        customerName: activeSubject.isCustomer ? activeSubject.name : undefined,
       };
     } catch (e) {
       console.error("mahaphuti loader error:", e);
     }
   }
 
-  return json({ profile, initialResult });
+  return json({ 
+    profile, 
+    initialResult,
+    activeSubject,
+    customers,
+    personLimit,
+    currentCustomerCount,
+    hasReachedLimit,
+  });
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -181,9 +190,9 @@ const MAHA_QUALITY: Record<string, { tone: "good" | "neutral" | "bad"; icon: str
 };
 
 const MAHA_TONE_COLOR: Record<string, { border: string; bg: string; text: string; badge: string }> = {
-  good:    { border: "border-emerald-500/25", bg: "bg-emerald-950/15", text: "text-emerald-400", badge: "bg-emerald-500/10 border-emerald-500/30 text-emerald-300" },
-  neutral: { border: "border-white/8",        bg: "bg-slate-900/30",   text: "text-[#C6B79F]",  badge: "bg-white/5 border-white/10 text-[#C6B79F]" },
-  bad:     { border: "border-rose-500/25",    bg: "bg-rose-950/10",    text: "text-rose-400",   badge: "bg-rose-500/10 border-rose-500/30 text-rose-300" },
+  good:    { border: "border-emerald-500/25", bg: "bg-emerald-500/5 dark:bg-emerald-950/15", text: "text-emerald-600 dark:text-emerald-400", badge: "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300" },
+  neutral: { border: "border-slate-200 dark:border-white/8", bg: "bg-slate-50 dark:bg-slate-900/30", text: "text-slate-700 dark:text-[#C6B79F]", badge: "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-700 dark:text-[#C6B79F]" },
+  bad:     { border: "border-rose-500/25", bg: "bg-rose-500/5 dark:bg-rose-950/10", text: "text-rose-600 dark:text-rose-400", badge: "bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300" },
 };
 
 const MAHA_SEQUENCE_DISPLAY: MahaBhop[] = ["ราชา", "อธิบดี", "ธงชัย", "ขุมทรัพย์", "มรณะ", "อริ", "โลกาวินาศ"];
@@ -202,24 +211,24 @@ function MahaGrid({
   currentYearThai: number;
 }) {
   return (
-    <Card className="p-0 overflow-hidden border-[#C9A96E]/20 shadow-2xl bg-slate-900/40 backdrop-blur-md">
-      <div className="p-4 border-b border-[#C9A96E]/20 bg-[#C9A96E]/5">
-        <p className="text-[14px] font-bold uppercase tracking-widest text-[#C9A96E]">
+    <Card className="p-0 overflow-hidden border border-slate-200 dark:border-[#C9A96E]/20 shadow-xl bg-white/95 dark:bg-slate-900/40 backdrop-blur-md">
+      <div className="p-4 border-b border-slate-200 dark:border-[#C9A96E]/20 bg-slate-50 dark:bg-[#C9A96E]/5">
+        <p className="text-[14px] font-bold uppercase tracking-widest text-[#8C6D2D] dark:text-[#C9A96E]">
           มหาภูติกำเนิด จ.ศ.{natal.cs} / จร จ.ศ.{transit.cs}
         </p>
-        <p className="text-[#C6B79F] text-sm mt-0.5">
+        <p className="text-slate-600 dark:text-[#C6B79F] text-sm mt-0.5">
           เศษกำเนิด: {natal.remainder} · เศษจร: {transit.remainder}
         </p>
       </div>
-      <div className="p-4">
-        <div className="grid grid-cols-3 gap-2 max-w-sm mx-auto">
+      <div className="p-4 sm:p-6">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 max-w-sm mx-auto">
           {MAHA_GRID_3X3.map((row, rIdx) =>
             row.map((bhop, cIdx) => {
               if (bhop === null) {
                 return (
                   <div key={`empty-${rIdx}-${cIdx}`}
-                    className="aspect-square flex items-center justify-center rounded-2xl border border-dashed border-white/5 bg-transparent">
-                    <span className="text-[#C6B79F] text-xs">—</span>
+                    className="aspect-square flex items-center justify-center rounded-2xl border border-dashed border-slate-200 dark:border-white/5 bg-transparent">
+                    <span className="text-slate-400 dark:text-[#C6B79F] text-xs">—</span>
                   </div>
                 );
               }
@@ -231,11 +240,11 @@ function MahaGrid({
 
               return (
                 <div key={`maha-${bhop}`}
-                  className={`aspect-square flex flex-col items-between justify-between rounded-2xl border p-2 hover:border-[#C9A96E]/30 transition-all ${colors.border} ${colors.bg}`}>
-                  <span className="text-[11px] font-bold text-center leading-tight text-[#C6B79F]">{bhop}</span>
+                  className={`aspect-square flex flex-col items-between justify-between rounded-2xl border p-2 hover:border-[#C9A96E]/40 transition-all ${colors.border} ${colors.bg}`}>
+                  <span className="text-[11px] font-bold text-center leading-tight text-slate-700 dark:text-[#C6B79F]">{bhop}</span>
                   <div className="flex flex-col items-center my-0.5">
-                    <span className="font-display text-3xl font-bold text-[#F8F6F1]">{starNatal}</span>
-                    <span className="text-[11px] text-[#C6B79F]">{STAR_NAMES[starNatal as StarNumber]}</span>
+                    <span className="font-display text-2xl sm:text-3xl font-bold text-slate-900 dark:text-[#F8F6F1]">{starNatal}</span>
+                    <span className="text-[11px] text-slate-500 dark:text-[#C6B79F]">{STAR_NAMES[starNatal as StarNumber]}</span>
                   </div>
                   <span className={`text-[11px] font-bold text-center ${colors.text}`}>
                     {starTransit} จร
@@ -245,9 +254,9 @@ function MahaGrid({
             })
           )}
         </div>
-        <div className="flex justify-center gap-6 mt-4 text-xs text-[#C6B79F]">
-          <span className="flex items-center gap-1"><span className="text-[#F8F6F1] font-bold">เลขใหญ่</span> = กำเนิด</span>
-          <span className="flex items-center gap-1"><span className="text-emerald-400 font-bold">X จร</span> = จรปีนี้</span>
+        <div className="flex justify-center gap-6 mt-4 text-xs text-slate-600 dark:text-[#C6B79F]">
+          <span className="flex items-center gap-1"><span className="text-slate-900 dark:text-[#F8F6F1] font-bold">เลขใหญ่</span> = กำเนิด</span>
+          <span className="flex items-center gap-1"><span className="text-emerald-600 dark:text-emerald-400 font-bold">X จร</span> = จรปีนี้</span>
         </div>
       </div>
     </Card>
@@ -267,18 +276,18 @@ function MahaPhupPredictionPanel({ bhop, natal, transit }: {
   const sameAsNatal = starNatal === starTransit;
 
   return (
-    <Card className={`border p-4 relative overflow-hidden ${colors.border} ${colors.bg}`}>
+    <Card className={`border p-4 relative overflow-hidden bg-white/95 dark:bg-slate-900/40 shadow-sm ${colors.border} ${colors.bg}`}>
       <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl -z-10 opacity-20"
         style={{ background: tone === "good" ? "#10b981" : tone === "bad" ? "#f43f5e" : "#C9A96E" }} />
 
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
-          <div className={`w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0`}>
+          <div className="w-11 h-11 rounded-xl flex items-center justify-center text-2xl shrink-0 bg-slate-100 dark:bg-white/5">
             {quality?.icon ?? "✦"}
           </div>
           <div>
-            <p className="text-[#F8F6F1] font-bold text-sm">{bhop}</p>
-            <p className="text-[#C6B79F] text-xs">{quality?.desc}</p>
+            <p className="text-slate-900 dark:text-[#F8F6F1] font-bold text-sm">{bhop}</p>
+            <p className="text-slate-600 dark:text-[#C6B79F] text-xs">{quality?.desc}</p>
           </div>
         </div>
         <div className="flex flex-col items-end gap-1 shrink-0">
@@ -287,20 +296,20 @@ function MahaPhupPredictionPanel({ bhop, natal, transit }: {
           </span>
           <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg border ${
             sameAsNatal
-              ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
-              : "bg-[#4B6FAE]/10 border-[#4B6FAE]/25 text-[#4B6FAE]"
+              ? "bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-400"
+              : "bg-[#4B6FAE]/10 border-[#4B6FAE]/25 text-[#3b5998] dark:text-[#4B6FAE]"
           }`}>
             จรปีนี้: ดาว {starTransit} ({STAR_NAMES[starTransit as StarNumber]})
           </span>
         </div>
       </div>
 
-      <div className={`rounded-xl p-3 text-xs border ${colors.border} bg-black/10`}>
-        <p className="text-[#F8F6F1] leading-relaxed">{quality?.insight}</p>
+      <div className={`rounded-xl p-3 text-xs border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-black/20`}>
+        <p className="text-slate-800 dark:text-[#F8F6F1] leading-relaxed">{quality?.insight}</p>
       </div>
 
       {sameAsNatal && (
-        <p className="text-[11px] text-amber-400 mt-2 bg-amber-950/20 border border-amber-500/20 rounded-xl px-3 py-2">
+        <p className="text-[11px] text-amber-700 dark:text-amber-400 mt-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-500/20 rounded-xl px-3 py-2">
           ⚠️ ดาวกำเนิดและดาวจรตรงกัน — พลังภพ{bhop}ขยายแรงเป็นสองเท่า
         </p>
       )}
@@ -309,24 +318,24 @@ function MahaPhupPredictionPanel({ bhop, natal, transit }: {
 }
 
 function MahaCrossCheckPanel({ taksaMaha }: { taksaMaha: any }) {
-  const { alerts, taksaTransit, mahaTransit } = taksaMaha;
+  const { alerts } = taksaMaha;
   if (!alerts?.length) return null;
 
   const levelColor: Record<string, string> = {
-    danger: "border-rose-500/40 bg-rose-950/20 text-rose-300",
-    warn:   "border-amber-500/40 bg-amber-950/20 text-amber-300",
-    good:   "border-emerald-500/40 bg-emerald-950/20 text-emerald-300",
-    info:   "border-sky-500/40 bg-sky-950/20 text-sky-300",
+    danger: "border-rose-500/40 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+    warn:   "border-amber-500/40 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+    good:   "border-emerald-500/40 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+    info:   "border-sky-500/40 bg-sky-500/10 text-sky-700 dark:text-sky-300",
   };
   const levelIcon: Record<string, string> = {
     danger: "🚨", warn: "⚠️", good: "✅", info: "ℹ️",
   };
 
   return (
-    <Card className="border-[#C9A96E]/20 bg-slate-900/40 p-4">
+    <Card className="border border-slate-200 dark:border-[#C9A96E]/20 bg-white/95 dark:bg-slate-900/40 p-4 shadow-sm">
       <div className="flex items-center gap-2 mb-4">
         <div className="w-2 h-2 bg-rose-400 rounded-full animate-pulse" />
-        <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold">Cross-Check ชะตาชีวิต</p>
+        <p className="text-[#8C6D2D] dark:text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold">Cross-Check ชะตาชีวิต</p>
       </div>
       <div className="space-y-2">
         {alerts.map((a: any, i: number) => (
@@ -362,28 +371,28 @@ function MahaSummaryBar({ natal, transit }: {
   const transitBadScore   = badTransitStars.length;
 
   return (
-    <Card className="border-[#C9A96E]/20 bg-gradient-to-r from-[#0A2240]/60 to-[#020617]/80 p-5">
-      <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold mb-4">สรุปพลังมหาภูติปีนี้</p>
+    <Card className="border border-slate-200 dark:border-[#C9A96E]/20 bg-white/95 dark:bg-gradient-to-r dark:from-[#0A2240]/60 dark:to-[#020617]/80 p-5 shadow-sm">
+      <p className="text-[#8C6D2D] dark:text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold mb-4">สรุปพลังมหาภูติปีนี้</p>
       <div className="grid grid-cols-2 gap-4">
-        <div className="bg-emerald-950/20 border border-emerald-500/20 rounded-2xl p-4 text-center">
-          <p className="text-emerald-400 text-xs uppercase tracking-wider mb-1">ภพมงคล</p>
-          <p className="font-display text-4xl font-bold text-emerald-300">{transitGoodScore}</p>
-          <p className="text-xs text-[#C6B79F] mt-1">ราชา · อธิบดี · ธงชัย · ขุมทรัพย์</p>
+        <div className="bg-emerald-500/10 dark:bg-emerald-950/20 border border-emerald-500/20 rounded-2xl p-4 text-center">
+          <p className="text-emerald-700 dark:text-emerald-400 text-xs uppercase tracking-wider mb-1 font-bold">ภพมงคล</p>
+          <p className="font-display text-4xl font-bold text-emerald-600 dark:text-emerald-300">{transitGoodScore}</p>
+          <p className="text-xs text-slate-600 dark:text-[#C6B79F] mt-1">ราชา · อธิบดี · ธงชัย · ขุมทรัพย์</p>
           <div className="flex flex-wrap gap-1 mt-2 justify-center">
             {goodBhops.map(b => (
-              <span key={b} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <span key={b} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400">
                 {b}: ดาว{transit.map[b]}
               </span>
             ))}
           </div>
         </div>
-        <div className="bg-rose-950/15 border border-rose-500/20 rounded-2xl p-4 text-center">
-          <p className="text-rose-400 text-xs uppercase tracking-wider mb-1">ภพอัปมงคล</p>
-          <p className="font-display text-4xl font-bold text-rose-300">{transitBadScore}</p>
-          <p className="text-xs text-[#C6B79F] mt-1">มรณะ · อริ · โลกาวินาศ</p>
+        <div className="bg-rose-500/10 dark:bg-rose-950/15 border border-rose-500/20 rounded-2xl p-4 text-center">
+          <p className="text-rose-700 dark:text-rose-400 text-xs uppercase tracking-wider mb-1 font-bold">ภพอัปมงคล</p>
+          <p className="font-display text-4xl font-bold text-rose-600 dark:text-rose-300">{transitBadScore}</p>
+          <p className="text-xs text-slate-600 dark:text-[#C6B79F] mt-1">มรณะ · อริ · โลกาวินาศ</p>
           <div className="flex flex-wrap gap-1 mt-2 justify-center">
             {badBhops.map(b => (
-              <span key={b} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400">
+              <span key={b} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-700 dark:text-rose-400">
                 {b}: ดาว{transit.map[b]}
               </span>
             ))}
@@ -396,28 +405,28 @@ function MahaSummaryBar({ natal, transit }: {
 
 function BirthForm() {
   return (
-    <Card className="border-[#C9A96E]/20 bg-slate-900/40 p-5">
-      <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold mb-4">ป้อนวันเดือนปีเกิด</p>
+    <Card className="border border-slate-200 dark:border-[#C9A96E]/20 bg-white/95 dark:bg-slate-900/40 p-5 shadow-sm">
+      <p className="text-[#8C6D2D] dark:text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold mb-4">ป้อนวันเดือนปีเกิดเพื่อคำนวณมหาภูติ</p>
       <Form method="post" className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div>
-          <label className="text-xs text-[#C6B79F] mb-1 block">วัน</label>
+          <label className="text-xs text-slate-600 dark:text-[#C6B79F] mb-1 block">วัน</label>
           <input name="birthDay" type="number" min={1} max={31} placeholder="15"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
+            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]" />
         </div>
         <div>
-          <label className="text-xs text-[#C6B79F] mb-1 block">เดือน</label>
+          <label className="text-xs text-slate-600 dark:text-[#C6B79F] mb-1 block">เดือน</label>
           <input name="birthMonth" type="number" min={1} max={12} placeholder="6"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
+            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]" />
         </div>
         <div>
-          <label className="text-xs text-[#C6B79F] mb-1 block">ปี พ.ศ.</label>
-          <input name="birthYear" type="number" min={2400} max={2600} placeholder="2500"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
+          <label className="text-xs text-slate-600 dark:text-[#C6B79F] mb-1 block">ปี พ.ศ.</label>
+          <input name="birthYear" type="number" min={2400} max={2600} placeholder="2530"
+            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]" />
         </div>
         <div>
-          <label className="text-xs text-[#C6B79F] mb-1 block">เวลาเกิด</label>
+          <label className="text-xs text-slate-600 dark:text-[#C6B79F] mb-1 block">เวลาเกิด</label>
           <input name="birthTime" type="time" defaultValue="06:00"
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40" />
+            className="w-full bg-slate-100 dark:bg-white/5 border border-slate-300 dark:border-white/10 rounded-xl px-3 py-2 text-sm text-slate-900 dark:text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]" />
         </div>
         <div className="col-span-2 sm:col-span-4">
           <Button type="submit" className="w-full">คำนวณมหาภูติ</Button>
@@ -427,10 +436,394 @@ function BirthForm() {
   );
 }
 
+// ─── Mahaphuti Consultation Chat Component ─────────────────────────────────────
+
+interface ChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  text: string;
+  timestamp: string;
+  streaming?: boolean;
+}
+
+const MAHAPHUTI_CHAT_STORAGE_KEY = "phopephum_mahaphuti_chat_history_v1";
+
+const MAHAPHUTI_SUGGESTIONS = [
+  "ช่วงนี้จิตใจแปรปรวนจากมหาภูติจร ควรปรับสภาวะภายในอย่างไร?",
+  "ภพอัปมงคลจรปีนี้ (มรณะ/อริ/โลกาวินาศ) ส่งผลต่อความคิดและการตัดสินใจอย่างไร?",
+  "จะดึงพลังภพมงคล (ราชา/อธิบดี/ขุมทรัพย์) มาบริหารจิตใจและเสริมความมั่นใจได้อย่างไร?",
+  "แนวทางสร้างความสงบนิ่งและภูมิคุ้มกันทางอารมณ์ในรอบปีนี้",
+];
+
+function MahaphutiConsultationChat({
+  natal,
+  transit,
+  userName = "คุณ",
+}: {
+  natal: { cs: number; remainder: number; map: Record<string, number> };
+  transit: { cs: number; remainder: number; map: Record<string, number> };
+  userName?: string;
+}) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const defaultInitialMessages: ChatMessage[] = [
+    {
+      id: "init-1",
+      role: "assistant",
+      text: `สวัสดีครับคุณ ${userName} ยินดีต้อนรับสู่ระบบสนทนาถอดรหัสมหาภูติวิถีจิตและสภาวะภายใน ✦\n\nในปี จ.ศ. ${transit.cs} นี้ คุณตกเศษมหาภูติจรที่ "${transit.remainder}" ซึ่งส่งผลโดยตรงต่อการทำงานของจิตใต้สำนึก ความรู้สึกนึกคิด และปัจจัยภายในจิตใจ\n\nหากคุณกำลังรู้สึกอึดอัด สับสน มีแรงผลักดันต้องการเปลี่ยนแปลง หรือต้องการแนวทางรับมือกับอารมณ์และสภาวะจิตใจ สามารถพิมพ์ปรึกษาได้ทันทีครับ`,
+      timestamp: new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }),
+    },
+  ];
+
+  // โหลดประวัติการสนทนาจาก LocalStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(MAHAPHUTI_CHAT_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed);
+          return;
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load mahaphuti chat history:", e);
+    }
+    setMessages(defaultInitialMessages);
+  }, [userName, transit.cs, transit.remainder]);
+
+  // เลื่อนหน้าจอลงล่างสุดเมื่อมีข้อความใหม่
+  useEffect(() => {
+    if (isExpanded) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, isExpanded]);
+
+  const saveHistory = (msgs: ChatMessage[]) => {
+    try {
+      localStorage.setItem(MAHAPHUTI_CHAT_STORAGE_KEY, JSON.stringify(msgs));
+    } catch (e) {
+      console.error("Failed to save mahaphuti chat history:", e);
+    }
+  };
+
+  const handleClearHistory = () => {
+    if (window.confirm("คุณต้องการล้างประวัติการสนทนามหาภูติทั้งหมดเพื่อเริ่มใหม่หรือไม่?")) {
+      const reset = defaultInitialMessages;
+      setMessages(reset);
+      saveHistory(reset);
+    }
+  };
+
+  // ปรับความสูงของ Textarea อัตโนมัติเมื่อพิมพ์ข้อความ
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    const target = e.target;
+    target.style.height = "auto";
+    target.style.height = `${Math.min(target.scrollHeight, 180)}px`;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleSend = async (customPrompt?: string) => {
+    const userText = (customPrompt ?? input).trim();
+    if (!userText || isStreaming) return;
+
+    setInput("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+
+    const userMessage: ChatMessage = {
+      id: `user-${Date.now()}`,
+      role: "user",
+      text: userText,
+      timestamp: timeStr,
+    };
+
+    const assistantId = `assistant-${Date.now()}`;
+    const assistantPlaceholder: ChatMessage = {
+      id: assistantId,
+      role: "assistant",
+      text: "",
+      timestamp: timeStr,
+      streaming: true,
+    };
+
+    const updated = [...messages, userMessage, assistantPlaceholder];
+    setMessages(updated);
+    setIsStreaming(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("category", "มหาภูติและสภาวะจิตใจ");
+
+      // เพิ่มบริบทมหาภูติกำเนิด/จรครบ 7 ภพเพื่อความแม่นยำสูงสุด
+      const bhopSummary = Object.entries(transit.map)
+        .map(([b, s]) => `${b}: ดาว${s} (${STAR_NAMES[s as StarNumber] || s})`)
+        .join(", ");
+      
+      const contextPrefix = `[บริบทมหาภูติของผู้รับคำปรึกษา (${userName}): จ.ศ.กำเนิด ${natal.cs} (เศษ ${natal.remainder}), จ.ศ.จรปีนี้ ${transit.cs} (เศษ ${transit.remainder}), การสถิตของดาวมหาภูติจรทั้ง 7 ภพ: ${bhopSummary} | มหาภูติเน้นเรื่องวิถีจิต สภาวะอารมณ์ภายใน จิตใต้สำนึก และการรับมือกับแรงผลักดันหรือความกดดันภายใน]`;
+      
+      formData.append("question", `${contextPrefix} คำถามจากผู้รับคำปรึกษา: ${userText}`);
+
+      const response = await fetch("/api/wisdom-chat", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error("ไม่สามารถเชื่อมต่อระบบปรึกษา AI ได้ในขณะนี้");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let accumulatedText = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith(":")) continue;
+
+          if (trimmed.startsWith("data:")) {
+            const dataStr = trimmed.replace(/^data:\s*/, "");
+            if (dataStr === "[DONE]") continue;
+
+            try {
+              const parsed = JSON.parse(dataStr);
+              if (parsed.text) {
+                accumulatedText += parsed.text;
+              } else if (parsed.content) {
+                accumulatedText += parsed.content;
+              } else if (typeof parsed === "string") {
+                accumulatedText += parsed;
+              }
+            } catch {
+              accumulatedText += dataStr;
+            }
+          } else {
+            accumulatedText += trimmed;
+          }
+
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId ? { ...m, text: accumulatedText } : m
+            )
+          );
+        }
+      }
+
+      const finalMessages = updated.map((m) =>
+        m.id === assistantId
+          ? {
+              ...m,
+              text: accumulatedText || "ขออภัยครับ ขณะนี้ระบบไม่สามารถประมวลผลคำตอบได้ กรุณาลองใหม่อีกครั้ง",
+              streaming: false,
+            }
+          : m
+      );
+      setMessages(finalMessages);
+      saveHistory(finalMessages);
+    } catch (err: any) {
+      console.error("Mahaphuti chat error:", err);
+      const errorMessages = updated.map((m) =>
+        m.id === assistantId
+          ? {
+              ...m,
+              text: "ขออภัยครับ เกิดข้อขัดข้องในการเชื่อมต่อระบบปัญญาญาณ AI กรุณาลองใหม่อีกครั้งในอีกสักครู่",
+              streaming: false,
+            }
+          : m
+      );
+      setMessages(errorMessages);
+      saveHistory(errorMessages);
+    } finally {
+      setIsStreaming(false);
+    }
+  };
+
+  return (
+    <Card className="rounded-3xl border border-indigo-300/40 dark:border-[#4B6FAE]/30 bg-white/95 dark:bg-[#071427]/85 backdrop-blur-xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
+      {/* Header bar */}
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 dark:border-white/10 pb-4 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4B6FAE] to-[#C6A96B] p-0.5 shadow-md flex items-center justify-center shrink-0">
+            <div className="w-full h-full rounded-[10px] bg-[#020617] flex items-center justify-center">
+              <Bot className="w-5 h-5 text-[#C6A96B]" />
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-display text-base sm:text-lg font-bold text-slate-900 dark:text-[#F8F6F1]">
+                สนทนาปัญญามหาภูติ — วิถีจิตและสภาวะภายใน
+              </h3>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#4B6FAE]/15 text-[#3b5998] dark:text-[#8cb3ff] border border-[#4B6FAE]/30">
+                เศษจร {transit.remainder} (จ.ศ. {transit.cs})
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-[#C6B79F]">
+              ถอดรหัสและขอคำแนะนำในการจัดการอารมณ์ ความรู้สึกนึกคิด และปัจจัยภายในจากมหาภูติจร
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {messages.length > 1 && (
+            <button
+              type="button"
+              onClick={handleClearHistory}
+              title="ล้างประวัติการสนทนา"
+              className="px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-white/10 hover:border-rose-400/50 text-slate-600 dark:text-[#C6B79F] hover:text-rose-500 text-xs flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">ล้างประวัติ</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-2 rounded-xl border border-slate-300 dark:border-white/10 text-slate-600 dark:text-[#C6B79F] hover:bg-slate-100 dark:hover:bg-white/5 transition-colors cursor-pointer"
+            aria-label={isExpanded ? "ย่อหน้าต่าง" : "ขยายหน้าต่าง"}
+          >
+            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="space-y-4 animate-in fade-in duration-200">
+          {/* Messages list */}
+          <div className="max-h-[380px] sm:max-h-[460px] overflow-y-auto space-y-3.5 pr-1 text-sm scroll-smooth">
+            {messages.map((m) => (
+              <div
+                key={m.id}
+                className={`flex gap-2.5 ${m.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                {m.role === "assistant" && (
+                  <div className="w-7 h-7 rounded-lg bg-[#4B6FAE]/15 border border-[#4B6FAE]/30 flex items-center justify-center shrink-0 mt-1">
+                    <Bot className="w-4 h-4 text-[#C6A96B]" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 shadow-sm ${
+                    m.role === "user"
+                      ? "bg-gradient-to-br from-amber-500/15 via-[#C6A96B]/15 to-transparent dark:from-[#C6A96B]/25 dark:to-[#0A2240]/40 border border-amber-500/30 text-slate-900 dark:text-[#F8F6F1] rounded-tr-xs"
+                      : "bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-[#D9CDB7] rounded-tl-xs"
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap leading-relaxed break-words text-xs sm:text-sm">
+                    {m.text}
+                    {m.streaming && (
+                      <span className="inline-block w-1.5 h-4 ml-1 bg-[#C6A96B] animate-pulse align-middle" />
+                    )}
+                  </p>
+                  <div
+                    className={`text-[10px] mt-1.5 flex items-center gap-1 ${
+                      m.role === "user"
+                        ? "justify-end text-[#8C6D2D] dark:text-[#C6A96B]"
+                        : "text-slate-500 dark:text-[#94A3B8]"
+                    }`}
+                  >
+                    <span>{m.timestamp}</span>
+                  </div>
+                </div>
+                {m.role === "user" && (
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0 mt-1">
+                    <User className="w-4 h-4 text-[#8C6D2D] dark:text-[#C6A96B]" />
+                  </div>
+                )}
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Suggestion Pills */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1.5 pt-1 scrollbar-none">
+            {MAHAPHUTI_SUGGESTIONS.map((s, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleSend(s)}
+                disabled={isStreaming}
+                className="shrink-0 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-100/80 dark:bg-white/5 hover:border-[#C6A96B]/50 hover:bg-amber-500/10 dark:hover:bg-[#C6A96B]/15 text-xs text-slate-700 dark:text-[#C6B79F] hover:text-slate-900 dark:hover:text-[#F8F6F1] transition-all shadow-xs cursor-pointer"
+              >
+                ✦ {s}
+              </button>
+            ))}
+          </div>
+
+          {/* Input container with auto-expanding textarea and prominent send button */}
+          <div className="relative flex items-end gap-2 p-2 rounded-2xl border border-slate-300/80 dark:border-[#C6A96B]/30 bg-slate-50/90 dark:bg-slate-900/80 focus-within:border-[#C6A96B] focus-within:ring-2 focus-within:ring-[#C6A96B]/20 transition-all shadow-sm">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              rows={1}
+              placeholder="พิมพ์คำถามแนวทางการจัดการอารมณ์ สภาวะภายใน หรือสิ่งที่กำลังคิดหนัก..."
+              className="flex-1 bg-transparent text-slate-900 dark:text-[#F8F6F1] placeholder-slate-400 dark:placeholder-white/40 text-xs sm:text-sm p-2 outline-none resize-none min-h-[44px] max-h-[180px] leading-relaxed"
+            />
+            <button
+              type="button"
+              onClick={() => handleSend()}
+              disabled={!input.trim() || isStreaming}
+              className={`h-11 px-4 sm:px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shrink-0 transition-all shadow-md ${
+                !input.trim() || isStreaming
+                  ? "bg-slate-200 dark:bg-white/10 text-slate-400 dark:text-slate-500 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#C6A96B] via-[#D9BC82] to-[#C6A96B] text-[#020617] shadow-[#C6A96B]/25 hover:shadow-lg hover:scale-102 active:scale-98 cursor-pointer"
+              }`}
+              aria-label="ส่งคำถาม"
+            >
+              {isStreaming ? (
+                <div className="w-4 h-4 border-2 border-[#020617] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span className="hidden sm:inline">ส่งคำถาม</span>
+                  <Send className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
+          <p className="text-[11px] text-slate-500 dark:text-[#C6B79F] text-center">
+            บันทึกประวัติการสนทนาอัตโนมัติบนอุปกรณ์ของคุณ สามารถย้อนดูและทบทวนเรื่องราวได้ตลอดเวลา
+          </p>
+        </div>
+      )}
+    </Card>
+  );
+}
+
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function MahaPhuti() {
-  const { profile, initialResult } = useLoaderData<typeof loader>();
+  const { 
+    profile, 
+    initialResult,
+    activeSubject,
+    customers,
+    personLimit,
+    currentCustomerCount,
+    hasReachedLimit,
+  } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
@@ -445,25 +838,50 @@ export default function MahaPhuti() {
   const natal    = taksaMaha?.mahaNatal;
   const transit  = taksaMaha?.mahaTransit;
 
+  const currentSubjectName = activeSubject?.name || profile?.display_name || "เจ้าชะตา";
+
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-6 pb-12 max-w-5xl mx-auto">
+      {/* ── Active Subject Switcher Banner ── */}
+      {activeSubject && (
+        <ActiveSubjectBanner
+          currentSubject={{
+            id: activeSubject.id,
+            name: activeSubject.name,
+            birthDate: activeResult?.birthDate || activeSubject.birthDate,
+            birthTime: activeResult?.birthTime || activeSubject.birthTime,
+            birthPlace: activeResult?.birthPlace || activeSubject.birthPlace,
+            isCustomer: activeSubject.isCustomer,
+          }}
+          customers={customers || []}
+          profileName={profile?.display_name || "ฉัน (เจ้าของบัญชี)"}
+          personLimit={personLimit}
+          currentCustomerCount={currentCustomerCount}
+          hasReachedLimit={hasReachedLimit}
+        />
+      )}
+
       {/* ── Header ── */}
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200/80 dark:border-white/10 pb-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <div className="w-2 h-2 bg-[#4B6FAE] rounded-full animate-pulse" />
             <p className="text-[#4B6FAE] text-[11px] tracking-[0.3em] uppercase font-bold">Mahabhuti System</p>
           </div>
-          <h1 className="font-display text-2xl sm:text-3xl text-[#F8F6F1] font-bold">
-            มหาภูติกำเนิด {activeResult?.customerName ? `(${activeResult.customerName})` : ""}
+          <h1 className="font-display text-2xl sm:text-3xl text-slate-900 dark:text-[#F8F6F1] font-bold">
+            มหาภูติกำเนิด {activeSubject?.isCustomer ? `(${activeSubject.name})` : activeResult?.customerName ? `(${activeResult.customerName})` : ""}
           </h1>
-          <p className="text-[#C6B79F] text-sm mt-1">ระบบมหาภูติ 7 ภพ — พลังงานวิถีจิตใจ กำเนิด/จร</p>
+          <p className="text-slate-600 dark:text-[#C6B79F] text-sm mt-1">
+            ระบบมหาภูติ 7 ภพ — วิเคราะห์พลังงานวิถีจิต สภาวะอารมณ์ภายใน กำเนิด/จร
+          </p>
         </div>
         {natal && (
-          <div className="text-right text-xs text-[#C6B79F] shrink-0">
-            <p>จ.ศ.กำเนิด</p>
-            <p className="font-display text-3xl text-[#4B6FAE] font-bold leading-none">{natal.cs}</p>
-            <p>เศษ {natal.remainder}</p>
+          <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-[#4B6FAE]/30 rounded-2xl px-4 py-2 text-right text-xs text-slate-600 dark:text-[#C6B79F] shrink-0 shadow-xs">
+            <p className="text-[10px] uppercase font-bold tracking-wider text-[#4B6FAE]">จ.ศ.กำเนิด {natal.cs}</p>
+            <p className="font-display text-2xl text-slate-900 dark:text-[#F8F6F1] font-bold leading-none my-0.5">
+              เศษ {natal.remainder}
+            </p>
+            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">จร จ.ศ.{transit.cs} (เศษ {transit.remainder})</p>
           </div>
         )}
       </div>
@@ -492,11 +910,20 @@ export default function MahaPhuti() {
             currentYearThai={activeResult.currentYearThai}
           />
 
+          {/* ── Consultation Chat: ช่องสนทนาปัญญามหาภูติ ── */}
+          <MahaphutiConsultationChat
+            natal={natal}
+            transit={transit}
+            userName={currentSubjectName}
+          />
+
           {/* Per-bhop prediction panels */}
           <div>
             <div className="flex items-center gap-3 mb-4">
               <div className="h-px flex-1 bg-[#C9A96E]/20" />
-              <p className="text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold">คำพยากรณ์รายภพ (ปีนี้)</p>
+              <p className="text-[#8C6D2D] dark:text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold">
+                คำพยากรณ์รายภพ (ปีนี้)
+              </p>
               <div className="h-px flex-1 bg-[#C9A96E]/20" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
