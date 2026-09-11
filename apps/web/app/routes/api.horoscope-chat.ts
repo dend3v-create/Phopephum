@@ -23,6 +23,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     transitTime?: string;
     filterType?: string;
     filterValue?: string | number;
+    history?: Array<{ role: "user" | "assistant"; content: string }>;
   };
 
   try {
@@ -136,15 +137,23 @@ export async function action({ request, context }: ActionFunctionArgs) {
 [ระบบมหาภูติจร]
 - มหาภูติจร: ${JSON.stringify(mahaTransit?.map || {})}
 
-${filterContext ? `[จุดเน้นพิเศษ]: ${filterContext}` : ""}
-
+${filterContext ? `[จุดเน้นพิเศษ]: ${filterContext}\n` : ""}${
+  Array.isArray(body.history) && body.history.length > 0
+    ? `\n[บริบทบทสนทนาก่อนหน้านี้ของ ${subjectName}]:\n` +
+      body.history
+        .slice(-6)
+        .map(h => `${h.role === "user" ? subjectName : "Wisdom Guidance"}: ${h.content.slice(0, 300)}`)
+        .join("\n") +
+      "\n"
+    : ""
+}
 ══════════════════════════════════════════════════════════════════════
-คำถามของ ${subjectName}:
+คำถามล่าสุดของ ${subjectName}:
 "${question}"
 ══════════════════════════════════════════════════════════════════════
 
 คำแนะนำและกติกาวิชาการในการพยากรณ์:
-1. เจาะจงคำทำนายไปที่ "${question}" โดยตรง โดยใช้หลักวิชาเลข ๗ ตัว ๙ ฐาน และทักษาจรของ ${subjectName}
+1. เจาะจงคำทำนายไปที่ "${question}" โดยตรง โดยใช้หลักวิชาเลข ๗ ตัว ๙ ฐาน และทักษาจรของ ${subjectName} หากเป็นการถามต่อเนื่องจากคำถามก่อนหน้า ให้ตอบอย่างสอดคล้องและลึกซึ้งขึ้น
    - หากถามเรื่อง "คดีความ/ข้อพิพาท/อุปสรรค": วิเคราะห์ดาวกาลกิณีจร (ดาว ${kaliStar}) และภพอริ, มรณะ, วินาศ พร้อมดูฐานรองรับ (ฐานกำลังมหาคุณ และฐาน 8-9) ว่ามีดาวช่วยค้ำจุนหรือไม่
    - หากถามเรื่อง "การเงิน/หนี้สิน/โชคลาภ": วิเคราะห์ดาวศรีจร (ดาว ${sriStar}), ภพกดุมภะ, ลาภะ และฐานโสฬส/มหาจักรพรรดิ
    - หากถามเรื่อง "การงาน/ธุรกิจ/เลื่อนตำแหน่ง": วิเคราะห์ดาวเดชจร (ดาว ${dechStar}), ดาวมนตรีจร (ดาว ${montriStar}) และภพกัมมะ
@@ -173,6 +182,7 @@ ${filterContext ? `[จุดเน้นพิเศษ]: ${filterContext}` : "
             transitDate,
             question,
             ageYang: currentAge,
+            history: body.history?.slice(-6),
           },
           prompt,
         }),

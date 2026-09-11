@@ -40,6 +40,26 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
+  const { supabase } = createSupabaseClient(request, env);
+
+  if (request.method === "DELETE") {
+    const url = new URL(request.url);
+    const subjectName = (url.searchParams.get("subjectName") || "").trim();
+
+    try {
+      let query = supabase.from("horoscope_chats").delete().eq("user_id", user.id);
+      if (subjectName) {
+        query = query.eq("subject_name", subjectName);
+      }
+      const { error } = await query;
+      if (error) {
+        return json({ success: false, error: error.message });
+      }
+      return json({ success: true });
+    } catch (err: any) {
+      return json({ success: false, error: err?.message || "Internal error" });
+    }
+  }
 
   let body: {
     subjectName?: string;
@@ -60,8 +80,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (!question || !answer) {
     return json({ error: "Missing question or answer" }, { status: 400 });
   }
-
-  const { supabase } = createSupabaseClient(request, env);
 
   try {
     const { data, error } = await supabase

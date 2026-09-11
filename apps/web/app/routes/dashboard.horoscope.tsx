@@ -633,6 +633,14 @@ export default function HoroscopePage() {
 
     setChatMessages(prev => [...prev, userMsg, aiPlaceholder]);
 
+    const historyContext = chatMessages
+      .filter(m => m.text && !m.isStreaming)
+      .slice(-6)
+      .map(m => ({
+        role: (m.sender === "user" ? "user" : "assistant") as "user" | "assistant",
+        content: m.text,
+      }));
+
     try {
       const res = await fetch("/api/horoscope-chat", {
         method: "POST",
@@ -647,6 +655,7 @@ export default function HoroscopePage() {
           transitTime: activeResult?.transitTime,
           filterType,
           filterValue,
+          history: historyContext,
         }),
       });
 
@@ -1573,11 +1582,14 @@ export default function HoroscopePage() {
                 {chatMessages.length > 1 && (
                   <button
                     type="button"
-                    onClick={() => {
+                    onClick={async () => {
                       if (confirm(`ต้องการล้างประวัติการสนทนาของ "${currentSubjectName}" หรือไม่?`)) {
                         setChatMessages([]);
                         try {
                           localStorage.removeItem(`phopephum_chat_${currentSubjectName}`);
+                          await fetch(`/api/horoscope-chat-history?subjectName=${encodeURIComponent(currentSubjectName)}`, {
+                            method: "DELETE",
+                          });
                         } catch {}
                       }
                     }}
