@@ -69,9 +69,19 @@ export default function ReportDetail() {
       </Link>
 
       {/* Header */}
-      <div>
-        <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-2">{date}</p>
-        <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">{label}</h1>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-2">{date}</p>
+          <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">{label}</h1>
+        </div>
+        <button
+          type="button"
+          onClick={() => window.print()}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[#C6A96B]/30 hover:border-[#C6A96B] bg-[#C6A96B]/10 hover:bg-[#C6A96B]/20 text-[#C6A96B] hover:text-[#F8F6F1] transition-all text-xs font-bold shadow-sm print:hidden"
+        >
+          <span>🖨️</span>
+          <span>พิมพ์ / ดาวน์โหลด PDF</span>
+        </button>
       </div>
 
       {/* Content */}

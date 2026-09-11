@@ -254,6 +254,10 @@ export default function NewReportPage() {
 
   const [searchParams] = useSearchParams();
   const defaultType = searchParams.get("type") || "general_prediction";
+  const paramName = searchParams.get("name");
+  const paramBirthDate = searchParams.get("birthDate");
+  const paramBirthTime = searchParams.get("birthTime");
+  const paramBirthPlace = searchParams.get("birthPlace");
 
   const [selectedType, setSelectedType] = useState<string>(defaultType);
   const selectedMeta = REPORT_TYPES.find((t) => t.value === selectedType);
@@ -263,10 +267,14 @@ export default function NewReportPage() {
     setMounted(true);
   }, []);
 
-  const birthDateObj = profile?.birth_date ? new Date(profile.birth_date) : null;
+  const birthDateStr = paramBirthDate || profile?.birth_date;
+  const birthDateObj = birthDateStr ? new Date(birthDateStr) : null;
   const defaultBDay = birthDateObj ? birthDateObj.getDate() : 15;
   const defaultBMonth = birthDateObj ? birthDateObj.getMonth() + 1 : 6;
   const defaultBYear = birthDateObj ? birthDateObj.getFullYear() + 543 : 2540;
+  const defaultName = paramName || profile?.display_name || "";
+  const defaultTime = paramBirthTime !== null && paramBirthTime !== undefined ? paramBirthTime : (profile?.birth_time || "");
+  const defaultPlace = paramBirthPlace !== null && paramBirthPlace !== undefined ? paramBirthPlace : (profile?.birth_place || "");
 
   if (!mounted) {
     return (
