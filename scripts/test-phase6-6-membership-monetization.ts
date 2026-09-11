@@ -152,7 +152,7 @@ async function runStep66MonetizationSuite() {
   assert(SUBSCRIPTION_PLANS.basic.priceThb === 59, "Basic price must be ฿59");
   assert(SUBSCRIPTION_PLANS.pro.priceThb === 259, "Pro price must be ฿259");
   assert(SUBSCRIPTION_PLANS.pro_annual.priceThb === 2490, "Pro annual price must be ฿2,490");
-  assert(SUBSCRIPTION_PLANS.imperial.priceThb === 789, "Imperial price must be ฿789");
+  assert(SUBSCRIPTION_PLANS.imperial.priceThb === 1289, "Imperial price must be ฿1,289");
 
   assert(SANDS_REFILL_PACKS.sands_50.priceThb === 59, "50 Sands must be ฿59");
   assert(SANDS_REFILL_PACKS.sands_150.priceThb === 149, "150 Sands must be ฿149");

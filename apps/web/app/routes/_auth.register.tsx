@@ -153,7 +153,7 @@ const PLAN_DISPLAY_NAMES: Record<string, string> = {
   premium: "Premium (฿89/เดือน)",
   pro: "Pro (฿289/เดือน)",
   pro_annual: "Pro รายปี (฿2,770/ปี)",
-  master: "Master (฿789/เดือน)",
+  master: "Master (฿1,289/เดือน)",
 };
 
 export default function RegisterPage() {

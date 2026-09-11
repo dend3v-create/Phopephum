@@ -254,7 +254,7 @@ async function runStep664E2EConversionSuite() {
   assert(prodBasic?.priceThb === 89 && prodBasic?.sku === "basic", "Basic resolved correctly");
   assert(prodPro?.priceThb === 289 && prodPro?.sku === "pro", "Pro resolved correctly");
   assert(prodProAnnual?.priceThb === 2790 && prodProAnnual?.sku === "pro_annual", "Pro Annual resolved correctly");
-  assert(prodImperial?.priceThb === 789 && prodImperial?.sku === "imperial", "Imperial resolved correctly");
+  assert(prodImperial?.priceThb === 1289 && prodImperial?.sku === "imperial", "Imperial resolved correctly");
   assert(prodSands50?.priceThb === 59 && prodSands50?.sandsAmount === 50, "Sands 50 resolved correctly");
   assert(prodSands150?.priceThb === 149 && prodSands150?.sandsAmount === 150, "Sands 150 resolved correctly");
   assert(prodSands500?.priceThb === 399 && prodSands500?.sandsAmount === 500, "Sands 500 resolved correctly");

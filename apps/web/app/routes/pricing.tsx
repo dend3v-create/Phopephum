@@ -121,12 +121,12 @@ const MONTHLY_PLANS = [
     id: "master",
     name: "โหราจารย์",
     subtitle: "ปลดล็อคเครื่องมือสำหรับนักพยากรณ์ เข้าถึงหลักวิชาและหลักการโหราศาสตร์เพื่อใช้ในการพยากรณ์ได้อย่างลึกซึ้งมากขึ้น",
-    price: "789",
-    priceLabel: "789",
+    price: "1289",
+    priceLabel: "1,289",
     priceNote: "/ เดือน",
     tag: "Master Class",
     style: "imperial" as const,
-    ctaLabel: "เริ่มใช้ Master ฿789/เดือน",
+    ctaLabel: "เริ่มใช้ Master ฿1,289/เดือน",
     ctaLoggedIn: "/dashboard/upgrade?plan=master",
     ctaGuest: "/register?plan=master",
     features: [
@@ -170,7 +170,7 @@ const ANNUAL_PLANS = [
     ...MONTHLY_PLANS[3],
     id: "master",
     priceNote: "/ เดือน (รอบบิลรายเดือน)",
-    note: "* แผน Master ให้บริการรอบบิลรายเดือน ฿789/เดือน",
+    note: "* แผน Master ให้บริการรอบบิลรายเดือน ฿1,289/เดือน",
   },
 ] as const;
 

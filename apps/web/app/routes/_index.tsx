@@ -655,7 +655,7 @@ export default function IndexPage() {
                 เครื่องมือสำหรับนักพยากรณ์ เข้าถึงหลักวิชาและหลักการโหราศาสตร์
               </p>
               <div className="mb-6">
-                <span className="font-display text-4xl font-bold text-slate-900 dark:text-[#F8F6F1]">฿789</span>
+                <span className="font-display text-4xl font-bold text-slate-900 dark:text-[#F8F6F1]">฿1,289</span>
                 <span className="text-xs text-slate-500 ml-1">/ เดือน</span>
               </div>
               <ul className="space-y-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-sarabun mb-6">

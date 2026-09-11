@@ -51,7 +51,7 @@ async function runConversionUpgradeUxTests() {
     SUBSCRIPTION_PLANS.basic.priceThb === 89 &&
     SUBSCRIPTION_PLANS.pro.priceThb === 289 &&
     SUBSCRIPTION_PLANS.pro_annual.priceThb === 2790 &&
-    SUBSCRIPTION_PLANS.imperial.priceThb === 789,
+    SUBSCRIPTION_PLANS.imperial.priceThb === 1289,
     "Basic=฿89, Pro=฿289, Pro Annual=฿2,790, Imperial=฿789 confirmed"
   );
 

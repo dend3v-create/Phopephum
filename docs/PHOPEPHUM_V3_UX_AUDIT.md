@@ -73,7 +73,7 @@ phopephum-v2/
 | `dashboard.community.tsx` | Growth | Affiliate Referral System, ลิงก์ชวนเพื่อน, คอมมิชชัน 3-10%, กระเป๋าเงิน |
 | `dashboard.chat.tsx` | AI Chat | แชทสนทนากับ Sesheta / Wisdom AI |
 | `dashboard.settings.tsx` | Settings | แก้ไขโปรไฟล์, วันเกิด, ภาษา, ธีม, สถิติ Affiliate, ข้อมูลกระเป๋าเงิน |
-| `dashboard.upgrade.tsx` & `pricing.tsx` | Monetization | แพ็กเกจ Basic (฿59), Pro (฿259), Imperial (฿789) ผ่าน Stripe Checkout |
+| `dashboard.upgrade.tsx` & `pricing.tsx` | Monetization | แพ็กเกจ Basic (฿59), Pro (฿259), Imperial (฿1,289) ผ่าน Stripe Checkout |
 | `api.daily-card.ts` | API | สุ่มไพ่ประจำวัน + บันทึกลง daily_plans + ให้เครดิต |
 | `api.payment.checkout.ts` | API | สร้าง Stripe Checkout Session |
 | `api.webhook.stripe.ts` | API | รับ Webhook จาก Stripe, ปลดล็อกสิทธิ์ membership, จ่าย Affiliate |

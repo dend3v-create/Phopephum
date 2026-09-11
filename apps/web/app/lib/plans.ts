@@ -79,7 +79,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlanDef> = {
     id: "imperial",
     name: "โหราจารย์ (Master)",
     subtitle: "ปลดล็อคเครื่องมือสำหรับนักพยากรณ์ เข้าถึงหลักวิชาและหลักการโหราศาสตร์เพื่อใช้ในการพยากรณ์ได้อย่างลึกซึ้งมากขึ้น",
-    priceThb: 789,
+    priceThb: 1289,
     interval: "month",
     durationDays: 30,
     canonicalPlan: "master",

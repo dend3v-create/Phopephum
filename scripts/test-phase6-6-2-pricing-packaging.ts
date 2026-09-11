@@ -227,19 +227,19 @@ async function runPricingPackagingSuite() {
   assert(fee289.totalDeductionThb === 5.10, `Expected total deduction 5.10, got ${fee289.totalDeductionThb}`);
   assert(fee289.netReceivedThb === 283.90, `Expected net 283.90, got ${fee289.netReceivedThb}`);
 
-  // 789 THB PromptPay: fee = 13.02, vat on fee = 0.91, total fee = 13.93, net = 775.07
-  const fee789 = calculateOmiseFee(789, "promptpay");
-  assert(fee789.feeThb === 13.02, `Expected fee 13.02, got ${fee789.feeThb}`);
-  assert(fee789.feeVatThb === 0.91, `Expected fee VAT 0.91, got ${fee789.feeVatThb}`);
-  assert(fee789.totalDeductionThb === 13.93, `Expected total deduction 13.93, got ${fee789.totalDeductionThb}`);
-  assert(fee789.netReceivedThb === 775.07, `Expected net 775.07, got ${fee789.netReceivedThb}`);
+  // 1289 THB PromptPay: fee = 21.27, vat on fee = 1.49, total fee = 22.76, net = 1266.24
+  const fee1289 = calculateOmiseFee(1289, "promptpay");
+  assert(fee1289.feeThb === 21.27, `Expected fee 21.27, got ${fee1289.feeThb}`);
+  assert(fee1289.feeVatThb === 1.49, `Expected fee VAT 1.49, got ${fee1289.feeVatThb}`);
+  assert(fee1289.totalDeductionThb === 22.76, `Expected total deduction 22.76, got ${fee1289.totalDeductionThb}`);
+  assert(fee1289.netReceivedThb === 1266.24, `Expected net 1266.24, got ${fee1289.netReceivedThb}`);
 
   recordResult({
     id: 6,
     domain: "GATEWAY MATH",
-    name: "Omise PromptPay Precision (89/289/789)",
-    expected: "89->Fee 1.57/Net 87.43, 289->Fee 5.10/Net 283.90, 789->Fee 13.93/Net 775.07",
-    actual: `89->Net ${fee89.netReceivedThb}, 289->Net ${fee289.netReceivedThb}, 789->Net ${fee789.netReceivedThb}`,
+    name: "Omise PromptPay Precision (89/289/1289)",
+    expected: "89->Fee 1.57/Net 87.43, 289->Fee 5.10/Net 283.90, 1289->Fee 22.76/Net 1266.24",
+    actual: `89->Net ${fee89.netReceivedThb}, 289->Net ${fee289.netReceivedThb}, 1289->Net ${fee1289.netReceivedThb}`,
     evidence: "apps/web/app/services/omise.server.ts calculateOmiseFee",
     status: "PASS",
   });
@@ -248,18 +248,18 @@ async function runPricingPackagingSuite() {
   const calcVat = (gross: number) => Math.round((gross * 0.07) / 1.07 * 100) / 100;
   const vat89 = calcVat(89);   // 5.82 THB
   const vat289 = calcVat(289); // 18.91 THB
-  const vat789 = calcVat(789); // 51.62 THB
+  const vat1289 = calcVat(1289); // 84.33 THB
 
   assert(vat89 === 5.82, `Expected 89 VAT 5.82, got ${vat89}`);
   assert(vat289 === 18.91, `Expected 289 VAT 18.91, got ${vat289}`);
-  assert(vat789 === 51.62, `Expected 789 VAT 51.62, got ${vat789}`);
+  assert(vat1289 === 84.33, `Expected 1289 VAT 84.33, got ${vat1289}`);
 
   recordResult({
     id: 7,
     domain: "INVOICE VAT",
     name: "Invoice VAT 7% Base Separation",
-    expected: "89->VAT 5.82, 289->VAT 18.91, 789->VAT 51.62",
-    actual: `89 VAT: ${vat89} THB, 289 VAT: ${vat289} THB, 789 VAT: ${vat789} THB`,
+    expected: "89->VAT 5.82, 289->VAT 18.91, 1289->VAT 84.33",
+    actual: `89 VAT: ${vat89} THB, 289 VAT: ${vat289} THB, 1289 VAT: ${vat1289} THB`,
     evidence: "Invoice VAT formula: gross * 0.07 / 1.07 (INV-07 separate from Gateway fee)",
     status: "PASS",
   });

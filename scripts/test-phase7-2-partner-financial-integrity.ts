@@ -57,7 +57,7 @@ const CANONICAL_SKU_POLICIES: Record<string, SkuPolicy> = {
   basic: { sku: "basic", grossPriceThb: 89, commissionable: true, type: "subscription" },
   pro: { sku: "pro", grossPriceThb: 289, commissionable: true, type: "subscription" },
   pro_annual: { sku: "pro_annual", grossPriceThb: 2790, commissionable: true, type: "subscription" },
-  imperial: { sku: "imperial", grossPriceThb: 789, commissionable: true, type: "lifetime" },
+  imperial: { sku: "imperial", grossPriceThb: 1289, commissionable: true, type: "lifetime" },
   sands_50: { sku: "sands_50", grossPriceThb: 59, commissionable: false, type: "sands_refill" },
   sands_150: { sku: "sands_150", grossPriceThb: 149, commissionable: false, type: "sands_refill" },
   sands_500: { sku: "sands_500", grossPriceThb: 399, commissionable: false, type: "sands_refill" },
@@ -129,17 +129,17 @@ function computeCommissionableBase(grossThb: number, vatRate: number = 0.07): nu
 
 const base89 = computeCommissionableBase(89); // 89 / 1.07 = 83.17757... -> 83.18
 const base289 = computeCommissionableBase(289); // 289 / 1.07 = 270.09345... -> 270.09
-const base789 = computeCommissionableBase(789); // 789 / 1.07 = 737.38317... -> 737.38
+const base1289 = computeCommissionableBase(1289); // 1289 / 1.07 = 1204.67289... -> 1204.67
 const base2790 = computeCommissionableBase(2790); // 2790 / 1.07 = 2607.4766... -> 2607.48
 
 const vatBaseAccurate =
-  base89 === 83.18 && base289 === 270.09 && base789 === 737.38 && base2790 === 2607.48;
+  base89 === 83.18 && base289 === 270.09 && base1289 === 1204.67 && base2790 === 2607.48;
 
 assertInvariant(
   "INV-PARTNER-03",
   "VAT-Segregated Base Calculation (7% Inc)",
   vatBaseAccurate,
-  `฿89→฿${base89}, ฿289→฿${base289}, ฿789→฿${base789}, ฿2790→฿${base2790} exactly verified`
+  `฿89→฿${base89}, ฿289→฿${base289}, ฿1289→฿${base1289}, ฿2790→฿${base2790} exactly verified`
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
