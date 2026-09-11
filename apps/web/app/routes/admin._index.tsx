@@ -37,10 +37,10 @@ export default function AdminOverview() {
   return (
     <div className="space-y-8 animate-fade-in">
       <header>
-        <h1 className="text-3xl font-display font-bold text-[#F8F6F1] mb-2">
+        <h1 className="text-3xl font-display font-bold text-slate-900 dark:text-[#F8F6F1] mb-2">
           System Overview
         </h1>
-        <p className="text-[#94A3B8]">
+        <p className="text-slate-600 dark:text-[#94A3B8] text-sm">
           Welcome to the PhopePhum administration dashboard.
         </p>
       </header>
@@ -51,52 +51,48 @@ export default function AdminOverview() {
           title="Total Users"
           value={stats.users.toString()}
           label="Registered accounts"
-          icon={<IconUsers className="w-5 h-5 text-[#38BDF8]" />}
+          icon={<IconUsers className="w-5 h-5 text-sky-600 dark:text-[#38BDF8]" />}
         />
         <StatCard
           title="บทวิเคราะห์ที่สร้างแล้ว"
           value={stats.reports.toString()}
           label="Total generations"
-          icon={<IconSparkles className="w-5 h-5 text-[#818CF8]" />}
+          icon={<IconSparkles className="w-5 h-5 text-indigo-600 dark:text-[#818CF8]" />}
         />
         <StatCard
           title="System Events Tracked"
           value={stats.events.toString()}
           label="Total analytics events"
-          icon={<IconActivity className="w-5 h-5 text-[#34D399]" />}
+          icon={<IconActivity className="w-5 h-5 text-emerald-600 dark:text-[#34D399]" />}
         />
       </div>
 
-      <div className="p-8 rounded-2xl border" style={{
-        background: "rgba(15,23,42,0.6)",
-        backdropFilter: "blur(12px)",
-        borderColor: "rgba(56,189,248,0.12)"
-      }}>
-        <h3 className="text-xl font-semibold text-[#F8F6F1] mb-4">Quick Actions</h3>
+      <div className="p-6 sm:p-8 rounded-2xl border border-slate-200 dark:border-sky-500/15 bg-white/95 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
+        <h3 className="text-xl font-semibold text-slate-900 dark:text-[#F8F6F1] mb-4">Quick Actions</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Link
             to="/admin/users"
-            className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#38BDF8]/30 transition-all group"
+            className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100/80 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 hover:border-[#38BDF8]/40 transition-all group"
           >
-            <div className="p-3 rounded-lg bg-[#38BDF8]/10 text-[#38BDF8]">
+            <div className="p-3 rounded-lg bg-sky-500/10 text-sky-600 dark:text-[#38BDF8]">
               <IconUsers className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#F8F6F1]">จัดการสมาชิก</p>
-              <p className="text-xs text-[#94A3B8]">ดูรายชื่อและแก้ไขสิทธิ์ผู้ใช้</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1]">จัดการสมาชิก</p>
+              <p className="text-xs text-slate-500 dark:text-[#94A3B8]">ดูรายชื่อและแก้ไขสิทธิ์ผู้ใช้</p>
             </div>
           </Link>
 
           <Link
             to="/admin/approvals"
-            className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-[#C6A96B]/30 transition-all group"
+            className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 hover:bg-slate-100/80 dark:bg-white/5 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 hover:border-[#C6A96B]/40 transition-all group"
           >
-            <div className="p-3 rounded-lg bg-[#C6A96B]/10 text-[#C6A96B]">
+            <div className="p-3 rounded-lg bg-[#C6A96B]/15 text-[#8C6D2D] dark:text-[#C6A96B]">
               <IconApprove className="w-5 h-5" />
             </div>
             <div>
-              <p className="text-sm font-bold text-[#F8F6F1]">อนุมัติคำขอ</p>
-              <p className="text-xs text-[#94A3B8]">จัดการคำอัปเกรดแพ็กเกจ</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1]">อนุมัติคำขอ</p>
+              <p className="text-xs text-slate-500 dark:text-[#94A3B8]">จัดการคำอัปเกรดแพ็กเกจ</p>
             </div>
           </Link>
         </div>
@@ -107,28 +103,20 @@ export default function AdminOverview() {
 
 function StatCard({ title, value, label, icon }: { title: string, value: string, label: string, icon: React.ReactNode }) {
   return (
-    <div
-      className="p-6 rounded-2xl border flex flex-col relative overflow-hidden group"
-      style={{
-        background: "rgba(15,23,42,0.8)",
-        backdropFilter: "blur(12px)",
-        borderColor: "rgba(56,189,248,0.15)",
-        boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)"
-      }}
-    >
+    <div className="p-6 rounded-2xl border border-slate-200 dark:border-sky-500/15 bg-white/95 dark:bg-slate-900/80 backdrop-blur-md shadow-sm flex flex-col relative overflow-hidden group">
       <div className="flex items-center gap-4 mb-4 z-10">
-        <div className="p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
+        <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50">
           {icon}
         </div>
-        <h3 className="text-sm font-semibold text-[#94A3B8] uppercase tracking-wider">{title}</h3>
+        <h3 className="text-xs font-bold text-slate-500 dark:text-[#94A3B8] uppercase tracking-wider">{title}</h3>
       </div>
       <div className="z-10">
-        <p className="text-4xl font-display font-bold text-[#F8F6F1] mb-1">{value}</p>
-        <p className="text-sm text-slate-400">{label}</p>
+        <p className="text-4xl font-display font-bold text-slate-900 dark:text-[#F8F6F1] mb-1">{value}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">{label}</p>
       </div>
       
       {/* Decorative background element */}
-      <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-[#38BDF8] opacity-5 rounded-full blur-2xl group-hover:opacity-10 transition-opacity duration-500" />
+      <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-sky-500 opacity-5 rounded-full blur-2xl group-hover:opacity-10 transition-opacity duration-500" />
     </div>
   );
 }
