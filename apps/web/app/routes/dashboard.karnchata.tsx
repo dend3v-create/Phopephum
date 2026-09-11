@@ -56,9 +56,21 @@ interface QuestionRecord {
 
 // ─── Loader ────────────────────────────────────────────────────────────────────
 
+import { resolveActiveSubject } from "~/services/activeSubject.server";
+import { ActiveSubjectBanner } from "~/components/subject/ActiveSubjectBanner";
+
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const { profile } = await requireMinPlan("basic", request, env);
+  const { profile, user } = await requireMinPlan("basic", request, env);
+
+  const {
+    activeSubject,
+    customers,
+    personLimit,
+    currentCustomerCount,
+    hasReachedLimit,
+  } = await resolveActiveSubject(request, env, user, profile);
+
   const now = new Date();
   const initialResult = calculateKarnchata(now);
   const thaiDateLabel = now.toLocaleDateString("th-TH", {
@@ -69,7 +81,18 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     const lunar = gregorianToThaiLunarV3(now);
     lunarInfo = { moonPhaseText: lunar.moonPhaseText, isWaxing: lunar.isWaxing, lunarDay: lunar.lunarDay, thaiMonthName: lunar.thaiMonthName };
   } catch (e) { /* */ }
-  return json({ profile, initialResult, thaiDateLabel, lunarInfo, currentTime: now.toISOString() });
+  return json({
+    profile,
+    initialResult,
+    thaiDateLabel,
+    lunarInfo,
+    currentTime: now.toISOString(),
+    activeSubject,
+    customers,
+    personLimit,
+    currentCustomerCount,
+    hasReachedLimit,
+  });
 }
 
 // ─── Action ────────────────────────────────────────────────────────────────────
@@ -623,7 +646,16 @@ function DateTimePicker({ timeMode, setTimeMode, onSubmit, isLoading }: {
 // ─── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function KarnchataPage() {
-  const { initialResult, thaiDateLabel, lunarInfo: initialLunar } = useLoaderData<typeof loader>();
+  const {
+    initialResult,
+    thaiDateLabel,
+    lunarInfo: initialLunar,
+    profile,
+    activeSubject,
+    customers,
+    personLimit,
+    hasReachedLimit,
+  } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
   const navigation = useNavigation();
@@ -779,6 +811,24 @@ export default function KarnchataPage() {
 
   return (
     <div className="space-y-5 animate-in fade-in duration-700 pb-20">
+
+      {/* ── แถบสลับและจัดการเจ้าชะตาแบบเรียลไทม์ (Active Subject Banner) ── */}
+      {activeSubject && (
+        <ActiveSubjectBanner
+          currentSubject={{
+            id: activeSubject.id,
+            name: activeSubject.name,
+            birthDate: activeSubject.birthDate,
+            birthTime: activeSubject.birthTime,
+            birthPlace: activeSubject.birthPlace,
+            isCustomer: activeSubject.isCustomer,
+          }}
+          customers={customers || []}
+          profileName={profile?.display_name || "ฉัน (เจ้าของบัญชี)"}
+          personLimit={personLimit}
+          hasReachedLimit={hasReachedLimit}
+        />
+      )}
 
       {/* ── Header ── */}
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">

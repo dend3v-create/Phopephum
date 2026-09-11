@@ -29,6 +29,8 @@ import {
 } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
+import { resolveActiveSubject } from "~/services/activeSubject.server";
+import { ActiveSubjectBanner } from "~/components/subject/ActiveSubjectBanner";
 import type { Env } from "~/env.server";
 
 export const meta: MetaFunction = () => [
@@ -160,7 +162,8 @@ function calculateDailyYamSlots(targetDate: Date): YamSlotDetail[] {
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const { profile } = await requireMinPlan("basic", request, env);
+  const { user, profile } = await requireMinPlan("basic", request, env);
+  const { activeSubject, customers, personLimit, currentCustomerCount, hasReachedLimit } = await resolveActiveSubject(request, env, user, profile);
 
   const yam = getCurrentYam();
   const moon = calculateMoonPhase();
@@ -176,6 +179,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const tomorrowDateLabel = tomorrow.toLocaleDateString("th-TH", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
 
   return json({
+    activeSubject,
+    customers,
+    personLimit,
+    currentCustomerCount,
+    hasReachedLimit,
     yamName:    yam.yamName,
     yamNumber:  yam.yamNumber,
     period:     yam.period,
@@ -259,6 +267,7 @@ function getTopicAdvice(topic: "love" | "trade" | "negotiate" | "travel", yamNam
 
 export default function YamPage() {
   const data = useLoaderData<typeof loader>();
+  const { activeSubject, customers, personLimit, currentCustomerCount, hasReachedLimit } = data;
   const { t, i18n } = useTranslation(["yam", "common", "horoscope"]);
   const isLocked = (data as any).isProLocked as boolean;
 
@@ -578,6 +587,24 @@ export default function YamPage() {
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
+      {/* 🔮 Active Subject Banner & Real-time Profile Switcher */}
+      {activeSubject && (
+        <ActiveSubjectBanner
+          currentSubject={{
+            id: activeSubject.id,
+            name: activeSubject.name,
+            birthDate: activeSubject.birthDate,
+            birthTime: activeSubject.birthTime,
+            birthPlace: activeSubject.birthPlace,
+            isCustomer: activeSubject.isCustomer,
+          }}
+          customers={customers || []}
+          personLimit={personLimit}
+          currentCustomerCount={currentCustomerCount}
+          hasReachedLimit={hasReachedLimit}
+        />
+      )}
+
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>

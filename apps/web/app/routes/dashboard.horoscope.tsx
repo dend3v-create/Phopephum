@@ -55,6 +55,9 @@ export const meta: MetaFunction = () => [
   { name: "keywords", content: "เลข 7 ตัว 9 ฐาน, ผังดวงจักรพรรดิ, ตรวจดวงชะตา, ดูดวงเลข 7 ตัว, ทักษากำเนิด, มหาภูติจร, พยากรณ์ชีวิต, ภพภูมิ, PhopePhum" }
 ];
 
+import { resolveActiveSubject } from "~/services/activeSubject.server";
+import { ActiveSubjectBanner } from "~/components/subject/ActiveSubjectBanner";
+
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const { user, profile } = await requireMinPlan("basic", request, env);
@@ -62,10 +65,16 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const { createSupabaseClient } = await import("~/services/supabase.server");
   const { supabase } = createSupabaseClient(request, env);
 
-  const url = new URL(request.url);
-  const customerId = url.searchParams.get("customerId");
-  
-  // 1. ดึงรายงานล่าสุด
+  // 1. ตรวจสอบและดึงข้อมูลเจ้าชะตาที่กำลัง Active (ดวงตนเอง หรือ ลูกดวงที่เลือกไว้)
+  const {
+    activeSubject,
+    customers,
+    personLimit,
+    currentCustomerCount,
+    hasReachedLimit,
+  } = await resolveActiveSubject(request, env, user, profile);
+
+  // 2. ดึงรายงานล่าสุด
   const { data: reports } = await supabase
     .from("ai_reports")
     .select("id, report_type, created_at, content")
@@ -73,7 +82,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .order("created_at", { ascending: false })
     .limit(5);
 
-  // 2. ดึงประวัติการคำนวณล่าสุด (History)
+  // 3. ดึงประวัติการคำนวณล่าสุด (History)
   const { data: history } = await supabase
     .from("calculations")
     .select("*")
@@ -81,41 +90,18 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     .order("created_at", { ascending: false })
     .limit(3);
 
-  // 3. ดึงรายชื่อลูกค้าที่บันทึกไว้
-  const { data: customers } = await supabase
-    .from("customers")
-    .select("*")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false });
-
-  // เลือกบุคคลเป้าหมายที่จะนำมาคำนวณเริ่มต้น
-  let targetPerson = profile;
-  let selectedCust = null;
-  if (customerId && customers) {
-    selectedCust = customers.find(c => c.id === customerId);
-    if (selectedCust) {
-      targetPerson = {
-        id: selectedCust.id,
-        birth_date: selectedCust.birth_date,
-        birth_time: selectedCust.birth_time,
-        birth_place: selectedCust.birth_place,
-        display_name: selectedCust.name,
-      } as any;
-    }
-  }
-
-  // 3. คำนวณผลลัพธ์เริ่มต้นหากมีข้อมูลวันเกิด
+  // 4. คำนวณผลลัพธ์เริ่มต้นสำหรับเจ้าชะตาที่กำลัง Active
   let initialResult = null;
-  if (targetPerson?.birth_date) {
+  if (activeSubject.birthDate) {
     try {
-      const bTimeStr = (targetPerson.birth_time || "12:00").slice(0, 5);
-      const birthDateObj = new Date(`${targetPerson.birth_date}T${bTimeStr}:00+07:00`);
+      const bTimeStr = (activeSubject.birthTime || "12:00").slice(0, 5);
+      const birthDateObj = new Date(`${activeSubject.birthDate}T${bTimeStr}:00+07:00`);
       const birthYamResult = getYamPrediction(birthDateObj);
 
       const phopephumResult = await calculatePhopephum({
-        birthDate: targetPerson.birth_date,
-        birthTime: targetPerson.birth_time || "12:00",
-        birthPlace: targetPerson.birth_place || "กรุงเทพมหานคร",
+        birthDate: activeSubject.birthDate,
+        birthTime: activeSubject.birthTime || "12:00",
+        birthPlace: activeSubject.birthPlace || "กรุงเทพมหานคร",
       }, new Date());
 
       initialResult = {
@@ -129,15 +115,15 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           elementPairFlags: phopephumResult.crossCheck.elementPairFlags,
           alerts: phopephumResult.crossCheck.alerts,
         },
-        birthDate: targetPerson.birth_date,
-        birthTime: targetPerson.birth_time || "",
+        birthDate: activeSubject.birthDate,
+        birthTime: activeSubject.birthTime || "",
         transitDate: new Date().toISOString().split("T")[0],
         transitTime: "12:00",
-        lagnaNakshatra: calculateLagnaNakshatra(targetPerson.birth_date, targetPerson.birth_time || "12:00"),
+        lagnaNakshatra: calculateLagnaNakshatra(activeSubject.birthDate, activeSubject.birthTime || "12:00"),
         birthYamResult,
-        customerId: customerId || undefined,
-        customerName: selectedCust ? selectedCust.name : undefined,
-        subjectName: selectedCust ? selectedCust.name : (profile?.display_name || "เจ้าชะตา"),
+        customerId: activeSubject.isCustomer ? activeSubject.id : undefined,
+        customerName: activeSubject.isCustomer ? activeSubject.name : undefined,
+        subjectName: activeSubject.name,
       };
     } catch (e) {
       console.error("Initial load calculation error:", e);
@@ -149,6 +135,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     reports: reports ?? [],
     history: history ?? [],
     customers: customers ?? [],
+    activeSubject,
+    personLimit,
+    currentCustomerCount,
+    hasReachedLimit,
     isProLocked: !canAccess(profile, "pro"),
     initialResult,
   });
@@ -493,7 +483,17 @@ const MAHA_QUALITY_MEANINGS: Record<string, { label: string; tone: "good" | "neu
 };
 
 export default function HoroscopePage() {
-  const { profile, reports, history, customers, isProLocked, initialResult } = useLoaderData<typeof loader>();
+  const {
+    profile,
+    reports,
+    history,
+    customers,
+    activeSubject,
+    personLimit,
+    hasReachedLimit,
+    isProLocked,
+    initialResult,
+  } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting";
@@ -965,10 +965,28 @@ export default function HoroscopePage() {
   return (
     <div className="space-y-6 max-w-2xl pb-20 animate-fade-up w-full" style={{ overflowX: "hidden" }}>
 
+      {/* ── แถบสลับและจัดการเจ้าชะตาแบบเรียลไทม์ (Active Subject Banner) ── */}
+      {activeSubject && (
+        <ActiveSubjectBanner
+          currentSubject={{
+            id: activeSubject.id,
+            name: currentSubjectName,
+            birthDate: activeResult?.birthDate || activeSubject.birthDate,
+            birthTime: activeResult?.birthTime || activeSubject.birthTime,
+            birthPlace: currentBirthPlace,
+            isCustomer: activeSubject.isCustomer,
+          }}
+          customers={customers || []}
+          profileName={profile?.display_name || "ฉัน (เจ้าของบัญชี)"}
+          personLimit={personLimit}
+          hasReachedLimit={hasReachedLimit}
+        />
+      )}
+
       {/* ── เมนูหลัก (Page Header) ── */}
       <div>
         <p className="text-[#D9BC82] text-xs tracking-widest uppercase mb-1 font-bold">
-          ดวงดีมีชัย · ตรวจดวงชะตา {activeResult?.customerName ? `(ดวงชะตาของ ${activeResult.customerName})` : ""}
+          ดวงดีมีชัย · ตรวจดวงชะตา {activeResult?.customerName ? `(ดวงชะตาของ ${activeResult.customerName})` : `(ดวงชะตาของ ${currentSubjectName})`}
         </p>
         <h1 className="font-display text-3xl font-bold text-[#F8F6F1]">
           เส้นทางชีวิต
@@ -1640,20 +1658,20 @@ export default function HoroscopePage() {
               </span>
             </div>
 
-            {/* Quick Suggestion Chips (ปรับตามโหมด forecastMode) */}
+            {/* Quick Suggestion Chips (คำถามเชิงสนทนาในชีวิตจริง) */}
             <div className="flex flex-wrap gap-1.5 pb-1">
               {(forecastMode === "transit" ? [
-                { label: "🌀 วัยจรและปีจรปีนี้ส่งผลเรื่องอะไร?", q: "ตรวจดวงจรปีนี้ วัยจรและปีจรตกภพใด และมีผลกระทบอย่างไรต่อชีวิต" },
-                { label: "⚡ ฐาน ๔ หนุนนำภพจรอย่างไร?", q: "พลังฐานที่ ๔ ในคอลัมน์ของจุดจรส่งผลหนุนนำหรือสร้างแรงเสียดทานอย่างไร" },
-                { label: "🔗 ดาวย้ำฐาน ๕-๗ เปิดทางออกใด?", q: "ระบบดาวย้ำในคอลัมน์ของดวงจรเปิดทางออกและโอกาสแก้ไขสถานการณ์อย่างไร" },
-                { label: "⚖️ คดีความ/อุปสรรคตามเกณฑ์จร", q: "วิเคราะห์เกณฑ์คดีความ ข้อพิพาท หรืออุปสรรคจรในปีนี้และจังหวะคลี่คลาย" },
-                { label: "💰 การเงินและโชคลาภจร", q: "กระแสการเงินและช่องทางโชคลาภตามลัคนาจรและปีจรในช่วงนี้" },
+                { label: "🌟 ภาพรวมจังหวะชีวิตและโอกาสในปีนี้", q: "ภาพรวมจังหวะชีวิตและโอกาสสำคัญในช่วงปีนี้เป็นอย่างไรบ้าง" },
+                { label: "💰 การเงินและสภาพคล่องในช่วงนี้", q: "กระแสการเงินและช่องทางสร้างรายได้ในช่วงนี้มีทิศทางอย่างไร" },
+                { label: "💼 ทิศทางการงานและโปรเจกต์ใหม่", q: "ทิศทางการงานและการตัดสินใจเรื่องงานในช่วงนี้ควรเดินหน้าอย่างไร" },
+                { label: "⚖️ แนวทางคลี่คลายข้อพิพาทหรือคดีความ", q: "ข้อพิพาท คดีความ หรืออุปสรรคที่มีอยู่ มีแนวโน้มคลี่คลายอย่างไรและควรรับมืออย่างไร" },
+                { label: "💖 ความรักและความสัมพันธ์", q: "ความรักและสายสัมพันธ์กับคนใกล้ชิดในช่วงนี้เป็นอย่างไร" },
               ] : [
-                { label: "🌟 ตัวตนและศักยภาพเดิม (อัตตะ)", q: "วิเคราะห์บุคลิกภาพตัวตน ศักยภาพ และวาสนาตามพื้นดวงเดิม" },
-                { label: "💼 การงานและอาชีพที่ตรงกับดวง (กัมมะ)", q: "อาชีพ ธุรกิจ และรูปแบบการทำงานที่เหมาะสมที่สุดตามพื้นดวงชะตา" },
-                { label: "💰 คลังสมบัติประจำดวง (ลาภะ/กดุมภะ)", q: "โอกาสในการสร้างความมั่งคั่งและคลังสมบัติประจำดวงชะตา" },
-                { label: "💖 ความรักและคู่ครองตามพื้นชะตา (ปัตนิ)", q: "ลักษณะเนื้อคู่และเกณฑ์ความรักตามพื้นดวงเดิม" },
-                { label: "🛡️ วิธีเสริมดวงและแก้จุดเปราะบาง", q: "จุดที่ต้องระวังตามพื้นดวงเดิมและแนวทางเสริมสร้างบารมีทางจิตวิญญาณ" },
+                { label: "🌟 ศักยภาพและจุดเด่นประจำตัว", q: "วิเคราะห์ศักยภาพ วาสนา และจุดเด่นประจำตัวตามพื้นดวงเดิม" },
+                { label: "💼 อาชีพและธุรกิจที่ถูกโฉลก", q: "อาชีพหรือรูปแบบธุรกิจที่สอดคล้องกับพื้นดวงชะตาที่สุด" },
+                { label: "💰 คลังสมบัติและวิธีเก็บทรัพย์", q: "โอกาสในการสร้างความมั่นคงทางการเงินและการบริหารทรัพย์สิน" },
+                { label: "💖 ลักษณะเนื้อคู่ตามพื้นชะตา", q: "ลักษณะเนื้อคู่และเกณฑ์คู่ครองตามพื้นดวงเดิม" },
+                { label: "🛡️ แนวทางเสริมดวงและความสงบใจ", q: "ข้อควรระวังประจำตัวและแนวทางเสริมพลังบารมีให้ชีวิตราบรื่น" },
               ]).map((chip, idx) => (
                 <button
                   key={idx}
@@ -1669,23 +1687,58 @@ export default function HoroscopePage() {
             
             {/* กล่องประวัติแชท */}
             <div className="space-y-3.5 max-h-[360px] overflow-y-auto p-4 bg-slate-950/70 rounded-2xl border border-white/5 shadow-inner">
-              {chatMessages.map((msg, index) => (
-                <div key={index} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
-                  <div className={`max-w-[90%] md:max-w-[82%] rounded-2xl px-4 py-3 text-xs sm:text-[13px] leading-relaxed whitespace-pre-line ${
-                    msg.sender === "user" 
-                      ? "bg-gradient-to-br from-[#C6A96B] to-[#D9BC82] text-[#020617] font-semibold rounded-tr-none shadow-md" 
-                      : "bg-[#0A2240]/80 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-tl-none shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
-                  }`}>
-                    {msg.text || (msg.isStreaming ? (
-                      <span className="flex items-center gap-2 text-[#C6A96B] italic animate-pulse">
-                        <span>🔮</span>
-                        <span>Wisdom Guidance กำลังเปิดคัมภีร์วิเคราะห์ผังดวงของ {currentSubjectName}...</span>
-                      </span>
-                    ) : "")}
+              {chatMessages.map((msg, index) => {
+                // จัดรูปแบบข้อความให้อ่านง่าย แปลง **หัวข้อ** เป็นตัวหนาและตัด ** ออก
+                const formattedText = msg.text ? (
+                  <div className="space-y-2">
+                    {msg.text.split("\n\n").map((para: string, pIdx: number) => {
+                      const trimmed = para.trim();
+                      if (!trimmed) return null;
+                      
+                      // ตรวจสอบว่าพารากราฟเริ่มต้นด้วยหัวข้อตัวหนาหรือไม่ เช่น **ประเด็นสำคัญ**
+                      const headerMatch = trimmed.match(/^\*\*([^*]+)\*\*\s*([\s\S]*)$/);
+                      if (headerMatch) {
+                        return (
+                          <div key={pIdx} className="space-y-1">
+                            <h4 className="font-bold text-[#C6A96B] text-xs sm:text-sm">
+                              {headerMatch[1]}
+                            </h4>
+                            {headerMatch[2] && (
+                              <p className="text-slate-100 dark:text-[#F8F6F1] leading-relaxed">
+                                {headerMatch[2].replace(/\*\*([^*]+)\*\*/g, "$1")}
+                              </p>
+                            )}
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <p key={pIdx} className="leading-relaxed">
+                          {trimmed.replace(/\*\*([^*]+)\*\*/g, "$1")}
+                        </p>
+                      );
+                    })}
                   </div>
-                  <span className="text-[11px] text-[#C6B79F]/70 mt-1 px-1">{msg.time}</span>
-                </div>
-              ))}
+                ) : null;
+
+                return (
+                  <div key={index} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
+                    <div className={`max-w-[90%] md:max-w-[82%] rounded-2xl px-4 py-3 text-xs sm:text-[13px] leading-relaxed ${
+                      msg.sender === "user" 
+                        ? "bg-gradient-to-br from-[#C6A96B] to-[#D9BC82] text-[#020617] font-semibold rounded-tr-none shadow-md" 
+                        : "bg-[#0A2240]/80 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-tl-none shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
+                    }`}>
+                      {formattedText || (msg.isStreaming ? (
+                        <span className="flex items-center gap-2 text-[#C6A96B] italic animate-pulse">
+                          <span>🔮</span>
+                          <span>กำลังประมวลผลดวงชะตาของ {currentSubjectName}...</span>
+                        </span>
+                      ) : "")}
+                    </div>
+                    <span className="text-[11px] text-[#C6B79F]/70 mt-1 px-1">{msg.time}</span>
+                  </div>
+                );
+              })}
               <div ref={chatEndRef} />
             </div>
 

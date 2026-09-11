@@ -23,6 +23,8 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "~/lib/i18n/i18n.server";
 import { AstralIcon } from "~/components/ui/AstralIcon";
+import { ActiveSubjectBanner } from "~/components/subject/ActiveSubjectBanner";
+import { resolveActiveSubject } from "~/services/activeSubject.server";
 
 export const meta: MetaFunction = () => [
   { title: "วันนี้ — PhopePhum" },
@@ -150,6 +152,15 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const locale = await i18next.getLocale(request);
   const currentLocale = locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "th-TH";
 
+  // ── ดึงข้อมูลเจ้าชะตาที่กำลัง Active (ดวงตนเอง หรือ ลูกดวงที่เลือกไว้) ──
+  const {
+    activeSubject,
+    customers,
+    personLimit,
+    currentCustomerCount,
+    hasReachedLimit,
+  } = await resolveActiveSubject(request, env, user, profile);
+
   // คำนวณวันที่ตามโหราศาสตร์ไทย (ระบบยามอัฐกาล ตัดวันใหม่ที่ 06:01 น.)
   const bkkDateStr = getAstrologicalDateStr(now);
   const thaiDateLabel = getAstrologicalThaiFormattedDate(now, currentLocale);
@@ -158,19 +169,19 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const yam = getCurrentYam();
   const moon = calculateMoonPhase();
 
-  // ── 2. Profile Context ──
-  const profileContext = profile
+  // ── 2. Active Subject Context (ผูกกับเจ้าชะตาที่กำลังเปิดอยู่) ──
+  const subjectContext = activeSubject.birthDate
     ? {
-        birthDate: profile.birth_date,
-        birthTime: profile.birth_time,
-        birthPlace: profile.birth_place,
-        displayName: profile.display_name,
+        birthDate: activeSubject.birthDate,
+        birthTime: activeSubject.birthTime,
+        birthPlace: activeSubject.birthPlace,
+        displayName: activeSubject.name,
       }
     : null;
 
   // ── 3. STEP 5.1 Calendar Intelligence (Daily Theme, Golden Window, 4 Domains) ──
   const dayIntelligence: CalendarDayIntelligence =
-    await calculateDayIntelligence(bkkDateStr, profileContext);
+    await calculateDayIntelligence(bkkDateStr, subjectContext);
 
   // ── 4. STEP 4.5 Personal Wisdom Intelligence ──
   let wisdomIntelligence: PersonalWisdomIntelligence | null = null;
@@ -178,7 +189,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     wisdomIntelligence = await generatePersonalWisdomIntelligence({
       userId: user.id,
       supabase,
-      userName: profile?.display_name || undefined,
+      userName: activeSubject.name || profile?.display_name || undefined,
     });
   } catch (err) {
     console.warn("Wisdom Intelligence loader error:", err);
@@ -205,15 +216,15 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     })
   );
 
-  // ── 6. Daily Advice (Phopephum Taksa detail) ──
+  // ── 6. Daily Advice (Phopephum Taksa detail — คำนวณตามเจ้าชะตาที่กำลัง Active) ──
   let dailyAdvice = null;
-  if (profile?.birth_date) {
+  if (activeSubject.birthDate) {
     try {
       const phResult = await calculatePhopephum(
         {
-          birthDate: profile.birth_date,
-          birthTime: profile.birth_time || "12:00",
-          birthPlace: profile.birth_place || "กรุงเทพมหานคร",
+          birthDate: activeSubject.birthDate,
+          birthTime: activeSubject.birthTime || "12:00",
+          birthPlace: activeSubject.birthPlace || "กรุงเทพมหานคร",
         },
         now
       );
@@ -273,6 +284,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     dailyAdvice,
     doList,
     avoidList,
+    activeSubject,
+    customers,
+    personLimit,
+    currentCustomerCount,
+    hasReachedLimit,
   });
 }
 
@@ -396,6 +412,10 @@ export default function TodayScreen() {
 
   const {
     profile,
+    activeSubject,
+    customers,
+    personLimit,
+    hasReachedLimit,
     loginReward,
     pendingCount,
     bkkDateStr,
@@ -410,7 +430,7 @@ export default function TodayScreen() {
     avoidList,
   } = d;
 
-  const displayName = profile?.display_name ?? t("auth.user", "คุณ");
+  const currentSubjectName = activeSubject?.name || profile?.display_name || t("auth.user", "คุณ");
   const locale = i18n.language;
 
   // ── Live date label ──
@@ -482,6 +502,24 @@ export default function TodayScreen() {
       className="max-w-2xl mx-auto space-y-6 pt-1 px-3 sm:px-4"
       style={{ paddingBottom: "calc(84px + env(safe-area-inset-bottom, 0px))" }}
     >
+      {/* ── แถบสลับและจัดการเจ้าชะตาแบบเรียลไทม์ (Active Subject Banner) ── */}
+      {activeSubject && (
+        <ActiveSubjectBanner
+          currentSubject={{
+            id: activeSubject.id,
+            name: activeSubject.name,
+            birthDate: activeSubject.birthDate,
+            birthTime: activeSubject.birthTime,
+            birthPlace: activeSubject.birthPlace,
+            isCustomer: activeSubject.isCustomer,
+          }}
+          customers={customers || []}
+          profileName={profile?.display_name || "ฉัน (เจ้าของบัญชี)"}
+          personLimit={personLimit}
+          hasReachedLimit={hasReachedLimit}
+        />
+      )}
+
       {/* ── Login Reward Toast ── */}
       {showReward && loginReward && (
         <LoginRewardToast
@@ -515,7 +553,7 @@ export default function TodayScreen() {
           </span>
         </div>
         <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-[#F8F6F1] leading-tight mt-1">
-          วันนี้ของ <span className="text-[#C6A96B]">{displayName}</span>
+          วันนี้ของ <span className="text-[#C6A96B]">{currentSubjectName}</span>
         </h1>
         <p
           className="text-xs text-[#94A3B8] mt-1 tracking-wide min-h-[16px]"
