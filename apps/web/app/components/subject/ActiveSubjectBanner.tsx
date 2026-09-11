@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Link, useNavigate, useFetcher } from "@remix-run/react";
 
 export interface ActiveSubjectProps {
@@ -37,6 +38,11 @@ export function ActiveSubjectBanner({
 }: ActiveSubjectProps) {
   const navigate = useNavigate();
   const fetcher = useFetcher();
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -170,7 +176,8 @@ export function ActiveSubjectBanner({
   };
 
   return (
-    <div className="rounded-2xl border border-[#C6A96B]/30 bg-gradient-to-r from-[#0A2240]/80 via-[#0A1628]/90 to-[#0A2240]/80 p-3.5 sm:p-4 text-[#F8F6F1] shadow-lg relative overflow-hidden backdrop-blur-md">
+    <>
+      <div className="rounded-2xl border border-[#C6A96B]/30 bg-gradient-to-r from-[#0A2240]/80 via-[#0A1628]/90 to-[#0A2240]/80 p-3.5 sm:p-4 text-[#F8F6F1] shadow-lg relative overflow-hidden backdrop-blur-md">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
         
         {/* ฝั่งซ้าย: ข้อมูลเจ้าชะตา */}
@@ -255,263 +262,273 @@ export function ActiveSubjectBanner({
         </div>
 
       </div>
+      </div>
 
-      {/* ── Modal ยืนยันการลบ ── */}
-      {isDeleteConfirmOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0A2240] border border-rose-500/40 rounded-2xl p-6 max-w-md w-full shadow-2xl text-[#F8F6F1] space-y-4">
-            <div className="flex items-center gap-3 text-rose-400">
-              <span className="text-2xl">⚠️</span>
-              <h3 className="text-lg font-bold">ยืนยันการลบเจ้าชะตา</h3>
-            </div>
-            <p className="text-sm text-[#C6B79F]">
-              คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลของ <strong className="text-[#F8F6F1]">"{currentSubject.name}"</strong> ออกจากฐานข้อมูล? เมื่อลบแล้วจะไม่สามารถกู้คืนได้
-            </p>
-            <div className="flex justify-end gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setIsDeleteConfirmOpen(false)}
-                className="px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5 text-sm text-[#C6B79F]"
-              >
-                ยกเลิก
-              </button>
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold shadow-md"
-              >
-                ยืนยันการลบ
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Modal เพิ่มเจ้าชะตาใหม่ ── */}
-      {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0A2240] border border-[#C6A96B]/40 rounded-2xl p-6 max-w-md w-full shadow-2xl text-[#F8F6F1] space-y-4">
-            <div className="flex items-center justify-between border-b border-[#C6A96B]/20 pb-3">
-              <h3 className="text-lg font-bold text-[#F8F6F1] flex items-center gap-2">
-                <span>➕</span>
-                <span>เพิ่มเจ้าชะตาใหม่</span>
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsAddModalOpen(false)}
-                className="text-[#C6B79F] hover:text-white text-lg font-bold"
-              >
-                ✕
-              </button>
-            </div>
-
-            {hasReachedLimit ? (
-              <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-3">
-                <p className="text-sm text-amber-300 font-semibold">
-                  คุณใช้โควต้าโปรไฟล์บุคคลครบแล้ว ({personLimit} คน)
+      {/* ── Render Modals via Portal directly into document.body to avoid stacking context & overflow issues ── */}
+      {mounted && typeof document !== "undefined" && createPortal(
+        <>
+          {/* ── Modal ยืนยันการลบ ── */}
+          {isDeleteConfirmOpen && (
+            <div className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-sm p-4 flex min-h-full items-center justify-center">
+              <div className="fixed inset-0" onClick={() => setIsDeleteConfirmOpen(false)} aria-hidden="true" />
+              <div className="relative bg-[#0A2240] border border-rose-500/40 rounded-2xl p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 z-10 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-center gap-3 text-rose-400">
+                  <span className="text-2xl">⚠️</span>
+                  <h3 className="text-lg font-bold">ยืนยันการลบเจ้าชะตา</h3>
+                </div>
+                <p className="text-sm text-[#C6B79F]">
+                  คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลของ <strong className="text-[#F8F6F1]">"{currentSubject.name}"</strong> ออกจากฐานข้อมูล? เมื่อลบแล้วจะไม่สามารถกู้คืนได้
                 </p>
-                <p className="text-xs text-[#C6B79F]">
-                  อัปเกรดเป็นแผน Pro หรือ Master เพื่อเพิ่มเจ้าชะตาได้สูงสุด 10 ถึงไม่จำกัดคน
-                </p>
-                <Link
-                  to="/pricing"
-                  className="inline-block px-4 py-2 bg-[#C6A96B] text-[#020617] font-bold rounded-xl text-xs"
-                >
-                  ดูแพ็กเกจสมาชิก ➔
-                </Link>
-              </div>
-            ) : (
-              <form onSubmit={handleSaveAdd} className="space-y-4 text-xs sm:text-sm">
-                <div>
-                  <label className="block text-[#C6B79F] mb-1 font-semibold">ชื่อเจ้าชะตา / ลูกดวง *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formName}
-                    onChange={e => setFormName(e.target.value)}
-                    placeholder="เช่น คุณสมชาย หรือ ลูกดวง A"
-                    className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-[#F8F6F1] focus:border-[#C6A96B] outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[#C6B79F] mb-1 font-semibold">วันเดือนปีเกิด (พ.ศ.) *</label>
-                  <div className="grid grid-cols-3 gap-2">
-                    <select
-                      value={formDay}
-                      onChange={e => setFormDay(Number(e.target.value))}
-                      className="bg-slate-950/60 border border-white/10 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none"
-                    >
-                      {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
-                        <option key={d} value={d} className="bg-[#0A2240]">{d}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={formMonth}
-                      onChange={e => setFormMonth(Number(e.target.value))}
-                      className="bg-slate-950/60 border border-white/10 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none"
-                    >
-                      {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                        <option key={i + 1} value={i + 1} className="bg-[#0A2240]">{m}</option>
-                      ))}
-                    </select>
-                    <select
-                      value={formYear}
-                      onChange={e => setFormYear(Number(e.target.value))}
-                      className="bg-slate-950/60 border border-white/10 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none"
-                    >
-                      {Array.from({ length: 100 }, (_, i) => 2569 - i).map(y => (
-                        <option key={y} value={y} className="bg-[#0A2240]">{y}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[#C6B79F] mb-1 font-semibold">เวลาเกิด</label>
-                    <input
-                      type="time"
-                      value={formTime}
-                      onChange={e => setFormTime(e.target.value)}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[#C6B79F] mb-1 font-semibold">จังหวัดที่เกิด</label>
-                    <input
-                      type="text"
-                      value={formPlace}
-                      onChange={e => setFormPlace(e.target.value)}
-                      className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none"
-                    />
-                  </div>
-                </div>
-
                 <div className="flex justify-end gap-3 pt-2">
                   <button
                     type="button"
-                    onClick={() => setIsAddModalOpen(false)}
-                    className="px-4 py-2 rounded-xl border border-white/10 text-[#C6B79F] hover:bg-white/5"
+                    onClick={() => setIsDeleteConfirmOpen(false)}
+                    className="px-4 py-2 rounded-xl border border-white/10 hover:bg-white/5 text-sm text-[#C6B79F]"
                   >
                     ยกเลิก
                   </button>
                   <button
-                    type="submit"
-                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold shadow-md"
+                    type="button"
+                    onClick={handleDelete}
+                    className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-sm font-bold shadow-md"
                   >
-                    บันทึกเจ้าชะตา
+                    ยืนยันการลบ
                   </button>
                 </div>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* ── Modal แก้ไขเจ้าชะตา ── */}
-      {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-[#0A2240] border border-[#C6A96B]/40 rounded-2xl p-6 max-w-md w-full shadow-2xl text-[#F8F6F1] space-y-4">
-            <div className="flex items-center justify-between border-b border-[#C6A96B]/20 pb-3">
-              <h3 className="text-lg font-bold text-[#F8F6F1] flex items-center gap-2">
-                <span>✏️</span>
-                <span>แก้ไขข้อมูลเจ้าชะตา</span>
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(false)}
-                className="text-[#C6B79F] hover:text-white text-lg font-bold"
-              >
-                ✕
-              </button>
+              </div>
             </div>
+          )}
 
-            <form onSubmit={handleSaveEdit} className="space-y-4 text-xs sm:text-sm">
-              <div>
-                <label className="block text-[#C6B79F] mb-1 font-semibold">ชื่อเจ้าชะตา / ลูกดวง *</label>
-                <input
-                  type="text"
-                  required
-                  value={formName}
-                  onChange={e => setFormName(e.target.value)}
-                  className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-[#F8F6F1] focus:border-[#C6A96B] outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[#C6B79F] mb-1 font-semibold">วันเดือนปีเกิด (พ.ศ.) *</label>
-                <div className="grid grid-cols-3 gap-2">
-                  <select
-                    value={formDay}
-                    onChange={e => setFormDay(Number(e.target.value))}
-                    className="bg-slate-950/60 border border-white/10 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none"
+          {/* ── Modal เพิ่มเจ้าชะตาใหม่ ── */}
+          {isAddModalOpen && (
+            <div className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:p-6 flex min-h-full items-center justify-center">
+              <div className="fixed inset-0" onClick={() => setIsAddModalOpen(false)} aria-hidden="true" />
+              <div className="relative bg-[#0A2240] border border-[#C6A96B]/50 rounded-2xl p-5 sm:p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 max-h-[90vh] overflow-y-auto z-10 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-center justify-between border-b border-[#C6A96B]/20 pb-3 sticky top-0 bg-[#0A2240] z-10">
+                  <h3 className="text-lg font-bold text-[#F8F6F1] flex items-center gap-2">
+                    <span>➕</span>
+                    <span>เพิ่มเจ้าชะตาใหม่</span>
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddModalOpen(false)}
+                    className="text-[#C6B79F] hover:text-white text-lg font-bold p-1 rounded-lg hover:bg-white/10"
                   >
-                    {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
-                      <option key={d} value={d} className="bg-[#0A2240]">{d}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={formMonth}
-                    onChange={e => setFormMonth(Number(e.target.value))}
-                    className="bg-slate-950/60 border border-white/10 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none"
-                  >
-                    {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                      <option key={i + 1} value={i + 1} className="bg-[#0A2240]">{m}</option>
-                    ))}
-                  </select>
-                  <select
-                    value={formYear}
-                    onChange={e => setFormYear(Number(e.target.value))}
-                    className="bg-slate-950/60 border border-white/10 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none"
-                  >
-                    {Array.from({ length: 100 }, (_, i) => 2569 - i).map(y => (
-                      <option key={y} value={y} className="bg-[#0A2240]">{y}</option>
-                    ))}
-                  </select>
+                    ✕
+                  </button>
                 </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[#C6B79F] mb-1 font-semibold">เวลาเกิด</label>
-                  <input
-                    type="time"
-                    value={formTime}
-                    onChange={e => setFormTime(e.target.value)}
-                    className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[#C6B79F] mb-1 font-semibold">จังหวัดที่เกิด</label>
-                  <input
-                    type="text"
-                    value={formPlace}
-                    onChange={e => setFormPlace(e.target.value)}
-                    className="w-full bg-slate-950/60 border border-white/10 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none"
-                  />
-                </div>
-              </div>
+                {hasReachedLimit ? (
+                  <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl space-y-3">
+                    <p className="text-sm text-amber-300 font-semibold">
+                      คุณใช้โควต้าโปรไฟล์บุคคลครบแล้ว ({personLimit} คน)
+                    </p>
+                    <p className="text-xs text-[#C6B79F]">
+                      อัปเกรดเป็นแผน Pro หรือ Master เพื่อเพิ่มเจ้าชะตาได้สูงสุด 10 ถึงไม่จำกัดคน
+                    </p>
+                    <Link
+                      to="/pricing"
+                      className="inline-block px-4 py-2 bg-[#C6A96B] text-[#020617] font-bold rounded-xl text-xs"
+                    >
+                      ดูแพ็กเกจสมาชิก ➔
+                    </Link>
+                  </div>
+                ) : (
+                  <form onSubmit={handleSaveAdd} className="space-y-4 text-xs sm:text-sm">
+                    <div>
+                      <label className="block text-[#C6B79F] mb-1 font-semibold">ชื่อเจ้าชะตา / ลูกดวง *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formName}
+                        onChange={e => setFormName(e.target.value)}
+                        placeholder="เช่น คุณสมชาย หรือ ลูกดวง A"
+                        className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] focus:border-[#C6A96B] outline-none"
+                      />
+                    </div>
 
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 rounded-xl border border-white/10 text-[#C6B79F] hover:bg-white/5"
-                >
-                  ยกเลิก
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold shadow-md"
-                >
-                  บันทึกการแก้ไข
-                </button>
+                    <div>
+                      <label className="block text-[#C6B79F] mb-1 font-semibold">วันเดือนปีเกิด (พ.ศ.) *</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        <select
+                          value={formDay}
+                          onChange={e => setFormDay(Number(e.target.value))}
+                          className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                        >
+                          {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                            <option key={d} value={d} className="bg-[#0A2240]">{d}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={formMonth}
+                          onChange={e => setFormMonth(Number(e.target.value))}
+                          className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                        >
+                          {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
+                            <option key={i + 1} value={i + 1} className="bg-[#0A2240]">{m}</option>
+                          ))}
+                        </select>
+                        <select
+                          value={formYear}
+                          onChange={e => setFormYear(Number(e.target.value))}
+                          className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                        >
+                          {Array.from({ length: 100 }, (_, i) => 2569 - i).map(y => (
+                            <option key={y} value={y} className="bg-[#0A2240]">{y}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-[#C6B79F] mb-1 font-semibold">เวลาเกิด</label>
+                        <input
+                          type="time"
+                          value={formTime}
+                          onChange={e => setFormTime(e.target.value)}
+                          className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[#C6B79F] mb-1 font-semibold">จังหวัดที่เกิด</label>
+                        <input
+                          type="text"
+                          value={formPlace}
+                          onChange={e => setFormPlace(e.target.value)}
+                          className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-3 border-t border-white/10 sticky bottom-0 bg-[#0A2240]">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddModalOpen(false)}
+                        className="px-4 py-2 rounded-xl border border-white/10 text-[#C6B79F] hover:bg-white/5"
+                      >
+                        ยกเลิก
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold shadow-md hover:opacity-90"
+                      >
+                        บันทึกเจ้าชะตา
+                      </button>
+                    </div>
+                  </form>
+                )}
               </div>
-            </form>
-          </div>
-        </div>
+            </div>
+          )}
+
+          {/* ── Modal แก้ไขเจ้าชะตา ── */}
+          {isEditModalOpen && (
+            <div className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:p-6 flex min-h-full items-center justify-center">
+              <div className="fixed inset-0" onClick={() => setIsEditModalOpen(false)} aria-hidden="true" />
+              <div className="relative bg-[#0A2240] border border-[#C6A96B]/50 rounded-2xl p-5 sm:p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 max-h-[90vh] overflow-y-auto z-10 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-center justify-between border-b border-[#C6A96B]/20 pb-3 sticky top-0 bg-[#0A2240] z-10">
+                  <h3 className="text-lg font-bold text-[#F8F6F1] flex items-center gap-2">
+                    <span>✏️</span>
+                    <span>แก้ไขข้อมูลเจ้าชะตา</span>
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsEditModalOpen(false)}
+                    className="text-[#C6B79F] hover:text-white text-lg font-bold p-1 rounded-lg hover:bg-white/10"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <form onSubmit={handleSaveEdit} className="space-y-4 text-xs sm:text-sm">
+                  <div>
+                    <label className="block text-[#C6B79F] mb-1 font-semibold">ชื่อเจ้าชะตา / ลูกดวง *</label>
+                    <input
+                      type="text"
+                      required
+                      value={formName}
+                      onChange={e => setFormName(e.target.value)}
+                      className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] focus:border-[#C6A96B] outline-none"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[#C6B79F] mb-1 font-semibold">วันเดือนปีเกิด (พ.ศ.) *</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      <select
+                        value={formDay}
+                        onChange={e => setFormDay(Number(e.target.value))}
+                        className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                      >
+                        {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+                          <option key={d} value={d} className="bg-[#0A2240]">{d}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={formMonth}
+                        onChange={e => setFormMonth(Number(e.target.value))}
+                        className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                      >
+                        {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
+                          <option key={i + 1} value={i + 1} className="bg-[#0A2240]">{m}</option>
+                        ))}
+                      </select>
+                      <select
+                        value={formYear}
+                        onChange={e => setFormYear(Number(e.target.value))}
+                        className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                      >
+                        {Array.from({ length: 100 }, (_, i) => 2569 - i).map(y => (
+                          <option key={y} value={y} className="bg-[#0A2240]">{y}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-[#C6B79F] mb-1 font-semibold">เวลาเกิด</label>
+                      <input
+                        type="time"
+                        value={formTime}
+                        onChange={e => setFormTime(e.target.value)}
+                        className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[#C6B79F] mb-1 font-semibold">จังหวัดที่เกิด</label>
+                      <input
+                        type="text"
+                        value={formPlace}
+                        onChange={e => setFormPlace(e.target.value)}
+                        className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-3 border-t border-white/10 sticky bottom-0 bg-[#0A2240]">
+                    <button
+                      type="button"
+                      onClick={() => setIsEditModalOpen(false)}
+                      className="px-4 py-2 rounded-xl border border-white/10 text-[#C6B79F] hover:bg-white/5"
+                    >
+                      ยกเลิก
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold shadow-md hover:opacity-90"
+                    >
+                      บันทึกการแก้ไข
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </>,
+        document.body
       )}
-    </div>
+    </>
   );
 }
