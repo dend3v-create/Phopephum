@@ -188,13 +188,23 @@ export default function FaqPage() {
           <p className="text-sm text-slate-700 dark:text-slate-400 mb-6">
             ทีมงานและผู้เชี่ยวชาญด้านระบบของเราพร้อมให้ความช่วยเหลือตลอดเวลา
           </p>
-          <a
-            href="mailto:support@phopephum.com"
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold border border-slate-300/90 dark:border-white/15 text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shadow-xs"
-          >
-            <span>ติดต่อฝ่ายสนับสนุน support@phopephum.com</span>
-            <span>→</span>
-          </a>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <a
+              href="https://lin.ee/QB5gIbD"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-bold bg-[#06C755] hover:bg-[#05b34c] text-white transition-all shadow-md hover:scale-102 cursor-pointer"
+            >
+              <span>ติดต่อผ่าน LINE Official</span>
+              <span>→</span>
+            </a>
+            <a
+              href="mailto:support@phopephum.com"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl text-sm font-semibold border border-slate-300/90 dark:border-white/15 text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 transition-colors shadow-xs"
+            >
+              <span>อีเมล support@phopephum.com</span>
+            </a>
+          </div>
         </div>
       </section>
 

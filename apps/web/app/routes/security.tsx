@@ -116,7 +116,7 @@ export default function SecurityPage() {
               <li><strong>สิทธิในการลบข้อมูล (Right to Erasure)</strong>: ร้องขอให้ลบข้อมูลส่วนบุคคลทั้งหมดออกจากฐานข้อมูลของเรา</li>
             </ul>
             <p className="pt-2 text-xs text-slate-700 dark:text-slate-400">
-              หากมีข้อสงสัยหรือต้องการใช้สิทธิของเจ้าของข้อมูล สามารถติดต่อเจ้าหน้าที่คุ้มครองข้อมูลได้ที่ <a href="mailto:privacy@phopephum.com" className="text-[#8C6D2D] dark:text-[#C6A96B] underline">privacy@phopephum.com</a>
+              หากมีข้อสงสัยหรือต้องการใช้สิทธิของเจ้าของข้อมูล สามารถติดต่อเจ้าหน้าที่คุ้มครองข้อมูลได้ที่ LINE Official: <a href="https://lin.ee/QB5gIbD" target="_blank" rel="noopener noreferrer" className="text-[#8C6D2D] dark:text-[#C6A96B] underline font-semibold">https://lin.ee/QB5gIbD</a> หรืออีเมล: <a href="mailto:privacy@phopephum.com" className="text-[#8C6D2D] dark:text-[#C6A96B] underline">privacy@phopephum.com</a>
             </p>
           </div>
         </div>

@@ -85,7 +85,7 @@ export default function RefundPage() {
               5. วิธีการขอรับการช่วยเหลือหรือยื่นคำร้องขอคืนเงิน
             </h2>
             <p>
-              สามารถติดต่อทีมงานฝ่ายดูแลลูกค้าได้ที่อีเมล: <a href="mailto:support@phopephum.com" className="text-[#8C6D2D] dark:text-[#C6A96B] underline font-semibold">support@phopephum.com</a> โดยระบุ:
+              สามารถติดต่อทีมงานฝ่ายดูแลลูกค้าได้ที่ LINE Official: <a href="https://lin.ee/QB5gIbD" target="_blank" rel="noopener noreferrer" className="text-[#8C6D2D] dark:text-[#C6A96B] underline font-semibold">https://lin.ee/QB5gIbD</a> หรืออีเมล: <a href="mailto:support@phopephum.com" className="text-[#8C6D2D] dark:text-[#C6A96B] underline font-semibold">support@phopephum.com</a> โดยระบุ:
             </p>
             <ul className="list-disc list-inside space-y-1 pl-2 mt-2">
               <li>อีเมลที่ใช้สมัครบัญชี PhopePhum</li>

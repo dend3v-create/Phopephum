@@ -102,7 +102,7 @@ export default function PrivacyPage() {
               6. สิทธิของคุณตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA)
             </h2>
             <p>
-              คุณมีสิทธิในการขอเข้าถึง ขอรับสำเนา ขอแก้ไข ขอระงับการใช้ หรือขอลบข้อมูลส่วนบุคคลของคุณทั้งหมดออกจากระบบของเราได้อย่างถาวรผ่านทางหน้าตั้งค่าโปรไฟล์ หรือติดต่อเจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคลของเราที่: <a href="mailto:privacy@phopephum.com" className="text-[#8C6D2D] dark:text-[#C6A96B] underline">privacy@phopephum.com</a>
+              คุณมีสิทธิในการขอเข้าถึง ขอรับสำเนา ขอแก้ไข ขอระงับการใช้ หรือขอลบข้อมูลส่วนบุคคลของคุณทั้งหมดออกจากระบบของเราได้อย่างถาวรผ่านทางหน้าตั้งค่าโปรไฟล์ หรือติดต่อเจ้าหน้าที่คุ้มครองข้อมูลส่วนบุคคลของเราได้ที่ LINE Official: <a href="https://lin.ee/QB5gIbD" target="_blank" rel="noopener noreferrer" className="text-[#8C6D2D] dark:text-[#C6A96B] underline font-semibold">https://lin.ee/QB5gIbD</a> หรืออีเมล: <a href="mailto:privacy@phopephum.com" className="text-[#8C6D2D] dark:text-[#C6A96B] underline">privacy@phopephum.com</a>
             </p>
           </div>
 

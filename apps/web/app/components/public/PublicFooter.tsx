@@ -119,8 +119,13 @@ export function PublicFooter() {
                 </Link>
               </li>
               <li>
-                <a href="mailto:support@phopephum.com" className="hover:text-slate-900 dark:hover:text-[#F8F6F1] transition-colors">
-                  ติดต่อฝ่ายบริการลูกค้า
+                <a 
+                  href="https://lin.ee/QB5gIbD" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-slate-900 dark:hover:text-[#F8F6F1] transition-colors flex items-center gap-1.5"
+                >
+                  <span>ติดต่อฝ่ายบริการลูกค้า (LINE)</span>
                 </a>
               </li>
             </ul>
