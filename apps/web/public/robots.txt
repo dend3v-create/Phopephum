@@ -8,6 +8,7 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /operator/
+Disallow: /dashboard/
 
 # Allow major AI search and answer bots to index for citation in answers
 User-agent: GPTBot
@@ -15,24 +16,28 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /operator/
+Disallow: /dashboard/
 
 User-agent: ClaudeBot
 Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /operator/
+Disallow: /dashboard/
 
 User-agent: PerplexityBot
 Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /operator/
+Disallow: /dashboard/
 
 User-agent: Google-Extended
 Allow: /
 Disallow: /api/
 Disallow: /admin/
 Disallow: /operator/
+Disallow: /dashboard/
 
 # Link to sitemap
 Sitemap: https://phopephum.com/sitemap.xml

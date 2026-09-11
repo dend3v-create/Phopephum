@@ -13,6 +13,7 @@ export const meta: MetaFunction = () => [
     name: "description",
     content: "รวมคำตอบทุกข้อสงสัยเกี่ยวกับ PhopePhum: การเริ่มต้นใช้งาน, ความแม่นยำของปฏิทินไทย 100 ปี, แพ็กเกจสมาชิก, ละอองทรายกาลเวลา, และความปลอดภัยของข้อมูล",
   },
+  { tagName: "link", rel: "canonical", href: "https://phopephum.com/faq" },
   { property: "og:title", content: "คำถามที่พบบ่อย (FAQ) — PhopePhum" },
   {
     property: "og:description",
@@ -197,6 +198,24 @@ export default function FaqPage() {
         </div>
       </section>
 
+      {/* ── JSON-LD Structured Data for FAQPage ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            "mainEntity": faqItems.map((item) => ({
+              "@type": "Question",
+              "name": item.q,
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": item.a,
+              },
+            })),
+          }),
+        }}
+      />
     </PublicLayout>
   );
 }

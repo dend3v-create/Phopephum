@@ -12,6 +12,7 @@ export const meta: MetaFunction = () => [
     name: "description",
     content: "สำรวจฟีเจอร์เด่นทั้งหมดของ PhopePhum: ยามอัฏฐกาล ๑๖ ยาม, ผังดวง ๗ ตัว ๙ ฐาน, ๔ ประตูศาสตร์พยากรณ์, Wisdom AI ส่วนตัว, และระบบวางแผนชีวิต TQM",
   },
+  { tagName: "link", rel: "canonical", href: "https://phopephum.com/features" },
   { property: "og:title", content: "ฟีเจอร์ทั้งหมด — PhopePhum (ภพภูมิ)" },
   {
     property: "og:description",
@@ -184,6 +185,23 @@ export default function FeaturesPage() {
         </Link>
       </section>
 
+      {/* ── JSON-LD Structured Data for Features ItemList ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "ItemList",
+            "name": "PHOPEPHUM Core Features",
+            "itemListElement": corePillars.map((p, idx) => ({
+              "@type": "ListItem",
+              "position": idx + 1,
+              "name": p.name,
+              "description": p.desc,
+            })),
+          }),
+        }}
+      />
     </PublicLayout>
   );
 }

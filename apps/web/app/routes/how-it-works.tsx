@@ -12,6 +12,7 @@ export const meta: MetaFunction = () => [
     name: "description",
     content: "คู่มือเริ่มต้นใช้งาน PhoPePhum OS ใน 3 ขั้นตอนง่ายๆ ถอดรหัสจังหวะชีวิต ค้นหาเวลาทอง และรับคำแนะนำ Action Plan เฉพาะบุคคลด้วย AI",
   },
+  { tagName: "link", rel: "canonical", href: "https://phopephum.com/how-it-works" },
   { property: "og:title", content: "วิธีใช้งาน — PhoPePhum OS" },
   {
     property: "og:description",
@@ -197,6 +198,24 @@ export default function HowItWorksPage() {
         </div>
       </section>
 
+      {/* ── JSON-LD Structured Data for HowTo ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "HowTo",
+            "name": "วิธีใช้งาน PhoPePhum OS เพื่อค้นหาจังหวะเวลาทอง",
+            "description": "คู่มือ 3 ขั้นตอนเริ่มต้นใช้งาน PhoPePhum OS ในการวางแผนชีวิตและการตัดสินใจด้วยปัญญาและกาลเวลา",
+            "step": steps.map((s, idx) => ({
+              "@type": "HowToStep",
+              "position": idx + 1,
+              "name": s.title,
+              "text": s.desc,
+            })),
+          }),
+        }}
+      />
     </PublicLayout>
   );
 }

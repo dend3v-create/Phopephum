@@ -16,6 +16,7 @@ export const meta: MetaFunction = () => [
     content:
       "วันนี้คุณควรทำอะไร และช่วงเวลาไหนดีที่สุด? PHOPEPHUM OS ผสานศาสตร์สุริยยาตร์แท้กับ Wisdom AI ถอดรหัสช่วงเวลาทอง (Golden Window) เฉพาะบุคคล เพื่อการตัดสินใจที่มั่นใจและลงมือทำอย่างแม่นยำ",
   },
+  { tagName: "link", rel: "canonical", href: "https://phopephum.com" },
   { property: "og:type", content: "website" },
   { property: "og:url", content: "https://phopephum.com" },
   { property: "og:title", content: "PHOPEPHUM OS — วันนี้คุณควรทำอะไร และช่วงเวลาไหนดีที่สุด?" },
@@ -908,6 +909,59 @@ export default function IndexPage() {
           </Link>
         </div>
       </section>
+
+      {/* ── JSON-LD Structured Data for SEO & AEO (AI Engines) ── */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify([
+            {
+              "@context": "https://schema.org",
+              "@type": "WebSite",
+              "name": "PHOPEPHUM OS",
+              "alternateName": ["ภพภูมิ", "PhopePhum", "Living Wisdom OS"],
+              "url": "https://phopephum.com",
+              "description":
+                "ระบบปฏิบัติการปัญญาและกาลเวลาชีวิต (Life Guidance Platform) คำนวณสุริยยาตร์แท้และ Wisdom AI เพื่อค้นหาช่วงเวลาทอง (Golden Window) เฉพาะบุคคล",
+              "inLanguage": "th",
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "SoftwareApplication",
+              "name": "PHOPEPHUM OS",
+              "applicationCategory": "LifestyleApplication",
+              "operatingSystem": "Web, Cloudflare Pages",
+              "offers": {
+                "@type": "Offer",
+                "price": "0",
+                "priceCurrency": "THB",
+                "availability": "https://schema.org/InStock",
+              },
+              "description":
+                "แพลตฟอร์มวิเคราะห์กาลชะตาและหน้าต่างเวลาทอง ด้วยสูตรคำนวณสุริยยาตร์แท้และระบบ Wisdom AI",
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              "name": "PHOPEPHUM OS",
+              "url": "https://phopephum.com",
+              "logo": "https://phopephum.com/favicon.svg",
+            },
+            {
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              "mainEntity": faqs.map((f) => ({
+                "@type": "Question",
+                "name": f.q,
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": f.a,
+                },
+              })),
+            },
+          ]),
+        }}
+      />
     </PublicLayout>
   );
 }

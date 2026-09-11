@@ -15,6 +15,7 @@ export const meta: MetaFunction = () => [
     content:
       "เริ่มต้นฟรี หรือยกระดับสู่เครื่องมือวิเคราะห์เชิงกลยุทธ์ระดับมืออาชีพ แพ็กเกจรายเดือนไม่มีสัญญาผูกมัด ผสานวิชาเลข ๗ ตัว ๙ ฐาน 35 ภพเรือน ฐานกำลังพระเคราะห์ 19 ฐาน และคัมภีร์สุริยยาตร์แท้",
   },
+  { tagName: "link", rel: "canonical", href: "https://phopephum.com/pricing" },
   { property: "og:type", content: "website" },
   { property: "og:url", content: "https://phopephum.com/pricing" },
   { property: "og:title", content: "ราคา & แพ็กเกจสมาชิก — PhoPePhum OS" },

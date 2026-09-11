@@ -97,8 +97,10 @@ export function PublicNavbar({ isLoggedIn = false }: PublicNavbarProps) {
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2.5 rounded-xl border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
-            aria-label="Toggle Navigation Menu"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl border border-slate-300/80 dark:border-white/10 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5 transition-colors focus:outline-none focus:ring-2 focus:ring-[#C6A96B]"
+            aria-label={mobileMenuOpen ? "ปิดเมนูนำทาง" : "เปิดเมนูนำทาง"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-nav-menu"
           >
             {mobileMenuOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -115,7 +117,10 @@ export function PublicNavbar({ isLoggedIn = false }: PublicNavbarProps) {
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="sm:hidden border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#020617]/95 backdrop-blur-2xl px-5 py-6 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200">
+        <div
+          id="mobile-nav-menu"
+          className="sm:hidden border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#020617]/95 backdrop-blur-2xl px-5 py-6 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
+        >
           <nav className="flex flex-col space-y-1">
             {navLinks.map((link) => (
               <Link

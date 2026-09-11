@@ -4,6 +4,8 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  isRouteErrorResponse,
+  useRouteError,
   useRouteLoaderData,
 } from "@remix-run/react";
 import { json } from "@remix-run/cloudflare";
@@ -81,4 +83,55 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return <Outlet />;
+}
+
+export function ErrorBoundary() {
+  const error = useRouteError();
+  let status = 500;
+  let title = "เกิดข้อผิดพลาดในการเชื่อมต่อมิติกาลเวลา";
+  let message = "ระบบไม่สามารถประมวลผลคำขอนี้ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง";
+
+  if (isRouteErrorResponse(error)) {
+    status = error.status;
+    if (status === 404) {
+      title = "404 — ไม่พบหน้านี้ในระบบกาลเวลา";
+      message = "หน้าที่คุณกำลังค้นหาอาจถูกย้าย หรือไม่มีอยู่ในมิตินี้ กรุณาตรวจสอบ URL หรือกลับสู่หน้าหลัก";
+    } else {
+      title = `${status} — เกิดข้อผิดพลาดในระบบ`;
+      message = error.data?.message || error.statusText || message;
+    }
+  } else if (error instanceof Error) {
+    message = error.message;
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 bg-[#020617] text-[#F8F6F1]">
+      <div className="max-w-md w-full rounded-2xl border border-[#C6A96B]/30 bg-[#0A1628]/85 backdrop-blur-xl p-6 sm:p-8 text-center shadow-2xl shadow-black/50">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-[#C6A96B]/15 border border-[#C6A96B]/40 flex items-center justify-center text-2xl font-bold font-display text-[#C6A96B]">
+          {status === 404 ? "✦" : "!"}
+        </div>
+        <h1 className="text-xl sm:text-2xl font-bold font-display text-[#F8F6F1] mb-2 tracking-wide">
+          {title}
+        </h1>
+        <p className="text-sm text-slate-300 dark:text-slate-400 mb-6 leading-relaxed">
+          {message}
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="px-4 py-2.5 rounded-xl border border-[#C6A96B]/40 text-[#F6D88C] hover:bg-[#C6A96B]/10 font-semibold text-sm transition-all"
+          >
+            โหลดใหม่อีกครั้ง
+          </button>
+          <a
+            href="/"
+            className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold text-sm shadow-md shadow-[#C6A96B]/20 hover:scale-102 active:scale-98 transition-all"
+          >
+            กลับสู่หน้าหลัก
+          </a>
+        </div>
+      </div>
+    </div>
+  );
 }
