@@ -12,7 +12,7 @@ export function Button({
   ...props
 }: ButtonProps) {
   const base =
-    "inline-flex items-center justify-center gap-2 font-semibold rounded-full px-6 py-3 text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center gap-2 font-semibold rounded-full px-5 sm:px-6 py-2.5 sm:py-3 min-h-[44px] text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation";
 
   const variants = {
     primary:

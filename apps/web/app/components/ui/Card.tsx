@@ -21,7 +21,7 @@ export function Card({
   return (
     <div
       style={style}
-      className={`${base} p-6
+      className={`${base} p-4 sm:p-6
         ${glow ? "shadow-[0_0_40px_rgba(232,196,106,0.12)]" : ""}
         ${className}`}
     >

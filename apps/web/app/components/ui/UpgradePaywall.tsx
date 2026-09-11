@@ -7,7 +7,7 @@ interface UpgradePaywallProps {
 
 export function UpgradePaywall({ featureName, description }: UpgradePaywallProps) {
   return (
-    <div className="relative min-h-[500px] flex items-center justify-center rounded-[2.5rem] border border-white/5 overflow-hidden"
+    <div className="relative min-h-[380px] sm:min-h-[500px] flex items-center justify-center rounded-3xl sm:rounded-[2.5rem] border border-white/5 overflow-hidden"
       style={{ background: "var(--card-dark-bg)", backdropFilter: "blur(8px)" }}>
       
       {/* Blurred background preview effect */}
@@ -19,24 +19,24 @@ export function UpgradePaywall({ featureName, description }: UpgradePaywallProps
         </div>
       </div>
 
-      <div className="relative z-10 max-w-md w-full px-8 py-12 text-center">
-        <div className="w-20 h-20 bg-[#C6A96B]/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-[#C6A96B]/20">
-          <svg className="w-10 h-10 text-[#C6A96B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="relative z-10 max-w-md w-full px-5 py-8 sm:px-8 sm:py-12 text-center">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#C6A96B]/10 rounded-full flex items-center justify-center mx-auto mb-5 sm:mb-6 border border-[#C6A96B]/20">
+          <svg className="w-8 h-8 sm:w-10 sm:h-10 text-[#C6A96B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         </div>
 
-        <h2 className="font-display text-2xl font-bold text-[#F8F6F1] mb-3 uppercase tracking-wider">
+        <h2 className="font-display text-xl sm:text-2xl font-bold text-[#F8F6F1] mb-2 sm:mb-3 uppercase tracking-wider">
           {featureName} ถูกล็อกไว้
         </h2>
-        <p className="text-[#94A3B8] text-sm leading-relaxed mb-8">
+        <p className="text-[#94A3B8] text-xs sm:text-sm leading-relaxed mb-6 sm:mb-8">
           {description || `ฟีเจอร์นี้สงวนสิทธิ์สำหรับสมาชิกระดับ Professional Master ขึ้นไป เพื่อรับการพยากรณ์ที่แม่นยำและเจาะลึกยิ่งขึ้น`}
         </p>
 
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <Link
             to="/dashboard/upgrade"
-            className="block w-full py-4 rounded-2xl font-bold text-[#020617] transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="flex items-center justify-center w-full py-3.5 sm:py-4 min-h-[48px] rounded-2xl font-bold text-[#020617] text-sm transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#C6A96B]/20"
             style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}
           >
             อัปเกรดเพื่อปลดล็อกตอนนี้ →

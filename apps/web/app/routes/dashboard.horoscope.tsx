@@ -436,6 +436,42 @@ function DomainAnnualIcon({ className = "w-7 h-7" }: { className?: string }) {
   );
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ชุดข้อมูลทำนายระบบดาว ทักษาจร และมหาภูติจรแบบ Dynamic
+// ─────────────────────────────────────────────────────────────────────────────
+
+const STAR_CORE_MEANINGS: Record<number, { title: string; element: string; desc: string; keywords: string[] }> = {
+  1: { title: "ดาวอาทิตย์ (๑)", element: "ไฟ", desc: "สัญลักษณ์แห่งเกียรติยศ ชื่อเสียง ความเป็นผู้นำ และการแสดงออกถึงศักดิ์ศรีและความคิดสร้างสรรค์ระดับจักรพรรดิ", keywords: ["เกียรติยศ", "ชื่อเสียง", "ผู้นำ", "ความร้อนแรง"] },
+  2: { title: "ดาวจันทร์ (๒)", element: "ดิน", desc: "สัญลักษณ์แห่งเสน่ห์เมตตามหานิยม ความอ่อนโยน การบริการ โชคลาภ และวิถีอารมณ์ความรู้สึกที่ละเอียดอ่อน", keywords: ["เสน่ห์", "เมตตา", "ความอ่อนโยน", "เงินทองไหลมา"] },
+  3: { title: "ดาวอังคาร (๓)", element: "ลม", desc: "สัญลักษณ์แห่งความกล้าหาญ การลงมือทำอย่างรวดเร็ว พลังขับเคลื่อน พละกำลัง และการแข่งขันเพื่อชัยชนะ", keywords: ["ความกล้าหาญ", "ขยันขันแข็ง", "รวดเร็ว", "ชัยชนะ"] },
+  4: { title: "ดาวพุธ (๔)", element: "น้ำ", desc: "สัญลักษณ์แห่งปัญญาปฏิภาณ ไหวพริบ การสื่อสาร เจรจา การประสานสัมพันธ์อันดี และการค้าขายสร้างรายได้", keywords: ["การเจรจา", "เอกสารสัญญา", "การค้า", "ไหวพริบ"] },
+  5: { title: "ดาวพฤหัสบดี (๕)", element: "ดิน", desc: "สัญลักษณ์แห่งปัญญาญาณอันสูงส่ง ความรู้ คุณธรรม ความมั่นคง ศีลธรรม และผู้ใหญ่อุปถัมภ์คำชูที่เป็นมงคล", keywords: ["ปัญญา", "ความรู้", "ความมั่นคง", "ผู้ใหญ่สนับสนุน"] },
+  6: { title: "ดาวศุกร์ (๖)", element: "น้ำ", desc: "สัญลักษณ์แห่งศิลปะ ความรัก โชคลาภการเงิน ความสุขสำราญทางโลก และเสน่ห์ดึงดูดสิ่งสวยงามเข้ามาหาตัว", keywords: ["ความรัก", "ศิลปะ", "เงินตรา", "ความสุขสมบูรณ์"] },
+  7: { title: "ดาวเสาร์ (๗)", element: "ไฟ", desc: "สัญลักษณ์แห่งความอดทน ความเพียรพยายาม ภารกิจระยะยาวอันหนักหน่วง และการสร้างรากฐานชีวิตที่ยั่งยืน", keywords: ["ความอดทน", "ความรับผิดชอบ", "งานใหญ่", "รากฐานมั่นคง"] },
+  8: { title: "ดาวราหู (๘)", element: "ลม", desc: "สัญลักษณ์แห่งความกล้าได้กล้าเสีย การเสี่ยงโชค ทางลัด การพลิกฟื้นดวงชะตา การต่างประเทศ หรือความลุ่มหลงนวัตกรรมใหม่ๆ", keywords: ["การต่างประเทศ", "เสี่ยงโชค", "นวัตกรรม", "พลิกแพลงชะตา"] }
+};
+
+const TAKSA_QUALITY_MEANINGS: Record<string, { label: string; tone: "good" | "neutral" | "bad"; desc: string }> = {
+  บริวาร: { label: "บริวารจร", tone: "good", desc: "ปีนี้มีพลังแห่งความเกื้อหนุนร่วมมือ มีการเริ่มโครงการใหม่ร่วมกับผู้อื่น หรือมีผู้ช่วยงาน ลูกน้อง คนรัก ครอบครัวช่วยส่งเสริมผลักดัน" },
+  อายุ: { label: "อายุจร", tone: "neutral", desc: "ปีนี้จะโฟกัสที่การดำเนินชีวิต สุขภาพร่างกาย และการปรับสมดุลวิถีชีวิต มีความมั่นคงในการดูแลตนเอง การเดินทางปลอดภัย" },
+  เดช: { label: "เดชจร", tone: "good", desc: "ปีนี้อำนาจบารมีโดดเด่นมาก ชนะอุปสรรคทั้งปวง มีเกียรติยศชื่อเสียง ได้รับตำแหน่ง คุมงาน คุมคน หรือมีพลังตัดสินใจเฉียบคมเด็ดขาด" },
+  ศรี: { label: "ศรีจร", tone: "good", desc: "ปีนี้คือ 'ปีทองและสิริมงคลสูงสุด' ของท่านในด้านดาวดวงนี้ จะนำมาซึ่งโชคลาภ ทรัพย์สิน ความสุข ความรักอันหวานชื่น และความราบรื่นในทุกมิติชีวิต" },
+  มูละ: { label: "มูละจร", tone: "good", desc: "ปีนี้มีความโดดเด่นด้านหลักทรัพย์ มรดก รากฐานชีวิตที่มั่นคง การซื้อที่อยู่อาศัย ยานพาหนะ หรือการออมเงินทองที่มีมูลค่าสูง" },
+  อุตสาหะ: { label: "อุตสาหะจร", tone: "neutral", desc: "ปีนี้เน้นความพากเพียรพยายาม การทำงานหนัก โครงการที่ต้องฝ่าฟันอุปสรรค เหนื่อยแต่จะประสบความสำเร็จลุล่วงด้วยน้ำพักน้ำแรง" },
+  มนตรี: { label: "มนตรีจร", tone: "good", desc: "ปีนี้ได้รับความเมตตาปรานีจากผู้ใหญ่ ครูอาจารย์ หรือมีผู้มีอิทธิพลคอยช่วยเหลือ สนับสนุนอุปถัมภ์ ชี้ช่องทางการงานการเงินให้สำเร็จได้ง่าย" },
+  กาลกิณี: { label: "กาลกิณีจร", tone: "bad", desc: "ปีนี้ควรดำเนินชีวิตด้วยความระมัดระวังสูงสุด ดาวดวงนี้จะทำหน้าที่เตือนภัยเรื่องการเสียชื่อเสียง ขัดแย้ง คดีความ หรือสุขภาพทรุดโทรม อย่าประมาท" }
+};
+
+const MAHA_QUALITY_MEANINGS: Record<string, { label: string; tone: "good" | "neutral" | "bad"; desc: string }> = {
+  อธิบดี: { label: "อธิบดีจร", tone: "good", desc: "จิตใจและพลังภายในมีความเข้มแข็งและกล้าหาญพร้อมรับบทบาทสำคัญในการปกครอง นำทัพ หรือตัดสินใจเรื่องใหญ่ๆ ได้อย่างยอดเยี่ยม" },
+  ราชา: { label: "ราชาจร", tone: "good", desc: "มีสภาวะภายในที่สง่างาม ได้รับความสะดวกสบาย มีสง่าราศีดึงดูดสิ่งพรีเมียมหรูหรา และได้รับความเคารพยกย่องสูง" },
+  ธงชัย: { label: "ธงชัยจร", tone: "good", desc: "จิตใจมีพลังแห่งชัยชนะ การตั้งเป้าหมายสิ่งใดจะมีแรงบันดาลใจนำพาไปสู่ความสำเร็จและมีโชคดีไม่คาดฝันคอยหนุนหลัง" },
+  ขุมทรัพย์: { label: "ขุมทรัพย์จร", tone: "good", desc: "สภาวะภายในเป็นปีแห่งการกักเก็บความมั่นคง ค้นพบโอกาสสร้างรายได้ หรือมีคลังปัญญาที่มองเห็นโอกาสสร้างผลประโยชน์ก้อนโต" },
+  มรณะ: { label: "มรณะจร", tone: "bad", desc: "มีความคิดอยากเปลี่ยนแปลงขนานใหญ่ ต้องการลบล้างสิ่งเดิมเพื่อเริ่มต้นบทเรียนชีวิตบทใหม่ หรือมีความกังวลเกี่ยวกับการพลัดพรากเดินทางไกล" },
+  อริ: { label: "อริจร", tone: "bad", desc: "สภาวะจิตใจต้องเผชิญหน้ากับความกดดัน ปัญหาขัดแย้ง และการแก้ไขปัญหารายวันค่อนข้างถี่ ต้องมีสติระงับอารมณ์และอดทนอย่างยิ่ง" },
+  โลกาวินาศ: { label: "โลกาวินาศจร", tone: "bad", desc: "สภาวะอารมณ์ภายในแปรปรวนลึกๆ มีเรื่องคาดไม่ถึงพลิกผันให้แก้ไข แนะนำให้รักษาความนิ่ง ปรับตัวตามสถานการณ์ และไม่แบกความเครียดไว้คนเดียว" }
+};
+
 export default function HoroscopePage() {
   const { profile, reports, history, customers, isProLocked, initialResult } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
@@ -460,7 +496,17 @@ export default function HoroscopePage() {
   const [filterValue, setFilterValue] = useState<string | number | null>(null);
 
   // ── ระบบจัดการ Tabs ย่อย (4 Tabs) ──
-  const [activeTab, setActiveTab] = useState<"calc" | "chart" | "taksa" | "analysis">("chart");
+  const [activeTab, setActiveTab] = useState<"calc" | "chart" | "taksa" | "analysis">("analysis");
+
+  // สกัดข้อมูลดวงดาวจรสำคัญเพื่อแสดงผลภาพรวม Personal Insight
+  const taksaTransitMap = activeResult?.taksaMaha?.taksaTransit?.map || activeResult?.phopephumResult?.taksaTransit?.map;
+  const sriStarNum = taksaTransitMap ? Number(Object.entries(taksaTransitMap).find(([_, b]) => b === "ศรี")?.[0] || 0) : 0;
+  const dechStarNum = taksaTransitMap ? Number(Object.entries(taksaTransitMap).find(([_, b]) => b === "เดช")?.[0] || 0) : 0;
+  const montriStarNum = taksaTransitMap ? Number(Object.entries(taksaTransitMap).find(([_, b]) => b === "มนตรี")?.[0] || 0) : 0;
+  const kaliStarNum = taksaTransitMap ? Number(Object.entries(taksaTransitMap).find(([_, b]) => b === "กาลกิณี")?.[0] || 0) : 0;
+  const ayuStarNum = taksaTransitMap ? Number(Object.entries(taksaTransitMap).find(([_, b]) => b === "อายุ")?.[0] || 0) : 0;
+  const mulaStarNum = taksaTransitMap ? Number(Object.entries(taksaTransitMap).find(([_, b]) => b === "มูละ")?.[0] || 0) : 0;
+  const currentYearThai = new Date(activeResult?.transitDate || new Date()).getFullYear() + 543;
 
   // Auto-fallback: ถ้าโหลดหน้าแรกแล้วไม่มี birth data (activeResult เป็น null) ให้สลับไปที่หน้ากรอกวันเดือนปีเกิด (calc)
   useEffect(() => {
@@ -706,10 +752,10 @@ export default function HoroscopePage() {
       {/* ── Sub-menu Card Navigation — บนสุด ── */}
       <div className="grid grid-cols-2 gap-2">
         {[
-          { id: "chart", label: "ผังดวงจักรพรรดิ", renderIcon: () => <PhopephumMandalaIcon className="w-5 h-5" />, desc: "เลข 7 ตัว 9 ฐาน" },
-          { id: "taksa", label: "ทักษา / มหาภูติ", renderIcon: () => <PhopephumCompassIcon className="w-5 h-5" />, desc: "ผังพลังงานวิถีจร" },
-          { id: "analysis", label: "บทวิเคราะห์ชีวิต", renderIcon: () => <PhopephumScrollIcon className="w-5 h-5" />, desc: "คำทำนายเจาะลึก" },
-          { id: "calc", label: "คำนวณชะตาใหม่", renderIcon: () => <PhopephumCalculateIcon className="w-5 h-5" />, desc: "เปลี่ยนข้อมูลวันเกิด" },
+          { id: "analysis", label: "ภาพรวมชีวิต & คำแนะนำ", renderIcon: () => <PhopephumScrollIcon className="w-5 h-5" />, desc: "จุดเด่น & จังหวะปีนี้" },
+          { id: "chart", label: "ผังดวงจักรพรรดิ", renderIcon: () => <PhopephumMandalaIcon className="w-5 h-5" />, desc: "เลข 7 ตัว 9 ฐาน (Pro)" },
+          { id: "taksa", label: "ทักษา / มหาภูติ", renderIcon: () => <PhopephumCompassIcon className="w-5 h-5" />, desc: "ผังพลังงานวิถีจร (Pro)" },
+          { id: "calc", label: "ข้อมูลวันเกิด", renderIcon: () => <PhopephumCalculateIcon className="w-5 h-5" />, desc: "เปลี่ยนข้อมูลวันเกิด" },
         ].map((tab) => {
           const isSelected = activeTab === tab.id;
           return (
@@ -1327,20 +1373,237 @@ export default function HoroscopePage() {
       {activeTab === "analysis" && activeResult?.matrix && (
         <div className="space-y-6 animate-in fade-in duration-300">
           {/* กล่องแสดงคำพยากรณ์คุณภาพดาวปีจรแบบ Dynamic */}
-          {hoverNum !== null && activeResult?.taksaMaha ? (
+          {hoverNum !== null && activeResult?.taksaMaha && (
             <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <YearlyStarPredictionPanel 
                 star={hoverNum} 
                 taksaMaha={activeResult.taksaMaha}
               />
             </div>
-          ) : (
-            <Card className="border-[#C9A96E]/20 bg-slate-950/20 py-6 px-4 text-center">
-              <p className="text-xs text-[#C6B79F]">
-                💡 ลองสลับไปที่เมนู **ผังดวงจักรพรรดิ** แล้วคลิกเลือกดาวดวงใดดวงหนึ่งในผังดวงชะตา เพื่อดึงคำพยากรณ์ปีจรเฉพาะบุคคลแบบเจาะลึกมาแสดงผลตรงนี้ทันทีค่ะ
-              </p>
-            </Card>
           )}
+          {/* 1. Personal Life Rhythm & Transit Overview Card */}
+          <div className="relative rounded-3xl border-2 border-slate-200 dark:border-[#C6A96B]/40 bg-white/95 dark:bg-gradient-to-br dark:from-[#0a2240] dark:via-[#0d1f38] dark:to-[#020617] p-5 sm:p-7 shadow-xl space-y-6 overflow-hidden">
+            <div
+              className="absolute -top-24 -right-24 w-72 h-72 rounded-full pointer-events-none opacity-20 blur-3xl"
+              style={{ background: "radial-gradient(circle, #C6A96B 0%, transparent 70%)" }}
+            />
+
+            {/* Header row */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-black/5 dark:border-white/10 pb-4 relative z-10">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-[0.22em] text-[#8C6D2D] dark:text-[#C6A96B] block mb-1">
+                  ✦ PERSONAL ASTRAL INSIGHT
+                </span>
+                <h2 className="text-xl sm:text-2xl font-bold font-display text-slate-900 dark:text-white">
+                  แผนที่ชีวิต & จังหวะดวงดาว {profile?.display_name ? `(${profile.display_name})` : ""}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-[#94A3B8]">
+                  วิเคราะห์จังหวะชีวิต วัยจร และพลังงานเกื้อหนุนในวัยย่าง {currentAge} ปี (พ.ศ. {currentYearThai})
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <span className="text-xs font-bold px-3 py-1 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/10 text-[#8C6D2D] dark:text-[#F3D68B]">
+                  วัยย่าง {currentAge} ปี
+                </span>
+                {lunar?.moonPhase && (
+                  <span className="text-xs font-bold px-3 py-1 rounded-full border border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-300">
+                    {lunar.moonPhase}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* 2. 4 Key Transit Pillars (๔ เสาหลักดวงดาวประจำปีนี้) */}
+            <div className="space-y-3 relative z-10">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#C6A96B]">
+                ๔ เสาหลักพลังงานดวงดาวจรปีนี้ (4 TRANSIT PILLARS):
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* ศรีจร */}
+                <div className="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/5 dark:bg-emerald-950/20 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+                      <span>🌟</span>
+                      <span>ดาวศรีจร — โชคลาภ & โอกาสทอง</span>
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+                      หนุนสูงสุด
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {sriStarNum ? STAR_CORE_MEANINGS[sriStarNum]?.title : "กำลังวิเคราะห์"}
+                  </p>
+                  <p className="text-xs text-slate-600 dark:text-[#CBD5E1] leading-relaxed">
+                    {sriStarNum ? STAR_CORE_MEANINGS[sriStarNum]?.desc : "พลังงานแห่งสิริมงคล โชคลาภ และความเจริญรุ่งเรือง"}
+                  </p>
+                </div>
+
+                {/* เดชจร */}
+                <div className="p-3.5 rounded-2xl border border-amber-500/30 bg-amber-500/5 dark:bg-amber-950/20 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-amber-800 dark:text-amber-300 flex items-center gap-1.5">
+                      <span>👑</span>
+                      <span>ดาวเดชจร — อำนาจ & ความสำเร็จ</span>
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                      บารมีเด่น
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {dechStarNum ? STAR_CORE_MEANINGS[dechStarNum]?.title : "กำลังวิเคราะห์"}
+                  </p>
+                  <p className="text-xs text-slate-600 dark:text-[#CBD5E1] leading-relaxed">
+                    {dechStarNum ? STAR_CORE_MEANINGS[dechStarNum]?.desc : "พลังอำนาจบารมี ชัยชนะในการเจรจา และการเลื่อนขั้นตำแหน่ง"}
+                  </p>
+                </div>
+
+                {/* มนตรีจร */}
+                <div className="p-3.5 rounded-2xl border border-sky-500/30 bg-sky-500/5 dark:bg-sky-950/20 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-sky-800 dark:text-sky-300 flex items-center gap-1.5">
+                      <span>🤝</span>
+                      <span>ดาวมนตรีจร — ผู้ใหญ่อุปถัมภ์ & เมตตา</span>
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-700 dark:text-sky-300">
+                      แรงหนุนดี
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {montriStarNum ? STAR_CORE_MEANINGS[montriStarNum]?.title : "กำลังวิเคราะห์"}
+                  </p>
+                  <p className="text-xs text-slate-600 dark:text-[#CBD5E1] leading-relaxed">
+                    {montriStarNum ? STAR_CORE_MEANINGS[montriStarNum]?.desc : "ได้รับความเมตตาช่วยเหลือจากผู้ใหญ่และกัลยาณมิตร"}
+                  </p>
+                </div>
+
+                {/* กาลกิณีจร */}
+                <div className="p-3.5 rounded-2xl border border-rose-500/30 bg-rose-500/5 dark:bg-rose-950/20 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-rose-800 dark:text-rose-300 flex items-center gap-1.5">
+                      <span>⚠️</span>
+                      <span>ดาวกาลกิณีจร — สิ่งที่ควรมีสติระวัง</span>
+                    </span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-700 dark:text-rose-300">
+                      พึงระวัง
+                    </span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">
+                    {kaliStarNum ? STAR_CORE_MEANINGS[kaliStarNum]?.title : "กำลังวิเคราะห์"}
+                  </p>
+                  <p className="text-xs text-slate-600 dark:text-[#CBD5E1] leading-relaxed">
+                    พึงระมัดระวังเรื่อง {kaliStarNum ? STAR_CORE_MEANINGS[kaliStarNum]?.keywords.join(", ") : "การตัดสินใจด้วยอารมณ์"} เลี่ยงความเสี่ยงสูงและตรวจเอกสารสัญญาอย่างรอบคอบ
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 3. 4 Life Domains Alignment (๔ มิติชีวิต) */}
+            <div className="space-y-3 relative z-10 pt-2 border-t border-black/5 dark:border-white/10">
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[#C6A96B]">
+                เข็มทิศ ๔ มิติชีวิตประจำปี (4 LIFE DOMAINS):
+              </p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                <div className="p-3 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 space-y-1">
+                  <span className="text-xl block">💼</span>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">การงาน & ธุรกิจ</p>
+                  <p className="text-[11px] text-slate-600 dark:text-[#94A3B8] leading-tight">
+                    {dechStarNum ? `ครองดาวเดช (${STAR_CORE_MEANINGS[dechStarNum]?.title.split(" ")[0]}) เด่นเรื่องการนำทัพ` : "ขับเคลื่อนตามเป้าหมาย"}
+                  </p>
+                </div>
+                <div className="p-3 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 space-y-1">
+                  <span className="text-xl block">💰</span>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">การเงิน & โชคลาภ</p>
+                  <p className="text-[11px] text-slate-600 dark:text-[#94A3B8] leading-tight">
+                    {sriStarNum ? `ครองดาวศรี (${STAR_CORE_MEANINGS[sriStarNum]?.title.split(" ")[0]}) มีโชคลาภการเงิน` : "หมุนเวียนคล่องตัว"}
+                  </p>
+                </div>
+                <div className="p-3 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 space-y-1">
+                  <span className="text-xl block">🤝</span>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">ความสัมพันธ์</p>
+                  <p className="text-[11px] text-slate-600 dark:text-[#94A3B8] leading-tight">
+                    {montriStarNum ? `ครองดาวมนตรี (${STAR_CORE_MEANINGS[montriStarNum]?.title.split(" ")[0]}) ผู้ใหญ่เมตตา` : "รักษาสายสัมพันธ์ดี"}
+                  </p>
+                </div>
+                <div className="p-3 rounded-2xl bg-black/[0.02] dark:bg-white/[0.03] border border-black/5 dark:border-white/5 space-y-1">
+                  <span className="text-xl block">🌿</span>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">สุขภาพ & จิตใจ</p>
+                  <p className="text-[11px] text-slate-600 dark:text-[#94A3B8] leading-tight">
+                    {ayuStarNum ? `ครองดาวอายุ (${STAR_CORE_MEANINGS[ayuStarNum]?.title.split(" ")[0]}) ปรับสมดุลกายใจ` : "รักษาวินัยพักผ่อน"}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* 4. Pro Astrology Direct Jump Buttons (Progressive Disclosure) */}
+            <div className="pt-3 border-t border-black/5 dark:border-white/10 relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <span className="text-xs text-slate-500 dark:text-[#94A3B8]">
+                ต้องการตรวจสอบโครงสร้างผังดวงเชิงลึกทางโหราศาสตร์?
+              </span>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("chart")}
+                  className="flex-1 sm:flex-none min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-[#C6A96B] border border-[#C6A96B]/40 hover:bg-[#C6A96B]/10 active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <span>📊</span>
+                  <span>ผังดวง 7 ตัว 9 ฐาน (Pro)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("taksa")}
+                  className="flex-1 sm:flex-none min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-white border border-slate-200 dark:border-white/10 hover:bg-white/5 active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                >
+                  <span>🧭</span>
+                  <span>ผังทักษา/มหาภูติ (Pro)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Star Explorer (คลิกเจาะจงดาว ๑ ถึง ๘) */}
+          <div className="space-y-3 p-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50/70 dark:bg-slate-950/40">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-800 dark:text-[#F8F6F1] flex items-center gap-1.5">
+                <span>🔍</span>
+                <span>วิเคราะห์เจาะจงดาวแต่ละดวง (คลิกเพื่อดูคำทำนายสด):</span>
+              </span>
+              {hoverNum !== null && (
+                <button
+                  type="button"
+                  onClick={() => setHoverNum(null)}
+                  className="text-[11px] text-[#C6A96B] hover:underline font-bold"
+                >
+                  ✕ ซ่อนคำทำนายเจาะลึก
+                </button>
+              )}
+            </div>
+
+            <div className="grid grid-cols-4 sm:grid-cols-8 gap-2">
+              {[1, 2, 3, 4, 5, 6, 7, 8].map((s) => {
+                const info = STAR_CORE_MEANINGS[s];
+                const isSelected = hoverNum === s;
+                const tBhop = taksaTransitMap?.[s];
+                return (
+                  <button
+                    key={s}
+                    type="button"
+                    onClick={() => setHoverNum(isSelected ? null : s)}
+                    className={`p-2 rounded-xl border text-center transition-all flex flex-col items-center gap-0.5 ${
+                      isSelected
+                        ? "bg-[#C6A96B] text-[#020617] border-[#C6A96B] font-bold shadow-md"
+                        : "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-800 dark:text-white hover:border-[#C6A96B]/50"
+                    }`}
+                  >
+                    <span className="text-xs font-black">ดาว {s}</span>
+                    <span className={`text-[10px] ${isSelected ? "text-[#020617]/80" : "text-[#C6A96B]"}`}>
+                      {tBhop || info?.title.split(" ")[0] || ""}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
 
           {/* ส่วนรายงานชะตาชีวิต (AI Reports & Categories) */}
           <div className="space-y-6 pt-6 border-t border-[#C9A96E]/20">
@@ -1621,41 +1884,7 @@ function TaksaMahaSection({
 }
 
 
-// ─────────────────────────────────────────────────────────────────────────────
-// ชุดข้อมูลทำนายระบบดาว ทักษาจร และมหาภูติจรแบบ Dynamic
-// ─────────────────────────────────────────────────────────────────────────────
 
-const STAR_CORE_MEANINGS: Record<number, { title: string; element: string; desc: string; keywords: string[] }> = {
-  1: { title: "ดาวอาทิตย์ (๑)", element: "ไฟ", desc: "สัญลักษณ์แห่งเกียรติยศ ชื่อเสียง ความเป็นผู้นำ และการแสดงออกถึงศักดิ์ศรีและความคิดสร้างสรรค์ระดับจักรพรรดิ", keywords: ["เกียรติยศ", "ชื่อเสียง", "ผู้นำ", "ความร้อนแรง"] },
-  2: { title: "ดาวจันทร์ (๒)", element: "ดิน", desc: "สัญลักษณ์แห่งเสน่ห์เมตตามหานิยม ความอ่อนโยน การบริการ โชคลาภ และวิถีอารมณ์ความรู้สึกที่ละเอียดอ่อน", keywords: ["เสน่ห์", "เมตตา", "ความอ่อนโยน", "เงินทองไหลมา"] },
-  3: { title: "ดาวอังคาร (๓)", element: "ลม", desc: "สัญลักษณ์แห่งความกล้าหาญ การลงมือทำอย่างรวดเร็ว พลังขับเคลื่อน พละกำลัง และการแข่งขันเพื่อชัยชนะ", keywords: ["ความกล้าหาญ", "ขยันขันแข็ง", "รวดเร็ว", "ชัยชนะ"] },
-  4: { title: "ดาวพุธ (๔)", element: "น้ำ", desc: "สัญลักษณ์แห่งปัญญาปฏิภาณ ไหวพริบ การสื่อสาร เจรจา การประสานสัมพันธ์อันดี และการค้าขายสร้างรายได้", keywords: ["การเจรจา", "เอกสารสัญญา", "การค้า", "ไหวพริบ"] },
-  5: { title: "ดาวพฤหัสบดี (๕)", element: "ดิน", desc: "สัญลักษณ์แห่งปัญญาญาณอันสูงส่ง ความรู้ คุณธรรม ความมั่นคง ศีลธรรม และผู้ใหญ่อุปถัมภ์คำชูที่เป็นมงคล", keywords: ["ปัญญา", "ความรู้", "ความมั่นคง", "ผู้ใหญ่สนับสนุน"] },
-  6: { title: "ดาวศุกร์ (๖)", element: "น้ำ", desc: "สัญลักษณ์แห่งศิลปะ ความรัก โชคลาภการเงิน ความสุขสำราญทางโลก และเสน่ห์ดึงดูดสิ่งสวยงามเข้ามาหาตัว", keywords: ["ความรัก", "ศิลปะ", "เงินตรา", "ความสุขสมบูรณ์"] },
-  7: { title: "ดาวเสาร์ (๗)", element: "ไฟ", desc: "สัญลักษณ์แห่งความอดทน ความเพียรพยายาม ภารกิจระยะยาวอันหนักหน่วง และการสร้างรากฐานชีวิตที่ยั่งยืน", keywords: ["ความอดทน", "ความรับผิดชอบ", "งานใหญ่", "รากฐานมั่นคง"] },
-  8: { title: "ดาวราหู (๘)", element: "ลม", desc: "สัญลักษณ์แห่งความกล้าได้กล้าเสีย การเสี่ยงโชค ทางลัด การพลิกฟื้นดวงชะตา การต่างประเทศ หรือความลุ่มหลงนวัตกรรมใหม่ๆ", keywords: ["การต่างประเทศ", "เสี่ยงโชค", "นวัตกรรม", "พลิกแพลงชะตา"] }
-};
-
-const TAKSA_QUALITY_MEANINGS: Record<string, { label: string; tone: "good" | "neutral" | "bad"; desc: string }> = {
-  บริวาร: { label: "บริวารจร", tone: "good", desc: "ปีนี้มีพลังแห่งความเกื้อหนุนร่วมมือ มีการเริ่มโครงการใหม่ร่วมกับผู้อื่น หรือมีผู้ช่วยงาน ลูกน้อง คนรัก ครอบครัวช่วยส่งเสริมผลักดัน" },
-  อายุ: { label: "อายุจร", tone: "neutral", desc: "ปีนี้จะโฟกัสที่การดำเนินชีวิต สุขภาพร่างกาย และการปรับสมดุลวิถีชีวิต มีความมั่นคงในการดูแลตนเอง การเดินทางปลอดภัย" },
-  เดช: { label: "เดชจร", tone: "good", desc: "ปีนี้อำนาจบารมีโดดเด่นมาก ชนะอุปสรรคทั้งปวง มีเกียรติยศชื่อเสียง ได้รับตำแหน่ง คุมงาน คุมคน หรือมีพลังตัดสินใจเฉียบคมเด็ดขาด" },
-  ศรี: { label: "ศรีจร", tone: "good", desc: "ปีนี้คือ 'ปีทองและสิริมงคลสูงสุด' ของท่านในด้านดาวดวงนี้ จะนำมาซึ่งโชคลาภ ทรัพย์สิน ความสุข ความรักอันหวานชื่น และความราบรื่นในทุกมิติชีวิต" },
-  มูละ: { label: "มูละจร", tone: "good", desc: "ปีนี้มีความโดดเด่นด้านหลักทรัพย์ มรดก รากฐานชีวิตที่มั่นคง การซื้อที่อยู่อาศัย ยานพาหนะ หรือการออมเงินทองที่มีมูลค่าสูง" },
-  อุตสาหะ: { label: "อุตสาหะจร", tone: "neutral", desc: "ปีนี้เน้นความพากเพียรพยายาม การทำงานหนัก โครงการที่ต้องฝ่าฟันอุปสรรค เหนื่อยแต่จะประสบความสำเร็จลุล่วงด้วยน้ำพักน้ำแรง" },
-  มนตรี: { label: "มนตรีจร", tone: "good", desc: "ปีนี้ได้รับความเมตตาปรานีจากผู้ใหญ่ ครูอาจารย์ หรือมีผู้มีอิทธิพลคอยช่วยเหลือ สนับสนุนอุปถัมภ์ ชี้ช่องทางการงานการเงินให้สำเร็จได้ง่าย" },
-  กาลกิณี: { label: "กาลกิณีจร", tone: "bad", desc: "ปีนี้ควรดำเนินชีวิตด้วยความระมัดระวังสูงสุด ดาวดวงนี้จะทำหน้าที่เตือนภัยเรื่องการเสียชื่อเสียง ขัดแย้ง คดีความ หรือสุขภาพทรุดโทรม อย่าประมาท" }
-};
-
-const MAHA_QUALITY_MEANINGS: Record<string, { label: string; tone: "good" | "neutral" | "bad"; desc: string }> = {
-  อธิบดี: { label: "อธิบดีจร", tone: "good", desc: "จิตใจและพลังภายในมีความเข้มแข็งและกล้าหาญพร้อมรับบทบาทสำคัญในการปกครอง นำทัพ หรือตัดสินใจเรื่องใหญ่ๆ ได้อย่างยอดเยี่ยม" },
-  ราชา: { label: "ราชาจร", tone: "good", desc: "มีสภาวะภายในที่สง่างาม ได้รับความสะดวกสบาย มีสง่าราศีดึงดูดสิ่งพรีเมียมหรูหรา และได้รับความเคารพยกย่องสูง" },
-  ธงชัย: { label: "ธงชัยจร", tone: "good", desc: "จิตใจมีพลังแห่งชัยชนะ การตั้งเป้าหมายสิ่งใดจะมีแรงบันดาลใจนำพาไปสู่ความสำเร็จและมีโชคดีไม่คาดฝันคอยหนุนหลัง" },
-  ขุมทรัพย์: { label: "ขุมทรัพย์จร", tone: "good", desc: "สภาวะภายในเป็นปีแห่งการกักเก็บความมั่นคง ค้นพบโอกาสสร้างรายได้ หรือมีคลังปัญญาที่มองเห็นโอกาสสร้างผลประโยชน์ก้อนโต" },
-  มรณะ: { label: "มรณะจร", tone: "bad", desc: "มีความคิดอยากเปลี่ยนแปลงขนานใหญ่ ต้องการลบล้างสิ่งเดิมเพื่อเริ่มต้นบทเรียนชีวิตบทใหม่ หรือมีความกังวลเกี่ยวกับการพลัดพรากเดินทางไกล" },
-  อริ: { label: "อริจร", tone: "bad", desc: "สภาวะจิตใจต้องเผชิญหน้ากับความกดดัน ปัญหาขัดแย้ง และการแก้ไขปัญหารายวันค่อนข้างถี่ ต้องมีสติระงับอารมณ์และอดทนอย่างยิ่ง" },
-  โลกาวินาศ: { label: "โลกาวินาศจร", tone: "bad", desc: "สภาวะอารมณ์ภายในแปรปรวนลึกๆ มีเรื่องคาดไม่ถึงพลิกผันให้แก้ไข แนะนำให้รักษาความนิ่ง ปรับตัวตามสถานการณ์ และไม่แบกความเครียดไว้คนเดียว" }
-};
 
 function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMaha: any }) {
   const { taksaNatal, taksaTransit, mahaNatal, mahaTransit } = taksaMaha;

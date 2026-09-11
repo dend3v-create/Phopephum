@@ -289,6 +289,12 @@ export default function DashboardCalendar() {
 
   const beYear = year + 543;
 
+  // คำนวณเดือนก่อนหน้าและเดือนถัดไป
+  const prevMonth = month === 1 ? 12 : month - 1;
+  const prevYear = month === 1 ? year - 1 : year;
+  const nextMonth = month === 12 ? 1 : month + 1;
+  const nextYear = month === 12 ? year + 1 : year;
+
   // ฟังก์ชันสร้าง Google Calendar Link
   const getGoogleCalendarUrl = (title: string, date: string, time: string, details: string) => {
     const baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
@@ -309,46 +315,76 @@ export default function DashboardCalendar() {
   };
 
   return (
-    <div className="w-full max-w-full min-w-0 overflow-x-hidden max-w-6xl mx-auto space-y-8 pb-20">
+    <div className="w-full max-w-full min-w-0 overflow-x-hidden max-w-6xl mx-auto space-y-6 pb-24">
       
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <span className="text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold block mb-1">
-            ✦ Living Wisdom Calendar
+          <span className="text-[#C6A96B] text-[11px] sm:text-xs tracking-[0.2em] uppercase font-bold block mb-0.5">
+            ✦ LIVING WISDOM CALENDAR
           </span>
-          <h1 className="font-display text-3xl font-bold text-[#F8F6F1] glow-gold">
-            ปฏิทินสำเร็จ & ฤกษ์มงคล
+          <h1 className="font-display text-2xl sm:text-3xl font-bold text-slate-900 dark:text-[#F8F6F1] glow-gold">
+            ปฏิทินสำเร็จ 100 ปี & ฤกษ์มงคล
           </h1>
-          <p className="text-[#C6B79F] text-sm font-sans-thai">
-            วางแผนนัดหมายสำคัญให้ตรงกับยามมงคลและทักษาจรส่วนบุคคลของคุณ
+          <p className="text-slate-600 dark:text-[#C6B79F] text-xs sm:text-sm font-sans-thai">
+            วางแผนวันสำคัญ ค้นหาช่วงเวลาทองคำ (Golden Window) เฉพาะบุคคล
           </p>
         </div>
 
-        {/* ── Month/Year Selectors ── */}
-        <Form method="get" className="flex flex-wrap gap-2">
-          <select 
-            name="month" 
-            defaultValue={month}
-            className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-4 py-2 text-sm focus:border-[#C9A96E]/50 outline-none"
-            onChange={(e) => e.target.form?.submit()}
+        {/* ── Month/Year Selectors & Prev/Next Quick Navigation ── */}
+        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          {/* Quick Prev Button */}
+          <Link
+            to={`?year=${prevYear}&month=${prevMonth}&eventDate=${prevYear}-${String(prevMonth).padStart(2, "0")}-01`}
+            className="min-h-[40px] min-w-[40px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-[#C6A96B]/50 active:scale-95 transition-all text-slate-700 dark:text-white flex items-center justify-center text-xs font-bold shadow-sm"
+            title="เดือนก่อนหน้า"
           >
-            {G_MONTH_NAMES.map((name, i) => (
-              <option key={i + 1} value={i + 1} className="bg-[#020617]">{name}</option>
-            ))}
-          </select>
-          <select 
-            name="year" 
-            defaultValue={year}
-            className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-4 py-2 text-sm focus:border-[#C9A96E]/50 outline-none"
-            onChange={(e) => e.target.form?.submit()}
+            ‹
+          </Link>
+
+          {/* Jump to Today Button */}
+          <Link
+            to={`/dashboard/calendar`}
+            className="min-h-[40px] px-3 py-1.5 rounded-xl border border-[#C6A96B]/30 bg-[#C6A96B]/10 hover:bg-[#C6A96B]/20 active:scale-95 transition-all text-[#8C6D2D] dark:text-[#F3D68B] text-xs font-bold flex items-center gap-1 shrink-0"
           >
-            {Array.from({ length: 401 }).map((_, i) => {
-              const y = 1757 + i;
-              return <option key={y} value={y} className="bg-[#020617]">{y + 543} (CE {y})</option>
-            })}
-          </select>
-        </Form>
+            <span>📅</span>
+            <span>วันนี้</span>
+          </Link>
+
+          {/* Select Forms */}
+          <Form method="get" className="flex items-center gap-1.5">
+            <select 
+              name="month" 
+              defaultValue={month}
+              className="min-h-[40px] bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-[#C9A96E]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-2.5 py-1.5 text-xs font-bold focus:border-[#C9A96E] outline-none shadow-sm"
+              onChange={(e) => e.target.form?.submit()}
+            >
+              {G_MONTH_NAMES.map((name, i) => (
+                <option key={i + 1} value={i + 1} className="bg-white dark:bg-[#020617] text-slate-900 dark:text-white">{name}</option>
+              ))}
+            </select>
+            <select 
+              name="year" 
+              defaultValue={year}
+              className="min-h-[40px] bg-white dark:bg-slate-950/70 border border-slate-200 dark:border-[#C9A96E]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-2.5 py-1.5 text-xs font-bold focus:border-[#C9A96E] outline-none shadow-sm"
+              onChange={(e) => e.target.form?.submit()}
+            >
+              {Array.from({ length: 401 }).map((_, i) => {
+                const y = 1757 + i;
+                return <option key={y} value={y} className="bg-white dark:bg-[#020617] text-slate-900 dark:text-white">{y + 543} (CE {y})</option>
+              })}
+            </select>
+          </Form>
+
+          {/* Quick Next Button */}
+          <Link
+            to={`?year=${nextYear}&month=${nextMonth}&eventDate=${nextYear}-${String(nextMonth).padStart(2, "0")}-01`}
+            className="min-h-[40px] min-w-[40px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-[#C6A96B]/50 active:scale-95 transition-all text-slate-700 dark:text-white flex items-center justify-center text-xs font-bold shadow-sm"
+            title="เดือนถัดไป"
+          >
+            ›
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -372,39 +408,57 @@ export default function DashboardCalendar() {
               {calendarDays.map((day) => (
                 <Link 
                   key={day.day}
-                  to={`?year=${year}&month=${month}&eventDate=${day.dateStr}&eventTime=${eventTime}&eventType=${eventType}&title=${encodeURIComponent(appointmentTitle)}`}
-                  className={`relative aspect-square md:aspect-video border-b border-r border-slate-200/60 dark:border-white/5 p-1 sm:p-2 transition-all hover:bg-amber-100/40 dark:hover:bg-[#C9A96E]/10 group ${day.isWanPhra ? "bg-amber-50/60 dark:bg-[#C9A96E]/5" : ""} ${eventDate === day.dateStr ? "bg-amber-100/80 dark:bg-[#C9A96E]/20 ring-2 ring-inset ring-amber-600 dark:ring-gold-liquid/50 font-bold" : ""}`}
+                  to={`?year=${year}&month=${month}&eventDate=${day.dateStr}&eventTime=${eventTime}&eventType=${eventType}&title=${encodeURIComponent(appointmentTitle)}#day-intelligence-section`}
+                  className={`relative min-h-[52px] sm:min-h-[64px] aspect-square md:aspect-video border-b border-r border-slate-200/60 dark:border-white/5 p-1 sm:p-2 transition-all hover:bg-amber-100/40 dark:hover:bg-[#C9A96E]/10 active:scale-[0.98] group ${
+                    day.isWanPhra ? "bg-amber-50/60 dark:bg-[#C9A96E]/5" : ""
+                  } ${
+                    eventDate === day.dateStr
+                      ? "bg-amber-100/90 dark:bg-[#C9A96E]/25 ring-2 ring-inset ring-[#C6A96B] font-bold shadow-md z-10"
+                      : ""
+                  }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className={`text-[11px] sm:text-sm font-bold ${day.weekDay === 0 ? "text-rose-600 dark:text-rose-400/80" : "text-slate-800 dark:text-[#F8F6F1]/60"} group-hover:text-slate-950 dark:group-hover:text-[#F8F6F1] transition-colors`}>
+                    <span className={`text-xs sm:text-sm font-bold ${
+                      day.weekDay === 0
+                        ? "text-rose-600 dark:text-rose-400"
+                        : eventDate === day.dateStr
+                        ? "text-amber-900 dark:text-[#F3D68B]"
+                        : "text-slate-800 dark:text-[#F8F6F1]/70"
+                    } group-hover:text-slate-950 dark:group-hover:text-[#F8F6F1] transition-colors`}>
                       {day.day}
                     </span>
                     {day.hasGoldenWindow && (
-                      <span className="text-[10px] text-amber-600 dark:text-amber-300 font-bold leading-none" title="มีช่วงเวลาทองคำ (Golden Window)">
+                      <span className="text-[11px] text-amber-500 dark:text-amber-300 font-bold leading-none animate-pulse" title="มีช่วงเวลาทองคำ (Golden Window)">
                         ⭐
                       </span>
                     )}
                   </div>
 
-                  <div className="mt-1 flex flex-col gap-0.5">
-                    <span className={`text-[10px] md:text-xs font-sans-thai leading-tight ${day.isWanPhra ? "text-amber-700 dark:text-amber-400 font-bold drop-shadow-sm" : "text-slate-600 dark:text-[#D9CDB7]/80"}`}>
+                  <div className="mt-0.5 sm:mt-1 flex flex-col gap-0.5">
+                    <span className={`text-[9px] sm:text-xs font-sans-thai leading-tight truncate ${
+                      day.isWanPhra
+                        ? "text-amber-700 dark:text-amber-400 font-bold drop-shadow-sm"
+                        : "text-slate-500 dark:text-[#D9CDB7]/70"
+                    }`}>
                       {day.moonPhase}
                     </span>
                   </div>
 
                   {/* แสดงจุดนัดหมาย */}
-                  <div className="mt-1.5 flex flex-wrap gap-1">
+                  <div className="mt-1 flex flex-wrap gap-1">
                     {day.appointments.map((apt: any) => (
                       <div 
                         key={apt.id} 
-                        className={`w-1.5 h-1.5 rounded-full ${apt.score >= 80 ? "bg-emerald-500" : apt.score >= 60 ? "bg-sky-500" : "bg-rose-500"}`}
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          apt.score >= 80 ? "bg-emerald-500" : apt.score >= 60 ? "bg-sky-500" : "bg-rose-500"
+                        }`}
                         title={apt.title}
                       />
                     ))}
                   </div>
 
                   {day.isWanPhra && (
-                    <div className="absolute top-2 right-2 w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" title="วันพระ" />
+                    <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]" title="วันพระ" />
                   )}
                 </Link>
               ))}
@@ -417,44 +471,44 @@ export default function DashboardCalendar() {
 
           {/* ── Upcoming Appointments ── */}
           <div className="space-y-4">
-            <h3 className="font-display font-bold text-gold-liquid flex items-center gap-2">
-              <ListTodo className="w-5 h-5" /> รายการนัดหมายฤกษ์มงคลของคุณ
+            <h3 className="font-display font-bold text-slate-900 dark:text-[#F3D68B] flex items-center gap-2 text-sm sm:text-base">
+              <ListTodo className="w-4 h-4 text-[#C6A96B]" /> รายการนัดหมายฤกษ์มงคลของคุณ ({appointments.length})
             </h3>
             {appointments.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 {appointments.map((apt: any) => (
-                  <Card key={apt.id} className="p-4 bg-slate-900/40 border-[#C9A96E]/20 hover:border-[#C9A96E]/50 transition-colors">
+                  <Card key={apt.id} className="p-4 bg-white/95 dark:bg-slate-900/60 border-slate-200 dark:border-[#C9A96E]/20 hover:border-[#C9A96E]/50 transition-colors shadow-sm">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-black px-1.5 py-0.5 rounded ${
-                          apt.score >= 80 ? "bg-emerald-500/20 text-emerald-400" : "bg-sky-500/20 text-sky-400"
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${
+                          apt.score >= 80 ? "bg-emerald-500/20 text-emerald-700 dark:text-emerald-400" : "bg-sky-500/20 text-sky-700 dark:text-sky-400"
                         }`}>
                           {apt.score}%
                         </span>
-                        <h4 className="text-sm font-bold text-[#F8F6F1] line-clamp-1">{apt.title}</h4>
+                        <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-[#F8F6F1] line-clamp-1">{apt.title}</h4>
                       </div>
-                      <span className="text-[10px] text-[#C6B79F] font-mono">{apt.event_time.slice(0, 5)}</span>
+                      <span className="text-[11px] text-slate-500 dark:text-[#C6B79F] font-mono">{apt.event_time.slice(0, 5)} น.</span>
                     </div>
-                    <div className="flex items-center gap-2 text-[11px] text-[#C6B79F]">
-                      <CalendarIcon className="w-3 h-3" /> {new Date(apt.event_date).toLocaleDateString("th-TH", { day: 'numeric', month: 'short', year: 'numeric' })}
+                    <div className="flex items-center gap-2 text-[11px] text-slate-600 dark:text-[#C6B79F]">
+                      <CalendarIcon className="w-3 h-3 text-[#C6A96B]" /> {new Date(apt.event_date).toLocaleDateString("th-TH", { day: 'numeric', month: 'short', year: 'numeric' })}
                       <span className="mx-1">•</span>
-                      <Clock className="w-3 h-3" /> {apt.yam_name}
+                      <Clock className="w-3 h-3 text-[#C6A96B]" /> {apt.yam_name}
                     </div>
                     <div className="mt-3 flex gap-2">
                       <a 
                         href={getGoogleCalendarUrl(apt.title, apt.event_date, apt.event_time, apt.advice)}
                         target="_blank"
                         rel="noreferrer"
-                        className="text-[10px] flex items-center gap-1 text-[#C9A96E] hover:text-gold-liquid transition-colors"
+                        className="min-h-[36px] px-3 py-1 rounded-xl text-[11px] font-bold flex items-center gap-1.5 text-[#8C6D2D] dark:text-[#C9A96E] hover:bg-[#C6A96B]/10 border border-[#C6A96B]/30 transition-colors"
                       >
-                        <ExternalLink className="w-3 h-3" /> Sync Google
+                        <ExternalLink className="w-3 h-3" /> Sync Google Calendar
                       </a>
                     </div>
                   </Card>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-[#C6B79F] bg-white/5 p-8 rounded-2xl text-center border border-white/5 italic">
+              <p className="text-xs sm:text-sm text-slate-500 dark:text-[#C6B79F] bg-white/60 dark:bg-white/5 p-6 rounded-2xl text-center border border-slate-200 dark:border-white/5 italic">
                 ยังไม่มีนัดหมายที่บันทึกไว้สำหรับเดือนนี้
               </p>
             )}
@@ -462,10 +516,10 @@ export default function DashboardCalendar() {
         </div>
 
         {/* ── Right: Personal Auspicious Day Intelligence (1/3 width) ── */}
-        <div className="space-y-6">
+        <div id="day-intelligence-section" className="space-y-6 scroll-mt-24">
           {/* Day Intelligence Card */}
           {dayIntelligence && (
-            <Card className="p-6 border-2 border-slate-200 dark:border-[#C9A96E]/40 bg-white/95 dark:bg-gradient-to-br dark:from-[#0a2240] dark:via-[#0d1f38] dark:to-[#020617] rounded-3xl shadow-xl space-y-5 relative overflow-hidden">
+            <Card className="p-5 sm:p-6 border-2 border-slate-200 dark:border-[#C9A96E]/40 bg-white/95 dark:bg-gradient-to-br dark:from-[#0a2240] dark:via-[#0d1f38] dark:to-[#020617] rounded-3xl shadow-xl space-y-5 relative overflow-hidden">
               <div
                 className="absolute -top-24 -right-24 w-72 h-72 rounded-full pointer-events-none opacity-20 blur-3xl"
                 style={{ background: "radial-gradient(circle, #C6A96B 0%, transparent 70%)" }}
@@ -477,12 +531,18 @@ export default function DashboardCalendar() {
                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#8C6D2D] dark:text-[#C6A96B]">
                     DAILY AUSPICIOUS INTELLIGENCE
                   </span>
-                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
-                    {dayIntelligence.overallScore}% พลังงานเกื้อหนุน
+                  <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${
+                    dayIntelligence.overallScore >= 75
+                      ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                      : dayIntelligence.overallScore >= 55
+                      ? "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                      : "border-rose-500/30 bg-rose-500/10 text-rose-700 dark:text-rose-300"
+                  }`}>
+                    {dayIntelligence.overallScore}% {dayIntelligence.overallScore >= 75 ? "พลังงานดีเลิศ" : dayIntelligence.overallScore >= 55 ? "ราบรื่นปานกลาง" : "ควรระวัง"}
                   </span>
                 </div>
 
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <span>{dayIntelligence.lunarDayInfo.dayOfWeekThai}</span>
                   <span className="text-xs text-slate-500 dark:text-[#94A3B8] font-normal">
                     ({new Date(dayIntelligence.date).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })})
@@ -556,7 +616,7 @@ export default function DashboardCalendar() {
                       setSelectedTime(dayIntelligence.goldenWindow!.startTime);
                       setShowPlannerForm(true);
                     }}
-                    className="w-full py-2 rounded-xl text-xs font-bold text-[#020617] transition-all flex items-center justify-center gap-1.5 shadow-sm"
+                    className="w-full min-h-[44px] py-2.5 rounded-xl text-xs font-bold text-[#020617] active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm"
                     style={{ background: "linear-gradient(135deg, #C6A96B 0%, #F2D49B 100%)" }}
                   >
                     <span>✨ ใช้นัดหมายช่วงเวลานี้</span>

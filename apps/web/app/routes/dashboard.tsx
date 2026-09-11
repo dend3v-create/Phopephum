@@ -74,16 +74,15 @@ export default function DashboardLayout() {
       <main
         className="flex-1 md:ml-64 min-h-screen transition-all w-full max-w-full min-w-0 overflow-x-hidden"
         style={{
-          paddingTop: "var(--topbar-h, 52px)",
-          paddingBottom: "calc(var(--bottombar-h, 62px) + env(safe-area-inset-bottom, 0px))",
+          paddingTop: "var(--topbar-h, calc(56px + env(safe-area-inset-top, 0px)))",
+          paddingBottom: "calc(var(--bottombar-h, 68px) + env(safe-area-inset-bottom, 0px))",
         }}
       >
         <style>{`
           @media (min-width: 768px) {
             main {
-              --topbar-h: 0px !important;
-              --bottombar-h: 0px !important;
-              padding-bottom: 2rem !important;
+              padding-top: 0px !important;
+              padding-bottom: 2.5rem !important;
             }
           }
         `}</style>

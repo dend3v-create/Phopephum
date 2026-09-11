@@ -597,7 +597,7 @@ export default function SettingsPage() {
         <button
           type="button"
           onClick={() => handleTabChange("personal")}
-          className={`col-span-2 sm:flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 ${
+          className={`col-span-2 sm:flex-1 py-2.5 px-2 min-h-[44px] rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 touch-manipulation ${
             activeTab === "personal"
               ? "bg-gradient-to-r from-[#D9BC82] to-[#C6A96B] text-[#0A1628] shadow-sm font-black"
               : "text-slate-600 dark:text-[#C6B79F] hover:text-slate-900 dark:hover:text-[#F8F6F1] hover:bg-slate-200/60 dark:hover:bg-white/5"
@@ -611,7 +611,7 @@ export default function SettingsPage() {
         <button
           type="button"
           onClick={() => handleTabChange("wisdom")}
-          className={`col-span-2 sm:flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 ${
+          className={`col-span-2 sm:flex-1 py-2.5 px-2 min-h-[44px] rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 touch-manipulation ${
             activeTab === "wisdom"
               ? "bg-gradient-to-r from-[#D9BC82] to-[#C6A96B] text-[#0A1628] shadow-sm font-black"
               : "text-slate-600 dark:text-[#C6B79F] hover:text-slate-900 dark:hover:text-[#F8F6F1] hover:bg-slate-200/60 dark:hover:bg-white/5"
@@ -636,7 +636,7 @@ export default function SettingsPage() {
         <button
           type="button"
           onClick={() => handleTabChange("sands")}
-          className={`col-span-2 sm:flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 ${
+          className={`col-span-2 sm:flex-1 py-2.5 px-2 min-h-[44px] rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 touch-manipulation ${
             activeTab === "sands"
               ? "bg-gradient-to-r from-[#D9BC82] to-[#C6A96B] text-[#0A1628] shadow-sm font-black"
               : "text-slate-600 dark:text-[#C6B79F] hover:text-slate-900 dark:hover:text-[#F8F6F1] hover:bg-slate-200/60 dark:hover:bg-white/5"
@@ -659,7 +659,7 @@ export default function SettingsPage() {
         <button
           type="button"
           onClick={() => handleTabChange("affiliate")}
-          className={`col-span-3 sm:flex-1 py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 ${
+          className={`col-span-3 sm:flex-1 py-2.5 px-3 min-h-[44px] rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 touch-manipulation ${
             activeTab === "affiliate"
               ? "bg-gradient-to-r from-[#D9BC82] to-[#C6A96B] text-[#0A1628] shadow-sm font-black"
               : "text-slate-600 dark:text-[#C6B79F] hover:text-slate-900 dark:hover:text-[#F8F6F1] hover:bg-slate-200/60 dark:hover:bg-white/5"
@@ -673,7 +673,7 @@ export default function SettingsPage() {
         <button
           type="button"
           onClick={() => handleTabChange("reminders")}
-          className={`col-span-3 sm:flex-1 py-2.5 px-3 rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 ${
+          className={`col-span-3 sm:flex-1 py-2.5 px-3 min-h-[44px] rounded-xl text-xs font-bold uppercase tracking-wider whitespace-nowrap transition-all flex items-center justify-center gap-1.5 touch-manipulation ${
             activeTab === "reminders"
               ? "bg-gradient-to-r from-[#D9BC82] to-[#C6A96B] text-[#0A1628] shadow-sm font-black"
               : "text-slate-600 dark:text-[#C6B79F] hover:text-slate-900 dark:hover:text-[#F8F6F1] hover:bg-slate-200/60 dark:hover:bg-white/5"
@@ -713,7 +713,7 @@ export default function SettingsPage() {
                     <select
                       name="gender"
                       defaultValue={profile?.gender ?? ""}
-                      className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
+                      className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-4 py-2.5 min-h-[44px] text-sm focus:outline-none focus:border-[#C6A96B]"
                     >
                       <option value="">{t("common:settings.select_gender", "เลือกเพศ...")}</option>
                       <option value="male">{t("common:settings.male", "ชาย (Male)")}</option>
@@ -736,7 +736,7 @@ export default function SettingsPage() {
                       max={31}
                       defaultValue={birthDateBE.day}
                       placeholder={t("common:settings.birth_day", "วัน")}
-                      className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
+                      className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-4 py-2.5 min-h-[44px] text-sm focus:outline-none focus:border-[#C6A96B]"
                     />
                   </div>
 
@@ -747,7 +747,7 @@ export default function SettingsPage() {
                     <select
                       name="birthMonth"
                       defaultValue={birthDateBE.month}
-                      className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
+                      className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-4 py-2.5 min-h-[44px] text-sm focus:outline-none focus:border-[#C6A96B]"
                     >
                       <option value="">{t("common:settings.birth_month", "เดือน...")}</option>
                       <option value="1">{t("common:language.th") === "ไทย" ? "มกราคม" : "January"}</option>
@@ -776,7 +776,7 @@ export default function SettingsPage() {
                       max={2600}
                       defaultValue={birthDateBE.year}
                       placeholder="เช่น 2525"
-                      className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-[#C6A96B]"
+                      className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-4 py-2.5 min-h-[44px] text-sm focus:outline-none focus:border-[#C6A96B]"
                     />
                   </div>
                 </div>
@@ -808,7 +808,7 @@ export default function SettingsPage() {
                             <select
                               value={birthHour}
                               onChange={(e) => setBirthHour(e.target.value)}
-                              className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-3 py-2.5 text-sm font-semibold focus:outline-none focus:border-[#C6A96B]"
+                              className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-3 py-2.5 min-h-[44px] text-sm font-semibold focus:outline-none focus:border-[#C6A96B]"
                             >
                               {Array.from({ length: 24 }, (_, i) => {
                                 const val = String(i).padStart(2, "0");
@@ -825,7 +825,7 @@ export default function SettingsPage() {
                             <select
                               value={birthMinute}
                               onChange={(e) => setBirthMinute(e.target.value)}
-                              className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-3 py-2.5 text-sm font-semibold focus:outline-none focus:border-[#C6A96B]"
+                              className="w-full bg-slate-50 dark:bg-[#0A1628]/70 border border-slate-200 dark:border-[#C6A96B]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-3 py-2.5 min-h-[44px] text-sm font-semibold focus:outline-none focus:border-[#C6A96B]"
                             >
                               {Array.from({ length: 60 }, (_, i) => {
                                 const val = String(i).padStart(2, "0");
@@ -905,7 +905,7 @@ export default function SettingsPage() {
                 <p className="text-2xl font-black font-display text-slate-900 dark:text-[#F8F6F1] uppercase">{profile?.plan || 'FREE'}</p>
               </div>
               <a href="/dashboard/upgrade"
-                className="px-4 py-2 rounded-xl text-xs font-bold text-[#020617] whitespace-nowrap shadow-md hover:brightness-110 active:scale-95 transition-all"
+                className="px-4 py-2 min-h-[44px] inline-flex items-center justify-center rounded-xl text-xs font-bold text-[#020617] whitespace-nowrap shadow-md hover:brightness-110 active:scale-95 transition-all touch-manipulation"
                 style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)" }}>
                 {t("common:settings.upgrade", "อัปเกรด →")}
               </a>

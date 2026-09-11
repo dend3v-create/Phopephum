@@ -101,60 +101,66 @@ export function MobileBottomNav({ currentPath }: MobileBottomNavProps) {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t flex items-stretch select-none"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t flex items-stretch select-none touch-manipulation"
       style={{
         background: "var(--sidebar-bg, rgba(2,6,23,0.97))",
         backdropFilter: "blur(24px)",
         WebkitBackdropFilter: "blur(24px)",
         borderColor: "var(--border-gold, rgba(217,188,130,0.18))",
         paddingBottom: "env(safe-area-inset-bottom, 0px)",
-        height: "calc(62px + env(safe-area-inset-bottom, 0px))",
+        height: "calc(64px + env(safe-area-inset-bottom, 0px))",
       }}
       aria-label={t("nav.main_menu", "เมนูหลัก")}
+      role="navigation"
     >
-      {NAV_TABS.map((tab) => {
-        const isActive = tab.exact
-          ? currentPath === tab.to
-          : currentPath.startsWith(tab.to);
+      <div className="flex w-full items-stretch" role="tablist">
+        {NAV_TABS.map((tab) => {
+          const isActive = tab.exact
+            ? currentPath === tab.to
+            : currentPath.startsWith(tab.to);
 
-        const label = t(`nav.${tab.labelKey}`, tab.defaultLabel);
+          const label = t(`nav.${tab.labelKey}`, tab.defaultLabel);
 
-        return (
-          <Link
-            key={tab.to}
-            to={tab.to}
-            className="relative flex-1 flex flex-col items-center justify-center gap-1 transition-colors active:scale-95"
-            style={{
-              color: isActive
-                ? "var(--accent-gold, #C6A96B)"
-                : "var(--text-muted, #94A3B8)",
-            }}
-          >
-            {/* Active top edge indicator with gold glow */}
-            {isActive && (
-              <span
-                className="absolute top-0 left-1/2 -translate-x-1/2 h-[2.5px] w-9 rounded-full"
-                style={{
-                  background: "linear-gradient(90deg, #C6A96B, #F2D49B, #C6A96B)",
-                  boxShadow: "0 0 10px rgba(232, 196, 106, 0.6)",
-                }}
-              />
-            )}
-
-            <span className="flex items-center justify-center">
-              <TabIcon name={tab.icon} isActive={isActive} />
-            </span>
-
-            <span
-              className={`text-[10px] tracking-wide leading-none ${
-                isActive ? "font-bold text-[#C6A96B] dark:text-[#F2D49B]" : "font-medium"
-              }`}
+          return (
+            <Link
+              key={tab.to}
+              to={tab.to}
+              role="tab"
+              aria-selected={isActive}
+              aria-current={isActive ? "page" : undefined}
+              className="relative flex-1 min-h-[48px] flex flex-col items-center justify-center gap-1 transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C6A96B]"
+              style={{
+                color: isActive
+                  ? "var(--accent-gold, #C6A96B)"
+                  : "var(--text-muted, #94A3B8)",
+              }}
             >
-              {label}
-            </span>
-          </Link>
-        );
-      })}
+              {/* Active top edge indicator with gold glow */}
+              {isActive && (
+                <span
+                  className="absolute top-0 left-1/2 -translate-x-1/2 h-[2.5px] w-10 rounded-full"
+                  style={{
+                    background: "linear-gradient(90deg, #C6A96B, #F2D49B, #C6A96B)",
+                    boxShadow: "0 0 10px rgba(232, 196, 106, 0.6)",
+                  }}
+                />
+              )}
+
+              <span className="flex items-center justify-center shrink-0">
+                <TabIcon name={tab.icon} isActive={isActive} />
+              </span>
+
+              <span
+                className={`text-[11px] font-sarabun tracking-tight leading-none ${
+                  isActive ? "font-bold text-[#C6A96B] dark:text-[#F2D49B]" : "font-medium"
+                }`}
+              >
+                {label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }

@@ -184,7 +184,7 @@ export function DesktopSidebar({
       )}
 
       <aside
-        className={`flex flex-col w-64 p-4 fixed h-full border-r z-50 transition-transform duration-300 ${
+        className={`flex flex-col w-72 max-w-[85vw] p-4 fixed h-full border-r z-50 transition-transform duration-300 touch-manipulation ${
           isMobileDrawerOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
         style={{
@@ -192,11 +192,13 @@ export function DesktopSidebar({
           backdropFilter: "blur(24px)",
           WebkitBackdropFilter: "blur(24px)",
           borderColor: "var(--border-gold, rgba(217,188,130,0.18))",
+          paddingTop: "max(1rem, env(safe-area-inset-top, 0px))",
+          paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))",
         }}
       >
         {/* ── Brand Header ── */}
         <div className="mb-6 flex items-center justify-between">
-          <Link to="/dashboard" onClick={onCloseMobileDrawer} className="flex items-center gap-3">
+          <Link to="/dashboard" onClick={onCloseMobileDrawer} className="flex items-center gap-3 min-h-[44px]">
             <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-[#C6A96B] to-[#D9BC82] flex items-center justify-center shadow-lg shadow-[#C6A96B]/20 shrink-0">
               <span className="text-[#020617] text-sm font-black font-display">P</span>
             </div>
@@ -213,7 +215,7 @@ export function DesktopSidebar({
           {/* Close button on mobile drawer */}
           <button
             onClick={onCloseMobileDrawer}
-            className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white"
+            className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-400 hover:text-white"
             aria-label="Close menu"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">

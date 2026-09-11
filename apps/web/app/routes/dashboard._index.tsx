@@ -632,7 +632,7 @@ export default function TodayScreen() {
             </p>
             <Link
               to={`/dashboard/calendar?date=${bkkDateStr}&time=${goldenWindow.startTime}`}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-[#020617] bg-gradient-to-r from-[#C6A96B] via-[#F2D49B] to-[#C6A96B] hover:opacity-95 active:scale-95 transition-all shadow-md shadow-[#C6A96B]/20"
+              className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-xl text-xs font-bold text-[#020617] bg-gradient-to-r from-[#C6A96B] via-[#F2D49B] to-[#C6A96B] hover:opacity-95 active:scale-95 transition-all shadow-md shadow-[#C6A96B]/20"
             >
               <AstralIcon name="spark" size="xs" />
               <span>ใช้นัดหมายช่วงนี้</span>
@@ -642,7 +642,82 @@ export default function TodayScreen() {
         </div>
       )}
 
-      {/* ── CARD 3: 4 LIFE DOMAINS & DO/AVOID GUIDANCE ── */}
+      {/* ── CARD 3: RECOMMENDED ACTIONS & THINGS TO AVOID (3-SECOND RULE) ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 animate-fade-up">
+        {/* Recommended Actions */}
+        <div className="p-4 sm:p-5 rounded-3xl border border-emerald-500/25 bg-emerald-500/10 backdrop-blur-md shadow-sm space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-emerald-500/20 text-emerald-300 font-black text-sm">
+              ✓
+            </div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-400">
+              วันนี้ส่งเสริม / ควรทำ
+            </p>
+          </div>
+          <ul className="space-y-2">
+            {doList.slice(0, 3).map((item, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-2.5 text-xs sm:text-sm font-medium text-[#E2E8F0] leading-snug"
+              >
+                <span className="text-emerald-400 mt-0.5 text-xs shrink-0">●</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Things to Avoid */}
+        <div className="p-4 sm:p-5 rounded-3xl border border-rose-500/25 bg-rose-500/10 backdrop-blur-md shadow-sm space-y-3">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-rose-500/20 text-rose-300 font-black text-sm">
+              ✕
+            </div>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-rose-400">
+              ควรหลีกเลี่ยง / ระมัดระวัง
+            </p>
+          </div>
+          <ul className="space-y-2">
+            {avoidList.slice(0, 3).map((item, i) => (
+              <li
+                key={i}
+                className="flex items-start gap-2.5 text-xs sm:text-sm font-medium text-[#E2E8F0] leading-snug"
+              >
+                <span className="text-rose-400 mt-0.5 text-xs shrink-0">●</span>
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      {/* ── CARD 4: PRIMARY ACTION "หาฤกษ์ให้ฉัน" ── */}
+      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/50 bg-gradient-to-br from-[#0A2240]/80 via-[#071427]/90 to-[#020617] backdrop-blur-xl shadow-xl shadow-[#C6A96B]/15 relative overflow-hidden animate-fade-up">
+        <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="space-y-1">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#C6A96B]">
+              AUSPICIOUS TIMING FINDER
+            </span>
+            <h3 className="font-display text-lg sm:text-xl font-black text-[#F8F6F1]">
+              หาฤกษ์มงคล & จังหวะเวลาที่ดีที่สุด
+            </h3>
+            <p className="text-xs text-[#CBD5E1] max-w-md leading-relaxed">
+              ไม่ว่าจะเป็น ออกรถใหม่, ขึ้นบ้านใหม่, เซ็นสัญญา, หรือเจรจาสำคัญ ให้ระบบช่วยคัดกรอง Top 3 ช่วงเวลาทองให้คุณ
+            </p>
+          </div>
+
+          <Link
+            to="/dashboard/check-yam"
+            className="w-full sm:w-auto shrink-0 min-h-[48px] px-6 py-3 rounded-2xl text-xs sm:text-sm font-black text-[#020617] bg-gradient-to-r from-[#C6A96B] via-[#F2D49B] to-[#C6A96B] hover:scale-[1.02] active:scale-95 transition-all shadow-lg shadow-[#C6A96B]/30 flex items-center justify-center gap-2"
+          >
+            <span>✦</span>
+            <span>หาฤกษ์ให้ฉัน</span>
+            <span>→</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* ── CARD 5: 4 LIFE DOMAINS ── */}
       <div className="rounded-3xl p-5 sm:p-6 border border-white/10 animate-fade-up card-glass space-y-5">
         <div className="flex items-center justify-between">
           <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#C6A96B]">
@@ -717,47 +792,6 @@ export default function TodayScreen() {
               </p>
             </div>
           ))}
-        </div>
-
-        {/* Do & Avoid lists */}
-        <div className="pt-3 border-t border-white/8 grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {doList.length > 0 && (
-            <div className="p-3.5 rounded-2xl border border-emerald-500/25 bg-emerald-500/8">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400 mb-2">
-                ✓ วันนี้ส่งเสริม
-              </p>
-              <ul className="space-y-1.5">
-                {doList.slice(0, 3).map((item, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-xs text-[#E2E8F0]"
-                  >
-                    <span className="text-emerald-400 mt-0.5 text-[10px]">●</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {avoidList.length > 0 && (
-            <div className="p-3.5 rounded-2xl border border-rose-500/20 bg-rose-500/8">
-              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-rose-400 mb-2">
-                ✕ ควรหลีกเลี่ยง / รอบคอบ
-              </p>
-              <ul className="space-y-1.5">
-                {avoidList.slice(0, 3).map((item, i) => (
-                  <li
-                    key={i}
-                    className="flex items-start gap-2 text-xs text-[#E2E8F0]"
-                  >
-                    <span className="text-rose-400 mt-0.5 text-[10px]">●</span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
       </div>
 

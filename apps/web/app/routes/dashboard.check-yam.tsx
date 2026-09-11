@@ -374,6 +374,17 @@ function Ticks({ ticks }: { ticks: number }) {
   );
 }
 
+const INTENT_ACTIVITIES = [
+  { emoji: "🚗", label: "ออกรถใหม่", query: "ออกรถใหม่ ช่วงวันและเวลาไหนเป็นฤกษ์มงคลที่สุด?" },
+  { emoji: "🏠", label: "ขึ้นบ้านใหม่", query: "ขึ้นบ้านใหม่ ย้ายเข้าบ้านใหม่ ฤกษ์เวลาไหนดีที่สุด?" },
+  { emoji: "💼", label: "เปิดธุรกิจ", query: "เปิดร้านใหม่ เริ่มต้นกิจการธุรกิจ เวลาไหนเฮงและรุ่งเรือง?" },
+  { emoji: "✍️", label: "เซ็นสัญญา", query: "เซ็นสัญญา เจรจาข้อตกลงสำคัญ ช่วงเวลาไหนสำเร็จราบรื่น?" },
+  { emoji: "💰", label: "เจรจาเรื่องเงิน", query: "เจรจาขอสินเชื่อ ติดต่อเรื่องการเงิน เวลาไหนสำเร็จง่าย?" },
+  { emoji: "✈️", label: "เดินทาง", query: "ออกเดินทางไกล เดินทางติดต่อธุรกิจ เวลาไหนปลอดภัยและมีโชค?" },
+  { emoji: "❤️", label: "แต่งงาน", query: "สู่ขอ จัดงานมงคลสมรส วันและเวลาไหนส่งเสริมชีวิตคู่?" },
+  { emoji: "＋", label: "อื่น ๆ", query: "" },
+] as const;
+
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function CheckYamPage() {
@@ -389,7 +400,15 @@ export default function CheckYamPage() {
   const [inputQuery, setInputQuery] = useState("");
   const [showEvidence, setShowEvidence] = useState(false);
   const [showProTools, setShowProTools] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [showVault, setShowVault] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleTextareaInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInputQuery(e.target.value);
+    const target = e.target;
+    target.style.height = "auto";
+    target.style.height = `${Math.min(Math.max(target.scrollHeight, 84), 240)}px`;
+  };
 
   // STEP 4.4: Timing Comparison state
   const [selectedActivity, setSelectedActivity] = useState("ทำสัญญา");
@@ -566,9 +585,11 @@ export default function CheckYamPage() {
 
   const handleChipClick = (question: string) => {
     setInputQuery(question);
-    if (inputRef.current) {
-      inputRef.current.value = question;
-      inputRef.current.focus();
+    if (textareaRef.current) {
+      textareaRef.current.value = question;
+      textareaRef.current.style.height = "auto";
+      textareaRef.current.style.height = `${Math.min(Math.max(textareaRef.current.scrollHeight, 84), 240)}px`;
+      textareaRef.current.focus();
     }
   };
 
@@ -583,13 +604,13 @@ export default function CheckYamPage() {
       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 border-b border-black/10 dark:border-white/8 pb-4">
         <div>
           <span className="text-[#C6A96B] text-[10px] tracking-[0.3em] uppercase font-bold block mb-1">
-            ✦ ๔ ศาสตร์พยากรณ์กาลเวลา · SACRED TIMING & HORARY HUB
+            ✦ AUSPICIOUS TIMING FINDER · ค้นหาฤกษ์มงคล
           </span>
           <h1 className="font-display text-2xl sm:text-3xl font-bold text-slate-900 dark:text-[#F8F6F1]">
-            ถามฤกษ์ & ไขคำถามกาลเวลา
+            หาฤกษ์มงคล & จังหวะเวลาที่ดีที่สุด
           </h1>
           <p className="text-slate-600 dark:text-[#94A3B8] text-xs sm:text-sm mt-1">
-            เลือกเชื่อมตรงสู่ ๔ ศาสตร์พยากรณ์แท้จริง หรือพิมพ์คำถามเพื่อให้ระบบนำทางสู่ศาสตร์ที่แม่นยำที่สุด
+            วันนี้ฉันควรทำอะไร และช่วงเวลาไหนดีที่สุด?
           </p>
         </div>
         <div className="flex flex-col items-start sm:items-end gap-1">
@@ -598,166 +619,7 @@ export default function CheckYamPage() {
         </div>
       </div>
 
-      {/* ── 4 Sacred Doors (๔ ประตูเปิดดวงกาลเวลา) ── */}
-      <div className="space-y-2.5">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-bold uppercase tracking-wider text-[#C6A96B] flex items-center gap-1.5">
-            <AstralIcon name="portal" size="xs" variant="gold" />
-            <span>เลือกเข้าสู่ ๔ ศาสตร์พยากรณ์หลัก (Direct Engine Portals)</span>
-          </span>
-          <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
-            คลิกเพื่อดูผังฉบับเต็ม หรือกดลองถาม
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Door 1: โหรทายหนู */}
-          <div className="rounded-2xl p-4 border border-amber-300/60 dark:border-amber-400/25 bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-white/95 dark:from-[#0A1A2F]/95 dark:to-[#071324] shadow-sm hover:shadow-md hover:border-amber-400 transition-all flex flex-col justify-between space-y-3">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-amber-500/15 border border-amber-500/30">
-                  <AstralIcon name="horanu" size="sm" variant="amber" glow />
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30">
-                  ผังดวง ๑๒ ภพ
-                </span>
-              </div>
-              <h3 className="font-display text-sm font-bold text-slate-900 dark:text-white">
-                ถามเรื่องเฉพาะหน้า
-              </h3>
-              <p className="text-[11px] text-slate-600 dark:text-[#94A3B8] mt-1 leading-relaxed">
-                จะได้ไหม? จะสำเร็จไหม? ตอบคำถามเฉพาะกิจและสถานการณ์ด่วน
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 pt-1">
-              <button
-                type="button"
-                onClick={() => handleChipClick("เรื่องนี้จะมีเกณฑ์สำเร็จลุล่วงสมหวังไหม?")}
-                className="flex-1 text-[11px] font-bold py-1.5 px-2.5 rounded-xl border border-amber-400/40 bg-white dark:bg-white/5 hover:bg-amber-100 dark:hover:bg-amber-400/20 text-amber-900 dark:text-amber-200 transition-all text-center"
-              >
-                ลองถามที่นี่
-              </button>
-              <Link
-                to="/dashboard/horanu"
-                className="p-1.5 px-2 rounded-xl border border-amber-400/40 bg-amber-500/10 hover:bg-amber-400/25 text-amber-700 dark:text-amber-300 transition-all font-bold text-xs"
-                title="เปิดหน้าระบบโหรทายหนูฉบับเต็ม"
-              >
-                ผังเต็ม ↗
-              </Link>
-            </div>
-          </div>
-
-          {/* Door 2: ยามอัฏฐกาล */}
-          <div className="rounded-2xl p-4 border border-sky-300/60 dark:border-sky-400/25 bg-gradient-to-b from-sky-500/10 via-sky-500/5 to-white/95 dark:from-[#0A1A2F]/95 dark:to-[#071324] shadow-sm hover:shadow-md hover:border-sky-400 transition-all flex flex-col justify-between space-y-3">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-sky-500/15 border border-sky-500/30">
-                  <AstralIcon name="yam" size="sm" variant="sky" glow />
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-800 dark:text-sky-300 border border-sky-500/30">
-                  ๘ ยาม ๙๐ นาที
-                </span>
-              </div>
-              <h3 className="font-display text-sm font-bold text-slate-900 dark:text-white">
-                ยามเดินทาง & เจรจา
-              </h3>
-              <p className="text-[11px] text-slate-600 dark:text-[#94A3B8] mt-1 leading-relaxed">
-                เลือกช่วงเวลาในวัน วันเดินทางไกล และเวลาเจรจาธุรกิจสำเร็จ
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 pt-1">
-              <button
-                type="button"
-                onClick={() => handleChipClick("วันนี้ควรออกเดินทางและติดต่อเจรจาช่วงยามใดดีที่สุด?")}
-                className="flex-1 text-[11px] font-bold py-1.5 px-2.5 rounded-xl border border-sky-400/40 bg-white dark:bg-white/5 hover:bg-sky-100 dark:hover:bg-sky-400/20 text-sky-900 dark:text-sky-200 transition-all text-center"
-              >
-                ลองถามที่นี่
-              </button>
-              <Link
-                to="/dashboard/yam"
-                className="p-1.5 px-2 rounded-xl border border-sky-400/40 bg-sky-500/10 hover:bg-sky-400/25 text-sky-700 dark:text-sky-300 transition-all font-bold text-xs"
-                title="เปิดหน้าระบบยามอัฏฐกาลฉบับเต็ม"
-              >
-                ผังเต็ม ↗
-              </Link>
-            </div>
-          </div>
-
-          {/* Door 3: กาลชะตา */}
-          <div className="rounded-2xl p-4 border border-purple-300/60 dark:border-purple-400/25 bg-gradient-to-b from-purple-500/10 via-purple-500/5 to-white/95 dark:from-[#0A1A2F]/95 dark:to-[#071324] shadow-sm hover:shadow-md hover:border-purple-400 transition-all flex flex-col justify-between space-y-3">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-purple-500/15 border border-purple-500/30">
-                  <AstralIcon name="timeline" size="sm" variant="mystic" glow />
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/15 text-purple-800 dark:text-purple-300 border border-purple-500/30">
-                  ยามซอยรายชั่วโมง
-                </span>
-              </div>
-              <h3 className="font-display text-sm font-bold text-slate-900 dark:text-white">
-                วางแผนรายวัน รายชั่วโมง
-              </h3>
-              <p className="text-[11px] text-slate-600 dark:text-[#94A3B8] mt-1 leading-relaxed">
-                จัดไทม์ไลน์รายชั่วโมงในการเจรจา ขอแต่งงาน หรือปิดการขาย
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 pt-1">
-              <button
-                type="button"
-                onClick={() => handleChipClick("วางแผนไทม์ไลน์รายชั่วโมงในการเจรจาและปิดการขายวันนี้")}
-                className="flex-1 text-[11px] font-bold py-1.5 px-2.5 rounded-xl border border-purple-400/40 bg-white dark:bg-white/5 hover:bg-purple-100 dark:hover:bg-purple-400/20 text-purple-900 dark:text-purple-200 transition-all text-center"
-              >
-                ลองถามที่นี่
-              </button>
-              <Link
-                to="/dashboard/karnchata"
-                className="p-1.5 px-2 rounded-xl border border-purple-400/40 bg-purple-500/10 hover:bg-purple-400/25 text-purple-700 dark:text-purple-300 transition-all font-bold text-xs"
-                title="เปิดหน้าระบบกาลชะตาฉบับเต็ม"
-              >
-                ผังเต็ม ↗
-              </Link>
-            </div>
-          </div>
-
-          {/* Door 4: ราหูค้นทรัพย์ */}
-          <div className="rounded-2xl p-4 border border-emerald-300/60 dark:border-emerald-400/25 bg-gradient-to-b from-emerald-500/10 via-emerald-500/5 to-white/95 dark:from-[#0A1A2F]/95 dark:to-[#071324] shadow-sm hover:shadow-md hover:border-emerald-400 transition-all flex flex-col justify-between space-y-3">
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-emerald-500/15 border border-emerald-500/30">
-                  <AstralIcon name="sub-yam" size="sm" variant="emerald" glow />
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-800 dark:text-emerald-300 border border-emerald-500/30">
-                  ๙ ฤกษ์ย่อย ๑๐ นาที
-                </span>
-              </div>
-              <h3 className="font-display text-sm font-bold text-slate-900 dark:text-white">
-                ฤกษ์ย่อย & ตามหาของหาย
-              </h3>
-              <p className="text-[11px] text-slate-600 dark:text-[#94A3B8] mt-1 leading-relaxed">
-                ฤกษ์ด่วนฉับพลัน สแกนทิศและตำแหน่งสิ่งของตกหล่น
-              </p>
-            </div>
-            <div className="flex items-center gap-1.5 pt-1">
-              <button
-                type="button"
-                onClick={() => handleChipClick("ของที่ทำหล่นหายไป อยู่ทิศไหนและจะหาเจอได้อย่างไร?")}
-                className="flex-1 text-[11px] font-bold py-1.5 px-2.5 rounded-xl border border-emerald-400/40 bg-white dark:bg-white/5 hover:bg-emerald-100 dark:hover:bg-emerald-400/20 text-emerald-900 dark:text-emerald-200 transition-all text-center"
-              >
-                ลองถามที่นี่
-              </button>
-              <Link
-                to="/dashboard/rahu"
-                className="p-1.5 px-2 rounded-xl border border-emerald-400/40 bg-emerald-500/10 hover:bg-emerald-400/25 text-emerald-700 dark:text-emerald-300 transition-all font-bold text-xs"
-                title="เปิดหน้าระบบราหูค้นทรัพย์ฉบับเต็ม"
-              >
-                ผังเต็ม ↗
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ── 1. HERO INTERACTION AREA (Mode Switcher + Forms) ── */}
+      {/* ── 1. HERO INTERACTION AREA (Intent Wizard + Auto-Grow Input) ── */}
       <div
         className="rounded-3xl p-4 sm:p-7 border border-[#C6A96B]/30 shadow-xl relative overflow-hidden w-full max-w-full bg-white/95 dark:bg-[#0A1A2F]/80 backdrop-blur-xl"
       >
@@ -769,19 +631,19 @@ export default function CheckYamPage() {
           <button
             type="button"
             onClick={() => setActiveMode("instant")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[40px] ${
               activeMode === "instant"
                 ? "bg-[#C6A96B] text-[#0A1628] shadow-md shadow-[#C6A96B]/20"
                 : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
             }`}
           >
             <AstralIcon name="spark" size="xs" />
-            <span>ถามเรื่องทันที</span>
+            <span>ถามเรื่องที่อยากรู้ทันที</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveMode("compare")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[40px] ${
               activeMode === "compare"
                 ? "bg-gradient-to-r from-amber-400 to-[#C6A96B] text-[#0A1628] shadow-md shadow-amber-400/20"
                 : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
@@ -792,42 +654,74 @@ export default function CheckYamPage() {
           </button>
         </div>
 
-        {/* ── Mode 1: Instant Question Form ── */}
+        {/* คุณกำลังจะทำอะไร? (Intent Selector) */}
+        {activeMode === "instant" && (
+          <div className="space-y-2 mb-5 relative z-10">
+            <label className="block text-xs font-black uppercase tracking-wider text-[#C6A96B]">
+              คุณกำลังจะทำอะไร?
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {INTENT_ACTIVITIES.map((act, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleChipClick(act.query)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl border border-amber-200/60 dark:border-white/10 bg-slate-100/80 dark:bg-white/5 hover:border-[#C6A96B] hover:bg-[#C6A96B]/15 text-xs font-bold text-slate-800 dark:text-[#E2E8F0] active:scale-95 transition-all shadow-sm min-h-[40px]"
+                >
+                  <span className="text-base">{act.emoji}</span>
+                  <span>{act.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ── Mode 1: Instant Question Form (Auto-Grow Textarea) ── */}
         {activeMode === "instant" && (
           <Form method="post" className="space-y-4 relative z-10 animate-in fade-in duration-200">
             <input type="hidden" name="formType" value="instant" />
-            <div>
-              <label htmlFor="question-input" className="block text-xs font-bold uppercase tracking-wider text-[#C6A96B] mb-2">
-                พิมพ์คำถามของคุณได้อิสระ
+            <div className="space-y-2">
+              <label htmlFor="question-input" className="block text-xs font-bold uppercase tracking-wider text-[#C6A96B]">
+                เล่าเรื่องที่คุณอยากหาฤกษ์ให้ฉัน:
               </label>
-              <div className="relative flex items-center">
-                <input
-                  ref={inputRef}
+              <div className="relative rounded-2xl border border-amber-200/80 dark:border-white/15 focus-within:border-[#C6A96B] focus-within:ring-2 focus-within:ring-[#C6A96B]/20 bg-white dark:bg-[#020617]/90 p-3.5 transition-all shadow-sm">
+                <textarea
+                  ref={textareaRef}
                   id="question-input"
                   name="question"
-                  type="text"
+                  rows={3}
                   value={inputQuery}
-                  onChange={(e) => setInputQuery(e.target.value)}
-                  placeholder="เช่น วันเสาร์นี้ จะได้เงินจากการทำงาน และ นำมาจ่ายค่าห้องได้ทันเวลาไหม?"
+                  onChange={handleTextareaInput}
+                  placeholder="เล่าเรื่องที่คุณอยากหาฤกษ์ให้ฉัน... (เช่น ออกรถใหม่วันไหนดี, หรือต้องการเซ็นสัญญาช่วงเวลาไหนดีที่สุด)"
                   disabled={isSubmitting}
-                  className="w-full bg-white dark:bg-[#020617]/80 border border-amber-200/80 dark:border-white/15 focus:border-[#C6A96B] focus:ring-2 focus:ring-[#C6A96B]/20 rounded-2xl px-4 py-4 pr-32 text-sm sm:text-base text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 transition-all outline-none shadow-sm"
+                  className="w-full bg-transparent text-sm sm:text-base text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none resize-none leading-relaxed font-sarabun"
+                  style={{ minHeight: "84px", maxHeight: "240px" }}
                 />
-                <button
-                  type="submit"
-                  disabled={isSubmitting || !inputQuery.trim()}
-                  className="absolute right-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-[#020617] transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shadow-md"
-                  style={{
-                    background: "linear-gradient(135deg, #C6A96B 0%, #F2D49B 100%)",
-                  }}
-                >
-                  {isSubmitting ? (
-                    <span className="flex items-center gap-1.5">
-                      <span className="animate-spin text-xs">⏳</span> กำลังวิเคราะห์...
-                    </span>
-                  ) : (
-                    <span>ถาม ✦</span>
-                  )}
-                </button>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pt-2.5 border-t border-slate-100 dark:border-white/5 mt-2">
+                  <span className="text-[11px] text-[#94A3B8]">
+                    ระบบจะวิเคราะห์และคัดกรองช่วงเวลาทองคำที่ดีที่สุดให้คุณ
+                  </span>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting || !inputQuery.trim()}
+                    className="min-h-[44px] px-6 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-[#020617] transition-all active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed shadow-md flex items-center justify-center gap-2 shrink-0 self-end sm:self-auto"
+                    style={{
+                      background: "linear-gradient(135deg, #C6A96B 0%, #F2D49B 100%)",
+                    }}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <span className="animate-spin text-xs">⏳</span>
+                        <span>กำลังคำนวณ...</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>หาฤกษ์ให้ฉัน</span>
+                        <span>✦</span>
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
               {actionData?.error && (
                 <p className="text-xs text-rose-500 mt-2 font-medium">{actionData.error}</p>
@@ -837,7 +731,7 @@ export default function CheckYamPage() {
             {/* Suggestion Chips */}
             <div>
               <p className="text-[11px] font-bold text-[#C6A96B] dark:text-[#94A3B8] mb-2 uppercase tracking-wide">
-                หรือเลือกหัวข้อแนะนำ:
+                หรือแตะเลือกคำถามยอดนิยม:
               </p>
               <div className="flex flex-wrap gap-2">
                 {suggestionChips.map((chip, idx) => (
@@ -845,7 +739,7 @@ export default function CheckYamPage() {
                     key={idx}
                     type="button"
                     onClick={() => handleChipClick(chip.question)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/5 hover:border-[#C6A96B]/50 hover:bg-[#C6A96B]/10 text-xs text-slate-800 dark:text-[#E2E8F0] transition-all active:scale-95 shadow-sm"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-slate-200 dark:border-white/10 bg-slate-100/80 dark:bg-white/5 hover:border-[#C6A96B]/50 hover:bg-[#C6A96B]/10 text-xs text-slate-800 dark:text-[#E2E8F0] transition-all active:scale-95 shadow-sm min-h-[36px]"
                   >
                     <span>{chip.emoji}</span>
                     <span className="font-medium">{chip.label}</span>
@@ -1232,273 +1126,304 @@ export default function CheckYamPage() {
 
       {/* ── 2B. PREDICTION RESULT DISPLAY (Instant Question) ── */}
       {prediction && activeMode === "instant" && (
-        <div
-          className="rounded-3xl p-6 sm:p-8 border border-amber-200/90 dark:border-emerald-500/30 bg-white/95 dark:bg-[#0A1A2F]/90 backdrop-blur-2xl shadow-xl space-y-6 animate-fade-up relative overflow-hidden text-slate-900 dark:text-white"
-        >
-          {/* Category Tag Header */}
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 dark:border-white/10 pb-4">
-            <div className="flex items-center gap-2.5">
-              <span
-                className={`text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 ${
-                  CATEGORY_ICONS[prediction.intentCategory]?.color || CATEGORY_ICONS.general.color
-                }`}
-              >
-                <span>{CATEGORY_ICONS[prediction.intentCategory]?.emoji}</span>
-                <span>{CATEGORY_ICONS[prediction.intentCategory]?.label}</span>
-              </span>
-              <span className="text-xs text-slate-600 dark:text-[#94A3B8] italic font-medium">
+        <div className="space-y-4 animate-fade-up">
+          {/* Question Context Anchor */}
+          <div className="p-4 rounded-2xl border border-[#C6A96B]/40 bg-[#C6A96B]/10 flex items-start gap-3 shadow-sm">
+            <span className="text-xl shrink-0">💬</span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+                คำถามล่าสุดของคุณ
+              </p>
+              <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5">
                 "{prediction.question}"
-              </span>
+              </p>
             </div>
+          </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">ระดับความสอดคล้อง:</span>
-              <span
-                className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                  prediction.confidence === "high"
-                    ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400"
-                    : prediction.confidence === "medium"
-                    ? "bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400"
-                    : "bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300"
-                }`}
-              >
-                {prediction.confidence === "high" ? "สูงมาก" : prediction.confidence === "medium" ? "ปานกลาง" : "แนะนำสังเกตการณ์"}
-              </span>
-
-              {prediction.queryId && (
-                <button
-                  type="button"
-                  onClick={handleToggleBookmark}
-                  title={bookmarked ? "ยกเลิกบุ๊กมาร์ก" : "บันทึกในบุ๊กมาร์ก"}
-                  className={`px-2.5 py-1 rounded-md border text-xs font-bold transition-all flex items-center gap-1 ${
-                    bookmarked
-                      ? "bg-amber-100 dark:bg-amber-400/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-400/40"
-                      : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-[#94A3B8] border-slate-200 dark:border-white/10 hover:text-slate-900 dark:hover:text-white"
+          <div
+            className="rounded-3xl p-6 sm:p-8 border border-amber-200/90 dark:border-emerald-500/30 bg-white/95 dark:bg-[#0A1A2F]/90 backdrop-blur-2xl shadow-xl space-y-6 relative overflow-hidden text-slate-900 dark:text-white"
+          >
+            {/* Category Tag Header */}
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 dark:border-white/10 pb-4">
+              <div className="flex items-center gap-2.5">
+                <span
+                  className={`text-xs font-bold px-3 py-1 rounded-full border flex items-center gap-1.5 ${
+                    CATEGORY_ICONS[prediction.intentCategory]?.color || CATEGORY_ICONS.general.color
                   }`}
                 >
-                  <span>{bookmarked ? "★" : "☆"}</span>
-                  <span className="hidden sm:inline text-[10px]">{bookmarked ? "บันทึกแล้ว" : "บุ๊กมาร์ก"}</span>
-                </button>
-              )}
-            </div>
-          </div>
-
-          {/* Level 1: Main Answer (Plain Thai, Wisdom-driven) */}
-          <div className="space-y-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
-              ✦ คำแนะนำสำหรับคุณ
-            </p>
-            <p className="text-base sm:text-lg text-slate-900 dark:text-[#F8F6F1] leading-relaxed font-sans font-medium whitespace-pre-line">
-              {prediction.answer}
-            </p>
-          </div>
-
-          {/* Best Window Box (if exists) */}
-          {prediction.bestWindow && (
-            <div className="p-4 rounded-2xl border border-amber-300/80 dark:border-amber-400/30 bg-amber-50/90 dark:bg-amber-400/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-slate-900 dark:text-white">
-              <div className="flex items-center gap-3">
-                <span className="text-2xl">⏳</span>
-                <div>
-                  <p className="text-[10px] font-bold text-amber-800 dark:text-amber-300 uppercase tracking-widest">
-                    ช่วงเวลาที่แนะนำมากที่สุด
-                  </p>
-                  <p className="text-base font-bold text-slate-900 dark:text-white">
-                    {prediction.bestWindow.timeRange}
-                  </p>
-                </div>
-              </div>
-              {prediction.bestWindow.description && (
-                <span className="text-xs text-slate-700 dark:text-amber-200/90 font-medium">
-                  {prediction.bestWindow.description}
+                  <span>{CATEGORY_ICONS[prediction.intentCategory]?.emoji}</span>
+                  <span>{CATEGORY_ICONS[prediction.intentCategory]?.label}</span>
                 </span>
-              )}
-            </div>
-          )}
-
-          {/* Deep Engine Link Portal (เชื่อมตรงสู่ ๔ ศาสตร์หลัก) */}
-          {prediction.targetRoute && (
-            <div className="p-4 sm:p-5 rounded-2xl border border-[#C6A96B]/50 bg-gradient-to-r from-amber-500/15 via-[#C6A96B]/10 to-transparent dark:from-[#0A1A2F] dark:to-[#071324] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
-              <div className="space-y-1">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B] flex items-center gap-1.5">
-                  <span>🏛️</span>
-                  <span>ระบบการพยากรณ์ที่ตรงหลักวิชาการแท้จริง</span>
-                </span>
-                <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                  {prediction.targetEngineTitle || "เปิดดูผังคำนวณเจาะลึก"}
-                </p>
-                <p className="text-xs text-slate-600 dark:text-[#CBD5E1] leading-relaxed max-w-xl">
-                  {prediction.targetEngineReason || "ดูผังดวงดาวและสมการเวลาฉบับเต็มเพื่อความแม่นยำสูงสุด"}
-                </p>
               </div>
-              <Link
-                to={`${prediction.targetRoute}?q=${encodeURIComponent(prediction.question)}`}
-                className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-[#C6A96B] bg-gradient-to-r from-[#C6A96B] to-[#F2D49B] text-[#0A1628] hover:opacity-90 active:scale-95 transition-all shrink-0 flex items-center gap-2 shadow-lg shadow-[#C6A96B]/25"
-              >
-                <span>เปิดผังวิเคราะห์ ↗</span>
-              </Link>
-            </div>
-          )}
 
-          {/* Inline Outcome Tracker for this Prediction */}
-          {prediction.queryId && (
-            <div className="pt-4 border-t border-black/10 dark:border-white/10 space-y-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm">🎯</span>
-                  <span className="text-xs font-bold text-slate-800 dark:text-amber-200 uppercase tracking-wide">
-                    บันทึกผลลัพธ์ความเป็นจริง (Outcome Tracking)
-                  </span>
-                </div>
-                {localOutcomes[prediction.queryId]?.actual_result && (
-                  <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                    <span>✓</span>
-                    <span>บันทึกผลแล้ว: {OUTCOME_OPTIONS.find(o => o.id === localOutcomes[prediction.queryId!]?.actual_result)?.label}</span>
-                  </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] text-slate-500 dark:text-[#94A3B8]">ระดับความเหมาะสม:</span>
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md ${
+                    prediction.confidence === "high"
+                      ? "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400"
+                      : prediction.confidence === "medium"
+                      ? "bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400"
+                      : "bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300"
+                  }`}
+                >
+                  {prediction.confidence === "high" ? "ส่งเสริมดีเยี่ยม" : prediction.confidence === "medium" ? "ปานกลาง" : "แนะนำสังเกตการณ์"}
+                </span>
+
+                {prediction.queryId && (
+                  <button
+                    type="button"
+                    onClick={handleToggleBookmark}
+                    title={bookmarked ? "ยกเลิกบุ๊กมาร์ก" : "บันทึกในบุ๊กมาร์ก"}
+                    className={`px-2.5 py-1 rounded-md border text-xs font-bold transition-all flex items-center gap-1 ${
+                      bookmarked
+                        ? "bg-amber-100 dark:bg-amber-400/20 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-400/40"
+                        : "bg-slate-100 dark:bg-white/5 text-slate-600 dark:text-[#94A3B8] border-slate-200 dark:border-white/10 hover:text-slate-900 dark:hover:text-white"
+                    }`}
+                  >
+                    <span>{bookmarked ? "★" : "☆"}</span>
+                    <span className="hidden sm:inline text-[10px]">{bookmarked ? "บันทึกแล้ว" : "บุ๊กมาร์ก"}</span>
+                  </button>
                 )}
               </div>
+            </div>
 
-              <p className="text-xs text-slate-600 dark:text-slate-400">
-                เมื่อคุณได้ดำเนินการตามฤกษ์หรือผ่านพ้นเวลานั้นแล้ว มาร่วมบันทึกผลจริงเพื่อตรวจสอบความแม่นยำและเก็บบันทึกในคลังปัญญา
+            {/* Level 1: Main Answer (Plain Thai, Wisdom-driven) */}
+            <div className="space-y-2">
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+                ✦ คำแนะนำสำหรับคุณ
               </p>
+              <p className="text-base sm:text-lg text-slate-900 dark:text-[#F8F6F1] leading-relaxed font-sans font-medium whitespace-pre-line">
+                {prediction.answer}
+              </p>
+            </div>
 
-              <div className="flex flex-wrap gap-2">
-                {OUTCOME_OPTIONS.map((opt) => {
-                  const currentOutcome = localOutcomes[prediction.queryId!]?.actual_result;
-                  const isSelected = currentOutcome === opt.id;
-                  return (
-                    <button
-                      key={opt.id}
-                      type="button"
-                      onClick={() => handleSaveOutcome(prediction.queryId!, opt.id, localOutcomes[prediction.queryId!]?.notes)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 ${
-                        isSelected
-                          ? `${opt.color} ring-2 ring-amber-400/50 scale-105 shadow-sm`
-                          : "bg-slate-100/80 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-amber-300/80 dark:hover:border-white/20"
-                      }`}
-                    >
-                      <span>{opt.emoji}</span>
-                      <span>{opt.label}</span>
-                    </button>
-                  );
-                })}
+            {/* Best Window Box: 🥇 ช่วงเวลาที่เหมาะที่สุด */}
+            {prediction.bestWindow && (
+              <div className="p-4 sm:p-5 rounded-2xl border border-[#C6A96B]/60 bg-gradient-to-r from-[#C6A96B]/15 via-[#F2D49B]/10 to-transparent flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-slate-900 dark:text-white">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🥇</span>
+                  <div>
+                    <p className="text-[10px] font-black text-amber-800 dark:text-[#C6A96B] uppercase tracking-widest">
+                      ช่วงเวลาที่เหมาะที่สุด
+                    </p>
+                    <p className="text-lg font-black text-slate-900 dark:text-white">
+                      {prediction.bestWindow.timeRange}
+                    </p>
+                    {prediction.bestWindow.description && (
+                      <p className="text-xs text-slate-700 dark:text-amber-200/90 font-medium mt-0.5">
+                        {prediction.bestWindow.description}
+                      </p>
+                    )}
+                  </div>
+                </div>
+                <Link
+                  to={`/dashboard/calendar?date=${new Date().toISOString().split("T")[0]}&time=${encodeURIComponent(prediction.bestWindow.timeRange.split("-")[0]?.trim() || "09:00")}`}
+                  className="inline-flex items-center justify-center gap-1.5 px-4 min-h-[44px] rounded-xl text-xs font-bold text-[#020617] bg-gradient-to-r from-[#C6A96B] via-[#F2D49B] to-[#C6A96B] hover:opacity-95 active:scale-95 transition-all shadow-md shrink-0"
+                >
+                  <span>ใช้นัดหมายช่วงเวลานี้</span>
+                  <span>→</span>
+                </Link>
               </div>
+            )}
 
-              {outcomeSavedId === prediction.queryId && (
-                <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold animate-fade-in flex items-center gap-1">
-                  <span>✓</span>
-                  <span>บันทึกผลการติดตามเข้าสู่คลังปัญญาเรียบร้อยแล้ว</span>
+            {/* Deep Engine Link Portal (เชื่อมตรงสู่ ๔ ศาสตร์หลัก) */}
+            {prediction.targetRoute && (
+              <div className="p-4 sm:p-5 rounded-2xl border border-[#C6A96B]/50 bg-gradient-to-r from-amber-500/15 via-[#C6A96B]/10 to-transparent dark:from-[#0A1A2F] dark:to-[#071324] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+                <div className="space-y-1">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B] flex items-center gap-1.5">
+                    <span>🏛️</span>
+                    <span>ระบบการพยากรณ์ที่ตรงหลักวิชาการแท้จริง</span>
+                  </span>
+                  <p className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                    {prediction.targetEngineTitle || "เปิดดูผังคำนวณเจาะลึก"}
+                  </p>
+                  <p className="text-xs text-slate-600 dark:text-[#CBD5E1] leading-relaxed max-w-xl">
+                    {prediction.targetEngineReason || "ดูผังดวงดาวและสมการเวลาฉบับเต็มเพื่อความแม่นยำสูงสุด"}
+                  </p>
+                </div>
+                <Link
+                  to={`${prediction.targetRoute}?q=${encodeURIComponent(prediction.question)}`}
+                  className="px-5 py-2.5 rounded-xl text-xs sm:text-sm font-bold border border-[#C6A96B] bg-gradient-to-r from-[#C6A96B] to-[#F2D49B] text-[#0A1628] hover:opacity-90 active:scale-95 transition-all shrink-0 flex items-center gap-2 shadow-lg shadow-[#C6A96B]/25 min-h-[44px]"
+                >
+                  <span>เปิดผังวิเคราะห์ ↗</span>
+                </Link>
+              </div>
+            )}
+
+            {/* Inline Outcome Tracker for this Prediction */}
+            {prediction.queryId && (
+              <div className="pt-4 border-t border-black/10 dark:border-white/10 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm">🎯</span>
+                    <span className="text-xs font-bold text-slate-800 dark:text-amber-200 uppercase tracking-wide">
+                      บันทึกผลลัพธ์ความเป็นจริง (Outcome Tracking)
+                    </span>
+                  </div>
+                  {localOutcomes[prediction.queryId]?.actual_result && (
+                    <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                      <span>✓</span>
+                      <span>บันทึกผลแล้ว: {OUTCOME_OPTIONS.find(o => o.id === localOutcomes[prediction.queryId!]?.actual_result)?.label}</span>
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-xs text-slate-600 dark:text-slate-400">
+                  เมื่อคุณได้ดำเนินการตามฤกษ์หรือผ่านพ้นเวลานั้นแล้ว มาร่วมบันทึกผลจริงเพื่อตรวจสอบความแม่นยำและเก็บบันทึกในคลังปัญญา
                 </p>
-              )}
-            </div>
-          )}
 
-          {/* Auto-saved Wisdom Query Notice */}
-          {prediction.queryId && (
-            <div className="pt-3 border-t border-black/10 dark:border-white/8 flex items-center justify-between text-xs text-slate-500 dark:text-[#94A3B8]">
-              <span className="flex items-center gap-1.5">
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span>
-                <span>บันทึกลงคลังคำตอบโดยอัตโนมัติแล้ว</span>
-              </span>
-              <a
-                href="#wisdom-vault-section"
-                className="text-[#C6A96B] hover:underline font-bold flex items-center gap-1"
-              >
-                <span>ดูในคลังคำตอบด้านล่าง</span>
-                <span>↓</span>
-              </a>
-            </div>
-          )}
+                <div className="flex flex-wrap gap-2">
+                  {OUTCOME_OPTIONS.map((opt) => {
+                    const currentOutcome = localOutcomes[prediction.queryId!]?.actual_result;
+                    const isSelected = currentOutcome === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => handleSaveOutcome(prediction.queryId!, opt.id, localOutcomes[prediction.queryId!]?.notes)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 min-h-[40px] ${
+                          isSelected
+                            ? `${opt.color} ring-2 ring-amber-400/50 scale-105 shadow-sm`
+                            : "bg-slate-100/80 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 hover:border-amber-300/80 dark:hover:border-white/20"
+                        }`}
+                      >
+                        <span>{opt.emoji}</span>
+                        <span>{opt.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
 
-          <div className="flex justify-end pt-2">
+                {outcomeSavedId === prediction.queryId && (
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400 font-bold animate-fade-in flex items-center gap-1">
+                    <span>✓</span>
+                    <span>บันทึกผลการติดตามเข้าสู่คลังปัญญาเรียบร้อยแล้ว</span>
+                  </p>
+                )}
+              </div>
+            )}
+
+            {/* Auto-saved Wisdom Query Notice */}
+            {prediction.queryId && (
+              <div className="pt-3 border-t border-black/10 dark:border-white/8 flex items-center justify-between text-xs text-slate-500 dark:text-[#94A3B8]">
+                <span className="flex items-center gap-1.5">
+                  <span className="text-emerald-600 dark:text-emerald-400 font-bold">✓</span>
+                  <span>บันทึกลงคลังคำตอบโดยอัตโนมัติแล้ว</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowVault(true)}
+                  className="text-[#C6A96B] hover:underline font-bold flex items-center gap-1 min-h-[36px]"
+                >
+                  <span>ดูในคลังคำตอบ</span>
+                  <span>↓</span>
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Follow-up / Ask Next composer */}
+          <div className="p-4 rounded-2xl border border-white/10 bg-white/5 flex flex-col sm:flex-row items-center justify-between gap-3">
+            <p className="text-xs text-slate-600 dark:text-[#94A3B8]">
+              มีเรื่องอื่นที่อยากหาฤกษ์หรือต้องการถามต่อไหม?
+            </p>
             <button
               type="button"
               onClick={() => {
                 setPersistedPrediction(null);
                 setInputQuery("");
-                if (inputRef.current) {
-                  inputRef.current.value = "";
-                  inputRef.current.focus();
+                if (textareaRef.current) {
+                  textareaRef.current.value = "";
+                  textareaRef.current.style.height = "auto";
+                  textareaRef.current.focus();
                 }
+                window.scrollTo({ top: 0, behavior: "smooth" });
               }}
-              className="text-xs text-[#C6A96B] font-bold hover:underline"
+              className="min-h-[44px] px-5 py-2 rounded-xl text-xs font-bold text-[#020617] bg-gradient-to-r from-[#C6A96B] to-[#F2D49B] hover:opacity-95 active:scale-95 transition-all shadow-md shrink-0"
             >
-              + ถามเรื่องใหม่อีกครั้ง
+              + ถามคำถามถัดไป
             </button>
           </div>
         </div>
       )}
 
-      {/* ── 3. WISDOM HISTORY & OUTCOME VAULT ("คลังคำตอบ & ติดตามผลย้อนหลัง") ── */}
-      <div id="wisdom-vault-section" className="rounded-3xl p-5 sm:p-7 border border-[#C6A96B]/30 bg-white/95 dark:bg-[#0A1A2F]/80 backdrop-blur-xl shadow-xl space-y-5 relative overflow-hidden">
-        {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-black/10 dark:border-white/10 pb-4">
+      {/* ── 3. WISDOM HISTORY & OUTCOME VAULT ("ดูประวัติการหาฤกษ์") ── */}
+      <div id="wisdom-vault-section" className="rounded-3xl border border-[#C6A96B]/30 bg-white/95 dark:bg-[#0A1A2F]/80 backdrop-blur-xl shadow-xl overflow-hidden">
+        {/* Collapsible Bar Header */}
+        <div className="p-4 sm:p-5 flex items-center justify-between gap-3 border-b border-black/10 dark:border-white/10">
           <div className="flex items-center gap-2.5">
             <span className="text-2xl">🏛️</span>
             <div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
-                WISDOM MEMORY & OUTCOME VAULT
-              </span>
-              <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white">
-                คลังคำตอบ & ติดตามผลย้อนหลัง
+              <h2 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
+                ประวัติการหาฤกษ์ & คลังคำตอบ ({allSavedQueries.length})
               </h2>
-              <p className="text-xs text-slate-600 dark:text-[#94A3B8] mt-0.5">
-                บันทึกประวัติคำถาม-คำตอบ พร้อมระบบติดตามผลลัพธ์จริงในชีวิตของคุณ ({allSavedQueries.length} รายการ)
+              <p className="text-[11px] text-slate-500 dark:text-[#94A3B8]">
+                ติดตามผลลัพธ์จริงเพื่อวิเคราะห์ความแม่นยำ
               </p>
             </div>
           </div>
-
-          {/* Filter Tabs */}
-          <div className="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-slate-100 dark:bg-[#020617]/70 border border-slate-200 dark:border-white/10 text-xs">
-            <button
-              type="button"
-              onClick={() => setVaultFilter("all")}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
-                vaultFilter === "all"
-                  ? "bg-[#C6A96B] text-[#0A1628] shadow-sm"
-                  : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              ทั้งหมด ({allSavedQueries.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setVaultFilter("bookmarked")}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 ${
-                vaultFilter === "bookmarked"
-                  ? "bg-amber-400 text-[#0A1628] shadow-sm"
-                  : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              <span>★</span>
-              <span>บุ๊กมาร์ก ({allSavedQueries.filter(q => q.is_bookmarked).length})</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setVaultFilter("resolved")}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
-                vaultFilter === "resolved"
-                  ? "bg-emerald-500 text-white shadow-sm"
-                  : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              บันทึกผลแล้ว ({allSavedQueries.filter(q => {
-                const out = localOutcomes[q.id]?.actual_result ?? q.outcome?.actual_result;
-                return out && out !== "unresolved";
-              }).length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setVaultFilter("pending")}
-              className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
-                vaultFilter === "pending"
-                  ? "bg-slate-700 text-white shadow-sm"
-                  : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
-              }`}
-            >
-              รอติดตามผล
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setShowVault(!showVault)}
+            className="min-h-[44px] px-4 py-2 rounded-xl text-xs font-bold text-[#C6A96B] border border-[#C6A96B]/40 hover:bg-[#C6A96B]/10 active:scale-95 transition-all shrink-0"
+          >
+            {showVault ? "ซ่อนประวัติ ▲" : "ดูประวัติทั้งหมด ▼"}
+          </button>
         </div>
+
+        {showVault && (
+          <div className="p-5 sm:p-7 space-y-5 animate-fade-in">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setVaultFilter("all")}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+                  vaultFilter === "all"
+                    ? "bg-[#C6A96B] text-[#0A1628] shadow-sm"
+                    : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                ทั้งหมด ({allSavedQueries.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setVaultFilter("bookmarked")}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all flex items-center gap-1 ${
+                  vaultFilter === "bookmarked"
+                    ? "bg-amber-400 text-[#0A1628] shadow-sm"
+                    : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                <span>★</span>
+                <span>บุ๊กมาร์ก ({allSavedQueries.filter(q => q.is_bookmarked).length})</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setVaultFilter("resolved")}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+                  vaultFilter === "resolved"
+                    ? "bg-emerald-500 text-white shadow-sm"
+                    : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                บันทึกผลแล้ว ({allSavedQueries.filter(q => {
+                  const out = localOutcomes[q.id]?.actual_result ?? q.outcome?.actual_result;
+                  return out && out !== "unresolved";
+                }).length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setVaultFilter("pending")}
+                className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
+                  vaultFilter === "pending"
+                    ? "bg-slate-700 text-white shadow-sm"
+                    : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                รอติดตามผล
+              </button>
+            </div>
 
         {/* Sacred Engines Filter Pills (คัดกรองตาม ๔ ศาสตร์) */}
         <div className="flex flex-wrap items-center gap-1.5 pt-1">
@@ -1763,7 +1688,9 @@ export default function CheckYamPage() {
             })}
           </div>
         )}
-      </div>
+        </div>
+      )}
+    </div>
 
       {/* ── 4. CURRENT LIVE ENERGY SNAPSHOT ── */}
       <div className="space-y-3 pt-4">
