@@ -771,18 +771,18 @@ export default function HoroscopePage() {
               }}
               className={`flex items-center gap-2.5 p-3 rounded-2xl border transition-all duration-300 min-h-[56px] text-left hover:scale-[1.01] active:scale-[0.99] ${
                 isSelected
-                  ? "bg-[#C6A96B] border-[#F8F6F1]/10 text-[#020617] shadow-[0_4px_20px_rgba(198,169,107,0.25)]"
-                  : "bg-[#0A2240]/45 border-white/5 text-[#C6B79F] hover:text-[#F8F6F1] hover:border-[#C6A96B]/25"
+                  ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] border-[#C6A96B] text-[#020617] shadow-md shadow-[#C6A96B]/20 font-bold"
+                  : "bg-white/90 border-slate-200/90 text-slate-700 hover:text-slate-900 hover:border-[#C6A96B]/50 hover:bg-white dark:bg-[#0A2240]/45 dark:border-white/5 dark:text-[#C6B79F] dark:hover:text-[#F8F6F1] dark:hover:border-[#C6A96B]/25 shadow-sm"
               }`}
             >
-              <span className={`shrink-0 ${isSelected ? "text-[#020617]" : "text-[#C6A96B]"}`}>
+              <span className={`shrink-0 ${isSelected ? "text-[#020617]" : "text-[#8C6D2D] dark:text-[#C6A96B]"}`}>
                 {tab.renderIcon()}
               </span>
               <div className="flex flex-col min-w-0">
-                <span className={`text-sm font-bold leading-tight ${isSelected ? "text-[#020617]" : "text-[#F8F6F1]"}`}>
+                <span className={`text-sm font-bold leading-tight ${isSelected ? "text-[#020617]" : "text-slate-900 dark:text-[#F8F6F1]"}`}>
                   {tab.label}
                 </span>
-                <span className={`text-[13px] mt-0.5 leading-tight ${isSelected ? "text-[#020617]/70" : "text-[#C6B79F]"}`}>
+                <span className={`text-[13px] mt-0.5 leading-tight ${isSelected ? "text-[#020617]/80" : "text-slate-500 dark:text-[#C6B79F]"}`}>
                   {tab.desc}
                 </span>
               </div>
@@ -1009,7 +1009,11 @@ export default function HoroscopePage() {
                       <span className="text-slate-900 dark:text-[#F8F6F1] font-extrabold text-base leading-tight flex flex-wrap items-center gap-1.5">
                         <span>{moonPhaseText}</span>
                         <span className="text-[#A68444] dark:text-[#C6A96B] text-xs font-normal border border-[#A68444]/25 dark:border-[#C6A96B]/25 px-1.5 py-[0.5px] rounded-md bg-[#A68444]/5 dark:bg-[#C6A96B]/5">
-                          เดือน {lunar?.lunarMonthName || lunar?.lunarMonth} ปี {lunar?.zodiacName || ''}
+                          {(() => {
+                            const m = lunar?.lunarMonthName || lunar?.lunarMonth;
+                            const mStr = m ? (String(m).startsWith("เดือน") ? m : `เดือน ${m}`) : "";
+                            return `${mStr} ปี ${lunar?.zodiacName || ''}`.trim();
+                          })()}
                         </span>
                       </span>
                       <span className="text-slate-500 dark:text-[#C6B79F] text-xs italic leading-tight">{lunarDescText}</span>
@@ -1075,7 +1079,10 @@ export default function HoroscopePage() {
                         <span className="text-[#A68444] dark:text-[#C6A96B]">☽</span>
                         <span className="text-slate-500 dark:text-[#C6B79F]">จันทรคติเกิด</span>
                         <span className="text-slate-900 dark:text-[#F8F6F1] font-semibold">
-                          วัน{lunar.dayName} เดือน{lunar.lunarMonthName ?? lunar.lunarMonth} ปี{lunar.zodiacName ?? ""}
+                          วัน{lunar.dayName} {(() => {
+                            const m = lunar.lunarMonthName ?? lunar.lunarMonth;
+                            return m ? (String(m).startsWith("เดือน") ? m : `เดือน${m}`) : "";
+                          })()} ปี{lunar.zodiacName ?? ""}
                         </span>
                       </div>
                     )}
@@ -1086,7 +1093,7 @@ export default function HoroscopePage() {
           )}
 
           {/* ── Chart Display Config (ด้านบนผัง) ── */}
-          <Card className="border-[#C9A96E]/20 bg-slate-950/40 backdrop-blur-md p-4 space-y-3">
+          <Card className="border-slate-200 dark:border-[#C9A96E]/20 bg-white/80 dark:bg-slate-950/40 backdrop-blur-md p-4 space-y-3">
             <div>
               <h3 className="text-xs font-bold uppercase tracking-widest text-[#C9A96E] flex items-center gap-2">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#C9A96E]" />
@@ -2122,13 +2129,16 @@ function HoroscopeResultDisplay({ result, phopephumResult }: { result: any; phop
         <div className="w-2 h-2 bg-[#C9A96E] rounded-full animate-pulse" />
         <p className="text-[#C9A96E] text-[13px] uppercase tracking-widest font-bold">ปฏิทินจันทรคติไทย (ปฏิทิน 100 ปี)</p>
       </div>
-      <p className="text-[#F3EFE8] font-semibold text-lg">
-        วัน{lunar.dayName || lunar.dayPlanet} เดือน{lunar.lunarMonthName || lunar.lunarMonth} ปี{lunar.zodiacName || ''}
-        <span className="text-[#C9A96E] ml-3 text-sm font-normal">({lunar.moonPhase})</span>
+      <p className="text-slate-900 dark:text-[#F3EFE8] font-semibold text-lg">
+        วัน{lunar.dayName || lunar.dayPlanet} {(() => {
+          const m = lunar.lunarMonthName || lunar.lunarMonth;
+          return m ? (String(m).startsWith("เดือน") ? m : `เดือน${m}`) : "";
+        })()} ปี{lunar.zodiacName || ''}
+        <span className="text-[#8C6D2D] dark:text-[#C9A96E] ml-3 text-sm font-normal">({lunar.moonPhase})</span>
       </p>
-      <div className="flex flex-wrap gap-2 mt-4 text-xs text-[#C6B79F]">
-        <span className="bg-white/5 px-3 py-1 rounded-full">ดาวประจำวัน: <span className="text-[#C9A96E] font-bold">{lunar.dayPlanet}</span></span>
-        <span className="bg-white/5 px-3 py-1 rounded-full">ขึ้น/แรม: {lunar.moonPhase || `ขึ้น ${lunar.lunarDay} ค่ำ เดือน ${lunar.lunarMonth}`}</span>
+      <div className="flex flex-wrap gap-2 mt-4 text-xs text-slate-500 dark:text-[#C6B79F]">
+        <span className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-transparent px-3 py-1 rounded-full">ดาวประจำวัน: <span className="text-[#8C6D2D] dark:text-[#C9A96E] font-bold">{lunar.dayPlanet}</span></span>
+        <span className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-transparent px-3 py-1 rounded-full">ขึ้น/แรม: {lunar.moonPhase || `ขึ้น ${lunar.lunarDay} ค่ำ เดือน ${lunar.lunarMonth}`}</span>
       </div>
     </Card>
   );

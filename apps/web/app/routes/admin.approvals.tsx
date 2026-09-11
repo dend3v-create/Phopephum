@@ -179,8 +179,8 @@ export default function AdminApprovals() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="font-display text-2xl md:text-3xl font-bold text-[#F8F6F1] mb-1">อนุมัติคำขอ</h1>
-        <p className="text-[#94A3B8] text-xs md:text-sm">
+        <h1 className="font-display text-2xl md:text-3xl font-bold text-slate-900 dark:text-[#F8F6F1] mb-1">อนุมัติคำขอ</h1>
+        <p className="text-slate-500 dark:text-[#94A3B8] text-xs md:text-sm">
           จัดการคำขอสมาชิกและอัปเกรดแพ็กเกจ · กดปุ่มใน LINE เพื่อเปิดหน้านี้โดยตรง
         </p>
       </header>
@@ -191,10 +191,10 @@ export default function AdminApprovals() {
           <a
             key={tab.key}
             href={`/admin/approvals?filter=${tab.key}`}
-            className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap ${
+            className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all whitespace-nowrap ${
               filter === tab.key
-                ? "text-[#020617]"
-                : "text-[#94A3B8] border border-white/10 hover:border-[#C6A96B]/30"
+                ? "text-[#020617] shadow-sm"
+                : "text-slate-600 dark:text-[#94A3B8] border border-slate-200 dark:border-white/10 hover:border-[#C6A96B]/50 hover:bg-slate-100 dark:hover:bg-white/5"
             }`}
             style={filter === tab.key ? { background: "linear-gradient(135deg, #C6A96B, #D9BC82)" } : {}}
           >
@@ -205,7 +205,7 @@ export default function AdminApprovals() {
 
       {/* Empty state */}
       {requests.length === 0 && (
-        <div className="text-center py-16 text-[#94A3B8]">
+        <div className="text-center py-16 text-slate-400 dark:text-[#94A3B8]">
           <p className="text-3xl mb-3 opacity-50">☽</p>
           <p className="text-sm italic">ไม่มีคำขอในขณะนี้</p>
         </div>
@@ -222,25 +222,23 @@ export default function AdminApprovals() {
             <div
               key={req.id}
               id={req.id}
-              className={`rounded-2xl border p-4 md:p-5 transition-all ${
-                isHighlighted ? "border-[#C6A96B]/60 ring-1 ring-[#C6A96B]/20" : "border-white/10"
+              className={`rounded-2xl border p-4 md:p-5 transition-all shadow-sm ${
+                isHighlighted
+                  ? "border-[#C6A96B] ring-1 ring-[#C6A96B]/30 bg-amber-50/60 dark:bg-[#C6A96B]/10"
+                  : "border-slate-200 dark:border-white/10 bg-white/95 dark:bg-slate-900/60 backdrop-blur-md"
               }`}
-              style={{
-                background: isHighlighted ? "rgba(198,169,107,0.08)" : "rgba(15,23,42,0.6)",
-                backdropFilter: "blur(12px)",
-              }}
             >
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
                 <div className="flex-1">
                   <div className="flex items-center gap-2 flex-wrap mb-1.5">
-                    <span className="text-sm font-bold text-[#F8F6F1]">
+                    <span className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1]">
                       {req.profiles?.display_name || "ไม่มีชื่อ"}
                     </span>
-                    <span className="text-[10px] text-[#94A3B8] truncate max-w-[150px]">{req.profiles?.email}</span>
+                    <span className="text-[10px] text-slate-500 dark:text-[#94A3B8] truncate max-w-[150px]">{req.profiles?.email}</span>
                   </div>
                   
                   <div className="flex gap-2 items-center flex-wrap mb-3">
-                    <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[#94A3B8]">
+                    <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-[#94A3B8]">
                       {TYPE_LABEL[req.type] || req.type}
                     </span>
                     <span className="text-[9px] uppercase font-bold px-2 py-0.5 rounded-md" 
@@ -249,7 +247,7 @@ export default function AdminApprovals() {
                     </span>
                   </div>
 
-                  <p className="text-[10px] text-[#C6B79F]">
+                  <p className="text-[10px] text-slate-500 dark:text-[#C6B79F]">
                     ขอเมื่อ: {new Date(req.created_at).toLocaleString("th-TH")}
                   </p>
                 </div>

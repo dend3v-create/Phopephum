@@ -647,10 +647,10 @@ export default function TodayScreen() {
         {/* Recommended Actions */}
         <div className="p-4 sm:p-5 rounded-3xl border border-emerald-500/25 bg-emerald-500/10 backdrop-blur-md shadow-sm space-y-3">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-emerald-500/20 text-emerald-300 font-black text-sm">
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-black text-sm">
               ✓
             </div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-400">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
               วันนี้ส่งเสริม / ควรทำ
             </p>
           </div>
@@ -658,9 +658,9 @@ export default function TodayScreen() {
             {doList.slice(0, 3).map((item, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2.5 text-xs sm:text-sm font-medium text-[#E2E8F0] leading-snug"
+                className="flex items-start gap-2.5 text-xs sm:text-sm font-medium text-slate-800 dark:text-[#E2E8F0] leading-snug"
               >
-                <span className="text-emerald-400 mt-0.5 text-xs shrink-0">●</span>
+                <span className="text-emerald-600 dark:text-emerald-400 mt-0.5 text-xs shrink-0">●</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -670,10 +670,10 @@ export default function TodayScreen() {
         {/* Things to Avoid */}
         <div className="p-4 sm:p-5 rounded-3xl border border-rose-500/25 bg-rose-500/10 backdrop-blur-md shadow-sm space-y-3">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-rose-500/20 text-rose-300 font-black text-sm">
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-rose-500/20 text-rose-700 dark:text-rose-300 font-black text-sm">
               ✕
             </div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-rose-400">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-rose-700 dark:text-rose-400">
               ควรหลีกเลี่ยง / ระมัดระวัง
             </p>
           </div>
@@ -681,9 +681,9 @@ export default function TodayScreen() {
             {avoidList.slice(0, 3).map((item, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2.5 text-xs sm:text-sm font-medium text-[#E2E8F0] leading-snug"
+                className="flex items-start gap-2.5 text-xs sm:text-sm font-medium text-slate-800 dark:text-[#E2E8F0] leading-snug"
               >
-                <span className="text-rose-400 mt-0.5 text-xs shrink-0">●</span>
+                <span className="text-rose-600 dark:text-rose-400 mt-0.5 text-xs shrink-0">●</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -692,16 +692,16 @@ export default function TodayScreen() {
       </div>
 
       {/* ── CARD 4: PRIMARY ACTION "หาฤกษ์ให้ฉัน" ── */}
-      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/50 bg-gradient-to-br from-[#0A2240]/80 via-[#071427]/90 to-[#020617] backdrop-blur-xl shadow-xl shadow-[#C6A96B]/15 relative overflow-hidden animate-fade-up">
+      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/30 dark:border-[#C6A96B]/50 bg-gradient-to-br from-[#FAF8F5] via-white to-[#F5F0ED] dark:from-[#0A2240]/80 dark:via-[#071427]/90 dark:to-[#020617] backdrop-blur-xl shadow-lg shadow-[#C6A96B]/10 dark:shadow-[#C6A96B]/15 relative overflow-hidden animate-fade-up">
         <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#C6A96B]">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#8C6D2D] dark:text-[#C6A96B]">
               AUSPICIOUS TIMING FINDER
             </span>
-            <h3 className="font-display text-lg sm:text-xl font-black text-[#F8F6F1]">
+            <h3 className="font-display text-lg sm:text-xl font-black text-slate-900 dark:text-[#F8F6F1]">
               หาฤกษ์มงคล & จังหวะเวลาที่ดีที่สุด
             </h3>
-            <p className="text-xs text-[#CBD5E1] max-w-md leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-[#CBD5E1] max-w-md leading-relaxed">
               ไม่ว่าจะเป็น ออกรถใหม่, ขึ้นบ้านใหม่, เซ็นสัญญา, หรือเจรจาสำคัญ ให้ระบบช่วยคัดกรอง Top 3 ช่วงเวลาทองให้คุณ
             </p>
           </div>

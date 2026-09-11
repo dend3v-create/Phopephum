@@ -194,61 +194,61 @@ function PredictionCard({ reading, onClose }: { reading: KarnchataReading; onClo
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <Card className="border-[#C6A96B]/30 bg-gradient-to-br from-[#0A1628] to-[#020617] p-5 sm:p-6 relative overflow-hidden">
-        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[#C6A96B]/4 blur-3xl pointer-events-none" />
+      <Card className="border-slate-200/80 dark:border-[#C6A96B]/30 bg-white/95 dark:bg-gradient-to-br dark:from-[#0A1628] dark:to-[#020617] p-5 sm:p-6 relative overflow-hidden shadow-sm">
+        <div className="absolute -top-10 -right-10 w-48 h-48 rounded-full bg-[#C6A96B]/5 blur-3xl pointer-events-none" />
         <div className="relative z-10">
           {/* Header */}
           <div className="flex items-start justify-between gap-3 mb-4">
             <div>
-              <span className="text-[#C6A96B] text-[10px] tracking-widest uppercase font-bold block mb-1">
+              <span className="text-[#8C6D2D] dark:text-[#C6A96B] text-[10px] tracking-widest uppercase font-bold block mb-1">
                 {CATEGORY_ICONS[reading.category]} {reading.categoryLabel} · ผลพยากรณ์
               </span>
-              <h3 className="text-lg sm:text-xl font-display font-black text-[#F8F6F1] leading-snug">
+              <h3 className="text-lg sm:text-xl font-display font-black text-slate-900 dark:text-[#F8F6F1] leading-snug">
                 {reading.verdict}
               </h3>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <div className="text-center">
-                <div className={`text-2xl font-display font-black ${isDanger ? "text-red-400" : isGood ? "text-[#C6A96B]" : "text-[#D9BC82]"}`}>{reading.score}</div>
-                <div className="text-[10px] text-[#C6B79F] font-bold">มงคล</div>
+                <div className={`text-2xl font-display font-black ${isDanger ? "text-red-500 dark:text-red-400" : isGood ? "text-emerald-600 dark:text-[#C6A96B]" : "text-[#8C6D2D] dark:text-[#D9BC82]"}`}>{reading.score}</div>
+                <div className="text-[10px] text-slate-500 dark:text-[#C6B79F] font-bold">มงคล</div>
               </div>
               {onClose && (
-                <button onClick={onClose} className="text-[#C6B79F] hover:text-[#F8F6F1] transition-colors">✕</button>
+                <button onClick={onClose} className="text-slate-400 hover:text-slate-700 dark:text-[#C6B79F] dark:hover:text-[#F8F6F1] transition-colors">✕</button>
               )}
             </div>
           </div>
 
           {/* Badges */}
           <div className="flex flex-wrap gap-1.5 mb-4">
-            <span className="bg-[#C6A96B]/10 border border-[#C6A96B]/30 text-[#C6A96B] text-[10px] font-bold px-2.5 py-1 rounded-full">ยาม{reading.yamYaiName}</span>
-            <span className="bg-white/5 border border-white/10 text-[#F8F6F1] text-[10px] font-bold px-2.5 py-1 rounded-full">ยาม{reading.yamPhase}</span>
+            <span className="bg-[#C6A96B]/15 border border-[#C6A96B]/30 text-[#8C6D2D] dark:text-[#C6A96B] text-[10px] font-bold px-2.5 py-1 rounded-full">ยาม{reading.yamYaiName}</span>
+            <span className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-[#F8F6F1] text-[10px] font-bold px-2.5 py-1 rounded-full">ยาม{reading.yamPhase}</span>
             <span className={`border text-[10px] font-bold px-2.5 py-1 rounded-full ${
-              reading.taksaQuality === "กาลกิณี" ? "border-red-500/30 bg-red-500/5 text-red-400" :
-              reading.taksaQuality === "เดช" || reading.taksaQuality === "ศรี" ? "border-[#C6A96B]/30 bg-[#C6A96B]/5 text-[#C6A96B]" :
-              "border-white/10 bg-white/5 text-[#C6B79F]"
+              reading.taksaQuality === "กาลกิณี" ? "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400" :
+              reading.taksaQuality === "เดช" || reading.taksaQuality === "ศรี" ? "border-[#C6A96B]/30 bg-[#C6A96B]/10 text-[#8C6D2D] dark:text-[#C6A96B]" :
+              "border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-white/5 text-slate-700 dark:text-[#C6B79F]"
             }`}>{TAKSA_DECISION[reading.taksaQuality]?.icon} ทักษา{reading.taksaQuality}</span>
           </div>
 
           {/* Detail */}
-          <div className="bg-[#020617]/60 border border-white/5 rounded-xl p-4 mb-3">
-            <p className="text-sm text-[#D9CDB7] leading-relaxed">{reading.detail}</p>
+          <div className="bg-slate-50/80 dark:bg-[#020617]/60 border border-slate-200/80 dark:border-white/5 rounded-xl p-4 mb-3">
+            <p className="text-sm text-slate-800 dark:text-[#D9CDB7] leading-relaxed">{reading.detail}</p>
           </div>
 
           {/* Advice + Warning */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="bg-[#071427]/60 border border-[#C6A96B]/15 rounded-xl p-3">
-              <p className="text-[10px] text-[#C6A96B] font-bold mb-1.5">✦ ควรทำ</p>
-              <p className="text-xs text-[#D9CDB7] leading-relaxed">{reading.advice}</p>
+            <div className="bg-emerald-50/60 dark:bg-[#071427]/60 border border-emerald-200/80 dark:border-[#C6A96B]/15 rounded-xl p-3">
+              <p className="text-[10px] text-emerald-700 dark:text-[#C6A96B] font-bold mb-1.5">✦ ควรทำ</p>
+              <p className="text-xs text-slate-700 dark:text-[#D9CDB7] leading-relaxed">{reading.advice}</p>
             </div>
             {reading.warning ? (
-              <div className="bg-[#1A0A0A]/60 border border-red-500/20 rounded-xl p-3">
-                <p className="text-[10px] text-red-400 font-bold mb-1.5">⚠️ ระวัง</p>
-                <p className="text-xs text-[#D9CDB7] leading-relaxed">{reading.warning}</p>
+              <div className="bg-rose-50/60 dark:bg-[#1A0A0A]/60 border border-rose-200/80 dark:border-red-500/20 rounded-xl p-3">
+                <p className="text-[10px] text-rose-700 dark:text-red-400 font-bold mb-1.5">⚠️ ระวัง</p>
+                <p className="text-xs text-slate-700 dark:text-[#D9CDB7] leading-relaxed">{reading.warning}</p>
               </div>
             ) : (
-              <div className="bg-[#071E3D]/60 border border-[#6D8FC7]/15 rounded-xl p-3">
-                <p className="text-[10px] text-[#6D8FC7] font-bold mb-1.5">🕐 เวลามงคล</p>
-                <p className="text-xs text-[#D9CDB7] leading-relaxed">{reading.auspiciousTime}</p>
+              <div className="bg-sky-50/60 dark:bg-[#071E3D]/60 border border-sky-200/80 dark:border-[#6D8FC7]/15 rounded-xl p-3">
+                <p className="text-[10px] text-sky-700 dark:text-[#6D8FC7] font-bold mb-1.5">🕐 เวลามงคล</p>
+                <p className="text-xs text-slate-700 dark:text-[#D9CDB7] leading-relaxed">{reading.auspiciousTime}</p>
               </div>
             )}
           </div>
@@ -279,14 +279,14 @@ function DecisionGuidance({
   const isDanger = taksaQuality === "กาลกิณี";
 
   return (
-    <Card className={`p-5 sm:p-6 border ${isDanger ? "border-red-500/20 bg-[#1A0A0A]/80" : "border-[#C6A96B]/20 bg-[#0A1628]"}`}>
+    <Card className={`p-5 sm:p-6 border ${isDanger ? "border-red-500/30 bg-rose-50/30 dark:bg-[#1A0A0A]/80" : "border-slate-200/80 dark:border-[#C6A96B]/20 bg-white/95 dark:bg-[#0A1628] shadow-sm"}`}>
       {/* Title */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <span className="text-[#C6A96B] text-[10px] tracking-widest uppercase font-bold block mb-0.5">{label} — คำแนะนำตัดสินใจ</span>
-          <h3 className="text-base font-display font-black text-[#F8F6F1]">
+          <span className="text-[#8C6D2D] dark:text-[#C6A96B] text-[10px] tracking-widest uppercase font-bold block mb-0.5">{label} — คำแนะนำตัดสินใจ</span>
+          <h3 className="text-base font-display font-black text-slate-900 dark:text-[#F8F6F1]">
             ยาม{yamName} · ยาม{yamPhase}
-            <span className={`ml-2 text-xs font-bold ${isAuspicious ? "text-[#C6A96B]" : "text-[#C6B79F]"}`}>
+            <span className={`ml-2 text-xs font-bold ${isAuspicious ? "text-[#8C6D2D] dark:text-[#C6A96B]" : "text-slate-500 dark:text-[#C6B79F]"}`}>
               {isAuspicious ? "✨ ช่วงดีที่สุด" : `ช่วงดีที่สุดคือ ${yamDec.best}`}
             </span>
           </h3>
@@ -297,32 +297,32 @@ function DecisionGuidance({
       </div>
 
       {/* Main guidance */}
-      <div className={`rounded-xl p-4 mb-4 border ${isAuspicious && !isDanger ? "bg-[#C6A96B]/5 border-[#C6A96B]/20" : isDanger ? "bg-red-500/5 border-red-500/20" : "bg-white/3 border-white/5"}`}>
-        <p className="text-[10px] font-bold mb-2 text-[#C6B79F] uppercase tracking-wider">⏱ ตอนนี้เหมาะกับ</p>
-        <p className="text-sm font-bold text-[#F8F6F1] mb-1">{taksaDec?.title ?? yamDec.what}</p>
-        <p className="text-xs text-[#C6B79F] leading-relaxed">{yamDec.why}</p>
+      <div className={`rounded-xl p-4 mb-4 border ${isAuspicious && !isDanger ? "bg-amber-50/50 border-[#C6A96B]/30 dark:bg-[#C6A96B]/5 dark:border-[#C6A96B]/20" : isDanger ? "bg-red-500/10 border-red-500/30 dark:bg-red-500/5 dark:border-red-500/20" : "bg-slate-50/80 border-slate-200 dark:bg-white/3 dark:border-white/5"}`}>
+        <p className="text-[10px] font-bold mb-2 text-slate-500 dark:text-[#C6B79F] uppercase tracking-wider">⏱ ตอนนี้เหมาะกับ</p>
+        <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1] mb-1">{taksaDec?.title ?? yamDec.what}</p>
+        <p className="text-xs text-slate-600 dark:text-[#C6B79F] leading-relaxed">{yamDec.why}</p>
       </div>
 
       {/* Taksa actions */}
       {taksaDec && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div className="bg-[#071427]/60 border border-[#C6A96B]/10 rounded-xl p-3">
-            <p className="text-[10px] text-[#C6A96B] font-bold mb-2 uppercase tracking-wider">✦ ควรทำตอนนี้</p>
+          <div className="bg-emerald-50/60 dark:bg-[#071427]/60 border border-emerald-200/80 dark:border-[#C6A96B]/10 rounded-xl p-3">
+            <p className="text-[10px] text-emerald-700 dark:text-[#C6A96B] font-bold mb-2 uppercase tracking-wider">✦ ควรทำตอนนี้</p>
             <ul className="space-y-1">
               {taksaDec.actions.map((a, i) => (
-                <li key={i} className="text-xs text-[#D9CDB7] flex items-start gap-1.5">
-                  <span className="text-[#C6A96B] shrink-0 mt-0.5">›</span>
+                <li key={i} className="text-xs text-slate-700 dark:text-[#D9CDB7] flex items-start gap-1.5">
+                  <span className="text-emerald-600 dark:text-[#C6A96B] shrink-0 mt-0.5">›</span>
                   <span>{a}</span>
                 </li>
               ))}
             </ul>
           </div>
-          <div className={`rounded-xl p-3 border ${isDanger ? "bg-red-500/5 border-red-500/15" : "bg-[#071E3D]/60 border-[#6D8FC7]/10"}`}>
-            <p className={`text-[10px] font-bold mb-2 uppercase tracking-wider ${isDanger ? "text-red-400" : "text-[#6D8FC7]"}`}>⚠️ ควรหลีกเลี่ยง</p>
+          <div className={`rounded-xl p-3 border ${isDanger ? "bg-red-500/10 border-red-500/20 dark:bg-red-500/5 dark:border-red-500/15" : "bg-rose-50/60 border-rose-200/80 dark:bg-[#071E3D]/60 dark:border-[#6D8FC7]/10"}`}>
+            <p className={`text-[10px] font-bold mb-2 uppercase tracking-wider ${isDanger ? "text-red-600 dark:text-red-400" : "text-rose-700 dark:text-[#6D8FC7]"}`}>⚠️ ควรหลีกเลี่ยง</p>
             <ul className="space-y-1">
               {taksaDec.avoid.map((a, i) => (
-                <li key={i} className="text-xs text-[#D9CDB7] flex items-start gap-1.5">
-                  <span className={`shrink-0 mt-0.5 ${isDanger ? "text-red-400" : "text-[#6D8FC7]"}`}>✕</span>
+                <li key={i} className="text-xs text-slate-700 dark:text-[#D9CDB7] flex items-start gap-1.5">
+                  <span className={`shrink-0 mt-0.5 ${isDanger ? "text-red-600 dark:text-red-400" : "text-rose-600 dark:text-[#6D8FC7]"}`}>✕</span>
                   <span>{a}</span>
                 </li>
               ))}
@@ -372,12 +372,12 @@ function QuestionBox({
   const cats = Object.entries(CATEGORY_LABELS) as [PredCategory, string][];
 
   return (
-    <div className="bg-[#071427]/80 border border-[#C6A96B]/15 rounded-2xl p-4 sm:p-5">
+    <div className="bg-white/95 dark:bg-[#071427]/80 border border-slate-200/90 dark:border-[#C6A96B]/15 rounded-2xl p-4 sm:p-5 shadow-sm">
       {/* Label */}
       <div className="flex items-center gap-2 mb-3">
         <div className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse shadow-[0_0_6px_rgba(198,169,107,0.6)]" />
-        <span className="text-xs font-bold text-[#C6A96B]">ถามกาลชะตา — {label}</span>
-        <span className="text-[10px] text-[#C6B79F] ml-auto">ยาม{yamName} · {yamPhase}</span>
+        <span className="text-xs font-bold text-[#8C6D2D] dark:text-[#C6A96B]">ถามกาลชะตา — {label}</span>
+        <span className="text-[10px] text-slate-500 dark:text-[#C6B79F] ml-auto">ยาม{yamName} · {yamPhase}</span>
       </div>
 
       {/* Category chips */}
@@ -386,8 +386,8 @@ function QuestionBox({
           <button key={id} type="button" onClick={() => setCategory(id)}
             className={`text-[10px] font-bold px-2.5 py-1 rounded-full border transition-all ${
               category === id
-                ? "bg-[#C6A96B] text-[#020617] border-[#C6A96B]"
-                : "border-white/10 text-[#C6B79F] hover:text-[#F8F6F1]"
+                ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] border-[#C6A96B] shadow-sm"
+                : "bg-slate-100 dark:bg-[#020617] border-slate-200 dark:border-white/10 text-slate-700 dark:text-[#C6B79F] hover:text-slate-900 dark:hover:text-[#F8F6F1] hover:bg-slate-200/70 dark:hover:bg-white/5"
             }`}>
             {CATEGORY_ICONS[id]} {label.split("/")[0].trim()}
           </button>
@@ -398,7 +398,7 @@ function QuestionBox({
       <div className="flex flex-wrap gap-1.5 mb-3">
         {QUICK_QUESTIONS[category]?.map((q, i) => (
           <button key={i} type="button" onClick={() => setQuestion(q)}
-            className="text-[10px] text-[#C6B79F] bg-[#020617] border border-white/8 hover:border-[#C6A96B]/40 hover:text-[#C6A96B] px-3 py-1.5 rounded-xl transition-all text-left">
+            className="text-[10px] text-slate-700 dark:text-[#C6B79F] bg-slate-50 dark:bg-[#020617] border border-slate-200 dark:border-white/8 hover:border-[#C6A96B] hover:text-[#8C6D2D] dark:hover:text-[#C6A96B] px-3 py-1.5 rounded-xl transition-all text-left">
             {q}
           </button>
         ))}
@@ -411,7 +411,7 @@ function QuestionBox({
           value={question}
           onChange={e => setQuestion(e.target.value)}
           placeholder="พิมพ์คำถามของคุณ... เช่น ควรออกเดินทางตอนนี้ไหม?"
-          className="w-full bg-[#020617] border border-white/10 focus:border-[#C6A96B]/40 rounded-xl px-4 py-3 text-sm text-[#F8F6F1] outline-none resize-none min-h-[52px] max-h-[200px] pr-24 placeholder-[#C6B79F]/40 transition-all"
+          className="w-full bg-slate-50 dark:bg-[#020617] border border-slate-200 dark:border-white/10 focus:border-[#C6A96B] focus:bg-white dark:focus:bg-[#020617] rounded-xl px-4 py-3 text-sm text-slate-900 dark:text-[#F8F6F1] outline-none resize-none min-h-[52px] max-h-[200px] pr-24 placeholder-slate-400 dark:placeholder-[#C6B79F]/40 transition-all shadow-inner"
           rows={2}
           onKeyDown={e => {
             if (e.key === "Enter" && !e.shiftKey) {
@@ -429,7 +429,7 @@ function QuestionBox({
           {isLoading ? "⏳" : "พยากรณ์ →"}
         </button>
       </div>
-      <p className="text-[10px] text-[#C6B79F]/50 mt-1.5 px-1">Enter ส่งคำถาม · Shift+Enter ขึ้นบรรทัดใหม่</p>
+      <p className="text-[10px] text-slate-400 dark:text-[#C6B79F]/50 mt-1.5 px-1">Enter ส่งคำถาม · Shift+Enter ขึ้นบรรทัดใหม่</p>
     </div>
   );
 }
@@ -444,27 +444,27 @@ function HistoryStrip({ history, onSelect, onClear }: {
   if (history.length === 0) return null;
   const [open, setOpen] = useState(false);
   return (
-    <div className="bg-[#020617]/60 border border-white/5 rounded-xl p-3">
+    <div className="bg-slate-50 dark:bg-[#020617]/60 border border-slate-200 dark:border-white/5 rounded-xl p-3">
       <div className="flex items-center justify-between">
-        <button onClick={() => setOpen(o => !o)} className="flex items-center gap-2 text-xs font-bold text-[#C6B79F] hover:text-[#F8F6F1]">
+        <button onClick={() => setOpen(o => !o)} className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-[#C6B79F] hover:text-slate-900 dark:hover:text-[#F8F6F1]">
           <span>📜 ประวัติคำถาม ({history.length})</span>
           <span>{open ? "▲" : "▼"}</span>
         </button>
-        <button onClick={onClear} className="text-[10px] text-[#C6B79F] hover:text-red-400 transition-colors">ล้าง</button>
+        <button onClick={onClear} className="text-[10px] text-slate-500 dark:text-[#C6B79F] hover:text-red-500 transition-colors">ล้าง</button>
       </div>
       {open && (
         <div className="mt-3 space-y-1.5 max-h-60 overflow-y-auto">
           {history.map(r => (
             <button key={r.id} onClick={() => onSelect(r)}
-              className="w-full text-left p-2.5 rounded-xl bg-[#071427]/60 border border-white/5 hover:border-[#C6A96B]/20 transition-all group">
+              className="w-full text-left p-2.5 rounded-xl bg-white dark:bg-[#071427]/60 border border-slate-200 dark:border-white/5 hover:border-[#C6A96B]/50 transition-all group shadow-sm">
               <div className="flex items-center gap-2">
                 <span className="shrink-0">{CATEGORY_ICONS[r.category]}</span>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-[#F8F6F1] truncate group-hover:text-[#C6A96B]">{r.question}</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-[#F8F6F1] truncate group-hover:text-[#8C6D2D] dark:group-hover:text-[#C6A96B]">{r.question}</p>
                   <div className="flex gap-2 mt-0.5">
-                    <span className="text-[10px] text-[#C6B79F]">{r.timestamp}</span>
-                    <span className="text-[10px] text-[#C6A96B] font-bold">{r.yamName} · {r.yamPhase}</span>
-                    <span className={`text-[10px] font-bold ml-auto ${r.reading.score >= 65 ? "text-[#C6A96B]" : "text-[#6D8FC7]"}`}>{r.reading.score}%</span>
+                    <span className="text-[10px] text-slate-500 dark:text-[#C6B79F]">{r.timestamp}</span>
+                    <span className="text-[10px] text-[#8C6D2D] dark:text-[#C6A96B] font-bold">{r.yamName} · {r.yamPhase}</span>
+                    <span className={`text-[10px] font-bold ml-auto ${r.reading.score >= 65 ? "text-emerald-600 dark:text-[#C6A96B]" : "text-[#4B6FAE]"}`}>{r.reading.score}%</span>
                   </div>
                 </div>
               </div>
@@ -507,40 +507,41 @@ function YamTableRow({
       <button onClick={onToggle}
         className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-xl border text-xs transition-all ${
           isCurrentYam || isCurrent
-            ? "bg-[#C6A96B]/10 border-[#C6A96B]/40"
-            : isDanger ? "bg-[#4B6FAE]/5 border-[#6D8FC7]/20"
-            : "bg-[#071427]/60 border-white/5 hover:border-[#C6A96B]/20"
+            ? "bg-amber-500/15 border-[#C6A96B] dark:bg-[#C6A96B]/10 dark:border-[#C6A96B]/40 shadow-sm font-bold"
+            : isDanger
+            ? "bg-rose-500/10 border-rose-300 dark:bg-[#4B6FAE]/5 dark:border-[#6D8FC7]/20"
+            : "bg-white/90 border-slate-200/90 text-slate-800 shadow-sm hover:border-[#C6A96B]/50 hover:bg-white dark:bg-[#071427]/60 dark:border-white/5 dark:text-[#F8F6F1] dark:hover:border-[#C6A96B]/20"
         }`}>
         {label !== undefined && (
-          <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] shrink-0 ${isCurrentYam || isCurrent ? "bg-[#C6A96B] text-[#020617]" : "bg-white/5 text-[#C6B79F]"}`}>{label}</span>
+          <span className={`w-6 h-6 rounded-full flex items-center justify-center font-black text-[10px] shrink-0 ${isCurrentYam || isCurrent ? "bg-[#C6A96B] text-[#020617]" : "bg-slate-100 text-slate-700 dark:bg-white/5 dark:text-[#C6B79F]"}`}>{label}</span>
         )}
-        <span className="font-mono text-[#C6B79F] text-[11px] shrink-0 w-26">{timeStr}</span>
-        <span className={`font-bold flex-1 text-left ${isCurrentYam || isCurrent ? "text-[#C6A96B]" : "text-[#F8F6F1]"}`}>
+        <span className="font-mono text-slate-500 dark:text-[#C6B79F] text-[11px] shrink-0 w-26">{timeStr}</span>
+        <span className={`font-bold flex-1 text-left ${isCurrentYam || isCurrent ? "text-[#8C6D2D] dark:text-[#C6A96B]" : "text-slate-900 dark:text-[#F8F6F1]"}`}>
           {STAR_NAMES[starNum as keyof typeof STAR_NAMES]}
         </span>
         {adv && (
-          <span className={`shrink-0 text-[10px] font-bold flex items-center gap-0.5 ${isDanger ? "text-[#6D8FC7]" : isGood ? "text-[#C6A96B]" : "text-[#C6B79F]"}`}>
+          <span className={`shrink-0 text-[10px] font-bold flex items-center gap-0.5 ${isDanger ? "text-rose-600 dark:text-[#6D8FC7]" : isGood ? "text-[#8C6D2D] dark:text-[#C6A96B]" : "text-slate-500 dark:text-[#C6B79F]"}`}>
             {adv.icon} {quality}
           </span>
         )}
-        <span className="text-[#C6B79F]/40 shrink-0 ml-1">{expanded ? "▲" : "▼"}</span>
+        <span className="text-slate-400 dark:text-[#C6B79F]/40 shrink-0 ml-1">{expanded ? "▲" : "▼"}</span>
       </button>
       {expanded && (
-        <div className="px-4 py-3 bg-[#020617]/70 border-x border-b border-white/5 rounded-b-xl space-y-2">
-          <p className="text-xs text-[#D9CDB7] leading-relaxed">{yamDec.why}</p>
+        <div className="px-4 py-3 bg-slate-50/95 dark:bg-[#020617]/70 border-x border-b border-slate-200/90 dark:border-white/5 rounded-b-xl space-y-2">
+          <p className="text-xs text-slate-700 dark:text-[#D9CDB7] leading-relaxed">{yamDec.why}</p>
           {adv && (
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <p className="text-[10px] text-[#C6A96B] font-bold mb-1">✦ ควรทำ</p>
-                {adv.actions.slice(0, 2).map((a, i) => <p key={i} className="text-[10px] text-[#D9CDB7]">› {a}</p>)}
+                <p className="text-[10px] text-emerald-700 dark:text-[#C6A96B] font-bold mb-1">✦ ควรทำ</p>
+                {adv.actions.slice(0, 2).map((a, i) => <p key={i} className="text-[10px] text-slate-700 dark:text-[#D9CDB7]">› {a}</p>)}
               </div>
               <div>
-                <p className={`text-[10px] font-bold mb-1 ${isDanger ? "text-red-400" : "text-[#6D8FC7]"}`}>✕ หลีกเลี่ยง</p>
-                {adv.avoid.slice(0, 2).map((a, i) => <p key={i} className="text-[10px] text-[#D9CDB7]">✕ {a}</p>)}
+                <p className={`text-[10px] font-bold mb-1 ${isDanger ? "text-red-500 dark:text-red-400" : "text-rose-600 dark:text-[#6D8FC7]"}`}>✕ หลีกเลี่ยง</p>
+                {adv.avoid.slice(0, 2).map((a, i) => <p key={i} className="text-[10px] text-slate-700 dark:text-[#D9CDB7]">✕ {a}</p>)}
               </div>
             </div>
           )}
-          <p className="text-[10px] text-[#C6A96B] font-bold">⏱ ช่วงดีที่สุด: ยาม{yamDec.best}</p>
+          <p className="text-[10px] text-[#8C6D2D] dark:text-[#C6A96B] font-bold">⏱ ช่วงดีที่สุด: ยาม{yamDec.best}</p>
         </div>
       )}
     </div>

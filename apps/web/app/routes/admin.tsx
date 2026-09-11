@@ -23,7 +23,7 @@ export default function AdminLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex bg-[#020617]">
+    <div className="min-h-screen flex bg-slate-50 dark:bg-[#020617] text-slate-900 dark:text-[#F8F6F1]">
       {/* Mobile Menu Backdrop */}
       {isMobileMenuOpen && (
         <div
@@ -34,32 +34,27 @@ export default function AdminLayout() {
 
       {/* Sidebar */}
       <aside
-        className={`flex flex-col w-64 p-5 fixed h-full border-r z-40 transition-transform duration-300 ${
+        className={`flex flex-col w-64 p-5 fixed h-full border-r z-40 transition-transform duration-300 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-slate-200 dark:border-sky-500/20 shadow-sm ${
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
         onClick={() => setIsMobileMenuOpen(false)}
-        style={{
-          background: "rgba(15,23,42,0.95)",
-          backdropFilter: "blur(20px)",
-          borderColor: "rgba(56,189,248,0.12)",
-        }}
       >
         {/* Logo */}
         <div className="mb-8 pl-1 flex items-center gap-3">
           <div className="relative w-10 h-10 flex items-center justify-center">
-            <div className="absolute inset-0 rounded-full border border-[#38BDF8]/30 bg-[#38BDF8]/5" />
-            <span className="text-[#38BDF8] text-xs font-bold z-10 font-display">P</span>
+            <div className="absolute inset-0 rounded-full border border-sky-500/30 bg-sky-500/10" />
+            <span className="text-sky-600 dark:text-[#38BDF8] text-xs font-bold z-10 font-display">P</span>
             <div className="absolute inset-0 opacity-20">
                <svg viewBox="0 0 40 40" fill="none">
-                 <circle cx="20" cy="20" r="18" stroke="#38BDF8" strokeWidth="0.5" strokeDasharray="2 2" />
+                 <circle cx="20" cy="20" r="18" stroke="currentColor" strokeWidth="0.5" strokeDasharray="2 2" className="text-sky-500" />
                </svg>
             </div>
           </div>
           <div>
-            <p className="text-[#38BDF8] text-[8px] tracking-[0.2em] uppercase mb-0.5 opacity-70">
+            <p className="text-sky-700 dark:text-[#38BDF8] text-[8px] tracking-[0.2em] uppercase mb-0.5 font-bold">
               System Admin
             </p>
-            <h2 className="font-display text-xl font-bold text-[#F8F6F1] drop-shadow-md leading-none">
+            <h2 className="font-display text-xl font-bold text-slate-900 dark:text-[#F8F6F1] leading-none">
               PhopePhum
             </h2>
           </div>
@@ -71,28 +66,27 @@ export default function AdminLayout() {
           <NavLink to="/admin/users" icon={<IconUsers />} label="จัดการสมาชิก" />
           <NavLink to="/admin/approvals" icon={<IconApprove />} label="อนุมัติคำขอ" />
           <div className="mt-4 mb-2">
-            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider pl-3">Yam Database</p>
+            <p className="text-xs font-semibold text-slate-400 dark:text-[#94A3B8] uppercase tracking-wider pl-3">Yam Database</p>
           </div>
           <NavLink to="/admin/yam-editor" icon={<IconYam />} label="กรอกข้อมูลยาม" />
           <NavLink to="/admin/seed-yam" icon={<IconSeed />} label="Seed อัตโนมัติ" />
           <div className="mt-4 mb-2">
-            <p className="text-xs font-semibold text-[#94A3B8] uppercase tracking-wider pl-3">Back to App</p>
+            <p className="text-xs font-semibold text-slate-400 dark:text-[#94A3B8] uppercase tracking-wider pl-3">Back to App</p>
           </div>
           <NavLink to="/dashboard" icon={<IconApp />} label="User Dashboard" />
         </nav>
 
         {/* User */}
-        <div className="border-t pt-4 mt-4" style={{ borderColor: "rgba(56,189,248,0.12)" }}>
+        <div className="border-t pt-4 mt-4 border-slate-200 dark:border-sky-500/20">
           <div className="flex items-center gap-3 mb-3">
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-[#38BDF8] text-sm font-semibold"
-              style={{ background: "rgba(56,189,248,0.15)", border: "1px solid rgba(56,189,248,0.25)" }}
+              className="w-8 h-8 rounded-full flex items-center justify-center text-sky-700 dark:text-[#38BDF8] text-sm font-semibold bg-sky-500/15 border border-sky-500/30"
             >
               {displayName.charAt(0).toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-[#F8F6F1] truncate">{displayName}</p>
-              <p className="text-xs text-[#38BDF8] font-medium truncate capitalize">
+              <p className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1] truncate">{displayName}</p>
+              <p className="text-xs text-sky-600 dark:text-[#38BDF8] font-medium truncate capitalize">
                 {profile?.role ?? "Admin"}
               </p>
             </div>
@@ -100,10 +94,7 @@ export default function AdminLayout() {
           <Form method="post" action="/logout">
             <button
               type="submit"
-              className="w-full text-left text-xs text-[#94A3B8] hover:text-[#F8F6F1] px-2 py-1.5 rounded-lg transition-colors"
-              style={{ "--hover-bg": "rgba(239,68,68,0.12)" } as React.CSSProperties}
-              onMouseEnter={e => (e.currentTarget.style.background = "rgba(239,68,68,0.12)")}
-              onMouseLeave={e => (e.currentTarget.style.background = "transparent")}
+              className="w-full text-left text-xs text-slate-500 dark:text-[#94A3B8] hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 px-2 py-1.5 rounded-lg transition-colors"
             >
               ออกจากระบบ (Logout)
             </button>
@@ -113,19 +104,14 @@ export default function AdminLayout() {
 
       {/* Mobile top bar */}
       <div
-        className="md:hidden fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 border-b"
-        style={{
-          background: "rgba(15,23,42,0.95)",
-          backdropFilter: "blur(16px)",
-          borderColor: "rgba(56,189,248,0.12)",
-        }}
+        className="md:hidden fixed top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-3 border-b bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-slate-200 dark:border-sky-500/20"
       >
-        <h2 className="font-display text-xl font-bold text-[#F8F6F1]">
+        <h2 className="font-display text-xl font-bold text-slate-900 dark:text-[#F8F6F1]">
           Admin Panel
         </h2>
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-1.5 rounded-lg hover:bg-white/5 active:scale-95 transition-all text-[#38BDF8]"
+          className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-white/5 active:scale-95 transition-all text-sky-600 dark:text-[#38BDF8]"
           aria-label="เมนู"
         >
           <MobileMenu />
