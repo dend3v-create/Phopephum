@@ -543,6 +543,7 @@ export default function HoroscopePage() {
   const currentBirthPlace = activeResult?.birthPlace || profile?.birth_place || "กรุงเทพมหานคร";
 
   // ── ส่วนแชทพยากรณ์อัจฉริยะตามผังดวง พร้อมระบบบันทึกประวัติแยกตามเจ้าชะตา ──
+  const [forecastMode, setForecastMode] = useState<"natal" | "transit">("transit");
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [userInput, setUserInput] = useState("");
   const [isChatLoading, setIsChatLoading] = useState(false);
@@ -655,6 +656,7 @@ export default function HoroscopePage() {
           transitTime: activeResult?.transitTime,
           filterType,
           filterValue,
+          forecastMode,
           history: historyContext,
         }),
       });
@@ -729,6 +731,7 @@ export default function HoroscopePage() {
           answer: finalCleanAnswer,
           filterType: filterType || undefined,
           filterValue: filterValue ? String(filterValue) : undefined,
+          forecastMode,
         }),
       }).catch(err => console.warn("Failed to persist horoscope chat:", err));
 
@@ -1601,15 +1604,57 @@ export default function HoroscopePage() {
               </div>
             </div>
 
-            {/* Quick Suggestion Chips */}
+            {/* ── [ยกระดับ!] ปุ่มเลือกโหมดการพยากรณ์: ดวงจร vs พื้นดวงเดิม ── */}
+            <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 bg-slate-950/60 rounded-xl border border-[#C6A96B]/20">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-[11px] text-[#C6B79F] font-semibold pl-1 pr-0.5">เลือกโหมด:</span>
+                <button
+                  type="button"
+                  onClick={() => setForecastMode("transit")}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                    forecastMode === "transit"
+                      ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-md ring-1 ring-[#C6A96B]"
+                      : "text-[#C6B79F] hover:text-[#F8F6F1] hover:bg-white/5"
+                  }`}
+                >
+                  <span>⚡</span>
+                  <span>อ่านดวงแบบจร (Transit Dynamics)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setForecastMode("natal")}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                    forecastMode === "natal"
+                      ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] shadow-md ring-1 ring-[#C6A96B]"
+                      : "text-[#C6B79F] hover:text-[#F8F6F1] hover:bg-white/5"
+                  }`}
+                >
+                  <span>🏛️</span>
+                  <span>อ่านพื้นดวงเดิม (Natal Destiny)</span>
+                </button>
+              </div>
+              <span className="text-[11px] text-[#D9BC82]/80 italic px-2">
+                {forecastMode === "transit" 
+                  ? "✦ เจาะลึก วัยจร/ปีจร/ลัคนาจร ด้วยพลังฐาน ๔ และดาวย้ำลูกโซ่" 
+                  : "✦ วิเคราะห์ศักยภาพ วาสนาบารมี และจุดเปราะบางประจำตัว"}
+              </span>
+            </div>
+
+            {/* Quick Suggestion Chips (ปรับตามโหมด forecastMode) */}
             <div className="flex flex-wrap gap-1.5 pb-1">
-              {[
-                { label: "⚖️ มีคดีความผลจะเป็นอย่างไร?", q: "ตอนนี้มีคดีความผลจะเป็นอย่างไรสำหรับเจ้าชะตานี้" },
-                { label: "💰 กระแสการเงินและโชคลาภ", q: "กระแสการเงินและช่องทางโชคลาภของเจ้าชะตาในปีนี้เป็นอย่างไร" },
-                { label: "🚀 การงานและความก้าวหน้า", q: "ทิศทางการงานและโอกาสเติบโตของเจ้าชะตาในช่วงนี้" },
-                { label: "💖 ความรักและความสัมพันธ์", q: "เรื่องความรัก คู่ครอง หรือความสัมพันธ์ในจังหวะเวลานี้" },
-                { label: "⚠️ สิ่งที่ต้องระวัง & ทางแก้", q: "อุปสรรคสำคัญที่ต้องระมัดระวังที่สุดในปีนี้ และวิธีเสริมดวงแก้ทาง" },
-              ].map((chip, idx) => (
+              {(forecastMode === "transit" ? [
+                { label: "🌀 วัยจรและปีจรปีนี้ส่งผลเรื่องอะไร?", q: "ตรวจดวงจรปีนี้ วัยจรและปีจรตกภพใด และมีผลกระทบอย่างไรต่อชีวิต" },
+                { label: "⚡ ฐาน ๔ หนุนนำภพจรอย่างไร?", q: "พลังฐานที่ ๔ ในคอลัมน์ของจุดจรส่งผลหนุนนำหรือสร้างแรงเสียดทานอย่างไร" },
+                { label: "🔗 ดาวย้ำฐาน ๕-๗ เปิดทางออกใด?", q: "ระบบดาวย้ำในคอลัมน์ของดวงจรเปิดทางออกและโอกาสแก้ไขสถานการณ์อย่างไร" },
+                { label: "⚖️ คดีความ/อุปสรรคตามเกณฑ์จร", q: "วิเคราะห์เกณฑ์คดีความ ข้อพิพาท หรืออุปสรรคจรในปีนี้และจังหวะคลี่คลาย" },
+                { label: "💰 การเงินและโชคลาภจร", q: "กระแสการเงินและช่องทางโชคลาภตามลัคนาจรและปีจรในช่วงนี้" },
+              ] : [
+                { label: "🌟 ตัวตนและศักยภาพเดิม (อัตตะ)", q: "วิเคราะห์บุคลิกภาพตัวตน ศักยภาพ และวาสนาตามพื้นดวงเดิม" },
+                { label: "💼 การงานและอาชีพที่ตรงกับดวง (กัมมะ)", q: "อาชีพ ธุรกิจ และรูปแบบการทำงานที่เหมาะสมที่สุดตามพื้นดวงชะตา" },
+                { label: "💰 คลังสมบัติประจำดวง (ลาภะ/กดุมภะ)", q: "โอกาสในการสร้างความมั่งคั่งและคลังสมบัติประจำดวงชะตา" },
+                { label: "💖 ความรักและคู่ครองตามพื้นชะตา (ปัตนิ)", q: "ลักษณะเนื้อคู่และเกณฑ์ความรักตามพื้นดวงเดิม" },
+                { label: "🛡️ วิธีเสริมดวงและแก้จุดเปราะบาง", q: "จุดที่ต้องระวังตามพื้นดวงเดิมและแนวทางเสริมสร้างบารมีทางจิตวิญญาณ" },
+              ]).map((chip, idx) => (
                 <button
                   key={idx}
                   type="button"

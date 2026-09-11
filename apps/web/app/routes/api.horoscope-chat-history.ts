@@ -68,6 +68,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     answer: string;
     filterType?: string;
     filterValue?: string;
+    forecastMode?: string;
   };
 
   try {
@@ -92,6 +93,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
         answer: answer.trim(),
         filter_type: body.filterType || null,
         filter_value: body.filterValue ? String(body.filterValue) : null,
+        metadata: { forecastMode: body.forecastMode || "auto" },
       })
       .select("id")
       .single();
