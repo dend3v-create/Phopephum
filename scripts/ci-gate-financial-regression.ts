@@ -69,8 +69,8 @@ export async function runFinancialRegressionGate(): Promise<boolean> {
     assert(freeProd?.priceThb === 0, "Free plan is ฿0");
     assert(basicProd?.priceThb === 89, "Basic plan is ฿89");
     assert(proProd?.priceThb === 289, "Pro plan is ฿289");
-    assert(proAnnualProd?.priceThb === 2790, "Pro Annual is ฿2,790");
-    assert(imperialProd?.priceThb === 789, "Imperial plan is ฿789");
+    assert(proAnnualProd?.priceThb === 2770, "Pro Annual is ฿2,770");
+    assert(imperialProd?.priceThb === 1289, "Imperial plan is ฿1,289");
     assert(sands50Prod?.priceThb === 59, "Sands 50 is ฿59");
     assert(sands150Prod?.priceThb === 149, "Sands 150 is ฿149");
     assert(sands500Prod?.priceThb === 399, "Sands 500 is ฿399");
@@ -101,7 +101,7 @@ export async function runFinancialRegressionGate(): Promise<boolean> {
     recordCheck(5, "INV-05", "Customer Invoice VAT Base (7% Inc)", "PASS", "฿289 Gross → ฿18.91 Invoice VAT Base");
 
     // ── CHECK 6: Deterministic Net Reconciliation Formula (INV-06 & INV-07) ───
-    const testAmounts = [59, 89, 149, 289, 399, 789, 2790];
+    const testAmounts = [59, 89, 149, 289, 399, 1289, 2770];
     for (const gross of testAmounts) {
       const calc = calculateOmiseFee(gross, "promptpay");
       const computedSum = Math.round((calc.netReceivedThb + calc.feeThb + calc.feeVatThb) * 100) / 100;

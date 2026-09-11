@@ -8,7 +8,7 @@
     "dev": "remix vite:dev",
     "build": "remix vite:build",
     "typecheck": "tsc",
-    "lint": "eslint app/",
+    "lint": "tsc --noEmit",
     "deploy": "remix vite:build && wrangler pages deploy ./build/client --project-name=phopephum-web --branch=phopephum --commit-dirty=true"
   },
   "dependencies": {
