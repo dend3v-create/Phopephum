@@ -459,7 +459,7 @@ export default function PlannerPage() {
         </section>
 
         {/* Footer Actions */}
-        <div className="fixed bottom-[64px] md:bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#020617] via-[#020617] to-transparent pointer-events-none z-10">
+        <div className="fixed bottom-[64px] md:bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#F9F7F3] via-[#F9F7F3]/95 dark:from-[#020617] dark:via-[#020617]/95 to-transparent pointer-events-none z-10">
           <div className="max-w-2xl mx-auto pointer-events-auto">
             <Button type="submit" loading={isSaving} className="w-full h-12 btn-gold-shine border-0 text-base font-bold flex items-center justify-center gap-2 shadow-2xl">
               <Save className="w-5 h-5" />

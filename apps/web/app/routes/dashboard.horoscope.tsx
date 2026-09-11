@@ -2377,16 +2377,16 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
   }
 
   return (
-    <Card className="border-[#C9A96E]/30 bg-gradient-to-br from-[#0A2240]/60 to-[#020617]/90 backdrop-blur-xl p-5 relative overflow-hidden shadow-2xl rounded-2xl">
+    <Card className="border-slate-200 dark:border-[#C9A96E]/30 bg-white/95 dark:bg-gradient-to-br dark:from-[#0A2240]/60 dark:to-[#020617]/90 backdrop-blur-xl p-5 relative overflow-hidden shadow-md dark:shadow-2xl rounded-2xl">
       <div className="absolute top-0 right-0 w-48 h-48 bg-[#C9A96E]/5 rounded-full blur-3xl -z-10" />
       
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#C9A96E]/20 pb-4 mb-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-amber-300/30 dark:border-[#C9A96E]/20 pb-4 mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-[#C9A96E]/15 border border-[#C9A96E]/35 flex items-center justify-center font-display text-2xl font-bold text-[#C9A96E] shadow-inner animate-pulse">
+          <div className="w-12 h-12 rounded-2xl bg-[#C9A96E]/15 border border-[#C9A96E]/35 flex items-center justify-center font-display text-2xl font-bold text-[#8C6D2D] dark:text-[#C9A96E] shadow-inner animate-pulse">
             {star}
           </div>
           <div>
-            <h4 className="font-display text-lg font-bold text-[#F8F6F1] glow-gold flex items-center gap-2">
+            <h4 className="font-display text-lg font-bold text-slate-900 dark:text-[#F8F6F1] glow-gold flex items-center gap-2">
               ถอดรหัสดาวชะตา: {starInfo.title}
             </h4>
             <div className="flex flex-wrap gap-2 mt-1">

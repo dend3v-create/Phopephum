@@ -769,13 +769,24 @@ body {
 [data-theme="light"] .via-\[\#0A1628\]\/80,
 [data-theme="light"] .via-\[\#0A1628\]\/90,
 [data-theme="light"] .via-\[\#0A2240\],
+[data-theme="light"] .via-\[\#0A2240\]\/80,
+[data-theme="light"] .via-\[\#0A2240\]\/90,
 [data-theme="light"] .via-\[\#0d1f38\],
 [data-theme="light"] .via-\[\#091C36\]    { --tw-gradient-via: #FAF8F5 !important; }
 
 [data-theme="light"] .to-\[\#020617\],
+[data-theme="light"] .to-\[\#020617\]\/80,
+[data-theme="light"] .to-\[\#020617\]\/90,
 [data-theme="light"] .to-\[\#040A14\],
 [data-theme="light"] .to-\[\#071427\],
-[data-theme="light"] .to-\[\#0A1628\]     { --tw-gradient-to: #F5F0ED !important; }
+[data-theme="light"] .to-\[\#0A1628\],
+[data-theme="light"] .to-\[\#0A1628\]\/70,
+[data-theme="light"] .to-\[\#0A1628\]\/80,
+[data-theme="light"] .to-\[\#0A1628\]\/90,
+[data-theme="light"] .to-\[\#0A2240\],
+[data-theme="light"] .to-\[\#0A2240\]\/70,
+[data-theme="light"] .to-\[\#0A2240\]\/80,
+[data-theme="light"] .to-\[\#0A2240\]\/90 { --tw-gradient-to: #F5F0ED !important; }
 
 /* ══════════════════════════════════════════════════════════════
    LIGHT MODE — Tailwind @theme token overrides

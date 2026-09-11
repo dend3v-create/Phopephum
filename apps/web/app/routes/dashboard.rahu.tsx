@@ -26,7 +26,11 @@ import {
   AlertTriangle, 
   Check, 
   CalendarDays,
-  Target
+  Target,
+  Send,
+  Trash2,
+  Bot,
+  User
 } from "lucide-react";
 
 export const meta: MetaFunction = () => [
@@ -394,6 +398,9 @@ export default function RahuDashboard() {
          <PredictionBox title="ผลตามไตรภูมิ" value={rahuResult.yam_rule.traibhum_result} icon="📜" />
       </div>
 
+      {/* ── 💬 ห้องสนทนาและปรึกษาปัญญายามราหู (Auto-expanding chat with local history) ── */}
+      <RahuConsultationChat rahuResult={rahuResult} />
+
       {/* ── 📅 ตารางยามราหูรายวัน 16 บล็อก (Daily Schedule) ── */}
       <div className="space-y-6 pt-6 border-t border-[#C6A96B]/15">
         
@@ -502,17 +509,363 @@ export default function RahuDashboard() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Sub-components
+// Sub-components: Rahu Consultation Chat & Prediction Boxes
 // ─────────────────────────────────────────────────────────────────────────────
+
+interface RahuChatMessage {
+  id: string;
+  role: "user" | "assistant";
+  text: string;
+  timestamp: string;
+  streaming?: boolean;
+}
+
+const RAHU_WELCOME_MESSAGE: RahuChatMessage = {
+  id: "welcome",
+  role: "assistant",
+  text: "สวัสดีครับ ✦ ยินดีต้อนรับสู่ห้องสนทนาปัญญายามราหูค้นทรัพย์\n\nผมพร้อมช่วยตอบคำถามและวิเคราะห์ช่วงเวลาทองในการเจรจา การเงิน การทวงถามผลประโยชน์ หรือจังหวะการลงมือทำตามคัมภีร์ยามราหูโบราณครับ ถามเรื่องที่ต้องการปรึกษาได้เลยครับ",
+  timestamp: new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" }),
+};
+
+const RAHU_SUGGESTIONS = [
+  "ช่วงเวลานี้เหมาะแก่การเจรจาการเงินหรือปิดการขายไหม?",
+  "วันนี้มีช่วงเวลาทอง (Golden Window) ช่วงใดบ้าง?",
+  "ทิศทางมงคลและข้อควรระวังสำคัญของยามนี้คืออะไร?",
+  "หากจะทวงหนี้สินหรือทวงถามงาน ควรทำช่วงเวลาไหนดีที่สุด?",
+];
+
+function RahuConsultationChat({ rahuResult }: { rahuResult: any }) {
+  const [messages, setMessages] = useState<RahuChatMessage[]>([RAHU_WELCOME_MESSAGE]);
+  const [input, setInput] = useState("");
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // โหลดประวัติการสนทนาจาก LocalStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("phopephum_rahu_chat_history_v1");
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed);
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  const saveHistory = (msgs: RahuChatMessage[]) => {
+    try {
+      const toSave = msgs.map((m) => ({ ...m, streaming: false }));
+      localStorage.setItem("phopephum_rahu_chat_history_v1", JSON.stringify(toSave));
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleClearHistory = () => {
+    if (window.confirm("คุณต้องการล้างประวัติการสนทนานี้เพื่อเริ่มใหม่ใช่หรือไม่?")) {
+      const reset = [RAHU_WELCOME_MESSAGE];
+      setMessages(reset);
+      try {
+        localStorage.removeItem("phopephum_rahu_chat_history_v1");
+      } catch {
+        // ignore
+      }
+    }
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isStreaming]);
+
+  // ปรับความสูงช่องพิมพ์ตามข้อความที่พิมพ์อัตโนมัติ (Auto-grow Textarea)
+  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+    e.target.style.height = "auto";
+    e.target.style.height = `${Math.min(e.target.scrollHeight, 180)}px`;
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleSend = async (customText?: string) => {
+    const textToSend = (customText || input).trim();
+    if (!textToSend || isStreaming) return;
+
+    const userMsgId = `u_${Date.now()}`;
+    const assistantMsgId = `a_${Date.now()}`;
+    const nowTime = new Date().toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+
+    const userMsg: RahuChatMessage = {
+      id: userMsgId,
+      role: "user",
+      text: textToSend,
+      timestamp: nowTime,
+    };
+
+    const initialAssistantMsg: RahuChatMessage = {
+      id: assistantMsgId,
+      role: "assistant",
+      text: "",
+      timestamp: nowTime,
+      streaming: true,
+    };
+
+    const updatedMessages = [...messages, userMsg, initialAssistantMsg];
+    setMessages(updatedMessages);
+    setInput("");
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
+    setIsStreaming(true);
+
+    try {
+      const currentYamName = rahuResult?.summary?.current_yam_name || "ยามราหูค้นทรัพย์";
+      const currentSubYam = rahuResult?.sub_block?.name || "";
+      const currentStatus = rahuResult?.is_current_moment_good ? "ช่วงเวลามงคล" : "ช่วงเวลาพึงระวัง";
+
+      const categoryInfo = `ยามราหูค้นทรัพย์ (${currentYamName} / ยามย่อย: ${currentSubYam} / สถานะ: ${currentStatus})`;
+
+      const formData = new FormData();
+      formData.append("question", textToSend);
+      formData.append("category", categoryInfo);
+
+      const response = await fetch("/api/wisdom-chat", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok || !response.body) {
+        throw new Error("AI Service Unavailable");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const data = line.slice(6).trim();
+          if (data === "[DONE]") continue;
+          try {
+            const parsed = JSON.parse(data);
+            const token = parsed?.choices?.[0]?.delta?.content ?? parsed?.content ?? "";
+            if (token) {
+              accumulated += token;
+              setMessages((prev) =>
+                prev.map((m) => (m.id === assistantMsgId ? { ...m, text: accumulated } : m))
+              );
+            }
+          } catch {
+            // plain text fallback
+          }
+        }
+      }
+
+      const finalMessages = updatedMessages.map((m) =>
+        m.id === assistantMsgId
+          ? {
+              ...m,
+              text: accumulated || "ขอบคุณสำหรับคำถามครับ แนะนำให้พิจารณาจังหวะเวลาตามตารางยามราหูของวันนี้เพื่อความรอบคอบครับ",
+              streaming: false,
+            }
+          : m
+      );
+      setMessages(finalMessages);
+      saveHistory(finalMessages);
+    } catch {
+      const errorMessages = updatedMessages.map((m) =>
+        m.id === assistantMsgId
+          ? {
+              ...m,
+              text: "ขออภัยครับ ระบบประมวลผลคำแนะนำติดขัดชั่วคราว กรุณากดลองใหม่อีกครั้งครับ ✦",
+              streaming: false,
+            }
+          : m
+      );
+      setMessages(errorMessages);
+      saveHistory(errorMessages);
+    } finally {
+      setIsStreaming(false);
+    }
+  };
+
+  return (
+    <Card className="rounded-3xl border border-amber-300/40 dark:border-[#C6A96B]/30 bg-white/95 dark:bg-[#071427]/85 backdrop-blur-xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
+      {/* Header bar */}
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 dark:border-white/10 pb-4 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C6A96B] to-[#9E824C] p-0.5 shadow-md flex items-center justify-center shrink-0">
+            <div className="w-full h-full rounded-[10px] bg-[#020617] flex items-center justify-center">
+              <Bot className="w-5 h-5 text-[#C6A96B]" />
+            </div>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-display text-base sm:text-lg font-bold text-slate-900 dark:text-[#F8F6F1]">
+                สนทนาปัญญายามราหู
+              </h3>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-[#8C6D2D] dark:text-[#F6D88C] border border-amber-500/30">
+                {rahuResult?.summary?.current_yam_name ?? "ยามราหู"}
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 dark:text-[#C6B79F]">
+              ถาม-ตอบเจาะจงเวลาทอง การเจรจา ทรัพย์สิน และการตัดสินใจฉับพลัน
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {messages.length > 1 && (
+            <button
+              type="button"
+              onClick={handleClearHistory}
+              title="ล้างประวัติการสนทนา"
+              className="px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-white/10 hover:border-rose-400/50 text-slate-600 dark:text-[#C6B79F] hover:text-rose-500 text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">ล้างประวัติ</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => setIsExpanded(!isExpanded)}
+            className="p-2 rounded-xl border border-slate-300 dark:border-white/10 text-slate-600 dark:text-[#C6B79F] hover:bg-slate-100 dark:hover:bg-white/5 transition-colors"
+            aria-label={isExpanded ? "ย่อหน้าต่าง" : "ขยายหน้าต่าง"}
+          >
+            {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          </button>
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="space-y-4 animate-in fade-in duration-200">
+          {/* Messages list */}
+          <div className="max-h-[380px] sm:max-h-[460px] overflow-y-auto space-y-3.5 pr-1 text-sm scroll-smooth">
+            {messages.map((m) => (
+              <div
+                key={m.id}
+                className={`flex gap-2.5 ${m.role === "user" ? "justify-end" : "justify-start"}`}
+              >
+                {m.role === "assistant" && (
+                  <div className="w-7 h-7 rounded-lg bg-[#C6A96B]/15 border border-[#C6A96B]/30 flex items-center justify-center shrink-0 mt-1">
+                    <Bot className="w-4 h-4 text-[#C6A96B]" />
+                  </div>
+                )}
+                <div
+                  className={`max-w-[88%] sm:max-w-[80%] rounded-2xl p-3.5 sm:p-4 shadow-sm ${
+                    m.role === "user"
+                      ? "bg-gradient-to-br from-amber-500/15 via-[#C6A96B]/15 to-transparent dark:from-[#C6A96B]/25 dark:to-[#0A2240]/40 border border-amber-500/30 text-slate-900 dark:text-[#F8F6F1] rounded-tr-xs"
+                      : "bg-slate-50 dark:bg-slate-900/90 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-[#D9CDB7] rounded-tl-xs"
+                  }`}
+                >
+                  <p className="whitespace-pre-wrap leading-relaxed break-words text-xs sm:text-sm">
+                    {m.text}
+                    {m.streaming && (
+                      <span className="inline-block w-1.5 h-4 ml-1 bg-[#C6A96B] animate-pulse align-middle" />
+                    )}
+                  </p>
+                  <div
+                    className={`text-[10px] mt-1.5 flex items-center gap-1 ${
+                      m.role === "user"
+                        ? "justify-end text-[#8C6D2D] dark:text-[#C6A96B]"
+                        : "text-slate-500 dark:text-[#94A3B8]"
+                    }`}
+                  >
+                    <span>{m.timestamp}</span>
+                  </div>
+                </div>
+                {m.role === "user" && (
+                  <div className="w-7 h-7 rounded-lg bg-amber-500/20 border border-amber-500/30 flex items-center justify-center shrink-0 mt-1">
+                    <User className="w-4 h-4 text-[#8C6D2D] dark:text-[#C6A96B]" />
+                  </div>
+                )}
+              </div>
+            ))}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Suggestion Pills */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1.5 pt-1 scrollbar-none">
+            {RAHU_SUGGESTIONS.map((s, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => handleSend(s)}
+                disabled={isStreaming}
+                className="shrink-0 px-3 py-1.5 rounded-xl border border-slate-300 dark:border-white/10 bg-slate-100/80 dark:bg-white/5 hover:border-[#C6A96B]/50 hover:bg-amber-500/10 dark:hover:bg-[#C6A96B]/15 text-xs text-slate-700 dark:text-[#C6B79F] hover:text-slate-900 dark:hover:text-[#F8F6F1] transition-all shadow-xs cursor-pointer"
+              >
+                ✦ {s}
+              </button>
+            ))}
+          </div>
+
+          {/* Input container with auto-expanding textarea and prominent send button */}
+          <div className="relative flex items-end gap-2 p-2 rounded-2xl border border-slate-300/80 dark:border-[#C6A96B]/30 bg-slate-50/90 dark:bg-slate-900/80 focus-within:border-[#C6A96B] focus-within:ring-2 focus-within:ring-[#C6A96B]/20 transition-all shadow-sm">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              rows={1}
+              placeholder="พิมพ์คำถามเกี่ยวกับฤกษ์ยาม การเงิน หรือการตัดสินใจ..."
+              className="flex-1 bg-transparent text-slate-900 dark:text-[#F8F6F1] placeholder-slate-400 dark:placeholder-white/40 text-xs sm:text-sm p-2 outline-none resize-none min-h-[44px] max-h-[180px] leading-relaxed"
+            />
+            <button
+              type="button"
+              onClick={() => handleSend()}
+              disabled={!input.trim() || isStreaming}
+              className={`h-11 px-4 sm:px-5 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 shrink-0 transition-all shadow-md ${
+                !input.trim() || isStreaming
+                  ? "bg-slate-200 dark:bg-white/10 text-slate-400 dark:text-slate-500 cursor-not-allowed"
+                  : "bg-gradient-to-r from-[#C6A96B] via-[#D9BC82] to-[#C6A96B] text-[#020617] shadow-[#C6A96B]/25 hover:shadow-lg hover:scale-102 active:scale-98 cursor-pointer"
+              }`}
+              aria-label="ส่งคำถาม"
+            >
+              {isStreaming ? (
+                <div className="w-4 h-4 border-2 border-[#020617] border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span className="hidden sm:inline">ส่งคำถาม</span>
+                  <Send className="w-4 h-4" />
+                </>
+              )}
+            </button>
+          </div>
+          <p className="text-[11px] text-slate-500 dark:text-[#C6B79F] text-center">
+            บันทึกประวัติการสนทนาอัตโนมัติบนอุปกรณ์ของคุณ สามารถย้อนดูและทบทวนเรื่องราวได้ตลอดเวลา
+          </p>
+        </div>
+      )}
+    </Card>
+  );
+}
 
 function PredictionBox({ title, value, icon }: { title: string; value: string; icon: string }) {
   return (
-    <Card className="p-4 rounded-2xl bg-slate-950/40 border-white/5 hover:border-[#C6A96B]/25 transition-all duration-300">
+    <Card className="p-4 rounded-2xl bg-white/95 dark:bg-slate-950/40 border border-slate-200 dark:border-white/5 hover:border-amber-400/50 dark:hover:border-[#C6A96B]/25 transition-all duration-300 shadow-sm">
       <div className="flex items-center gap-2 mb-2">
         <span className="text-sm">{icon}</span>
-        <p className="text-[12px] text-[#C6B79F] uppercase tracking-[0.15em] font-bold">{title}</p>
+        <p className="text-[12px] text-slate-600 dark:text-[#C6B79F] uppercase tracking-[0.15em] font-bold">{title}</p>
       </div>
-      <p className="text-[#F8F6F1] text-base font-semibold leading-snug">{value}</p>
+      <p className="text-slate-900 dark:text-[#F8F6F1] text-base font-semibold leading-snug">{value}</p>
     </Card>
   );
 }

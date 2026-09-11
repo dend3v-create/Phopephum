@@ -2100,17 +2100,17 @@ export default function YamPage() {
 
           {compareResult && (
             <div className="space-y-6 animate-fade-in">
-              <Card className="relative overflow-hidden bg-gradient-to-br from-[#0A2240] to-[#020617] border-[#D9BC82]/40 shadow-[0_0_30px_rgba(217,188,130,0.15)] p-6 text-center">
+              <Card className="relative overflow-hidden bg-white/95 dark:bg-gradient-to-br dark:from-[#0A2240] dark:to-[#020617] border-slate-200 dark:border-[#D9BC82]/40 shadow-md dark:shadow-[0_0_30px_rgba(217,188,130,0.15)] p-6 text-center">
                 <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#D9BC82]/10 rounded-full blur-3xl pointer-events-none" />
                 <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-[#4B6FAE]/10 rounded-full blur-3xl pointer-events-none" />
                 
-                <span className="text-[#D9BC82] text-[13px] tracking-[0.25em] uppercase font-bold block mb-1">
+                <span className="text-[#8C6D2D] dark:text-[#D9BC82] text-[13px] tracking-[0.25em] uppercase font-bold block mb-1">
                   ✦ คำวินิจฉัยฤกษ์เดินทางที่ดีที่สุด ✦
                 </span>
-                <p className="text-sm text-[#F8F6F1] font-medium leading-relaxed max-w-2xl mx-auto py-2 border-y border-white/5 my-2">
+                <p className="text-sm text-slate-800 dark:text-[#F8F6F1] font-medium leading-relaxed max-w-2xl mx-auto py-2 border-y border-slate-200 dark:border-white/5 my-2">
                   {compareResult.verdict}
                 </p>
-                <p className="text-[13px] text-[#C6B79F] italic">
+                <p className="text-[13px] text-slate-600 dark:text-[#C6B79F] italic">
                   *การตรวจวิเคราะห์อ้างอิงจากฐานความมงคลยามอัฏฐกาลร่วมกับกำลังของเจ้าดารายามอย่างสมบูรณ์
                 </p>
               </Card>
