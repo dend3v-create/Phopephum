@@ -145,32 +145,12 @@ export function canUseFeature(profile: ProfileLike, feature: Feature): boolean {
   return canAccess(profile, FEATURE_PLANS[feature]);
 }
 
-// ─── Quota Limits per Plan ─────────────────────────────────────────────────
-
-export const AI_REPORT_LIMIT: Record<CanonicalPlan, number | null> = {
-  free:     0,
-  premium:  1,
-  pro:      15,
-  master:   null, // Unlimited
-};
-
-export function getAiReportLimit(profile: ProfileLike): number | null {
-  return AI_REPORT_LIMIT[getUserPlan(profile)];
-}
-
-export const PERSON_LIMIT: Record<CanonicalPlan, number | null> = {
-  free:     0,
-  premium:  3,    // ตนเอง + คนใกล้ชิด 3 คน
-  pro:      20,   // สมุดบันทึกดวงลูกค้า (Pro: 20 คน)
-  master:   null, // Unlimited
-};
-
-export function getPersonLimit(profile: ProfileLike): number | null {
-  return PERSON_LIMIT[getUserPlan(profile)];
-}
-
+// ─── Quota Limits per Plan (SSoT from @phopephum/engine) ────────────────────
 import {
+  PERSON_LIMIT,
+  AI_REPORT_LIMIT,
   WISDOM_AI_LIMIT,
+  HISTORY_RETENTION_DAYS,
   getUserBillingCycleWindow,
   checkQuotaStatus,
   type BillingCycleWindow,
@@ -178,12 +158,31 @@ import {
 } from "@phopephum/engine";
 
 export {
+  PERSON_LIMIT,
+  AI_REPORT_LIMIT,
   WISDOM_AI_LIMIT,
+  HISTORY_RETENTION_DAYS,
   getUserBillingCycleWindow,
   checkQuotaStatus,
   type BillingCycleWindow,
   type QuotaCheckResult,
 };
+
+export function getAiReportLimit(profile: ProfileLike): number | null {
+  return AI_REPORT_LIMIT[getUserPlan(profile)];
+}
+
+export function getPersonLimit(profile: ProfileLike): number | null {
+  return PERSON_LIMIT[getUserPlan(profile)];
+}
+
+export function getWisdomAiLimit(profile: ProfileLike): number | null {
+  return WISDOM_AI_LIMIT[getUserPlan(profile)];
+}
+
+export function getHistoryRetentionDays(profile: ProfileLike): number {
+  return HISTORY_RETENTION_DAYS[getUserPlan(profile)];
+}
 
 export const TIMING_COMPARISON_CANDIDATE_LIMIT: Record<CanonicalPlan, number> = {
   free:     0,
@@ -194,8 +193,4 @@ export const TIMING_COMPARISON_CANDIDATE_LIMIT: Record<CanonicalPlan, number> = 
 
 export function getTimingComparisonLimit(profile: ProfileLike): number {
   return TIMING_COMPARISON_CANDIDATE_LIMIT[getUserPlan(profile)];
-}
-
-export function getWisdomAiLimit(profile: ProfileLike): number | null {
-  return WISDOM_AI_LIMIT[getUserPlan(profile)];
 }

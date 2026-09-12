@@ -96,17 +96,17 @@ describe('Quota and Billing Cycle Engine Tests', () => {
       expect(checkQuotaStatus({ currentUsage: 9, limit: WISDOM_AI_LIMIT.premium }).allowed).toBe(true)
       expect(checkQuotaStatus({ currentUsage: 10, limit: WISDOM_AI_LIMIT.premium }).allowed).toBe(false)
 
-      // 3. Upgrade to Pro (AI Report: 15, Wisdom AI: Unlimited)
-      expect(checkQuotaStatus({ currentUsage: 14, limit: AI_REPORT_LIMIT.pro }).allowed).toBe(true)
-      expect(checkQuotaStatus({ currentUsage: 15, limit: AI_REPORT_LIMIT.pro }).allowed).toBe(false)
-      expect(checkQuotaStatus({ currentUsage: 50, limit: WISDOM_AI_LIMIT.pro }).allowed).toBe(true)
-      expect(checkQuotaStatus({ currentUsage: 50, limit: WISDOM_AI_LIMIT.pro }).remaining).toBe(null)
+      // 3. Upgrade to Pro (AI Report: 5, Wisdom AI: 50)
+      expect(checkQuotaStatus({ currentUsage: 4, limit: AI_REPORT_LIMIT.pro }).allowed).toBe(true)
+      expect(checkQuotaStatus({ currentUsage: 5, limit: AI_REPORT_LIMIT.pro }).allowed).toBe(false)
+      expect(checkQuotaStatus({ currentUsage: 49, limit: WISDOM_AI_LIMIT.pro }).allowed).toBe(true)
+      expect(checkQuotaStatus({ currentUsage: 50, limit: WISDOM_AI_LIMIT.pro }).allowed).toBe(false)
 
-      // 4. Upgrade to Master (AI Report: Unlimited, Wisdom AI: Unlimited)
-      expect(checkQuotaStatus({ currentUsage: 100, limit: AI_REPORT_LIMIT.master }).allowed).toBe(true)
-      expect(checkQuotaStatus({ currentUsage: 100, limit: AI_REPORT_LIMIT.master }).remaining).toBe(null)
-      expect(checkQuotaStatus({ currentUsage: 500, limit: WISDOM_AI_LIMIT.master }).allowed).toBe(true)
-      expect(checkQuotaStatus({ currentUsage: 500, limit: WISDOM_AI_LIMIT.master }).remaining).toBe(null)
+      // 4. Upgrade to Master (AI Report: 10, Wisdom AI: 100)
+      expect(checkQuotaStatus({ currentUsage: 9, limit: AI_REPORT_LIMIT.master }).allowed).toBe(true)
+      expect(checkQuotaStatus({ currentUsage: 10, limit: AI_REPORT_LIMIT.master }).allowed).toBe(false)
+      expect(checkQuotaStatus({ currentUsage: 99, limit: WISDOM_AI_LIMIT.master }).allowed).toBe(true)
+      expect(checkQuotaStatus({ currentUsage: 100, limit: WISDOM_AI_LIMIT.master }).allowed).toBe(false)
     })
 
     it('should ensure rejected quota requests never invoke AI and never debit Sands', () => {
@@ -176,7 +176,7 @@ describe('Quota and Billing Cycle Engine Tests', () => {
         expect(aiCalled).toBe(true)
       })
 
-      it('should enforce Karnchata Wisdom quota before calling AI (Free: 3, Premium: 10, Pro/Master: Unlimited)', () => {
+      it('should enforce Karnchata Wisdom quota before calling AI (Free: 3, Premium: 10, Pro: 50, Master: 100)', () => {
         let aiCalled = false
         const requestKarnchata = (plan: 'free' | 'premium' | 'pro' | 'master', currentUsage: number) => {
           const limit = WISDOM_AI_LIMIT[plan]
@@ -203,10 +203,20 @@ describe('Quota and Billing Cycle Engine Tests', () => {
         expect(requestKarnchata('premium', 10).status).toBe(403)
         expect(aiCalled).toBe(false)
 
-        // Pro: over 50 queries -> unlimited
+        // Pro: under limit (49 used) -> allowed
         aiCalled = false
-        expect(requestKarnchata('pro', 50).status).toBe(200)
+        expect(requestKarnchata('pro', 49).status).toBe(200)
         expect(aiCalled).toBe(true)
+
+        // Pro: at limit (50 used) -> reject
+        aiCalled = false
+        expect(requestKarnchata('pro', 50).status).toBe(403)
+        expect(aiCalled).toBe(false)
+
+        // Master: at limit (100 used) -> reject
+        aiCalled = false
+        expect(requestKarnchata('master', 100).status).toBe(403)
+        expect(aiCalled).toBe(false)
       })
 
       it('should enforce Horoscope Chat Entitlement for Natal (Premium+) and Transit (Pro+)', () => {

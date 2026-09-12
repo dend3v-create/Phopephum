@@ -77,15 +77,15 @@ export async function runFinancialRegressionGate(): Promise<boolean> {
     recordCheck(2, "INV-01", "Pricing Matrix Integrity", "PASS", "All 8 SKU price points strictly locked");
 
     // ── CHECK 3: Quota Hierarchy & Single Source of Truth (INV-02) ────────────
-    assert(getPersonLimit({ plan: "free" }) === 0, "Free person limit = 0");
+    assert(getPersonLimit({ plan: "free" }) === 1, "Free person limit = 1");
     assert(getAiReportLimit({ plan: "free" }) === 0, "Free AI limit = 0");
-    assert(getPersonLimit({ plan: "basic" }) === 3, "Basic person limit = 3");
+    assert(getPersonLimit({ plan: "basic" }) === 5, "Basic person limit = 5");
     assert(getAiReportLimit({ plan: "basic" }) === 1, "Basic AI limit = 1");
     assert(getPersonLimit({ plan: "pro" }) === 20, "Pro person limit = 20");
-    assert(getAiReportLimit({ plan: "pro" }) === 15, "Pro AI limit = 15");
-    assert(getPersonLimit({ plan: "imperial" }) === null, "Imperial person limit = ∞ (null)");
-    assert(getAiReportLimit({ plan: "imperial" }) === null, "Imperial AI limit = ∞ (null)");
-    recordCheck(3, "INV-02", "Quota Single Source of Truth", "PASS", "Hierarchy: 0/0 → 3/1 → 20/15 → ∞/∞ verified");
+    assert(getAiReportLimit({ plan: "pro" }) === 5, "Pro AI limit = 5");
+    assert(getPersonLimit({ plan: "imperial" }) === 100, "Imperial person limit = 100");
+    assert(getAiReportLimit({ plan: "imperial" }) === 10, "Imperial AI limit = 10");
+    recordCheck(3, "INV-02", "Quota Single Source of Truth", "PASS", "Hierarchy: 1/0 → 5/1 → 20/5 → 100/10 verified");
 
     // ── CHECK 4: Omise Gateway Fee (1.65%) Exact Arithmetic (INV-04) ───────────
     const fee289 = calculateOmiseFee(289, "promptpay");

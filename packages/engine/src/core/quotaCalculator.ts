@@ -21,22 +21,48 @@ export interface QuotaCheckResult {
   currentUsage: number
 }
 
+export const PERSON_LIMIT: Record<CanonicalPlan, number | null> = {
+  free: 1,
+  premium: 5,
+  pro: 20,
+  master: 100,
+}
+
 export const AI_REPORT_LIMIT: Record<CanonicalPlan, number | null> = {
   free: 0,
   premium: 1,
-  pro: 15,
-  master: null, // Unlimited
+  pro: 5,
+  master: 10,
 }
 
 export const WISDOM_AI_LIMIT: Record<CanonicalPlan, number | null> = {
-  free: 3,       // ทดลองใช้งาน 3 ครั้งต่อรอบ 30 วัน
+  free: 3,       // 3 ครั้งต่อรอบ 30 วัน
   premium: 10,   // 10 ครั้งต่อรอบ 30 วัน
-  pro: null,     // Unlimited (Fair use)
-  master: null,  // Unlimited (Real-time)
+  pro: 50,       // 50 ครั้งต่อรอบ 30 วัน
+  master: 100,   // 100 ครั้งต่อรอบ 30 วัน (Fair Use / Cost Guard)
+}
+
+export const HISTORY_RETENTION_DAYS: Record<CanonicalPlan, number> = {
+  free: 30,      // 30 วัน
+  premium: 90,   // 90 วัน (3 เดือน)
+  pro: 180,      // 180 วัน (6 เดือน)
+  master: 365,   // 365 วัน (1 ปี)
+}
+
+export function getPersonLimit(plan: CanonicalPlan): number | null {
+  return PERSON_LIMIT[plan]
+}
+
+export function getAiReportLimit(plan: CanonicalPlan): number | null {
+  return AI_REPORT_LIMIT[plan]
 }
 
 export function getWisdomAiLimit(plan: CanonicalPlan): number | null {
   return WISDOM_AI_LIMIT[plan]
+}
+
+export function getHistoryRetentionDays(plan: CanonicalPlan): number {
+  return HISTORY_RETENTION_DAYS[plan]
 }
 
 /**
