@@ -17,13 +17,8 @@ export function calculateYam(
   date: Date,
   options: CalculateYamOptions = {}
 ): YamInfo & { sunTimes: ReturnType<typeof getSunTimes> } {
-  // โคลน Date เพื่อหลีกเลี่ยง side effects
-  const adjustedDate = new Date(date.getTime());
-  
-  // ยามอัฏฐกาลเปลี่ยนวันตอน 06:00
-  if (getBKKHour(date) < 6) {
-    adjustedDate.setDate(adjustedDate.getDate() - 1);
-  }
+  // โคลน Date และถอยหลัง 24 ชม. หากเวลาก่อน 06:00 (เวลาไทย)
+  const adjustedDate = new Date(date.getTime() - (getBKKHour(date) < 6 ? 24 * 3600 * 1000 : 0));
 
   const sunTimes = getSunTimes(adjustedDate, options.lat, options.lng);
   const dayName  = DAY_INDEX_MAP[getBKKDay(adjustedDate)];

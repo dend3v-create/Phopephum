@@ -1464,26 +1464,32 @@ export const YAM_PREDICTIONS: YamPrediction[] = [
 // 7. CORE CALCULATION FUNCTIONS
 // ============================================================
 
+function getBKKDateParts(date: Date) {
+  const bkk = new Date(date.getTime() + 7 * 60 * 60 * 1000)
+  return {
+    dayIndex: bkk.getUTCDay(),
+    hour: bkk.getUTCHours(),
+    minute: bkk.getUTCMinutes(),
+    totalMinutes: bkk.getUTCHours() * 60 + bkk.getUTCMinutes()
+  }
+}
+
 /**
  * หาวันในสัปดาห์จาก Date object (ทางโหราศาสตร์)
  * กฎ: เปลี่ยนวันเวลา 06:01 น.
  * ถ้าเป็นเวลา 00:00 - 06:00 จะถือว่าเป็น "วันก่อนหน้า"
  */
 export function getDayOfWeek(date: Date): DayOfWeek {
-  const hour = date.getHours()
-  const minute = date.getMinutes()
-  const totalMinutes = hour * 60 + minute
+  const { dayIndex, totalMinutes } = getBKKDateParts(date)
+  const days: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
 
-  // ถ้าเวลาก่อน 06:01 น. (361 นาที)
+  // ถ้าเวลาก่อน 06:01 น. (361 นาที) ถอยหลังไป 1 วัน
   if (totalMinutes < 361) {
-    // ถอยหลังไป 1 วัน
-    const yesterday = new Date(date.getTime() - 24 * 60 * 60 * 1000)
-    const days: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-    return days[yesterday.getDay()]
+    const yesterdayBkk = new Date(date.getTime() + 7 * 60 * 60 * 1000 - 24 * 60 * 60 * 1000)
+    return days[yesterdayBkk.getUTCDay()]
   }
 
-  const days: DayOfWeek[] = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-  return days[date.getDay()]
+  return days[dayIndex]
 }
 
 /**
@@ -1492,9 +1498,7 @@ export function getDayOfWeek(date: Date): DayOfWeek {
  * กลางคืน: 18:01 - 05:59 (ของเช้าวันถัดไป)
  */
 export function getDayPeriod(date: Date): DayPeriod {
-  const hour = date.getHours()
-  const minute = date.getMinutes()
-  const totalMinutes = hour * 60 + minute
+  const { totalMinutes } = getBKKDateParts(date)
 
   // กลางวัน: 06:00 (360) ถึง 18:00 (1080)
   if (totalMinutes >= 360 && totalMinutes <= 1080) {
@@ -1508,9 +1512,7 @@ export function getDayPeriod(date: Date): DayPeriod {
  * หาเลขยามและยามย่อยจากเวลา
  */
 export function getYamNumberFromTime(date: Date, period: DayPeriod): { yamNumber: YamNumber; subYam: SubYam } {
-  const hour = date.getHours()
-  const minute = date.getMinutes()
-  const totalMinutes = hour * 60 + minute
+  const { totalMinutes } = getBKKDateParts(date)
 
   const timeTables = period === 'day' ? DAY_YAM_TIMES : NIGHT_YAM_TIMES
 
