@@ -161,7 +161,7 @@ export function getAiReportLimit(profile: ProfileLike): number | null {
 export const PERSON_LIMIT: Record<CanonicalPlan, number | null> = {
   free:     0,
   premium:  3,    // ตนเอง + คนใกล้ชิด 3 คน
-  pro:      15,   // ทีมงาน / ลูกค้าเบื้องต้น (ตรงกับหน้า Pricing)
+  pro:      20,   // สมุดบันทึกดวงลูกค้า (Pro: 20 คน)
   master:   null, // Unlimited
 };
 
