@@ -693,6 +693,10 @@ export async function assertPartnerFinancialEligibility(
  *   5. เงินเข้าบัญชีปลายทางในวันทำการถัดไป (T+1 Banking Day)
  * ดังนั้น PhopePhum Commission Available ≠ "โอนได้ทันที" — Omise อาจ delay ตาม banking conditions
  */
+export const isCashCommissionEnabled = (env?: Env): boolean => {
+  return env?.ENABLE_CASH_COMMISSION === "true";
+};
+
 export async function requestPartnerPayout(options: {
   partnerId: string; // user_id หรือ partner entity id
   amount: number;
@@ -705,6 +709,14 @@ export async function requestPartnerPayout(options: {
   env: Env;
 }): Promise<{ success: boolean; netPayout?: number; whtAmount?: number; error?: string }> {
   const { partnerId, amount, bankInfo, env } = options;
+
+  // 0. Feature Flag Check: Cash Commission Payout is OFF by default in MVP
+  if (!isCashCommissionEnabled(env)) {
+    return {
+      success: false,
+      error: "ระบบถอนเงินสด (Cash Commission Payout) ปิดให้บริการในเวอร์ชันนี้ โดยสิทธิประโยชน์ของพันธมิตรจะมอบในรูปแบบรางวัลและทรายกาลเวลา (Sands of Time)",
+    };
+  }
 
   if (amount < 500) {
     return { success: false, error: "ยอดถอนขั้นต่ำคือ 500 บาท" };

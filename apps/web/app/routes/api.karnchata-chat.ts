@@ -1,6 +1,8 @@
 import { json } from "@remix-run/cloudflare";
 import type { ActionFunctionArgs } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
+import { getUserPlan, getWisdomAiLimit, getUserBillingCycleWindow } from "~/services/permissions.server";
+import { createSupabaseClient } from "~/services/supabase.server";
 import { calculateKarnchata, calculatePhopephum } from "@phopephum/engine";
 import { buildKarnchataChatPrompt } from "@phopephum/prompts";
 import type { Env } from "~/env.server";
@@ -17,6 +19,27 @@ export async function action({ request, context }: ActionFunctionArgs) {
   
   if (!question) {
     return json({ error: "กรุณาระบุคำถาม" }, { status: 400 });
+  }
+
+  // Server-side Wisdom AI Quota Gate
+  const limit = getWisdomAiLimit(profile);
+  if (limit !== null) {
+    const { supabase } = createSupabaseClient(request, env);
+    const { cycleStart } = getUserBillingCycleWindow(profile);
+    const { count: queriesCount } = await supabase
+      .from("wisdom_queries")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", cycleStart.toISOString());
+
+    if (queriesCount !== null && queriesCount >= limit) {
+      const plan = getUserPlan(profile);
+      const isFree = plan === "free";
+      const message = isFree
+        ? `คุณใช้งานสิทธิ์ทดลองถาม Wisdom AI ครบกำหนด ${limit} ครั้งแล้ว กรุณาอัปเกรดเพื่อสนทนาต่อ`
+        : `คุณใช้งานสิทธิ์ถาม Wisdom AI ครบ ${limit} ครั้งสำหรับรอบการใช้งานนี้แล้ว กรุณารอรอบถัดไปหรืออัปเกรดแพ็กเกจ`;
+      return json({ error: message, code: "QUOTA_EXCEEDED" }, { status: 403 });
+    }
   }
 
   const targetDate = new Date(targetDateStr);

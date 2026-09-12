@@ -5,3 +5,4 @@ export * from "./thaiLunar.js";
 export * from "./astroTime.js";
 export * from "./newMoon.js";
 export * from "./buddhistEvents.js";
+export * from "./quotaCalculator.js";

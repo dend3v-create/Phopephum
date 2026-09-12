@@ -275,7 +275,8 @@ export default function YamPage() {
   const [now, setNow] = useState<Date>(new Date());
   
   // React states for tab controllers & interactive form
-  const [activeTab, setActiveTab] = useState<"live" | "ashta" | "finder" | "grid" | "compare">("live");
+  const [activeTab, setActiveTab] = useState<"master" | "live" | "ashta" | "finder" | "grid" | "compare">("live");
+  const [masterView, setMasterView] = useState<"summary" | "matrix7" | "matrix24">("summary");
   const [activeInquiry, setActiveInquiry] = useState<"news" | "sickness" | "lostItem" | "travel" | "bestTime">("news");
   const [ashtaInquiry, setAshtaInquiry] = useState<"news" | "sickness" | "lostItem" | "travel" | "bestTime">("news");
 
@@ -656,6 +657,16 @@ export default function YamPage() {
       {/* Tab Selectors */}
       <div className="flex flex-wrap bg-white/90 dark:bg-[#0A1628]/60 p-1.5 rounded-2xl border border-amber-200/60 dark:border-[#D9BC82]/15 gap-1.5 w-full relative shadow-sm dark:shadow-md">
         <button
+          onClick={() => setActiveTab("master")}
+          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+            activeTab === "master"
+              ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-md dark:from-[#C6A96B] dark:to-[#D9BC82] dark:text-[#0A1628] dark:shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
+              : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 dark:text-[#94A3B8] dark:hover:text-[#F8F6F1] dark:hover:bg-white/5"
+          }`}
+        >
+          📜 คัมภีร์ยาม
+        </button>
+        <button
           onClick={() => setActiveTab("live")}
           className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
             activeTab === "live"
@@ -713,9 +724,202 @@ export default function YamPage() {
         </button>
       </div>
 
-      {isLocked && (activeTab === "compare" || activeTab === "grid") && (
+      {isLocked && (activeTab === "compare" || activeTab === "grid" || activeTab === "master") && (
         <div className="animate-fade-in mt-6">
-          <UpgradePaywall featureName="เครื่องมือวิเคราะห์ฤกษ์ขั้นสูง (PRO)" description="ตารางยามอัฏฐกาลล่วงหน้าและการเปรียบเทียบฤกษ์เดินทาง สงวนสิทธิ์สำหรับสมาชิกระดับ PRO ขึ้นไป" />
+          <UpgradePaywall featureName="เครื่องมือวิเคราะห์ฤกษ์ขั้นสูง (PRO)" description="คัมภีร์ยาม ตารางยามล่วงหน้า และเปรียบเทียบฤกษ์เดินทาง สงวนสิทธิ์สำหรับสมาชิกระดับ PRO ขึ้นไป" />
+        </div>
+      )}
+
+      {/* 📜 MASTER REFERENCE VIEW */}
+      {activeTab === "master" && !isLocked && (
+        <div className="space-y-6 animate-fade-in">
+          <Card className="p-6 bg-white/95 dark:bg-[#0A1628]/40 border-slate-200 dark:border-[#D9BC82]/15 shadow-xl">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200 dark:border-white/10">
+              <div>
+                <h2 className="font-display text-2xl font-bold text-slate-900 dark:text-[#F8F6F1] flex items-center gap-2">
+                  <span className="text-3xl">📜</span> คัมภีร์ยามอัฏฐกาล & ชั้นฉาย
+                </h2>
+                <p className="text-sm text-slate-500 dark:text-[#94A3B8] mt-1">
+                  แหล่งอ้างอิงข้อมูลยาม 7 ฐาน ข้อมูลคำพยากรณ์ยามต้น-กลาง-ปลาย และการแบ่งช่วงเวลาย่อย 24 ชั้นฉาย
+                </p>
+              </div>
+              <div className="flex bg-slate-100 dark:bg-black/30 rounded-xl p-1 border border-slate-200 dark:border-white/10 w-full sm:w-auto overflow-x-auto">
+                {[
+                  { id: "summary", label: "สรุปยามต้น-กลาง-ปลาย" },
+                  { id: "matrix7", label: "ตาราง 7 ยาม" },
+                  { id: "matrix24", label: "ตาราง 24 ช่วงเวลา" }
+                ].map(view => (
+                  <button
+                    key={view.id}
+                    onClick={() => setMasterView(view.id as any)}
+                    className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all whitespace-nowrap ${
+                      masterView === view.id
+                        ? "bg-white dark:bg-[#D9BC82]/20 text-slate-900 dark:text-[#D9BC82] shadow-sm border border-slate-200 dark:border-[#D9BC82]/30"
+                        : "text-slate-500 dark:text-[#94A3B8] hover:text-slate-800 dark:hover:text-white"
+                    }`}
+                  >
+                    {view.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {masterView === "summary" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {ATTHAKARN_CHAN_CHAI_TABLE.map((item) => (
+                  <div key={item.yamNumber} className="p-4 rounded-xl border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-black/20 space-y-3">
+                    <div className="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-white/10">
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold"
+                          style={{ backgroundColor: item.planetColor }}
+                        >
+                          {item.planetSymbol}
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-slate-900 dark:text-[#F8F6F1] leading-none">ยาม{item.nameDay}/{item.nameNight}</h4>
+                          <span className="text-[10px] uppercase tracking-wider text-slate-500 dark:text-[#94A3B8]">{item.planetNameThai}</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] px-2 py-1 bg-amber-100 dark:bg-[#D9BC82]/20 text-amber-800 dark:text-[#D9BC82] rounded-full border border-amber-200 dark:border-[#D9BC82]/30 font-bold">
+                        🌟 ฤกษ์ดีสุด: {item.bestTime}
+                      </span>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      {[item.chanChai.start, item.chanChai.middle, item.chanChai.end].map((sub, i) => (
+                        <div key={i} className={`p-2.5 rounded-lg border flex gap-3 ${
+                          sub.quality === "good" ? "bg-green-50/50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20" :
+                          sub.quality === "bad" ? "bg-red-50/50 dark:bg-red-500/10 border-red-200 dark:border-red-500/20" :
+                          "bg-white dark:bg-white/5 border-slate-200 dark:border-white/10"
+                        }`}>
+                          <div className={`shrink-0 font-bold text-xs uppercase tracking-wider px-2 py-1 rounded h-fit ${
+                            sub.quality === "good" ? "bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-400" :
+                            sub.quality === "bad" ? "bg-red-100 text-red-700 dark:bg-red-500/20 dark:text-red-400" :
+                            "bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-[#94A3B8]"
+                          }`}>
+                            {sub.label}
+                          </div>
+                          <p className="text-xs text-slate-700 dark:text-[#D9CDB7] leading-relaxed">
+                            {sub.text}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {masterView === "matrix7" && (
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/10">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-slate-100 dark:bg-white/5 text-xs uppercase text-slate-600 dark:text-[#94A3B8]">
+                    <tr>
+                      <th className="px-4 py-3 border-b dark:border-white/10 whitespace-nowrap">ยาม (วัน/คืน)</th>
+                      <th className="px-4 py-3 border-b dark:border-white/10 min-w-[150px]">ได้ยินสิ่งใด</th>
+                      <th className="px-4 py-3 border-b dark:border-white/10 min-w-[150px]">คนไข้ คนเจ็บ</th>
+                      <th className="px-4 py-3 border-b dark:border-white/10 min-w-[200px]">ของหาย/ขโมย</th>
+                      <th className="px-4 py-3 border-b dark:border-white/10 min-w-[200px]">เดินทาง (ภาพรวม)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200 dark:divide-white/10">
+                    {ATTHAKARN_CHAN_CHAI_TABLE.map((item) => (
+                      <tr key={item.yamNumber} className="hover:bg-slate-50 dark:hover:bg-white/[0.02]">
+                        <td className="px-4 py-3 align-top">
+                          <div className="flex items-center gap-1.5">
+                            <span style={{ color: item.planetColor }}>{item.planetSymbol}</span>
+                            <span className="font-bold text-slate-900 dark:text-[#F8F6F1]">{item.nameDay}/{item.nameNight}</span>
+                          </div>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-slate-700 dark:text-[#D9CDB7] align-top leading-relaxed">{item.news}</td>
+                        <td className="px-4 py-3 text-xs text-slate-700 dark:text-[#D9CDB7] align-top leading-relaxed">{item.sickness}</td>
+                        <td className="px-4 py-3 text-xs text-slate-700 dark:text-[#D9CDB7] align-top leading-relaxed">{item.lostItem}</td>
+                        <td className="px-4 py-3 text-xs align-top space-y-1">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-amber-600 dark:text-[#D9BC82] font-bold text-[10px] uppercase">ต้น</span>
+                            <span className="text-slate-700 dark:text-[#D9CDB7]">{item.travel.start}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5 mt-1">
+                            <span className="text-amber-600 dark:text-[#D9BC82] font-bold text-[10px] uppercase">กลาง</span>
+                            <span className="text-slate-700 dark:text-[#D9CDB7]">{item.travel.middle}</span>
+                          </div>
+                          <div className="flex flex-col gap-0.5 mt-1">
+                            <span className="text-amber-600 dark:text-[#D9BC82] font-bold text-[10px] uppercase">ปลาย</span>
+                            <span className="text-slate-700 dark:text-[#D9CDB7]">{item.travel.end}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {masterView === "matrix24" && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1] mb-3 flex items-center gap-2">
+                    <span>☀️</span> เวลา 24 ชั้นฉาย กลางวัน (06:01 - 18:00)
+                  </h3>
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/10">
+                    <table className="w-full text-[11px] sm:text-xs text-left">
+                      <thead className="bg-slate-100 dark:bg-white/5 uppercase text-slate-600 dark:text-[#94A3B8]">
+                        <tr>
+                          <th className="px-3 py-2 border-b dark:border-white/10">เวลา (น.)</th>
+                          <th className="px-3 py-2 border-b dark:border-white/10">ยามย่อย</th>
+                          <th className="px-3 py-2 border-b dark:border-white/10">หมายเหตุ</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200 dark:divide-white/10">
+                        {DAY_SUB_TIME_SLOTS_24.map((slot, i) => (
+                          <tr key={i} className="hover:bg-slate-50 dark:hover:bg-white/[0.02]">
+                            <td className="px-3 py-2 font-mono text-slate-900 dark:text-[#F8F6F1] whitespace-nowrap">{slot.timeRangeLabel}</td>
+                            <td className="px-3 py-2 text-slate-700 dark:text-[#D9CDB7]">{slot.subPhaseLabel}</td>
+                            <td className="px-3 py-2">
+                              <span className="px-2 py-0.5 rounded font-bold text-[10px] uppercase bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-[#94A3B8]">
+                                ยามใหญ่ {slot.majorYam}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-[#F8F6F1] mb-3 flex items-center gap-2">
+                    <span>🌙</span> เวลา 24 ชั้นฉาย กลางคืน (18:01 - 06:00)
+                  </h3>
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-white/10">
+                    <table className="w-full text-[11px] sm:text-xs text-left">
+                      <thead className="bg-slate-100 dark:bg-white/5 uppercase text-slate-600 dark:text-[#94A3B8]">
+                        <tr>
+                          <th className="px-3 py-2 border-b dark:border-white/10">เวลา (น.)</th>
+                          <th className="px-3 py-2 border-b dark:border-white/10">ยามย่อย</th>
+                          <th className="px-3 py-2 border-b dark:border-white/10">หมายเหตุ</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200 dark:divide-white/10">
+                        {NIGHT_SUB_TIME_SLOTS_24.map((slot, i) => (
+                          <tr key={i} className="hover:bg-slate-50 dark:hover:bg-white/[0.02]">
+                            <td className="px-3 py-2 font-mono text-slate-900 dark:text-[#F8F6F1] whitespace-nowrap">{slot.timeRangeLabel}</td>
+                            <td className="px-3 py-2 text-slate-700 dark:text-[#D9CDB7]">{slot.subPhaseLabel}</td>
+                            <td className="px-3 py-2">
+                              <span className="px-2 py-0.5 rounded font-bold text-[10px] uppercase bg-slate-100 text-slate-600 dark:bg-white/10 dark:text-[#94A3B8]">
+                                ยามใหญ่ {slot.majorYam}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+          </Card>
         </div>
       )}
 

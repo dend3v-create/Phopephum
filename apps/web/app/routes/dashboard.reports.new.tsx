@@ -3,7 +3,7 @@ import { Form, useLoaderData, useNavigation, useActionData, useSearchParams } fr
 import { useState, useEffect } from "react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireMinPlan, requireAuth, getProfile } from "~/services/auth.server";
-import { getUserPlan, getAiReportLimit } from "~/services/permissions.server";
+import { getUserPlan, getAiReportLimit, getUserBillingCycleWindow } from "~/services/permissions.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { generateAIReport } from "~/services/ai.server";
 import { alertAIFailed, alertDatabaseError } from "~/services/alert.server";
@@ -111,7 +111,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   // 1. Get Profile & check quota
   const { data: profile } = await supabase
     .from("profiles")
-    .select("plan, time_sands")
+    .select("plan, time_sands, created_at, membership_expires_at, role, membership_status")
     .eq("id", user.id)
     .single();
 
@@ -123,20 +123,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "คุณไม่มีเม็ดทรายกาลเวลาเหลือพอสำหรับการวิเคราะห์นี้ (Sands of Time: 0) กรุณาร่วมกิจกรรมรายวันหรืออัปเกรดเพื่อวิเคราะห์ไม่จำกัด" });
   }
 
-  // 2. Count reports today
-  const startOfDay = new Date();
-  startOfDay.setUTCHours(0, 0, 0, 0);
+  // 2. Count reports in current user billing cycle (30 days window across all report_types)
+  const { cycleStart } = getUserBillingCycleWindow(profile);
 
   const { count: reportsCount } = await supabase
     .from("ai_reports")
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
-    .eq("report_type", reportType)
-    .gte("created_at", startOfDay.toISOString());
+    .gte("created_at", cycleStart.toISOString());
 
   const limit = getAiReportLimit(profile);
-  if (limit !== null && reportsCount && reportsCount >= limit) {
-    return json({ error: `คุณสร้างบทวิเคราะห์ประเภทนี้ครบกำหนด ${limit} ครั้งของวันนี้แล้ว กรุณากลับมาใหม่ในวันถัดไป` });
+  if (limit !== null && reportsCount !== null && reportsCount >= limit) {
+    return json({ error: `คุณสร้างบทวิเคราะห์ครบกำหนด ${limit} ฉบับสำหรับรอบการใช้งานนี้แล้ว กรุณารอรอบถัดไปหรืออัปเกรดแพ็กเกจ` });
   }
 
   try {

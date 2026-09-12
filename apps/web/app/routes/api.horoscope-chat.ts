@@ -1,6 +1,7 @@
 import { json } from "@remix-run/cloudflare";
 import type { ActionFunctionArgs } from "@remix-run/cloudflare";
-import { requireAuth } from "~/services/auth.server";
+import { requireAuth, getProfile } from "~/services/auth.server";
+import { canUseFeature } from "~/services/permissions.server";
 import {
   calculatePhopephum,
   getYamPrediction,
@@ -80,6 +81,15 @@ function analyzeTransitPoint(name: string, p: any, matrix: number[][]) {
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
+  const profile = await getProfile(user.id, request, env);
+
+  // Entitlement Gate 1: Natal horoscope chat requires Premium or higher
+  if (!canUseFeature(profile, "horoscope_self")) {
+    return json({ 
+      error: "ระบบวิเคราะห์ผังดวง 7 ตัว 9 ฐาน สงวนสิทธิ์สำหรับสมาชิก Premium ขึ้นไป", 
+      code: "PLAN_UPGRADE_REQUIRED" 
+    }, { status: 403 });
+  }
 
   let body: {
     question: string;
@@ -162,6 +172,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
   // ตรวจสอบโหมดดวงจร (Transit Detection)
   const isTransitKeyword = /(จร|วัยจร|ปีจร|ลัคนาจร|เดือนจร|วันจร|อายุจร|ช่วงนี้|ปีนี้|เดือนนี้|วันนี้|อนาคตอันใกล้|จังหวะชีวิต)/i.test(question);
   const isTransitMode = body.forecastMode === "transit" || (body.forecastMode !== "natal" && isTransitKeyword);
+
+  // Entitlement Gate 2: Transit analysis requires Pro or higher
+  if (isTransitMode && !canUseFeature(profile, "transit_system")) {
+    return json({ 
+      error: "ระบบวิเคราะห์จังหวะชีวิตและดวงจร (Transit System) สงวนสิทธิ์สำหรับสมาชิก Pro ขึ้นไป", 
+      code: "PLAN_UPGRADE_REQUIRED" 
+    }, { status: 403 });
+  }
 
   // สกัดข้อมูล 5 มิติดวงจร พร้อมการวิเคราะห์ฐานที่ ๔ ในคอลัมน์ตรงกัน และสายใยดาวสถิต
   const vayaJorn = phopephumResult?.vayaJorn;

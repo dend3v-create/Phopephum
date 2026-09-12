@@ -161,13 +161,29 @@ export function getAiReportLimit(profile: ProfileLike): number | null {
 export const PERSON_LIMIT: Record<CanonicalPlan, number | null> = {
   free:     0,
   premium:  3,    // ตนเอง + คนใกล้ชิด 3 คน
-  pro:      20,   // ทีมงาน / ลูกค้าเบื้องต้น
+  pro:      15,   // ทีมงาน / ลูกค้าเบื้องต้น (ตรงกับหน้า Pricing)
   master:   null, // Unlimited
 };
 
 export function getPersonLimit(profile: ProfileLike): number | null {
   return PERSON_LIMIT[getUserPlan(profile)];
 }
+
+import {
+  WISDOM_AI_LIMIT,
+  getUserBillingCycleWindow,
+  checkQuotaStatus,
+  type BillingCycleWindow,
+  type QuotaCheckResult,
+} from "@phopephum/engine";
+
+export {
+  WISDOM_AI_LIMIT,
+  getUserBillingCycleWindow,
+  checkQuotaStatus,
+  type BillingCycleWindow,
+  type QuotaCheckResult,
+};
 
 export const TIMING_COMPARISON_CANDIDATE_LIMIT: Record<CanonicalPlan, number> = {
   free:     0,
@@ -178,4 +194,8 @@ export const TIMING_COMPARISON_CANDIDATE_LIMIT: Record<CanonicalPlan, number> = 
 
 export function getTimingComparisonLimit(profile: ProfileLike): number {
   return TIMING_COMPARISON_CANDIDATE_LIMIT[getUserPlan(profile)];
+}
+
+export function getWisdomAiLimit(profile: ProfileLike): number | null {
+  return WISDOM_AI_LIMIT[getUserPlan(profile)];
 }

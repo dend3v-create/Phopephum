@@ -51,54 +51,36 @@ export async function action({ request, context }: ActionFunctionArgs) {
     // 2. สร้าง Omise Charge ตามช่องทางที่เลือก
     let charge: any = null;
 
-    try {
-      if (method === "card" && cardToken) {
-        charge = await createOmiseCardCharge({
-          amountThb,
-          cardToken,
-          returnUrl: `${env.APP_URL || "http://localhost:8080"}/dashboard?payment=success&plan=${canonicalSku}`,
-          userId: user.id,
-          planCode: canonicalSku,
-          metadata: {
-            requestType,
-            referredBy: profile?.referred_by || null,
-          },
-          env,
-        });
-      } else {
-        // PromptPay QR (Default & Primary Gateway for Thailand)
-        charge = await createOmisePromptPayCharge({
-          amountThb,
-          userId: user.id,
-          planCode: canonicalSku,
-          metadata: {
-            requestType,
-            referredBy: profile?.referred_by || null,
-          },
-          env,
-        });
-      }
-    } catch (chargeErr: any) {
-      console.warn("[Checkout] Omise live charge fallback triggered:", chargeErr?.message);
-      // Fallback สำหรับ Mock/Local Development เมื่อไม่มี Live Secret
-      const mockChargeId = `chrg_test_${Date.now()}`;
-      charge = {
-        id: mockChargeId,
-        status: "pending",
-        amount: amountThb * 100,
-        currency: "THB",
-        paid: false,
-        source: {
-          id: `src_test_${Date.now()}`,
-          type: "promptpay",
-          scannable_code: {
-            image: {
-              id: "img_test",
-              download_uri: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=00020101021229370016A000000677010111011300668123456785802TH5303764540${amountThb}.005802TH6304`,
-            },
-          },
+    if (method === "card" && cardToken) {
+      charge = await createOmiseCardCharge({
+        amountThb,
+        cardToken,
+        returnUrl: `${env.APP_URL || "http://localhost:8080"}/dashboard?payment=success&plan=${canonicalSku}`,
+        userId: user.id,
+        planCode: canonicalSku,
+        metadata: {
+          requestType,
+          referredBy: profile?.referred_by || null,
         },
-      };
+        env,
+      });
+    } else {
+      // PromptPay QR (Default & Primary Gateway for Thailand)
+      charge = await createOmisePromptPayCharge({
+        amountThb,
+        userId: user.id,
+        planCode: canonicalSku,
+        metadata: {
+          requestType,
+          referredBy: profile?.referred_by || null,
+        },
+        env,
+      });
+    }
+
+    if (!charge || !charge.id) {
+      console.error("[Checkout] Omise charge creation failed or returned empty response");
+      return json({ error: "ไม่สามารถสร้างรายการชำระเงินกับเกตเวย์ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 502 });
     }
 
     // 3. บันทึกคำขอสมัครสมาชิก / ซื้อทรายลงใน subscription_requests ด้วย Canonical SKU

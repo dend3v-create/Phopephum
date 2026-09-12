@@ -3,7 +3,7 @@ import type { ActionFunctionArgs } from "@remix-run/cloudflare";
 import { generateAIReport } from "~/services/ai.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { getProfile } from "~/services/auth.server";
-import { getUserPlan } from "~/services/permissions.server";
+import { getUserPlan, getAiReportLimit, getUserBillingCycleWindow } from "~/services/permissions.server";
 import type { Env } from "~/env.server";
 
 /**
@@ -63,12 +63,40 @@ export async function action({ request, context }: ActionFunctionArgs) {
   };
   const backendReportType = reportTypeMap[report_type] || "general_prediction";
 
-  // 4. ตรวจสอบทรายกาลเวลา (Sands of Time)
+  // 4. ตรวจสอบ Quota ตาม Membership Billing Cycle (Single Source of Truth)
   const userPlan = getUserPlan(profile);
-  const isPremium = userPlan === "master" || profile?.role === "admin" || profile?.role === "operator";
+  const limit = getAiReportLimit(profile);
+
+  if (limit === 0) {
+    return json({ 
+      error: "แพ็กเกจปัจจุบันไม่รวมสิทธิ์สร้าง AI Life Report กรุณาอัปเกรดเป็น Premium หรือสูงกว่า",
+      code: "PLAN_UPGRADE_REQUIRED" 
+    }, { status: 403 });
+  }
+
+  if (limit !== null) {
+    const { cycleStart } = getUserBillingCycleWindow(profile);
+    const { count: reportsCount } = await supabase
+      .from("ai_reports")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", user.id)
+      .gte("created_at", cycleStart.toISOString());
+
+    if (reportsCount !== null && reportsCount >= limit) {
+      return json({ 
+        error: `คุณสร้างบทวิเคราะห์ครบกำหนด ${limit} ฉบับสำหรับรอบการใช้งานนี้แล้ว กรุณารอรอบถัดไปหรืออัปเกรดแพ็กเกจ`,
+        code: "QUOTA_EXCEEDED",
+        limit,
+        currentUsage: reportsCount,
+      }, { status: 403 });
+    }
+  }
+
+  // 5. ตรวจสอบทรายกาลเวลา (Sands of Time)
+  const isMasterOrAdmin = userPlan === "master" || profile?.role === "admin" || profile?.role === "operator";
   const currentSands = profile?.time_sands ?? 0;
 
-  if (!isPremium && currentSands <= 0) {
+  if (!isMasterOrAdmin && currentSands <= 0) {
     return json({ error: "ขออภัย ทรายกาลเวลา (Sands of Time) ในนาฬิกาทรายของคุณหมดแล้ว กรุณาเติมทรายหรืออัปเกรดเพื่อรับทรายเพิ่ม" }, { status: 403 });
   }
 
@@ -140,7 +168,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     // 8. หักทรายกาลเวลาอย่างปลอดภัยผ่าน Atomic Function (Ledger Source of Truth)
-    if (!isPremium) {
+    if (!isMasterOrAdmin) {
       const { debitSandsAtomic } = await import("~/services/rewards.server");
       const debitRes = await debitSandsAtomic({
         userId: user.id,

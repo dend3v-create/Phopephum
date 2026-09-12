@@ -1,0 +1,57 @@
+name: Automated Supabase DB Backup to Cloudflare R2
+
+on:
+  schedule:
+    # รันทุกวันเวลา 03:00 น. ตามเวลาไทย (20:00 UTC)
+    - cron: '0 20 * * *'
+  workflow_dispatch: # รองรับการกด Run Workflow ด้วยตนเองจาก GitHub Actions
+
+jobs:
+  backup:
+    name: Backup Supabase DB to Cloudflare R2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Install Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Install AWS CLI & Postgres Client Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client gzip awscli
+
+      - name: Dump Supabase Database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          TIMESTAMP=$(date +'%Y%m%d_%H%M%S')
+          BACKUP_FILENAME="phopephum_db_${TIMESTAMP}.sql.gz"
+          echo "Starting Supabase database dump at ${TIMESTAMP}..."
+          
+          # ใช้ supabase db dump พร้อมบีบอัด gzip
+          supabase db dump --db-url "${SUPABASE_DB_URL}" | gzip -9 > "${BACKUP_FILENAME}"
+          
+          FILE_SIZE=$(du -h "${BACKUP_FILENAME}" | cut -f1)
+          echo "Backup file created: ${BACKUP_FILENAME} (Size: ${FILE_SIZE})"
+          echo "BACKUP_FILENAME=${BACKUP_FILENAME}" >> $GITHUB_ENV
+
+      - name: Upload Backup to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+        run: |
+          R2_ENDPOINT="https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com"
+          echo "Uploading ${BACKUP_FILENAME} to Cloudflare R2 bucket: ${R2_BUCKET_NAME}..."
+          
+          aws s3 cp "${BACKUP_FILENAME}" "s3://${R2_BUCKET_NAME}/daily-backups/${BACKUP_FILENAME}" \
+            --endpoint-url "${R2_ENDPOINT}"
+            
+          echo "✅ Backup successfully uploaded to Cloudflare R2!"

@@ -118,6 +118,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const partnerBenefits = partnerProfile ? await getPartnerBenefits(partnerProfile.id, env) : [];
   const termsStatus = partnerProfile ? await getPartnerTermsStatus(partnerProfile.id, env) : { accepted: true, activeVersion: "v2026.1" };
+  const cashCommissionEnabled = env.ENABLE_CASH_COMMISSION === "true";
 
   return json({
     user,
@@ -130,6 +131,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     referralPerformance,
     partnerBenefits,
     termsStatus,
+    cashCommissionEnabled,
   });
 }
 
@@ -158,8 +160,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ success: true, message: `ยอมรับข้อตกลงพันธมิตร (${termsVersion}) เรียบร้อยแล้ว` });
   }
 
-  // 1. ยื่นคำขอถอนเงินสด (Payout Request Atomic)
+  // 1. ยื่นคำขอถอนเงินสด (Payout Request Atomic) - Guarded by Feature Flag (OFF in MVP)
   if (intent === "request_payout") {
+    if (env.ENABLE_CASH_COMMISSION !== "true") {
+      return json(
+        {
+          error: "ระบบถอนเงินสด (Cash Commission Payout) ปิดให้บริการในเวอร์ชันนี้ โดยสิทธิประโยชน์ของพันธมิตรจะมอบในรูปแบบรางวัลและทรายกาลเวลา (Sands of Time)",
+          success: false,
+        },
+        { status: 403 }
+      );
+    }
+
     const amountStr = formData.get("amount") as string;
     const amount = parseFloat(amountStr);
     const bankName = (formData.get("bankName") as string) || "";
@@ -266,6 +278,7 @@ export default function PartnerPortalPage() {
     commissionHistory,
     referralPerformance,
     termsStatus,
+    cashCommissionEnabled,
   } = useLoaderData<typeof loader>();
 
   const actionData = useActionData<{ error?: string; message?: string; success?: boolean }>();
@@ -504,6 +517,20 @@ export default function PartnerPortalPage() {
 
       {/* ── 2. UX HIERARCHY LEVEL 1: สถานะการเงิน & ความพร้อมถอน (Financial Status) ── */}
       <div className="space-y-3">
+        {!cashCommissionEnabled && (
+          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-3 shadow-sm">
+            <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <div className="font-bold text-sm mb-0.5 text-amber-800 dark:text-[#D9BC82]">
+                🌟 ระบบพันธมิตรเวอร์ชัน MVP — Reward & Sands Economy
+              </div>
+              <p className="text-slate-600 dark:text-slate-300 font-light leading-relaxed">
+                ในเวอร์ชันปัจจุบัน ระบบให้ผลตอบแทนการบอกต่อผ่าน <strong>สิทธิประโยชน์พิเศษ และ ละอองทรายกาลเวลา (Sands of Time)</strong> สำหรับใช้ปลดล็อกรายงานและการวิเคราะห์ดวงชะตา โดยระบบถอนเงินสด (Cash Commission Payout) ปิดให้บริการชั่วคราวและจะเปิดให้ใช้งานในเฟสถัดไป
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between px-1">
           <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
             <Wallet className="w-4 h-4 text-[#8C6D2D] dark:text-[#C6A96B]" />
@@ -526,14 +553,16 @@ export default function PartnerPortalPage() {
               ฿{availableBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
             </div>
             <div className="mt-3 flex items-center justify-between pt-2 border-t border-emerald-200 dark:border-emerald-500/15">
-              <span className="text-[11px] text-emerald-700 dark:text-emerald-400/80 font-medium">ขั้นต่ำ ฿500</span>
+              <span className="text-[11px] text-emerald-700 dark:text-emerald-400/80 font-medium">
+                {cashCommissionEnabled ? "ขั้นต่ำ ฿500" : "ปิดใน MVP"}
+              </span>
               <Button
                 type="button"
-                onClick={() => setIsPayoutModalOpen(true)}
-                disabled={availableBalance < 500}
+                onClick={() => (cashCommissionEnabled ? setIsPayoutModalOpen(true) : null)}
+                disabled={!cashCommissionEnabled || availableBalance < 500}
                 className="text-xs py-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                ขอถอนเงิน
+                {cashCommissionEnabled ? "ขอถอนเงิน" : "เร็วๆ นี้ (MVP)"}
               </Button>
             </div>
           </div>
@@ -1435,24 +1464,45 @@ export default function PartnerPortalPage() {
               <XCircle className="w-5 h-5" />
             </button>
 
-            <div>
-              <span className="text-[11px] font-semibold tracking-wider text-[#D9BC82] uppercase bg-[#C6A96B]/15 px-2.5 py-0.5 rounded-full border border-[#C6A96B]/30">
-                Atomic Payout Settlement
-              </span>
-              <h2 className="text-xl font-bold font-serif text-[#F8F6F1] mt-2">
-                ยื่นคำขอถอนเงินสด (Payout Request)
-              </h2>
-              <p className="text-xs text-slate-400 mt-1">
-                ยอดเงินพร้อมถอนปัจจุบันของคุณคือ <span className="text-emerald-400 font-mono font-bold">฿{availableBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>
-              </p>
-            </div>
+            {!cashCommissionEnabled ? (
+              <div className="space-y-4 py-4 text-center">
+                <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center mx-auto text-amber-400">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+                <h2 className="text-xl font-bold font-serif text-[#F8F6F1]">
+                  ระบบถอนเงินสดปิดให้บริการในรุ่น MVP
+                </h2>
+                <p className="text-xs text-slate-300 font-light leading-relaxed max-w-md mx-auto">
+                  ในเวอร์ชันทดสอบระบบปัจจุบัน สิทธิประโยชน์ของพันธมิตรจะได้รับในรูปแบบ <strong>ละอองทรายกาลเวลา (Sands of Time)</strong> และสิทธิพิเศษการใช้งานระบบ โดยระบบถอนเงินสด (Cash Commission Payout) จะเปิดให้บริการในรอบถัดไป
+                </p>
+                <Button
+                  type="button"
+                  onClick={() => setIsPayoutModalOpen(false)}
+                  className="bg-[#C6A96B] hover:bg-[#D9BC82] text-black text-xs font-bold py-2.5 px-6 rounded-xl shadow-md"
+                >
+                  รับทราบ
+                </Button>
+              </div>
+            ) : (
+              <>
+                <div>
+                  <span className="text-[11px] font-semibold tracking-wider text-[#D9BC82] uppercase bg-[#C6A96B]/15 px-2.5 py-0.5 rounded-full border border-[#C6A96B]/30">
+                    Atomic Payout Settlement
+                  </span>
+                  <h2 className="text-xl font-bold font-serif text-[#F8F6F1] mt-2">
+                    ยื่นคำขอถอนเงินสด (Payout Request)
+                  </h2>
+                  <p className="text-xs text-slate-400 mt-1">
+                    ยอดเงินพร้อมถอนปัจจุบันของคุณคือ <span className="text-emerald-400 font-mono font-bold">฿{availableBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>
+                  </p>
+                </div>
 
-            <Form method="post" onSubmit={() => setIsPayoutModalOpen(false)} className="space-y-4">
-              <input type="hidden" name="intent" value="request_payout" />
-              <input type="hidden" name="bankName" value={partnerProfile?.bankName || ""} />
-              <input type="hidden" name="accountNo" value={partnerProfile?.bankAccountNo || ""} />
-              <input type="hidden" name="accountName" value={partnerProfile?.bankAccountName || ""} />
-              <input type="hidden" name="taxId" value={partnerProfile?.taxId || ""} />
+                <Form method="post" onSubmit={() => setIsPayoutModalOpen(false)} className="space-y-4">
+                  <input type="hidden" name="intent" value="request_payout" />
+                  <input type="hidden" name="bankName" value={partnerProfile?.bankName || ""} />
+                  <input type="hidden" name="accountNo" value={partnerProfile?.bankAccountNo || ""} />
+                  <input type="hidden" name="accountName" value={partnerProfile?.bankAccountName || ""} />
+                  <input type="hidden" name="taxId" value={partnerProfile?.taxId || ""} />
 
               <div>
                 <label className="text-xs text-slate-300 font-medium mb-1.5 flex justify-between">
@@ -1522,6 +1572,8 @@ export default function PartnerPortalPage() {
                 </Button>
               </div>
             </Form>
+            </>
+          )}
           </div>
         </div>
       )}

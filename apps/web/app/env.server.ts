@@ -33,6 +33,7 @@ export interface Env {
   APP_URL: string;                    // e.g. https://phopephum-web.pages.dev
   HEALTH_CHECK_SECRET?: string;       // Optional secret for /api/health external monitors
   CRON_SECRET?: string;               // Optional secret for /api/cron/* scheduled jobs
+  ENABLE_CASH_COMMISSION?: string;    // Feature flag for cash commission payouts (default: false in MVP)
 
   // Cloudflare Bindings
   KV_CACHE: KVNamespace;

@@ -46,7 +46,7 @@ export async function calculatePhopephum(input: HoroscopeInput, checkDate: Date 
 
   const vayaJorn = calculateVayaJorn(matrix, ageYang);
   const yearlyJorn = calculateYearlyJorn(matrix, ageYang);
-  const monthlyJorn = calculateMonthlyJorn(matrix, transitThai.lunarMonth);
+  const monthlyJorn = calculateMonthlyJorn(matrix, transitThai.lunarMonth, yearlyJorn.col);
   const dailyJorn = calculateDailyJorn(matrix, transitThai.dayNum);
   
   const timeStr = (input.birthTime || '12:00').slice(0, 5); // normalize HH:MM:SS → HH:MM

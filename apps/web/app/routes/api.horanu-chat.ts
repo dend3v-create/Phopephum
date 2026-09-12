@@ -5,7 +5,8 @@
  * หลักการ: ภพ (เรือนชะตา) + ดาวลอย + มาตรฐานดาว = คำพยากรณ์
  */
 import type { ActionFunctionArgs } from "@remix-run/cloudflare";
-import { requireAuth } from "~/services/auth.server";
+import { requireAuth, getProfile } from "~/services/auth.server";
+import { canUseFeature } from "~/services/permissions.server";
 import {
   calculateHoraTaynoo,
   PLANET_INFO,
@@ -168,6 +169,21 @@ ${xyzEquation}
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
+  const profile = await getProfile(user.id, request, env);
+
+  // Entitlement Gate: Hora Nu requires Premium or higher
+  if (!canUseFeature(profile, "horanu")) {
+    return new Response(
+      JSON.stringify({ 
+        error: "ฟีเจอร์ยามพรายกระซิบ (Hora Nu) สงวนสิทธิ์สำหรับสมาชิก Premium ขึ้นไป", 
+        code: "PLAN_UPGRADE_REQUIRED" 
+      }), 
+      {
+        status: 403,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
 
   let question: string;
   let isoTime: string | undefined;

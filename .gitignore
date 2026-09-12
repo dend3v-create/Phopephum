@@ -48,3 +48,8 @@ Thumbs.db
 .idea
 .vscode
 *.swp
+
+# Backups
+backups/
+*.sql
+*.sql.gz

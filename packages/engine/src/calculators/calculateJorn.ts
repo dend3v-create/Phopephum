@@ -89,10 +89,10 @@ export function calculateYearlyJorn(matrix: FateMatrix, age: number): JornResult
 
 /**
  * คำนวณเดือนจร (Monthly Forecast)
- * เริ่มที่ภพพันธุ (Row 2, Col 4) = เดือน 1
+ * เริ่มเดือน 1 ที่ตำแหน่งของปีจรในปีนั้น (fallback เป็นภพพันธุ Col 4)
  */
-export function calculateMonthlyJorn(matrix: FateMatrix, lunarMonth: number): JornResult {
-  const startCol = 3; // Index 3 is Col 4 (พันธุ)
+export function calculateMonthlyJorn(matrix: FateMatrix, lunarMonth: number, yearlyJornCol?: number): JornResult {
+  const startCol = yearlyJornCol ? yearlyJornCol - 1 : 3;
   const col = (startCol + (lunarMonth - 1)) % 7;
   const row = 1; // ฐานเดือน (Base 2)
   

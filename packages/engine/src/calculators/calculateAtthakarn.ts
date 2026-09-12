@@ -55,6 +55,8 @@ const HORA_MEANINGS: Record<string, { meaning: string; strengths: string[]; isAu
   },
 }
 
+export type AtthakarnPhase = 'start' | 'middle' | 'end'
+
 export interface AtthakarnResult {
   /** ชื่อดาวเจ้าของยามกำเนิด */
   horaPlanet: string
@@ -64,6 +66,14 @@ export interface AtthakarnResult {
   horaNumber: number
   /** กลางวัน / กลางคืน */
   period: 'day' | 'night'
+  /** ช่วงยามย่อย: start (ยามต้น 0-29 นาที), middle (ยามกลาง 30-59 นาที), end (ยามปลาย 60-89 นาที) */
+  phase: AtthakarnPhase
+  /** ชื่อช่วงยามย่อย ('ยามต้น' | 'ยามกลาง' | 'ยามปลาย') */
+  phaseLabel: string
+  /** ฐานชั้นฉายของยาม (1 = ยามต้น, 2 = ยามกลาง, 3 = ยามปลาย) */
+  phaseBase: number
+  /** นาทีภายในยามใหญ่ (0-89) */
+  minuteInYam: number
   /** ความหมายยามกำเนิด */
   meaning: string
   /** จุดแข็งจากยามกำเนิด */
@@ -75,12 +85,12 @@ export interface AtthakarnResult {
 /**
  * คำนวณยามกำเนิด (อัฏฐกาล) จากวันเกิด + เวลาเกิด
  * @param birthDate  "YYYY-MM-DD"
- * @param birthTime  "HH:MM" (optional, default 12:00 ถ้าไม่ทราบเวลา)
+ * @param birthTime  "HH:MM" หรือ "HH:MM:SS" (optional, default 12:00 ถ้าไม่ทราบเวลา)
  */
 export function calculateAtthakarn(birthDate: string, birthTime?: string): AtthakarnResult {
   const timeStr = birthTime ?? '12:00'
   const [hStr, mStr] = timeStr.split(':')
-  const totalMinutes = (parseInt(hStr ?? '12') * 60) + (parseInt(mStr ?? '0'))
+  const totalMinutes = (parseInt(hStr ?? '12', 10) * 60) + (parseInt(mStr ?? '0', 10))
 
   const date = new Date(birthDate)
   const dayOfWeek = date.getDay() // 0=อาทิตย์
@@ -90,21 +100,47 @@ export function calculateAtthakarn(birthDate: string, birthTime?: string): Attha
 
   // ยามกลางวันเริ่ม 06:00 = 360 นาที
   const DAY_START = 360
-  const MAJOR_SLOT = 180 // 3 ชั่วโมง
-  const NIGHT_START = DAY_START + 4 * MAJOR_SLOT // 1080 = 18:00
+  const MAJOR_SLOT = 90 // 1.5 ชั่วโมง (90 นาที)
+  const NIGHT_START = DAY_START + 8 * MAJOR_SLOT // 1080 = 18:00
 
   let majorOffset: number
   let period: 'day' | 'night'
+  let minuteInYam: number
 
   if (totalMinutes >= DAY_START && totalMinutes < NIGHT_START) {
-    majorOffset = Math.floor((totalMinutes - DAY_START) / MAJOR_SLOT)
+    const dayMinutes = totalMinutes - DAY_START
+    majorOffset = Math.floor(dayMinutes / MAJOR_SLOT)
+    minuteInYam = dayMinutes % MAJOR_SLOT
     period = 'day'
   } else {
     const nightMinutes = totalMinutes >= NIGHT_START
       ? totalMinutes - NIGHT_START
       : totalMinutes + (1440 - NIGHT_START)
-    majorOffset = Math.floor(nightMinutes / MAJOR_SLOT) + 4
+    majorOffset = Math.floor(nightMinutes / MAJOR_SLOT) + 8
+    minuteInYam = nightMinutes % MAJOR_SLOT
     period = 'night'
+  }
+
+  // Phase calculation within 90-min slot:
+  // 0–29 นาที = ยามต้น → ฐาน 1
+  // 30–59 นาที = ยามกลาง → ฐาน 2
+  // 60–89 นาที = ยามปลาย → ฐาน 3
+  let phase: AtthakarnPhase
+  let phaseLabel: string
+  let phaseBase: number
+
+  if (minuteInYam < 30) {
+    phase = 'start'
+    phaseLabel = 'ยามต้น'
+    phaseBase = 1
+  } else if (minuteInYam < 60) {
+    phase = 'middle'
+    phaseLabel = 'ยามกลาง'
+    phaseBase = 2
+  } else {
+    phase = 'end'
+    phaseLabel = 'ยามปลาย'
+    phaseBase = 3
   }
 
   // หาดาวเจ้าของยาม
@@ -124,6 +160,10 @@ export function calculateAtthakarn(birthDate: string, birthTime?: string): Attha
     horaSymbol: planetSymbol,
     horaNumber,
     period,
+    phase,
+    phaseLabel,
+    phaseBase,
+    minuteInYam,
     meaning: info.meaning,
     strengths: info.strengths,
     isAuspicious: info.isAuspicious,
