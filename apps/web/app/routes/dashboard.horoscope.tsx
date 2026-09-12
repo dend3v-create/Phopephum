@@ -2,6 +2,7 @@ import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireMinPlan, getProfile, requireAuth, canAccess } from "~/services/auth.server";
+import { getPersonLimit } from "~/services/permissions.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 
 import {
@@ -231,13 +232,30 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     // ── 4. Save Customer if requested ──
     if (isSaveCustomer && customerName) {
-      await supabase.from("customers").insert({
-        user_id: user.id,
-        name: customerName,
-        birth_date: parsed.data.birthDate,
-        birth_time: parsed.data.birthTime,
-        birth_place: parsed.data.birthPlace,
-      });
+      const personLimit = getPersonLimit(profile);
+      if (personLimit !== null) {
+        const { count } = await supabase
+          .from("customers")
+          .select("*", { count: "exact", head: true })
+          .eq("user_id", user.id);
+        if ((count ?? 0) < personLimit) {
+          await supabase.from("customers").insert({
+            user_id: user.id,
+            name: customerName,
+            birth_date: parsed.data.birthDate,
+            birth_time: parsed.data.birthTime,
+            birth_place: parsed.data.birthPlace,
+          });
+        }
+      } else {
+        await supabase.from("customers").insert({
+          user_id: user.id,
+          name: customerName,
+          birth_date: parsed.data.birthDate,
+          birth_time: parsed.data.birthTime,
+          birth_place: parsed.data.birthPlace,
+        });
+      }
     }
 
     await logEvent(request, env, EVENTS.CALC_HORA, {

@@ -82,16 +82,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }, { status: guard.status });
   }
 
-  // 5. ตรวจสอบทรายกาลเวลา (Sands of Time)
-  const userPlan = getUserPlan(profile);
-  const isMasterOrAdmin = userPlan === "master" || profile?.role === "admin" || profile?.role === "operator";
-  const currentSands = profile?.time_sands ?? 0;
-
-  if (!isMasterOrAdmin && currentSands <= 0) {
-    await guard.releaseSlot();
-    return json({ error: "ขออภัย ทรายกาลเวลา (Sands of Time) ในนาฬิกาทรายของคุณหมดแล้ว กรุณาเติมทรายหรืออัปเกรดเพื่อรับทรายเพิ่ม" }, { status: 403 });
-  }
-
   try {
     // 6. รัน AI Report (ผ่าน Stream)
     const stream = await generateAIReport(

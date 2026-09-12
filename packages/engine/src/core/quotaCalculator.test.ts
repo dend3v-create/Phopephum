@@ -68,8 +68,8 @@ describe('Quota and Billing Cycle Engine Tests', () => {
     })
 
     it('should disallow usage exceeding limit (เกิน limit)', () => {
-      // Premium Wisdom AI Limit = 10, current usage = 11
-      const status = checkQuotaStatus({ currentUsage: 11, limit: WISDOM_AI_LIMIT.premium })
+      // Premium Wisdom AI Limit = 20, current usage = 21
+      const status = checkQuotaStatus({ currentUsage: 21, limit: WISDOM_AI_LIMIT.premium })
       expect(status.allowed).toBe(false)
       expect(status.remaining).toBe(0)
     })
@@ -85,22 +85,22 @@ describe('Quota and Billing Cycle Engine Tests', () => {
     })
 
     it('should correctly handle Plan Changes (เปลี่ยน Plan: Free -> Premium -> Pro -> Master)', () => {
-      // 1. Free plan
+      // 1. Free plan (AI Report: 0, Wisdom AI: 5)
       expect(checkQuotaStatus({ currentUsage: 0, limit: AI_REPORT_LIMIT.free }).allowed).toBe(false)
-      expect(checkQuotaStatus({ currentUsage: 2, limit: WISDOM_AI_LIMIT.free }).allowed).toBe(true)
-      expect(checkQuotaStatus({ currentUsage: 3, limit: WISDOM_AI_LIMIT.free }).allowed).toBe(false)
+      expect(checkQuotaStatus({ currentUsage: 4, limit: WISDOM_AI_LIMIT.free }).allowed).toBe(true)
+      expect(checkQuotaStatus({ currentUsage: 5, limit: WISDOM_AI_LIMIT.free }).allowed).toBe(false)
 
-      // 2. Upgrade to Premium (AI Report: 1, Wisdom AI: 10)
+      // 2. Upgrade to Premium (AI Report: 1, Wisdom AI: 20)
       expect(checkQuotaStatus({ currentUsage: 0, limit: AI_REPORT_LIMIT.premium }).allowed).toBe(true)
       expect(checkQuotaStatus({ currentUsage: 1, limit: AI_REPORT_LIMIT.premium }).allowed).toBe(false)
-      expect(checkQuotaStatus({ currentUsage: 9, limit: WISDOM_AI_LIMIT.premium }).allowed).toBe(true)
-      expect(checkQuotaStatus({ currentUsage: 10, limit: WISDOM_AI_LIMIT.premium }).allowed).toBe(false)
+      expect(checkQuotaStatus({ currentUsage: 19, limit: WISDOM_AI_LIMIT.premium }).allowed).toBe(true)
+      expect(checkQuotaStatus({ currentUsage: 20, limit: WISDOM_AI_LIMIT.premium }).allowed).toBe(false)
 
-      // 3. Upgrade to Pro (AI Report: 5, Wisdom AI: 50)
+      // 3. Upgrade to Pro (AI Report: 5, Wisdom AI: 100)
       expect(checkQuotaStatus({ currentUsage: 4, limit: AI_REPORT_LIMIT.pro }).allowed).toBe(true)
       expect(checkQuotaStatus({ currentUsage: 5, limit: AI_REPORT_LIMIT.pro }).allowed).toBe(false)
-      expect(checkQuotaStatus({ currentUsage: 49, limit: WISDOM_AI_LIMIT.pro }).allowed).toBe(true)
-      expect(checkQuotaStatus({ currentUsage: 50, limit: WISDOM_AI_LIMIT.pro }).allowed).toBe(false)
+      expect(checkQuotaStatus({ currentUsage: 99, limit: WISDOM_AI_LIMIT.pro }).allowed).toBe(true)
+      expect(checkQuotaStatus({ currentUsage: 100, limit: WISDOM_AI_LIMIT.pro }).allowed).toBe(false)
 
       // 4. Upgrade to Master (AI Report: 10, Wisdom AI: 100)
       expect(checkQuotaStatus({ currentUsage: 9, limit: AI_REPORT_LIMIT.master }).allowed).toBe(true)
@@ -176,7 +176,7 @@ describe('Quota and Billing Cycle Engine Tests', () => {
         expect(aiCalled).toBe(true)
       })
 
-      it('should enforce Karnchata Wisdom quota before calling AI (Free: 3, Premium: 10, Pro: 50, Master: 100)', () => {
+      it('should enforce Karnchata Wisdom quota before calling AI (Free: 5, Premium: 20, Pro: 100, Master: 100)', () => {
         let aiCalled = false
         const requestKarnchata = (plan: 'free' | 'premium' | 'pro' | 'master', currentUsage: number) => {
           const limit = WISDOM_AI_LIMIT[plan]
@@ -188,29 +188,29 @@ describe('Quota and Billing Cycle Engine Tests', () => {
           return { status: 200, success: true }
         }
 
-        // Free: under limit (2 used)
+        // Free: under limit (4 used)
         aiCalled = false
-        expect(requestKarnchata('free', 2).status).toBe(200)
+        expect(requestKarnchata('free', 4).status).toBe(200)
         expect(aiCalled).toBe(true)
 
-        // Free: at limit (3 used) -> reject before AI
+        // Free: at limit (5 used) -> reject before AI
         aiCalled = false
-        expect(requestKarnchata('free', 3).status).toBe(403)
+        expect(requestKarnchata('free', 5).status).toBe(403)
         expect(aiCalled).toBe(false)
 
-        // Premium: at limit (10 used) -> reject before AI
+        // Premium: at limit (20 used) -> reject before AI
         aiCalled = false
-        expect(requestKarnchata('premium', 10).status).toBe(403)
+        expect(requestKarnchata('premium', 20).status).toBe(403)
         expect(aiCalled).toBe(false)
 
-        // Pro: under limit (49 used) -> allowed
+        // Pro: under limit (99 used) -> allowed
         aiCalled = false
-        expect(requestKarnchata('pro', 49).status).toBe(200)
+        expect(requestKarnchata('pro', 99).status).toBe(200)
         expect(aiCalled).toBe(true)
 
-        // Pro: at limit (50 used) -> reject
+        // Pro: at limit (100 used) -> reject
         aiCalled = false
-        expect(requestKarnchata('pro', 50).status).toBe(403)
+        expect(requestKarnchata('pro', 100).status).toBe(403)
         expect(aiCalled).toBe(false)
 
         // Master: at limit (100 used) -> reject

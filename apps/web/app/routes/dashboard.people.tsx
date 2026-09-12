@@ -17,7 +17,9 @@ export const meta: MetaFunction = () => [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const { user, profile } = await requireMinPlan("basic", request, env);
+  const user = await requireAuth(request, env);
+  const { getProfile } = await import("~/services/auth.server");
+  const profile = await getProfile(user.id, request, env);
 
   const { createSupabaseClient } = await import("~/services/supabase.server");
   const { supabase } = createSupabaseClient(request, env);

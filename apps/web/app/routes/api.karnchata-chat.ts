@@ -21,34 +21,34 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "กรุณาระบุคำถาม" }, { status: 400 });
   }
 
-  // Server-side Wisdom AI Quota Gate
-  const limit = getWisdomAiLimit(profile);
-  if (limit !== null) {
-    const { supabase } = createSupabaseClient(request, env);
-    const { cycleStart } = getUserBillingCycleWindow(profile);
-    const { count: queriesCount } = await supabase
-      .from("wisdom_queries")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .gte("created_at", cycleStart.toISOString());
+  // 1. Server-Side AI Cost Guard (Pre-Flight: Auth → Entitlement → Quota → Rate Limit → Concurrency → Sands Reservation)
+  const { createSupabaseClient } = await import("~/services/supabase.server");
+  const { supabase } = createSupabaseClient(request, env);
+  const { guardAiRequestPreflight, recordAiExecutionTelemetry } = await import("~/services/aiCostGuard.server");
 
-    if (queriesCount !== null && queriesCount >= limit) {
-      const plan = getUserPlan(profile);
-      const isFree = plan === "free";
-      const message = isFree
-        ? `คุณใช้งานสิทธิ์ทดลองถาม Wisdom AI ครบกำหนด ${limit} ครั้งแล้ว กรุณาอัปเกรดเพื่อสนทนาต่อ`
-        : `คุณใช้งานสิทธิ์ถาม Wisdom AI ครบ ${limit} ครั้งสำหรับรอบการใช้งานนี้แล้ว กรุณารอรอบถัดไปหรืออัปเกรดแพ็กเกจ`;
-      return json({ error: message, code: "QUOTA_EXCEEDED" }, { status: 403 });
-    }
+  const guard = await guardAiRequestPreflight({
+    userId: user.id,
+    profile,
+    featureType: "wisdom_ai",
+    promptText: question,
+    env,
+    supabase,
+  });
+
+  if (!guard.allowed) {
+    return json({
+      error: guard.errorMessage,
+      code: guard.errorCode,
+    }, { status: guard.status });
   }
 
   const targetDate = new Date(targetDateStr);
 
   try {
-    // 1. Calculate Karnchata
+    // 2. Calculate Karnchata
     const karnchataResult = calculateKarnchata(targetDate);
 
-    // 2. Calculate Phopephum (if user has birth date)
+    // 3. Calculate Phopephum (if user has birth date)
     let phopephumResult = null;
     if (profile?.birth_date) {
       phopephumResult = await calculatePhopephum({
@@ -58,7 +58,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       }, targetDate);
     }
 
-    // 3. Build Prompt
+    // 4. Build Prompt
     const prompt = buildKarnchataChatPrompt(
       question,
       category,
@@ -67,7 +67,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       profile?.display_name || profile?.full_name || "ผู้ใช้งาน"
     );
 
-    // 4. Request AI Worker
+    // 5. Request AI Worker
     const response = await fetch(`${env.AI_WORKER_URL}/generate`, {
       method: "POST",
       headers: {
@@ -76,7 +76,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       },
       body: JSON.stringify({
         userId: user.id,
-        reportType: "karnchata_chat", // Custom report type
+        reportType: "karnchata_chat",
         context: {
           category,
           targetDate: targetDateStr,
@@ -86,11 +86,60 @@ export async function action({ request, context }: ActionFunctionArgs) {
     });
 
     if (!response.ok || !response.body) {
+      await recordAiExecutionTelemetry({
+        userId: user.id,
+        profile,
+        reportType: "karnchata_chat",
+        promptText: prompt,
+        env,
+        isSuccess: false,
+        error: new Error(`AI Service Response: ${response.status}`),
+        releaseSlot: guard.releaseSlot,
+        refundSandsIfNeeded: guard.refundSandsIfNeeded,
+      });
       throw new Error("AI Service Unavailable");
     }
 
-    // Return the response stream directly to the client
-    return new Response(response.body, {
+    // 6. Wrap stream to capture output tokens & record telemetry upon completion
+    const reader = response.body.getReader();
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+    let accumulatedText = "";
+
+    (async () => {
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          await writer.write(value);
+        }
+      } catch (streamErr) {
+        console.error("[api.karnchata-chat] Stream pipe error:", streamErr);
+      } finally {
+        await writer.close();
+        await recordAiExecutionTelemetry({
+          userId: user.id,
+          profile,
+          reportType: "karnchata_chat",
+          promptText: prompt,
+          outputText: accumulatedText,
+          env,
+          isSuccess: true,
+          releaseSlot: guard.releaseSlot,
+          refundSandsIfNeeded: guard.refundSandsIfNeeded,
+        });
+
+        supabase.from("wisdom_queries").insert({
+          user_id: user.id,
+          question,
+          category,
+        }).then(({ error: insertErr }) => {
+          if (insertErr) console.error("[api.karnchata-chat] Insert query error:", insertErr);
+        });
+      }
+    })();
+
+    return new Response(readable, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
@@ -100,6 +149,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   } catch (err) {
     console.error("Karnchata Chat Error:", err);
-    return json({ error: "ระบบพยากรณ์ขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้ง" }, { status: 500 });
+    await recordAiExecutionTelemetry({
+      userId: user.id,
+      profile,
+      reportType: "karnchata_chat",
+      env,
+      isSuccess: false,
+      error: err,
+      releaseSlot: guard.releaseSlot,
+      refundSandsIfNeeded: guard.refundSandsIfNeeded,
+    });
+    return json({ error: "Karnchata Wisdom ไม่ว่างชั่วคราว กรุณาลองใหม่สักครู่ ✦" }, { status: 500 });
   }
 }

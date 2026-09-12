@@ -193,40 +193,140 @@ export async function action({ request, context }: ActionFunctionArgs) {
     question = (body.question ?? "").trim();
     isoTime = body.isoTime;
   } catch {
-    return new Response("Invalid JSON body", { status: 400 });
+    return new Response(JSON.stringify({ error: "Invalid JSON body" }), { 
+      status: 400, 
+      headers: { "Content-Type": "application/json" } 
+    });
   }
 
   if (!question) {
-    return new Response("Missing question", { status: 400 });
+    return new Response(JSON.stringify({ error: "Missing question" }), { 
+      status: 400, 
+      headers: { "Content-Type": "application/json" } 
+    });
+  }
+
+  // 1. Server-Side AI Cost Guard (Pre-Flight: Auth → Entitlement → Quota → Rate Limit → Concurrency → Sands Reservation)
+  const { createSupabaseClient } = await import("~/services/supabase.server");
+  const { supabase } = createSupabaseClient(request, env);
+  const { guardAiRequestPreflight, recordAiExecutionTelemetry } = await import("~/services/aiCostGuard.server");
+
+  const guard = await guardAiRequestPreflight({
+    userId: user.id,
+    profile,
+    featureType: "wisdom_ai",
+    promptText: question,
+    env,
+    supabase,
+  });
+
+  if (!guard.allowed) {
+    return new Response(
+      JSON.stringify({
+        error: guard.errorMessage,
+        code: guard.errorCode,
+      }),
+      { status: guard.status, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   const dateAsked = isoTime ? new Date(isoTime) : new Date();
   const chart = calculateHoraTaynoo({ dateAsked });
   const prompt = buildHoranuPrompt(chart, dateAsked, question);
 
-  const aiRes = await fetch(`${env.AI_WORKER_URL}/generate`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${env.AI_WORKER_SECRET}`,
-    },
-    body: JSON.stringify({
+  try {
+    const aiRes = await fetch(`${env.AI_WORKER_URL}/generate`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${env.AI_WORKER_SECRET}`,
+      },
+      body: JSON.stringify({
+        userId: user.id,
+        reportType: "horanu_chat",
+        context: {},
+        prompt,
+      }),
+    });
+
+    if (!aiRes.ok || !aiRes.body) {
+      await recordAiExecutionTelemetry({
+        userId: user.id,
+        profile,
+        reportType: "horanu_chat",
+        promptText: prompt,
+        env,
+        isSuccess: false,
+        error: new Error(`AI service response: ${aiRes.status}`),
+        releaseSlot: guard.releaseSlot,
+        refundSandsIfNeeded: guard.refundSandsIfNeeded,
+      });
+      return new Response(JSON.stringify({ error: "AI service error" }), { 
+        status: 502, 
+        headers: { "Content-Type": "application/json" } 
+      });
+    }
+
+    const reader = aiRes.body.getReader();
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+    let accumulatedText = "";
+
+    (async () => {
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          await writer.write(value);
+        }
+      } catch (streamErr) {
+        console.error("[api.horanu-chat] Stream pipe error:", streamErr);
+      } finally {
+        await writer.close();
+        await recordAiExecutionTelemetry({
+          userId: user.id,
+          profile,
+          reportType: "horanu_chat",
+          promptText: prompt,
+          outputText: accumulatedText,
+          env,
+          isSuccess: true,
+          releaseSlot: guard.releaseSlot,
+          refundSandsIfNeeded: guard.refundSandsIfNeeded,
+        });
+
+        supabase.from("wisdom_queries").insert({
+          user_id: user.id,
+          question,
+          category: "ยามพรายกระซิบ",
+        }).then(({ error: insertErr }) => {
+          if (insertErr) console.error("[api.horanu-chat] Insert query error:", insertErr);
+        });
+      }
+    })();
+
+    return new Response(readable, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        "X-Accel-Buffering": "no",
+      },
+    });
+  } catch (err: any) {
+    console.error("Horanu Chat Error:", err);
+    await recordAiExecutionTelemetry({
       userId: user.id,
-      reportType: "horanu-chat",
-      context: {},
-      prompt,
-    }),
-  });
-
-  if (!aiRes.ok || !aiRes.body) {
-    return new Response("AI service error", { status: 502 });
+      profile,
+      reportType: "horanu_chat",
+      env,
+      isSuccess: false,
+      error: err,
+      releaseSlot: guard.releaseSlot,
+      refundSandsIfNeeded: guard.refundSandsIfNeeded,
+    });
+    return new Response(JSON.stringify({ error: "ระบบพยากรณ์ขัดข้องชั่วคราว กรุณาลองใหม่อีกครั้ง" }), { 
+      status: 500, 
+      headers: { "Content-Type": "application/json" } 
+    });
   }
-
-  return new Response(aiRes.body, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      "X-Accel-Buffering": "no",
-    },
-  });
 }

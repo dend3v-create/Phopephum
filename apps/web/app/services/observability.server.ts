@@ -17,6 +17,15 @@ import type { Env } from "~/env.server";
 import { calculateOmiseFee } from "./omise.server";
 import { getUserPlan, getAiReportLimit, getPersonLimit } from "./permissions.server";
 import { CANONICAL_SKUS, resolveProductFromSku } from "../lib/plans";
+import {
+  calculateSandsLedgerBreakdown,
+  calculateNormalizedMrr,
+  calculateUnitEconomicsMetrics,
+  isCanonicalActiveUserEvent,
+  type SandsAccountingBreakdown,
+  type RevenueMrrBreakdown,
+  type UnitEconomicsMetrics,
+} from "@phopephum/engine";
 
 export type PaymentLifecycleEvent =
   | "PAYMENT_CREATED"
@@ -343,21 +352,26 @@ export async function auditUserEntitlement(
   const aiLimit = getAiReportLimit(profile);
   const notes: string[] = [];
 
+  // Strict SSoT check against Canonical Engine limits:
+  // Free: 1 person, 0 AI report
+  // Premium: 5 persons, 1 AI report
+  // Pro: 20 persons, 5 AI reports
+  // Master: 100 persons, 10 AI reports (+ Fair Use)
   if (normalized === "master") {
-    if (personLimit !== null || aiLimit !== null) {
-      notes.push("Master/Imperial quota must be null (unlimited)");
+    if (personLimit !== 100 || aiLimit !== 10) {
+      notes.push(`Master quota mismatch: person=${personLimit} (expected 100), ai=${aiLimit} (expected 10)`);
     }
   } else if (normalized === "pro") {
-    if (personLimit !== 20 || aiLimit !== 15) {
-      notes.push(`Pro quota mismatch: person=${personLimit}, ai=${aiLimit}`);
+    if (personLimit !== 20 || aiLimit !== 5) {
+      notes.push(`Pro quota mismatch: person=${personLimit} (expected 20), ai=${aiLimit} (expected 5)`);
     }
   } else if (normalized === "premium") {
-    if (personLimit !== 3 || aiLimit !== 1) {
-      notes.push(`Basic quota mismatch: person=${personLimit}, ai=${aiLimit}`);
+    if (personLimit !== 5 || aiLimit !== 1) {
+      notes.push(`Premium quota mismatch: person=${personLimit} (expected 5), ai=${aiLimit} (expected 1)`);
     }
   } else if (normalized === "free") {
-    if (personLimit !== 0 || aiLimit !== 0) {
-      notes.push(`Free quota mismatch: person=${personLimit}, ai=${aiLimit}`);
+    if (personLimit !== 1 || aiLimit !== 0) {
+      notes.push(`Free quota mismatch: person=${personLimit} (expected 1), ai=${aiLimit} (expected 0)`);
     }
   }
 
@@ -383,11 +397,21 @@ export interface OperationalSystemMetrics {
   expiredTransactions: number;
   successRatePercent: number;
   financials: {
+    cashCollectedThb: number;
     grossSalesThb: number;
     gatewayFeesThb: number;
     gatewayFeeVatThb: number;
     pmarketInvoiceVatThb: number;
     netReceivedThb: number;
+    normalizedMrrThb: number;
+  };
+  mrrBreakdown: RevenueMrrBreakdown;
+  userSegmentation: {
+    totalUsers: number;
+    activePaidSubscribers: number;
+    sandsBuyersCount: number;
+    totalHistoricalPayingUsers: number;
+    dau: number;
   };
   subscriptionBreakdown: Record<string, number>;
   sandsTurnover: {
@@ -395,6 +419,15 @@ export interface OperationalSystemMetrics {
     totalDebits: number;
     netDelta: number;
   };
+  sandsAccounting: SandsAccountingBreakdown;
+  aiMetrics: {
+    totalRequests: number;
+    successfulRequests: number;
+    failedRequests: number;
+    estimatedCostThb: number;
+    estimatedCostUsd: number;
+  };
+  unitEconomics: UnitEconomicsMetrics;
 }
 
 export interface OperationalAnomaly {
@@ -428,11 +461,26 @@ export async function getOperationalSystemMetrics(
   const supabase = createClient(env.SUPABASE_URL, serviceKey);
   const cutoffDate = new Date(Date.now() - timeWindowHours * 3600000).toISOString();
 
-  // 1. Fetch transactions within time window
-  const { data: txs } = await supabase
-    .from("payment_transactions")
-    .select("*")
-    .gte("created_at", cutoffDate);
+  // 1. Fetch transactions within time window & all-time successful
+  const [
+    { data: txs },
+    { data: allHistoricalTxs },
+    { data: profilesData },
+    { data: allSandsRows },
+    { data: windowSandsRows },
+    { data: eventsData },
+    { count: aiSuccessCount },
+    { count: aiFailCount },
+  ] = await Promise.all([
+    supabase.from("payment_transactions").select("*").gte("created_at", cutoffDate),
+    supabase.from("payment_transactions").select("user_id, sku, status").eq("status", "successful"),
+    supabase.from("profiles").select("id, plan, created_at"),
+    supabase.from("sands_ledger").select("amount, activity_type, reward_class, reference_id, created_at"),
+    supabase.from("sands_ledger").select("amount, activity_type, reward_class, reference_id, created_at").gte("created_at", cutoffDate),
+    supabase.from("events").select("name, user_id, timestamp").gte("timestamp", cutoffDate),
+    supabase.from("ai_reports").select("id", { count: "exact", head: true }).gte("created_at", cutoffDate),
+    supabase.from("financial_job_logs").select("id", { count: "exact", head: true }).eq("job_type", "ai_cost_anomaly").gte("created_at", cutoffDate),
+  ]);
 
   const transactions = txs || [];
   let grossSalesThb = 0;
@@ -443,11 +491,11 @@ export async function getOperationalSystemMetrics(
 
   for (const tx of transactions) {
     const status = tx.status || "pending";
-    const sku = tx.sku || "unknown";
+    const sku = tx.sku || tx.subscription_plan_code || "unknown";
 
     if (status === "successful") {
       successfulTransactions++;
-      const amount = Number(tx.amount || 0);
+      const amount = Number(tx.amount || tx.gross_amount_thb || 0);
       grossSalesThb += amount;
       subscriptionBreakdown[sku] = (subscriptionBreakdown[sku] || 0) + 1;
     } else if (status === "failed") {
@@ -469,20 +517,87 @@ export async function getOperationalSystemMetrics(
       ? Math.round((successfulTransactions / totalTransactions) * 10000) / 100
       : 100.0;
 
-  // 2. Fetch Sands ledger turnover
-  const { data: sandsRows } = await supabase
-    .from("sands_ledger")
-    .select("amount")
-    .gte("created_at", cutoffDate);
+  // 2. Sands Accounting Breakdown from Ledger SSoT (All-time + Window)
+  const sandsAccounting = calculateSandsLedgerBreakdown(
+    (allSandsRows || []).map((r) => ({
+      amount: Number(r.amount || 0),
+      activityType: r.activity_type,
+      rewardClass: r.reward_class,
+      referenceId: r.reference_id,
+      createdAt: r.created_at,
+    }))
+  );
 
-  let totalCredits = 0;
-  let totalDebits = 0;
-
-  for (const row of sandsRows || []) {
+  let totalWindowCredits = 0;
+  let totalWindowDebits = 0;
+  for (const row of windowSandsRows || []) {
     const amt = Number(row.amount || 0);
-    if (amt > 0) totalCredits += amt;
-    else totalDebits += Math.abs(amt);
+    if (amt > 0) totalWindowCredits += amt;
+    else totalWindowDebits += Math.abs(amt);
   }
+
+  // 3. User Segmentation & Normalized MRR
+  const totalProfiles = profilesData || [];
+  const planCounts = {
+    free: 0,
+    premium: 0,
+    proMonthly: 0,
+    proAnnual: 0,
+    master: 0,
+  };
+
+  for (const p of totalProfiles) {
+    const pl = (p.plan || "free").toLowerCase();
+    if (pl === "master") planCounts.master++;
+    else if (pl === "pro_annual" || pl === "annual_pro") planCounts.proAnnual++;
+    else if (pl === "pro") planCounts.proMonthly++;
+    else if (pl === "premium") planCounts.premium++;
+    else planCounts.free++;
+  }
+
+  const mrrBreakdown = calculateNormalizedMrr(planCounts);
+
+  // Paying Users & Sands Buyers
+  const payingUserSet = new Set<string>();
+  const sandsBuyerSet = new Set<string>();
+  for (const h of allHistoricalTxs || []) {
+    if (h.user_id) {
+      payingUserSet.add(h.user_id);
+      const sku = (h.sku || "").toLowerCase();
+      if (sku.startsWith("sands_")) {
+        sandsBuyerSet.add(h.user_id);
+      }
+    }
+  }
+
+  // 4. Canonical Active Users (DAU) Filter
+  const activeUserSet = new Set<string>();
+  for (const ev of eventsData || []) {
+    if (ev.user_id && isCanonicalActiveUserEvent(ev.name)) {
+      activeUserSet.add(ev.user_id);
+    }
+  }
+  const dau = Math.max(activeUserSet.size, 1);
+
+  // 5. AI Telemetry Aggregate
+  const successAi = aiSuccessCount || 0;
+  const failedAi = aiFailCount || 0;
+  const totalAiRequests = successAi + failedAi;
+  // SSoT estimate per report ~ ฿0.0354 / $0.00101
+  const estimatedCostThb = Math.round(successAi * 0.0354 * 100) / 100;
+  const estimatedCostUsd = Math.round((estimatedCostThb / 35.0) * 10000) / 10000;
+
+  // 6. Unit Economics Ratios
+  const daysInWindow = Math.max(1, timeWindowHours / 24);
+  const unitEconomics = calculateUnitEconomicsMetrics({
+    totalAiCostThb: estimatedCostThb,
+    totalRevenueThb: grossSalesThb,
+    activeUsersCount: dau,
+    totalPayingUsersCount: payingUserSet.size,
+    totalOutstandingSands: sandsAccounting.sandsOutstanding,
+    sandsConsumed: sandsAccounting.sandsConsumed,
+    periodDays: daysInWindow,
+  });
 
   return {
     timestamp: new Date().toISOString(),
@@ -493,18 +608,37 @@ export async function getOperationalSystemMetrics(
     expiredTransactions,
     successRatePercent,
     financials: {
+      cashCollectedThb: Math.round(grossSalesThb * 100) / 100,
       grossSalesThb: Math.round(grossSalesThb * 100) / 100,
       gatewayFeesThb,
       gatewayFeeVatThb,
       pmarketInvoiceVatThb,
       netReceivedThb,
+      normalizedMrrThb: mrrBreakdown.totalMrrThb,
+    },
+    mrrBreakdown,
+    userSegmentation: {
+      totalUsers: totalProfiles.length,
+      activePaidSubscribers: mrrBreakdown.activePaidSubscribers,
+      sandsBuyersCount: sandsBuyerSet.size,
+      totalHistoricalPayingUsers: payingUserSet.size,
+      dau,
     },
     subscriptionBreakdown,
     sandsTurnover: {
-      totalCredits,
-      totalDebits,
-      netDelta: totalCredits - totalDebits,
+      totalCredits: totalWindowCredits,
+      totalDebits: totalWindowDebits,
+      netDelta: totalWindowCredits - totalWindowDebits,
     },
+    sandsAccounting,
+    aiMetrics: {
+      totalRequests: totalAiRequests,
+      successfulRequests: successAi,
+      failedRequests: failedAi,
+      estimatedCostThb,
+      estimatedCostUsd,
+    },
+    unitEconomics,
   };
 }
 

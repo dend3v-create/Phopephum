@@ -181,7 +181,7 @@ describe("PHOPEPHUM V3 — AI QUOTA + SANDS PAY-PER-USE FLOW", () => {
 
   // ── TEST 1: Wisdom AI within quota ─────────────────────────────────────────
   it("should not charge Sands when Wisdom AI is within monthly quota (0 Sands)", () => {
-    // Premium user has 10 monthly queries. Currently used 5.
+    // Premium user has 20 monthly queries. Currently used 5.
     const res = executeAiPipeline({
       userId: "user_prem_within",
       plan: "premium",
@@ -201,12 +201,12 @@ describe("PHOPEPHUM V3 — AI QUOTA + SANDS PAY-PER-USE FLOW", () => {
 
   // ── TEST 2: Wisdom AI exceeded quota (Pay-Per-Use: 1 Sands) ────────────────
   it("should charge exactly 1 Sands when Wisdom AI exceeds monthly quota", () => {
-    // Premium user has 10 monthly queries. Currently used 10 (exceeded).
+    // Premium user has 20 monthly queries. Currently used 20 (exceeded).
     const res = executeAiPipeline({
       userId: "user_prem_exceeded",
       plan: "premium",
       initialSands: 20,
-      currentUsage: 10,
+      currentUsage: 20,
       featureType: "wisdom_ai",
       shouldAiSucceed: true,
       requestId: "req_002",
@@ -339,5 +339,63 @@ describe("PHOPEPHUM V3 — AI QUOTA + SANDS PAY-PER-USE FLOW", () => {
     expect(debitNew.success).toBe(false);
     expect(debitNew.error).toBe("INSUFFICIENT_SANDS");
     expect(user.sandsBalance).toBe(0);
+  });
+
+  // ── TEST 9: AI Timeout Refund ─────────────────────────────────────────────
+  it("should automatically refund reserved Sands on upstream AI timeout", () => {
+    const user = getOrCreateUser("user_timeout_case", "pro", 30);
+
+    // Pro user exceeds 5 monthly reports, now at 5. Wants 6th report (10 Sands).
+    const res = executeAiPipeline({
+      userId: "user_timeout_case",
+      plan: "pro",
+      initialSands: 30,
+      currentUsage: 5,
+      featureType: "ai_report",
+      shouldAiSucceed: false, // Simulates 504 Gateway Timeout
+      requestId: "req_timeout_999",
+    });
+
+    expect(res.status).toBe(500);
+    expect(res.aiSuccess).toBe(false);
+    expect(user.sandsBalance).toBe(30); // 30 - 10 + 10 = 30
+    expect(user.ledger.length).toBe(2);
+    expect(user.ledger[0].amount).toBe(-10);
+    expect(user.ledger[1].amount).toBe(10);
+    expect(user.ledger[1].referenceId).toBe("refund:reserve:ai_report:user_timeout_case:req_timeout_999");
+  });
+
+  // ── TEST 10: Duplicate Webhook / Payment Event Idempotency ────────────────
+  it("should ignore duplicate webhook credit events and credit sands exactly once", () => {
+    const user = getOrCreateUser("user_webhook_test", "free", 5);
+    const webhookEventRef = "evt_stripe_pi_3N9Z123456";
+
+    // 1st Webhook delivery (Sands Top-up +50 Sands)
+    const credit1 = atomicCredit(user, 50, webhookEventRef);
+    expect(credit1.success).toBe(true);
+    expect(user.sandsBalance).toBe(55); // 5 + 50 = 55
+    expect(user.ledger.length).toBe(1);
+
+    // 2nd Webhook delivery (Duplicate retry by provider)
+    const credit2 = atomicCredit(user, 50, webhookEventRef);
+    expect(credit2.success).toBe(true);
+    expect(user.sandsBalance).toBe(55); // Still 55, NOT 105
+    expect(user.ledger.length).toBe(1); // No double credit
+  });
+
+  // ── TEST 11: Concurrent Race Condition Protection ────────────────────────
+  it("should prevent concurrent over-spending when balance is only enough for one request", () => {
+    const user = getOrCreateUser("user_concurrent_test", "free", 10);
+
+    // Request A reserves 10 sands (Balance: 10 -> 0)
+    const resA = atomicDebit(user, 10, "reserve:ai_report:user_concurrent_test:req_A");
+    expect(resA.success).toBe(true);
+    expect(user.sandsBalance).toBe(0);
+
+    // Request B arrives simultaneously, needs 10 sands (Must fail cleanly)
+    const resB = atomicDebit(user, 10, "reserve:ai_report:user_concurrent_test:req_B");
+    expect(resB.success).toBe(false);
+    expect(resB.error).toBe("INSUFFICIENT_SANDS");
+    expect(user.sandsBalance).toBe(0); // Invariant maintained: 0, never negative
   });
 });

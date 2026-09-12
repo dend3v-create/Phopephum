@@ -131,16 +131,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: guard.errorMessage, code: guard.errorCode });
   }
 
-  // 3. Sands of Time Check
-  const plan = getUserPlan(profile);
-  const isPremium = plan === "pro" || plan === "master";
-  const currentSands = profile?.time_sands ?? 0;
-
-  if (!isPremium && currentSands <= 0) {
-    await guard.releaseSlot();
-    return json({ error: "คุณไม่มีเม็ดทรายกาลเวลาเหลือพอสำหรับการวิเคราะห์นี้ (Sands of Time: 0) กรุณาร่วมกิจกรรมรายวันหรืออัปเกรดเพื่อวิเคราะห์ไม่จำกัด" });
-  }
-
   try {
     // 4. Call AI report generator
     const stream = await generateAIReport(

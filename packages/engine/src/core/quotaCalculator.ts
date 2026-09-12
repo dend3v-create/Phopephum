@@ -21,6 +21,51 @@ export interface QuotaCheckResult {
   currentUsage: number
 }
 
+export const CANONICAL_PRICING_THB: Record<CanonicalPlan, number> = {
+  free: 0,
+  premium: 89,
+  pro: 289,
+  master: 1289,
+};
+
+export const CANONICAL_PLANS = {
+  free: {
+    code: "free" as CanonicalPlan,
+    name: "Free",
+    priceMonthlyThb: 0,
+    priceAnnualThb: 0,
+    normalizedMonthlyPriceThb: 0,
+  },
+  premium: {
+    code: "premium" as CanonicalPlan,
+    name: "Premium",
+    priceMonthlyThb: 89,
+    priceAnnualThb: 1068,
+    normalizedMonthlyPriceThb: 89,
+  },
+  pro: {
+    code: "pro" as CanonicalPlan,
+    name: "Pro",
+    priceMonthlyThb: 289,
+    priceAnnualThb: 2770,
+    normalizedMonthlyPriceThb: 289,
+  },
+  proAnnual: {
+    code: "pro" as CanonicalPlan,
+    name: "Pro Annual",
+    priceMonthlyThb: 289,
+    priceAnnualThb: 2770,
+    normalizedMonthlyPriceThb: 2770 / 12, // 230.8333...
+  },
+  master: {
+    code: "master" as CanonicalPlan,
+    name: "Master",
+    priceMonthlyThb: 1289,
+    priceAnnualThb: 15468,
+    normalizedMonthlyPriceThb: 1289,
+  },
+} as const;
+
 export const PERSON_LIMIT: Record<CanonicalPlan, number | null> = {
   free: 1,
   premium: 5,
@@ -36,10 +81,10 @@ export const AI_REPORT_LIMIT: Record<CanonicalPlan, number | null> = {
 }
 
 export const WISDOM_AI_LIMIT: Record<CanonicalPlan, number | null> = {
-  free: 3,       // 3 ครั้งต่อรอบ 30 วัน
-  premium: 10,   // 10 ครั้งต่อรอบ 30 วัน
-  pro: 50,       // 50 ครั้งต่อรอบ 30 วัน
-  master: 100,   // 100 ครั้งต่อรอบ 30 วัน (Fair Use / Cost Guard)
+  free: 5,       // 5 ครั้งต่อรอบ 30 วัน
+  premium: 20,   // 20 ครั้งต่อรอบ 30 วัน
+  pro: 100,      // 100 ครั้งต่อรอบ 30 วัน
+  master: 100,   // 100 ครั้งต่อรอบ 30 วัน (Extensive Usage / Fair Use Guard)
 }
 
 export const HISTORY_RETENTION_DAYS: Record<CanonicalPlan, number> = {
