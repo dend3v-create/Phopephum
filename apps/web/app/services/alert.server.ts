@@ -30,7 +30,10 @@ export type AlertType =
   | "sands_ledger_discrepancy"          // ยอดทรายไม่ตรงกับ Ledger (ECON-03)
   | "webhook_replay_anomaly"            // Webhook ผิดปกติ
   | "payout_settlement_failed"          // โอนเงิน Partner ล้มเหลว
-  | "security_cross_tenant_attempt";    // การพยายามเข้าถึงข้ามบัญชี
+  | "security_cross_tenant_attempt"     // การพยายามเข้าถึงข้ามบัญชี
+  | "ai_cost_anomaly"                   // ตรวจพบต้นทุน AI ผิดปกติ
+  | "ai_rate_limit_spike"               // ตรวจพบการเรียก AI ถี่ผิดปกติ
+  | "ai_concurrency_exceeded";          // ตรวจพบการเรียก AI พร้อมกันเกินลิมิต
 
 export interface AlertPayload {
   type: AlertType;
@@ -94,6 +97,9 @@ const ALERT_TYPE_LABEL: Record<AlertType, string> = {
   webhook_replay_anomaly: "พบ Webhook ซ้ำซ้อนผิดปกติ (Webhook Anomaly)",
   payout_settlement_failed: "โอนเงิน Partner ล้มเหลว (Payout Failed)",
   security_cross_tenant_attempt: "ตรวจพบการเข้าถึงข้ามบัญชี (Security Breach Attempt)",
+  ai_cost_anomaly: "ตรวจพบต้นทุน AI ผิดปกติ (AI Cost Anomaly)",
+  ai_rate_limit_spike: "ตรวจพบการเรียก AI ถี่ผิดปกติ (Rate Limit Spike)",
+  ai_concurrency_exceeded: "ตรวจพบการเรียก AI พร้อมกันเกินลิมิต (Concurrency Spike)",
 };
 
 // ─── LINE push ───────────────────────────────────────────────────────────────

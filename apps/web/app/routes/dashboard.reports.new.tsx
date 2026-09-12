@@ -108,37 +108,41 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const { supabase } = createSupabaseClient(request, env);
   const locale = await i18next.getLocale(request);
 
-  // 1. Get Profile & check quota
+  // 1. Get Profile
   const { data: profile } = await supabase
     .from("profiles")
-    .select("plan, time_sands, created_at, membership_expires_at, role, membership_status")
+    .select("plan, time_sands, created_at, membership_expires_at, role, membership_status, display_name, birth_date, birth_time, birth_place")
     .eq("id", user.id)
     .single();
 
+  // 2. Server-Side AI Cost Guard (Pre-Flight: Auth → Entitlement → Quota → Rate Limit → Concurrency → Payload)
+  const { guardAiRequestPreflight, recordAiExecutionTelemetry } = await import("~/services/aiCostGuard.server");
+
+  const guard = await guardAiRequestPreflight({
+    userId: user.id,
+    profile,
+    featureType: "ai_report",
+    promptText: reportType,
+    env,
+    supabase,
+  });
+
+  if (!guard.allowed) {
+    return json({ error: guard.errorMessage, code: guard.errorCode });
+  }
+
+  // 3. Sands of Time Check
   const plan = getUserPlan(profile);
   const isPremium = plan === "pro" || plan === "master";
   const currentSands = profile?.time_sands ?? 0;
 
   if (!isPremium && currentSands <= 0) {
+    await guard.releaseSlot();
     return json({ error: "คุณไม่มีเม็ดทรายกาลเวลาเหลือพอสำหรับการวิเคราะห์นี้ (Sands of Time: 0) กรุณาร่วมกิจกรรมรายวันหรืออัปเกรดเพื่อวิเคราะห์ไม่จำกัด" });
   }
 
-  // 2. Count reports in current user billing cycle (30 days window across all report_types)
-  const { cycleStart } = getUserBillingCycleWindow(profile);
-
-  const { count: reportsCount } = await supabase
-    .from("ai_reports")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user.id)
-    .gte("created_at", cycleStart.toISOString());
-
-  const limit = getAiReportLimit(profile);
-  if (limit !== null && reportsCount !== null && reportsCount >= limit) {
-    return json({ error: `คุณสร้างบทวิเคราะห์ครบกำหนด ${limit} ฉบับสำหรับรอบการใช้งานนี้แล้ว กรุณารอรอบถัดไปหรืออัปเกรดแพ็กเกจ` });
-  }
-
   try {
-    // 3. Call AI report generator
+    // 4. Call AI report generator
     const stream = await generateAIReport(
       {
         userId: user.id,
@@ -154,7 +158,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       env
     );
 
-    // ── 4. Collect SSE stream → plain text ──
+    // ── 5. Collect SSE stream → plain text ──
     const reader = stream.getReader();
     const decoder = new TextDecoder();
     let reportText = "";
@@ -185,7 +189,22 @@ export async function action({ request, context }: ActionFunctionArgs) {
       }
     }
 
-    // 4. Save to Database
+    if (!reportText || reportText.length < 50) {
+      await recordAiExecutionTelemetry({
+        userId: user.id,
+        profile,
+        reportType,
+        outputText: reportText,
+        env,
+        isSuccess: false,
+        error: new Error("AI output empty or too short (< 50 chars)"),
+        releaseSlot: guard.releaseSlot,
+        refundSandsIfNeeded: guard.refundSandsIfNeeded,
+      });
+      return json({ error: "ระบบพยากรณ์ไม่ส่งเนื้อหากลับมา หรือเนื้อหาสั้นเกินไป กรุณาลองใหม่อีกครั้ง" });
+    }
+
+    // 6. Save to Database
     const { data: report, error: insertError } = await supabase
       .from("ai_reports")
       .insert({
@@ -200,31 +219,35 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .select("id")
       .single();
 
-    if (insertError) {
-      console.error("Report save error:", insertError);
+    if (insertError || !report) {
+      await recordAiExecutionTelemetry({
+        userId: user.id,
+        profile,
+        reportType,
+        outputText: reportText,
+        env,
+        isSuccess: false,
+        error: insertError || new Error("Unknown insert error"),
+        releaseSlot: guard.releaseSlot,
+        refundSandsIfNeeded: guard.refundSandsIfNeeded,
+      });
       alertDatabaseError(env, "insert ai_reports", insertError, user.id).catch(console.error);
       return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` });
     }
 
-    // 5. Decrement Sands of Time safely via Atomic RPC
-    if (!isPremium) {
-      const { debitSandsAtomic } = await import("~/services/rewards.server");
-      const debitRes = await debitSandsAtomic({
-        userId: user.id,
-        amount: 1,
-        activityType: "ai_report_redeem",
-        referenceId: report.id,
-        description: `สร้างรายงานดวงดาว ${reportType}`,
-        metadata: { reportType },
-        env,
-      });
+    // 7. Record Telemetry & Anomaly Tracking
+    await recordAiExecutionTelemetry({
+      userId: user.id,
+      profile,
+      reportType,
+      outputText: reportText,
+      env,
+      isSuccess: true,
+      releaseSlot: guard.releaseSlot,
+      refundSandsIfNeeded: guard.refundSandsIfNeeded,
+    });
 
-      if (!debitRes.success) {
-        console.warn("[dashboard.reports.new] Debit sands warning:", debitRes.error);
-      }
-    }
-
-    // 6. Record Usage (Non-blocking)
+    // 8. Record Usage (Non-blocking)
     supabase.from("ai_report_usage").insert({
       user_id: user.id,
       report_type: reportType,
@@ -238,7 +261,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : "เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ";
     console.error("Report generation critical error:", msg);
-    alertAIFailed(env, err, { userId: user.id, reportType }).catch(console.error);
+    await recordAiExecutionTelemetry({
+      userId: user.id,
+      profile,
+      reportType,
+      env,
+      isSuccess: false,
+      error: err,
+      releaseSlot: guard.releaseSlot,
+      refundSandsIfNeeded: guard.refundSandsIfNeeded,
+    });
     return json({ error: `ขออภัย ระบบเกิดข้อผิดพลาด: ${msg}` });
   }
 }

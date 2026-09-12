@@ -20,34 +20,34 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "กรุณาระบุคำถาม" }, { status: 400 });
   }
 
-  // Server-side Quota Gate (Single source of truth)
-  const limit = getWisdomAiLimit(profile);
-  if (limit !== null) {
-    const { supabase } = createSupabaseClient(request, env);
-    const { cycleStart } = getUserBillingCycleWindow(profile);
-    const { count: queriesCount } = await supabase
-      .from("wisdom_queries")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .gte("created_at", cycleStart.toISOString());
+  const { supabase } = createSupabaseClient(request, env);
 
-    if (queriesCount !== null && queriesCount >= limit) {
-      const plan = getUserPlan(profile);
-      const isFree = plan === "free";
-      const message = isFree
-        ? `คุณใช้งานสิทธิ์ทดลองถาม Wisdom AI ครบกำหนด ${limit} ครั้งแล้ว กรุณาอัปเกรดเพื่อสนทนาต่อ`
-        : `คุณใช้งานสิทธิ์ถาม Wisdom AI ครบ ${limit} ครั้งสำหรับรอบการใช้งานนี้แล้ว กรุณารอรอบถัดไปหรืออัปเกรดแพ็กเกจ`;
-      return json({ error: message, code: "QUOTA_EXCEEDED" }, { status: 403 });
-    }
+  // 1. Server-Side AI Cost Guard (Pre-Flight: Auth → Entitlement → Quota → Rate Limit → Concurrency → Payload)
+  const { guardAiRequestPreflight, recordAiExecutionTelemetry } = await import("~/services/aiCostGuard.server");
+
+  const guard = await guardAiRequestPreflight({
+    userId: user.id,
+    profile,
+    featureType: "wisdom_ai",
+    promptText: question,
+    env,
+    supabase,
+  });
+
+  if (!guard.allowed) {
+    return json({
+      error: guard.errorMessage,
+      code: guard.errorCode,
+    }, { status: guard.status });
   }
 
   const now = new Date();
 
   try {
-    // 1. Get current timing energy (karnchata)
+    // 2. Get current timing energy (karnchata)
     const karnchata = calculateKarnchata(now);
 
-    // 2. Get personal chart data if birth date exists
+    // 3. Get personal chart data if birth date exists
     let personal: {
       userName?: string;
       taksaSri?: string;
@@ -82,7 +82,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       personal = { userName: profile.display_name || profile.full_name || "คุณ" };
     }
 
-    // 3. Build unified prompt
+    // 4. Build unified prompt
     const prompt = buildWisdomChatPrompt(
       question,
       category,
@@ -94,7 +94,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       now
     );
 
-    // 4. Call AI Worker (streaming)
+    // 5. Call AI Worker (streaming)
     const aiResponse = await fetch(`${env.AI_WORKER_URL}/generate`, {
       method: "POST",
       headers: {
@@ -110,10 +110,62 @@ export async function action({ request, context }: ActionFunctionArgs) {
     });
 
     if (!aiResponse.ok || !aiResponse.body) {
+      await recordAiExecutionTelemetry({
+        userId: user.id,
+        profile,
+        reportType: "wisdom_chat",
+        promptText: prompt,
+        env,
+        isSuccess: false,
+        error: new Error(`AI Service Response Status: ${aiResponse.status}`),
+        releaseSlot: guard.releaseSlot,
+        refundSandsIfNeeded: guard.refundSandsIfNeeded,
+      });
       throw new Error("AI Service Unavailable");
     }
 
-    return new Response(aiResponse.body, {
+    // 6. Wrap stream to capture output tokens & record telemetry upon completion
+    const reader = aiResponse.body.getReader();
+    const { readable, writable } = new TransformStream();
+    const writer = writable.getWriter();
+    let accumulatedText = "";
+
+    (async () => {
+      try {
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          await writer.write(value);
+        }
+      } catch (streamErr) {
+        console.error("[api.wisdom-chat] Stream pipe error:", streamErr);
+      } finally {
+        await writer.close();
+        // Record telemetry & release slot
+        await recordAiExecutionTelemetry({
+          userId: user.id,
+          profile,
+          reportType: "wisdom_chat",
+          promptText: prompt,
+          outputText: accumulatedText,
+          env,
+          isSuccess: true,
+          releaseSlot: guard.releaseSlot,
+          refundSandsIfNeeded: guard.refundSandsIfNeeded,
+        });
+
+        // Insert wisdom_query record for usage tracking
+        supabase.from("wisdom_queries").insert({
+          user_id: user.id,
+          question,
+          category,
+        }).then(({ error: insertErr }) => {
+          if (insertErr) console.error("[api.wisdom-chat] Insert query error:", insertErr);
+        });
+      }
+    })();
+
+    return new Response(readable, {
       headers: {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
@@ -123,6 +175,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   } catch (err) {
     console.error("Wisdom Chat Error:", err);
+    await recordAiExecutionTelemetry({
+      userId: user.id,
+      profile,
+      reportType: "wisdom_chat",
+      env,
+      isSuccess: false,
+      error: err,
+      releaseSlot: guard.releaseSlot,
+      refundSandsIfNeeded: guard.refundSandsIfNeeded,
+    });
     return json({ error: "Wisdom ไม่ว่างชั่วคราว กรุณาลองใหม่สักครู่ ✦" }, { status: 500 });
   }
 }

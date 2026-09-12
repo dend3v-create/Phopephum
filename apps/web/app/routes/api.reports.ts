@@ -63,45 +63,37 @@ export async function action({ request, context }: ActionFunctionArgs) {
   };
   const backendReportType = reportTypeMap[report_type] || "general_prediction";
 
-  // 4. ตรวจสอบ Quota ตาม Membership Billing Cycle (Single Source of Truth)
-  const userPlan = getUserPlan(profile);
-  const limit = getAiReportLimit(profile);
+  // 4. Server-Side AI Cost Guard (Pre-Flight: Auth → Entitlement → Quota → Rate Limit → Concurrency → Payload)
+  const { guardAiRequestPreflight, recordAiExecutionTelemetry } = await import("~/services/aiCostGuard.server");
 
-  if (limit === 0) {
-    return json({ 
-      error: "แพ็กเกจปัจจุบันไม่รวมสิทธิ์สร้าง AI Life Report กรุณาอัปเกรดเป็น Premium หรือสูงกว่า",
-      code: "PLAN_UPGRADE_REQUIRED" 
-    }, { status: 403 });
-  }
+  const guard = await guardAiRequestPreflight({
+    userId: user.id,
+    profile,
+    featureType: "ai_report",
+    promptText: backendReportType,
+    env,
+    supabase,
+  });
 
-  if (limit !== null) {
-    const { cycleStart } = getUserBillingCycleWindow(profile);
-    const { count: reportsCount } = await supabase
-      .from("ai_reports")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .gte("created_at", cycleStart.toISOString());
-
-    if (reportsCount !== null && reportsCount >= limit) {
-      return json({ 
-        error: `คุณสร้างบทวิเคราะห์ครบกำหนด ${limit} ฉบับสำหรับรอบการใช้งานนี้แล้ว กรุณารอรอบถัดไปหรืออัปเกรดแพ็กเกจ`,
-        code: "QUOTA_EXCEEDED",
-        limit,
-        currentUsage: reportsCount,
-      }, { status: 403 });
-    }
+  if (!guard.allowed) {
+    return json({
+      error: guard.errorMessage,
+      code: guard.errorCode,
+    }, { status: guard.status });
   }
 
   // 5. ตรวจสอบทรายกาลเวลา (Sands of Time)
+  const userPlan = getUserPlan(profile);
   const isMasterOrAdmin = userPlan === "master" || profile?.role === "admin" || profile?.role === "operator";
   const currentSands = profile?.time_sands ?? 0;
 
   if (!isMasterOrAdmin && currentSands <= 0) {
+    await guard.releaseSlot();
     return json({ error: "ขออภัย ทรายกาลเวลา (Sands of Time) ในนาฬิกาทรายของคุณหมดแล้ว กรุณาเติมทรายหรืออัปเกรดเพื่อรับทรายเพิ่ม" }, { status: 403 });
   }
 
   try {
-    // 5. รัน AI Report (ผ่าน Stream)
+    // 6. รัน AI Report (ผ่าน Stream)
     const stream = await generateAIReport(
       {
         userId: user.id,
@@ -149,6 +141,17 @@ export async function action({ request, context }: ActionFunctionArgs) {
     }
 
     if (!text || text.length < 50) {
+      await recordAiExecutionTelemetry({
+        userId: user.id,
+        profile,
+        reportType: backendReportType,
+        outputText: text,
+        env,
+        isSuccess: false,
+        error: new Error("AI output empty or too short (< 50 chars)"),
+        releaseSlot: guard.releaseSlot,
+        refundSandsIfNeeded: guard.refundSandsIfNeeded,
+      });
       return json({ error: "ระบบพยากรณ์ไม่ส่งเนื้อหากลับมา หรือเนื้อหาสั้นเกินไป กรุณาลองใหม่อีกครั้ง" }, { status: 500 });
     }
 
@@ -164,28 +167,32 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .single();
 
     if (insertError || !report) {
+      await recordAiExecutionTelemetry({
+        userId: user.id,
+        profile,
+        reportType: backendReportType,
+        outputText: text,
+        env,
+        isSuccess: false,
+        error: insertError || new Error("Unknown insert error"),
+        releaseSlot: guard.releaseSlot,
+        refundSandsIfNeeded: guard.refundSandsIfNeeded,
+      });
       return json({ error: `บันทึกรายงานไม่สำเร็จ: ${insertError?.message || "Unknown error"}` }, { status: 500 });
     }
 
-    // 8. หักทรายกาลเวลาอย่างปลอดภัยผ่าน Atomic Function (Ledger Source of Truth)
-    if (!isMasterOrAdmin) {
-      const { debitSandsAtomic } = await import("~/services/rewards.server");
-      const debitRes = await debitSandsAtomic({
-        userId: user.id,
-        amount: 1,
-        activityType: "ai_report_redeem",
-        referenceId: report.id,
-        description: `สร้างรายงานดวงดาว ${backendReportType}`,
-        metadata: { reportType: backendReportType },
-        env,
-      });
+    // 8. บันทึกการใช้งานและ Telemetry (SSoT Cost & Anomaly Detection)
+    await recordAiExecutionTelemetry({
+      userId: user.id,
+      profile,
+      reportType: backendReportType,
+      outputText: text,
+      env,
+      isSuccess: true,
+      releaseSlot: guard.releaseSlot,
+      refundSandsIfNeeded: guard.refundSandsIfNeeded,
+    });
 
-      if (!debitRes.success) {
-        console.warn("[api.reports] Debit sands warning:", debitRes.error);
-      }
-    }
-
-    // 9. บันทึกการใช้งาน (Non-blocking)
     supabase.from("ai_report_usage").insert({
       user_id: user.id,
       report_type: backendReportType,
@@ -194,10 +201,25 @@ export async function action({ request, context }: ActionFunctionArgs) {
       if (error) console.error("[api.reports] Usage record error:", error);
     });
 
-    return json({ success: true, reportId: report.id });
+    return json({ 
+      success: true, 
+      reportId: report.id,
+      isPayPerUse: guard.isPayPerUse,
+      sandsCharged: guard.sandsCharged,
+    });
 
   } catch (err: any) {
     console.error("[api.reports] Critical error:", err);
+    await recordAiExecutionTelemetry({
+      userId: user.id,
+      profile,
+      reportType: backendReportType,
+      env,
+      isSuccess: false,
+      error: err,
+      releaseSlot: guard.releaseSlot,
+      refundSandsIfNeeded: guard.refundSandsIfNeeded,
+    });
     return json({ error: `ขออภัย เกิดข้อผิดพลาดของระบบ: ${err.message || "Unknown error"}` }, { status: 500 });
   }
 }
