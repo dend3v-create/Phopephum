@@ -1,10 +1,11 @@
 name: "CI — PhopePhum v3 Quality & Invariant Gate"
 
 on:
+  push:
+    branches: ["main", "feature/**", "hotfix/**", "staging", "develop"]
   pull_request:
     branches: ["main", "phopephum"]
-  push:
-    branches: ["feature/**", "hotfix/**", "staging", "develop"]
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
