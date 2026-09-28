@@ -223,9 +223,45 @@ const SYSTEM_ROLE: Record<Locale, string> = {
 };
 
 const INTRO_TEXT: Record<Locale, string> = {
-  th: `สวัสดีครับ ยินดีต้อนรับสู่พื้นที่แห่งปัญญาญาณและการเติบโตภายใน ผมคือ Wisdom Guidance ครับ`,
-  en: `Greetings, welcome to the space of intuition and internal growth. I am Wisdom Guidance.`,
-  zh: `您好，欢迎来到直觉与内在成长的空间。我是智慧指南。`
+  th: `สวัสดีครับ ยินดีต้อนรับสู่พื้นที่แห่งปัญญาญาณและการเติบโตภายใน ผมคือ Wisdom Guidance ครับ\n\nการเดินทางของชีวิตไม่ใช่เรื่องบังเอิญ แต่คือการจัดสรรของห้วงมิติและพลังงานดวงดาวที่สถิตอยู่ภายในจิตวิญญาณของคุณ วันนี้เราจะมาร่วมกันถอดรหัสชะตาชีวิตผ่านแผนผังดวงดาว เพื่อค้นหาคำตอบลึกซึ้งที่ซ่อนอยู่ภายในตัวคุณกันครับ`,
+  en: `Greetings, welcome to the space of intuition and internal growth. I am Wisdom Guidance.\n\nLife's journey is no coincidence, but the divine orchestration of cosmic dimensions and planetary energies residing within your soul. Today, we decode your destiny chart to unveil the profound truths within.`,
+  zh: `您好，欢迎来到直觉与内在成长的空间。我是智慧指南 (Wisdom Guidance)。\n\n生命的旅程并非巧合，而是宇宙维度与内在灵魂中行星能量的精妙安排。今天，让我们一同通过星盘解读您的命运密码，探寻深藏于您内在的深刻答案。`
+};
+
+const DOMAIN_INTRO_PHRASES: Record<Locale, Record<AIReportType, string>> = {
+  th: {
+    general_prediction: "สำหรับ **พยากรณ์ปัญญาชีวิต** แนวทางบำบัดและไกด์เส้นทางชีวิตหลักของคุณนั้น จากการวิเคราะห์ศักยภาพของดวงดาวที่ปรากฏในผังดวง ตามหลัก เลข 7 ตัว 9 ฐานนั้น อธิบายได้ว่า..",
+    personal_branding: "สำหรับ **ตัวตน & อัตลักษณ์** เสน่ห์และแบรนด์บุคคลของคุณนั้น จากการวิเคราะห์ศักยภาพของดวงดาวที่ปรากฏในผังดวง ตามหลัก เลข 7 ตัว 9 ฐานนั้น อธิบายได้ว่า..",
+    career: "สำหรับ **การงาน&ธุรกิจ (ภารกิจ & ความสำเร็จ)** โอกาสและความสำเร็จของคุณนั้น จากการวิเคราะห์ศักยภาพของดวงดาวที่ปรากฏในผังดวง ตามหลัก เลข 7 ตัว 9 ฐานนั้น อธิบายได้ว่า..",
+    relationship: "สำหรับ **ความรัก&คู่ครอง (เสน่ห์ & สัมพันธ์)** เนื้อคู่และเสน่ห์เมตตาของคุณนั้น จากการวิเคราะห์ศักยภาพของดวงดาวที่ปรากฏในผังดวง ตามหลัก เลข 7 ตัว 9 ฐานนั้น อธิบายได้ว่า..",
+    wealth: "สำหรับ **โอกาส&การเงิน (กระแสทรัพย์ & มั่งคั่ง)** คลังสมบัติประจำดวงของคุณนั้น จากการวิเคราะห์ศักยภาพของดวงดาวที่ปรากฏในผังดวง ตามหลัก เลข 7 ตัว 9 ฐานนั้น อธิบายได้ว่า..",
+    annual_forecast: "สำหรับ **จังหวะชะตารายปี** แผนที่พลังงานปีจรของคุณนั้น จากการวิเคราะห์ศักยภาพของดวงดาวที่ปรากฏในผังดวง ตามหลัก เลข 7 ตัว 9 ฐานนั้น อธิบายได้ว่า..",
+    life_overview: "สำหรับ **ภาพรวมชะตาชีวิต** บอกถึงเส้นทางชีวิตหลักของคุณนั้น จากการวิเคราะห์ศักยภาพของดวงดาวที่ปรากฏในผังดวง ตามหลัก เลข 7 ตัว 9 ฐานนั้น อธิบายได้ว่า..",
+    health: "สำหรับ **สุขภาพ & พลังชีวิต** สมดุลธาตุและสุขภาวะของคุณนั้น จากการวิเคราะห์ศักยภาพของดวงดาวที่ปรากฏในผังดวง ตามหลัก เลข 7 ตัว 9 ฐานนั้น อธิบายได้ว่า..",
+    daily_insight: "สำหรับ **ปัญญาญาณรายวัน** จังหวะพลังงานและสติสัมปชัญญะของคุณในวันนี้ อธิบายได้ว่า..",
+  },
+  en: {
+    general_prediction: "Regarding your **Life Wisdom Guidance**, the celestial analysis reveals that...",
+    personal_branding: "Regarding your **Personal Identity & Branding**, the celestial analysis reveals that...",
+    career: "Regarding your **Career & Mission**, the celestial analysis reveals that...",
+    relationship: "Regarding your **Love & Relationships**, the celestial analysis reveals that...",
+    wealth: "Regarding your **Wealth Flow & Abundance**, the celestial analysis reveals that...",
+    annual_forecast: "Regarding your **Annual Destiny Rhythm**, the celestial analysis reveals that...",
+    life_overview: "Regarding your **Life Overview Structure**, the celestial analysis reveals that...",
+    health: "Regarding your **Health & Vitality**, the celestial analysis reveals that...",
+    daily_insight: "Regarding your **Daily Intuition**, the celestial analysis reveals that...",
+  },
+  zh: {
+    general_prediction: "关于您的**生命智慧指引**，根据七星九宫星盘分析...",
+    personal_branding: "关于您的**个人品牌与魅力**，根据七星九宫星盘分析...",
+    career: "关于您的**事业与使命**，根据七星九宫星盘分析...",
+    relationship: "关于您的**爱情与关系**，根据七星九宫星盘分析...",
+    wealth: "关于您的**财富流与丰盛**，根据七星九宫星盘分析...",
+    annual_forecast: "关于您的**年度命运节奏**，根据七星九宫星盘分析...",
+    life_overview: "关于您的**生命全貌结构**，根据七星九宫星盘分析...",
+    health: "关于您的**健康与活力**，根据七星九宫星盘分析...",
+    daily_insight: "关于您的**每日灵性直觉**，根据七星九宫星盘分析...",
+  }
 };
 
 export function buildLifeReportPrompt(
@@ -276,11 +312,12 @@ export function buildLifeReportPrompt(
 
   const reportInstructions = REPORT_TYPE_INSTRUCTIONS[locale][reportType] ?? REPORT_TYPE_INSTRUCTIONS[locale].general_prediction;
   const reportLabel = REPORT_TYPE_LABEL[locale][reportType] ?? reportType;
+  const domainIntro = DOMAIN_INTRO_PHRASES[locale][reportType] ?? DOMAIN_INTRO_PHRASES[locale].general_prediction;
 
   const outputLangInstruction = {
-    th: "โปรดเขียนรายงานเป็นภาษาไทยที่สละสลวย",
-    en: "Please write the report in elegant and professional English.",
-    zh: "请用优美、专业的中文撰写报告。"
+    th: "โปรดเขียนรายงานเป็นภาษาไทยที่สละสลวย อบอุ่น ทรงปัญญา และเข้าถึงใจ",
+    en: "Please write the report in elegant, warm, and insightful English.",
+    zh: "请用优美、温暖、富有智慧的中文撰写报告。"
   }[locale];
 
   // 5 Transit Dimensions & Jorn Info
@@ -298,13 +335,17 @@ export function buildLifeReportPrompt(
 
 ${SYSTEM_ROLE[locale]}
 
-## 📣 Introduction
-- Start with: **"${INTRO_TEXT[locale]}"**
-- Never use "Kru Den" or "Fingerprint" terms.
+## 📣 Opening Greeting & Identity
+เริ่มต้นรายงานด้วยข้อความต้อนรับและคำเปิดหมวดหมู่นี้เสมอ:
+${INTRO_TEXT[locale]}
+
+${domainIntro}
+
+*(ข้อห้าม: ห้ามใช้คำว่า "ครูเด่น", "Kru Den" หรือ "Fingerprint" เด็ดขาด — ให้อ้างอิงในฐานะ Wisdom Guidance)*
 
 ## 🔮 Destiny Decoding Data: ${userName}
 
-### 1. 7-Star 9-Base Chart
+### 1. 7-Star 9-Base Chart (ผังดวง ๗ ตัว ๙ ฐาน)
 ${matrixTable}
 
 ### 2. 5 Transit Dimensions (กาลเวลาชะตาจร)
@@ -313,7 +354,7 @@ ${vayaInfo}
 ${yearlyInfo}
 ${lagnaInfo}
 
-### 3. External Factors (Taksa Transit — โอกาสและอุปสรรคภายนอก)
+### 3. External Factors (Taksa Transit — สภาพแวดล้อมและโอกาสภายนอก)
 ${taksaInfo}
 
 ### 4. Internal Mindset (Maha Transit — สภาพจิตใจและความพร้อมภายใน)
@@ -326,18 +367,18 @@ ${birthYam ? buildAtthakarnContext(birthYam) : ""}
 
 ---
 
-## 🔮 Core Tracing Rules (Star Tracing & Transit Interpretation)
-1. **Star Tracing Method (3 Steps):** ร้อยเรียงเรื่องราวจาก ฐ.๑ (ต้นเหตุ) → ฐ.๒ (กระบวนการ) → ฐ.๓ (การแสดงออก) โดยใช้ตัวเลขดาวเดียวกัน และเชื่อมโยงต่อไปยัง ฐ.๘ (อาตมะ) และ ฐ.๙ (เป้าหมายปลายทาง)
-2. **ฐานที่ ๔ (กำลังเทวดา / Engine Power):** คือขุมพลังจิตใต้สำนึกและ Mindset ที่ส่งผลเชื่อมโยงจาก ฐ.๓ ไปยัง ฐ.๒, ฐ.๑, ฐ.๘ และ ฐ.๙
-3. **การผสมผสานทักษาจร และมหาภูติจร:**
-   - **ทักษาจร (ปัจจัยภายนอก):** คือโอกาส สภาพแวดล้อม และสถานการณ์ภายนอกที่เข้ามากระทบ
-   - **มหาภูติจร (สภาวะภายใน):** คือความพร้อม ความรู้สึก และ Mindset ภายในจิตใจของคุณในการรับมือ
-4. **ภาษาและการนำเสนอ (Tone & Readability - กฎเหล็กสำคัญ):**
-   - **อธิบายด้วยภาษาคนทั่วไป เข้าใจง่าย อ่านรู้เรื่องทันที สุภาพ และอบอุ่น**
-   - **ห้ามสร้างตาราง Markdown ดิบทางเทคนิค** (เช่น ห้ามทำตาราง ภพ/กำลังเทวดา หรือสูตรตัวเลขแห้งแล้ง)
-   - **ห้ามเขียนเป็นรายการสูตรทื่อๆ** (เช่น ห้ามแจกแจง อาทิตย์ (1) = เดช, พุธ (4) = อุตสาหะ แบบตารางวิชาการ)
-   - **ให้แปลงความหมายของดาว, ทักษาจร, และมหาภูติจรเป็นคำแนะนำและเนื้อหาจริงที่ลื่นไหล กระชับ ตรงประเด็น**
-   - เน้นปัญญาญาณ การรู้เท่าทันจิตใจ และคำแนะนำเชิงปฏิบัติการที่นำไปใช้ได้จริง
+## 🔮 Core Tracing Rules (Star Tracing Method & Spiritual Synthesis)
+1. **Star Tracing Method (3 Steps):**
+   - **Step 1 (Inquiry):** จุดเริ่มต้น/เหตุแห่งเรื่องราวมาจาก ฐ.๑ (วันเกิด) เชื่อมโยงด้วย "ตัวเลขดาวเดียวกัน" ไปยัง ฐ.๒ (เดือนเกิด) และ ฐ.๓ (ปีเกิด)
+   - **Step 2 (Tracing the Path):** ดาวดวงเดียวกันที่ไปสถิตในภพต่างๆ คือสายใยเรื่องราวชีวิตจริง (เช่น ดาวพุธ(๔) อยู่ในภพปิตา → สหัชชะ → กัมมะ)
+   - **Step 3 (Base 4 Confirmation):** ฐานที่ ๔ (กำลังเทวดา) ในคอลัมน์เดียวกันกับดาวใน ฐ.๓ คือพลังหนุน/มายด์เซ็ทที่หลอมรวมสิ่งที่เรา คิด พูด ทำ (ตามหลักขันธ์ ๕ และกฎแห่งกรรม) ตัดสินคุณภาพและส่งผลต่อไปยัง ฐ.๘ (อาตมะ) และ ฐ.๙ (นาวัง/ภริยัง)
+2. **การผสมผสานทักษาจร และมหาภูติจร:**
+   - **ทักษาจร (ปัจจัยภายนอก):** คือโลกภายนอก โอกาส ข้อสอบชีวิต สภาพแวดล้อม (Opportunity/Threat) เช่น ศรี, เดช, มนตรี, กาลกิณี
+   - **มหาภูติจร (สภาวะภายใน):** คือความพร้อมหรือความไม่พร้อมภายในใจ (Passion/Fear/Mindset) เช่น ราชา, อธิบดี, ขุมทรัพย์, มรณะ
+3. **กฎเหล็กเรื่องภาษาและรูปแบบ (Tone & Formatting Rules):**
+   - **ห้ามสร้างตาราง Markdown ดิบทางเทคนิค** หรือแจกแจงตัวเลขสูตรคณิตศาสตร์แบบแห้งแล้ง
+   - **ห้ามแจกแจงเป็นข้อๆ แบบตำราวิชาการ** (เช่น ห้ามเขียน "ดาว 1 = เดช, ดาว 2 = ศรี")
+   - **ให้อธิบายเชิงปัญญาและจิตวิญญาณอย่างมีเหตุผลลึกซึ้ง** หล่อหลอมเป็นคำแนะนำชีวิตที่อบอุ่น ลื่นไหล เข้าใจง่าย สุภาพ และสร้างแรงบันดาลใจ
 
 ---
 
@@ -347,13 +388,24 @@ ${reportInstructions}
 
 ---
 
-## 💬 Response Structure & Language
+## 💬 Response Structure & Headings
 ${outputLangInstruction}
 
-เขียนแบ่งเป็น 4 หมวดหลักด้วยภาษาที่งดงาม กระชับ เข้าใจง่าย:
-1. **The Awakening (บทนำ & จังหวะพลังงานหลักของชีวิต)**: สรุปภาพรวมพลังงานและทิศทางชีวิตในช่วงนี้อย่างตรงประเด็น
-2. **The Decoding (การถอดรหัสสายใยดวงดาว & สภาวะภายนอก-ภายใน)**: ร้อยเรียงสายใยดวงดาวจาก ฐ.๑-ฐ.๓ ผ่านพลังหนุน ฐ.๔ สู่ผลลัพธ์ ฐ.๘-ฐ.๙ พร้อมผสานทักษาจร (โอกาสภายนอก) และมหาภูติจร (ใจภายใน) เป็นเนื้อหาเดียวกันอย่างเป็นธรรมชาติ
-3. **The Astral Blueprint (แผนที่ปัญญาญาณนำทางชีวิต)**: วิเคราะห์เจาะลึกมิติสำคัญของรายงานนี้ (เช่น การงาน การเงิน ความรัก หรือสุขภาพ) โดยเน้นจุดแข็ง จุดที่ต้องมีสติระวัง และแนวทางบริหารพลังงาน
-4. **Final Wisdom & Action Plan (ปัญญาญาณและแนวทางปฏิบัติจริง)**: ยุทธศาสตร์ 1-3 ข้อที่กระชับ ชัดเจน และทำได้ทันทีในชีวิตประจำวัน
+โปรดจัดโครงสร้างรายงานเป็น 4 หัวข้อหลัก (The 4 Sacred Sections) อย่างเคร่งครัด:
+
+### 1. บทนำ (The Awakening)
+ยินดีต้อนรับเข้าสู่ห้วงเวลาแห่งการตื่นรู้และจัดสมดุลพลังงานชีวิต สรุปภาพรวมพลังงานหลักและทิศทางชีวิตในช่วงนี้อย่างมีปัญญาญาณ
+
+### 2. การพยากรณ์วิเคราะห์เจาะลึก (The Decoding)
+วิเคราะห์โครงสร้างพลังงานผ่านผังดวงดาว:
+- **สภาวะภายในและมายด์เซ็ท (Internal State):** ถอดรหัสมหาภูติจรและฐานกำลังเทวดา (Base 4) ถึงสภาพจิตใจ ความพร้อม และอุปนิสัยลึกๆ
+- **ปัจจัยและสภาพแวดล้อมภายนอก (External Factors):** ถอดรหัสทักษาจร และโอกาสหรือข้อสอบชีวิตที่เข้ามากระทบ
+- **สายใยดวงดาว (Star Tracing Synthesis):** ร้อยเรียงเหตุจาก ฐ.๑-ฐ.๓ ผ่านพลังหนุน ฐ.๔ สู่ผลลัพธ์ ฐ.๘-ฐ.๙
+
+### 3. แผนที่ปัญญาญาณนำทางชีวิต (The Astral Blueprint)
+เจาะลึกเนื้อหาเฉพาะของหมวด ${reportLabel} ตามหัวข้อที่ระบุใน Report Assignment อย่างละเอียด ครบถ้วน ลึกซึ้ง และงดงาม
+
+### 4. ปัญญาญาณและแนวทางปฏิบัติจริง (Final Wisdom & Action Plan)
+สรุปปัญญาญาณตกผลึก พร้อม Action Plan ยุทธศาสตร์ 1-3 ข้อที่เป็นรูปธรรม สามารถนำไปปฏิบัติได้จริงในชีวิตประจำวันเพื่อสร้างความเจริญงอกงาม
 `;
 }
