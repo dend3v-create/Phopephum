@@ -5,6 +5,7 @@ import { requireAuth, getProfile } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import { ProtectedContent } from "~/components/ui/ProtectedContent";
 import { MobileBottomNav } from "~/components/layout/MobileBottomNav";
+import { MobileFloatingSpeedDial } from "~/components/layout/MobileFloatingSpeedDial";
 import { AppTopBar } from "~/components/layout/AppTopBar";
 import { DesktopSidebar } from "~/components/layout/DesktopSidebar";
 import type { Env } from "~/env.server";
@@ -95,7 +96,10 @@ export default function DashboardLayout() {
         </ProtectedContent>
       </main>
 
-      {/* ── 4. Mobile Bottom Navigation (5 Tabs) ── */}
+      {/* ── 4. Mobile Floating Speed Dial (Sesheta Style FAB ✨) ── */}
+      <MobileFloatingSpeedDial />
+
+      {/* ── 5. Mobile Bottom Navigation (5 Tabs) ── */}
       <MobileBottomNav currentPath={location.pathname} />
     </div>
   );

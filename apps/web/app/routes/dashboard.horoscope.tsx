@@ -30,6 +30,7 @@ import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
 import { InteractiveTaksaCard } from "~/components/taksa/InteractiveTaksaCard";
 import { CombinedMahaCard } from "~/components/taksa/CombinedMahaCard";
+import { CoreStarWisdomModal, getCoreStarWisdom } from "~/components/cards/CoreStarWisdomModal";
 
 import type { Env } from "~/env.server";
 import type { HoroscopeResult } from "@phopephum/types";
@@ -537,6 +538,16 @@ export default function HoroscopePage() {
   // ── ระบบจัดการ Tabs ย่อย (4 Tabs) ──
   const [activeTab, setActiveTab] = useState<"calc" | "chart" | "taksa" | "analysis">("analysis");
 
+  // ── Sesheta-Style Core Star Wisdom Modal State ──
+  const [isWisdomModalOpen, setIsWisdomModalOpen] = useState(false);
+
+  // คำนวณรหัสดาวประจำตัวกำเนิด (Core Natal Star Number)
+  const coreNatalStarNum = Number(
+    activeResult?.matrix?.[0]?.[0] ||
+    activeResult?.phopephumResult?.nineBase?.bases?.[0]?.[0] ||
+    (activeResult?.birthDate ? ((new Date(activeResult.birthDate).getDay() + 1) % 7 || 7) : 1)
+  );
+  const coreStarWisdomData = getCoreStarWisdom(coreNatalStarNum || 1);
 
   // สกัดข้อมูลดวงดาวจรสำคัญเพื่อแสดงผลภาพรวม Personal Insight
   const taksaTransitMap = activeResult?.taksaMaha?.taksaTransit?.map || activeResult?.phopephumResult?.taksaTransit?.map;
@@ -1015,6 +1026,84 @@ export default function HoroscopePage() {
           {formattedTransitDate}
         </p>
       </div>
+
+      {/* ── Sesheta-Style Core Star Hero Card (ป้ายตัวตน & รหัสดาวกำเนิด) ── */}
+      {activeResult && (
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#0B1E38]/90 via-[#061426]/95 to-[#020617] border border-[#C6A96B]/30 p-5 sm:p-6 shadow-2xl text-center flex flex-col items-center gap-3.5 backdrop-blur-xl">
+          {/* Background Ambient Cosmic Glow */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-32 bg-gradient-to-b from-[#C6A96B]/20 via-[#4B6FAE]/15 to-transparent blur-2xl rounded-full pointer-events-none" />
+
+          {/* Element & Star Pill */}
+          <div className="relative z-10 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/40 text-[#D9BC82] text-xs font-bold tracking-wider uppercase shadow-sm">
+            <span>✦ รหัสดาวกำเนิด</span>
+            <span>·</span>
+            <span>{coreStarWisdomData.element}</span>
+          </div>
+
+          {/* Star Title & Tagline */}
+          <div className="relative z-10 space-y-1">
+            <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-[#F8F6F1] tracking-tight">
+              {coreStarWisdomData.starName}
+            </h2>
+            <p className="text-sm italic text-[#C6B79F] font-serif max-w-md mx-auto leading-relaxed">
+              "{coreStarWisdomData.quote}"
+            </p>
+          </div>
+
+          {/* CTA Button: เรียนรู้เพิ่มเติม ❯ */}
+          <button
+            type="button"
+            onClick={() => setIsWisdomModalOpen(true)}
+            className="relative z-10 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-gradient-to-r from-white/15 to-white/10 hover:from-white/25 hover:to-white/15 border border-white/25 text-[#F8F6F1] text-xs sm:text-sm font-bold tracking-wide transition-all hover:scale-105 active:scale-95 shadow-lg backdrop-blur-md cursor-pointer"
+          >
+            <span>เรียนรู้เพิ่มเติม</span>
+            <span className="text-[#D9BC82] font-black">❯</span>
+          </button>
+
+          {/* Teaser 3 Insights Cards (Sesheta Inspiration) */}
+          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full mt-2">
+            <div
+              onClick={() => setIsWisdomModalOpen(true)}
+              className="group flex items-center gap-3 p-3 rounded-2xl bg-[#0A2240]/40 hover:bg-[#0A2240]/80 border border-[#C6A96B]/15 hover:border-[#C6A96B]/50 cursor-pointer transition-all text-left shadow-sm active:scale-98"
+            >
+              <span className="text-2xl group-hover:scale-110 transition-transform">💎</span>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-[#E2C785] truncate">ตัวตนของคุณ</p>
+                <p className="text-[11px] text-[#C6B79F] truncate">{coreStarWisdomData.identity.slice(0, 24)}...</p>
+              </div>
+            </div>
+
+            <div
+              onClick={() => setIsWisdomModalOpen(true)}
+              className="group flex items-center gap-3 p-3 rounded-2xl bg-[#0A2240]/40 hover:bg-[#0A2240]/80 border border-[#60A5FA]/15 hover:border-[#60A5FA]/50 cursor-pointer transition-all text-left shadow-sm active:scale-98"
+            >
+              <span className="text-2xl group-hover:scale-110 transition-transform">🛡️</span>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-[#60A5FA] truncate">จุดแข็ง & พรสวรรค์</p>
+                <p className="text-[11px] text-[#C6B79F] truncate">{coreStarWisdomData.strengths.slice(0, 24)}...</p>
+              </div>
+            </div>
+
+            <div
+              onClick={() => setIsWisdomModalOpen(true)}
+              className="group flex items-center gap-3 p-3 rounded-2xl bg-[#0A2240]/40 hover:bg-[#0A2240]/80 border border-[#34D399]/15 hover:border-[#34D399]/50 cursor-pointer transition-all text-left shadow-sm active:scale-98"
+            >
+              <span className="text-2xl group-hover:scale-110 transition-transform">🏺</span>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-[#34D399] truncate">เส้นทางของคุณ</p>
+                <p className="text-[11px] text-[#C6B79F] truncate">{coreStarWisdomData.destinyPath.slice(0, 24)}...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Core Star Wisdom Pop-up Modal ── */}
+      <CoreStarWisdomModal
+        isOpen={isWisdomModalOpen}
+        onClose={() => setIsWisdomModalOpen(false)}
+        data={coreStarWisdomData}
+      />
 
       {/* ── Sub-menu Card Navigation — บนสุด ── */}
 

@@ -409,101 +409,26 @@ export default function ReportDetail() {
               </p>
             </div>
 
-            {/* Star Tracing Lineage Banner */}
-            {selectedStar && (() => {
-              const col1 = chartData.bases[0]?.indexOf(selectedStar);
-              const col2 = chartData.bases[1]?.indexOf(selectedStar);
-              const col3 = chartData.bases[2]?.indexOf(selectedStar);
-              const col8 = chartData.bases[7]?.indexOf(selectedStar);
-              const col9 = chartData.bases[8]?.indexOf(selectedStar);
-
-              const house1 = col1 !== undefined && col1 >= 0 ? HOUSE_NAMES_ROW1[col1] : "";
-              const house2 = col2 !== undefined && col2 >= 0 ? HOUSE_NAMES_ROW2[col2] : "";
-              const house3 = col3 !== undefined && col3 >= 0 ? HOUSE_NAMES_ROW3[col3] : "";
-              const base4Val = col3 !== undefined && col3 >= 0 ? chartData.bases[3]?.[col3] : undefined;
-              const powerName3 = base4Val ? POWER_NAMES[base4Val] : "";
-              const house8 = col8 !== undefined && col8 >= 0 ? HOUSE_NAMES_ROW8[col8] : "";
-              const house9 = col9 !== undefined && col9 >= 0 ? HOUSE_NAMES_ROW9[col9] : "";
-
-              return (
-                <div className="bg-[#C6A96B]/15 border border-[#C6A96B]/40 rounded-lg p-2.5 text-xs text-[#F8F6F1] space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 font-bold text-[#D9BC82] text-xs sm:text-sm">
-                      <span>✨ สายใยดาว {selectedStar}</span>
-                      {powerName3 && <span className="text-amber-300 text-[11px] font-normal">(หนุนด้วย ฐ.๔: {base4Val} {powerName3})</span>}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setSelectedStar(null)}
-                      className="text-[11px] text-[#C6B79F] hover:text-white underline cursor-pointer"
-                    >
-                      ล้างการเลือก
-                    </button>
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-[#F8F6F1]/90 flex flex-wrap items-center gap-1">
-                    <span className="bg-[#C6A96B]/25 px-1.5 py-0.5 rounded font-semibold text-[#D9BC82]">ฐ.๑: {house1 || "-"}</span>
-                    <span>→</span>
-                    <span className="bg-[#C6A96B]/25 px-1.5 py-0.5 rounded font-semibold text-[#D9BC82]">ฐ.๒: {house2 || "-"}</span>
-                    <span>→</span>
-                    <span className="bg-[#C6A96B]/25 px-1.5 py-0.5 rounded font-semibold text-[#D9BC82]">ฐ.๓: {house3 || "-"}</span>
-                    <span>→</span>
-                    <span className="bg-amber-400/25 px-1.5 py-0.5 rounded font-semibold text-amber-300">ฐ.๔: {base4Val || "-"} ({powerName3 || "-"})</span>
-                    <span>→</span>
-                    <span className="bg-[#C6A96B]/25 px-1.5 py-0.5 rounded font-semibold text-[#D9BC82]">ฐ.๘: {house8 || "-"}</span>
-                    <span>→</span>
-                    <span className="bg-[#C6A96B]/25 px-1.5 py-0.5 rounded font-semibold text-[#D9BC82]">ฐ.๙: {house9 || "-"}</span>
-                  </div>
-                </div>
-              );
-            })()}
-
-            {/* Matrix Table — Full Mobile Responsive */}
+             {/* Matrix Table — Full Mobile Responsive with Clean Capsule Cards */}
             <div className="w-full overflow-hidden">
-              <table className="w-full table-fixed text-center border-collapse">
-                <thead>
-                  <tr className="border-b border-white/10 print:border-slate-300 text-[10px] sm:text-[11px] text-[#C6B79F] print:text-slate-600">
-                    <th className="py-1 px-0.5 w-[36px] sm:w-[46px] text-center font-bold text-[#D9BC82]">ฐาน</th>
-                    {[
-                      { n: 1, name: "อาทิตย์" },
-                      { n: 2, name: "จันทร์" },
-                      { n: 3, name: "อังคาร" },
-                      { n: 4, name: "พุธ" },
-                      { n: 5, name: "พฤหัส" },
-                      { n: 6, name: "ศุกร์" },
-                      { n: 7, name: "เสาร์" },
-                    ].map((col) => (
-                      <th key={col.n} className="py-1 px-0.5 text-center">
-                        <span className="text-[11px] sm:text-xs font-bold text-[#F8F6F1]">{col.n}</span>
-                        <span className="block text-[7.5px] sm:text-[9px] text-[#C6B79F]/80 -mt-0.5 truncate">{col.name}</span>
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/5 print:divide-slate-200 font-mono">
+              <table className="w-full table-fixed border-separate border-spacing-1 sm:border-spacing-1.5 text-center">
+                <tbody className="font-mono">
                   {chartData.bases.map((row, rIdx) => {
                     const rowName = BASE_ROW_NAMES[rIdx] || `ฐ.${rIdx + 1}`;
                     const isBase4 = rIdx === 3;
+                    const isLinkedBase = rIdx === 0 || rIdx === 1 || rIdx === 2 || rIdx === 7 || rIdx === 8;
                     const col3Star = selectedStar !== null ? chartData.bases[2]?.indexOf(selectedStar) : -1;
 
                     return (
-                      <tr
-                        key={rIdx}
-                        className={`transition-colors ${
-                          isBase4
-                            ? "bg-[#C6A96B]/10 print:bg-amber-50 font-bold"
-                            : rIdx >= 7
-                            ? "bg-black/20 print:bg-slate-50"
-                            : ""
-                        }`}
-                      >
-                        {/* Row Header */}
-                        <td className="py-1 px-0.5 text-center font-sans text-[11px] sm:text-xs font-bold text-[#D9BC82] print:text-slate-800 whitespace-nowrap">
+                      <tr key={rIdx}>
+                        {/* Row Header ฐ.๑ - ฐ.๙ */}
+                        <td className="w-[34px] sm:w-[44px] py-1 text-center font-sans text-xs sm:text-sm font-bold text-[#D9BC82] print:text-slate-800 whitespace-nowrap select-none">
                           {rowName}
                         </td>
 
                         {/* 7 Columns */}
                         {row.map((val, cIdx) => {
-                          const isHighlighted = selectedStar !== null && !isBase4 && val === selectedStar;
+                          const isHighlighted = selectedStar !== null && isLinkedBase && val === selectedStar;
                           const isBase4Linked = selectedStar !== null && isBase4 && cIdx === col3Star;
                           const houseName =
                             rIdx === 0
@@ -533,21 +458,25 @@ export default function ReportDetail() {
                             <td
                               key={cIdx}
                               onClick={handleClick}
-                              className={`py-1 px-0.5 cursor-pointer select-none transition-all rounded ${
-                                isHighlighted
-                                  ? "bg-[#C6A96B] text-[#020617] font-extrabold shadow-sm scale-105 ring-1 ring-[#F8F6F1]/50"
-                                  : isBase4Linked
-                                  ? "bg-amber-400 text-[#020617] font-black scale-105 shadow-[0_0_10px_rgba(251,191,36,0.5)] ring-1 ring-amber-300"
-                                  : "hover:bg-white/10 print:hover:bg-transparent"
-                              }`}
+                              className="p-0 select-none cursor-pointer"
                             >
-                              <div className="flex flex-col items-center justify-center overflow-hidden">
+                              <div
+                                className={`rounded-xl sm:rounded-2xl py-1.5 px-0.5 sm:px-1 flex flex-col items-center justify-center min-h-[50px] sm:min-h-[58px] transition-all duration-200 border ${
+                                  isHighlighted
+                                    ? "bg-gradient-to-br from-[#E8D4A8] via-[#C6A96B] to-[#9D7F3E] text-[#020617] font-black shadow-lg shadow-[#C6A96B]/30 border-[#FFF8E7] scale-[1.04]"
+                                    : isBase4Linked
+                                    ? "bg-gradient-to-br from-[#FDE047] via-[#F59E0B] to-[#D97706] text-[#020617] font-black shadow-lg shadow-amber-500/40 border-white scale-[1.04]"
+                                    : isBase4
+                                    ? "bg-[#0B1E38]/85 hover:bg-[#0B1E38] border-[#C6A96B]/35 hover:border-[#C6A96B]/60 text-[#F8F6F1] shadow-sm"
+                                    : "bg-[#061426]/75 hover:bg-[#0A2240]/80 border-white/10 hover:border-[#C6A96B]/40 text-[#F8F6F1]"
+                                }`}
+                              >
                                 <span
-                                  className={`text-xs sm:text-sm md:text-base font-bold leading-tight ${
+                                  className={`text-sm sm:text-base md:text-lg font-display font-extrabold leading-tight ${
                                     isHighlighted || isBase4Linked
                                       ? "text-[#020617]"
                                       : isBase4
-                                      ? "text-[#F2D49B] print:text-amber-900"
+                                      ? "text-[#F8E3B6] print:text-amber-900"
                                       : "text-[#F8F6F1] print:text-slate-900"
                                   }`}
                                 >
@@ -557,10 +486,10 @@ export default function ReportDetail() {
                                 {/* House or Power subtitle */}
                                 {houseName && (
                                   <span
-                                    className={`text-[7.5px] sm:text-[8.5px] md:text-[9.5px] font-sans tracking-tighter truncate max-w-full block leading-none mt-0.5 ${
+                                    className={`text-[9px] sm:text-[10.5px] md:text-[11.5px] font-sans tracking-tight truncate max-w-full block leading-none mt-0.5 ${
                                       isHighlighted
-                                        ? "text-[#020617] font-semibold"
-                                        : "text-[#C6B79F] print:text-slate-600"
+                                        ? "text-[#020617] font-bold"
+                                        : "text-[#C6B79F] print:text-slate-600 font-medium"
                                     }`}
                                   >
                                     {houseName}
@@ -568,10 +497,10 @@ export default function ReportDetail() {
                                 )}
                                 {powerName && (
                                   <span
-                                    className={`text-[7px] sm:text-[8px] md:text-[9px] font-sans tracking-tighter truncate max-w-full block leading-none mt-0.5 ${
+                                    className={`text-[8.5px] sm:text-[10px] md:text-[11px] font-sans tracking-tight truncate max-w-full block leading-none mt-0.5 ${
                                       isBase4Linked
                                         ? "text-[#020617] font-black"
-                                        : "text-[#D9BC82] print:text-amber-800"
+                                        : "text-[#D9BC82] print:text-amber-800 font-bold"
                                     }`}
                                   >
                                     {powerName}
