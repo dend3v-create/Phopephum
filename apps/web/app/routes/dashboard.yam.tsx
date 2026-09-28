@@ -31,8 +31,8 @@ import { Card } from "~/components/ui/Card";
 import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
 import { resolveActiveSubject } from "~/services/activeSubject.server";
 import { ActiveSubjectBanner } from "~/components/subject/ActiveSubjectBanner";
-import { SocialStoryModal } from "~/components/cards/SocialStoryModal";
 import type { Env } from "~/env.server";
+
 
 export const meta: MetaFunction = () => [
   { title: "ฤกษ์ดีมีชัย & คัมภีร์ยามอัฏฐกาลชั้นฉาย — PhopePhum" },
@@ -274,7 +274,7 @@ export default function YamPage() {
 
   const { revalidate } = useRevalidator();
   const [now, setNow] = useState<Date>(new Date());
-  const [isStoryModalOpen, setIsStoryModalOpen] = useState<boolean>(false);
+
   
   // React states for tab controllers & interactive form
   const [activeTab, setActiveTab] = useState<"master" | "live" | "ashta" | "finder" | "grid" | "compare">("live");
@@ -656,26 +656,8 @@ export default function YamPage() {
         </div>
       </div>
 
-      {/* ── 📸 Creator Social Story Share Banner ── */}
-      <div className="p-3 sm:p-4 rounded-2xl border border-[#C6A96B]/30 bg-gradient-to-r from-[#C6A96B]/15 via-[#0A2240]/40 to-[#C6A96B]/15 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
-        <div className="flex items-center gap-2.5 text-xs text-[#F8F6F1]">
-          <span className="text-base">✨</span>
-          <span className="font-medium text-[#D9CDB7]">แบ่งปันฤกษ์มงคลและพลังงานดวงดาวของคุณสู่โซเชียล</span>
-        </div>
-        <button
-          type="button"
-          onClick={() => setIsStoryModalOpen(true)}
-          className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#C6A96B] via-[#E2C785] to-[#D9BC82] text-[#020617] font-display text-xs font-bold shadow-md shadow-[#C6A96B]/20 hover:brightness-110 active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
-        >
-          <span>📸</span>
-          <span>สร้างการ์ดสตอรี่แชร์โซเชียล (IG / TikTok / FB)</span>
-          <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-black/20 text-[#020617] font-bold">
-            ✦ NEW
-          </span>
-        </button>
-      </div>
-
       {/* Tab Selectors */}
+
       <div className="flex flex-wrap bg-white/90 dark:bg-[#0A1628]/60 p-1.5 rounded-2xl border border-amber-200/60 dark:border-[#D9BC82]/15 gap-1.5 w-full relative shadow-sm dark:shadow-md">
         <button
           onClick={() => setActiveTab("master")}
@@ -2469,26 +2451,7 @@ export default function YamPage() {
         </UpgradePaywall>
       )}
 
-      {/* ── Social Story Modal ── */}
-      <SocialStoryModal
-        isOpen={isStoryModalOpen}
-        onClose={() => setIsStoryModalOpen(false)}
-        data={{
-          userName: activeSubject?.name || "สมาชิกภพภูมิ",
-          userTier: "WISDOM PRO",
-          dateStr: dateStr,
-          lunarStr: data.moon.moonPhase,
-          yamName: data.yamName,
-          yamPeriod: data.period === "day" ? "กลางวัน" : "กลางคืน",
-          auspiciousTime: timeStr,
-          energyScore: 92,
-          wisdomTitle: `ยาม${data.yamName} · จังหวะมงคลนำทาง`,
-          wisdomQuote: typeof data.prediction === "string" ? data.prediction : "รักษาจิตใจให้ผ่องใส ดำเนินการตามฤกษ์ยามมงคลเพื่อความคล่องตัวและเกิดลาภผลอันงดงาม",
-          doList: ["เจรจาติดต่อสิ่งสำคัญตามฤกษ์", "เริ่มต้นโครงการและภารกิจใหม่", "สร้างความประทับใจในทุกมิติ"],
-          avoidList: ["การตัดสินใจด้วยความเร่งร้อน", "การเผชิญหน้าในเวลาที่เสียเปรียบ"],
-        }}
-      />
-
     </div>
   );
 }
+
