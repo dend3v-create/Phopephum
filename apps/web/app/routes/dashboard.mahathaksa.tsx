@@ -39,6 +39,9 @@ export const meta: MetaFunction = () => [
   { name: "description", content: "วิเคราะห์ระบบทักษาคู่ครองทิศและผังมหาภูติพยากรณ์สมดุลชีวิต พร้อมระบบปรึกษาดวงชะตารายหัวข้อ" },
 ];
 
+import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
+import { canAccess } from "~/services/permissions.server";
+
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
@@ -108,7 +111,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     }
   }
 
-  return json({ profile, initialResult });
+  const isProLocked = !canAccess(profile, "pro");
+  return json({ profile, initialResult, isProLocked });
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -359,7 +363,7 @@ function BirthForm() {
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 export default function MahaThaksaPage() {
-  const { profile, initialResult } = useLoaderData<typeof loader>();
+  const { profile, initialResult, isProLocked } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
   const isLoading = navigation.state === "submitting" && navigation.formData?.get("intent") !== "ask_oracle";
@@ -415,34 +419,60 @@ export default function MahaThaksaPage() {
 
       {/* ── Visual Charts & Consultation ── */}
       {taksaMaha && (
-        <div className="space-y-6">
-          {/* 1. ตารางทักษาคู่ครองทิศ + ผังมหาภูติ Side-by-Side (2 สีแยก กำเนิด/จร) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-            <InteractiveTaksaCard
+        isProLocked ? (
+          <UpgradePaywall
+            featureName="มหาทักษาและมหาภูติพยากรณ์ (PRO)"
+            description="วิเคราะห์ระบบทักษาคู่ครองทิศ ทักษากำเนิด-ทักษาจร และผังมหาภูติพยากรณ์สมดุลชีวิตขั้นสูง สงวนสิทธิ์สำหรับสมาชิกระดับ PRO ขึ้นไป หรือปลดล็อกด้วยทรายกาลเวลา"
+            requiredTier="pro"
+            userPlan={profile?.plan || "basic"}
+            timeSands={profile?.time_sands || 0}
+          >
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+                <InteractiveTaksaCard
+                  taksaNatal={taksaMaha.taksaNatal}
+                  taksaTransit={taksaMaha.taksaTransit}
+                />
+                <CombinedMahaCard
+                  natal={taksaMaha.mahaNatal}
+                  transit={taksaMaha.mahaTransit}
+                  birthYearThai={activeResult.birthYearThai}
+                  currentYearThai={activeResult.currentYearThai}
+                  taksaMaha={taksaMaha}
+                />
+              </div>
+            </div>
+          </UpgradePaywall>
+        ) : (
+          <div className="space-y-6">
+            {/* 1. ตารางทักษาคู่ครองทิศ + ผังมหาภูติ Side-by-Side (2 สีแยก กำเนิด/จร) */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+              <InteractiveTaksaCard
+                taksaNatal={taksaMaha.taksaNatal}
+                taksaTransit={taksaMaha.taksaTransit}
+              />
+              <CombinedMahaCard
+                natal={taksaMaha.mahaNatal}
+                transit={taksaMaha.mahaTransit}
+                birthYearThai={activeResult.birthYearThai}
+                currentYearThai={activeResult.currentYearThai}
+                taksaMaha={taksaMaha}
+              />
+            </div>
+
+            {/* 2. ระบบถาม-ตอบเจาะลึกตามหัวข้อที่สนใจ (Auto-expanding Textarea + History) */}
+            <TaksaConsultationChat
               taksaNatal={taksaMaha.taksaNatal}
               taksaTransit={taksaMaha.taksaTransit}
+              mahaNatal={taksaMaha.mahaNatal}
+              mahaTransit={taksaMaha.mahaTransit}
+              storageKeyId={profile?.id || "guest"}
             />
-            <CombinedMahaCard
-              natal={taksaMaha.mahaNatal}
-              transit={taksaMaha.mahaTransit}
-              birthYearThai={activeResult.birthYearThai}
-              currentYearThai={activeResult.currentYearThai}
-              taksaMaha={taksaMaha}
-            />
+
+            {/* 3. ฟอร์มป้อนวันเกิดคำนวณชะตาใหม่ */}
+            <BirthForm />
           </div>
-
-          {/* 2. ระบบถาม-ตอบเจาะลึกตามหัวข้อที่สนใจ (Auto-expanding Textarea + History) */}
-          <TaksaConsultationChat
-            taksaNatal={taksaMaha.taksaNatal}
-            taksaTransit={taksaMaha.taksaTransit}
-            mahaNatal={taksaMaha.mahaNatal}
-            mahaTransit={taksaMaha.mahaTransit}
-            storageKeyId={profile?.id || "guest"}
-          />
-
-          {/* 3. ฟอร์มป้อนวันเกิดคำนวณชะตาใหม่ */}
-          <BirthForm />
-        </div>
+        )
       )}
 
       {/* Loading Overlay */}

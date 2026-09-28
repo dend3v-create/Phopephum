@@ -306,11 +306,17 @@ export function DesktopSidebar({
               onClick={() => setIsProHubOpen(!isProHubOpen)}
               className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-[0.2em] text-[#C6A96B] hover:bg-white/5 transition-all"
             >
-              <span className="flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 min-w-0">
                 <span>✦</span>
-                <span>{t("nav.pro_tools", "เครื่องมือนักพยากรณ์")}</span>
+                <span className="truncate">{t("nav.pro_tools", "เครื่องมือนักพยากรณ์")}</span>
+                {!isPro && (
+                  <span className="ml-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#C6A96B]/15 text-[#D9BC82] border border-[#C6A96B]/30 flex items-center gap-1 shrink-0">
+                    <span>🔒</span>
+                    <span>PRO</span>
+                  </span>
+                )}
               </span>
-              <span className={`text-xs transition-transform duration-200 text-[#C6A96B] ${isProHubOpen ? "rotate-180" : ""}`}>
+              <span className={`text-xs transition-transform duration-200 text-[#C6A96B] shrink-0 ml-1 ${isProHubOpen ? "rotate-180" : ""}`}>
                 ▼
               </span>
             </button>
@@ -320,20 +326,31 @@ export function DesktopSidebar({
                 {PRO_TOOLS.map((item) => {
                   const isActive = currentPath.startsWith(item.to);
                   const label = t(`nav.${item.labelKey}`, item.defaultLabel);
+                  const isItemLocked = !isPro;
 
                   return (
                     <Link
                       key={item.to}
                       to={item.to}
                       onClick={onCloseMobileDrawer}
-                      className={`relative flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all active:scale-[0.98] ${
+                      className={`relative flex items-center justify-between gap-2 px-3 py-2 rounded-xl text-xs font-medium transition-all active:scale-[0.98] ${
                         isActive
                           ? "text-[#C6A96B] bg-[rgba(198,169,107,0.14)] border border-[#C6A96B]/30"
+                          : isItemLocked
+                          ? "text-[var(--text-muted)] hover:text-[var(--text-body)] hover:bg-white/5 opacity-85"
                           : "text-[var(--text-muted)] hover:text-[var(--text-body)] hover:bg-white/5"
                       }`}
                     >
-                      <SidebarIcon name={item.icon} />
-                      <span className="truncate">{label}</span>
+                      <div className="flex items-center gap-2.5 truncate min-w-0">
+                        <SidebarIcon name={item.icon} />
+                        <span className="truncate">{label}</span>
+                      </div>
+                      {isItemLocked && (
+                        <span className="text-[10px] shrink-0 text-[#C6A96B]/70 bg-[#C6A96B]/10 px-1.5 py-0.5 rounded border border-[#C6A96B]/20 flex items-center gap-1" title="สิทธิ์เฉพาะสมาชิก PRO หรือใช้ทรายกาลเวลา">
+                          <span>🔒</span>
+                          <span className="font-mono text-[9px]">PRO</span>
+                        </span>
+                      )}
                     </Link>
                   );
                 })}

@@ -17,6 +17,8 @@ import type { StarNumber, MahaBhop } from "@phopephum/engine";
 import { HoroscopeInputSchema } from "@phopephum/validators";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
+import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
+import { canAccess } from "~/services/permissions.server";
 import type { Env } from "~/env.server";
 import { useState, useEffect, useRef } from "react";
 import { 
@@ -99,6 +101,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     }
   }
 
+  const isProLocked = !canAccess(profile, "pro");
+
   return json({ 
     profile, 
     initialResult,
@@ -107,6 +111,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     personLimit,
     currentCustomerCount,
     hasReachedLimit,
+    isProLocked,
   });
 }
 
@@ -823,6 +828,7 @@ export default function MahaPhuti() {
     personLimit,
     currentCustomerCount,
     hasReachedLimit,
+    isProLocked,
   } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const navigation = useNavigation();
@@ -898,52 +904,72 @@ export default function MahaPhuti() {
 
       {/* ── Result ── */}
       {taksaMaha && natal && transit && (
-        <div className="space-y-6">
-          {/* Summary bar */}
-          <MahaSummaryBar natal={natal} transit={transit} />
-
-          {/* Grid */}
-          <MahaGrid
-            natal={natal}
-            transit={transit}
-            birthYearThai={activeResult.birthYearThai}
-            currentYearThai={activeResult.currentYearThai}
-          />
-
-          {/* ── Consultation Chat: ช่องสนทนาปัญญามหาภูติ ── */}
-          <MahaphutiConsultationChat
-            natal={natal}
-            transit={transit}
-            userName={currentSubjectName}
-          />
-
-          {/* Per-bhop prediction panels */}
-          <div>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-px flex-1 bg-[#C9A96E]/20" />
-              <p className="text-[#8C6D2D] dark:text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold">
-                คำพยากรณ์รายภพ (ปีนี้)
-              </p>
-              <div className="h-px flex-1 bg-[#C9A96E]/20" />
+        isProLocked ? (
+          <UpgradePaywall
+            featureName="มหาภูติกำเนิด & มหาภูติจร (PRO)"
+            description="วิเคราะห์ระบบมหาภูติ 7 ภพ กำเนิด/จร สภาวะจิตใจ พลังภายใน และคำพยากรณ์มหาภูติรายภพขั้นสูง สงวนสิทธิ์สำหรับสมาชิกระดับ PRO ขึ้นไป หรือปลดล็อกด้วยทรายกาลเวลา"
+            requiredTier="pro"
+            userPlan={profile?.plan || "basic"}
+            timeSands={profile?.time_sands || 0}
+          >
+            <div className="space-y-6">
+              <MahaSummaryBar natal={natal} transit={transit} />
+              <MahaGrid
+                natal={natal}
+                transit={transit}
+                birthYearThai={activeResult.birthYearThai}
+                currentYearThai={activeResult.currentYearThai}
+              />
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {MAHA_SEQUENCE_DISPLAY.map(bhop => (
-                <MahaPhupPredictionPanel
-                  key={bhop}
-                  bhop={bhop}
-                  natal={natal}
-                  transit={transit}
-                />
-              ))}
+          </UpgradePaywall>
+        ) : (
+          <div className="space-y-6">
+            {/* Summary bar */}
+            <MahaSummaryBar natal={natal} transit={transit} />
+
+            {/* Grid */}
+            <MahaGrid
+              natal={natal}
+              transit={transit}
+              birthYearThai={activeResult.birthYearThai}
+              currentYearThai={activeResult.currentYearThai}
+            />
+
+            {/* ── Consultation Chat: ช่องสนทนาปัญญามหาภูติ ── */}
+            <MahaphutiConsultationChat
+              natal={natal}
+              transit={transit}
+              userName={currentSubjectName}
+            />
+
+            {/* Per-bhop prediction panels */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-px flex-1 bg-[#C9A96E]/20" />
+                <p className="text-[#8C6D2D] dark:text-[#C9A96E] text-[13px] tracking-[0.25em] uppercase font-bold">
+                  คำพยากรณ์รายภพ (ปีนี้)
+                </p>
+                <div className="h-px flex-1 bg-[#C9A96E]/20" />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {MAHA_SEQUENCE_DISPLAY.map(bhop => (
+                  <MahaPhupPredictionPanel
+                    key={bhop}
+                    bhop={bhop}
+                    natal={natal}
+                    transit={transit}
+                  />
+                ))}
+              </div>
             </div>
+
+            {/* Cross-check alerts */}
+            <MahaCrossCheckPanel taksaMaha={taksaMaha} />
+
+            {/* Re-calculate */}
+            <BirthForm />
           </div>
-
-          {/* Cross-check alerts */}
-          <MahaCrossCheckPanel taksaMaha={taksaMaha} />
-
-          {/* Re-calculate */}
-          <BirthForm />
-        </div>
+        )
       )}
 
       {/* Loading */}

@@ -697,41 +697,39 @@ export default function YamPage() {
           ✨ คำนวณฤกษ์มีชัย
         </button>
         <button
-          onClick={() => isLocked ? null : setActiveTab("compare")}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+          onClick={() => setActiveTab("compare")}
+          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
             activeTab === "compare"
               ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-md dark:from-[#C6A96B] dark:to-[#D9BC82] dark:text-[#0A1628] dark:shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
-              : isLocked
-              ? "text-slate-400 dark:text-[#94A3B8]/40 cursor-not-allowed"
               : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 dark:text-[#94A3B8] dark:hover:text-[#F8F6F1] dark:hover:bg-white/5"
           }`}
-          title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
-          ✈️ เปรียบเทียบฤกษ์ {isLocked && '🔒'}
+          <span>✈️ เปรียบเทียบฤกษ์</span>
+          {isLocked && <span className="text-[10px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">🔒 PRO</span>}
         </button>
         <button
-          onClick={() => isLocked ? null : setActiveTab("grid")}
-          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
+          onClick={() => setActiveTab("grid")}
+          className={`flex-1 py-2.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-1.5 ${
             activeTab === "grid"
               ? "bg-gradient-to-r from-amber-600 to-amber-500 text-white shadow-md dark:from-[#C6A96B] dark:to-[#D9BC82] dark:text-[#0A1628] dark:shadow-[0_0_12px_rgba(217,188,130,0.25)] font-black"
-              : isLocked
-              ? "text-slate-400 dark:text-[#94A3B8]/40 cursor-not-allowed"
               : "text-slate-600 hover:text-slate-900 hover:bg-amber-50/70 dark:text-[#94A3B8] dark:hover:text-[#F8F6F1] dark:hover:bg-white/5"
           }`}
-          title={isLocked ? "สมาชิก PRO ขึ้นไปเท่านั้น" : ""}
         >
-          📅 ตารางยามอัฐกาล {isLocked && '🔒'}
+          <span>📅 ตารางยามอัฐกาล</span>
+          {isLocked && <span className="text-[10px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">🔒 PRO</span>}
         </button>
       </div>
 
-      {isLocked && (activeTab === "compare" || activeTab === "grid" || activeTab === "master") && (
-        <div className="animate-fade-in mt-6">
-          <UpgradePaywall featureName="เครื่องมือวิเคราะห์ฤกษ์ขั้นสูง (PRO)" description="คัมภีร์ยาม ตารางยามล่วงหน้า และเปรียบเทียบฤกษ์เดินทาง สงวนสิทธิ์สำหรับสมาชิกระดับ PRO ขึ้นไป" />
-        </div>
-      )}
-
       {/* 📜 MASTER REFERENCE VIEW */}
-      {activeTab === "master" && !isLocked && (
+      {activeTab === "master" && (
+        <UpgradePaywall
+          isLocked={isLocked}
+          currentPlan="basic"
+          requiredPlan="pro"
+          sandsCost={5}
+          title="ปลดล็อกคัมภีร์ยามอัฏฐกาล & ๒๔ ชั้นฉาย"
+          description="เข้าถึงข้อมูลคัมภีร์ยามโบราณ ๗ ฐาน คำพยากรณ์ยามต้น-กลาง-ปลาย และตาราง ๒๔ ช่วงเวลาย่อย"
+        >
         <div className="space-y-6 animate-fade-in">
           <Card className="p-6 bg-white/95 dark:bg-[#0A1628]/40 border-slate-200 dark:border-[#D9BC82]/15 shadow-xl">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-slate-200 dark:border-white/10">
@@ -921,6 +919,7 @@ export default function YamPage() {
             )}
           </Card>
         </div>
+        </UpgradePaywall>
       )}
 
       {/* ⏱️ LIVE WATCH VIEW */}
@@ -1922,6 +1921,14 @@ export default function YamPage() {
 
       {/* 📅 WATCH GRID VIEW (กระดานตารางยาม 8x7) */}
       {activeTab === "grid" && (
+        <UpgradePaywall
+          isLocked={isLocked}
+          currentPlan="basic"
+          requiredPlan="pro"
+          sandsCost={5}
+          title="ปลดล็อกตารางยามอัฏฐกาล ๗ วัน ๒๔ ช่วงเวลา"
+          description="เข้าถึงตารางสรุปยามครบ ๗ วัน ทั้งกลางวันและกลางคืน ๒๔ ช่วงเวลาย่อย พร้อมเจาะลึกคำแนะนำ ๔ มิติความมงคล"
+        >
         <div className="space-y-6">
           <div className="flex bg-amber-100/60 dark:bg-[#0A1628]/60 p-1 rounded-2xl border border-amber-200/60 dark:border-white/5 gap-1 w-full max-w-md mx-auto shadow-sm">
             <button
@@ -2166,10 +2173,19 @@ export default function YamPage() {
             </div>
           )}
         </div>
+        </UpgradePaywall>
       )}
 
       {/* ✈️ COMPARE TRAVEL VIEW (เปรียบเทียบฤกษ์เดินทาง) */}
       {activeTab === "compare" && (
+        <UpgradePaywall
+          isLocked={isLocked}
+          currentPlan="basic"
+          requiredPlan="pro"
+          sandsCost={5}
+          title="ปลดล็อกระบบเปรียบเทียบฤกษ์เดินทาง"
+          description="เปรียบเทียบฤกษ์สัญจร ๒ ช่วงเวลาพร้อมกันแบบแม่นยำ วิเคราะห์ระดับคะแนนมงคล ข้อควรระวัง และคำชี้ขาดฤกษ์ที่ดีที่สุด"
+        >
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="bg-[#0A1628]/40 border-[#4B6FAE]/20 p-5">
@@ -2429,6 +2445,7 @@ export default function YamPage() {
             </div>
           )}
         </div>
+        </UpgradePaywall>
       )}
 
     </div>

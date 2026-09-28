@@ -7,6 +7,8 @@ import { STAR_NAMES } from "@phopephum/types";
 import type { Env } from "~/env.server";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
+import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
+import { canAccess } from "~/services/permissions.server";
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { generateKarnchataReading, type PredCategory, type KarnchataReading } from "~/services/karnchata-prediction.server";
 
@@ -81,6 +83,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     const lunar = gregorianToThaiLunarV3(now);
     lunarInfo = { moonPhaseText: lunar.moonPhaseText, isWaxing: lunar.isWaxing, lunarDay: lunar.lunarDay, thaiMonthName: lunar.thaiMonthName };
   } catch (e) { /* */ }
+
+  const isProLocked = !canAccess(profile, "pro");
+
   return json({
     profile,
     initialResult,
@@ -92,6 +97,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     personLimit,
     currentCustomerCount,
     hasReachedLimit,
+    isProLocked,
   });
 }
 
@@ -655,6 +661,7 @@ export default function KarnchataPage() {
     customers,
     personLimit,
     hasReachedLimit,
+    isProLocked,
   } = useLoaderData<typeof loader>();
   const actionData = useActionData<typeof action>();
   const submit = useSubmit();
@@ -865,10 +872,25 @@ export default function KarnchataPage() {
 
       {/* ── Tab Selector ── */}
       <div className="flex bg-[#0A1628]/60 p-1.5 rounded-2xl border border-white/5 gap-1">
-        {([["daily","📅","รายวัน"],["hourly","⏱","รายชั่วโมง"],["minute","🎯","รายนาที"]] as const).map(([id,icon,label]) => (
-          <button key={id} onClick={() => setActiveTab(id)}
-            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${activeTab === id ? "bg-[#C6A96B] text-[#020617]" : "text-[#C6B79F] hover:text-[#F8F6F1]"}`}>
-            <span>{icon}</span><span>{label}</span>
+        {([
+          ["daily", "📅", "รายวัน", false],
+          ["hourly", "⏱", "รายชั่วโมง", isProLocked],
+          ["minute", "🎯", "รายนาที", isProLocked]
+        ] as const).map(([id, icon, label, locked]) => (
+          <button
+            key={id}
+            onClick={() => setActiveTab(id)}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all ${
+              activeTab === id ? "bg-[#C6A96B] text-[#020617] shadow-md" : "text-[#C6B79F] hover:text-[#F8F6F1]"
+            }`}
+          >
+            <span>{icon}</span>
+            <span>{label}</span>
+            {locked && (
+              <span className="text-[10px] text-[#C6A96B] bg-[#C6A96B]/15 px-1.5 py-0.5 rounded border border-[#C6A96B]/30 ml-1">
+                🔒 PRO
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -945,123 +967,169 @@ export default function KarnchataPage() {
           TAB: รายชั่วโมง
       ══════════════════════════════════════════════════════════ */}
       {activeTab === "hourly" && (
-        <div className="space-y-4">
-          {/* Decision Guidance */}
-          <DecisionGuidance
-            yamNum={yaiN}
-            taksaQuality={currentTaksa}
-            yamPhase={yamPhaseLabel}
-            yamName={activeResult.yamYaiName}
-            label="ชั่วโมงนี้ (ยามใหญ่)"
-          />
-
-          {/* Question Box */}
-          <QuestionBox
-            tabMode="hourly"
-            onSubmit={handleAsk}
-            isLoading={isLoading}
-            label="ถามเรื่องชั่วโมงนี้"
-            yamName={activeResult.yamYaiName}
-            yamPhase={yamPhaseLabel}
-          />
-
-          {/* Prediction result */}
-          {currentReading && readingFromTab === "hourly" && (
-            <PredictionCard reading={currentReading} onClose={() => setCurrentReading(null)} />
-          )}
-
-          {/* History */}
-          <HistoryStrip
-            history={history.filter(h => h.tabMode === "hourly")}
-            onSelect={r => { setCurrentReading(r.reading); setReadingFromTab("hourly"); }}
-            onClear={() => saveHistory(history.filter(h => h.tabMode !== "hourly"))}
-          />
-
-          {/* Yam table */}
-          <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-5">
-            <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยาม{isDaytime ? "กลางวัน" : "กลางคืน"} 8 ยาม</h3>
-            <p className="text-[10px] text-[#C6B79F] mb-4">กดแต่ละยามเพื่อดูคำแนะนำตัดสินใจ</p>
-            <div className="space-y-1">
-              {dayYamTable.filter(y => y.isDay === isDaytime).map(y => {
-                const key = `h-${y.isDay ? "d" : "n"}-${y.yamNum}`;
-                return (
-                  <YamTableRow
-                    key={key}
-                    timeStr={y.timeStr}
-                    starNum={y.star}
-                    quality={y.quality}
-                    isCurrentYam={y.isCurrentYam}
-                    label={y.yamNum}
-                    expanded={selectedKey === key}
-                    onToggle={() => toggle(key)}
-                  />
-                );
-              })}
+        isProLocked ? (
+          <UpgradePaywall
+            featureName="กาลชะตารายชั่วโมง (ยามใหญ่)"
+            description="วิเคราะห์กาลชะตาเจาะลึก 8 ยามใหญ่ พร้อมระบบถาม-ตอบเจาะจงชั่วโมงนี้ สงวนสิทธิ์สำหรับสมาชิกระดับ PRO ขึ้นไป หรือปลดล็อกด้วยทรายกาลเวลา"
+            requiredTier="pro"
+            userPlan={profile?.plan || "basic"}
+            timeSands={profile?.time_sands || 0}
+          >
+            <div className="space-y-4">
+              <DecisionGuidance
+                yamNum={yaiN}
+                taksaQuality={currentTaksa}
+                yamPhase={yamPhaseLabel}
+                yamName={activeResult.yamYaiName}
+                label="ชั่วโมงนี้ (ยามใหญ่)"
+              />
+              <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-5">
+                <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยาม{isDaytime ? "กลางวัน" : "กลางคืน"} 8 ยาม</h3>
+              </Card>
             </div>
-          </Card>
-        </div>
+          </UpgradePaywall>
+        ) : (
+          <div className="space-y-4">
+            {/* Decision Guidance */}
+            <DecisionGuidance
+              yamNum={yaiN}
+              taksaQuality={currentTaksa}
+              yamPhase={yamPhaseLabel}
+              yamName={activeResult.yamYaiName}
+              label="ชั่วโมงนี้ (ยามใหญ่)"
+            />
+
+            {/* Question Box */}
+            <QuestionBox
+              tabMode="hourly"
+              onSubmit={handleAsk}
+              isLoading={isLoading}
+              label="ถามเรื่องชั่วโมงนี้"
+              yamName={activeResult.yamYaiName}
+              yamPhase={yamPhaseLabel}
+            />
+
+            {/* Prediction result */}
+            {currentReading && readingFromTab === "hourly" && (
+              <PredictionCard reading={currentReading} onClose={() => setCurrentReading(null)} />
+            )}
+
+            {/* History */}
+            <HistoryStrip
+              history={history.filter(h => h.tabMode === "hourly")}
+              onSelect={r => { setCurrentReading(r.reading); setReadingFromTab("hourly"); }}
+              onClear={() => saveHistory(history.filter(h => h.tabMode !== "hourly"))}
+            />
+
+            {/* Yam table */}
+            <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-5">
+              <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยาม{isDaytime ? "กลางวัน" : "กลางคืน"} 8 ยาม</h3>
+              <p className="text-[10px] text-[#C6B79F] mb-4">กดแต่ละยามเพื่อดูคำแนะนำตัดสินใจ</p>
+              <div className="space-y-1">
+                {dayYamTable.filter(y => y.isDay === isDaytime).map(y => {
+                  const key = `h-${y.isDay ? "d" : "n"}-${y.yamNum}`;
+                  return (
+                    <YamTableRow
+                      key={key}
+                      timeStr={y.timeStr}
+                      starNum={y.star}
+                      quality={y.quality}
+                      isCurrentYam={y.isCurrentYam}
+                      label={y.yamNum}
+                      expanded={selectedKey === key}
+                      onToggle={() => toggle(key)}
+                    />
+                  );
+                })}
+              </div>
+            </Card>
+          </div>
+        )
       )}
 
       {/* ══════════════════════════════════════════════════════════
           TAB: รายนาที
       ══════════════════════════════════════════════════════════ */}
       {activeTab === "minute" && (
-        <div className="space-y-4">
-          {/* Decision Guidance */}
-          <DecisionGuidance
-            yamNum={soyN}
-            taksaQuality={currentSoyTaksa}
-            yamPhase={yamPhaseLabel}
-            yamName={activeResult.yamSoyName}
-            label="นาทีนี้ (ยามซอย)"
-          />
-
-          {/* Question Box */}
-          <QuestionBox
-            tabMode="minute"
-            onSubmit={handleAsk}
-            isLoading={isLoading}
-            label="ถามเรื่องนาทีนี้"
-            yamName={activeResult.yamSoyName}
-            yamPhase={yamPhaseLabel}
-          />
-
-          {/* Prediction result */}
-          {currentReading && readingFromTab === "minute" && (
-            <PredictionCard reading={currentReading} onClose={() => setCurrentReading(null)} />
-          )}
-
-          {/* History */}
-          <HistoryStrip
-            history={history.filter(h => h.tabMode === "minute")}
-            onSelect={r => { setCurrentReading(r.reading); setReadingFromTab("minute"); }}
-            onClear={() => saveHistory(history.filter(h => h.tabMode !== "minute"))}
-          />
-
-          {/* Soy table */}
-          <Card className="border-[#6D8FC7]/20 bg-[#0A1628] p-5">
-            <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยามซอย 8 ช่วง — ยามใหญ่ {activeResult.yamYaiName}</h3>
-            <p className="text-[10px] text-[#C6B79F] mb-4">แต่ละซอย 3 นาที 45 วินาที · กดเพื่อดูคำแนะนำ</p>
-            <div className="space-y-1">
-              {yamSoyTable.map(soy => {
-                const key = `s-${soy.slot}`;
-                return (
-                  <YamTableRow
-                    key={key}
-                    timeStr={soy.timeStr}
-                    starNum={soy.planet}
-                    quality={soy.quality}
-                    isCurrentYam={false}
-                    isCurrent={soy.isCurrent}
-                    label={soy.slot}
-                    expanded={selectedKey === key}
-                    onToggle={() => toggle(key)}
-                  />
-                );
-              })}
+        isProLocked ? (
+          <UpgradePaywall
+            featureName="กาลชะตาระดับนาที (ยามซอย)"
+            description="วิเคราะห์กาลชะตาระดับ 3 นาที 45 วินาที สำหรับการเจรจาและการตัดสินใจฉับพลัน สงวนสิทธิ์สำหรับสมาชิกระดับ PRO ขึ้นไป หรือปลดล็อกด้วยทรายกาลเวลา"
+            requiredTier="pro"
+            userPlan={profile?.plan || "basic"}
+            timeSands={profile?.time_sands || 0}
+          >
+            <div className="space-y-4">
+              <DecisionGuidance
+                yamNum={soyN}
+                taksaQuality={currentSoyTaksa}
+                yamPhase={yamPhaseLabel}
+                yamName={activeResult.yamSoyName}
+                label="นาทีนี้ (ยามซอย)"
+              />
+              <Card className="border-[#6D8FC7]/20 bg-[#0A1628] p-5">
+                <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยามซอย 8 ช่วง — ยามใหญ่ {activeResult.yamYaiName}</h3>
+              </Card>
             </div>
-          </Card>
-        </div>
+          </UpgradePaywall>
+        ) : (
+          <div className="space-y-4">
+            {/* Decision Guidance */}
+            <DecisionGuidance
+              yamNum={soyN}
+              taksaQuality={currentSoyTaksa}
+              yamPhase={yamPhaseLabel}
+              yamName={activeResult.yamSoyName}
+              label="นาทีนี้ (ยามซอย)"
+            />
+
+            {/* Question Box */}
+            <QuestionBox
+              tabMode="minute"
+              onSubmit={handleAsk}
+              isLoading={isLoading}
+              label="ถามเรื่องนาทีนี้"
+              yamName={activeResult.yamSoyName}
+              yamPhase={yamPhaseLabel}
+            />
+
+            {/* Prediction result */}
+            {currentReading && readingFromTab === "minute" && (
+              <PredictionCard reading={currentReading} onClose={() => setCurrentReading(null)} />
+            )}
+
+            {/* History */}
+            <HistoryStrip
+              history={history.filter(h => h.tabMode === "minute")}
+              onSelect={r => { setCurrentReading(r.reading); setReadingFromTab("minute"); }}
+              onClear={() => saveHistory(history.filter(h => h.tabMode !== "minute"))}
+            />
+
+            {/* Soy table */}
+            <Card className="border-[#6D8FC7]/20 bg-[#0A1628] p-5">
+              <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยามซอย 8 ช่วง — ยามใหญ่ {activeResult.yamYaiName}</h3>
+              <p className="text-[10px] text-[#C6B79F] mb-4">แต่ละซอย 3 นาที 45 วินาที · กดเพื่อดูคำแนะนำ</p>
+              <div className="space-y-1">
+                {yamSoyTable.map(soy => {
+                  const key = `s-${soy.slot}`;
+                  return (
+                    <YamTableRow
+                      key={key}
+                      timeStr={soy.timeStr}
+                      starNum={soy.planet}
+                      quality={soy.quality}
+                      isCurrentYam={false}
+                      isCurrent={soy.isCurrent}
+                      label={soy.slot}
+                      expanded={selectedKey === key}
+                      onToggle={() => toggle(key)}
+                    />
+                  );
+                })}
+              </div>
+            </Card>
+          </div>
+        )
       )}
     </div>
   );

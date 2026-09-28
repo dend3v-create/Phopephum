@@ -5,7 +5,9 @@
 import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
-import { requireMinPlan, requireAuth } from "~/services/auth.server";
+import { requireAuth, getProfile } from "~/services/auth.server";
+import { canAccess } from "~/services/permissions.server";
+import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
 import {
   calculateHoraTaynoo,
   generateHoraTaynooSVG,
@@ -38,7 +40,8 @@ export const meta: MetaFunction = () => [
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await requireAuth(request, env);
-  await requireMinPlan("basic", request, env);
+  const profile = await getProfile(user.id, request, env);
+  const isProLocked = !canAccess(profile, "pro");
 
   const now    = new Date();
   const result = calculateHoraTaynoo({ dateAsked: now });
@@ -63,6 +66,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     meta,
     library,
     pastChats: pastChats || [],
+    profile,
+    isProLocked,
   });
 }
 
@@ -1887,50 +1892,61 @@ export default function HoraNuPage() {
         </div>
       </div>
 
-      {/* ── 2 Prediction Mode Switcher (แท็บเลือกวิธีการพยากรณ์ ๒ แบบ) ── */}
-      <div className="flex flex-col sm:flex-row gap-2.5 p-1.5 rounded-2xl bg-[#07132b]/90 border border-[#C6A96B]/30 shadow-xl shadow-black/50">
-        <button
-          type="button"
-          onClick={() => setPredictionMethod("time")}
-          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
-            predictionMethod === "time"
-              ? "bg-gradient-to-r from-[#C6A96B]/30 to-[#D9BC82]/35 border border-[#C6A96B] text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20"
-              : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[#091838]/60"
-          }`}
-        >
-          <ModeSymbol mode="time" className="w-5 h-5 text-[#C6A96B] shrink-0" />
-          <span>๑. อ่านตามดวงยาม ณ เวลาที่ถาม (สมการจุดพยากรณ์)</span>
-        </button>
+      {/* ── 2 Prediction Mode Switcher (แท็บเลือกวิธีการพยากรณ์ ๒ แบบ) & Chat ── */}
+      <UpgradePaywall
+        isLocked={loaderData.isProLocked}
+        currentPlan={loaderData.profile?.subscription_tier || "free"}
+        requiredPlan="pro"
+        sandsCost={5}
+        title="ปลดล็อกวิชายามพรายกระซิบ ๑๑๒ ผัง & ปรึกษาปัญญายาม"
+        description="เข้าถึงระบบพยากรณ์ยามพรายกระซิบ ๑๑๒ ผังสำเร็จ สมการจุดพยากรณ์ ๑๒ ภพ และห้องสนทนาปัญญายามสด"
+      >
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row gap-2.5 p-1.5 rounded-2xl bg-[#07132b]/90 border border-[#C6A96B]/30 shadow-xl shadow-black/50">
+            <button
+              type="button"
+              onClick={() => setPredictionMethod("time")}
+              className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
+                predictionMethod === "time"
+                  ? "bg-gradient-to-r from-[#C6A96B]/30 to-[#D9BC82]/35 border border-[#C6A96B] text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20"
+                  : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[#091838]/60"
+              }`}
+            >
+              <ModeSymbol mode="time" className="w-5 h-5 text-[#C6A96B] shrink-0" />
+              <span>๑. อ่านตามดวงยาม ณ เวลาที่ถาม (สมการจุดพยากรณ์)</span>
+            </button>
 
-        <button
-          type="button"
-          onClick={() => setPredictionMethod("bhava")}
-          className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
-            predictionMethod === "bhava"
-              ? "bg-gradient-to-r from-[#C6A96B]/30 to-[#D9BC82]/35 border border-[#C6A96B] text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20"
-              : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[#091838]/60"
-          }`}
-        >
-          <ModeSymbol mode="bhava" className="w-5 h-5 text-[#C6A96B] shrink-0" />
-          <span>๒. อ่านจากเรื่องที่ถาม (เจาะลึก ๑๒ ภพ)</span>
-        </button>
-      </div>
+            <button
+              type="button"
+              onClick={() => setPredictionMethod("bhava")}
+              className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
+                predictionMethod === "bhava"
+                  ? "bg-gradient-to-r from-[#C6A96B]/30 to-[#D9BC82]/35 border border-[#C6A96B] text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20"
+                  : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[#091838]/60"
+              }`}
+            >
+              <ModeSymbol mode="bhava" className="w-5 h-5 text-[#C6A96B] shrink-0" />
+              <span>๒. อ่านจากเรื่องที่ถาม (เจาะลึก ๑๒ ภพ)</span>
+            </button>
+          </div>
 
-      {/* ── Active Prediction Method View ── */}
-      {predictionMethod === "time" ? (
-        <PhraKrasibCalcTable result={result} onAskAI={handleAskAIWithTopic} />
-      ) : (
-        <TwoStageBhavaPredictor result={result} onAskAI={handleAskAIWithTopic} />
-      )}
+          {/* ── Active Prediction Method View ── */}
+          {predictionMethod === "time" ? (
+            <PhraKrasibCalcTable result={result} onAskAI={handleAskAIWithTopic} />
+          ) : (
+            <TwoStageBhavaPredictor result={result} onAskAI={handleAskAIWithTopic} />
+          )}
 
-      {/* ── Horanu Chat ── */}
-      <div id="horanu-chat-section">
-        <HoranuChatPanel
-          initialPastChats={loaderData.pastChats}
-          externalPrompt={externalPrompt}
-          onPromptHandled={() => setExternalPrompt("")}
-        />
-      </div>
+          {/* ── Horanu Chat ── */}
+          <div id="horanu-chat-section">
+            <HoranuChatPanel
+              initialPastChats={loaderData.pastChats}
+              externalPrompt={externalPrompt}
+              onPromptHandled={() => setExternalPrompt("")}
+            />
+          </div>
+        </div>
+      </UpgradePaywall>
 
       {/* Loading overlay */}
       {isSubmitting && (

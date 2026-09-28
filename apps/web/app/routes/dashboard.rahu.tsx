@@ -55,7 +55,9 @@ export const meta: MetaFunction = () => [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const { profile } = await requireMinPlan("basic", request, env);
+  const { requireAuth, getProfile } = await import("~/services/auth.server");
+  const user = await requireAuth(request, env);
+  const profile = await getProfile(user.id, request, env);
 
   const now = new Date();
   const rahuResult = calculateRahu(now);
@@ -63,6 +65,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   return json({
     rahuResult,
     serverTime: now.toISOString(),
+    profile,
     isProLocked: !canAccess(profile, "pro"),
   });
 }
@@ -81,7 +84,7 @@ const DAY_COLOR_THEMES: Record<number, { name: string; bg: string; text: string;
 import { UpgradePaywall } from "~/components/ui/UpgradePaywall";
 
 export default function RahuDashboard() {
-  const { rahuResult, serverTime, isProLocked } = useLoaderData<typeof loader>();
+  const { rahuResult, serverTime, isProLocked, profile } = useLoaderData<typeof loader>();
   const revalidator = useRevalidator();
 
   const [currentTime, setCurrentTime] = useState(new Date(serverTime));
@@ -398,111 +401,123 @@ export default function RahuDashboard() {
          <PredictionBox title="ผลตามไตรภูมิ" value={rahuResult.yam_rule.traibhum_result} icon="📜" />
       </div>
 
-      {/* ── 💬 ห้องสนทนาและปรึกษาปัญญายามราหู (Auto-expanding chat with local history) ── */}
-      <RahuConsultationChat rahuResult={rahuResult} />
+      {/* ── 💬 & 📅 ห้องสนทนายามราหู & ตารางรายวัน 16 บล็อก ── */}
+      <UpgradePaywall
+        isLocked={isProLocked}
+        currentPlan={profile?.subscription_tier || "free"}
+        requiredPlan="pro"
+        sandsCost={5}
+        title="ปลดล็อกตารางยามราหู ๑๖ ช่วงเวลา & สนทนาปัญญายาม"
+        description="เจาะลึกตารางยามราหูค้นทรัพย์ครบ ๗ วัน ทั้ง ๑๖ ช่วงเวลาหลัก พร้อมระบบสนทนาปัญญายามราหูเพื่อถามฤกษ์มงคลเฉพาะกิจ"
+      >
+        <div className="space-y-8">
+          {/* ── 💬 ห้องสนทนาและปรึกษาปัญญายามราหู (Auto-expanding chat with local history) ── */}
+          <RahuConsultationChat rahuResult={rahuResult} />
 
-      {/* ── 📅 ตารางยามราหูรายวัน 16 บล็อก (Daily Schedule) ── */}
-      <div className="space-y-6 pt-6 border-t border-[#C6A96B]/15">
-        
-        {/* หัวข้อตารางรายวัน */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 className="font-display text-2xl font-bold text-[#F8F6F1] flex items-center gap-2">
-              <CalendarDays className="w-5 h-5 text-[#C6A96B]" /> ตารางยามราหูประจำวัน
-            </h3>
-            <p className="text-xs text-[#C6B79F] italic">
-              เลือกวันในสัปดาห์เพื่อถอดรหัสฤกษ์มงคลยามราหูทั้ง 16 ช่วงเวลา
-            </p>
-          </div>
-          
-          {/* แท็บปุ่มกดเลือก 7 วัน */}
-          <div className="flex flex-wrap gap-1 bg-slate-950/40 p-1 rounded-xl border border-white/5">
-            {[
-              { id: 1, label: "อา.", name: "อาทิตย์" },
-              { id: 2, label: "จ.", name: "จันทร์" },
-              { id: 3, label: "อ.", name: "อังคาร" },
-              { id: 4, label: "พ.", name: "พุธ" },
-              { id: 5, label: "พฤ.", name: "พฤหัส" },
-              { id: 6, label: "ศ.", name: "ศุกร์" },
-              { id: 7, label: "ส.", name: "เสาร์" },
-            ].map((day) => {
-              const isActive = selectedDay === day.id;
-              const isToday = rahuResult.day_of_week === day.id;
+          {/* ── 📅 ตารางยามราหูรายวัน 16 บล็อก (Daily Schedule) ── */}
+          <div className="space-y-6 pt-6 border-t border-[#C6A96B]/15">
+            
+            {/* หัวข้อตารางรายวัน */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="font-display text-2xl font-bold text-[#F8F6F1] flex items-center gap-2">
+                  <CalendarDays className="w-5 h-5 text-[#C6A96B]" /> ตารางยามราหูประจำวัน
+                </h3>
+                <p className="text-xs text-[#C6B79F] italic">
+                  เลือกวันในสัปดาห์เพื่อถอดรหัสฤกษ์มงคลยามราหูทั้ง 16 ช่วงเวลา
+                </p>
+              </div>
               
-              // สีปุ่มตามวันไทย
-              const baseTheme = DAY_COLOR_THEMES[day.id]!;
+              {/* แท็บปุ่มกดเลือก 7 วัน */}
+              <div className="flex flex-wrap gap-1 bg-slate-950/40 p-1 rounded-xl border border-white/5">
+                {[
+                  { id: 1, label: "อา.", name: "อาทิตย์" },
+                  { id: 2, label: "จ.", name: "จันทร์" },
+                  { id: 3, label: "อ.", name: "อังคาร" },
+                  { id: 4, label: "พ.", name: "พุธ" },
+                  { id: 5, label: "พฤ.", name: "พฤหัส" },
+                  { id: 6, label: "ศ.", name: "ศุกร์" },
+                  { id: 7, label: "ส.", name: "เสาร์" },
+                ].map((day) => {
+                  const isActive = selectedDay === day.id;
+                  const isToday = rahuResult.day_of_week === day.id;
+                  
+                  // สีปุ่มตามวันไทย
+                  const baseTheme = DAY_COLOR_THEMES[day.id]!;
+                  
+                  return (
+                    <button
+                      key={day.id}
+                      onClick={() => {
+                        setSelectedDay(day.id);
+                        setExpandedBlock(null);
+                      }}
+                      className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                        isActive
+                          ? `${baseTheme.bg} ${baseTheme.text} ${baseTheme.border} border shadow-lg`
+                          : "text-[#C6B79F] hover:text-[#F8F6F1] hover:bg-white/5"
+                      } relative`}
+                    >
+                      {day.label}
+                      {isToday && (
+                        <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#C6A96B]" title="วันนี้" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* ตารางแสดงผล 16 ยามย่อย (Timeline grid) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               
-              return (
-                <button
-                  key={day.id}
-                  onClick={() => {
-                    setSelectedDay(day.id);
-                    setExpandedBlock(null);
-                  }}
-                  className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-                    isActive
-                      ? `${baseTheme.bg} ${baseTheme.text} ${baseTheme.border} border shadow-lg`
-                      : "text-[#C6B79F] hover:text-[#F8F6F1] hover:bg-white/5"
-                  } relative`}
-                >
-                  {day.label}
-                  {isToday && (
-                    <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#C6A96B]" title="วันนี้" />
-                  )}
-                </button>
-              );
-            })}
+              {/* กลางวัน */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-[#C6A96B] uppercase tracking-widest pl-1">
+                  ☀️ ยามกลางวัน (06:00 - 18:00)
+                </h4>
+                <div className="space-y-3">
+                  {dailyTimelineBlocks.slice(0, 8).map((item, index) => {
+                    const isCurrentBlock = rahuResult.day_of_week === selectedDay && rahuResult.main_block.id === item.block.id;
+                    return (
+                      <TimelineBlockCard
+                        key={item.block.id}
+                        item={item}
+                        isCurrent={isCurrentBlock}
+                        isExpanded={expandedBlock === item.block.id}
+                        onToggle={() => setExpandedBlock(expandedBlock === item.block.id ? null : item.block.id)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* กลางคืน */}
+              <div className="space-y-3">
+                <h4 className="text-xs font-bold text-[#4B6FAE] uppercase tracking-widest pl-1">
+                  🌙 ยามกลางคืน (18:00 - 06:00)
+                </h4>
+                <div className="space-y-3">
+                  {dailyTimelineBlocks.slice(8, 16).map((item, index) => {
+                    const isCurrentBlock = rahuResult.day_of_week === selectedDay && rahuResult.main_block.id === item.block.id;
+                    return (
+                      <TimelineBlockCard
+                        key={item.block.id}
+                        item={item}
+                        isCurrent={isCurrentBlock}
+                        isExpanded={expandedBlock === item.block.id}
+                        onToggle={() => setExpandedBlock(expandedBlock === item.block.id ? null : item.block.id)}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+
+            </div>
+
           </div>
         </div>
-
-        {/* ตารางแสดงผล 16 ยามย่อย (Timeline grid) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          
-          {/* กลางวัน */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-[#C6A96B] uppercase tracking-widest pl-1">
-              ☀️ ยามกลางวัน (06:00 - 18:00)
-            </h4>
-            <div className="space-y-3">
-              {dailyTimelineBlocks.slice(0, 8).map((item, index) => {
-                const isCurrentBlock = rahuResult.day_of_week === selectedDay && rahuResult.main_block.id === item.block.id;
-                return (
-                  <TimelineBlockCard
-                    key={item.block.id}
-                    item={item}
-                    isCurrent={isCurrentBlock}
-                    isExpanded={expandedBlock === item.block.id}
-                    onToggle={() => setExpandedBlock(expandedBlock === item.block.id ? null : item.block.id)}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-          {/* กลางคืน */}
-          <div className="space-y-3">
-            <h4 className="text-xs font-bold text-[#4B6FAE] uppercase tracking-widest pl-1">
-              🌙 ยามกลางคืน (18:00 - 06:00)
-            </h4>
-            <div className="space-y-3">
-              {dailyTimelineBlocks.slice(8, 16).map((item, index) => {
-                const isCurrentBlock = rahuResult.day_of_week === selectedDay && rahuResult.main_block.id === item.block.id;
-                return (
-                  <TimelineBlockCard
-                    key={item.block.id}
-                    item={item}
-                    isCurrent={isCurrentBlock}
-                    isExpanded={expandedBlock === item.block.id}
-                    onToggle={() => setExpandedBlock(expandedBlock === item.block.id ? null : item.block.id)}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-        </div>
-
-      </div>
+      </UpgradePaywall>
 
     </div>
   );

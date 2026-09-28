@@ -41,7 +41,8 @@ export default function DashboardLayout() {
   const location = useLocation();
 
   const displayName = profile?.display_name ?? profile?.email ?? t("auth.user", "ผู้ใช้งาน");
-  const isPro = profile?.role === "admin" || profile?.role === "operator" || profile?.plan === "imperial" || profile?.plan === "pro";
+  const rawPlan = (profile?.plan || profile?.subscription || "free").toLowerCase();
+  const isPro = profile?.role === "admin" || profile?.role === "operator" || rawPlan === "master" || rawPlan === "imperial" || rawPlan === "pro" || rawPlan === "lifetime";
   const timeSands = profile?.time_sands ?? 0;
   const plan = profile?.plan ?? "free";
   const role = profile?.role ?? "user";
