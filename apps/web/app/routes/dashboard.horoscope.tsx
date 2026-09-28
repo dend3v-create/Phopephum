@@ -1054,44 +1054,44 @@ export default function HoroscopePage() {
           <button
             type="button"
             onClick={() => setIsWisdomModalOpen(true)}
-            className="relative z-10 inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-gradient-to-r dark:from-white/15 dark:to-white/10 dark:hover:from-white/25 dark:hover:to-white/15 border border-slate-200 dark:border-white/25 text-slate-800 dark:text-[#F8F6F1] text-xs sm:text-sm font-bold tracking-wide transition-all hover:scale-105 active:scale-95 shadow-md backdrop-blur-md cursor-pointer"
+            className="relative z-10 inline-flex items-center gap-2 px-7 py-2.5 rounded-full bg-gradient-to-r from-[#C6A96B] via-[#E2C785] to-[#D9BC82] hover:brightness-110 active:scale-95 border border-[#F5E6C8]/80 text-[#020617] text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-amber-950/40 cursor-pointer"
           >
             <span>เรียนรู้เพิ่มเติม</span>
-            <span className="text-[#8C6D2D] dark:text-[#D9BC82] font-black">❯</span>
+            <span className="font-black text-sm text-[#020617]">❯</span>
           </button>
 
           {/* Teaser 3 Insights Cards (Sesheta Inspiration) */}
           <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full mt-2">
             <div
               onClick={() => setIsWisdomModalOpen(true)}
-              className="group flex items-center gap-3 p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/90 dark:bg-[#0A2240]/40 dark:hover:bg-[#0A2240]/80 border border-slate-200/80 dark:border-[#C6A96B]/15 hover:border-[#C6A96B]/50 cursor-pointer transition-all text-left shadow-sm active:scale-98"
+              className="group flex items-center gap-3 p-3 rounded-2xl bg-white/80 dark:bg-[#07192F]/80 hover:bg-slate-100 dark:hover:bg-[#0A2240] border border-slate-200 dark:border-[#C6A96B]/25 hover:border-[#C6A96B]/60 cursor-pointer transition-all text-left shadow-sm active:scale-98 backdrop-blur-md"
             >
               <span className="text-2xl group-hover:scale-110 transition-transform">💎</span>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-[#9A7B38] dark:text-[#E2C785] truncate">ตัวตนของคุณ</p>
-                <p className="text-[11px] text-slate-600 dark:text-[#C6B79F] truncate">{coreStarWisdomData.identity.slice(0, 24)}...</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate">{coreStarWisdomData.identity.slice(0, 24)}...</p>
               </div>
             </div>
 
             <div
               onClick={() => setIsWisdomModalOpen(true)}
-              className="group flex items-center gap-3 p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/90 dark:bg-[#0A2240]/40 dark:hover:bg-[#0A2240]/80 border border-slate-200/80 dark:border-[#60A5FA]/15 hover:border-[#60A5FA]/50 cursor-pointer transition-all text-left shadow-sm active:scale-98"
+              className="group flex items-center gap-3 p-3 rounded-2xl bg-white/80 dark:bg-[#07192F]/80 hover:bg-slate-100 dark:hover:bg-[#0A2240] border border-slate-200 dark:border-[#60A5FA]/25 hover:border-[#60A5FA]/60 cursor-pointer transition-all text-left shadow-sm active:scale-98 backdrop-blur-md"
             >
               <span className="text-2xl group-hover:scale-110 transition-transform">🛡️</span>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-[#2563EB] dark:text-[#60A5FA] truncate">จุดแข็ง & พรสวรรค์</p>
-                <p className="text-[11px] text-slate-600 dark:text-[#C6B79F] truncate">{coreStarWisdomData.strengths.slice(0, 24)}...</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate">{coreStarWisdomData.strengths.slice(0, 24)}...</p>
               </div>
             </div>
 
             <div
               onClick={() => setIsWisdomModalOpen(true)}
-              className="group flex items-center gap-3 p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/90 dark:bg-[#0A2240]/40 dark:hover:bg-[#0A2240]/80 border border-slate-200/80 dark:border-[#34D399]/15 hover:border-[#34D399]/50 cursor-pointer transition-all text-left shadow-sm active:scale-98"
+              className="group flex items-center gap-3 p-3 rounded-2xl bg-white/80 dark:bg-[#07192F]/80 hover:bg-slate-100 dark:hover:bg-[#0A2240] border border-slate-200 dark:border-[#34D399]/25 hover:border-[#34D399]/60 cursor-pointer transition-all text-left shadow-sm active:scale-98 backdrop-blur-md"
             >
               <span className="text-2xl group-hover:scale-110 transition-transform">🏺</span>
               <div className="min-w-0">
                 <p className="text-xs font-bold text-[#059669] dark:text-[#34D399] truncate">เส้นทางของคุณ</p>
-                <p className="text-[11px] text-slate-600 dark:text-[#C6B79F] truncate">{coreStarWisdomData.destinyPath.slice(0, 24)}...</p>
+                <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate">{coreStarWisdomData.destinyPath.slice(0, 24)}...</p>
               </div>
             </div>
           </div>
@@ -1979,61 +1979,83 @@ export default function HoroscopePage() {
                 {
                   value: "general_prediction",
                   label: "พยากรณ์ปัญญาชีวิต",
-                  renderIcon: () => <DomainWisdomIcon className="w-8 h-8" />,
+                  renderIcon: () => <DomainWisdomIcon className="w-7 h-7" />,
                   desc: "แนวทางบำบัดชะตา",
-                  color: "bg-purple-50/70 dark:bg-gradient-to-br dark:from-violet-950/40 dark:to-purple-900/10 border-purple-200 dark:border-violet-500/20 hover:border-purple-400 dark:hover:border-violet-500/55",
+                  border: "border-purple-200 dark:border-purple-500/25 hover:border-purple-500/60",
+                  glow: "hover:shadow-[0_0_24px_rgba(168,85,247,0.22)]",
+                  iconGlow: "bg-purple-50 dark:bg-purple-500/15 border-purple-200 dark:border-purple-500/30 text-purple-600 dark:text-purple-300",
+                  activeText: "group-hover:text-purple-600 dark:group-hover:text-purple-300",
                 },
                 {
                   value: "personal_branding",
                   label: "ตัวตน & อัตลักษณ์",
-                  renderIcon: () => <DomainIdentityIcon className="w-8 h-8" />,
+                  renderIcon: () => <DomainIdentityIcon className="w-7 h-7" />,
                   desc: "เสน่ห์และแบรนด์บุคคล",
-                  color: "bg-amber-50/70 dark:bg-gradient-to-br dark:from-amber-950/40 dark:to-orange-900/10 border-amber-200 dark:border-amber-500/20 hover:border-amber-400 dark:hover:border-amber-500/55",
+                  border: "border-amber-200 dark:border-[#C6A96B]/30 hover:border-[#C6A96B]/70",
+                  glow: "hover:shadow-[0_0_24px_rgba(198,169,107,0.25)]",
+                  iconGlow: "bg-amber-50 dark:bg-[#C6A96B]/15 border-amber-200 dark:border-[#C6A96B]/30 text-[#8C6D2D] dark:text-[#D9BC82]",
+                  activeText: "group-hover:text-[#8C6D2D] dark:group-hover:text-[#D9BC82]",
                 },
                 {
                   value: "career",
                   label: "ภารกิจ & ความสำเร็จ",
-                  renderIcon: () => <DomainCareerIcon className="w-8 h-8" />,
+                  renderIcon: () => <DomainCareerIcon className="w-7 h-7" />,
                   desc: "โอกาสและเป้าหมาย",
-                  color: "bg-sky-50/70 dark:bg-gradient-to-br dark:from-sky-950/40 dark:to-blue-900/10 border-sky-200 dark:border-sky-500/20 hover:border-sky-400 dark:hover:border-sky-500/55",
+                  border: "border-sky-200 dark:border-sky-500/25 hover:border-sky-500/60",
+                  glow: "hover:shadow-[0_0_24px_rgba(56,189,248,0.22)]",
+                  iconGlow: "bg-sky-50 dark:bg-sky-500/15 border-sky-200 dark:border-sky-500/30 text-sky-600 dark:text-sky-300",
+                  activeText: "group-hover:text-sky-600 dark:group-hover:text-sky-300",
                 },
                 {
                   value: "relationship",
                   label: "เสน่ห์ & สัมพันธ์",
-                  renderIcon: () => <DomainRelationshipIcon className="w-8 h-8" />,
+                  renderIcon: () => <DomainRelationshipIcon className="w-7 h-7" />,
                   desc: "สายใยและเมตตา",
-                  color: "bg-rose-50/70 dark:bg-gradient-to-br dark:from-rose-950/40 dark:to-pink-900/10 border-rose-200 dark:border-rose-500/20 hover:border-rose-400 dark:hover:border-rose-500/55",
+                  border: "border-rose-200 dark:border-rose-500/25 hover:border-rose-500/60",
+                  glow: "hover:shadow-[0_0_24px_rgba(244,63,94,0.22)]",
+                  iconGlow: "bg-rose-50 dark:bg-rose-500/15 border-rose-200 dark:border-rose-500/30 text-rose-600 dark:text-rose-300",
+                  activeText: "group-hover:text-rose-600 dark:group-hover:text-rose-300",
                 },
                 {
                   value: "wealth",
                   label: "กระแสทรัพย์ & มั่งคั่ง",
-                  renderIcon: () => <DomainWealthIcon className="w-8 h-8" />,
+                  renderIcon: () => <DomainWealthIcon className="w-7 h-7" />,
                   desc: "คลังสมบัติและ Flow",
-                  color: "bg-emerald-50/70 dark:bg-gradient-to-br dark:from-emerald-950/40 dark:to-green-900/10 border-emerald-200 dark:border-emerald-500/20 hover:border-emerald-400 dark:hover:border-emerald-500/55",
+                  border: "border-emerald-200 dark:border-emerald-500/25 hover:border-emerald-500/60",
+                  glow: "hover:shadow-[0_0_24px_rgba(16,185,129,0.22)]",
+                  iconGlow: "bg-emerald-50 dark:bg-emerald-500/15 border-emerald-200 dark:border-emerald-500/30 text-emerald-600 dark:text-emerald-300",
+                  activeText: "group-hover:text-emerald-600 dark:group-hover:text-emerald-300",
                 },
                 {
                   value: "annual_forecast",
                   label: "จังหวะชะตารายปี",
-                  renderIcon: () => <DomainAnnualIcon className="w-8 h-8" />,
+                  renderIcon: () => <DomainAnnualIcon className="w-7 h-7" />,
                   desc: "แผนที่พลังงานปีจร",
-                  color: "bg-teal-50/70 dark:bg-gradient-to-br dark:from-cyan-950/40 dark:to-teal-900/10 border-teal-200 dark:border-cyan-500/20 hover:border-teal-400 dark:hover:border-cyan-500/55",
+                  border: "border-teal-200 dark:border-cyan-500/25 hover:border-cyan-500/60",
+                  glow: "hover:shadow-[0_0_24px_rgba(6,182,212,0.22)]",
+                  iconGlow: "bg-teal-50 dark:bg-cyan-500/15 border-teal-200 dark:border-cyan-500/30 text-cyan-600 dark:text-cyan-300",
+                  activeText: "group-hover:text-cyan-600 dark:group-hover:text-cyan-300",
                 },
               ].map((cat) => (
                 <a
                   key={cat.value}
                   href={`/dashboard/reports/new?type=${cat.value}&name=${encodeURIComponent(currentSubjectName)}&birthDate=${activeResult?.birthDate || profile?.birth_date || ''}&birthTime=${encodeURIComponent(activeResult?.birthTime || profile?.birth_time || '')}&birthPlace=${encodeURIComponent(currentBirthPlace)}`}
-                  className={`relative overflow-hidden rounded-2xl border p-4 ${cat.color} transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] group flex flex-col justify-between min-h-[140px] shadow-sm`}
+                  className={`relative overflow-hidden rounded-2xl border p-4 bg-white/95 dark:bg-[#07162C]/90 hover:bg-slate-50 dark:hover:bg-[#0A203E] ${cat.border} ${cat.glow} transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] group flex flex-col justify-between min-h-[145px] shadow-sm backdrop-blur-md`}
                 >
-                  <div className="mb-2">{cat.renderIcon()}</div>
+                  <div className="mb-2.5">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${cat.iconGlow} transition-transform group-hover:scale-110 shadow-sm`}>
+                      {cat.renderIcon()}
+                    </div>
+                  </div>
                   <div>
-                    <p className="font-semibold text-xs text-slate-900 dark:text-[#F8F6F1] group-hover:text-[#8C6D2D] dark:group-hover:text-[#C9A96E] transition-colors leading-tight">
+                    <p className={`font-bold text-xs text-slate-900 dark:text-[#F8F6F1] ${cat.activeText} transition-colors leading-tight`}>
                       {cat.label}
                     </p>
-                    <p className="text-[13px] text-slate-600 dark:text-[#C6B79F] mt-1 leading-snug">
+                    <p className="text-[12px] text-slate-500 dark:text-[#94A3B8] group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors mt-1 leading-snug">
                       {cat.desc}
                     </p>
                   </div>
-                  <span className="absolute bottom-2.5 right-3 text-[13px] text-[#8C6D2D] dark:text-[#C9A96E] opacity-0 group-hover:opacity-100 transition-opacity font-bold">
+                  <span className="absolute bottom-2.5 right-3 text-[11px] text-[#8C6D2D] dark:text-[#C6A96B] opacity-0 group-hover:opacity-100 transition-opacity font-bold flex items-center gap-0.5">
                     ถอดรหัส ➔
                   </span>
                 </a>
