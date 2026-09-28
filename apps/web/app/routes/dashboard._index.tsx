@@ -25,6 +25,7 @@ import i18next from "~/lib/i18n/i18n.server";
 import { AstralIcon } from "~/components/ui/AstralIcon";
 import { ActiveSubjectBanner } from "~/components/subject/ActiveSubjectBanner";
 import { resolveActiveSubject } from "~/services/activeSubject.server";
+import { SocialStoryModal } from "~/components/cards/SocialStoryModal";
 
 export const meta: MetaFunction = () => [
   { title: "วันนี้ — PhopePhum" },
@@ -268,6 +269,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     yamEndTimeISO,
     yam: {
       name: yam.yamName,
+      period: yam.period,
       level: yam.travelAuspiciousness.level,
       label: yam.travelAuspiciousness.label,
       ticks: yam.travelAuspiciousness.ticks,
@@ -438,6 +440,7 @@ export default function TodayScreen() {
   const [greeting, setGreeting] = useState("");
   const [showReward, setShowReward] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
+  const [isStoryModalOpen, setIsStoryModalOpen] = useState(false);
 
   useEffect(() => {
     const now = new Date();
@@ -618,6 +621,24 @@ export default function TodayScreen() {
                   </span>
                 )}
               </div>
+            </div>
+
+            {/* ── 📸 Creator Social Story Share Button ── */}
+            <div className="mt-4 pt-3 border-t border-white/10 flex flex-col sm:flex-row gap-2 items-center justify-between">
+              <span className="text-[11px] text-[#C6B79F] flex items-center gap-1.5 font-medium">
+                <span>✨</span> แบ่งปันเรื่องราวและพลังงานดวงดาวของคุณ
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsStoryModalOpen(true)}
+                className="w-full sm:w-auto py-2 px-4 rounded-xl bg-gradient-to-r from-[#C6A96B] via-[#E2C785] to-[#D9BC82] text-[#020617] font-display text-xs font-bold shadow-md shadow-[#C6A96B]/20 hover:brightness-110 active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <span>📸</span>
+                <span>สร้างการ์ดสตอรี่แชร์โซเชียล (IG / TikTok / FB)</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-black/20 text-[#020617] font-bold">
+                  ✦ NEW
+                </span>
+              </button>
             </div>
           </div>
         </div>
@@ -1048,6 +1069,26 @@ export default function TodayScreen() {
           </Link>
         </div>
       </div>
+
+      {/* ── Social Story Modal ── */}
+      <SocialStoryModal
+        isOpen={isStoryModalOpen}
+        onClose={() => setIsStoryModalOpen(false)}
+        data={{
+          userName: currentSubjectName,
+          userTier: profile?.subscription_tier || "free",
+          dateStr: dateLabel,
+          lunarStr: dayIntelligence.lunarDayInfo.lunarDateStr,
+          yamName: yam.name,
+          yamPeriod: yam.period === "day" ? "กลางวัน" : "กลางคืน",
+          auspiciousTime: goldenWindow ? `${goldenWindow.startTime} - ${goldenWindow.endTime}` : undefined,
+          energyScore: dayIntelligence.overallScore,
+          wisdomTitle: dayIntelligence.dailyTheme,
+          wisdomQuote: (wisdomIntelligence as any)?.affirmation || (wisdomIntelligence as any)?.insight || dayIntelligence.dailySummary,
+          doList: doList,
+          avoidList: avoidList,
+        }}
+      />
     </div>
   );
 }

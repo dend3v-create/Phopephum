@@ -1,11 +1,29 @@
 {
   "version": 1,
   "skills": {
+    "ai-avatar-video": {
+      "source": "genmedia-labs/skills",
+      "sourceType": "github",
+      "skillPath": "ai-avatar-video/SKILL.md",
+      "computedHash": "d16c4d30049bbd87b94c4e66a10cbd89f0d1dbb62544fb771c68deeb41ddce7e"
+    },
+    "ai-image-generation": {
+      "source": "genmedia-labs/skills",
+      "sourceType": "github",
+      "skillPath": "ai-image-generation/SKILL.md",
+      "computedHash": "06f41b40b32a080bc38536156b80a7d4a3175e1b1eeece55fc125e54bee467f3"
+    },
     "copywriting": {
       "source": "coreyhaines31/marketingskills",
       "sourceType": "github",
       "skillPath": "skills/copywriting/SKILL.md",
       "computedHash": "81ce7ad67c2e99e96148f47c2816678bd1ebfc831cb455e836441f2c65ccf815"
+    },
+    "image-outpainting": {
+      "source": "genmedia-labs/skills",
+      "sourceType": "github",
+      "skillPath": "image-outpainting/SKILL.md",
+      "computedHash": "1bc3e26711c935463c9b0d64c69209cc200c89bd9cb31f4c9f78396122cd5805"
     },
     "landing-page-conversion-audit": {
       "source": "autonnel/autonnel-skills",
