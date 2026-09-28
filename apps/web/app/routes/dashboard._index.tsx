@@ -505,24 +505,6 @@ export default function TodayScreen() {
       className="max-w-2xl mx-auto space-y-6 pt-1 px-3 sm:px-4"
       style={{ paddingBottom: "calc(84px + env(safe-area-inset-bottom, 0px))" }}
     >
-      {/* ── แถบสลับและจัดการเจ้าชะตาแบบเรียลไทม์ (Active Subject Banner) ── */}
-      {activeSubject && (
-        <ActiveSubjectBanner
-          currentSubject={{
-            id: activeSubject.id,
-            name: activeSubject.name,
-            birthDate: activeSubject.birthDate,
-            birthTime: activeSubject.birthTime,
-            birthPlace: activeSubject.birthPlace,
-            isCustomer: activeSubject.isCustomer,
-          }}
-          customers={customers || []}
-          profileName={profile?.display_name || "ฉัน (เจ้าของบัญชี)"}
-          personLimit={personLimit}
-          hasReachedLimit={hasReachedLimit}
-        />
-      )}
-
       {/* ── Login Reward Toast ── */}
       {showReward && loginReward && (
         <LoginRewardToast
@@ -631,7 +613,7 @@ export default function TodayScreen() {
               <button
                 type="button"
                 onClick={() => setIsStoryModalOpen(true)}
-                className="w-full sm:w-auto py-2 px-4 rounded-xl bg-gradient-to-r from-[#C6A96B] via-[#E2C785] to-[#D9BC82] text-[#020617] font-display text-xs font-bold shadow-md shadow-[#C6A96B]/20 hover:brightness-110 active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#C6A96B] via-[#E2C785] to-[#D9BC82] text-[#020617] font-display text-xs font-bold shadow-md shadow-[#C6A96B]/20 hover:brightness-110 active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>📸</span>
                 <span>สร้างการ์ดสตอรี่แชร์โซเชียล (IG / TikTok / FB)</span>
@@ -643,63 +625,6 @@ export default function TodayScreen() {
           </div>
         </div>
       </div>
-
-      {/* ── CARD 2: ⭐ GOLDEN WINDOW SPOTLIGHT ── */}
-      {goldenWindow && (
-        <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/50 overflow-hidden relative animate-fade-up card-glass-gold shadow-lg shadow-[#C6A96B]/10">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="text-xl">⭐</span>
-              <p className="text-xs font-black uppercase tracking-[0.2em] text-[#F2D49B]">
-                ช่วงเวลาทองคำสูงสุดของวัน
-              </p>
-            </div>
-            <span className="px-2.5 py-1 rounded-full text-xs font-black bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-              คะแนน {goldenWindow.score}%
-            </span>
-          </div>
-
-          <div className="mt-2 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-            <div>
-              <span className="font-display text-2xl sm:text-3xl font-extrabold text-[#F8F6F1] tracking-tight">
-                {goldenWindow.startTime} – {goldenWindow.endTime} น.
-              </span>
-              <p className="text-xs sm:text-sm text-[#E2E8F0] mt-1.5 leading-relaxed">
-                {goldenWindow.plainAdvice}
-              </p>
-            </div>
-          </div>
-
-          {/* Suitable activities tags */}
-          {goldenWindow.suitableFor && goldenWindow.suitableFor.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {goldenWindow.suitableFor.map((act, i) => (
-                <span
-                  key={i}
-                  className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 text-[#F8F6F1] border border-white/15"
-                >
-                  ✓ {act}
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* CTA: ใช้นัดหมายช่วงเวลานี้ */}
-          <div className="mt-5 pt-4 border-t border-[#C6A96B]/25 flex items-center justify-between">
-            <p className="text-xs text-[#C6B79F]">
-              ใช้จังหวะเวลานี้ให้เกิดประโยชน์สูงสุด
-            </p>
-            <Link
-              to={`/dashboard/calendar?date=${bkkDateStr}&time=${goldenWindow.startTime}`}
-              className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-xl text-xs font-bold text-[#020617] bg-gradient-to-r from-[#C6A96B] via-[#F2D49B] to-[#C6A96B] hover:opacity-95 active:scale-95 transition-all shadow-md shadow-[#C6A96B]/20"
-            >
-              <AstralIcon name="spark" size="xs" />
-              <span>ใช้นัดหมายช่วงนี้</span>
-              <span>→</span>
-            </Link>
-          </div>
-        </div>
-      )}
 
       {/* ── CARD 3: RECOMMENDED ACTIONS & THINGS TO AVOID (3-SECOND RULE) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 animate-fade-up">

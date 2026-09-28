@@ -30,6 +30,7 @@ import { Button } from "~/components/ui/Button";
 import { Card } from "~/components/ui/Card";
 import { InteractiveTaksaCard } from "~/components/taksa/InteractiveTaksaCard";
 import { CombinedMahaCard } from "~/components/taksa/CombinedMahaCard";
+import { SocialStoryModal } from "~/components/cards/SocialStoryModal";
 import type { Env } from "~/env.server";
 import type { HoroscopeResult } from "@phopephum/types";
 import type { YamResult } from "@phopephum/engine";
@@ -535,6 +536,7 @@ export default function HoroscopePage() {
 
   // ── ระบบจัดการ Tabs ย่อย (4 Tabs) ──
   const [activeTab, setActiveTab] = useState<"calc" | "chart" | "taksa" | "analysis">("analysis");
+  const [isStoryModalOpen, setIsStoryModalOpen] = useState<boolean>(false);
 
   // สกัดข้อมูลดวงดาวจรสำคัญเพื่อแสดงผลภาพรวม Personal Insight
   const taksaTransitMap = activeResult?.taksaMaha?.taksaTransit?.map || activeResult?.phopephumResult?.taksaTransit?.map;
@@ -1012,6 +1014,25 @@ export default function HoroscopePage() {
         <p className="text-[#94A3B8] text-sm mt-1">
           {formattedTransitDate}
         </p>
+      </div>
+
+      {/* ── 📸 Creator Social Story Share Banner ── */}
+      <div className="p-3 sm:p-4 rounded-2xl border border-[#C6A96B]/30 bg-gradient-to-r from-[#C6A96B]/15 via-[#0A2240]/40 to-[#C6A96B]/15 flex flex-col sm:flex-row items-center justify-between gap-3 shadow-md">
+        <div className="flex items-center gap-2.5 text-xs text-[#F8F6F1]">
+          <span className="text-base">✨</span>
+          <span className="font-medium text-[#D9CDB7]">แบ่งปันพลังงานดวงชะตาและผังดวงจักรพรรดิสู่โซเชียล</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setIsStoryModalOpen(true)}
+          className="w-full sm:w-auto py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#C6A96B] via-[#E2C785] to-[#D9BC82] text-[#020617] font-display text-xs font-bold shadow-md shadow-[#C6A96B]/20 hover:brightness-110 active:scale-[0.97] transition-all flex items-center justify-center gap-1.5 cursor-pointer shrink-0"
+        >
+          <span>📸</span>
+          <span>สร้างการ์ดสตอรี่แชร์โซเชียล (IG / TikTok / FB)</span>
+          <span className="text-[9px] px-1.5 py-0.2 rounded-full bg-black/20 text-[#020617] font-bold">
+            ✦ NEW
+          </span>
+        </button>
       </div>
 
       {/* ── Sub-menu Card Navigation — บนสุด ── */}
@@ -2003,6 +2024,33 @@ export default function HoroscopePage() {
           </div>
         </div>
       )}
+
+      {/* ── Social Story Modal ── */}
+      <SocialStoryModal
+        isOpen={isStoryModalOpen}
+        onClose={() => setIsStoryModalOpen(false)}
+        data={{
+          userName: currentSubjectName,
+          userTier: "WISDOM PRO",
+          dateStr: formattedTransitDate,
+          lunarStr: lunar?.lunarDateStr || lunar?.moonPhase || "ผังดวง ๗ ตัว ๙ ฐาน",
+          yamName: activeResult?.taksaNatal?.dayName ? `วัน${activeResult.taksaNatal.dayName}` : "ทักษากำเนิด",
+          yamPeriod: "จักรพรรดิ",
+          energyScore: 95,
+          wisdomTitle: `ผังดวงจักรพรรดิ · ${currentSubjectName}`,
+          wisdomQuote: `วิเคราะห์ผังพลังงานชีวิต เสวยดาวศุภเคราะห์ศรีจร (${sriStarNum ? STAR_NAMES[sriStarNum as StarNumber] : "ดาวมงคล"}) หนุนนำบารมีและความสำเร็จอันยั่งยืน`,
+          doList: [
+            sriStarNum ? `ส่งเสริมพลังดาว ${STAR_NAMES[sriStarNum as StarNumber]} (ศรีจร)` : "ลงมือทำตามแผนงานหลัก",
+            dechStarNum ? `ใช้อำนาจบารมีดาว ${STAR_NAMES[dechStarNum as StarNumber]} (เดชจร)` : "บริหารจัดการอย่างมีวิสัยทัศน์",
+            montriStarNum ? `ขอคำปรึกษาผู้ใหญ่ดาว ${STAR_NAMES[montriStarNum as StarNumber]} (มนตรีจร)` : "เชื่อมโยงความร่วมมือที่ดี",
+          ],
+          avoidList: [
+            kaliStarNum ? `ระมัดระวังอุปสรรคดาว ${STAR_NAMES[kaliStarNum as StarNumber]} (กาลกิณีจร)` : "การตัดสินใจด้วยความหุนหันพลันแล่น",
+            "การรับภาระเกินกำลังโดยไม่วางแผน",
+          ],
+        }}
+      />
+
     </div>
   );
 }
@@ -2981,6 +3029,7 @@ function FateMatrixPanel({
         )}
       </div>
     </Card>
-    </div>
+  </div>
   );
 }
+
