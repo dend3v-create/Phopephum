@@ -26,7 +26,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlanDef> = {
     tag: null,
     features: [
       "ยามอัฏฐกาลเต็มผัง (กลางวัน-กลางคืน)",
-      "วิชาเลข ๗ ตัว ๙ ฐาน 35 ภพเรือน ฐานกำลังพระเคราะห์ 19 ฐาน (ตนเอง)",
+      "วิชาเลข ๗ ตัว ๙ ฐาน 35 ภพเรือน (ตนเอง)",
       "ปฏิทินจันทรคติไทย 100 ปีแท้ (สุริยยาตร์)",
       "AI Life Report 1 ครั้ง/เดือน",
       "Wisdom AI 20 ครั้ง/เดือน",
@@ -92,7 +92,7 @@ export const SUBSCRIPTION_PLANS: Record<string, SubscriptionPlanDef> = {
     tag: "Master Class",
     features: [
       "ปลดล็อคเครื่องมือสำหรับนักพยากรณ์ เข้าถึงหลักวิชาลึกซึ้ง",
-      "ผังดวงจักรพรรดิ 35 ภพ 19 ฐาน + สุริยยาตร์แท้",
+      "ผังดวงจักรพรรดิ 35 ภพเรือน + สุริยยาตร์แท้",
       "AI Life Report 10 ครั้ง/เดือน (Fair Use)",
       "Wisdom AI ใช้งานจุใจ (Extensive + Fair Use)",
       "บันทึกดวงสูงสุด 100 รายชื่อ",

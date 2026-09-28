@@ -77,7 +77,8 @@ const REPORT_TYPES = [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const { profile } = await requireMinPlan("basic", request, env);
+  const user = await requireAuth(request, env);
+  const profile = await getProfile(user.id, request, env);
   const aiLimit = getAiReportLimit(profile);
   
   const locale = await i18next.getLocale(request);
@@ -200,10 +201,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
       .insert({
         user_id: user.id,
         report_type: reportType,
-        display_name: displayName,
-        birth_date: birthDate,
-        birth_time: birthTime || null,
-        birth_place: birthPlace || null,
         content: reportText,
       })
       .select("id")

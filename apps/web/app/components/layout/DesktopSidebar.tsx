@@ -171,21 +171,22 @@ export function DesktopSidebar({
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const [isProHubOpen, setIsProHubOpen] = useState(false);
+  const [isProHubOpen, setIsProHubOpen] = useState(true);
 
   return (
     <>
       {/* Mobile Drawer Backdrop */}
       {isMobileDrawerOpen && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm z-40 md:hidden animate-fade-in"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-[60] md:hidden transition-opacity duration-300 animate-fade-in"
           onClick={onCloseMobileDrawer}
+          aria-hidden="true"
         />
       )}
 
       <aside
-        className={`flex flex-col w-72 max-w-[85vw] p-4 fixed h-full border-r z-50 transition-transform duration-300 touch-manipulation ${
-          isMobileDrawerOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+        className={`flex flex-col w-80 max-w-[88vw] md:w-64 p-4 fixed top-0 bottom-0 left-0 border-r z-[70] md:z-30 transition-transform duration-300 ease-out touch-manipulation select-none ${
+          isMobileDrawerOpen ? "translate-x-0 shadow-2xl shadow-black/80" : "-translate-x-full md:translate-x-0"
         }`}
         style={{
           background: "var(--sidebar-bg, rgba(2,6,23,0.98))",
@@ -193,11 +194,11 @@ export function DesktopSidebar({
           WebkitBackdropFilter: "blur(24px)",
           borderColor: "var(--border-gold, rgba(217,188,130,0.18))",
           paddingTop: "max(1rem, env(safe-area-inset-top, 0px))",
-          paddingBottom: "max(1rem, env(safe-area-inset-bottom, 0px))",
+          paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 0px))",
         }}
       >
-        {/* ── Brand Header ── */}
-        <div className="mb-6 flex items-center justify-between">
+        {/* ── Brand Header & Mobile Close Button ── */}
+        <div className="mb-4 pb-3 border-b border-white/10 flex items-center justify-between shrink-0">
           <Link to="/dashboard" onClick={onCloseMobileDrawer} className="flex items-center gap-3 min-h-[44px]">
             <div className="relative w-9 h-9 rounded-full bg-gradient-to-br from-[#C6A96B] to-[#D9BC82] flex items-center justify-center shadow-lg shadow-[#C6A96B]/20 shrink-0">
               <span className="text-[#020617] text-sm font-black font-display">P</span>
@@ -212,26 +213,32 @@ export function DesktopSidebar({
             </div>
           </Link>
 
-          {/* Close button on mobile drawer */}
+          {/* Close / Hide Button on Mobile Drawer */}
           <button
+            type="button"
             onClick={onCloseMobileDrawer}
-            className="md:hidden min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg text-slate-400 hover:text-white"
-            aria-label="Close menu"
+            className="md:hidden flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 active:scale-95 text-xs text-[#94A3B8] hover:text-[#F8F6F1] transition-all"
+            aria-label="ซ่อนเมนู"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
-              <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
-            </svg>
+            <span className="text-xs">✕</span>
+            <span className="font-medium text-[11px]">ซ่อน</span>
           </button>
         </div>
 
-        {/* ── Scrollable Navigation Items ── */}
-        <nav className="flex-1 overflow-y-auto space-y-5 pr-1 -mr-1">
+        {/* ── Scrollable Container for ALL Navigation & Footer on Mobile ── */}
+        <div
+          className="flex-1 overflow-y-auto overscroll-contain space-y-5 pr-1 -mr-1 scrollbar-thin scrollbar-thumb-white/10"
+          style={{
+            WebkitOverflowScrolling: "touch",
+            paddingBottom: "calc(5rem + env(safe-area-inset-bottom, 0px))",
+          }}
+        >
           {/* Main 5 Tabs */}
           <div>
             <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] dark:text-[#64748B] px-3 mb-1.5 opacity-80">
               {t("nav.main_menu", "เมนูหลัก")}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {PRIMARY_NAV.map((item) => {
                 const isActive = item.exact
                   ? currentPath === item.to
@@ -243,14 +250,14 @@ export function DesktopSidebar({
                     key={item.to}
                     to={item.to}
                     onClick={onCloseMobileDrawer}
-                    className={`relative flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 ${
+                    className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all duration-200 active:scale-[0.98] ${
                       isActive
-                        ? "text-[#C6A96B] dark:text-[#F2D49B] bg-[rgba(198,169,107,0.12)] shadow-sm"
+                        ? "text-[#C6A96B] dark:text-[#F2D49B] bg-[rgba(198,169,107,0.14)] shadow-sm border border-[#C6A96B]/30"
                         : "text-[var(--text-muted)] hover:text-[var(--text-body)] hover:bg-white/5"
                     }`}
                   >
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#C6A96B] rounded-r-full shadow-[0_0_8px_rgba(198,169,107,0.8)]" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-[#C6A96B] rounded-r-full shadow-[0_0_10px_rgba(198,169,107,0.9)]" />
                     )}
                     <SidebarIcon name={item.icon} />
                     <span>{label}</span>
@@ -265,7 +272,7 @@ export function DesktopSidebar({
             <p className="text-[9px] font-bold uppercase tracking-[0.25em] text-[#94A3B8] dark:text-[#64748B] px-3 mb-1.5 opacity-80">
               {t("nav.features", "เครื่องมือเสริม")}
             </p>
-            <div className="space-y-0.5">
+            <div className="space-y-1">
               {SECONDARY_NAV.map((item) => {
                 const isActive = currentPath.startsWith(item.to);
                 const label = t(`nav.${item.labelKey}`, item.defaultLabel);
@@ -275,14 +282,14 @@ export function DesktopSidebar({
                     key={item.to}
                     to={item.to}
                     onClick={onCloseMobileDrawer}
-                    className={`relative flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 ${
+                    className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 active:scale-[0.98] ${
                       isActive
-                        ? "text-[#C6A96B] dark:text-[#F2D49B] bg-[rgba(198,169,107,0.12)]"
+                        ? "text-[#C6A96B] dark:text-[#F2D49B] bg-[rgba(198,169,107,0.14)] border border-[#C6A96B]/30"
                         : "text-[var(--text-muted)] hover:text-[var(--text-body)] hover:bg-white/5"
                     }`}
                   >
                     {isActive && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 bg-[#C6A96B] rounded-r-full" />
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1.5 h-6 bg-[#C6A96B] rounded-r-full" />
                     )}
                     <SidebarIcon name={item.icon} />
                     <span>{label}</span>
@@ -293,20 +300,23 @@ export function DesktopSidebar({
           </div>
 
           {/* Pro Tools Hub (Collapsible Accordion) */}
-          <div className="pt-2 border-t border-[rgba(217,188,130,0.1)]">
+          <div className="pt-2 border-t border-[rgba(217,188,130,0.12)]">
             <button
               type="button"
               onClick={() => setIsProHubOpen(!isProHubOpen)}
-              className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-[0.22em] text-[#C6A96B]/80 hover:text-[#C6A96B] transition-colors"
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-[11px] font-bold uppercase tracking-[0.2em] text-[#C6A96B] hover:bg-white/5 transition-all"
             >
-              <span>{t("nav.pro_tools", "✦ โหมดโหราจารย์")}</span>
-              <span className={`text-xs transition-transform duration-200 ${isProHubOpen ? "rotate-180" : ""}`}>
+              <span className="flex items-center gap-1.5">
+                <span>✦</span>
+                <span>{t("nav.pro_tools", "เครื่องมือนักพยากรณ์")}</span>
+              </span>
+              <span className={`text-xs transition-transform duration-200 text-[#C6A96B] ${isProHubOpen ? "rotate-180" : ""}`}>
                 ▼
               </span>
             </button>
 
-            {(isProHubOpen || isPro) && (
-              <div className="space-y-0.5 mt-1 animate-fade-in">
+            {isProHubOpen && (
+              <div className="space-y-1 mt-1.5 pl-1 animate-fade-in">
                 {PRO_TOOLS.map((item) => {
                   const isActive = currentPath.startsWith(item.to);
                   const label = t(`nav.${item.labelKey}`, item.defaultLabel);
@@ -316,9 +326,9 @@ export function DesktopSidebar({
                       key={item.to}
                       to={item.to}
                       onClick={onCloseMobileDrawer}
-                      className={`relative flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[11px] font-medium transition-all ${
+                      className={`relative flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-medium transition-all active:scale-[0.98] ${
                         isActive
-                          ? "text-[#C6A96B] bg-[rgba(198,169,107,0.12)]"
+                          ? "text-[#C6A96B] bg-[rgba(198,169,107,0.14)] border border-[#C6A96B]/30"
                           : "text-[var(--text-muted)] hover:text-[var(--text-body)] hover:bg-white/5"
                       }`}
                     >
@@ -330,11 +340,11 @@ export function DesktopSidebar({
 
                 {/* Operator / Admin links */}
                 {(role === "admin" || role === "operator") && (
-                  <div className="pt-2 mt-2 border-t border-white/5 space-y-0.5">
+                  <div className="pt-2 mt-2 border-t border-white/10 space-y-1">
                     <Link
                       to="/operator"
                       onClick={onCloseMobileDrawer}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-sky-400 hover:bg-sky-500/10"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-sky-400 hover:bg-sky-500/10 border border-sky-500/20"
                     >
                       <span>🛡️ {t("nav.operator_system", "ระบบ Operator")}</span>
                     </Link>
@@ -342,7 +352,7 @@ export function DesktopSidebar({
                       <Link
                         to="/admin/approvals"
                         onClick={onCloseMobileDrawer}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-semibold text-amber-400 hover:bg-amber-500/10"
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-amber-400 hover:bg-amber-500/10 border border-amber-500/20"
                       >
                         <span>⚡ {t("nav.approvals", "อนุมัติคำขอ")}</span>
                       </Link>
@@ -352,93 +362,94 @@ export function DesktopSidebar({
               </div>
             )}
           </div>
-        </nav>
 
-        {/* ── Sidebar Footer ── */}
-        <div className="border-t pt-3 mt-2 space-y-2.5" style={{ borderColor: "rgba(217,188,130,0.12)" }}>
-          {/* Upgrade Banner for Free Users */}
-          {!isPro && (
-            <Link
-              to="/dashboard/upgrade"
-              onClick={onCloseMobileDrawer}
-              className="flex items-center justify-center gap-2 w-full py-2 rounded-xl text-xs font-bold tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md shadow-[#C6A96B]/15"
-              style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)", color: "#020617" }}
-            >
-              <span>✦</span>
-              <span>{t("nav.upgrade_membership", "อัปเกรดสมาชิก PRO")}</span>
-            </Link>
-          )}
-
-          {/* Sands of Time Token Progress */}
-          <Link
-            to="/dashboard/upgrade?tab=sands"
-            onClick={onCloseMobileDrawer}
-            className="block px-3 py-1.5 rounded-xl border transition-all hover:border-[#C6A96B]/40 hover:bg-[#C6A96B]/[0.08]"
-            style={{ background: "rgba(198,169,107,0.05)", borderColor: "rgba(198,169,107,0.15)" }}
-            title={!isPro ? "คลิกเพื่อเติมละอองทรายกาลเวลา" : undefined}
-          >
-            <div className="flex justify-between items-center text-[10px] font-bold text-[#C6A96B]">
-              <span className="tracking-wider flex items-center gap-1.5">
-                <AstralIcon name="sandglass" size="xs" variant="gold" />
-                <span>{t("sands_of_time", "ทรายกาลเวลา")}</span>
-              </span>
-              {isPro ? (
-                <span className="text-[10px] uppercase font-extrabold">{t("unlimited", "UNLIMITED")}</span>
-              ) : (
-                <span className="font-mono flex items-center gap-1">
-                  <span>{timeSands}</span>
-                  <span className="text-[9px] text-[#C6A96B]/70 font-normal hover:underline">+ เติม</span>
-                </span>
-              )}
-            </div>
+          {/* ── Integrated Footer Section inside Scroll Container for Full Visibility ── */}
+          <div className="border-t pt-4 mt-4 space-y-3" style={{ borderColor: "rgba(217,188,130,0.18)" }}>
+            {/* Upgrade Banner for Free Users */}
             {!isPro && (
-              <div className="w-full h-1 rounded-full overflow-hidden mt-1" style={{ background: "var(--bg-base)" }}>
-                <div
-                  className="bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] h-full transition-all duration-500"
-                  style={{ width: `${Math.min(100, (timeSands / 15) * 100)}%` }}
-                />
-              </div>
-            )}
-          </Link>
-
-          {/* User info & Controls */}
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center gap-2 min-w-0">
-              <div
-                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border"
-                style={{
-                  background: "rgba(198,169,107,0.15)",
-                  borderColor: "rgba(217,188,130,0.25)",
-                  color: "var(--accent-gold)",
-                }}
+              <Link
+                to="/dashboard/upgrade"
+                onClick={onCloseMobileDrawer}
+                className="flex items-center justify-center gap-2 w-full py-2.5 rounded-2xl text-xs font-bold tracking-wide transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-[#C6A96B]/20"
+                style={{ background: "linear-gradient(135deg, #C6A96B, #D9BC82)", color: "#020617" }}
               >
-                {displayName.charAt(0).toUpperCase()}
-              </div>
-              <div className="min-w-0">
-                <p className="text-xs truncate font-semibold leading-tight text-[var(--text-body)]">
-                  {displayName}
-                </p>
-                <p className="text-[10px] truncate text-[var(--text-muted)] leading-tight">
-                  {email}
-                </p>
-              </div>
-            </div>
+                <span>✦</span>
+                <span>{t("nav.upgrade_membership", "อัปเกรดสมาชิก PRO")}</span>
+              </Link>
+            )}
 
-            <div className="flex items-center gap-1">
-              <TimingReminderBell />
-              <ThemeToggle />
-            </div>
-          </div>
-
-          {/* Logout button */}
-          <Form method="post" action="/logout">
-            <button
-              type="submit"
-              className="w-full text-left text-[11px] px-2 py-1 rounded-lg text-[var(--text-muted)] hover:text-rose-400 hover:bg-white/5 transition-colors"
+            {/* Sands of Time Token Progress */}
+            <Link
+              to="/dashboard/upgrade?tab=sands"
+              onClick={onCloseMobileDrawer}
+              className="block px-3.5 py-2.5 rounded-2xl border transition-all hover:border-[#C6A96B]/40 hover:bg-[#C6A96B]/[0.08]"
+              style={{ background: "rgba(198,169,107,0.06)", borderColor: "rgba(198,169,107,0.20)" }}
             >
-              ← {t("nav.logout", "ออกจากระบบ")}
-            </button>
-          </Form>
+              <div className="flex justify-between items-center text-xs font-bold text-[#C6A96B]">
+                <span className="tracking-wider flex items-center gap-2">
+                  <AstralIcon name="sandglass" size="sm" variant="gold" />
+                  <span>{t("sands_of_time", "SANDS OF TIME")}</span>
+                </span>
+                {isPro ? (
+                  <span className="text-[10px] px-2 py-0.5 rounded-md bg-[#C6A96B]/20 text-[#C6A96B] uppercase font-extrabold">
+                    {t("unlimited", "UNLIMITED")}
+                  </span>
+                ) : (
+                  <span className="font-mono flex items-center gap-1.5">
+                    <span>{timeSands}</span>
+                    <span className="text-[10px] text-[#C6A96B]/80 font-normal underline">+ เติม</span>
+                  </span>
+                )}
+              </div>
+              {!isPro && (
+                <div className="w-full h-1.5 rounded-full overflow-hidden mt-2" style={{ background: "var(--bg-base)" }}>
+                  <div
+                    className="bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] h-full transition-all duration-500"
+                    style={{ width: `${Math.min(100, (timeSands / 15) * 100)}%` }}
+                  />
+                </div>
+              )}
+            </Link>
+
+            {/* User info & Controls */}
+            <div className="flex items-center justify-between p-2 rounded-2xl bg-white/[0.03] border border-white/5">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 border"
+                  style={{
+                    background: "rgba(198,169,107,0.15)",
+                    borderColor: "rgba(217,188,130,0.30)",
+                    color: "var(--accent-gold)",
+                  }}
+                >
+                  {displayName.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs truncate font-semibold leading-tight text-[var(--text-body)]">
+                    {displayName}
+                  </p>
+                  <p className="text-[10px] truncate text-[var(--text-muted)] leading-tight">
+                    {email}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-1">
+                <TimingReminderBell />
+                <ThemeToggle />
+              </div>
+            </div>
+
+            {/* Logout button */}
+            <Form method="post" action="/logout">
+              <button
+                type="submit"
+                className="w-full text-center text-xs font-semibold py-2 px-3 rounded-xl border border-rose-500/20 text-rose-400 bg-rose-500/5 hover:bg-rose-500/10 transition-colors"
+              >
+                ← {t("nav.logout", "ออกจากระบบ")}
+              </button>
+            </Form>
+          </div>
         </div>
       </aside>
     </>

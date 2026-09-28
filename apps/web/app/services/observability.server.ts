@@ -14,7 +14,7 @@
 
 import { createClient } from "@supabase/supabase-js";
 import type { Env } from "~/env.server";
-import { calculateOmiseFee } from "./omise.server";
+import { calculateStripeFee } from "./payment.server";
 import { getUserPlan, getAiReportLimit, getPersonLimit } from "./permissions.server";
 import { CANONICAL_SKUS, resolveProductFromSku } from "../lib/plans";
 import {

@@ -9,11 +9,12 @@ export interface Env {
   AI_WORKER_URL: string;
   AI_WORKER_SECRET: string;
 
-  // Stripe (Legacy / Alternative)
+  // Stripe (Primary Payment Gateway: PromptPay QR, Credit/Debit Cards)
   STRIPE_SECRET_KEY?: string;
+  STRIPE_PUBLISHABLE_KEY?: string;
   STRIPE_WEBHOOK_SECRET?: string;
 
-  // Omise (Primary Thailand Gateway)
+  // Legacy / Alternative Gateway
   OMISE_PUBLIC_KEY?: string;
   OMISE_SECRET_KEY?: string;
   OMISE_WEBHOOK_SECRET?: string;
@@ -26,6 +27,8 @@ export interface Env {
 
   // Resend
   RESEND_API_KEY: string;
+  RESEND_FROM?: string;
+  ADMIN_EMAIL?: string;
 
   // LINE Messaging API
   LINE_CHANNEL_ACCESS_TOKEN: string;  // Channel Access Token (Long-lived)

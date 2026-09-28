@@ -5,7 +5,7 @@ import type { Env } from "~/env.server";
 
 /**
  * API: GET /api/payment/status/$id
- * ตรวจสอบสถานะการชำระเงินแบบ Real-time (STEP 6.6)
+ * ตรวจสอบสถานะการชำระเงินแบบ Real-time (รองรับ Stripe Session ID / Request ID)
  */
 export async function loader({ request, params, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -18,7 +18,7 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
 
   const { supabase } = createSupabaseClient(request, env);
 
-  // 1. ตรวจสอบจาก subscription_requests
+  // 1. ตรวจสอบจาก subscription_requests ตาม ID
   let { data: subReq } = await supabase
     .from("subscription_requests")
     .select("id, status, plan, type, note")
@@ -26,8 +26,8 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     .eq("id", requestId)
     .maybeSingle();
 
-  // หากค้นหาด้วย ID ไม่เจอ ลองค้นหาจาก note ที่มี chargeId
-  if (!subReq && requestId.startsWith("chrg_")) {
+  // หากค้นหาด้วย ID ไม่เจอ หรือ parameter เป็น session id (cs_...) หรือ charge id (chrg_... / pi_...)
+  if (!subReq && (requestId.startsWith("cs_") || requestId.startsWith("pi_") || requestId.startsWith("chrg_"))) {
     const { data: byNote } = await supabase
       .from("subscription_requests")
       .select("id, status, plan, type, note")
@@ -80,4 +80,3 @@ export async function loader({ request, params, context }: LoaderFunctionArgs) {
     plan: subReq?.plan || null,
   });
 }
-

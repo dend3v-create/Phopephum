@@ -13,16 +13,30 @@ import type { Env } from "~/env.server";
 
 const LINE_PUSH_URL = "https://api.line.me/v2/bot/message/push";
 
-const PLAN_LABEL: Record<string, string> = {
-  basic:    "BASIC INITIATION (ฟรี)",
-  pro:      "PROFESSIONAL SAGE (฿149/เดือน)",
-  imperial: "IMPERIAL MASTER (฿299/เดือน)",
+export const PLAN_LABEL: Record<string, string> = {
+  free: "เริ่มทดลอง (FREE)",
+  basic: "ยกระดับชีวิต (Premium ฿89/ด.)",
+  premium: "ยกระดับชีวิต (Premium ฿89/ด.)",
+  pro: "มืออาชีพ (Professional ฿289/ด.)",
+  pro_annual: "มืออาชีพ (Professional รายปี ฿2,770/ปี)",
+  master: "โหราจารย์ (Master ฿1,289/ด.)",
+  imperial: "โหราจารย์ (Master ฿1,289/ด.)",
+  sands_50: "50 ละอองทรายกาลเวลา (฿59)",
+  sands_150: "150 ละอองทรายกาลเวลา (฿149)",
+  sands_500: "500 ละอองทรายกาลเวลา (฿399)",
 };
 
-const PLAN_COLOR: Record<string, string> = {
-  basic:    "#94A3B8",
-  pro:      "#C6A96B",
-  imperial: "#4B6FAE",
+export const PLAN_COLOR: Record<string, string> = {
+  free: "#94A3B8",
+  basic: "#34D399",
+  premium: "#34D399",
+  pro: "#D9BC82",
+  pro_annual: "#D9BC82",
+  master: "#C6A96B",
+  imperial: "#C6A96B",
+  sands_50: "#C6A96B",
+  sands_150: "#C6A96B",
+  sands_500: "#C6A96B",
 };
 
 // ─── Push helper ─────────────────────────────────────────────────────────────
@@ -56,8 +70,8 @@ export async function notifyNewRegistration(
 ) {
   if (!env.LINE_CHANNEL_ACCESS_TOKEN || !env.LINE_ADMIN_USER_ID) return;
 
-  const appUrl = env.APP_URL || "https://phopephum-web.pages.dev";
-  const approveUrl = `${appUrl}/admin/approvals?highlight=${data.requestId}`;
+  const appUrl = env.APP_URL || "https://phopephum.com";
+  const approveUrl = `${appUrl}/admin/users`;
   const timeStr = new Date(data.createdAt).toLocaleString("th-TH", {
     timeZone: "Asia/Bangkok",
     dateStyle: "short",
@@ -89,7 +103,7 @@ export async function notifyNewRegistration(
               },
               {
                 type: "text",
-                text: "PhopePhum",
+                text: "PhopePhum OS",
                 color: "#F8F6F1",
                 weight: "bold",
                 size: "lg",
@@ -99,7 +113,7 @@ export async function notifyNewRegistration(
           },
           {
             type: "text",
-            text: "สมาชิกใหม่สมัครเข้าใช้งาน",
+            text: "🌟 สมาชิกใหม่สมัครเข้าใช้งาน",
             color: "#C6A96B",
             size: "xs",
             margin: "sm",
@@ -122,17 +136,9 @@ export async function notifyNewRegistration(
             contents: [
               infoRow("☽", "ชื่อ", data.displayName),
               infoRow("◈", "อีเมล", data.email),
-              infoRow("⌘", "แพ็กเกจ", "BASIC (ฟรี)"),
+              infoRow("⌘", "ระดับสมาชิก", "เริ่มทดลอง (FREE)"),
               infoRow("⟁", "เวลาสมัคร", timeStr),
             ],
-          },
-          {
-            type: "text",
-            text: "⏳ รอการอนุมัติจากแอดมิน",
-            color: "#E8A44A",
-            size: "xs",
-            margin: "md",
-            align: "center",
           },
         ],
       },
@@ -150,7 +156,7 @@ export async function notifyNewRegistration(
             height: "sm",
             action: {
               type: "uri",
-              label: "✅ อนุมัติ / จัดการ",
+              label: "👥 ดูรายชื่อสมาชิก",
               uri: approveUrl,
             },
           },
@@ -178,10 +184,9 @@ export async function notifyPackageRequest(
 ) {
   if (!env.LINE_CHANNEL_ACCESS_TOKEN || !env.LINE_ADMIN_USER_ID) return;
 
-  const appUrl = env.APP_URL || "https://phopephum-web.pages.dev";
-  const approveUrl = `${appUrl}/admin/approvals?highlight=${data.requestId}`;
+  const appUrl = env.APP_URL || "https://phopephum.com";
   const planLabel = PLAN_LABEL[data.plan] ?? data.plan;
-  const planColor = PLAN_COLOR[data.plan] ?? "#94A3B8";
+  const planColor = PLAN_COLOR[data.plan] ?? "#C6A96B";
   const timeStr = new Date(data.createdAt).toLocaleString("th-TH", {
     timeZone: "Asia/Bangkok",
     dateStyle: "short",
@@ -190,7 +195,7 @@ export async function notifyPackageRequest(
 
   const message = {
     type: "flex",
-    altText: `💎 คำขออัปเกรด: ${data.displayName} → ${data.plan.toUpperCase()}`,
+    altText: `💎 รายการสั่งซื้อใหม่: ${data.displayName} (${planLabel})`,
     contents: {
       type: "bubble",
       size: "kilo",
@@ -205,12 +210,12 @@ export async function notifyPackageRequest(
             layout: "horizontal",
             contents: [
               { type: "text", text: "✦", color: planColor, size: "lg", flex: 0 },
-              { type: "text", text: "PhopePhum", color: "#F8F6F1", weight: "bold", size: "lg", margin: "sm" },
+              { type: "text", text: "PhopePhum OS", color: "#F8F6F1", weight: "bold", size: "lg", margin: "sm" },
             ],
           },
           {
             type: "text",
-            text: "คำขออัปเกรดแพ็กเกจ",
+            text: "💎 รายการสั่งซื้อ / อัปเกรดสมาชิก",
             color: planColor,
             size: "xs",
             margin: "sm",
@@ -246,14 +251,6 @@ export async function notifyPackageRequest(
               ...(data.note ? [infoRow("💬", "หมายเหตุ", data.note)] : []),
             ],
           },
-          {
-            type: "text",
-            text: "⏳ ยังไม่ได้ชำระเงิน — รอแอดมินอนุมัติ",
-            color: "#E8A44A",
-            size: "xs",
-            margin: "md",
-            align: "center",
-          },
         ],
       },
       footer: {
@@ -270,8 +267,8 @@ export async function notifyPackageRequest(
             height: "sm",
             action: {
               type: "uri",
-              label: "✅ อนุมัติ / จัดการ",
-              uri: approveUrl,
+              label: "📊 ดูประวัติธุรกรรม",
+              uri: `${appUrl}/admin/payouts`,
             },
           },
         ],
@@ -296,13 +293,16 @@ export async function notifyPaymentSuccess(
 ) {
   if (!env.LINE_CHANNEL_ACCESS_TOKEN || !env.LINE_ADMIN_USER_ID) return;
 
+  const isSands = data.plan.startsWith("sands_");
   const planLabel = PLAN_LABEL[data.plan] ?? data.plan;
   const planColor = PLAN_COLOR[data.plan] ?? "#34D399";
-  const expiryStr = new Date(data.expiresAt).toLocaleDateString("th-TH", { dateStyle: "medium" });
+  const expiryStr = data.expiresAt
+    ? new Date(data.expiresAt).toLocaleDateString("th-TH", { dateStyle: "medium" })
+    : "ไม่มีวันหมดอายุ";
 
   const message = {
     type: "flex",
-    altText: `💰 รับเงินสำเร็จ: ฿${data.amount} จาก ${data.displayName}`,
+    altText: `💰 รับเงินสำเร็จ: ฿${data.amount.toLocaleString()} จาก ${data.displayName} (${planLabel})`,
     contents: {
       type: "bubble",
       size: "kilo",
@@ -312,8 +312,22 @@ export async function notifyPaymentSuccess(
         paddingAll: "16px",
         backgroundColor: "#020617",
         contents: [
-          { type: "text", text: "💰 PAYMENT RECEIVED", color: "#34D399", weight: "bold", size: "xs", letterSpacing: "0.1em" },
-          { type: "text", text: `฿${data.amount.toLocaleString()}`, color: "#F8F6F1", weight: "bold", size: "xxl", margin: "sm" },
+          {
+            type: "text",
+            text: isSands ? "⌛ SANDS REFILL RECEIVED" : "💎 MEMBERSHIP PAYMENT SUCCESS",
+            color: "#34D399",
+            weight: "bold",
+            size: "xs",
+            letterSpacing: "0.1em",
+          },
+          {
+            type: "text",
+            text: `฿${data.amount.toLocaleString()}`,
+            color: "#F8F6F1",
+            weight: "bold",
+            size: "xxl",
+            margin: "sm",
+          },
         ],
       },
       body: {
@@ -323,8 +337,8 @@ export async function notifyPaymentSuccess(
         backgroundColor: "#0A1628",
         contents: [
           infoRow("☽", "ลูกค้า", data.displayName),
-          infoRow("✦", "แพ็กเกจ", planLabel),
-          infoRow("📅", "หมดอายุ", expiryStr),
+          infoRow("✦", "รายการ", planLabel),
+          infoRow(isSands ? "⌛" : "📅", isSands ? "อายุใช้งาน" : "หมดอายุ", expiryStr),
         ],
       },
     },

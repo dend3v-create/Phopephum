@@ -1,18 +1,14 @@
 import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
-import {
-  resolveProductFromSku,
-} from "~/services/permissions.server";
-import {
-  createOmisePromptPayCharge,
-  createOmiseCardCharge,
-} from "~/services/omise.server";
+import { resolveProductFromSku } from "~/services/permissions.server";
+import { getStripeService } from "~/services/payment.server";
+import { notifyPackageRequest } from "~/services/line.server";
 import type { Env } from "~/env.server";
 
 /**
  * API: POST /api/payment/checkout
- * สร้าง Omise PromptPay QR Code หรือ Card Charge (STEP 6.6.4 Hardened)
+ * สร้าง Stripe Checkout Session (รองรับ PromptPay QR และบัตรเครดิต/เดบิต)
  */
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -26,15 +22,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
   try {
     const formData = await request.formData();
     const rawPlan = formData.get("plan") as string;
-    const method = (formData.get("method") as string) || "promptpay";
-    const cardToken = formData.get("cardToken") as string | null;
+    const method = (formData.get("method") as string) || "card";
 
     if (!rawPlan || typeof rawPlan !== "string" || rawPlan.trim() === "") {
       return json({ error: "กรุณาระบุแพ็กเกจที่ต้องการสมัคร" }, { status: 400 });
     }
 
     // 1. Single Source of Truth Resolution: SKU → Product → Price → Entitlement
-    // ไม่เชื่อถือ amount / price / sandsAmount จาก client ใดๆ ทั้งสิ้น
     const product = resolveProductFromSku(rawPlan);
 
     if (!product || product.type === "free") {
@@ -47,43 +41,33 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const canonicalSku = product.sku;
 
     const { supabase } = createSupabaseClient(request, env);
+    const stripe = getStripeService(env);
 
-    // 2. สร้าง Omise Charge ตามช่องทางที่เลือก
-    let charge: any = null;
+    const requestUrl = new URL(request.url);
+    const origin = requestUrl.origin || "https://phopephum.com";
+    const appBaseUrl = env.APP_URL || origin;
+    const successUrl = `${appBaseUrl}/dashboard?payment=success&plan=${canonicalSku}&session_id={CHECKOUT_SESSION_ID}`;
+    const cancelUrl = `${appBaseUrl}/dashboard/upgrade?payment=cancelled&plan=${canonicalSku}`;
 
-    if (method === "card" && cardToken) {
-      charge = await createOmiseCardCharge({
-        amountThb,
-        cardToken,
-        returnUrl: `${env.APP_URL || "http://localhost:8080"}/dashboard?payment=success&plan=${canonicalSku}`,
-        userId: user.id,
-        planCode: canonicalSku,
-        metadata: {
-          requestType,
-          referredBy: profile?.referred_by || null,
-        },
-        env,
-      });
-    } else {
-      // PromptPay QR (Default & Primary Gateway for Thailand)
-      charge = await createOmisePromptPayCharge({
-        amountThb,
-        userId: user.id,
-        planCode: canonicalSku,
-        metadata: {
-          requestType,
-          referredBy: profile?.referred_by || null,
-        },
-        env,
-      });
-    }
+    // 2. สร้าง Stripe Checkout Session
+    const session = await stripe.createCheckoutSession({
+      planId: canonicalSku,
+      amount: amountThb,
+      userId: user.id,
+      userEmail: profile?.email || user.email,
+      successUrl,
+      cancelUrl,
+      referralCode: profile?.referred_by || null,
+      requestType,
+      itemName,
+    });
 
-    if (!charge || !charge.id) {
-      console.error("[Checkout] Omise charge creation failed or returned empty response");
+    if (!session || !session.id) {
+      console.error("[Checkout] Stripe session creation failed or returned empty response");
       return json({ error: "ไม่สามารถสร้างรายการชำระเงินกับเกตเวย์ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 502 });
     }
 
-    // 3. บันทึกคำขอสมัครสมาชิก / ซื้อทรายลงใน subscription_requests ด้วย Canonical SKU
+    // 3. บันทึกคำขอสมัครสมาชิก / ซื้อทรายลงใน subscription_requests
     const { data: subReq, error: dbError } = await supabase
       .from("subscription_requests")
       .insert({
@@ -91,34 +75,39 @@ export async function action({ request, context }: ActionFunctionArgs) {
         type: requestType,
         plan: canonicalSku,
         status: "pending",
-        note: `Omise Charge: ${charge.id} (${method})`,
+        note: `Stripe Session: ${session.id} (${method})`,
       })
       .select()
       .single();
 
-    if (dbError || !subReq) {
+    if (dbError) {
       console.error("[Checkout] DB Insert Error:", dbError);
     }
 
-    const qrCodeUrl = charge?.source?.scannable_code?.image?.download_uri || null;
-    const authorizeUri = charge?.authorize_uri || null;
+    // 4. ส่ง Flex Message แจ้งเตือนแอดมินทาง LINE OA
+    notifyPackageRequest(env, {
+      requestId: subReq?.id || session.id,
+      userId: user.id,
+      displayName: profile?.display_name || user.email || "ผู้ใช้งาน",
+      email: profile?.email || user.email || "",
+      plan: canonicalSku,
+      note: `สร้างรายการชำระเงิน Stripe ฿${amountThb.toLocaleString()}`,
+      createdAt: new Date().toISOString(),
+    }).catch((err) => console.warn("[Checkout] LINE notify warning:", err));
 
     return json({
       success: true,
       paymentType: method,
-      chargeId: charge.id,
-      requestId: subReq?.id || charge.id,
+      sessionId: session.id,
+      checkoutUrl: session.url,
+      requestId: subReq?.id || session.id,
       amount: amountThb,
       planCode: canonicalSku,
       itemName,
-      qrCodeUrl,
-      authorizeUri,
-      expiresInSeconds: 900,
+      expiresInSeconds: 1800, // 30 นาทีสำหรับ Stripe Checkout
     });
   } catch (error: any) {
     console.error("[Checkout API] Error:", error);
     return json({ error: error.message || "เกิดข้อผิดพลาดในการสร้างรายการชำระเงิน" }, { status: 500 });
   }
 }
-
-

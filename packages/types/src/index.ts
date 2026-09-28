@@ -882,6 +882,8 @@ export interface PayoutRequest {
   failureMessage?: string | null;
   failedAt?: string | null;
   omiseTransferId?: string | null;
+  stripeTransferId?: string | null;
+  gatewayTransferId?: string | null;
   reviewedBy?: string | null;
   reviewedAt?: string | null;
   createdAt: string;
@@ -981,7 +983,7 @@ export type DiscrepancyCode =
   | "DISC-02" // MISSING_COMMISSION
   | "DISC-03" // COMMISSION_AMOUNT_MISMATCH
   | "DISC-04" // HOLDING_OVERDUE_CLEARANCE
-  | "DISC-05" // ORPHANED_OMISE_TRANSFER
+  | "DISC-05" // ORPHANED_GATEWAY_OR_OMISE_TRANSFER
   | "DISC-06" // TRANSFER_SETTLEMENT_MISSING
   | "DISC-07" // LEDGER_DRIFT_DETECTED
   | "DISC-08"; // RECONCILING_SLA_EXCEEDED
@@ -1085,6 +1087,8 @@ export interface Wht50TawiCertificateRecord {
   netPaidAmountThb: number;
   whtCertificateNumber?: string | null;
   omiseTransferId?: string | null;
+  stripeTransferId?: string | null;
+  gatewayTransferId?: string | null;
 }
 
 export interface Wht50TawiReport {

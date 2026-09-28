@@ -13,7 +13,7 @@ export const meta: MetaFunction = () => [
   {
     name: "description",
     content:
-      "เริ่มต้นฟรี หรือยกระดับสู่เครื่องมือวิเคราะห์เชิงกลยุทธ์ระดับมืออาชีพ แพ็กเกจรายเดือนไม่มีสัญญาผูกมัด ผสานวิชาเลข ๗ ตัว ๙ ฐาน 35 ภพเรือน ฐานกำลังพระเคราะห์ 19 ฐาน และคัมภีร์สุริยยาตร์แท้",
+      "เริ่มต้นฟรี หรือยกระดับสู่เครื่องมือวิเคราะห์เชิงกลยุทธ์ระดับมืออาชีพ แพ็กเกจรายเดือนไม่มีสัญญาผูกมัด ผสานวิชาเลข ๗ ตัว ๙ ฐาน 35 ภพเรือน และคัมภีร์สุริยยาตร์แท้",
   },
   { tagName: "link", rel: "canonical", href: "https://phopephum.com/pricing" },
   { property: "og:type", content: "website" },
@@ -66,7 +66,7 @@ const MONTHLY_PLANS = [
       { text: "Wisdom AI 5 ครั้ง/เดือน", included: true },
       { text: "บันทึกดวงตนเอง 1 โปรไฟล์", included: true },
       { text: "รับทรายกาลเวลา (Sands) ฟรีทุกวัน", included: true },
-      { text: "ผังจักรพรรดิ 35 ภพ 19 ฐาน", included: false },
+      { text: "ผังจักรพรรดิ 35 ภพเรือน", included: false },
     ],
     note: "* เริ่มต้นใช้งานฟรี ไม่มีข้อผูกมัดใดๆ",
   },
@@ -85,7 +85,7 @@ const MONTHLY_PLANS = [
     ctaGuest: "/register?plan=premium",
     features: [
       { text: "ยามอัฏฐกาลเต็มผัง (กลางวัน-กลางคืน)", included: true },
-      { text: "วิชาเลข ๗ ตัว ๙ ฐาน 35 ภพเรือน ฐานกำลังพระเคราะห์ 19 ฐาน (ตนเอง)", included: true },
+      { text: "วิชาเลข ๗ ตัว ๙ ฐาน 35 ภพเรือน (ตนเอง)", included: true },
       { text: "ปฏิทินจันทรคติไทย 100 ปีแท้ (สุริยยาตร์)", included: true },
       { text: "AI Life Report 1 ครั้ง/เดือน", included: true },
       { text: "Wisdom AI 20 ครั้ง/เดือน", included: true },
@@ -136,7 +136,7 @@ const MONTHLY_PLANS = [
     ctaGuest: "/register?plan=master",
     features: [
       { text: "ปลดล็อคเครื่องมือสำหรับนักพยากรณ์ เข้าถึงหลักวิชาลึกซึ้ง", included: true },
-      { text: "ผังดวงจักรพรรดิ 35 ภพ 19 ฐาน + สุริยยาตร์แท้", included: true },
+      { text: "ผังดวงจักรพรรดิ 35 ภพเรือน + สุริยยาตร์แท้", included: true },
       { text: "AI Life Report 10 ครั้ง/เดือน (Fair Use)", included: true },
       { text: "Wisdom AI ใช้งานจุใจ (Extensive + Fair Use)", included: true },
       { text: "บันทึกดวงสูงสุด 100 รายชื่อ", included: true },
@@ -183,7 +183,7 @@ const ANNUAL_PLANS = [
 
 const COMPARE_ROWS = [
   { label: "Dashboard สรุปพลังงานประจำวัน", free: "✅", premium: "✅", pro: "✅", master: "✅" },
-  { label: "ผังวิชาเลข ๗ ตัว ๙ ฐาน", free: "พื้นฐาน", premium: "35 ภพ 19 ฐาน (ตนเอง)", pro: "✅ ผังจักรพรรดิละเอียด", master: "✅ สุริยยาตร์แท้ครบมิติ" },
+  { label: "ผังวิชาเลข ๗ ตัว ๙ ฐาน", free: "พื้นฐาน", premium: "35 ภพเรือน (ตนเอง)", pro: "✅ ผังจักรพรรดิละเอียด", master: "✅ สุริยยาตร์แท้ครบมิติ" },
   { label: "AI Life Report & วางแผนชีวิต", free: "—", premium: "1 ครั้ง/ด.", pro: "5 ครั้ง/ด.", master: "10 ครั้ง/ด. (พรีเมียม PDF)" },
   { label: "Wisdom AI Assistant", free: "5 ครั้ง/ด.", premium: "20 ครั้ง/ด.", pro: "100 ครั้ง/ด.", master: "Extensive + Fair Use" },
   { label: "ยามอัฏฐกาล & ปฏิทินกาลเวลา", free: "ยามปัจจุบัน", premium: "เต็มผัง 16 ยาม", pro: "7 วันล่วงหน้า", master: "100 ปีแท้ + พรายกระซิบ 12 ภพ" },
@@ -498,9 +498,9 @@ export default function PricingPage() {
         {/* ── Trust signals ── */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-16">
           {[
-            { icon: "🔒", title: "ปลอดภัย 100%", desc: "ชำระเงินผ่าน Omise (Opn Payments) ด้วย PromptPay QR หรือบัตรเครดิตมาตรฐานระดับสากล" },
+            { icon: "🔒", title: "ปลอดภัย 100%", desc: "ชำระเงินผ่าน Stripe Gateway มาตรฐาน PCI-DSS Level 1 ด้วย PromptPay QR หรือบัตรเครดิตระดับสากล" },
             { icon: "⚡", title: "ปลดล็อกทันที", desc: "ระบบ Atomic Webhook ยืนยันยอดและเปิดสิทธิ์ทันทีภายในไม่กี่วินาที" },
-            { icon: "✦", title: "ภูมิปัญญาแท้ดั้งเดิม", desc: "วิชาเลข ๗ ตัว ๙ ฐาน 35 ภพเรือน ฐานกำลังพระเคราะห์ 19 ฐาน + สุริยยาตร์แท้ ผสาน AI อัจฉริยะ" },
+            { icon: "✦", title: "ภูมิปัญญาแท้ดั้งเดิม", desc: "วิชาเลข ๗ ตัว ๙ ฐาน 35 ภพเรือน + สุริยยาตร์แท้ ผสาน AI อัจฉริยะ" },
           ].map(({ icon, title, desc }) => (
             <div
               key={title}
@@ -525,7 +525,7 @@ export default function PricingPage() {
           <div className="space-y-4">
             {[
               { q: "ยกเลิกการสมัครสมาชิกได้ตอนไหน?", a: "ยกเลิกได้ทุกเมื่อก่อนรอบบิลถัดไป ไม่มีสัญญาผูกมัดหรือค่าบริการยกเลิกเพิ่มเติม" },
-              { q: "ช่องทางการชำระเงินรองรับแบบไหนบ้าง?", a: "เรารองรับ Thai PromptPay QR ทุกธนาคาร และบัตรเครดิต/เดบิต ผ่านเกตเวย์ Omise (Opn Payments) ที่มีความปลอดภัยระดับสากล" },
+              { q: "ช่องทางการชำระเงินรองรับแบบไหนบ้าง?", a: "เรารองรับ Thai PromptPay QR ทุกธนาคาร และบัตรเครดิต/เดบิต ผ่านเกตเวย์ Stripe ที่มีความปลอดภัยระดับสากลสูงสุด (PCI-DSS Level 1)" },
               { q: "ละอองทรายกาลเวลา (Sands of Time) คืออะไรและหมดอายุไหม?", a: "ละอองทรายกาลเวลาเป็นหน่วยแต้มปัญญาสำหรับแลกรับบทวิเคราะห์เชิงลึก โดยละอองทรายที่ซื้อเพิ่มจะไม่มีวันหมดอายุ และจะถูกเก็บสะสมไว้ในบัญชีของคุณตลอดไป" },
             ].map(({ q, a }) => (
               <div

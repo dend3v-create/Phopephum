@@ -323,7 +323,7 @@ export function exportWht50TawiCsv(report: Wht50TawiReport): string {
     "อัตราภาษีหัก ณ ที่จ่าย",
     "จำนวนภาษีที่หักและนำส่ง (บาท)",
     "ยอดเงินโอนสุทธิ (บาท)",
-    "รหัสธุรกรรม Omise",
+    "รหัสธุรกรรมการโอน (Gateway / Stripe Ref)",
   ];
 
   const rows = report.records.map((r, index) => [
@@ -340,7 +340,7 @@ export function exportWht50TawiCsv(report: Wht50TawiReport): string {
     `${(r.whtRateApplied * 100).toFixed(0)}%`,
     r.whtAmountThb.toFixed(2),
     r.netPaidAmountThb.toFixed(2),
-    r.omiseTransferId || "-",
+    r.omiseTransferId || (r as any).stripeTransferId || "-",
   ]);
 
   const summaryHeader = [

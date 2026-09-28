@@ -498,7 +498,7 @@ export default function IndexPage() {
             <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#0B1528]/50 p-6 sm:p-7 shadow-sm">
               <div className="text-xs font-bold text-[#8C6D2D] dark:text-[#C6A96B] uppercase mb-1">02 · Full Astrological Matrix</div>
               <h3 className="font-display font-bold text-xl sm:text-2xl text-slate-900 dark:text-[#F8F6F1] mb-2">
-                ผังดวงจักรพรรดิ 35 ภพเรือน 19 ฐาน
+                ผังดวงจักรพรรดิ 35 ภพเรือน
               </h3>
               <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed font-sarabun mb-4">
                 แสดงความสัมพันธ์ของดวงดาวแบบ Multi-select Overlay Filter เพื่อวิเคราะห์รากเหง้าของปัญหาและแนวทางแก้ไขลึกซึ้ง
@@ -596,7 +596,7 @@ export default function IndexPage() {
               </div>
               <ul className="space-y-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-sarabun mb-6">
                 <li className="flex items-start gap-2"><span className="text-blue-500 font-bold">✓</span> ยามอัฏฐกาลเต็มผัง กลางวัน–กลางคืน</li>
-                <li className="flex items-start gap-2"><span className="text-blue-500 font-bold">✓</span> ผังเลข ๗ ตัว ๙ ฐาน 35 ภพ 19 ฐาน</li>
+                <li className="flex items-start gap-2"><span className="text-blue-500 font-bold">✓</span> ผังเลข ๗ ตัว ๙ ฐาน 35 ภพเรือน</li>
                 <li className="flex items-start gap-2"><span className="text-blue-500 font-bold">✓</span> ปฏิทินจันทรคติไทย 100 ปีแท้</li>
                 <li className="flex items-start gap-2"><span className="text-blue-500 font-bold">✓</span> AI Life Report 1 ครั้ง/เดือน</li>
                 <li className="flex items-start gap-2"><span className="text-blue-500 font-bold">✓</span> Wisdom AI 10 ครั้ง/เดือน</li>
@@ -660,7 +660,7 @@ export default function IndexPage() {
                 <span className="text-xs text-slate-500 ml-1">/ เดือน</span>
               </div>
               <ul className="space-y-3 text-xs sm:text-sm text-slate-700 dark:text-slate-300 font-sarabun mb-6">
-                <li className="flex items-start gap-2"><span className="text-purple-500 font-bold">✓</span> ผังดวงจักรพรรดิ 35 ภพ 19 ฐาน สุริยยาตร์แท้</li>
+                <li className="flex items-start gap-2"><span className="text-purple-500 font-bold">✓</span> ผังดวงจักรพรรดิ 35 ภพเรือน สุริยยาตร์แท้</li>
                 <li className="flex items-start gap-2"><span className="text-purple-500 font-bold">✓</span> ส่งออกรายงาน AI Life Report พรีเมียม (PDF)</li>
                 <li className="flex items-start gap-2"><span className="text-purple-500 font-bold">✓</span> Pro Tools: 16 ยาม, พรายกระซิบ, ราหูค้นทรัพย์</li>
                 <li className="flex items-start gap-2"><span className="text-purple-500 font-bold">✓</span> บันทึกดวงไม่จำกัดโปรไฟล์</li>

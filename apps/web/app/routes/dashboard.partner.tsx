@@ -397,47 +397,47 @@ export default function PartnerPortalPage() {
   }, [commissionHistory, commissionFilter]);
 
   return (
-    <div className="space-y-6 pb-16">
+    <div className="space-y-6 pb-16 font-sans text-[#F8F6F1]">
       {/* ── 1. Top Hero Header: Astral Imperial Flow ── */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFE6] dark:from-[#0B1528]/95 dark:via-[#070F1E]/90 dark:to-[#020617] border border-[#C6A96B]/30 p-6 md:p-8 backdrop-blur-xl shadow-xl">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-[#4B6FAE]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-[#C6A96B]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B182F]/95 via-[#071427]/90 to-[#020617] border border-[#C6A96B]/30 p-6 md:p-8 backdrop-blur-2xl shadow-2xl">
+        <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#4B6FAE]/20 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#C6A96B]/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <div className="flex flex-wrap items-center gap-2.5 mb-2.5">
-              <span className="px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-amber-500/15 dark:bg-[#C6A96B]/20 text-amber-900 dark:text-[#D9BC82] border border-amber-500/30 dark:border-[#C6A96B]/40 flex items-center gap-1.5 shadow-sm">
-                <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-[#D9BC82]" />
+            <div className="flex flex-wrap items-center gap-2.5 mb-3">
+              <span className="px-3.5 py-1 rounded-full text-xs font-semibold tracking-wider uppercase bg-[#C6A96B]/20 text-[#D9BC82] border border-[#C6A96B]/40 flex items-center gap-1.5 shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-[#D9BC82]" />
                 {tier === "master" ? "👑 Master Partner (25%)" : tier === "creator" ? "✨ Creator Partner (15%)" : "🌟 Affiliate Partner (7%)"}
               </span>
 
               {/* Partner Status Badge */}
-              <span className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-1.5 shadow-sm ${partnerStatus.color}`}>
+              <span className={`px-3.5 py-1 rounded-full text-xs font-medium border flex items-center gap-1.5 shadow-sm ${partnerStatus.color}`}>
                 <partnerStatus.icon className="w-3.5 h-3.5" />
                 {partnerStatus.badge}
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold font-serif text-slate-900 dark:text-[#F8F6F1] tracking-wide">
-              ศูนย์ปฏิบัติการพันธมิตร <span className="text-[#8C6D2D] dark:text-[#C6A96B] font-light text-xl md:text-2xl">/ Partner Portal</span>
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold font-serif text-[#F8F6F1] tracking-wide">
+              ศูนย์ปฏิบัติการพันธมิตร <span className="text-[#C6A96B] font-light text-xl md:text-2xl">/ Partner Portal</span>
             </h1>
-            <p className="text-slate-600 dark:text-slate-400 text-sm mt-1 max-w-2xl font-light">
+            <p className="text-slate-300 text-sm mt-1.5 max-w-2xl font-light leading-relaxed">
               ระบบบริหารจัดการรายได้ ผลตอบแทน และการบอกต่อแบบ Single Source of Truth ตรวจสอบความถูกต้องทางการเงินได้ 100%
             </p>
           </div>
 
           {/* Quick Share Code & Link */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-slate-100/90 dark:bg-black/40 p-3 rounded-xl border border-slate-200 dark:border-white/10 backdrop-blur-md">
-            <div className="px-3 py-1.5 bg-white dark:bg-white/5 rounded-lg border border-slate-300/80 dark:border-white/5 flex items-center justify-between gap-3">
-              <span className="text-xs text-slate-600 dark:text-slate-400">รหัสของคุณ:</span>
-              <span className="font-mono font-bold text-amber-800 dark:text-[#D9BC82] text-sm tracking-wider">{partnerCode}</span>
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-[#020617]/80 p-3 rounded-2xl border border-white/10 backdrop-blur-md shadow-inner">
+            <div className="px-3.5 py-2 bg-[#071427] rounded-xl border border-white/10 flex items-center justify-between gap-3">
+              <span className="text-xs text-slate-400">รหัสของคุณ:</span>
+              <span className="font-mono font-bold text-[#D9BC82] text-sm tracking-wider">{partnerCode}</span>
               <button
                 type="button"
                 onClick={handleCopyCode}
-                className="p-1 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
+                className="p-1 text-slate-400 hover:text-white transition-colors"
                 title="คัดลอกรหัส"
               >
-                {copiedCode ? <Check className="w-4 h-4 text-emerald-500 dark:text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                {copiedCode ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
               </button>
             </div>
 
@@ -445,11 +445,11 @@ export default function PartnerPortalPage() {
               type="button"
               variant="outline"
               onClick={handleCopyLink}
-              className="border-[#C6A96B]/50 bg-[#C6A96B] hover:bg-[#D9BC82] text-slate-950 font-bold text-xs py-2 px-3.5 flex items-center justify-center gap-2 shadow-sm"
+              className="border-[#C6A96B]/60 bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] hover:brightness-110 text-slate-950 font-bold text-xs py-2.5 px-4 flex items-center justify-center gap-2 shadow-lg shadow-[#C6A96B]/20 rounded-xl"
             >
               {copiedLink ? (
                 <>
-                  <Check className="w-4 h-4 text-emerald-900" />
+                  <Check className="w-4 h-4 text-slate-950" />
                   <span>คัดลอกลิงก์แล้ว!</span>
                 </>
               ) : (
@@ -464,13 +464,13 @@ export default function PartnerPortalPage() {
 
         {/* Action & Status Alerts */}
         {actionData?.error && (
-          <div className="mt-4 p-3.5 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-sm flex items-center gap-2.5">
+          <div className="mt-5 p-4 rounded-xl bg-red-500/15 border border-red-500/30 text-red-300 text-sm flex items-center gap-2.5">
             <AlertTriangle className="w-4 h-4 shrink-0 text-red-400" />
             <span>{actionData.error}</span>
           </div>
         )}
         {actionData?.message && actionData?.success && (
-          <div className="mt-4 p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm flex items-center gap-2.5">
+          <div className="mt-5 p-4 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-sm flex items-center gap-2.5">
             <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
             <span>{actionData.message}</span>
           </div>
@@ -478,14 +478,14 @@ export default function PartnerPortalPage() {
 
         {/* Versioned Terms Acceptance Banner (INV-PARTNER-23) */}
         {termsStatus && !termsStatus.accepted && (
-          <div className="mt-4 p-4 rounded-xl bg-amber-50 dark:bg-amber-500/10 border border-amber-300 dark:border-amber-500/30 text-amber-900 dark:text-amber-200 text-sm flex flex-col md:flex-row md:items-center justify-between gap-3 backdrop-blur-md">
-            <div className="flex items-start gap-2.5">
-              <ShieldCheck className="w-5 h-5 text-[#8C6D2D] dark:text-[#D9BC82] shrink-0 mt-0.5" />
+          <div className="mt-5 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-sm flex flex-col md:flex-row md:items-center justify-between gap-3 backdrop-blur-md">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-[#D9BC82] shrink-0 mt-0.5" />
               <div>
-                <div className="font-semibold text-slate-900 dark:text-[#F8F6F1]">
+                <div className="font-semibold text-[#F8F6F1]">
                   จำเป็นต้องยอมรับข้อตกลงพันธมิตรล่าสุด ({termsStatus.activeVersion})
                 </div>
-                <div className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+                <div className="text-xs text-slate-300 mt-0.5">
                   {termsStatus.termsTitle || "ข้อกำหนดและเงื่อนไขโปรแกรมพันธมิตร PhopePhum"} เพื่อรักษาสิทธิ์ในการเบิกถอนคอมมิชชัน
                 </div>
               </div>
@@ -498,7 +498,7 @@ export default function PartnerPortalPage() {
                   href={termsStatus.documentUrl}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-xs text-[#8C6D2D] dark:text-[#D9BC82] underline font-medium px-2.5 py-1.5"
+                  className="text-xs text-[#D9BC82] underline font-medium px-2.5 py-1.5 hover:text-white transition-colors"
                 >
                   อ่านข้อตกลง PDF
                 </a>
@@ -506,7 +506,7 @@ export default function PartnerPortalPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[#C6A96B] hover:bg-[#D9BC82] text-slate-950 font-bold text-xs px-4 py-1.5 shadow-sm"
+                className="bg-[#C6A96B] hover:bg-[#D9BC82] text-slate-950 font-bold text-xs px-4 py-2 rounded-xl shadow-md"
               >
                 {isSubmitting ? "กำลังบันทึก..." : "ยอมรับข้อตกลง"}
               </Button>
@@ -518,13 +518,13 @@ export default function PartnerPortalPage() {
       {/* ── 2. UX HIERARCHY LEVEL 1: สถานะการเงิน & ความพร้อมถอน (Financial Status) ── */}
       <div className="space-y-3">
         {!cashCommissionEnabled && (
-          <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-3 shadow-sm">
-            <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 text-amber-200 text-xs flex items-start gap-3 shadow-lg backdrop-blur-md">
+            <Sparkles className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <div className="font-bold text-sm mb-0.5 text-amber-800 dark:text-[#D9BC82]">
+              <div className="font-bold text-sm mb-1 text-[#D9BC82]">
                 🌟 ระบบพันธมิตรเวอร์ชัน MVP — Reward & Sands Economy
               </div>
-              <p className="text-slate-600 dark:text-slate-300 font-light leading-relaxed">
+              <p className="text-slate-300 font-light leading-relaxed">
                 ในเวอร์ชันปัจจุบัน ระบบให้ผลตอบแทนการบอกต่อผ่าน <strong>สิทธิประโยชน์พิเศษ และ ละอองทรายกาลเวลา (Sands of Time)</strong> สำหรับใช้ปลดล็อกรายงานและการวิเคราะห์ดวงชะตา โดยระบบถอนเงินสด (Cash Commission Payout) ปิดให้บริการชั่วคราวและจะเปิดให้ใช้งานในเฟสถัดไป
               </p>
             </div>
@@ -532,8 +532,8 @@ export default function PartnerPortalPage() {
         )}
 
         <div className="flex items-center justify-between px-1">
-          <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300 uppercase tracking-wider flex items-center gap-2">
-            <Wallet className="w-4 h-4 text-[#8C6D2D] dark:text-[#C6A96B]" />
+          <h2 className="text-xs md:text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+            <Wallet className="w-4 h-4 text-[#C6A96B]" />
             ระดับที่ 1 — สถานะการเงิน & ยอดคงเหลือ (Financial Status)
           </h2>
           <span className="text-xs text-slate-500">Source of Truth: partner_entities</span>
@@ -541,26 +541,26 @@ export default function PartnerPortalPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Balance 1: Available Balance (พร้อมถอน) */}
-          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-emerald-50/90 to-white/95 dark:from-[#0D241C]/90 dark:to-[#05130E]/95 border border-emerald-400/40 dark:border-emerald-500/30 p-5 shadow-sm dark:shadow-lg backdrop-blur-md">
-            <div className="flex items-center justify-between text-xs text-emerald-800 dark:text-emerald-400 font-medium mb-2">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0D241C]/90 via-[#071E15]/80 to-[#020B07] border border-emerald-500/30 p-5 shadow-xl backdrop-blur-xl">
+            <div className="flex items-center justify-between text-xs text-emerald-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
-                <Wallet className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <Wallet className="w-4 h-4 text-emerald-400" />
                 พร้อมถอน (Available)
               </span>
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             </div>
-            <div className="text-2xl lg:text-3xl font-bold font-mono text-emerald-700 dark:text-emerald-200 tracking-tight">
+            <div className="text-2xl lg:text-3xl font-bold font-mono text-emerald-200 tracking-tight">
               ฿{availableBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
             </div>
-            <div className="mt-3 flex items-center justify-between pt-2 border-t border-emerald-200 dark:border-emerald-500/15">
-              <span className="text-[11px] text-emerald-700 dark:text-emerald-400/80 font-medium">
+            <div className="mt-4 flex items-center justify-between pt-2.5 border-t border-emerald-500/20">
+              <span className="text-[11px] text-emerald-400/80 font-medium">
                 {cashCommissionEnabled ? "ขั้นต่ำ ฿500" : "ปิดใน MVP"}
               </span>
               <Button
                 type="button"
                 onClick={() => (cashCommissionEnabled ? setIsPayoutModalOpen(true) : null)}
                 disabled={!cashCommissionEnabled || availableBalance < 500}
-                className="text-xs py-1 px-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                className="text-xs py-1 px-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-lg shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {cashCommissionEnabled ? "ขอถอนเงิน" : "เร็วๆ นี้ (MVP)"}
               </Button>
@@ -568,69 +568,69 @@ export default function PartnerPortalPage() {
           </div>
 
           {/* Balance 2: Holding Balance (รอปลดล็อก 14 วัน) */}
-          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-amber-50/90 to-white/95 dark:from-[#241F0D]/90 dark:to-[#141005]/95 border border-amber-400/40 dark:border-amber-500/30 p-5 shadow-sm dark:shadow-lg backdrop-blur-md">
-            <div className="flex items-center justify-between text-xs text-amber-800 dark:text-amber-400 font-medium mb-2">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#241F0D]/90 via-[#1A1607]/80 to-[#0A0802] border border-amber-500/30 p-5 shadow-xl backdrop-blur-xl">
+            <div className="flex items-center justify-between text-xs text-amber-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <Clock className="w-4 h-4 text-amber-400" />
                 รอปลดล็อก (Holding 14D)
               </span>
-              <span className="text-[11px] text-amber-700 dark:text-amber-400/70 font-mono font-bold">14 วัน</span>
+              <span className="text-[11px] text-amber-300 font-mono font-bold bg-amber-500/20 px-2 py-0.5 rounded-full border border-amber-500/30">14 วัน</span>
             </div>
-            <div className="text-2xl lg:text-3xl font-bold font-mono text-amber-700 dark:text-amber-200 tracking-tight">
+            <div className="text-2xl lg:text-3xl font-bold font-mono text-amber-200 tracking-tight">
               ฿{holdingBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
             </div>
-            <div className="mt-3 text-[11px] text-amber-700 dark:text-amber-400/70 pt-2 border-t border-amber-200 dark:border-amber-500/15 font-medium">
+            <div className="mt-4 text-[11px] text-amber-300/80 pt-2.5 border-t border-amber-500/20 font-medium">
               โอนเข้า Available อัตโนมัติเมื่อครบ 14 วัน
             </div>
           </div>
 
           {/* Balance 3: Payout Pending (กำลังโอน) */}
-          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-sky-50/90 to-white/95 dark:from-[#0D1D2C]/90 dark:to-[#060F17]/95 border border-sky-400/40 dark:border-sky-500/30 p-5 shadow-sm dark:shadow-lg backdrop-blur-md">
-            <div className="flex items-center justify-between text-xs text-sky-800 dark:text-sky-400 font-medium mb-2">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0D1D2C]/90 via-[#081522]/80 to-[#02060B] border border-sky-500/30 p-5 shadow-xl backdrop-blur-xl">
+            <div className="flex items-center justify-between text-xs text-sky-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
-                <Send className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+                <Send className="w-4 h-4 text-sky-400" />
                 กำลังดำเนินการ (In-Flight)
               </span>
-              <span className="text-[11px] text-sky-700 dark:text-sky-400/70 font-bold">คิวธนาคาร</span>
+              <span className="text-[11px] text-sky-300 font-bold bg-sky-500/20 px-2 py-0.5 rounded-full border border-sky-500/30">คิวธนาคาร</span>
             </div>
-            <div className="text-2xl lg:text-3xl font-bold font-mono text-sky-700 dark:text-sky-200 tracking-tight">
+            <div className="text-2xl lg:text-3xl font-bold font-mono text-sky-200 tracking-tight">
               ฿{payoutPendingBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
             </div>
-            <div className="mt-3 text-[11px] text-sky-700 dark:text-sky-400/70 pt-2 border-t border-sky-200 dark:border-sky-500/15 font-medium">
+            <div className="mt-4 text-[11px] text-sky-300/80 pt-2.5 border-t border-sky-500/20 font-medium">
               อยู่ระหว่างตรวจสอบ / รอผล Settlement
             </div>
           </div>
 
           {/* Balance 4: Clawback Debt & Lifetime Earned */}
-          <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-rose-50/90 to-white/95 dark:from-[#1F1116]/90 dark:to-[#0D070A]/95 border border-rose-400/40 dark:border-pink-500/30 p-5 shadow-sm dark:shadow-lg backdrop-blur-md">
-            <div className="flex items-center justify-between text-xs text-rose-800 dark:text-pink-400 font-medium mb-2">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1F1116]/90 via-[#150B0F]/80 to-[#080205] border border-rose-500/30 p-5 shadow-xl backdrop-blur-xl">
+            <div className="flex items-center justify-between text-xs text-rose-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
-                <Coins className="w-4 h-4 text-rose-600 dark:text-pink-400" />
+                <Coins className="w-4 h-4 text-rose-400" />
                 หนี้รอหักกลบ (Clawback)
               </span>
-              <span className="text-[11px] text-rose-700 dark:text-pink-400/80 font-mono font-bold">฿{clawbackDebt.toFixed(2)}</span>
+              <span className="text-[11px] text-rose-300 font-mono font-bold bg-rose-500/20 px-2 py-0.5 rounded-full border border-rose-500/30">฿{clawbackDebt.toFixed(2)}</span>
             </div>
-            <div className="text-xs text-slate-500 dark:text-slate-400 mb-1">รายได้รวมสะสมทั้งหมด</div>
-            <div className="text-xl lg:text-2xl font-bold font-mono text-amber-700 dark:text-[#D9BC82] tracking-tight">
+            <div className="text-xs text-slate-400 mb-1">รายได้รวมสะสมทั้งหมด</div>
+            <div className="text-xl lg:text-2xl font-bold font-mono text-[#D9BC82] tracking-tight">
               ฿{totalEarned.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
             </div>
-            <div className="mt-2 text-[11px] text-slate-500 dark:text-slate-400 flex justify-between pt-1 border-t border-rose-200 dark:border-white/5">
+            <div className="mt-3 text-[11px] text-slate-400 flex justify-between pt-2 border-t border-white/10">
               <span>ถอนแล้วสะสม:</span>
-              <span className="font-mono text-slate-700 dark:text-slate-300 font-bold">฿{totalWithdrawn.toLocaleString()}</span>
+              <span className="font-mono text-slate-200 font-bold">฿{totalWithdrawn.toLocaleString()}</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* ── 3. Navigation Tabs ── */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+      <div className="p-1.5 rounded-2xl bg-[#071427]/80 border border-white/10 backdrop-blur-xl flex items-center gap-1.5 overflow-x-auto scrollbar-none shadow-lg">
         <button
           type="button"
           onClick={() => setActiveTab("overview")}
-          className={`px-4 py-2 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+          className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
             activeTab === "overview"
-              ? "bg-[#C6A96B] text-black font-semibold shadow-md"
-              : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-slate-950 font-bold shadow-lg shadow-[#C6A96B]/20"
+              : "text-slate-300 hover:bg-white/10 hover:text-white"
           }`}
         >
           <TrendingUp className="w-4 h-4" />
@@ -640,10 +640,10 @@ export default function PartnerPortalPage() {
         <button
           type="button"
           onClick={() => setActiveTab("commissions")}
-          className={`px-4 py-2 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+          className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
             activeTab === "commissions"
-              ? "bg-[#C6A96B] text-black font-semibold shadow-md"
-              : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-slate-950 font-bold shadow-lg shadow-[#C6A96B]/20"
+              : "text-slate-300 hover:bg-white/10 hover:text-white"
           }`}
         >
           <DollarSign className="w-4 h-4" />
@@ -653,10 +653,10 @@ export default function PartnerPortalPage() {
         <button
           type="button"
           onClick={() => setActiveTab("referrals")}
-          className={`px-4 py-2 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+          className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
             activeTab === "referrals"
-              ? "bg-[#C6A96B] text-black font-semibold shadow-md"
-              : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-slate-950 font-bold shadow-lg shadow-[#C6A96B]/20"
+              : "text-slate-300 hover:bg-white/10 hover:text-white"
           }`}
         >
           <Users className="w-4 h-4" />
@@ -666,10 +666,10 @@ export default function PartnerPortalPage() {
         <button
           type="button"
           onClick={() => setActiveTab("payouts")}
-          className={`px-4 py-2 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+          className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
             activeTab === "payouts"
-              ? "bg-[#C6A96B] text-black font-semibold shadow-md"
-              : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-slate-950 font-bold shadow-lg shadow-[#C6A96B]/20"
+              : "text-slate-300 hover:bg-white/10 hover:text-white"
           }`}
         >
           <CreditCard className="w-4 h-4" />
@@ -679,10 +679,10 @@ export default function PartnerPortalPage() {
         <button
           type="button"
           onClick={() => setActiveTab("ledger")}
-          className={`px-4 py-2 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+          className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
             activeTab === "ledger"
-              ? "bg-[#C6A96B] text-black font-semibold shadow-md"
-              : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-slate-950 font-bold shadow-lg shadow-[#C6A96B]/20"
+              : "text-slate-300 hover:bg-white/10 hover:text-white"
           }`}
         >
           <History className="w-4 h-4" />
@@ -692,10 +692,10 @@ export default function PartnerPortalPage() {
         <button
           type="button"
           onClick={() => setActiveTab("settings")}
-          className={`px-4 py-2 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
+          className={`px-4 py-2.5 rounded-xl text-xs md:text-sm font-medium transition-all whitespace-nowrap flex items-center gap-2 ${
             activeTab === "settings"
-              ? "bg-[#C6A96B] text-black font-semibold shadow-md"
-              : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-slate-950 font-bold shadow-lg shadow-[#C6A96B]/20"
+              : "text-slate-300 hover:bg-white/10 hover:text-white"
           }`}
         >
           <Building className="w-4 h-4" />
@@ -705,43 +705,44 @@ export default function PartnerPortalPage() {
 
       {/* ── 4. Tab Content Panels ── */}
 
-      {/* ── TAB 1: ภาพรวม & สรุปผลงาน (UX Hierarchy Level 2 Growth & Level 3 Details) ── */}
+      {/* ── TAB 1: ภาพรวม & สรุปผลงาน ── */}
       {activeTab === "overview" && (
         <div className="space-y-6">
           {/* UX HIERARCHY LEVEL 2: Growth & Attribution Analytics */}
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2 px-1">
+            <h2 className="text-xs md:text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2 px-1">
               <TrendingUp className="w-4 h-4 text-sky-400" />
               ระดับที่ 2 — สถิติการเติบโต & การแนะนำ (Growth & Attribution)
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-5 rounded-2xl bg-white dark:bg-[#0A1628]/70 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
-                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">ยอดคลิกลิงก์ทั้งหมด (Attribution Clicks)</div>
-                <div className="text-3xl font-bold font-mono text-slate-900 dark:text-[#F8F6F1]">
+              <div className="p-6 rounded-2xl bg-[#0A1628]/90 border border-white/10 shadow-xl backdrop-blur-xl hover:border-[#4B6FAE]/40 transition-all">
+                <div className="text-xs text-slate-400 mb-1">ยอดคลิกลิงก์ทั้งหมด (Attribution Clicks)</div>
+                <div className="text-3xl font-bold font-mono text-[#F8F6F1]">
                   {referralPerformance.totalClicks.toLocaleString()}
                 </div>
-                <div className="mt-2 text-xs text-sky-700 dark:text-sky-400 flex items-center gap-1 font-medium">
+                <div className="mt-3 text-xs text-sky-400 flex items-center gap-1.5 font-medium">
                   <Sparkles className="w-3.5 h-3.5" /> First-Touch Attribution Engine
                 </div>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white dark:bg-[#0A1628]/70 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
-                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">สมาชิกที่สมัครสำเร็จ (Conversions)</div>
-                <div className="text-3xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+              <div className="p-6 rounded-2xl bg-[#0A1628]/90 border border-white/10 shadow-xl backdrop-blur-xl hover:border-emerald-500/40 transition-all">
+                <div className="text-xs text-slate-400 mb-1">สมาชิกที่สมัครสำเร็จ (Conversions)</div>
+                <div className="text-3xl font-bold font-mono text-emerald-400">
                   {referralPerformance.totalConverted.toLocaleString()}
                 </div>
-                <div className="mt-2 text-xs text-emerald-700 dark:text-emerald-300 flex items-center gap-1 font-medium">
+                <div className="mt-3 text-xs text-emerald-300 flex items-center gap-1.5 font-medium">
                   <CheckCircle2 className="w-3.5 h-3.5" /> ผูกมิตรกับบัญชีของคุณระยะยาว
                 </div>
               </div>
 
-              <div className="p-5 rounded-2xl bg-white dark:bg-[#0A1628]/70 border border-slate-200 dark:border-white/10 shadow-sm backdrop-blur-md">
-                <div className="text-xs text-slate-600 dark:text-slate-400 mb-1">อัตราความสำเร็จ (Conversion Rate)</div>
-                <div className="text-3xl font-bold font-mono text-amber-700 dark:text-[#D9BC82]">
+              <div className="p-6 rounded-2xl bg-[#0A1628]/90 border border-white/10 shadow-xl backdrop-blur-xl hover:border-amber-500/40 transition-all">
+                <div className="text-xs text-slate-400 mb-1">อัตราความสำเร็จ (Conversion Rate)</div>
+                <div className="text-3xl font-bold font-mono text-[#D9BC82]">
                   {referralPerformance.conversionRate}%
                 </div>
-                <div className="mt-2 text-xs text-slate-600 dark:text-slate-400 flex items-center gap-1">
+                <div className="mt-3 text-xs text-slate-400 flex items-center gap-1.5">
+                  <Users className="w-3.5 h-3.5 text-[#C6A96B]" />
                   สมาชิกปัจจุบัน {referralPerformance.activeReferralsCount} ท่าน
                 </div>
               </div>
@@ -750,110 +751,121 @@ export default function PartnerPortalPage() {
 
           {/* Campaign Generator & Tier Details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Tier Perks Card */}
-            <div className="p-6 rounded-2xl bg-gradient-to-br from-white via-[#FAF8F5] to-[#F5EFE6] dark:from-[#0B1528] dark:to-[#040914] border border-[#C6A96B]/30 shadow-md space-y-4">
+            {/* Tier Perks Card — Refined Deep Cosmic Gold */}
+            <div className="p-6 md:p-7 rounded-2xl bg-gradient-to-br from-[#0B182F]/95 via-[#071427]/90 to-[#020617] border border-[#C6A96B]/30 shadow-2xl space-y-4 backdrop-blur-2xl">
               <div className="flex items-center justify-between">
-                <h3 className="text-base font-semibold text-slate-900 dark:text-[#F8F6F1] flex items-center gap-2">
-                  <Award className="w-5 h-5 text-amber-600 dark:text-[#D9BC82]" />
+                <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
+                  <Award className="w-5 h-5 text-[#D9BC82]" />
                   ลำดับขั้นและสิทธิประโยชน์พันธมิตร
                 </h3>
-                <span className="text-xs text-amber-800 dark:text-[#D9BC82] font-mono font-bold">คอมมิชชัน {commissionRate}%</span>
+                <span className="text-xs text-[#D9BC82] font-mono font-bold px-2.5 py-1 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/30">
+                  คอมมิชชัน {commissionRate}%
+                </span>
               </div>
 
-              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+              <p className="text-xs text-slate-300 leading-relaxed font-light">
                 ท่านได้รับส่วนแบ่งรายได้ต่อเนื่องทุกเดือน (Recurring Commission) ตลอดระยะเวลาที่ผู้ถูกแนะนำยังคงสมัครใช้งานแพ็กเกจ Pro หรือ Imperial
               </p>
 
-              <div className="space-y-2.5 pt-2">
-                <div className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
+              <div className="space-y-3 pt-2">
+                <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs transition-all ${
                   tier === "affiliate"
-                    ? "bg-amber-100/70 dark:bg-[#C6A96B]/15 border-amber-300 dark:border-[#C6A96B]/40 text-amber-900 dark:text-[#D9BC82]"
-                    : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400"
+                    ? "bg-[#C6A96B]/15 border-[#C6A96B]/50 text-[#F8F6F1] ring-1 ring-[#C6A96B]/30 shadow-lg shadow-[#C6A96B]/10"
+                    : "bg-[#071427]/60 border-white/10 text-slate-300 hover:border-white/20"
                 }`}>
                   <div>
-                    <span className="font-bold">Affiliate Level</span>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">สมาชิกทั่วไป แนะนำเพื่อนและกัลยาณมิตร</p>
+                    <div className="font-bold text-sm text-[#F8F6F1] flex items-center gap-1.5">
+                      <span>Affiliate Level</span>
+                      {tier === "affiliate" && <span className="text-[10px] bg-[#C6A96B] text-slate-950 px-2 py-0.5 rounded-full font-bold">ระดับปัจจุบัน</span>}
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-0.5">สมาชิกทั่วไป แนะนำเพื่อนและกัลยาณมิตร</p>
                   </div>
-                  <span className="font-mono font-bold">7% ทุกออเดอร์</span>
+                  <span className="font-mono font-bold text-sm text-[#D9BC82]">7% ทุกออเดอร์</span>
                 </div>
 
-                <div className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
+                <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs transition-all ${
                   tier === "creator"
-                    ? "bg-amber-100/70 dark:bg-[#C6A96B]/15 border-amber-300 dark:border-[#C6A96B]/40 text-amber-900 dark:text-[#D9BC82]"
-                    : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400"
+                    ? "bg-[#C6A96B]/15 border-[#C6A96B]/50 text-[#F8F6F1] ring-1 ring-[#C6A96B]/30 shadow-lg shadow-[#C6A96B]/10"
+                    : "bg-[#071427]/60 border-white/10 text-slate-300 hover:border-white/20"
                 }`}>
                   <div>
-                    <span className="font-bold">Creator Level</span>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">คอนเทนต์ครีเอเตอร์ / โหราจารย์ผู้แบ่งปัน</p>
+                    <div className="font-bold text-sm text-[#F8F6F1] flex items-center gap-1.5">
+                      <span>Creator Level</span>
+                      {tier === "creator" && <span className="text-[10px] bg-[#C6A96B] text-slate-950 px-2 py-0.5 rounded-full font-bold">ระดับปัจจุบัน</span>}
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-0.5">คอนเทนต์ครีเอเตอร์ / โหราจารย์ผู้แบ่งปัน</p>
                   </div>
-                  <span className="font-mono font-bold">15% ทุกออเดอร์</span>
+                  <span className="font-mono font-bold text-sm text-[#D9BC82]">15% ทุกออเดอร์</span>
                 </div>
 
-                <div className={`p-3 rounded-xl border flex items-center justify-between text-xs ${
+                <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs transition-all ${
                   tier === "master"
-                    ? "bg-amber-100/70 dark:bg-[#C6A96B]/15 border-amber-300 dark:border-[#C6A96B]/40 text-amber-900 dark:text-[#D9BC82]"
-                    : "bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/5 text-slate-700 dark:text-slate-400"
+                    ? "bg-[#C6A96B]/15 border-[#C6A96B]/50 text-[#F8F6F1] ring-1 ring-[#C6A96B]/30 shadow-lg shadow-[#C6A96B]/10"
+                    : "bg-[#071427]/60 border-white/10 text-slate-300 hover:border-white/20"
                 }`}>
                   <div>
-                    <span className="font-bold">Master / Institutional</span>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400">คุรุผู้เจริญญาณ / สำนักโหราศาสตร์พันธมิตร</p>
+                    <div className="font-bold text-sm text-[#F8F6F1] flex items-center gap-1.5">
+                      <span>Master / Institutional</span>
+                      {tier === "master" && <span className="text-[10px] bg-[#C6A96B] text-slate-950 px-2 py-0.5 rounded-full font-bold">ระดับปัจจุบัน</span>}
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-0.5">คุรุผู้เจริญญาณ / สำนักโหราศาสตร์พันธมิตร</p>
                   </div>
-                  <span className="font-mono font-bold">25% ทุกออเดอร์</span>
+                  <span className="font-mono font-bold text-sm text-[#D9BC82]">25% ทุกออเดอร์</span>
                 </div>
               </div>
             </div>
 
             {/* Campaign Generator & Link Share */}
-            <div className="p-6 rounded-2xl bg-white dark:bg-[#0A1628]/80 border border-slate-200 dark:border-white/10 shadow-md space-y-4">
-              <h3 className="text-base font-semibold text-slate-900 dark:text-[#F8F6F1] flex items-center gap-2">
-                <Share2 className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+            <div className="p-6 md:p-7 rounded-2xl bg-gradient-to-br from-[#0A1628]/95 to-[#020617] border border-white/10 shadow-2xl space-y-4 backdrop-blur-2xl">
+              <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
+                <Share2 className="w-5 h-5 text-sky-400" />
                 สร้างลิงก์แคมเปญเฉพาะกิจ (Custom Campaign Link)
               </h3>
-              <p className="text-xs text-slate-600 dark:text-slate-400">
+              <p className="text-xs text-slate-300 font-light leading-relaxed">
                 ระบุชื่อแคมเปญ (เช่น tiktok, line_oa, live_stream) เพื่อแยกวัดผลประสิทธิภาพของแต่ละช่องทาง
               </p>
 
-              <div>
-                <label className="text-xs text-slate-700 dark:text-slate-300 font-medium mb-1.5 block">ชื่อแคมเปญ / Channel Tag:</label>
+              <div className="space-y-2">
+                <label className="text-xs text-slate-300 font-medium block">ชื่อแคมเปญ / Channel Tag:</label>
                 <div className="flex gap-2">
                   <Input
                     type="text"
                     value={customCampaign}
                     onChange={(e) => setCustomCampaign(e.target.value)}
                     placeholder="เช่น facebook_group, youtube"
-                    className="bg-slate-50 dark:bg-black/50 border border-slate-300 dark:border-white/15 text-slate-900 dark:text-white text-xs placeholder:text-slate-400 dark:placeholder:text-slate-500 rounded-xl px-3 py-2 focus:ring-1 focus:ring-[#C6A96B]"
+                    className="bg-[#020617]/80 border border-white/15 text-white text-xs placeholder:text-slate-500 rounded-xl px-3.5 py-2.5 focus:border-[#C6A96B] focus:ring-1 focus:ring-[#C6A96B]"
                   />
                   <Button
                     type="button"
                     onClick={handleCopyLink}
-                    className="bg-[#C6A96B] hover:bg-[#D9BC82] text-slate-950 font-bold text-xs py-2 px-4 shrink-0 rounded-xl shadow-sm"
+                    className="bg-[#C6A96B] hover:bg-[#D9BC82] text-slate-950 font-bold text-xs py-2.5 px-4 shrink-0 rounded-xl shadow-md"
                   >
                     {copiedLink ? "คัดลอกแล้ว!" : "คัดลอก"}
                   </Button>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-amber-50/70 dark:bg-black/40 border border-[#C6A96B]/30 dark:border-white/5 text-xs font-mono text-slate-800 dark:text-[#D9BC82] break-all select-all">
+              <div className="p-4 rounded-xl bg-[#020617]/90 border border-[#C6A96B]/30 text-xs font-mono text-[#D9BC82] break-all select-all shadow-inner">
                 {dynamicReferralLink}
               </div>
             </div>
           </div>
 
           {/* UX HIERARCHY LEVEL 3: Details & Audit Trail Quicklinks */}
-          <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/10 space-y-3">
-            <h2 className="text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
+          <div className="p-6 rounded-2xl bg-[#071427]/60 border border-white/10 space-y-3 backdrop-blur-xl">
+            <h2 className="text-xs md:text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
               <Layers className="w-4 h-4 text-purple-400" />
               ระดับที่ 3 — รายละเอียดประวัติและการตรวจสอบ (Details & Audit Trail)
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
               <button
                 type="button"
                 onClick={() => setActiveTab("commissions")}
-                className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-left transition-colors flex items-center justify-between group"
+                className="p-4 rounded-xl bg-[#0B182F]/70 hover:bg-[#0E203E]/90 border border-white/10 hover:border-[#C6A96B]/40 text-left transition-all flex items-center justify-between group shadow-sm"
               >
                 <div>
-                  <div className="text-xs font-semibold text-slate-200">ประวัติคอมมิชชัน</div>
-                  <div className="text-[11px] text-slate-400">{commissionHistory.length} รายการ</div>
+                  <div className="text-xs font-semibold text-slate-200 group-hover:text-[#D9BC82]">ประวัติคอมมิชชัน</div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">{commissionHistory.length} รายการ</div>
                 </div>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#D9BC82] transition-colors" />
               </button>
@@ -861,11 +873,11 @@ export default function PartnerPortalPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("payouts")}
-                className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-left transition-colors flex items-center justify-between group"
+                className="p-4 rounded-xl bg-[#0B182F]/70 hover:bg-[#0E203E]/90 border border-white/10 hover:border-[#C6A96B]/40 text-left transition-all flex items-center justify-between group shadow-sm"
               >
                 <div>
-                  <div className="text-xs font-semibold text-slate-200">ประวัติการถอนเงิน</div>
-                  <div className="text-[11px] text-slate-400">{payoutRequests.length} รายการ</div>
+                  <div className="text-xs font-semibold text-slate-200 group-hover:text-[#D9BC82]">ประวัติการถอนเงิน</div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">{payoutRequests.length} รายการ</div>
                 </div>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#D9BC82] transition-colors" />
               </button>
@@ -873,11 +885,11 @@ export default function PartnerPortalPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("ledger")}
-                className="p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 text-left transition-colors flex items-center justify-between group"
+                className="p-4 rounded-xl bg-[#0B182F]/70 hover:bg-[#0E203E]/90 border border-white/10 hover:border-[#C6A96B]/40 text-left transition-all flex items-center justify-between group shadow-sm"
               >
                 <div>
-                  <div className="text-xs font-semibold text-slate-200">สมุดบัญชีแยกประเภท</div>
-                  <div className="text-[11px] text-slate-400">{partnerLedger.length} รายการ Double-Entry</div>
+                  <div className="text-xs font-semibold text-slate-200 group-hover:text-[#D9BC82]">สมุดบัญชีแยกประเภท</div>
+                  <div className="text-[11px] text-slate-400 mt-0.5">{partnerLedger.length} รายการ Double-Entry</div>
                 </div>
                 <ArrowRight className="w-4 h-4 text-slate-400 group-hover:text-[#D9BC82] transition-colors" />
               </button>
@@ -886,7 +898,7 @@ export default function PartnerPortalPage() {
         </div>
       )}
 
-      {/* ── TAB 2: ประวัติคอมมิชชัน (Commissions History & Dynamic VAT) ── */}
+      {/* ── TAB 2: ประวัติคอมมิชชัน ── */}
       {activeTab === "commissions" && (
         <div className="space-y-4">
           {/* Filters */}
@@ -895,8 +907,8 @@ export default function PartnerPortalPage() {
               <button
                 type="button"
                 onClick={() => setCommissionFilter("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  commissionFilter === "all" ? "bg-white/20 text-white font-bold" : "bg-white/5 text-slate-400 hover:text-white"
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  commissionFilter === "all" ? "bg-[#C6A96B] text-slate-950 font-bold shadow-md" : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
                 }`}
               >
                 ทั้งหมด ({commissionHistory.length})
@@ -904,8 +916,8 @@ export default function PartnerPortalPage() {
               <button
                 type="button"
                 onClick={() => setCommissionFilter("holding")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  commissionFilter === "holding" ? "bg-amber-500/20 text-amber-300 border border-amber-500/30" : "bg-white/5 text-slate-400 hover:text-white"
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  commissionFilter === "holding" ? "bg-amber-500/20 text-amber-300 border border-amber-500/40" : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
                 }`}
               >
                 กำลังกักยอด 14 วัน
@@ -913,8 +925,8 @@ export default function PartnerPortalPage() {
               <button
                 type="button"
                 onClick={() => setCommissionFilter("cleared")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  commissionFilter === "cleared" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30" : "bg-white/5 text-slate-400 hover:text-white"
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  commissionFilter === "cleared" ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40" : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
                 }`}
               >
                 ปลดล็อกแล้ว (Available)
@@ -922,8 +934,8 @@ export default function PartnerPortalPage() {
               <button
                 type="button"
                 onClick={() => setCommissionFilter("clawback_refunded")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  commissionFilter === "clawback_refunded" ? "bg-red-500/20 text-red-300 border border-red-500/30" : "bg-white/5 text-slate-400 hover:text-white"
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all ${
+                  commissionFilter === "clawback_refunded" ? "bg-red-500/20 text-red-300 border border-red-500/40" : "bg-white/5 text-slate-400 hover:text-white hover:bg-white/10"
                 }`}
               >
                 หักคืน (Clawback)
@@ -937,70 +949,70 @@ export default function PartnerPortalPage() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0A1628]/80 backdrop-blur-md">
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0A1628]/90 backdrop-blur-2xl shadow-xl">
             <table className="w-full text-left text-xs">
-              <thead className="bg-white/5 text-slate-400 uppercase tracking-wider font-semibold border-b border-white/10">
+              <thead className="bg-[#071427] text-slate-300 uppercase tracking-wider font-semibold border-b border-white/10">
                 <tr>
-                  <th className="p-3.5">วันที่ / รายการ</th>
-                  <th className="p-3.5">ผู้ซื้อ (Masked PII)</th>
-                  <th className="p-3.5">แพ็กเกจ</th>
-                  <th className="p-3.5 text-right">ยอดรวม (Gross)</th>
-                  <th className="p-3.5 text-right">ฐานคำนวณ (หัก VAT)</th>
-                  <th className="p-3.5 text-right">คอมมิชชัน</th>
-                  <th className="p-3.5 text-center">สถานะ</th>
-                  <th className="p-3.5 text-right">กำหนดปลดล็อก</th>
+                  <th className="p-4">วันที่ / รายการ</th>
+                  <th className="p-4">ผู้ซื้อ (Masked PII)</th>
+                  <th className="p-4">แพ็กเกจ</th>
+                  <th className="p-4 text-right">ยอดรวม (Gross)</th>
+                  <th className="p-4 text-right">ฐานคำนวณ (หัก VAT)</th>
+                  <th className="p-4 text-right">คอมมิชชัน</th>
+                  <th className="p-4 text-center">สถานะ</th>
+                  <th className="p-4 text-right">กำหนดปลดล็อก</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 font-mono">
                 {filteredCommissions.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-slate-400 font-sans">
+                    <td colSpan={8} className="p-10 text-center text-slate-400 font-sans">
                       ยังไม่พบรายการคอมมิชชันในหมวดหมู่นี้
                     </td>
                   </tr>
                 ) : (
                   filteredCommissions.map((comm) => (
-                    <tr key={comm.id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="p-3.5 text-slate-300 font-sans">
+                    <tr key={comm.id} className="hover:bg-white/[0.03] transition-colors">
+                      <td className="p-4 text-slate-300 font-sans">
                         <div>{new Date(comm.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" })}</div>
                         <div className="text-[10px] text-slate-500 font-mono">{new Date(comm.createdAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}</div>
                       </td>
-                      <td className="p-3.5 font-sans font-medium text-slate-200">
+                      <td className="p-4 font-sans font-medium text-slate-200">
                         {comm.maskedBuyerName}
                       </td>
-                      <td className="p-3.5 font-sans text-slate-300">
+                      <td className="p-4 font-sans text-slate-300">
                         {comm.planName || comm.subscriptionPlanCode}
                       </td>
-                      <td className="p-3.5 text-right text-slate-400">
+                      <td className="p-4 text-right text-slate-400">
                         ฿{comm.grossAmountThb.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="p-3.5 text-right text-slate-300">
+                      <td className="p-4 text-right text-slate-300">
                         ฿{comm.commissionableAmountThb.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="p-3.5 text-right font-bold text-[#D9BC82]">
+                      <td className="p-4 text-right font-bold text-[#D9BC82]">
                         +฿{comm.commissionAmountThb.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                         <span className="text-[10px] text-slate-500 block font-normal font-sans">({(comm.commissionRateApplied * 100).toFixed(0)}%)</span>
                       </td>
-                      <td className="p-3.5 text-center font-sans">
+                      <td className="p-4 text-center font-sans">
                         {comm.status === "holding" ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] bg-amber-500/15 text-amber-300 border border-amber-500/30">
                             กักยอด 14 วัน
                           </span>
                         ) : comm.status === "cleared" ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                             ปลดล็อกแล้ว
                           </span>
                         ) : comm.status === "clawback_refunded" ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-red-500/15 text-red-300 border border-red-500/30">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] bg-red-500/15 text-red-300 border border-red-500/30">
                             หักคืน (Refund)
                           </span>
                         ) : (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] bg-slate-500/15 text-slate-400 border border-slate-500/30">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] bg-slate-500/15 text-slate-400 border border-slate-500/30">
                             {comm.status}
                           </span>
                         )}
                       </td>
-                      <td className="p-3.5 text-right font-sans text-slate-400">
+                      <td className="p-4 text-right font-sans text-slate-400">
                         {comm.status === "holding" ? (
                           <div>
                             <span className="text-amber-300 font-mono">{new Date(comm.holdingUntil).toLocaleDateString("th-TH", { day: "numeric", month: "short" })}</span>
@@ -1024,7 +1036,7 @@ export default function PartnerPortalPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left 2 Cols: Recent Referrals (Masked PII) */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="p-5 rounded-2xl bg-[#0A1628]/80 border border-white/10 space-y-4">
+            <div className="p-6 rounded-2xl bg-[#0A1628]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
                   <Users className="w-5 h-5 text-sky-400" />
@@ -1035,14 +1047,14 @@ export default function PartnerPortalPage() {
 
               <div className="divide-y divide-white/5">
                 {referralPerformance.recentReferrals.length === 0 ? (
-                  <div className="py-8 text-center text-slate-400 text-xs">
+                  <div className="py-10 text-center text-slate-400 text-xs">
                     ยังไม่มีผู้ลงทะเบียนผ่านลิงก์ของท่าน เริ่มต้นแชร์ลิงก์เพื่อสร้างกัลยาณมิตรร่วมกัน
                   </div>
                 ) : (
                   referralPerformance.recentReferrals.map((ref, idx) => (
-                    <div key={idx} className="py-3 flex items-center justify-between text-xs">
+                    <div key={idx} className="py-3.5 flex items-center justify-between text-xs hover:bg-white/[0.02] px-2 rounded-xl transition-colors">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/30 flex items-center justify-center font-bold text-[#D9BC82]">
+                        <div className="w-9 h-9 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/30 flex items-center justify-center font-bold text-[#D9BC82]">
                           {ref.maskedName.charAt(0)}
                         </div>
                         <div>
@@ -1053,7 +1065,7 @@ export default function PartnerPortalPage() {
                         </div>
                       </div>
 
-                      <span className="px-2.5 py-1 rounded-full text-[11px] font-medium bg-white/5 border border-white/10 text-slate-300">
+                      <span className="px-3 py-1 rounded-full text-[11px] font-medium bg-white/5 border border-white/10 text-slate-300">
                         {ref.tierOrPlan}
                       </span>
                     </div>
@@ -1065,23 +1077,23 @@ export default function PartnerPortalPage() {
 
           {/* Right Col: Top Campaigns */}
           <div className="space-y-4">
-            <div className="p-5 rounded-2xl bg-[#0A1628]/80 border border-white/10 space-y-3">
+            <div className="p-6 rounded-2xl bg-[#0A1628]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
               <h3 className="text-sm font-semibold text-[#F8F6F1] flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-[#D9BC82]" />
                 สถิติแคมเปญ (Top Channels)
               </h3>
 
-              <div className="space-y-2">
+              <div className="space-y-2.5">
                 {referralPerformance.topCampaigns.length === 0 ? (
-                  <div className="py-6 text-center text-xs text-slate-400">
+                  <div className="py-8 text-center text-xs text-slate-400">
                     ยังไม่มีข้อมูลแคมเปญที่บันทึก
                   </div>
                 ) : (
                   referralPerformance.topCampaigns.map((camp, idx) => (
-                    <div key={idx} className="p-3 rounded-xl bg-white/5 border border-white/5 text-xs flex justify-between items-center">
+                    <div key={idx} className="p-3.5 rounded-xl bg-[#071427] border border-white/5 text-xs flex justify-between items-center hover:border-white/10 transition-colors">
                       <div>
                         <span className="font-mono text-[#D9BC82] font-semibold">{camp.campaignCode}</span>
-                        <div className="text-[10px] text-slate-400">{camp.clicks} ครั้งที่กดเข้าชม</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{camp.clicks} ครั้งที่กดเข้าชม</div>
                       </div>
                       <span className="font-mono font-bold text-emerald-400">{camp.conversions} สมาชิก</span>
                     </div>
@@ -1093,10 +1105,10 @@ export default function PartnerPortalPage() {
         </div>
       )}
 
-      {/* ── TAB 4: ประวัติการถอนเงิน & สถานะการโอน (Strict State Machine & Tax Breakdown) ── */}
+      {/* ── TAB 4: ประวัติการถอนเงิน & สถานะการโอน ── */}
       {activeTab === "payouts" && (
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
                 <CreditCard className="w-5 h-5 text-emerald-400" />
@@ -1111,53 +1123,53 @@ export default function PartnerPortalPage() {
               type="button"
               onClick={() => setIsPayoutModalOpen(true)}
               disabled={availableBalance < 500}
-              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-2 px-3.5 flex items-center gap-1.5 shadow-md disabled:opacity-40"
+              className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs py-2.5 px-4 flex items-center gap-1.5 shadow-lg rounded-xl disabled:opacity-40"
             >
               <Send className="w-3.5 h-3.5" />
               ยื่นคำขอถอนเงิน (พร้อมถอน ฿{availableBalance.toLocaleString()})
             </Button>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0A1628]/80 backdrop-blur-md">
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0A1628]/90 backdrop-blur-2xl shadow-xl">
             <table className="w-full text-left text-xs">
-              <thead className="bg-white/5 text-slate-400 uppercase tracking-wider font-semibold border-b border-white/10">
+              <thead className="bg-[#071427] text-slate-300 uppercase tracking-wider font-semibold border-b border-white/10">
                 <tr>
-                  <th className="p-3.5">เลขที่คำขอ / วันที่</th>
-                  <th className="p-3.5 text-right">ยอดที่ขอถอน</th>
-                  <th className="p-3.5 text-right">ภาษีหัก ณ ที่จ่าย</th>
-                  <th className="p-3.5 text-right">ยอดรับสุทธิ (Net)</th>
-                  <th className="p-3.5">บัญชีปลายทาง (Masked)</th>
-                  <th className="p-3.5 text-center">สถานะ</th>
-                  <th className="p-3.5">รายละเอียด / กฎภาษี</th>
+                  <th className="p-4">เลขที่คำขอ / วันที่</th>
+                  <th className="p-4 text-right">ยอดที่ขอถอน</th>
+                  <th className="p-4 text-right">ภาษีหัก ณ ที่จ่าย</th>
+                  <th className="p-4 text-right">ยอดรับสุทธิ (Net)</th>
+                  <th className="p-4">บัญชีปลายทาง (Masked)</th>
+                  <th className="p-4 text-center">สถานะ</th>
+                  <th className="p-4">รายละเอียด / กฎภาษี</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 font-mono">
                 {payoutRequests.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400 font-sans">
+                    <td colSpan={7} className="p-10 text-center text-slate-400 font-sans">
                       ยังไม่มีประวัติคำขอถอนเงิน
                     </td>
                   </tr>
                 ) : (
                   payoutRequests.map((req) => (
-                    <tr key={req.id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="p-3.5 font-sans">
+                    <tr key={req.id} className="hover:bg-white/[0.03] transition-colors">
+                      <td className="p-4 font-sans">
                         <div className="font-mono font-bold text-slate-200">{req.requestNumber}</div>
                         <div className="text-[10px] text-slate-400">{new Date(req.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })}</div>
                       </td>
-                      <td className="p-3.5 text-right text-slate-300">
+                      <td className="p-4 text-right text-slate-300">
                         ฿{req.requestedAmountThb.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="p-3.5 text-right text-amber-400/90 font-sans">
+                      <td className="p-4 text-right text-amber-400/90 font-sans">
                         -฿{req.withholdingTaxAmountThb.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                         <span className="text-[10px] text-slate-500 block font-mono">
                           ({(req.withholdingRateApplied * 100).toFixed(0)}% Tax)
                         </span>
                       </td>
-                      <td className="p-3.5 text-right font-bold text-emerald-300">
+                      <td className="p-4 text-right font-bold text-emerald-300">
                         ฿{req.netPayoutAmountThb.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="p-3.5 font-sans text-slate-300">
+                      <td className="p-4 font-sans text-slate-300">
                         <div>{(req.destinationSnapshot as any)?.bankName || (req.destinationSnapshot as any)?.bank_code || "ธนาคาร"}</div>
                         <div className="text-[10px] text-slate-400 font-mono">
                           {maskBankAccount((req.destinationSnapshot as any)?.accountNo || (req.destinationSnapshot as any)?.account_number)}
@@ -1166,7 +1178,7 @@ export default function PartnerPortalPage() {
                           {maskName((req.destinationSnapshot as any)?.accountName || (req.destinationSnapshot as any)?.account_name)}
                         </div>
                       </td>
-                      <td className="p-3.5 text-center font-sans">
+                      <td className="p-4 text-center font-sans">
                         {req.status === "pending_review" ? (
                           <span className="px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center justify-center gap-1 mx-auto w-max">
                             <Clock className="w-3 h-3" /> รอตรวจสอบ
@@ -1197,7 +1209,7 @@ export default function PartnerPortalPage() {
                           </span>
                         )}
                       </td>
-                      <td className="p-3.5 font-sans text-slate-400 text-[11px]">
+                      <td className="p-4 font-sans text-slate-400 text-[11px]">
                         <div className="font-mono text-[10px] text-slate-300">
                           {req.taxRuleCodeApplied || "TH_INDIVIDUAL_COMMISSION"}
                         </div>
@@ -1220,7 +1232,7 @@ export default function PartnerPortalPage() {
         </div>
       )}
 
-      {/* ── TAB 5: สมุดบัญชีรายได้ (Double-Entry Financial Ledger) ── */}
+      {/* ── TAB 5: สมุดบัญชีรายได้ ── */}
       {activeTab === "ledger" && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -1235,65 +1247,65 @@ export default function PartnerPortalPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0A1628]/80 backdrop-blur-md">
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0A1628]/90 backdrop-blur-2xl shadow-xl">
             <table className="w-full text-left text-xs">
-              <thead className="bg-white/5 text-slate-400 uppercase tracking-wider font-semibold border-b border-white/10">
+              <thead className="bg-[#071427] text-slate-300 uppercase tracking-wider font-semibold border-b border-white/10">
                 <tr>
-                  <th className="p-3.5">วันและเวลา</th>
-                  <th className="p-3.5">ประเภทธุรกรรม</th>
-                  <th className="p-3.5 text-right">จำนวนเงิน</th>
-                  <th className="p-3.5 text-right">Holding ก่อน/หลัง</th>
-                  <th className="p-3.5 text-right">Available ก่อน/หลัง</th>
-                  <th className="p-3.5 text-right">Pending ก่อน/หลัง</th>
-                  <th className="p-3.5">บันทึกช่วยจำ (Notes)</th>
+                  <th className="p-4">วันและเวลา</th>
+                  <th className="p-4">ประเภทธุรกรรม</th>
+                  <th className="p-4 text-right">จำนวนเงิน</th>
+                  <th className="p-4 text-right">Holding ก่อน/หลัง</th>
+                  <th className="p-4 text-right">Available ก่อน/หลัง</th>
+                  <th className="p-4 text-right">Pending ก่อน/หลัง</th>
+                  <th className="p-4">บันทึกช่วยจำ (Notes)</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5 font-mono">
                 {partnerLedger.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="p-8 text-center text-slate-400 font-sans">
+                    <td colSpan={7} className="p-10 text-center text-slate-400 font-sans">
                       ยังไม่มีรายการในสมุดบัญชีแยกประเภท
                     </td>
                   </tr>
                 ) : (
                   partnerLedger.map((tx) => (
-                    <tr key={tx.id} className="hover:bg-white/[0.02] transition-colors">
-                      <td className="p-3.5 text-slate-400 font-sans">
+                    <tr key={tx.id} className="hover:bg-white/[0.03] transition-colors">
+                      <td className="p-4 text-slate-400 font-sans">
                         <div>{new Date(tx.createdAt).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "2-digit" })}</div>
                         <div className="text-[10px] text-slate-500 font-mono">{new Date(tx.createdAt).toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</div>
                       </td>
-                      <td className="p-3.5 font-sans">
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-medium ${
+                      <td className="p-4 font-sans">
+                        <span className={`px-2.5 py-1 rounded text-[10px] font-medium ${
                           tx.entryType === "commission_holding_in"
-                            ? "bg-amber-500/15 text-amber-300"
+                            ? "bg-amber-500/15 text-amber-300 border border-amber-500/30"
                             : tx.entryType === "commission_cleared"
-                            ? "bg-emerald-500/15 text-emerald-300"
+                            ? "bg-emerald-500/15 text-emerald-300 border border-emerald-500/30"
                             : tx.entryType === "commission_clawback"
-                            ? "bg-red-500/15 text-red-300"
+                            ? "bg-red-500/15 text-red-300 border border-red-500/30"
                             : tx.entryType === "payout_reserved"
-                            ? "bg-sky-500/15 text-sky-300"
+                            ? "bg-sky-500/15 text-sky-300 border border-sky-500/30"
                             : tx.entryType === "payout_settled"
-                            ? "bg-purple-500/15 text-purple-300"
-                            : "bg-slate-500/15 text-slate-300"
+                            ? "bg-purple-500/15 text-purple-300 border border-purple-500/30"
+                            : "bg-slate-500/15 text-slate-300 border border-slate-500/30"
                         }`}>
                           {tx.entryType}
                         </span>
                       </td>
-                      <td className={`p-3.5 text-right font-bold ${
+                      <td className={`p-4 text-right font-bold ${
                         tx.amount > 0 ? "text-emerald-300" : "text-slate-300"
                       }`}>
                         ฿{tx.amount.toLocaleString("th-TH", { minimumFractionDigits: 2 })}
                       </td>
-                      <td className="p-3.5 text-right text-slate-400 text-[11px]">
+                      <td className="p-4 text-right text-slate-400 text-[11px]">
                         ฿{tx.holdingBalanceBefore.toFixed(2)} ➔ <span className="text-amber-300 font-bold">฿{tx.holdingBalanceAfter.toFixed(2)}</span>
                       </td>
-                      <td className="p-3.5 text-right text-slate-400 text-[11px]">
+                      <td className="p-4 text-right text-slate-400 text-[11px]">
                         ฿{tx.availableBalanceBefore.toFixed(2)} ➔ <span className="text-emerald-300 font-bold">฿{tx.availableBalanceAfter.toFixed(2)}</span>
                       </td>
-                      <td className="p-3.5 text-right text-slate-400 text-[11px]">
+                      <td className="p-4 text-right text-slate-400 text-[11px]">
                         ฿{tx.payoutPendingBefore.toFixed(2)} ➔ <span className="text-sky-300 font-bold">฿{tx.payoutPendingAfter.toFixed(2)}</span>
                       </td>
-                      <td className="p-3.5 font-sans text-slate-300 text-[11px] max-w-xs truncate" title={tx.notes || ""}>
+                      <td className="p-4 font-sans text-slate-300 text-[11px] max-w-xs truncate" title={tx.notes || ""}>
                         {tx.notes || "—"}
                       </td>
                     </tr>
@@ -1305,73 +1317,73 @@ export default function PartnerPortalPage() {
         </div>
       )}
 
-      {/* ── TAB 6: บัญชีรับเงิน & ข้อมูลภาษี (Bank & Tax Profile Settings) ── */}
+      {/* ── TAB 6: บัญชีรับเงิน & ข้อมูลภาษี ── */}
       {activeTab === "settings" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Form 1: Payout Destination */}
-          <div className="p-6 rounded-2xl bg-[#0A1628]/80 border border-white/10 space-y-4">
+          <div className="p-6 md:p-7 rounded-2xl bg-[#0A1628]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
             <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
               <Building className="w-5 h-5 text-emerald-400" />
               ข้อมูลบัญชีรับเงินโอน (Payout Destination)
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-300 font-light leading-relaxed">
               ยอดเงินจะถูกโอนเข้าบัญชีนี้เมื่อได้รับอนุมัติคำขอถอนเงิน โปรดระบุชื่อบัญชีให้ตรงกับบัตรประชาชน
             </p>
 
-            <Form method="post" className="space-y-4">
+            <Form method="post" className="space-y-4 pt-2">
               <input type="hidden" name="intent" value="update_bank_info" />
 
               <div>
-                <label className="text-xs text-slate-300 font-medium mb-1 block">ธนาคาร:</label>
+                <label className="text-xs text-slate-300 font-medium mb-1.5 block">ธนาคาร:</label>
                 <Input
                   type="text"
                   name="bankName"
                   defaultValue={partnerProfile?.bankName || "กสิกรไทย (KBANK)"}
                   placeholder="เช่น กสิกรไทย, ไทยพาณิชย์, กรุงเทพ"
                   required
-                  className="bg-black/50 border-white/15 text-xs"
+                  className="bg-[#020617]/80 border-white/15 text-xs text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 font-medium mb-1 block">เลขที่บัญชีธนาคาร:</label>
+                <label className="text-xs text-slate-300 font-medium mb-1.5 block">เลขที่บัญชีธนาคาร:</label>
                 <Input
                   type="text"
                   name="bankAccountNo"
                   defaultValue={partnerProfile?.bankAccountNo || ""}
                   placeholder="เช่น 012-3-45678-9"
                   required
-                  className="bg-black/50 border-white/15 text-xs font-mono"
+                  className="bg-[#020617]/80 border-white/15 text-xs font-mono text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 font-medium mb-1 block">ชื่อบัญชี (ตรงตามสมุดบัญชี):</label>
+                <label className="text-xs text-slate-300 font-medium mb-1.5 block">ชื่อบัญชี (ตรงตามสมุดบัญชี):</label>
                 <Input
                   type="text"
                   name="bankAccountName"
                   defaultValue={partnerProfile?.bankAccountName || profile?.display_name || ""}
                   placeholder="ชื่อ-นามสกุลเจ้าของบัญชี"
                   required
-                  className="bg-black/50 border-white/15 text-xs"
+                  className="bg-[#020617]/80 border-white/15 text-xs text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 font-medium mb-1 block">พร้อมเพย์ (ไม่บังคับ):</label>
+                <label className="text-xs text-slate-300 font-medium mb-1.5 block">พร้อมเพย์ (ไม่บังคับ):</label>
                 <Input
                   type="text"
                   name="promptpayId"
                   defaultValue={partnerProfile?.promptpayId || ""}
                   placeholder="เบอร์โทรศัพท์ หรือ เลขบัตร ปชช."
-                  className="bg-black/50 border-white/15 text-xs font-mono"
+                  className="bg-[#020617]/80 border-white/15 text-xs font-mono text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-2.5 rounded-xl shadow-md"
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold py-3 rounded-xl shadow-lg mt-2"
               >
                 {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูลบัญชีรับเงิน"}
               </Button>
@@ -1379,24 +1391,24 @@ export default function PartnerPortalPage() {
           </div>
 
           {/* Form 2: Tax Compliance Profile */}
-          <div className="p-6 rounded-2xl bg-[#0A1628]/80 border border-white/10 space-y-4">
+          <div className="p-6 md:p-7 rounded-2xl bg-[#0A1628]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
             <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
               <FileText className="w-5 h-5 text-[#D9BC82]" />
               ข้อมูลภาษีและหนังสือรับรอง (Tax Compliance Profile)
             </h3>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-300 font-light leading-relaxed">
               ใช้สำหรับออกหนังสือรับรองการหักภาษี ณ ที่จ่าย (ใบ 50 ทวิ) ตามกฎหมายภาษีที่ใช้กับบัญชีของคุณ
             </p>
 
-            <Form method="post" className="space-y-4">
+            <Form method="post" className="space-y-4 pt-2">
               <input type="hidden" name="intent" value="update_tax_profile" />
 
               <div>
-                <label className="text-xs text-slate-300 font-medium mb-1 block">ประเภทผู้เสียภาษี:</label>
+                <label className="text-xs text-slate-300 font-medium mb-1.5 block">ประเภทผู้เสียภาษี:</label>
                 <select
                   name="entityType"
                   defaultValue={partnerProfile?.entityType || "individual"}
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-[#C6A96B]"
+                  className="w-full bg-[#020617]/80 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-[#C6A96B]"
                 >
                   <option value="individual">บุคคลธรรมดา (หัก ณ ที่จ่ายตามเกณฑ์สรรพากร)</option>
                   <option value="corporate">นิติบุคคล / บริษัทจำกัด (หัก ณ ที่จ่ายตามเกณฑ์สรรพากร)</option>
@@ -1404,30 +1416,30 @@ export default function PartnerPortalPage() {
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 font-medium mb-1 block">เลขประจำตัวผู้เสียภาษี / บัตรประชาชน:</label>
+                <label className="text-xs text-slate-300 font-medium mb-1.5 block">เลขประจำตัวผู้เสียภาษี / บัตรประชาชน:</label>
                 <Input
                   type="text"
                   name="taxId"
                   defaultValue={partnerProfile?.taxId || ""}
                   placeholder="เลข 13 หลัก"
                   required
-                  className="bg-black/50 border-white/15 text-xs font-mono"
+                  className="bg-[#020617]/80 border-white/15 text-xs font-mono text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
               <div>
-                <label className="text-xs text-slate-300 font-medium mb-1 block">ชื่อ-นามสกุล / ชื่อนิติบุคคลตามทะเบียนภาษี:</label>
+                <label className="text-xs text-slate-300 font-medium mb-1.5 block">ชื่อ-นามสกุล / ชื่อนิติบุคคลตามทะเบียนภาษี:</label>
                 <Input
                   type="text"
                   name="legalName"
                   defaultValue={partnerProfile?.legalName || partnerProfile?.bankAccountName || profile?.display_name || ""}
                   placeholder="ชื่อนิติบุคคลหรือชื่อบุคคลตามบัตร ปชช."
                   required
-                  className="bg-black/50 border-white/15 text-xs"
+                  className="bg-[#020617]/80 border-white/15 text-xs text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
-              <div className="p-3.5 rounded-xl bg-white/5 border border-white/10 space-y-2">
+              <div className="p-4 rounded-xl bg-[#020617]/60 border border-white/10 space-y-2">
                 <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
                   <input
                     type="checkbox"
@@ -1443,7 +1455,7 @@ export default function PartnerPortalPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-[#C6A96B] hover:bg-[#D9BC82] text-black text-xs font-bold py-2.5 rounded-xl shadow-md"
+                className="w-full bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] hover:brightness-110 text-slate-950 text-xs font-bold py-3 rounded-xl shadow-lg mt-2"
               >
                 {isSubmitting ? "กำลังบันทึก..." : "บันทึกข้อมูลภาษี"}
               </Button>
@@ -1454,20 +1466,20 @@ export default function PartnerPortalPage() {
 
       {/* ── 5. Payout Request Drawer / Modal with Live Dynamic Tax Calculation Preview ── */}
       {isPayoutModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-2xl bg-gradient-to-b from-[#0B1528] to-[#040914] border border-[#C6A96B]/40 p-6 md:p-8 shadow-2xl space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg rounded-3xl bg-gradient-to-b from-[#0B182F] via-[#071427] to-[#020617] border border-[#C6A96B]/40 p-6 md:p-8 shadow-2xl space-y-6">
             <button
               type="button"
               onClick={() => setIsPayoutModalOpen(false)}
-              className="absolute top-4 right-4 p-1.5 text-slate-400 hover:text-white rounded-lg bg-white/5"
+              className="absolute top-5 right-5 p-1.5 text-slate-400 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 transition-colors"
             >
               <XCircle className="w-5 h-5" />
             </button>
 
             {!cashCommissionEnabled ? (
               <div className="space-y-4 py-4 text-center">
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center mx-auto text-amber-400">
-                  <Sparkles className="w-6 h-6" />
+                <div className="w-14 h-14 rounded-full bg-amber-500/20 border border-amber-500/40 flex items-center justify-center mx-auto text-amber-400">
+                  <Sparkles className="w-7 h-7" />
                 </div>
                 <h2 className="text-xl font-bold font-serif text-[#F8F6F1]">
                   ระบบถอนเงินสดปิดให้บริการในรุ่น MVP
@@ -1478,7 +1490,7 @@ export default function PartnerPortalPage() {
                 <Button
                   type="button"
                   onClick={() => setIsPayoutModalOpen(false)}
-                  className="bg-[#C6A96B] hover:bg-[#D9BC82] text-black text-xs font-bold py-2.5 px-6 rounded-xl shadow-md"
+                  className="bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-slate-950 text-xs font-bold py-2.5 px-6 rounded-xl shadow-lg mt-2"
                 >
                   รับทราบ
                 </Button>
@@ -1486,13 +1498,13 @@ export default function PartnerPortalPage() {
             ) : (
               <>
                 <div>
-                  <span className="text-[11px] font-semibold tracking-wider text-[#D9BC82] uppercase bg-[#C6A96B]/15 px-2.5 py-0.5 rounded-full border border-[#C6A96B]/30">
+                  <span className="text-[11px] font-semibold tracking-wider text-[#D9BC82] uppercase bg-[#C6A96B]/15 px-3 py-1 rounded-full border border-[#C6A96B]/30">
                     Atomic Payout Settlement
                   </span>
-                  <h2 className="text-xl font-bold font-serif text-[#F8F6F1] mt-2">
+                  <h2 className="text-xl font-bold font-serif text-[#F8F6F1] mt-2.5">
                     ยื่นคำขอถอนเงินสด (Payout Request)
                   </h2>
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs text-slate-300 mt-1 font-light">
                     ยอดเงินพร้อมถอนปัจจุบันของคุณคือ <span className="text-emerald-400 font-mono font-bold">฿{availableBalance.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>
                   </p>
                 </div>
@@ -1504,76 +1516,76 @@ export default function PartnerPortalPage() {
                   <input type="hidden" name="accountName" value={partnerProfile?.bankAccountName || ""} />
                   <input type="hidden" name="taxId" value={partnerProfile?.taxId || ""} />
 
-              <div>
-                <label className="text-xs text-slate-300 font-medium mb-1.5 flex justify-between">
-                  <span>ระบุจำนวนเงินที่ต้องการถอน (บาท):</span>
-                  <span className="text-slate-400">ขั้นต่ำ ฿500</span>
-                </label>
-                <div className="relative">
-                  <Input
-                    type="number"
-                    name="amount"
-                    min={500}
-                    max={availableBalance}
-                    step={100}
-                    value={payoutAmount}
-                    onChange={(e) => setPayoutAmount(Math.max(0, parseFloat(e.target.value) || 0))}
-                    required
-                    className="bg-black/60 border-white/20 text-lg font-mono font-bold text-[#F8F6F1] pl-8 py-2.5"
-                  />
-                  <span className="absolute left-3 top-3 text-slate-400 font-mono text-sm">฿</span>
-                </div>
-              </div>
+                  <div>
+                    <label className="text-xs text-slate-300 font-medium mb-1.5 flex justify-between">
+                      <span>ระบุจำนวนเงินที่ต้องการถอน (บาท):</span>
+                      <span className="text-slate-400 font-mono">ขั้นต่ำ ฿500</span>
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="number"
+                        name="amount"
+                        min={500}
+                        max={availableBalance}
+                        step={100}
+                        value={payoutAmount}
+                        onChange={(e) => setPayoutAmount(Math.max(0, parseFloat(e.target.value) || 0))}
+                        required
+                        className="bg-[#020617]/80 border-white/20 text-lg font-mono font-bold text-[#F8F6F1] pl-8 py-2.5 rounded-xl focus:border-[#C6A96B]"
+                      />
+                      <span className="absolute left-3 top-3 text-slate-400 font-mono text-sm">฿</span>
+                    </div>
+                  </div>
 
-              {/* Live Dynamic Tax Breakdown */}
-              <div className="p-4 rounded-xl bg-black/50 border border-white/10 space-y-2 text-xs">
-                <div className="flex justify-between text-slate-300">
-                  <span>ยอดที่ขอถอน:</span>
-                  <span className="font-mono">฿{payoutAmount.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>
-                </div>
-                <div className="flex justify-between text-amber-400/90">
-                  <span>ภาษีหัก ณ ที่จ่ายตามกฎภาษีที่ใช้กับบัญชีของคุณ ({taxPreview.taxRatePercentage}%):</span>
-                  <span className="font-mono">-฿{taxPreview.whtAmount.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>
-                </div>
-                <div className="text-[10px] text-slate-500 font-mono">
-                  Applied Rule: {taxPreview.taxRuleCode} (อัตรา {taxPreview.taxRatePercentage}%)
-                </div>
-                <div className="pt-2 border-t border-white/10 flex justify-between text-emerald-300 font-bold text-sm">
-                  <span>ยอดโอนเข้าบัญชีสุทธิ:</span>
-                  <span className="font-mono text-base">฿{taxPreview.netAmount.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>
-                </div>
-              </div>
+                  {/* Live Dynamic Tax Breakdown */}
+                  <div className="p-4 rounded-xl bg-[#020617]/90 border border-white/10 space-y-2 text-xs">
+                    <div className="flex justify-between text-slate-300">
+                      <span>ยอดที่ขอถอน:</span>
+                      <span className="font-mono">฿{payoutAmount.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="flex justify-between text-amber-300">
+                      <span>ภาษีหัก ณ ที่จ่ายตามเกณฑ์ ({taxPreview.taxRatePercentage}%):</span>
+                      <span className="font-mono">-฿{taxPreview.whtAmount.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>
+                    </div>
+                    <div className="text-[10px] text-slate-500 font-mono">
+                      Applied Rule: {taxPreview.taxRuleCode} (อัตรา {taxPreview.taxRatePercentage}%)
+                    </div>
+                    <div className="pt-2 border-t border-white/10 flex justify-between text-emerald-300 font-bold text-sm">
+                      <span>ยอดโอนเข้าบัญชีสุทธิ:</span>
+                      <span className="font-mono text-base">฿{taxPreview.netAmount.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  </div>
 
-              {/* Destination Summary (Masked PII) */}
-              <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 text-xs text-slate-300 space-y-1">
-                <div className="font-semibold text-slate-200">โอนเข้าบัญชีปลายทาง:</div>
-                <div className="flex justify-between text-slate-400">
-                  <span>{partnerProfile?.bankName || "ยังไม่ได้ตั้งค่าบัญชี"}</span>
-                  <span className="font-mono text-slate-200">{maskBankAccount(partnerProfile?.bankAccountNo || "")}</span>
-                </div>
-                <div className="text-slate-400 text-[11px]">{maskName(partnerProfile?.bankAccountName || profile?.display_name || "")}</div>
-              </div>
+                  {/* Destination Summary (Masked PII) */}
+                  <div className="p-3.5 rounded-xl bg-white/5 border border-white/5 text-xs text-slate-300 space-y-1">
+                    <div className="font-semibold text-slate-200">โอนเข้าบัญชีปลายทาง:</div>
+                    <div className="flex justify-between text-slate-400">
+                      <span>{partnerProfile?.bankName || "ยังไม่ได้ตั้งค่าบัญชี"}</span>
+                      <span className="font-mono text-slate-200">{maskBankAccount(partnerProfile?.bankAccountNo || "")}</span>
+                    </div>
+                    <div className="text-slate-400 text-[11px]">{maskName(partnerProfile?.bankAccountName || profile?.display_name || "")}</div>
+                  </div>
 
-              <div className="flex items-center gap-3 pt-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setIsPayoutModalOpen(false)}
-                  className="flex-1 border-white/15 text-slate-300 text-xs py-2.5 rounded-xl"
-                >
-                  ยกเลิก
-                </Button>
-                <Button
-                  type="submit"
-                  disabled={payoutAmount < 500 || payoutAmount > availableBalance || !partnerProfile?.bankAccountNo}
-                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                  ยืนยันการถอนเงิน
-                </Button>
-              </div>
-            </Form>
-            </>
-          )}
+                  <div className="flex items-center gap-3 pt-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setIsPayoutModalOpen(false)}
+                      className="flex-1 border-white/15 text-slate-300 text-xs py-2.5 rounded-xl hover:bg-white/5"
+                    >
+                      ยกเลิก
+                    </Button>
+                    <Button
+                      type="submit"
+                      disabled={payoutAmount < 500 || payoutAmount > availableBalance || !partnerProfile?.bankAccountNo}
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2.5 rounded-xl shadow-lg disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      ยืนยันการถอนเงิน
+                    </Button>
+                  </div>
+                </Form>
+              </>
+            )}
           </div>
         </div>
       )}

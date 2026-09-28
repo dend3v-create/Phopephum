@@ -177,28 +177,28 @@ export function ActiveSubjectBanner({
 
   return (
     <>
-      <div className="rounded-2xl border border-amber-300/40 dark:border-[#C6A96B]/30 bg-white/95 dark:bg-gradient-to-r dark:from-[#0A2240]/80 dark:via-[#0A1628]/90 dark:to-[#0A2240]/80 p-3.5 sm:p-4 text-slate-800 dark:text-[#F8F6F1] shadow-md dark:shadow-lg relative overflow-hidden backdrop-blur-md">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 relative z-10">
+      <div className="rounded-2xl border border-[#C6A96B]/30 bg-gradient-to-r from-[#0A2240]/90 via-[#0A1628]/95 to-[#0A2240]/90 p-3.5 sm:p-4 text-[#F8F6F1] shadow-lg relative overflow-hidden backdrop-blur-md">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 relative z-10">
         
         {/* ฝั่งซ้าย: ข้อมูลเจ้าชะตา */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 dark:bg-[#C6A96B]/15 border border-amber-400/30 dark:border-[#C6A96B]/40 flex items-center justify-center text-lg shrink-0 shadow-[0_0_12px_rgba(198,169,107,0.15)]">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <div className="w-10 h-10 rounded-xl bg-[#C6A96B]/15 border border-[#C6A96B]/40 flex items-center justify-center text-lg shrink-0 shadow-[0_0_12px_rgba(198,169,107,0.15)]">
             {currentSubject.isCustomer ? "👤" : "🌟"}
           </div>
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-[#8C6D2D] dark:text-[#C6A96B]">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-[#C6A96B] whitespace-nowrap">
                 {currentSubject.isCustomer ? "ผังดวงลูกดวง (เจ้าชะตา)" : "ผังดวงประจำตัวของฉัน"}
               </span>
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">เรียลไทม์</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span className="text-[10px] text-emerald-400 font-semibold whitespace-nowrap">เรียลไทม์</span>
             </div>
             <div className="flex items-center gap-2 truncate">
-              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-[#F8F6F1] truncate">
+              <h2 className="text-base sm:text-lg font-bold text-[#F8F6F1] truncate">
                 {currentSubject.name}
               </h2>
               {currentSubject.birthDate && (
-                <span className="text-xs text-slate-600 dark:text-[#C6B79F] hidden md:inline">
+                <span className="text-xs text-[#C6B79F] hidden sm:inline whitespace-nowrap">
                   (เกิด {new Date(currentSubject.birthDate).toLocaleDateString("th-TH", { day: "numeric", month: "short", year: "numeric" })})
                 </span>
               )}
@@ -207,24 +207,24 @@ export function ActiveSubjectBanner({
         </div>
 
         {/* ฝั่งขวา: Dropdown สลับดวง + ปุ่มจัดการ */}
-        <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
+        <div className="flex items-center gap-2 flex-wrap shrink-0">
           <div className="relative">
             <select
               value={currentSubject.isCustomer ? currentSubject.id : "self"}
               onChange={handleSelectSubject}
-              className="bg-slate-50 dark:bg-slate-950/80 border border-slate-300 dark:border-[#C6A96B]/40 text-slate-800 dark:text-[#F8F6F1] text-xs sm:text-sm rounded-xl px-3 py-2 pr-8 focus:border-[#C6A96B] outline-none shadow-xs cursor-pointer"
+              className="bg-slate-950/80 border border-[#C6A96B]/40 text-[#F8F6F1] text-xs sm:text-sm rounded-xl px-3 py-2 pr-8 focus:border-[#C6A96B] outline-none shadow-sm cursor-pointer"
             >
-              <option value="self">🌟 ดวงของฉัน ({profileName})</option>
+              <option value="self" className="bg-[#020617] text-[#F8F6F1]">🌟 ดวงของฉัน ({profileName})</option>
               {customers && customers.length > 0 && (
-                <optgroup label="── รายชื่อลูกดวงที่บันทึกไว้ ──">
+                <optgroup label="── รายชื่อลูกดวงที่บันทึกไว้ ──" className="bg-[#0A2240] text-[#C6A96B]">
                   {customers.map(c => (
-                    <option key={c.id} value={c.id}>
+                    <option key={c.id} value={c.id} className="bg-[#020617] text-[#F8F6F1]">
                       👤 {c.name}
                     </option>
                   ))}
                 </optgroup>
               )}
-              <option value="__ADD_NEW__">➕ เพิ่มเจ้าชะตาใหม่...</option>
+              <option value="__ADD_NEW__" className="bg-[#020617] text-[#C6A96B]">➕ เพิ่มเจ้าชะตาใหม่...</option>
             </select>
           </div>
 
@@ -233,7 +233,7 @@ export function ActiveSubjectBanner({
               <button
                 type="button"
                 onClick={openEditModal}
-                className="px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-white/10 hover:border-[#C6A96B]/60 bg-slate-100 dark:bg-white/5 hover:bg-amber-500/10 dark:hover:bg-[#C6A96B]/15 text-xs text-slate-700 dark:text-[#C6B79F] hover:text-slate-900 dark:hover:text-[#F8F6F1] transition-all flex items-center gap-1 shadow-xs"
+                className="px-2.5 py-1.5 rounded-xl border border-white/10 hover:border-[#C6A96B]/60 bg-white/5 hover:bg-[#C6A96B]/15 text-xs text-[#C6B79F] hover:text-[#F8F6F1] transition-all flex items-center gap-1 shadow-sm"
                 title="แก้ไขข้อมูลเจ้าชะตานี้"
               >
                 <span>✏️</span>
@@ -242,7 +242,7 @@ export function ActiveSubjectBanner({
               <button
                 type="button"
                 onClick={() => setIsDeleteConfirmOpen(true)}
-                className="px-2.5 py-1.5 rounded-xl border border-rose-300 dark:border-rose-500/20 hover:border-rose-500/60 bg-rose-50 dark:bg-rose-500/10 hover:bg-rose-100 dark:hover:bg-rose-500/20 text-xs text-rose-600 dark:text-rose-300 hover:text-rose-700 dark:hover:text-rose-200 transition-all flex items-center gap-1 shadow-xs"
+                className="px-2.5 py-1.5 rounded-xl border border-rose-500/20 hover:border-rose-500/60 bg-rose-500/10 hover:bg-rose-500/20 text-xs text-rose-300 hover:text-rose-200 transition-all flex items-center gap-1 shadow-sm"
                 title="ลบเจ้าชะตานี้ออกจากฐานข้อมูล"
               >
                 <span>🗑️</span>

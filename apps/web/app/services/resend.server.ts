@@ -19,9 +19,11 @@ interface EmailPayload {
   html: string;
 }
 
-// ─── Core send function ───────────────────────────────────────────────────────
-
 async function sendEmail(apiKey: string, payload: EmailPayload): Promise<void> {
+  if (!apiKey) {
+    console.warn("[Resend] Skipping sendEmail: RESEND_API_KEY is not configured in environment bindings.");
+    return;
+  }
   const res = await fetch(RESEND_API_URL, {
     method: "POST",
     headers: {
@@ -78,17 +80,17 @@ function buildApprovalHtml(
   plan: string,
   approved: boolean,
   adminNote?: string,
-  appUrl = "https://phopephum-web.pages.dev"
+  appUrl = "https://phopephum.com"
 ): string {
   const planLabel =
-    plan === "imperial"
-      ? "✦ Imperial Master"
-      : plan === "pro"
-      ? "◈ Professional Sage"
-      : "⚡ Basic";
+    plan === "imperial" || plan === "master"
+      ? "✦ โหราจารย์ (Master)"
+      : plan === "pro" || plan === "pro_annual"
+      ? "◈ มืออาชีพ (Professional)"
+      : "⚡ ยกระดับชีวิต (Premium)";
 
   const planColor =
-    plan === "imperial" ? "#C6A96B" : plan === "pro" ? "#6D8FC7" : "#34D399";
+    plan === "imperial" || plan === "master" ? "#C6A96B" : plan === "pro" || plan === "pro_annual" ? "#D9BC82" : "#34D399";
 
   const statusColor = approved ? "#34D399" : "#F87171";
   const statusTitle = approved ? "✅ อนุมัติแล้ว!" : "❌ ยังไม่ผ่านการอนุมัติ";
@@ -218,6 +220,15 @@ function buildWelcomeHtml(
 </html>`;
 }
 
+const DEFAULT_FROM = "PhopePhum <noreply@phopephum.com>";
+const DEFAULT_APP_URL = "https://phopephum.com";
+
+export function getResendApiKey(env?: Partial<Env> | any): string {
+  let key = env?.RESEND_API_KEY;
+  if (typeof key === "string") key = key.trim();
+  return key || "";
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -232,19 +243,15 @@ export async function sendApprovalEmail(
   approved: boolean,
   adminNote?: string
 ): Promise<void> {
-  const apiKey = env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.warn("[Resend] Missing RESEND_API_KEY — skipping email");
-    return;
-  }
-
-  const appUrl = env.APP_URL ?? "https://phopephum-web.pages.dev";
+  const apiKey = getResendApiKey(env);
+  const appUrl = env?.APP_URL || DEFAULT_APP_URL;
+  const fromEmail = env?.RESEND_FROM || DEFAULT_FROM;
   const subject = approved
     ? `✅ แพ็กเกจของคุณได้รับการอนุมัติแล้ว — PhopePhum`
     : `แจ้งผลการพิจารณาคำขอ — PhopePhum`;
 
   await sendEmail(apiKey, {
-    from: "PhopePhum <noreply@phopephum.com>",
+    from: fromEmail,
     to: [toEmail],
     subject,
     html: buildApprovalHtml(displayName, plan, approved, adminNote, appUrl),
@@ -252,7 +259,7 @@ export async function sendApprovalEmail(
 }
 
 /**
- * ส่ง Welcome Email เมื่ออนุมัติ Registration
+ * ส่ง Welcome Email เมื่ออนุมัติ Registration หรือสมัครสมาชิกใหม่
  * ใช้ใน: admin.approvals.tsx action (type === "registration")
  */
 export async function sendWelcomeEmail(
@@ -260,16 +267,12 @@ export async function sendWelcomeEmail(
   toEmail: string,
   displayName: string
 ): Promise<void> {
-  const apiKey = env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.warn("[Resend] Missing RESEND_API_KEY — skipping welcome email");
-    return;
-  }
-
-  const appUrl = env.APP_URL ?? "https://phopephum-web.pages.dev";
+  const apiKey = getResendApiKey(env);
+  const appUrl = env?.APP_URL || DEFAULT_APP_URL;
+  const fromEmail = env?.RESEND_FROM || DEFAULT_FROM;
 
   await sendEmail(apiKey, {
-    from: "PhopePhum <noreply@phopephum.com>",
+    from: fromEmail,
     to: [toEmail],
     subject: "✨ ยินดีต้อนรับสู่ PhopePhum — บัญชีของคุณพร้อมใช้งานแล้ว!",
     html: buildWelcomeHtml(displayName, appUrl),
@@ -277,8 +280,7 @@ export async function sendWelcomeEmail(
 }
 
 /**
- * ส่ง Email แจ้งชำระเงินสำเร็จ
- * ใช้ใน: api.webhook.gbprimepay.ts
+ * ส่ง Email แจ้งชำระเงินสำเร็จ (รองรับทั้ง Subscription Plans และ Sands of Time)
  */
 export async function sendPaymentSuccessEmail(
   env: Env,
@@ -287,23 +289,24 @@ export async function sendPaymentSuccessEmail(
   plan: string,
   expiresAt: string
 ): Promise<void> {
-  const apiKey = env.RESEND_API_KEY;
-  if (!apiKey) {
-    console.warn("[Resend] Missing RESEND_API_KEY — skipping payment email");
-    return;
-  }
+  const apiKey = getResendApiKey(env);
+  const appUrl = env?.APP_URL || DEFAULT_APP_URL;
+  const fromEmail = env?.RESEND_FROM || DEFAULT_FROM;
 
-  const appUrl = env.APP_URL ?? "https://phopephum-web.pages.dev";
-  const formattedExpiry = new Date(expiresAt).toLocaleDateString("th-TH", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const formattedExpiry = expiresAt
+    ? new Date(expiresAt).toLocaleDateString("th-TH", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      })
+    : "";
 
   await sendEmail(apiKey, {
-    from: "PhopePhum <noreply@phopephum.com>",
+    from: fromEmail,
     to: [toEmail],
-    subject: "✅ ขอบคุณสำหรับการชำระเงิน — แพ็กเกจของคุณพร้อมใช้งานแล้ว!",
+    subject: plan.startsWith("sands_")
+      ? "⌛ ยืนยันการเติมละอองทรายกาลเวลาสำเร็จ — PhopePhum"
+      : "✅ ขอบคุณสำหรับการชำระเงิน — แพ็กเกจของคุณพร้อมใช้งานแล้ว!",
     html: buildPaymentSuccessHtml(displayName, plan, formattedExpiry, appUrl),
   });
 }
@@ -312,17 +315,36 @@ function buildPaymentSuccessHtml(
   displayName: string,
   plan: string,
   expiresAt: string,
-  appUrl: string
+  appUrl = "https://phopephum.com"
 ): string {
-  const planLabel =
-    plan === "imperial"
-      ? "✦ Imperial Master"
-      : plan === "pro"
-      ? "◈ Professional Sage"
-      : "⚡ Basic";
+  const isSands = plan.startsWith("sands_");
 
-  const planColor =
-    plan === "imperial" ? "#C6A96B" : plan === "pro" ? "#6D8FC7" : "#34D399";
+  let planLabel = "⚡ ยกระดับชีวิต (Premium)";
+  let planColor = "#34D399";
+  let descriptionText = "ขอบคุณที่เลือกใช้บริการ <strong>PhopePhum</strong> ครับ ระบบได้รับการยืนยันการชำระเงินของคุณเรียบร้อยแล้ว และได้ทำการยกระดับสมาชิกของคุณเป็น:";
+  let validityText = expiresAt ? `ใช้บริการได้ถึง: ${expiresAt}` : "ไม่มีวันหมดอายุ";
+
+  if (isSands) {
+    const sandsPackName =
+      plan === "sands_500"
+        ? "500 ละอองทรายกาลเวลา (แพ็กเกจจุใจ)"
+        : plan === "sands_150"
+        ? "150 ละอองทรายกาลเวลา (ยอดนิยม คุ้มค่า)"
+        : "50 ละอองทรายกาลเวลา (เริ่มต้นทดลองใช้)";
+    planLabel = `⌛ ${sandsPackName}`;
+    planColor = "#C6A96B";
+    descriptionText = "ขอบคุณที่เลือกเติมทรายกาลเวลา <strong>PhopePhum</strong> ครับ ระบบได้เพิ่มยอดละอองทรายกาลเวลาเข้าสู่กระเป๋าของคุณเรียบร้อยแล้ว:";
+    validityText = "ยอดทรายกาลเวลาสะสมพร้อมใช้งานทันที ไม่มีวันหมดอายุ";
+  } else if (plan === "imperial" || plan === "master") {
+    planLabel = "✦ โหราจารย์ (Master)";
+    planColor = "#C6A96B";
+  } else if (plan === "pro" || plan === "pro_annual") {
+    planLabel = "◈ มืออาชีพ (Professional)";
+    planColor = "#D9BC82";
+  } else {
+    planLabel = "⚡ ยกระดับชีวิต (Premium)";
+    planColor = "#34D399";
+  }
 
   return `
 <!DOCTYPE html>
@@ -338,27 +360,30 @@ function buildPaymentSuccessHtml(
         <span style="color:#C6A96B; font-size:20px;">✦</span>
         <span style="color:#F8F6F1; font-size:18px; font-weight:bold; letter-spacing:0.08em;">PhopePhum</span>
       </div>
+      <p style="color:#94A3B8; font-size:11px; margin:4px 0 0; letter-spacing:0.12em; text-transform:uppercase;">
+        Living Wisdom OS · ใบเสร็จและการยืนยัน
+      </p>
     </div>
     <div style="${BODY_STYLE}">
       <p style="color:#C6A96B; font-size:22px; font-weight:bold; margin:0 0 12px;">✅ ชำระเงินสำเร็จ!</p>
       <p style="color:#F8F6F1; font-size:14px; margin:0 0 8px;">สวัสดีคุณ <strong style="color:#C6A96B;">${displayName}</strong>,</p>
       <p style="color:#D9CDB7; font-size:13px; line-height:1.7; margin:0 0 20px;">
-        ขอบคุณที่เลือกใช้บริการ <strong>PhopePhum</strong> ครับ ระบบได้รับการยืนยันการชำระเงินของคุณเรียบร้อยแล้ว และได้ทำการยกระดับสมาชิกของคุณเป็น:
+        ${descriptionText}
       </p>
       <div style="background:rgba(198,169,107,0.06); border:1px solid rgba(198,169,107,0.20); border-radius:12px; padding:16px 20px; margin-bottom:24px; text-align:center;">
         <p style="color:${planColor}; font-size:18px; font-weight:bold; margin:0 0 5px;">${planLabel}</p>
-        <p style="color:#94A3B8; font-size:12px; margin:0;">ใช้บริการได้ถึง: ${expiresAt}</p>
+        <p style="color:#94A3B8; font-size:12px; margin:0;">${validityText}</p>
       </div>
       <div style="text-align:center;">
         <a href="${appUrl}/dashboard" 
            style="display:inline-block; background:linear-gradient(135deg, #C6A96B, #D9BC82); color:#020617; font-weight:bold; font-size:14px; padding:14px 36px; border-radius:50px; text-decoration:none;">
-          กลับสู่หน้า Dashboard →
+          เข้าสู่แดชบอร์ด →
         </a>
       </div>
     </div>
     <div style="${FOOTER_STYLE}">
       <p style="color:#94A3B8; font-size:11px; margin:0;">
-        © 2025 PhopePhum · <a href="${appUrl}" style="color:#C6A96B; text-decoration:none;">phopephum-web.pages.dev</a>
+        © 2026 PhopePhum · <a href="${appUrl}" style="color:#C6A96B; text-decoration:none;">phopephum.com</a>
       </p>
     </div>
   </div>
