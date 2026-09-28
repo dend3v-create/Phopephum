@@ -10,6 +10,8 @@ import { alertAIFailed, alertDatabaseError } from "~/services/alert.server";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import { Input } from "~/components/ui/Input";
+import { AstralIcon } from "~/components/ui/AstralIcon";
+import type { AstralIconName, AstralIconVariant } from "~/components/ui/AstralIcon";
 import type { Env } from "~/env.server";
 import { useTranslation } from "react-i18next";
 import i18next from "~/lib/i18n/i18n.server";
@@ -18,62 +20,86 @@ export const meta: MetaFunction = () => [
   { title: "New Report — PhopePhum" },
 ];
 
-const REPORT_TYPES = [
+interface ReportTypeMeta {
+  value: string;
+  label: string;
+  iconName: AstralIconName;
+  variant: AstralIconVariant;
+  desc: string;
+  color: string;
+  border: string;
+  glow: string;
+  iconBg: string;
+}
+
+const REPORT_TYPES: ReportTypeMeta[] = [
   {
     value: "general_prediction",
     label: "พยากรณ์ปัญญาชีวิต",
-    icon: "🧘",
+    iconName: "wisdom",
+    variant: "gold",
     desc: "แนวทางบำบัดและไกด์เส้นทางชีวิตหลัก",
     color: "from-violet-500/20 to-purple-500/10",
     border: "border-violet-500/30",
     glow: "shadow-violet-500/10",
+    iconBg: "bg-gradient-to-br from-violet-500/25 to-purple-500/15 border-violet-400/30 shadow-[0_0_15px_rgba(168,85,247,0.25)]",
   },
   {
     value: "personal_branding",
     label: "ตัวตน & อัตลักษณ์",
-    icon: "🎭",
+    iconName: "crown",
+    variant: "amber",
     desc: "เสน่ห์จากพื้นดวงและแบรนด์บุคคล",
     color: "from-amber-500/20 to-orange-500/10",
     border: "border-amber-500/30",
     glow: "shadow-amber-500/10",
+    iconBg: "bg-gradient-to-br from-amber-500/25 to-orange-500/15 border-amber-400/30 shadow-[0_0_15px_rgba(245,158,11,0.25)]",
   },
   {
     value: "career",
     label: "ภารกิจ & ความสำเร็จ",
-    icon: "🚀",
+    iconName: "career",
+    variant: "sky",
     desc: "หน้าที่ความรับผิดชอบและเป้าหมายชีวิต",
     color: "from-sky-500/20 to-blue-500/10",
     border: "border-sky-500/30",
     glow: "shadow-sky-500/10",
+    iconBg: "bg-gradient-to-br from-sky-500/25 to-blue-500/15 border-sky-400/30 shadow-[0_0_15px_rgba(14,165,233,0.25)]",
   },
   {
     value: "relationship",
     label: "เสน่ห์ & สัมพันธ์",
-    icon: "✨",
+    iconName: "relationship",
+    variant: "rose",
     desc: "สายใยบทเรียนและเมตตาบารมี",
     color: "from-rose-500/20 to-pink-500/10",
     border: "border-rose-500/30",
     glow: "shadow-rose-500/10",
+    iconBg: "bg-gradient-to-br from-rose-500/25 to-pink-500/15 border-rose-400/30 shadow-[0_0_15px_rgba(244,63,94,0.25)]",
   },
   {
     value: "wealth",
     label: "กระแสทรัพย์ & มั่งคั่ง",
-    icon: "💰",
+    iconName: "finance",
+    variant: "emerald",
     desc: "คลังสมบัติประจำดวงและวิถีดึงดูดทรัพย์",
     color: "from-emerald-500/20 to-green-500/10",
     border: "border-emerald-500/30",
     glow: "shadow-emerald-500/10",
+    iconBg: "bg-gradient-to-br from-emerald-500/25 to-green-500/15 border-emerald-400/30 shadow-[0_0_15px_rgba(16,185,129,0.25)]",
   },
   {
     value: "annual_forecast",
     label: "จังหวะชะตารายปี",
-    icon: "📅",
+    iconName: "calendar",
+    variant: "gold",
     desc: "แผนที่พลังงานและบทเรียนปีจร",
     color: "from-cyan-500/20 to-teal-500/10",
     border: "border-cyan-500/30",
     glow: "shadow-cyan-500/10",
+    iconBg: "bg-gradient-to-br from-cyan-500/25 to-teal-500/15 border-cyan-400/30 shadow-[0_0_15px_rgba(6,182,212,0.25)]",
   },
-] as const;
+];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -346,7 +372,7 @@ export default function NewReportPage() {
                 className={`
                   relative cursor-pointer group rounded-2xl border p-4 transition-all duration-300
                   ${selectedType === type.value 
-                    ? `bg-gradient-to-br ${type.color} ${type.border} shadow-[0_0_20px_rgba(198,169,107,0.05)]` 
+                    ? `bg-gradient-to-br ${type.color} ${type.border} shadow-[0_0_25px_rgba(198,169,107,0.08)] ring-1 ring-[#C6A96B]/30` 
                     : 'bg-white/[0.02] border-white/5 hover:bg-white/[0.05] hover:border-white/10'
                   }
                 `}
@@ -359,11 +385,11 @@ export default function NewReportPage() {
                   onChange={() => setSelectedType(type.value)}
                   className="sr-only"
                 />
-                <div className="flex gap-4">
-                  <span className={`text-2xl transition-transform duration-300 ${selectedType === type.value ? 'scale-110' : 'group-hover:scale-105'}`}>
-                    {type.icon}
-                  </span>
-                  <div>
+                <div className="flex items-start gap-3.5">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 ${type.iconBg} ${selectedType === type.value ? 'scale-105 ring-1 ring-white/20' : 'group-hover:scale-105'}`}>
+                    <AstralIcon name={type.iconName} variant={type.variant} size="lg" glow={selectedType === type.value} />
+                  </div>
+                  <div className="min-w-0">
                     <p className={`text-sm font-bold ${selectedType === type.value ? 'text-[#F8F6F1]' : 'text-[#D9CDB7]'}`}>
                       {t("common:reports.types." + type.value + ".label", String(type.label))}
                     </p>
@@ -441,7 +467,9 @@ export default function NewReportPage() {
         {/* ── Selected Preview ── */}
         {selectedMeta && (
           <div className={`rounded-2xl border bg-gradient-to-r ${selectedMeta.color} ${selectedMeta.border} p-4 flex items-center gap-4`}>
-            <span className="text-3xl flex-shrink-0">{selectedMeta.icon}</span>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${selectedMeta.iconBg}`}>
+              <AstralIcon name={selectedMeta.iconName} variant={selectedMeta.variant} size="xl" glow />
+            </div>
             <div className="flex-1 min-w-0">
               <p className="text-[#F8F6F1] font-semibold text-sm">
                 {t("common:reports.types." + selectedMeta.value + ".label", String(selectedMeta.label))}
@@ -488,8 +516,8 @@ export default function NewReportPage() {
                 className="absolute inset-2 rounded-full border border-[#C9A96E]/30 animate-ping"
                 style={{ animationDelay: "0.3s" }}
               />
-              <div className="relative w-24 h-24 rounded-full bg-[#C9A96E]/8 border border-[#C9A96E]/25 flex items-center justify-center">
-                <span className="text-4xl">{selectedMeta?.icon ?? "✨"}</span>
+              <div className="relative w-24 h-24 rounded-full bg-[#C9A96E]/10 border border-[#C9A96E]/30 flex items-center justify-center shadow-[0_0_30px_rgba(198,169,107,0.25)]">
+                <AstralIcon name={selectedMeta?.iconName || "wisdom"} variant={selectedMeta?.variant || "gold"} size={44} glow />
               </div>
             </div>
             <div>

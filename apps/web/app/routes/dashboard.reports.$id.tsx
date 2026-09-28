@@ -8,6 +8,8 @@ import { calculatePhopephum } from "@phopephum/engine";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
 import { SocialStoryModal } from "~/components/cards/SocialStoryModal";
+import { AstralIcon } from "~/components/ui/AstralIcon";
+import type { AstralIconName, AstralIconVariant } from "~/components/ui/AstralIcon";
 import type { Env } from "~/env.server";
 
 export const meta: MetaFunction<typeof loader> = ({ data }) => [
@@ -15,51 +17,77 @@ export const meta: MetaFunction<typeof loader> = ({ data }) => [
   { name: "description", content: "รายงานการถอดรหัสปัญญาชะตาชีวิต ผังดวง ๗ ตัว ๙ ฐาน และมหาภูติทักษาจักรพรรดิ" },
 ];
 
-const REPORT_LABELS: Record<string, { label: string; icon: string; desc: string }> = {
+interface ReportMetaItem {
+  label: string;
+  iconName: AstralIconName;
+  variant: AstralIconVariant;
+  desc: string;
+  iconBg: string;
+}
+
+const REPORT_LABELS: Record<string, ReportMetaItem> = {
   general_prediction: {
     label: "พยากรณ์ปัญญาชีวิต (Therapy)",
-    icon: "🧘",
+    iconName: "wisdom",
+    variant: "gold",
     desc: "แนวทางบำบัดและไกด์เส้นทางชีวิตหลัก",
+    iconBg: "bg-violet-500/20 border-violet-400/30 text-violet-300 shadow-[0_0_15px_rgba(168,85,247,0.25)]",
   },
   life_overview: {
     label: "โครงสร้างชีวิตเชิงลึก",
-    icon: "🔮",
+    iconName: "horanu",
+    variant: "gold",
     desc: "แก่นแท้และจุดมุ่งหมายชีวิต",
+    iconBg: "bg-amber-500/20 border-amber-400/30 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)]",
   },
   personal_branding: {
     label: "ตัวตน & อัตลักษณ์",
-    icon: "🎭",
+    iconName: "crown",
+    variant: "amber",
     desc: "เสน่ห์จากพื้นดวงและแบรนด์บุคคล",
+    iconBg: "bg-amber-500/20 border-amber-400/30 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)]",
   },
   career: {
     label: "ภารกิจ & ความสำเร็จ",
-    icon: "🚀",
+    iconName: "career",
+    variant: "sky",
     desc: "หน้าที่ความรับผิดชอบและเป้าหมายชีวิต",
+    iconBg: "bg-sky-500/20 border-sky-400/30 text-sky-300 shadow-[0_0_15px_rgba(14,165,233,0.25)]",
   },
   relationship: {
     label: "เสน่ห์ & ความสัมพันธ์",
-    icon: "✨",
+    iconName: "relationship",
+    variant: "rose",
     desc: "สายใยบทเรียนและเมตตาบารมี",
+    iconBg: "bg-rose-500/20 border-rose-400/30 text-rose-300 shadow-[0_0_15px_rgba(244,63,94,0.25)]",
   },
   health: {
     label: "สุขภาพ & พลังชีวิต",
-    icon: "🌿",
+    iconName: "wellness",
+    variant: "emerald",
     desc: "ความสมดุลของธาตุและพลังชีวิต",
+    iconBg: "bg-emerald-500/20 border-emerald-400/30 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]",
   },
   wealth: {
     label: "กระแสทรัพย์ & มั่งคั่ง",
-    icon: "💰",
+    iconName: "finance",
+    variant: "emerald",
     desc: "คลังสมบัติประจำดวงและวิถีดึงดูดทรัพย์",
+    iconBg: "bg-emerald-500/20 border-emerald-400/30 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.25)]",
   },
   daily_insight: {
     label: "ปัญญาญาณรายวัน",
-    icon: "☀️",
+    iconName: "spark",
+    variant: "gold",
     desc: "แนวทางปฏิบัติและการเจริญสติ",
+    iconBg: "bg-yellow-500/20 border-yellow-400/30 text-yellow-300 shadow-[0_0_15px_rgba(234,179,8,0.25)]",
   },
   annual_forecast: {
     label: "จังหวะชะตารายปี",
-    icon: "📅",
+    iconName: "calendar",
+    variant: "gold",
     desc: "แผนที่พลังงานและบทเรียนปีจร",
+    iconBg: "bg-cyan-500/20 border-cyan-400/30 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.25)]",
   },
 };
 
@@ -122,11 +150,16 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
 
   const metaItem = REPORT_LABELS[report.report_type] ?? {
     label: report.report_type,
-    icon: "📜",
+    iconName: "wisdom" as AstralIconName,
+    variant: "gold" as AstralIconVariant,
     desc: "รายงานการถอดรหัสชะตาชีวิต",
+    iconBg: "bg-amber-500/20 border-amber-400/30 text-amber-300 shadow-[0_0_15px_rgba(245,158,11,0.25)]",
   };
   const label = metaItem.label;
-  const icon = metaItem.icon;
+  const iconName = metaItem.iconName;
+  const variant = metaItem.variant;
+  const iconBg = metaItem.iconBg;
+  const desc = metaItem.desc;
   const text = extractText(report.content);
 
   // Determine membership tier
@@ -168,8 +201,10 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
   return json({
     report,
     label,
-    icon,
-    desc: metaItem.desc,
+    iconName,
+    variant,
+    iconBg,
+    desc,
     text,
     tierName,
     isPro,
@@ -186,7 +221,7 @@ export async function loader({ request, context, params }: LoaderFunctionArgs) {
 }
 
 export default function ReportDetail() {
-  const { report, label, icon, desc, text, tierName, isPro, isMaster, profile, chartData } =
+  const { report, label, iconName, variant, iconBg, desc, text, tierName, isPro, isMaster, profile, chartData } =
     useLoaderData<typeof loader>();
 
   const [selectedStar, setSelectedStar] = useState<number | null>(null);
@@ -291,9 +326,9 @@ export default function ReportDetail() {
           <button
             type="button"
             onClick={() => setIsStoryModalOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 hover:border-[#C6A96B]/50 bg-white/5 hover:bg-[#C6A96B]/10 text-xs font-semibold text-[#D9CDB7] hover:text-[#F8F6F1] transition-all shadow-sm active:scale-95"
+            className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 hover:border-[#C6A96B]/50 bg-white/5 hover:bg-[#C6A96B]/10 text-xs font-semibold text-[#D9CDB7] hover:text-[#F8F6F1] transition-all shadow-sm active:scale-95"
           >
-            <span>📱</span>
+            <AstralIcon name="spark" variant="gold" size="sm" glow={false} />
             <span className="hidden sm:inline">แชร์ Social Story</span>
           </button>
 
@@ -303,7 +338,9 @@ export default function ReportDetail() {
             onClick={() => window.print()}
             className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[#C6A96B]/40 hover:border-[#C6A96B] bg-gradient-to-r from-[#C6A96B]/20 to-[#D9BC82]/10 hover:from-[#C6A96B]/30 hover:to-[#D9BC82]/20 text-[#D9BC82] hover:text-[#F8F6F1] transition-all text-xs font-bold shadow-sm active:scale-95"
           >
-            <span>🖨️</span>
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+            </svg>
             <span>พิมพ์ / PDF</span>
           </button>
         </div>
@@ -313,21 +350,26 @@ export default function ReportDetail() {
       <div className="card-glass p-5 md:p-6 border-[#C6A96B]/20 relative overflow-hidden print:hidden">
         <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-[#C6A96B]/10 to-transparent pointer-events-none rounded-full blur-2xl" />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wider uppercase bg-[#C6A96B]/15 border border-[#C6A96B]/30 text-[#D9BC82]">
-                {tierName}
-              </span>
-              <span className="text-xs text-[#94A3B8]">· {formattedDate}</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+          <div className="flex items-start gap-4">
+            <div className={`w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center shrink-0 border ${iconBg}`}>
+              <AstralIcon name={iconName} variant={variant} size="xl" glow />
             </div>
 
-            <h1 className="font-display text-2xl md:text-3xl font-bold text-[#F8F6F1] flex items-center gap-3">
-              <span className="text-2xl md:text-3xl">{icon}</span>
-              <span>{label}</span>
-            </h1>
+            <div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wider uppercase bg-[#C6A96B]/15 border border-[#C6A96B]/30 text-[#D9BC82]">
+                  {tierName}
+                </span>
+                <span className="text-xs text-[#94A3B8]">· {formattedDate}</span>
+              </div>
 
-            <p className="text-sm text-[#C6B79F] mt-1.5 leading-relaxed">{desc}</p>
+              <h1 className="font-display text-2xl md:text-3xl font-bold text-[#F8F6F1]">
+                {label}
+              </h1>
+
+              <p className="text-sm text-[#C6B79F] mt-1 leading-relaxed">{desc}</p>
+            </div>
           </div>
 
           {/* Quick Chart Toggle */}
@@ -337,7 +379,8 @@ export default function ReportDetail() {
               onClick={() => setShowChartOnScreen(!showChartOnScreen)}
               className="shrink-0 flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 bg-black/30 hover:bg-black/50 text-xs text-[#D9CDB7] hover:text-[#F8F6F1] transition-all self-start sm:self-auto"
             >
-              <span>{showChartOnScreen ? "👁️ ซ่อนผังดวง" : "🔮 แสดงผังดวง ๗ ตัว"}</span>
+              <AstralIcon name="horoscope" variant="gold" size="sm" glow={false} />
+              <span>{showChartOnScreen ? "ซ่อนผังดวง" : "แสดงผังดวง ๗ ตัว"}</span>
             </button>
           )}
         </div>

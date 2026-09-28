@@ -5,25 +5,76 @@ import { requireAuth } from "~/services/auth.server";
 import { createSupabaseClient } from "~/services/supabase.server";
 import { Card } from "~/components/ui/Card";
 import { Button } from "~/components/ui/Button";
+import { AstralIcon } from "~/components/ui/AstralIcon";
+import type { AstralIconName, AstralIconVariant } from "~/components/ui/AstralIcon";
 import type { Env } from "~/env.server";
 
 export const meta: MetaFunction = () => [
   { title: "รายงาน — PhopePhum" },
 ];
 
-const REPORT_LABELS: Record<string, string> = {
-  general_prediction: "พยากรณ์ทั่วไป",
-  life_overview:      "ภาพรวมชีวิต",
-  career:             "การงาน",
-  relationship:       "ความสัมพันธ์",
-  health:             "สุขภาพ",
-  wealth:             "การเงิน",
-  daily_insight:      "Insight วันนี้",
-  annual_forecast:    "พยากรณ์รายปี",
-  horoscope:          "ดวงชะตา",
-  numerology:         "ตัวเลขโชคชะตา",
-  yearly:             "พยากรณ์รายปี",
-  monthly:            "พยากรณ์รายเดือน",
+interface ReportMeta {
+  label: string;
+  iconName: AstralIconName;
+  variant: AstralIconVariant;
+  iconBg: string;
+}
+
+const REPORT_META: Record<string, ReportMeta> = {
+  general_prediction: {
+    label: "พยากรณ์ปัญญาชีวิต (Therapy)",
+    iconName: "wisdom",
+    variant: "gold",
+    iconBg: "bg-violet-500/20 border-violet-400/30 text-violet-300",
+  },
+  life_overview: {
+    label: "โครงสร้างชีวิตเชิงลึก",
+    iconName: "horanu",
+    variant: "gold",
+    iconBg: "bg-amber-500/20 border-amber-400/30 text-amber-300",
+  },
+  personal_branding: {
+    label: "ตัวตน & อัตลักษณ์",
+    iconName: "crown",
+    variant: "amber",
+    iconBg: "bg-amber-500/20 border-amber-400/30 text-amber-300",
+  },
+  career: {
+    label: "ภารกิจ & ความสำเร็จ",
+    iconName: "career",
+    variant: "sky",
+    iconBg: "bg-sky-500/20 border-sky-400/30 text-sky-300",
+  },
+  relationship: {
+    label: "เสน่ห์ & ความสัมพันธ์",
+    iconName: "relationship",
+    variant: "rose",
+    iconBg: "bg-rose-500/20 border-rose-400/30 text-rose-300",
+  },
+  health: {
+    label: "สุขภาพ & พลังชีวิต",
+    iconName: "wellness",
+    variant: "emerald",
+    iconBg: "bg-emerald-500/20 border-emerald-400/30 text-emerald-300",
+  },
+  wealth: {
+    label: "กระแสทรัพย์ & มั่งคั่ง",
+    iconName: "finance",
+    variant: "emerald",
+    iconBg: "bg-emerald-500/20 border-emerald-400/30 text-emerald-300",
+  },
+  daily_insight: {
+    label: "ปัญญาญาณรายวัน",
+    iconName: "spark",
+    variant: "gold",
+    iconBg: "bg-yellow-500/20 border-yellow-400/30 text-yellow-300",
+  },
+  annual_forecast: {
+    label: "จังหวะชะตารายปี",
+    iconName: "calendar",
+    variant: "gold",
+    iconBg: "bg-cyan-500/20 border-cyan-400/30 text-cyan-300",
+  },
 };
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
@@ -80,7 +131,9 @@ export default function ReportsIndex() {
 
       {reports.length === 0 ? (
         <Card className="text-center py-12">
-          <p className="text-3xl mb-4 text-[#C6A96B]">✦</p>
+          <div className="w-12 h-12 rounded-2xl bg-[#C6A96B]/10 border border-[#C6A96B]/30 flex items-center justify-center mx-auto mb-4">
+            <AstralIcon name="horoscope" variant="gold" size="lg" glow />
+          </div>
           <p className="text-[#F8F6F1] font-medium mb-2">ยังไม่มีรายงาน</p>
           <p className="text-[#94A3B8] text-sm mb-6">
             เริ่มต้นการเดินทางด้วยการสร้างรายงานดวงชะตาแรกของคุณ
@@ -91,34 +144,48 @@ export default function ReportsIndex() {
         </Card>
       ) : (
         <div className="space-y-3">
-          {reports.map((r) => (
-            <Link key={r.id} to={`/dashboard/reports/${r.id}`}>
-              <Card className="hover:border-[#C6A96B]/40 transition-all group cursor-pointer">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-[#F8F6F1] font-medium group-hover:text-[#D9BC82] transition-colors">
-                      {REPORT_LABELS[r.report_type] ?? r.report_type}
-                    </p>
-                    <p className="text-[#94A3B8] text-sm mt-1 line-clamp-1">
-                      {extractText(r.content).slice(0, 100)}…
-                    </p>
+          {reports.map((r) => {
+            const meta = REPORT_META[r.report_type] ?? {
+              label: r.report_type,
+              iconName: "wisdom" as AstralIconName,
+              variant: "gold" as AstralIconVariant,
+              iconBg: "bg-amber-500/20 border-amber-400/30 text-amber-300",
+            };
+
+            return (
+              <Link key={r.id} to={`/dashboard/reports/${r.id}`}>
+                <Card className="hover:border-[#C6A96B]/40 transition-all group cursor-pointer p-4 md:p-5">
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 border ${meta.iconBg}`}>
+                        <AstralIcon name={meta.iconName} variant={meta.variant} size="md" glow={false} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-[#F8F6F1] font-medium group-hover:text-[#D9BC82] transition-colors text-sm">
+                          {meta.label}
+                        </p>
+                        <p className="text-[#94A3B8] text-xs mt-0.5 line-clamp-1">
+                          {extractText(r.content).slice(0, 100)}…
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <p className="text-[#94A3B8] text-xs">
+                        {new Date(r.created_at).toLocaleDateString("th-TH", {
+                          day: "numeric",
+                          month: "short",
+                          year: "2-digit",
+                        })}
+                      </p>
+                      <p className="text-[#C6A96B] text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        อ่านรายงาน →
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-[#94A3B8] text-xs">
-                      {new Date(r.created_at).toLocaleDateString("th-TH", {
-                        day: "numeric",
-                        month: "short",
-                        year: "2-digit",
-                      })}
-                    </p>
-                    <p className="text-[#C6A96B] text-xs mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      อ่านรายงาน →
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            </Link>
-          ))}
+                </Card>
+              </Link>
+            );
+          })}
         </div>
       )}
     </div>
