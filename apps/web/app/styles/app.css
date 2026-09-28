@@ -1216,3 +1216,119 @@ html {
   color: #94A3B8;
 }
 
+/* ══════════════════════════════════════════════════════════════
+   PRINT MEDIA STYLES — Flawless PDF Export & Clean Multi-page
+   ══════════════════════════════════════════════════════════════ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 12mm 10mm 14mm 10mm;
+  }
+
+  /* Force exact background & colors in all browsers */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  html, body {
+    background: #FFFFFF !important;
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    font-size: 10.5pt !important;
+    line-height: 1.6 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+    width: 100% !important;
+  }
+
+  /* Hide layout chrome and web UI navigation */
+  aside,
+  nav,
+  header,
+  .app-topbar,
+  .mobile-bottom-nav,
+  .print\:hidden,
+  button,
+  .no-print,
+  .print-hidden {
+    display: none !important;
+  }
+
+  /* Reset layout structure */
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: auto !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+
+  /* Reset cards for print */
+  .card-glass,
+  .card-glass-premium,
+  .card-glass-gold,
+  .card {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    box-shadow: none !important;
+    color: #0F172A !important;
+    border-radius: 8px !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 1rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  /* Typography for print */
+  h1, h2, h3, h4, h5, h6 {
+    color: #0F172A !important;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  h1 { font-size: 16pt !important; font-weight: 700 !important; }
+  h2 { font-size: 13pt !important; font-weight: 700 !important; border-bottom: 1px solid #E2E8F0; padding-bottom: 4px; margin-top: 14px !important; }
+  h3 { font-size: 11.5pt !important; font-weight: 600 !important; color: #7A5C2E !important; }
+
+  p, li, span, strong, em {
+    color: #1E293B !important;
+  }
+
+  strong {
+    color: #0F172A !important;
+    font-weight: 700 !important;
+  }
+
+  /* Print avoid break helpers */
+  .print-avoid-break,
+  .report-section,
+  .chart-table-container,
+  table, tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  .print-page-break {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+
+  .print\:block {
+    display: block !important;
+  }
+  .print\:flex {
+    display: flex !important;
+  }
+  .print\:grid {
+    display: grid !important;
+  }
+}
+

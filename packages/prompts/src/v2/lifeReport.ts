@@ -283,6 +283,17 @@ export function buildLifeReportPrompt(
     zh: "请用优美、专业的中文撰写报告。"
   }[locale];
 
+  // 5 Transit Dimensions & Jorn Info
+  const vayaInfo = result.vayaJorn 
+    ? `- วัยจร (Life Age Stage): เสวยภพ "${result.vayaJorn.houseName}" (ดาว ${result.vayaJorn.star}) ฐานที่ ${result.vayaJorn.row} คอลัมน์ที่ ${result.vayaJorn.col} (ช่วงอายุ ${result.vayaJorn.ageRange || ""})`
+    : "";
+  const yearlyInfo = result.yearlyJorn
+    ? `- ปีจร (Annual Focus): ตกภพ "${result.yearlyJorn.houseName}" (ดาว ${result.yearlyJorn.star}) ฐานที่ ${result.yearlyJorn.row} คอลัมน์ที่ ${result.yearlyJorn.col}`
+    : "";
+  const lagnaInfo = result.lagnaTransit
+    ? `- ลัคนาจร (Progressed Lagna): สถิตภพ "${result.lagnaTransit.houseName}" (ดาว ${result.lagnaTransit.star}) ฐานที่ ${result.lagnaTransit.row} คอลัมน์ที่ ${result.lagnaTransit.col}`
+    : "";
+
   return `# Role: spiritual wisdom guidance
 
 ${SYSTEM_ROLE[locale]}
@@ -296,16 +307,31 @@ ${SYSTEM_ROLE[locale]}
 ### 1. 7-Star 9-Base Chart
 ${matrixTable}
 
-### 2. External Factors (Taksa Transit)
+### 2. 5 Transit Dimensions (กาลเวลาชะตาจร)
+- อายุย่างปัจจุบัน: ${taksaTransit.ageYang} ปี
+${vayaInfo}
+${yearlyInfo}
+${lagnaInfo}
+
+### 3. External Factors (Taksa Transit — โอกาสและอุปสรรคภายนอก)
 ${taksaInfo}
 
-### 3. Internal Mindset (Maha Transit)
+### 4. Internal Mindset (Maha Transit — สภาพจิตใจและความพร้อมภายใน)
 ${mahaInfo}
 
-### 4. Current Time Context
+### 5. Current Time Context
 - Current Yam: ${atthakarn.planetName} (${atthakarn.startTime}–${atthakarn.endTime})
 
 ${birthYam ? buildAtthakarnContext(birthYam) : ""}
+
+---
+
+## 🔮 Core Tracing Rules (Star Tracing & Transit Interpretation)
+1. **Star Tracing Method (3 Steps):** ห้ามอ่านแนวดิ่งเสมอไป แต่ให้ใช้ "ตัวเลขดาวเดียวกัน" ร้อยเรียงเรื่องราวจากฐาน 1 → ฐาน 2 → ฐาน 3
+2. **ฐานที่ ๔ (กำลังเทวดา):** คือ Engine Power ส่งผลกระทบโดยตรงต่อคอลัมน์ของจุดจรและดาวในฐาน 3
+3. **ระบบดาวย้ำ (ฐาน ๕-๗):** เป็นกลไกแก้ไข (Solution) และทางออกของปัญหา
+4. **ฐาน ๘-๙:** เป็นบทสรุปผลลัพธ์สูงสุด (Ultimate Outcome)
+5. **Spiritual Tone:** หลีกเลี่ยงการอธิบายเชิงคณิตศาสตร์แห้งแล้ง เน้นปัญญาญาณ จิตใต้สำนึก มายด์เซ็ท และปัจจุบันกรรม
 
 ---
 
@@ -319,9 +345,9 @@ ${reportInstructions}
 ${outputLangInstruction}
 
 Write in 4 sections:
-1. The Awakening (Intro)
-2. The Decoding (Analysis)
-3. The Astral Blueprint (Metaphor)
-4. Final Wisdom & Action Plan
+1. The Awakening (Intro & จังหวะพลังงานหลัก)
+2. The Decoding (การถอดรหัสรุกรับภายนอก-ภายในและสายใยดวงดาว)
+3. The Astral Blueprint (การจำลองแผนที่ดวงดาว Planets + Signs + Houses)
+4. Final Wisdom & Action Plan (ปัญญาญาณและยุทธศาสตร์การลงมือทำ 1 ข้อที่ทรงพลัง)
 `;
 }

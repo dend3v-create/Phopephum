@@ -201,6 +201,7 @@ function WatermarkOverlay({
   return (
     <div
       aria-hidden
+      className="print:hidden"
       style={{
         position: "absolute",
         inset: 0,
