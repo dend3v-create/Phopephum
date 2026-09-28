@@ -47,48 +47,54 @@ function TabIcon({ name, isActive }: { name: string; isActive: boolean }) {
   const cls = `w-5 h-5 transition-transform duration-200 ${isActive ? "scale-110" : "scale-100"}`;
 
   if (name === "today") {
+    // Sacred Solar Star of Daily Wisdom (ดวงตะวัน ๘ แฉกแห่งปัญญา)
     return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2.2 : 1.8} className={cls}>
-        <circle cx="12" cy="12" r="4" />
-        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" strokeLinecap="round" />
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2 : 1.7} className={cls}>
+        <circle cx="12" cy="12" r="4.5" fill={isActive ? "currentColor" : "none"} fillOpacity={isActive ? 0.25 : 0} />
+        <path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.93 4.93l1.77 1.77M17.3 17.3l1.77 1.77M4.93 19.07l1.77-1.77M17.3 6.7l1.77-1.77" strokeLinecap="round" />
       </svg>
     );
   }
 
   if (name === "timing") {
+    // Sacred 8-Directional Ashtakarn Wheel (กงล้อยามอัฏฐกาล)
     return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2.2 : 1.8} className={cls}>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2 : 1.7} className={cls}>
         <circle cx="12" cy="12" r="9" />
-        <path d="M12 7v5l3 3" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M16.5 4.5l1.5-1.5M7.5 4.5L6 3" strokeLinecap="round" />
+        <path d="M12 3v18M3 12h18M5.64 5.64l12.72 12.72M5.64 18.36L18.36 5.64" strokeLinecap="round" opacity={0.65} />
+        <circle cx="12" cy="12" r="3" fill={isActive ? "currentColor" : "none"} fillOpacity={isActive ? 0.3 : 0} />
       </svg>
     );
   }
 
   if (name === "calendar") {
+    // 100-Year Lunar & Solar Sacred Almanac (คัมภีร์ปฏิทินจันทรคติ ๑๐๐ ปี)
     return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2.2 : 1.8} className={cls}>
-        <rect x="3" y="4" width="18" height="18" rx="2.5" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M16 2v4M8 2v4M3 10h18" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="12" cy="15" r="1.5" fill="currentColor" />
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2 : 1.7} className={cls}>
+        <rect x="3" y="4" width="18" height="17" rx="2.5" />
+        <path d="M16 2v4M8 2v4M3 9.5h18" strokeLinecap="round" />
+        <path d="M12 13a2.5 2.5 0 0 0 2.5 2.5 2.5 2.5 0 0 1-2.5 2.5 2.5 2.5 0 0 1-2.5-2.5 2.5 2.5 0 0 0 2.5-2.5z" fill={isActive ? "currentColor" : "none"} fillOpacity={isActive ? 0.35 : 0} />
       </svg>
     );
   }
 
   if (name === "destiny") {
+    // Sacred 7-Star Emperor Matrix Seal (ผังจักรพรรดิ ๗ ตัว ๙ ฐาน)
     return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2.2 : 1.8} className={cls}>
-        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M12 8v8M8 12h8" strokeLinecap="round" />
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2 : 1.7} className={cls}>
+        <polygon points="12,2 15,9 22,9 16.5,14 18.5,21 12,17 5.5,21 7.5,14 2,9 9,9" strokeLinejoin="round" fill={isActive ? "currentColor" : "none"} fillOpacity={isActive ? 0.2 : 0} />
+        <circle cx="12" cy="12" r="1.8" fill="currentColor" />
       </svg>
     );
   }
 
   if (name === "me") {
+    // Sacred Soul Lotus (ดวงจิตและปัญญาญาณตนเอง)
     return (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2.2 : 1.8} className={cls}>
-        <circle cx="12" cy="8" r="4" strokeLinecap="round" strokeLinejoin="round" />
-        <path d="M4 20c0-3.8 3.6-6.5 8-6.5s8 2.7 8 6.5" strokeLinecap="round" />
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={isActive ? 2 : 1.7} className={cls}>
+        <path d="M12 3c-1.5 3-4 6-4 9a4 4 0 0 0 8 0c0-3-2.5-6-4-9z" fill={isActive ? "currentColor" : "none"} fillOpacity={isActive ? 0.25 : 0} />
+        <path d="M4 14c2-1 4.5-1 6.5 1M20 14c-2-1-4.5-1-6.5 1" strokeLinecap="round" />
+        <path d="M6 19c3-1.5 9-1.5 12 0" strokeLinecap="round" />
       </svg>
     );
   }

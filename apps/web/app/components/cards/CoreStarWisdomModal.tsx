@@ -97,12 +97,12 @@ export function CoreStarWisdomModal({ isOpen, onClose, data }: CoreStarWisdomMod
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3.5 sm:p-4 bg-black/70 dark:bg-black/80 backdrop-blur-md animate-fadeIn">
       {/* Modal Container */}
       <div 
-        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-[#030914] border border-[#C6A96B]/30 shadow-2xl shadow-black/80 text-[#F8F6F1] no-scrollbar animate-scaleUp"
+        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-3xl bg-white dark:bg-[#030914] border border-[#C6A96B]/40 shadow-2xl shadow-black/40 dark:shadow-black/90 text-slate-900 dark:text-[#F8F6F1] no-scrollbar animate-scaleUp"
         style={{
-          boxShadow: "0 20px 60px -10px rgba(0,0,0,0.9), 0 0 30px rgba(198,169,107,0.15)",
+          boxShadow: "0 20px 60px -10px rgba(0,0,0,0.4), 0 0 30px rgba(198,169,107,0.15)",
         }}
       >
         {/* Header Background Glow */}
@@ -112,7 +112,7 @@ export function CoreStarWisdomModal({ isOpen, onClose, data }: CoreStarWisdomMod
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-[#F8F6F1] flex items-center justify-center transition-all active:scale-95 cursor-pointer"
+          className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 border border-slate-200 dark:border-white/15 text-slate-700 dark:text-[#F8F6F1] flex items-center justify-center transition-all active:scale-95 cursor-pointer"
           aria-label="Close"
         >
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="w-5 h-5">
@@ -124,15 +124,15 @@ export function CoreStarWisdomModal({ isOpen, onClose, data }: CoreStarWisdomMod
         <div className="relative p-6 sm:p-7 space-y-6">
           {/* Header Title */}
           <div className="space-y-1.5 pr-8">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/30 text-[#D9BC82] text-xs font-bold tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/30 text-[#8C6D2D] dark:text-[#D9BC82] text-xs font-bold tracking-wider">
               <span>✦ รหัสดาวประจำตัว</span>
               <span>·</span>
               <span>{data.element}</span>
             </div>
-            <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-[#F8F6F1] tracking-tight">
+            <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-[#F8F6F1] tracking-tight">
               {data.starName}
             </h2>
-            <p className="text-sm italic text-[#C6B79F] font-serif leading-relaxed">
+            <p className="text-sm italic text-[#8B6914] dark:text-[#C6B79F] font-serif leading-relaxed">
               "{data.quote}"
             </p>
           </div>
@@ -141,33 +141,33 @@ export function CoreStarWisdomModal({ isOpen, onClose, data }: CoreStarWisdomMod
 
           {/* Section 1: ตัวตนของคุณ */}
           <div className="space-y-2.5">
-            <div className="flex items-center gap-2 text-base font-bold text-[#E2C785]">
+            <div className="flex items-center gap-2 text-base font-bold text-[#9A7B38] dark:text-[#E2C785]">
               <span className="text-lg">💎</span>
               <span className="font-display">ตัวตนของคุณ:</span>
             </div>
-            <p className="text-sm sm:text-[15px] leading-relaxed text-[#F8F6F1]/90 font-sans pl-1">
+            <p className="text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-[#F8F6F1]/90 font-sans pl-1">
               {data.identity}
             </p>
           </div>
 
           {/* Section 2: จุดแข็ง */}
           <div className="space-y-2.5">
-            <div className="flex items-center gap-2 text-base font-bold text-[#60A5FA]">
+            <div className="flex items-center gap-2 text-base font-bold text-[#2563EB] dark:text-[#60A5FA]">
               <span className="text-lg">🛡️</span>
               <span className="font-display">จุดแข็ง & พรสวรรค์:</span>
             </div>
-            <p className="text-sm sm:text-[15px] leading-relaxed text-[#F8F6F1]/90 font-sans pl-1">
+            <p className="text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-[#F8F6F1]/90 font-sans pl-1">
               {data.strengths}
             </p>
           </div>
 
           {/* Section 3: เส้นทางของคุณ */}
           <div className="space-y-2.5">
-            <div className="flex items-center gap-2 text-base font-bold text-[#34D399]">
+            <div className="flex items-center gap-2 text-base font-bold text-[#059669] dark:text-[#34D399]">
               <span className="text-lg">🏺</span>
               <span className="font-display">เส้นทางของคุณ:</span>
             </div>
-            <p className="text-sm sm:text-[15px] leading-relaxed text-[#F8F6F1]/90 font-sans pl-1">
+            <p className="text-sm sm:text-[15px] leading-relaxed text-slate-700 dark:text-[#F8F6F1]/90 font-sans pl-1">
               {data.destinyPath}
             </p>
           </div>
@@ -177,7 +177,7 @@ export function CoreStarWisdomModal({ isOpen, onClose, data }: CoreStarWisdomMod
             <button
               type="button"
               onClick={onClose}
-              className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#C6A96B] via-[#E2C785] to-[#D9BC82] text-[#020617] font-display font-bold text-sm shadow-lg shadow-[#C6A96B]/20 hover:brightness-110 active:scale-[0.98] transition-all cursor-pointer"
+              className="w-full py-3 rounded-2xl bg-gradient-to-r from-[#C6A96B] via-[#E2C785] to-[#D9BC82] text-[#020617] font-display font-bold text-sm shadow-lg shadow-[#C6A96B]/20 hover:brightness-105 active:scale-[0.98] transition-all cursor-pointer"
             >
               เข้าใจแล้ว ปิดหน้าต่าง
             </button>

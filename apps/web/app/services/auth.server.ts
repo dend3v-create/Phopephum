@@ -133,7 +133,8 @@ export async function signUp(
       role: isAdmin ? "admin" : "user",
       subscription: isAdmin ? "lifetime" : "free",
       plan: isAdmin ? "imperial" : "free",
-      membership_status: isAdmin ? "active" : "pending"
+      membership_status: "active",
+      time_sands_balance: 50,
     });
 
   if (profileError) {

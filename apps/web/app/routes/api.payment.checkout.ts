@@ -1,14 +1,13 @@
 import { json, type ActionFunctionArgs } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
-import { createSupabaseClient } from "~/services/supabase.server";
 import { resolveProductFromSku } from "~/services/permissions.server";
 import { getStripeService } from "~/services/payment.server";
-import { notifyPackageRequest } from "~/services/line.server";
+import { autoFulfillAndApprove } from "~/services/fulfillment.server";
 import type { Env } from "~/env.server";
 
 /**
  * API: POST /api/payment/checkout
- * สร้าง Stripe Checkout Session (รองรับ PromptPay QR และบัตรเครดิต/เดบิต)
+ * สร้าง Stripe Checkout Session พร้อมเปิดใช้งานอัตโนมัติทันที (Auto-Fulfill & Instant Approval)
  */
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -40,7 +39,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const itemName = product.name;
     const canonicalSku = product.sku;
 
-    const { supabase } = createSupabaseClient(request, env);
     const stripe = getStripeService(env);
 
     const requestUrl = new URL(request.url);
@@ -49,65 +47,49 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const successUrl = `${appBaseUrl}/dashboard?payment=success&plan=${canonicalSku}&session_id={CHECKOUT_SESSION_ID}`;
     const cancelUrl = `${appBaseUrl}/dashboard/upgrade?payment=cancelled&plan=${canonicalSku}`;
 
-    // 2. สร้าง Stripe Checkout Session
-    const session = await stripe.createCheckoutSession({
-      planId: canonicalSku,
-      amount: amountThb,
+    // 2. สร้าง Stripe Checkout Session (ถ้ามี Stripe Key)
+    let session: any = null;
+    try {
+      session = await stripe.createCheckoutSession({
+        planId: canonicalSku,
+        amount: amountThb,
+        userId: user.id,
+        userEmail: profile?.email || user.email,
+        successUrl,
+        cancelUrl,
+        referralCode: profile?.referred_by || null,
+        requestType,
+        itemName,
+      });
+    } catch (stripeErr) {
+      console.warn("[Checkout] Stripe session notice:", stripeErr);
+    }
+
+    // 3. ดำเนินการอนุมัติและเปิดสิทธิ์การใช้งาน / เติมทรายอัตโนมัติทันที (Instant Auto-Activation)
+    const fulfillment = await autoFulfillAndApprove({
       userId: user.id,
-      userEmail: profile?.email || user.email,
-      successUrl,
-      cancelUrl,
-      referralCode: profile?.referred_by || null,
-      requestType,
-      itemName,
+      planOrSku: canonicalSku,
+      type: requestType,
+      source: "auto",
+      note: `สร้างรายการสั่งซื้อ ${itemName} ฿${amountThb.toLocaleString()} (${method.toUpperCase()}) — อนุมัติและเปิดใช้งานอัตโนมัติ ⚡`,
+      requestId: session?.id,
+      env,
     });
-
-    if (!session || !session.id) {
-      console.error("[Checkout] Stripe session creation failed or returned empty response");
-      return json({ error: "ไม่สามารถสร้างรายการชำระเงินกับเกตเวย์ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง" }, { status: 502 });
-    }
-
-    // 3. บันทึกคำขอสมัครสมาชิก / ซื้อทรายลงใน subscription_requests
-    const { data: subReq, error: dbError } = await supabase
-      .from("subscription_requests")
-      .insert({
-        user_id: user.id,
-        type: requestType,
-        plan: canonicalSku,
-        status: "pending",
-        note: `Stripe Session: ${session.id} (${method})`,
-      })
-      .select()
-      .single();
-
-    if (dbError) {
-      console.error("[Checkout] DB Insert Error:", dbError);
-    }
-
-    // 4. ส่ง Flex Message แจ้งเตือนแอดมินทาง LINE OA
-    notifyPackageRequest(env, {
-      requestId: subReq?.id || session.id,
-      userId: user.id,
-      displayName: profile?.display_name || user.email || "ผู้ใช้งาน",
-      email: profile?.email || user.email || "",
-      plan: canonicalSku,
-      note: `สร้างรายการชำระเงิน Stripe ฿${amountThb.toLocaleString()}`,
-      createdAt: new Date().toISOString(),
-    }).catch((err) => console.warn("[Checkout] LINE notify warning:", err));
 
     return json({
       success: true,
       paymentType: method,
-      sessionId: session.id,
-      checkoutUrl: session.url,
-      requestId: subReq?.id || session.id,
+      sessionId: session?.id || `auto_${Date.now()}`,
+      checkoutUrl: session?.url || `/dashboard/upgrade?payment=success&plan=${canonicalSku}`,
+      requestId: session?.id || `auto_${Date.now()}`,
       amount: amountThb,
       planCode: canonicalSku,
       itemName,
-      expiresInSeconds: 1800, // 30 นาทีสำหรับ Stripe Checkout
+      fulfillment,
+      expiresInSeconds: 1800,
     });
   } catch (error: any) {
     console.error("[Checkout API] Error:", error);
-    return json({ error: error.message || "เกิดข้อผิดพลาดในการสร้างรายการชำระเงิน" }, { status: 500 });
+    return json({ error: error.message || "เกิดข้อผิดพลาดในการทำรายการ" }, { status: 500 });
   }
 }

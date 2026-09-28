@@ -325,11 +325,18 @@ body {
 /* #1E1730 (active gold tint) */
 [data-theme="light"] .bg-\[\#1E1730\]     { background-color: rgba(198, 169, 107, 0.12) !important; }
 
-/* #0f172a */
+/* #0f172a / #0F172A */
 [data-theme="light"] .bg-\[\#0f172a\]     { background-color: rgba(255, 255, 255, 0.88) !important; }
 [data-theme="light"] .bg-\[\#0f172a\]\/50 { background-color: rgba(255, 255, 255, 0.85) !important; }
 [data-theme="light"] .bg-\[\#0f172a\]\/60 { background-color: rgba(255, 255, 255, 0.88) !important; }
 [data-theme="light"] .bg-\[\#0f172a\]\/80 { background-color: rgba(255, 255, 255, 0.92) !important; }
+[data-theme="light"] .bg-\[\#0f172a\]\/90 { background-color: rgba(255, 255, 255, 0.95) !important; }
+[data-theme="light"] .bg-\[\#0F172A\]     { background-color: rgba(255, 255, 255, 0.88) !important; }
+[data-theme="light"] .bg-\[\#0F172A\]\/50 { background-color: rgba(255, 255, 255, 0.85) !important; }
+[data-theme="light"] .bg-\[\#0F172A\]\/60 { background-color: rgba(255, 255, 255, 0.88) !important; }
+[data-theme="light"] .bg-\[\#0F172A\]\/80 { background-color: rgba(255, 255, 255, 0.92) !important; }
+[data-theme="light"] .bg-\[\#0F172A\]\/90 { background-color: rgba(255, 255, 255, 0.95) !important; }
+[data-theme="light"] .bg-\[\#0F172A\]\/95 { background-color: rgba(255, 255, 255, 0.98) !important; }
 
 /* #07132b / #091a3e / #050e24 / #091838 / #040a18 (Grand Horanu & Astral Cards) */
 [data-theme="light"] .bg-\[\#07132b\]        { background-color: rgba(255, 255, 255, 0.95) !important; }

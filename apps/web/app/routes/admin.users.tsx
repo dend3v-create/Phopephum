@@ -128,16 +128,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const status = String(formData.get("status") ?? "active");
     const role = String(formData.get("role") ?? "");
 
-    const subscriptions = ["free", "basic", "premium", "lifetime"];
-    const plans = ["free", "basic", "pro", "imperial"];
+    const subscriptions = ["free", "basic", "premium", "pro", "master"];
+    const plans = ["free", "basic", "premium", "pro", "pro_annual", "imperial", "master"];
     const roles = ["user", "admin", "operator"];
 
     if (subscription && !subscriptions.includes(subscription)) {
-      return json({ error: "Subscription ไม่ถูกต้อง" }, { status: 400 });
+      return json({ error: "ระดับสมาชิก (Subscription Tier) ไม่ถูกต้อง" }, { status: 400 });
     }
 
     if (plan && !plans.includes(plan)) {
-      return json({ error: "Plan ไม่ถูกต้อง" }, { status: 400 });
+      return json({ error: "แพ็กเกจ (Plan) ไม่ถูกต้อง" }, { status: 400 });
     }
 
     const updateData: any = {
@@ -249,14 +249,14 @@ export default function AdminUsersPage() {
       ) : null}
 
       {/* Filters */}
-      <Form method="get" className="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
+      <Form method="get" className="grid grid-cols-1 md:grid-cols-5 gap-4 bg-white/5 p-4 rounded-2xl border border-white/10">
         <div className="md:col-span-2">
           <label className="block text-[10px] text-[#94A3B8] uppercase tracking-wider mb-1.5 ml-1">ค้นหา (ชื่อ/อีเมล)</label>
           <input
             name="search"
             type="text"
             defaultValue={search}
-            placeholder="ค้นหา..."
+            placeholder="ค้นหาชื่อ หรือ อีเมล..."
             className="w-full bg-[#0A1628] border border-white/10 rounded-xl px-4 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#38BDF8]/50"
           />
         </div>
@@ -265,12 +265,26 @@ export default function AdminUsersPage() {
           <select
             name="role"
             defaultValue={roleFilter}
-            className="w-full bg-[#0A1628] border border-white/10 rounded-xl px-4 py-2 text-sm text-[#F8F6F1] focus:outline-none"
+            className="w-full bg-[#0A1628] border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none"
           >
             <option value="all">ทั้งหมด</option>
             <option value="user">User</option>
-            <option value="admin">Admin</option>
             <option value="operator">Operator</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div>
+          <label className="block text-[10px] text-[#94A3B8] uppercase tracking-wider mb-1.5 ml-1">ระดับ (Tier)</label>
+          <select
+            name="plan"
+            defaultValue={planFilter}
+            className="w-full bg-[#0A1628] border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none"
+          >
+            <option value="all">ทุกระดับ</option>
+            <option value="free">Free</option>
+            <option value="basic">Basic</option>
+            <option value="pro">Pro</option>
+            <option value="master">Master</option>
           </select>
         </div>
         <div className="flex items-end">
@@ -343,6 +357,11 @@ export default function AdminUsersPage() {
                 const isSelected = selectedUserIds.includes(u.id);
                 const isSelf = u.id === currentAdminId;
 
+                const subTier = (u.subscription || "free").toLowerCase();
+                const isMaster = subTier === "master" || subTier === "imperial" || subTier === "lifetime" || u.plan === "imperial" || u.plan === "master";
+                const isPro = subTier === "pro" || u.plan === "pro" || u.plan === "pro_annual";
+                const isBasic = subTier === "basic" || subTier === "premium" || u.plan === "basic" || u.plan === "premium";
+
                 return (
                   <tr
                     key={u.id}
@@ -390,7 +409,7 @@ export default function AdminUsersPage() {
                         <select
                           form={`edit-form-${u.id}`}
                           name="role"
-                          defaultValue={u.role}
+                          defaultValue={u.role || "user"}
                           className="bg-[#0A1628] border border-white/20 rounded-lg px-2 py-1.5 text-xs text-[#F8F6F1] w-full"
                         >
                           <option value="user">User</option>
@@ -418,40 +437,41 @@ export default function AdminUsersPage() {
                           <select
                             form={`edit-form-${u.id}`}
                             name="subscription"
-                            defaultValue={u.subscription}
+                            defaultValue={u.subscription === "imperial" || u.subscription === "lifetime" ? "master" : u.subscription || "free"}
                             className="bg-[#0A1628] border border-white/20 rounded-lg px-2 py-1.5 text-[10px] text-[#F8F6F1]"
                           >
-                            <option value="free">Tier: Free</option>
-                            <option value="basic">Tier: Basic</option>
-                            <option value="premium">Tier: Premium</option>
-                            <option value="lifetime">Tier: Lifetime</option>
+                            <option value="free">Tier: Free (เริ่มทดลอง)</option>
+                            <option value="basic">Tier: Basic (ยกระดับชีวิต)</option>
+                            <option value="pro">Tier: Pro (มืออาชีพ)</option>
+                            <option value="master">Tier: Master (โหราจารย์)</option>
                           </select>
                           <select
                             form={`edit-form-${u.id}`}
                             name="plan"
-                            defaultValue={u.plan}
+                            defaultValue={u.plan || "free"}
                             className="bg-[#0A1628] border border-white/20 rounded-lg px-2 py-1.5 text-[10px] text-[#F8F6F1]"
                           >
-                            <option value="free">Plan: Free</option>
-                            <option value="basic">Plan: Basic</option>
-                            <option value="pro">Plan: Pro</option>
-                            <option value="imperial">Plan: Imperial</option>
+                            <option value="free">Plan: Free (เริ่มทดลอง)</option>
+                            <option value="basic">Plan: Basic (฿89/ด.)</option>
+                            <option value="pro">Plan: Pro (฿289/ด.)</option>
+                            <option value="pro_annual">Plan: Pro รายปี (฿2,770/ปี)</option>
+                            <option value="imperial">Plan: Master (฿1,289/ด.)</option>
                           </select>
                         </div>
                       ) : (
                         <div className="flex flex-col gap-1">
                           <span
                             className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border w-fit ${
-                              u.subscription === "lifetime"
-                                ? "border-amber-500/50 text-amber-400 bg-amber-500/10"
-                                : u.subscription === "premium"
-                                ? "border-cyan-500/50 text-cyan-400 bg-cyan-500/10"
-                                : u.subscription === "basic"
-                                ? "border-green-500/50 text-green-400 bg-green-500/10"
-                                : "border-slate-500/50 text-slate-400 bg-slate-500/10"
+                              isMaster
+                                ? "border-[#C6A96B]/50 text-[#C6A96B] bg-[#C6A96B]/15"
+                                : isPro
+                                ? "border-[#38BDF8]/50 text-[#38BDF8] bg-[#38BDF8]/15"
+                                : isBasic
+                                ? "border-emerald-500/50 text-emerald-400 bg-emerald-500/15"
+                                : "border-slate-500/50 text-slate-400 bg-slate-500/15"
                             }`}
                           >
-                            {u.subscription}
+                            {isMaster ? "MASTER" : isPro ? "PRO" : isBasic ? "BASIC" : "FREE"}
                           </span>
                           <span className="text-[9px] text-[#94A3B8] ml-1">Plan: {u.plan || "free"}</span>
                         </div>

@@ -4,6 +4,7 @@ import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remi
 import { signUp } from "~/services/auth.server";
 import { logEvent, EVENTS } from "~/services/analytics.server";
 import { notifyNewRegistration } from "~/services/line.server";
+import { autoFulfillAndApprove } from "~/services/fulfillment.server";
 import { createServiceRoleClient } from "~/services/supabase.server";
 import { convertAttributionOnSignup, getReferralCodeFromRequest } from "~/services/attribution.server";
 import { Input } from "~/components/ui/Input";
@@ -104,34 +105,18 @@ export async function action({ request, context }: ActionFunctionArgs) {
       console.error("[register] convertAttributionOnSignup error:", attrErr);
     }
 
-    // สร้าง subscription_request และส่ง LINE notification
+    // อนุมัติการสมัครใช้งานฟรีและเปิดใช้งานทันทีแบบอัตโนมัติ (Instant Auto-Activation)
     try {
-      const supabase = createServiceRoleClient(env);
-      const now = new Date().toISOString();
-      const isAdmin = email === "dend3v@gmail.com";
-      
-      const { data: reqRow } = await supabase
-        .from("subscription_requests")
-        .insert({
-          user_id: user.id,
-          type: "registration",
-          plan: isAdmin ? "imperial" : (plan || "basic"),
-          status: isAdmin ? "approved" : "pending",
-          created_at: now,
-          approved_at: isAdmin ? now : null
-        })
-        .select("id")
-        .single();
-
-      await notifyNewRegistration(env, {
-        requestId: reqRow?.id ?? user.id,
+      await autoFulfillAndApprove({
         userId: user.id,
-        displayName: displayName || fullName,
-        email,
-        createdAt: now,
-      }).catch(console.error);
+        planOrSku: plan || "free",
+        type: "registration",
+        source: "auto",
+        note: "[อัตโนมัติ] สมาชิกใหม่สมัครเข้าใช้งาน — อนุมัติและเปิดสิทธิ์ทันที ⚡",
+        env,
+      });
     } catch (e) {
-      console.error("[register] LINE notify error:", e);
+      console.error("[register] Auto-fulfillment error:", e);
     }
   }
 
