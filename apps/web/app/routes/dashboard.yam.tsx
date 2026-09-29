@@ -49,25 +49,25 @@ const PLANET_SYMBOLS: Record<string, string> = {
 };
 
 const DAY_GRID_HEADER_TIMES = [
-  { major: "06.01-7.30 น.", subs: ["6.01", "6.31", "7.01"] },
-  { major: "07.31-09.00 น.", subs: ["7.31", "8.01", "8.31"] },
-  { major: "09.01-10.30 น.", subs: ["9.01", "9.31", "10.01"] },
-  { major: "10.31-12.00 น.", subs: ["10.31", "11.01", "11.31"] },
-  { major: "12.01-13.30 น.", subs: ["12.01", "12.31", "13.01"] },
-  { major: "13.31-15.00 น.", subs: ["13.31", "14.01", "14.31"] },
-  { major: "15.01-16.30 น.", subs: ["15.01", "15.31", "16.01"] },
-  { major: "16.31-18.00 น.", subs: ["16.31", "17.01", "17.31"] },
+  { major: "06:01-07:30 น.", subs: ["06:01", "06:31", "07:01"] },
+  { major: "07:31-09:00 น.", subs: ["07:31", "08:01", "08:31"] },
+  { major: "09:01-10:30 น.", subs: ["09:01", "09:31", "10:01"] },
+  { major: "10:31-12:00 น.", subs: ["10:31", "11:01", "11:31"] },
+  { major: "12:01-13:30 น.", subs: ["12:01", "12:31", "13:01"] },
+  { major: "13:31-15:00 น.", subs: ["13:31", "14:01", "14:31"] },
+  { major: "15:01-16:30 น.", subs: ["15:01", "15:31", "16:01"] },
+  { major: "16:31-18:00 น.", subs: ["16:31", "17:01", "17:31"] },
 ];
 
 const NIGHT_GRID_HEADER_TIMES = [
-  { major: "18.01-19.30 น.", subs: ["18.01", "18.31", "19.01"] },
-  { major: "19.31-21.00 น.", subs: ["19.31", "20.01", "20.31"] },
-  { major: "21.01-22.30 น.", subs: ["21.01", "21.31", "22.01"] },
-  { major: "22.31-24.00 น.", subs: ["22.31", "23.01", "23.31"] },
-  { major: "0.01-01.30 น.", subs: ["0.01", "0.31", "1.01"] },
-  { major: "01.31-03.00 น.", subs: ["1.31", "2.01", "2.31"] },
-  { major: "03.10-04.30 น.", subs: ["3.01", "3.31", "4.01"] },
-  { major: "04.31-06.00 น.", subs: ["4.31", "5.01", "5.31"] },
+  { major: "18:01-19:30 น.", subs: ["18:01", "18:31", "19:01"] },
+  { major: "19:31-21:00 น.", subs: ["19:31", "20:01", "20:31"] },
+  { major: "21:01-22:30 น.", subs: ["21:01", "21:31", "22:01"] },
+  { major: "22:31-24:00 น.", subs: ["22:31", "23:01", "23:31"] },
+  { major: "00:01-01:30 น.", subs: ["00:01", "00:31", "01:01"] },
+  { major: "01:31-03:00 น.", subs: ["01:31", "02:01", "02:31"] },
+  { major: "03:01-04:30 น.", subs: ["03:01", "03:31", "04:01"] },
+  { major: "04:31-06:00 น.", subs: ["04:31", "05:01", "05:31"] },
 ];
 
 const PHASE_LABEL: Record<string, string> = {
@@ -1984,21 +1984,29 @@ export default function YamPage() {
                   </tr>
 
                   {/* Row 2: วัน + 24 ช่วงเวลาย่อย (ต้น กลาง ปลาย) */}
-                  <tr className="border-b border-amber-200/60 dark:border-white/10 bg-amber-50/90 dark:bg-[#0A1628]/90">
-                    <th className="p-2 text-xs font-bold text-center text-slate-900 dark:text-[#F8F6F1] border-r border-amber-200/50 dark:border-white/10 bg-amber-100/70 dark:bg-white/[0.04]">
+                  <tr className="border-b border-amber-200/70 dark:border-white/10 bg-amber-50/90 dark:bg-[#0A1628]/95">
+                    <th className="p-2 text-xs font-bold text-center text-slate-900 dark:text-[#F8F6F1] border-r border-amber-200/60 dark:border-white/10 bg-amber-100/80 dark:bg-white/[0.05]">
                       วัน
                     </th>
                     {(gridPeriod === "day" ? DAY_GRID_HEADER_TIMES : NIGHT_GRID_HEADER_TIMES).map((item, i) => (
-                      <th key={i} className="p-1 border-r border-amber-200/40 dark:border-white/10 last:border-r-0 bg-amber-50/50 dark:bg-[#0A1628]/80">
-                        <div className="grid grid-cols-3 gap-0.5 text-center">
-                          {item.subs.map((subTime, sIdx) => (
-                            <div
-                              key={sIdx}
-                              className="bg-white dark:bg-black/30 border border-amber-200/50 dark:border-transparent rounded px-0.5 py-1 text-[11px] font-mono text-slate-800 dark:text-[#D9CDB7] font-semibold"
-                            >
-                              {subTime}
-                            </div>
-                          ))}
+                      <th key={i} className="p-1 border-r border-amber-200/50 dark:border-white/10 last:border-r-0 bg-amber-50/60 dark:bg-[#071527]/90">
+                        <div className="grid grid-cols-3 divide-x divide-amber-300/80 dark:divide-white/20 border border-amber-300/80 dark:border-white/15 rounded-lg overflow-hidden bg-white/95 dark:bg-[#0A1D34]/80 text-center shadow-xs">
+                          {item.subs.map((subTime, sIdx) => {
+                            const phaseName = sIdx === 0 ? "ต้น" : sIdx === 1 ? "กลาง" : "ปลาย";
+                            return (
+                              <div
+                                key={sIdx}
+                                className="px-0.5 py-1 flex flex-col items-center justify-center min-w-0"
+                              >
+                                <span className="text-[9px] text-[#8C6D2D] dark:text-[#D9BC82] font-bold leading-none mb-0.5">
+                                  {phaseName}
+                                </span>
+                                <span className="text-[10px] sm:text-[11px] font-mono text-slate-900 dark:text-[#F8F6F1] font-bold leading-tight truncate">
+                                  {subTime}
+                                </span>
+                              </div>
+                            );
+                          })}
                         </div>
                       </th>
                     ))}
