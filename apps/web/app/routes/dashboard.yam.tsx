@@ -1967,7 +1967,7 @@ export default function YamPage() {
           {/* 8x7 Watch Grid Table */}
           <Card className="p-0 overflow-hidden bg-white/95 dark:bg-[#0A1628]/40 border border-amber-200/60 dark:border-white/5 shadow-md">
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse min-w-[760px]">
+              <table className="w-full text-left border-collapse min-w-[1100px]">
                 <thead>
                   {/* Row 1: กลางวัน / กลางคืน + 8 ช่วงเวลายามใหญ่ */}
                   <tr className="border-b border-amber-200/60 dark:border-white/10 bg-amber-100/80 dark:bg-[#0A2240]/80">
@@ -1975,8 +1975,8 @@ export default function YamPage() {
                       {gridPeriod === "day" ? "กลางวัน" : "กลางคืน"}
                     </th>
                     {(gridPeriod === "day" ? DAY_GRID_HEADER_TIMES : NIGHT_GRID_HEADER_TIMES).map((item, i) => (
-                      <th key={i} className="p-2 text-center border-r border-amber-200/50 dark:border-white/10 last:border-r-0 bg-amber-100/50 dark:bg-[#0A2240]/60">
-                        <span className="text-xs font-bold text-slate-900 dark:text-[#F8F6F1] font-mono block">
+                      <th key={i} className="p-2 text-center border-r border-amber-200/50 dark:border-white/10 last:border-r-0 bg-amber-100/50 dark:bg-[#0A2240]/60 min-w-[125px]">
+                        <span className="text-xs font-bold text-slate-900 dark:text-[#F8F6F1] font-mono tracking-tight block whitespace-nowrap">
                           {item.major}
                         </span>
                       </th>
@@ -1985,23 +1985,23 @@ export default function YamPage() {
 
                   {/* Row 2: วัน + 24 ช่วงเวลาย่อย (ต้น กลาง ปลาย) */}
                   <tr className="border-b border-amber-200/70 dark:border-white/10 bg-amber-50/90 dark:bg-[#0A1628]/95">
-                    <th className="p-2 text-xs font-bold text-center text-slate-900 dark:text-[#F8F6F1] border-r border-amber-200/60 dark:border-white/10 bg-amber-100/80 dark:bg-white/[0.05]">
+                    <th className="p-2 text-xs font-bold text-center text-slate-900 dark:text-[#F8F6F1] border-r border-amber-200/60 dark:border-white/10 bg-amber-100/80 dark:bg-white/[0.05] w-24">
                       วัน
                     </th>
                     {(gridPeriod === "day" ? DAY_GRID_HEADER_TIMES : NIGHT_GRID_HEADER_TIMES).map((item, i) => (
-                      <th key={i} className="p-1 border-r border-amber-200/50 dark:border-white/10 last:border-r-0 bg-amber-50/60 dark:bg-[#071527]/90">
-                        <div className="grid grid-cols-3 divide-x divide-amber-300/80 dark:divide-white/20 border border-amber-300/80 dark:border-white/15 rounded-lg overflow-hidden bg-white/95 dark:bg-[#0A1D34]/80 text-center shadow-xs">
+                      <th key={i} className="p-1 border-r border-amber-200/50 dark:border-white/10 last:border-r-0 bg-amber-50/60 dark:bg-[#071527]/90 min-w-[125px]">
+                        <div className="grid grid-cols-3 divide-x divide-amber-300/80 dark:divide-white/20 border border-amber-300/80 dark:border-white/15 rounded-lg overflow-hidden bg-white/95 dark:bg-[#0A1D34]/90 text-center shadow-xs">
                           {item.subs.map((subTime, sIdx) => {
                             const phaseName = sIdx === 0 ? "ต้น" : sIdx === 1 ? "กลาง" : "ปลาย";
                             return (
                               <div
                                 key={sIdx}
-                                className="px-0.5 py-1 flex flex-col items-center justify-center min-w-0"
+                                className="px-1 py-1 flex flex-col items-center justify-center min-w-0"
                               >
-                                <span className="text-[9px] text-[#8C6D2D] dark:text-[#D9BC82] font-bold leading-none mb-0.5">
+                                <span className="text-[10px] text-[#8C6D2D] dark:text-[#D9BC82] font-black leading-none mb-0.5">
                                   {phaseName}
                                 </span>
-                                <span className="text-[10px] sm:text-[11px] font-mono text-slate-900 dark:text-[#F8F6F1] font-bold leading-tight truncate">
+                                <span className="text-[11px] font-mono text-slate-900 dark:text-[#F8F6F1] font-bold leading-none tracking-tight whitespace-nowrap">
                                   {subTime}
                                 </span>
                               </div>
@@ -2020,7 +2020,7 @@ export default function YamPage() {
 
                     return (
                       <tr key={dIdx} className="border-b border-amber-200/40 dark:border-white/5 hover:bg-amber-50/40 dark:hover:bg-white/[0.01]">
-                        <td className="p-3 text-xs font-bold text-slate-900 dark:text-[#F8F6F1] bg-amber-50/30 dark:bg-white/[0.01] border-r border-amber-200/40 dark:border-white/5 text-center">
+                        <td className="p-3 text-xs font-bold text-slate-900 dark:text-[#F8F6F1] bg-amber-50/30 dark:bg-white/[0.01] border-r border-amber-200/40 dark:border-white/5 text-center w-24">
                           {dayName}
                         </td>
                         
@@ -2031,20 +2031,20 @@ export default function YamPage() {
                             <td
                               key={yIdx}
                               onClick={() => handleGridCellClick(dayName, yIdx + 1)}
-                              className={`p-2 text-center cursor-pointer transition-all border-r border-amber-200/40 dark:border-white/5 select-none align-top ${
+                              className={`p-2 text-center cursor-pointer transition-all border-r border-amber-200/40 dark:border-white/5 select-none align-top min-w-[125px] ${
                                 isSelected
                                   ? "bg-amber-100/70 text-amber-900 dark:bg-[#D9BC82]/15 dark:text-[#D9BC82] ring-1 ring-inset ring-amber-500 dark:ring-[#D9BC82]"
                                   : "hover:bg-amber-50/60 dark:hover:bg-white/5"
                               }`}
                             >
-                              <div className="text-xs font-bold flex flex-col items-center gap-1 min-w-[70px]">
+                              <div className="text-xs font-bold flex flex-col items-center gap-1 w-full">
                                 <span className="text-base text-amber-700 dark:text-[#D9BC82]" style={{ fontFamily: "serif" }}>
                                   {PLANET_SYMBOLS[yamName] || "✦"}
                                 </span>
                                 <span className={`text-[13px] font-bold ${isSelected ? "text-amber-900 dark:text-[#D9BC82]" : "text-slate-800 dark:text-[#D9CDB7]"}`}>
                                   {yamName}
                                 </span>
-                                <div className="grid grid-cols-3 gap-0.5 w-full mt-1 border-t border-amber-200/40 dark:border-white/10 pt-1">
+                                <div className="grid grid-cols-3 gap-1 w-full mt-1 border-t border-amber-200/40 dark:border-white/10 pt-1">
                                   {(["ต้น","กลาง","ปลาย"] as const).map((phase, pIdx) => {
                                     const isGood = subTable[yIdx]?.[pIdx] ?? false;
 
