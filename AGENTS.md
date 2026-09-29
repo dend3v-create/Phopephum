@@ -16,6 +16,7 @@ Stack: Remix + Expo + Cloudflare | Blueprint: `antigravity-remix-expo-cloudflare
 
 | Skill | File | Trigger |
 |---|---|---|
+| spiritual-wisdom-guidance | agents/spiritual-wisdom-guidance.md | ถอดรหัสปัญญาชีวิต & Prompt Guidelines |
 | migrate-engine | agents/skill-migrate-engine.md | extend/fix calculators |
 | build-routes | agents/skill-build-routes.md | สร้าง Remix routes ใหม่ |
 | deploy-worker | agents/skill-deploy-worker.md | deploy AI proxy worker |
