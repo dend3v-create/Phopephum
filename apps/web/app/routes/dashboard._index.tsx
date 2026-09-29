@@ -534,20 +534,20 @@ export default function TodayScreen() {
       <div className="pt-1 animate-fade-up">
         <div className="flex items-center justify-between">
           <p
-            className="text-[11px] font-black uppercase tracking-[0.25em] text-[#8C6D2D] dark:text-[#C6A96B] min-h-[14px]"
+            className="text-[11px] font-black uppercase tracking-[0.25em] text-[#C6A96B] min-h-[14px]"
             suppressHydrationWarning
           >
             {greeting}
           </p>
-          <span className="text-[11px] font-semibold text-slate-700 dark:text-[#C6B79F] px-2.5 py-0.5 rounded-full border border-slate-200 dark:border-[#C6A96B]/30 bg-slate-100 dark:bg-[#C6A96B]/10">
+          <span className="text-[11px] font-semibold text-[#C6B79F] px-2.5 py-0.5 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/10 backdrop-blur-sm">
             {dayIntelligence.lunarDayInfo.lunarDateStr}
           </span>
         </div>
-        <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-[#F8F6F1] leading-tight mt-1">
-          วันนี้ของ <span className="text-[#8C6D2D] dark:text-[#C6A96B]">{currentSubjectName}</span>
+        <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-[#F8F6F1] leading-tight mt-1">
+          วันนี้ของ <span className="text-[#C6A96B]">{currentSubjectName}</span>
         </h1>
         <p
-          className="text-xs text-slate-500 dark:text-[#94A3B8] mt-1 tracking-wide min-h-[16px]"
+          className="text-xs text-[#94A3B8] mt-1 tracking-wide min-h-[16px]"
           suppressHydrationWarning
         >
           {dateLabel}
@@ -555,7 +555,7 @@ export default function TodayScreen() {
       </div>
 
       {/* ── 🎯 PILLAR 1: สิ่งที่ควรใส่พลังงานทุ่มเทในวันนี้ (POWER FOCUS & GOLDEN WINDOW) ── */}
-      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/30 dark:border-[#C6A96B]/40 overflow-hidden relative animate-fade-up bg-white/95 dark:bg-gradient-to-br dark:from-[#0a2240] dark:via-[#0d1f38] dark:to-[#020617] backdrop-blur-xl shadow-xl space-y-4">
+      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/40 overflow-hidden relative animate-fade-up bg-gradient-to-br from-[#0a2240]/90 via-[#0d1f38]/95 to-[#020617] backdrop-blur-xl shadow-xl space-y-4">
         <div
           className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-30"
           style={{
@@ -566,36 +566,36 @@ export default function TodayScreen() {
         {/* Top Header: Score & Theme */}
         <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
           <div className="space-y-1">
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#8C6D2D] dark:text-[#C6A96B]">
+            <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#C6A96B]">
               <span>✦</span> จุดโฟกัสพลังงานประจำวัน (POWER FOCUS)
             </span>
-            <h2 className="font-display text-lg sm:text-xl font-black text-slate-900 dark:text-[#F8F6F1] leading-snug">
+            <h2 className="font-display text-lg sm:text-xl font-black text-[#F8F6F1] leading-snug">
               {dayIntelligence.dailyTheme}
             </h2>
           </div>
 
-          <div className="flex items-center gap-2 self-start sm:self-center px-3 py-1.5 rounded-2xl bg-black/5 dark:bg-white/5 border border-black/10 dark:border-[#C6A96B]/20">
-            <span className="text-xs text-slate-600 dark:text-[#94A3B8] font-bold">ความราบรื่น:</span>
-            <span className="font-display text-base font-black text-amber-700 dark:text-[#F2D49B]">
+          <div className="flex items-center gap-2 self-start sm:self-center px-3 py-1.5 rounded-2xl bg-white/5 border border-[#C6A96B]/30 backdrop-blur-sm">
+            <span className="text-xs text-[#94A3B8] font-bold">ความราบรื่น:</span>
+            <span className="font-display text-base font-black text-[#F2D49B]">
               {dayIntelligence.overallScore}
             </span>
-            <span className="text-[10px] text-slate-500 dark:text-[#94A3B8]">/100</span>
+            <span className="text-[10px] text-[#94A3B8]">/100</span>
           </div>
         </div>
 
         {/* Focus Highlight Card: เรื่องที่ควรทุ่มเทพลังงาน */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/10 via-[#C6A96B]/10 to-transparent border border-amber-500/25 dark:border-[#C6A96B]/30 space-y-3 relative z-10">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#C6A96B]/15 to-[#0A2240]/40 border border-[#C6A96B]/40 space-y-3 relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <span className="text-lg">🎯</span>
-              <span className="text-xs font-black text-slate-900 dark:text-[#F8F6F1]">
+              <span className="text-xs font-black text-[#F8F6F1]">
                 {goldenWindow
                   ? `ช่วงเวลาทองคำ: ${goldenWindow.startTime} – ${goldenWindow.endTime} น.`
                   : "จังหวะเวลาขับเคลื่อนผลงานที่ดีที่สุด"}
               </span>
             </div>
             {goldenWindow && (
-              <span className="text-[10px] font-black text-amber-800 dark:text-amber-300 bg-amber-400/20 border border-amber-400/30 px-2.5 py-0.5 rounded-full self-start sm:self-auto">
+              <span className="text-[10px] font-black text-amber-300 bg-amber-400/20 border border-amber-400/40 px-2.5 py-0.5 rounded-full self-start sm:self-auto">
                 ฤกษ์สำเร็จ {goldenWindow.score}%
               </span>
             )}
@@ -607,7 +607,7 @@ export default function TodayScreen() {
               {goldenWindow.suitableFor.map((item, idx) => (
                 <span
                   key={idx}
-                  className="text-[11px] px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-slate-800 dark:text-[#F8F6F1] border border-black/10 dark:border-white/10 font-bold"
+                  className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/10 text-[#F8F6F1] border border-white/15 font-bold"
                 >
                   ✓ {item}
                 </span>
@@ -615,7 +615,7 @@ export default function TodayScreen() {
             </div>
           )}
 
-          <p className="text-xs text-slate-700 dark:text-[#CBD5E1] leading-relaxed font-medium">
+          <p className="text-xs text-[#CBD5E1] leading-relaxed font-medium">
             {goldenWindow?.plainAdvice || dayIntelligence.personalNote || dayIntelligence.dailySummary}
           </p>
 
@@ -623,7 +623,7 @@ export default function TodayScreen() {
             <div className="pt-1 flex items-center justify-end">
               <Link
                 to={`/dashboard/calendar?date=${bkkDateStr}&time=${goldenWindow.startTime}&eventType=negotiation`}
-                className="text-xs font-bold text-amber-800 dark:text-[#F2D49B] hover:underline flex items-center gap-1 transition-colors"
+                className="text-xs font-bold text-[#F2D49B] hover:text-[#C6A96B] hover:underline flex items-center gap-1 transition-colors"
               >
                 <span>✦ วางแผนนัดหมายช่วงเวลานี้</span>
                 <span>→</span>
@@ -633,13 +633,13 @@ export default function TodayScreen() {
         </div>
 
         {/* Live Yam and Moon Status Bar */}
-        <div className="pt-2 border-t border-black/5 dark:border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
           <div className="flex items-center gap-2">
             <div
               className="w-2 h-2 rounded-full animate-pulse shrink-0"
               style={{ background: yamLevelColor }}
             />
-            <span className="text-slate-600 dark:text-[#C6B79F] font-semibold">
+            <span className="text-[#C6B79F] font-semibold">
               ยามขณะนี้:{" "}
               <span className="font-bold" style={{ color: yamLevelColor }}>
                 {yam.name}
@@ -647,7 +647,7 @@ export default function TodayScreen() {
             </span>
             {timeLeft && (
               <span
-                className="text-[10px] text-slate-500 dark:text-[#94A3B8] font-mono"
+                className="text-[10px] text-[#94A3B8] font-mono"
                 suppressHydrationWarning
               >
                 (เหลือ {timeLeft})
@@ -655,11 +655,11 @@ export default function TodayScreen() {
             )}
           </div>
 
-          <div className="flex items-center gap-1.5 text-[11px] text-slate-600 dark:text-[#94A3B8]">
+          <div className="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
             <span>{moon.isWanPhra ? "🙏" : "🌙"}</span>
             <span>{moon.phase}</span>
             {moon.isWanPhra && (
-              <span className="text-amber-700 dark:text-amber-400 font-bold ml-1 bg-amber-400/15 px-1.5 py-0.5 rounded">
+              <span className="text-amber-400 font-bold ml-1 bg-amber-400/20 px-1.5 py-0.5 rounded border border-amber-400/30">
                 วันพระ
               </span>
             )}
@@ -670,12 +670,12 @@ export default function TodayScreen() {
       {/* ── ⚖️ PILLAR 2 & 3: แนวทางที่เหมาะควรทำ VS สิ่งที่ควรระวัง (MINIMAL 2-COLUMN) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 animate-fade-up">
         {/* Recommended Actions */}
-        <div className="p-4 sm:p-5 rounded-3xl border border-emerald-500/30 bg-emerald-500/10 backdrop-blur-md shadow-sm space-y-3">
+        <div className="p-4 sm:p-5 rounded-3xl border border-emerald-500/30 bg-emerald-950/30 backdrop-blur-md shadow-sm space-y-3">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-black text-sm">
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-emerald-500/20 text-emerald-300 font-black text-sm">
               ✓
             </div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-700 dark:text-emerald-400">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-400">
               แนวทางที่เหมาะควรทำ
             </p>
           </div>
@@ -683,9 +683,9 @@ export default function TodayScreen() {
             {doList.slice(0, 3).map((item, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2.5 text-xs sm:text-sm font-medium text-slate-800 dark:text-[#E2E8F0] leading-snug"
+                className="flex items-start gap-2.5 text-xs sm:text-sm font-medium text-[#E2E8F0] leading-snug"
               >
-                <span className="text-emerald-600 dark:text-emerald-400 mt-0.5 text-xs shrink-0">●</span>
+                <span className="text-emerald-400 mt-0.5 text-xs shrink-0">●</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -693,12 +693,12 @@ export default function TodayScreen() {
         </div>
 
         {/* Things to Avoid */}
-        <div className="p-4 sm:p-5 rounded-3xl border border-rose-500/30 bg-rose-500/10 backdrop-blur-md shadow-sm space-y-3">
+        <div className="p-4 sm:p-5 rounded-3xl border border-rose-500/30 bg-rose-950/30 backdrop-blur-md shadow-sm space-y-3">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-rose-500/20 text-rose-700 dark:text-rose-300 font-black text-sm">
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-rose-500/20 text-rose-300 font-black text-sm">
               ✕
             </div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-rose-700 dark:text-rose-400">
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-rose-400">
               สิ่งที่ควรระวัง / หลีกเลี่ยง
             </p>
           </div>
@@ -706,9 +706,9 @@ export default function TodayScreen() {
             {avoidList.slice(0, 3).map((item, i) => (
               <li
                 key={i}
-                className="flex items-start gap-2.5 text-xs sm:text-sm font-medium text-slate-800 dark:text-[#E2E8F0] leading-snug"
+                className="flex items-start gap-2.5 text-xs sm:text-sm font-medium text-[#E2E8F0] leading-snug"
               >
-                <span className="text-rose-600 dark:text-rose-400 mt-0.5 text-xs shrink-0">●</span>
+                <span className="text-rose-400 mt-0.5 text-xs shrink-0">●</span>
                 <span>{item}</span>
               </li>
             ))}
@@ -717,16 +717,16 @@ export default function TodayScreen() {
       </div>
 
       {/* ── CARD 3: หาฤกษ์มงคล & จังหวะเวลาที่ดีที่สุด ── */}
-      <div className="rounded-3xl p-5 border border-slate-200 dark:border-[#C6A96B]/40 bg-white/95 dark:bg-gradient-to-br dark:from-[#0a2240] dark:via-[#071427] dark:to-[#020617] backdrop-blur-xl shadow-lg relative overflow-hidden animate-fade-up">
+      <div className="rounded-3xl p-5 border border-[#C6A96B]/40 bg-gradient-to-br from-[#0a2240]/80 via-[#071427]/90 to-[#020617] backdrop-blur-xl shadow-lg relative overflow-hidden animate-fade-up">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <div className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#8C6D2D] dark:text-[#C6A96B]">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#C6A96B]">
               AUSPICIOUS TIMING FINDER
             </span>
-            <h3 className="font-display text-base sm:text-lg font-black text-slate-900 dark:text-[#F8F6F1]">
+            <h3 className="font-display text-base sm:text-lg font-black text-[#F8F6F1]">
               หาฤกษ์มงคล & จังหวะเวลาที่ดีที่สุด
             </h3>
-            <p className="text-xs text-slate-600 dark:text-[#CBD5E1] max-w-md leading-relaxed">
+            <p className="text-xs text-[#CBD5E1] max-w-md leading-relaxed">
               ออกรถใหม่, ขึ้นบ้านใหม่, เซ็นสัญญา หรือเจรจาสำคัญ คัดกรอง Top 3 ช่วงเวลาทองคำเฉพาะคุณ
             </p>
           </div>
@@ -743,19 +743,19 @@ export default function TodayScreen() {
       </div>
 
       {/* ── CARD 4: TODAY'S APPOINTMENTS (นัดหมายวันนี้) ── */}
-      <div className="rounded-3xl p-5 border border-slate-200 dark:border-white/10 bg-white/95 dark:bg-slate-900/40 backdrop-blur-md animate-fade-up shadow-sm space-y-3">
+      <div className="rounded-3xl p-5 border border-white/10 bg-[#0A2240]/40 backdrop-blur-md animate-fade-up shadow-sm space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 shrink-0">
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 shrink-0">
               <AstralIcon name="calendar" size="xs" variant="gold" />
             </div>
-            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#8C6D2D] dark:text-[#C6A96B]">
+            <p className="text-[11px] font-black uppercase tracking-[0.22em] text-[#C6A96B]">
               นัดหมายและกิจกรรมวันนี้ ({todayAppointments.length})
             </p>
           </div>
           <Link
             to={`/dashboard/calendar?date=${bkkDateStr}`}
-            className="text-xs text-slate-500 dark:text-[#94A3B8] hover:text-[#8C6D2D] dark:hover:text-[#C6A96B] font-semibold transition-colors"
+            className="text-xs text-[#94A3B8] hover:text-[#C6A96B] font-semibold transition-colors"
           >
             + เพิ่มนัดหมาย →
           </Link>
@@ -766,19 +766,19 @@ export default function TodayScreen() {
             {todayAppointments.map((app) => (
               <div
                 key={app.id}
-                className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 dark:border-white/8 bg-slate-50/70 dark:bg-white/4 hover:bg-slate-100/70 dark:hover:bg-white/7 transition-all"
+                className="flex items-center justify-between p-3.5 rounded-2xl border border-white/10 bg-white/5 hover:bg-white/10 transition-all"
               >
                 <div className="min-w-0 pr-3">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-[#8C6D2D] dark:text-[#C6A96B]">
+                    <span className="font-mono text-xs font-bold text-[#C6A96B]">
                       {app.event_time.slice(0, 5)} น.
                     </span>
-                    <span className="text-xs font-bold text-slate-900 dark:text-[#F8F6F1] truncate">
+                    <span className="text-xs font-bold text-[#F8F6F1] truncate">
                       {app.title}
                     </span>
                   </div>
                   {app.advice && (
-                    <p className="text-[11px] text-slate-500 dark:text-[#94A3B8] mt-1 line-clamp-1">
+                    <p className="text-[11px] text-[#94A3B8] mt-1 line-clamp-1">
                       {app.advice}
                     </p>
                   )}
@@ -807,15 +807,15 @@ export default function TodayScreen() {
             ))}
           </div>
         ) : (
-          <div className="p-3.5 rounded-2xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 flex items-center justify-between">
-            <span className="text-xs text-slate-500 dark:text-[#94A3B8]">
+          <div className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/5 flex items-center justify-between">
+            <span className="text-xs text-[#94A3B8]">
               ยังไม่มีนัดหมายที่ลงบันทึกไว้ในวันนี้
             </span>
             <Link
               to={`/dashboard/calendar?date=${bkkDateStr}${
                 goldenWindow ? `&time=${goldenWindow.startTime}` : ""
               }`}
-              className="text-xs font-bold text-[#8C6D2D] dark:text-[#C6A96B] hover:underline"
+              className="text-xs font-bold text-[#C6A96B] hover:underline"
             >
               + วางแผนนัดหมาย
             </Link>
@@ -825,20 +825,20 @@ export default function TodayScreen() {
 
       {/* ── QUICK ACTION HUB: 3 ESSENTIAL ACTIONS ── */}
       <div className="pt-2 animate-fade-up space-y-3">
-        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-center text-slate-500 dark:text-[#94A3B8]">
+        <p className="text-[11px] font-black uppercase tracking-[0.22em] text-center text-[#94A3B8]">
           เครื่องมือตัดสินใจด่วน
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
             to="/dashboard/check-yam"
-            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-slate-200 dark:border-[#C6A96B]/40 bg-white/90 dark:bg-gradient-to-br dark:from-[#C6A96B]/15 dark:to-[#4B6FAE]/10 hover:border-[#C6A96B] transition-all group active:scale-95 text-left sm:text-center shadow-sm"
+            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-[#C6A96B]/40 bg-gradient-to-br from-[#C6A96B]/20 via-[#0A2240]/60 to-[#020617] hover:border-[#C6A96B] transition-all group active:scale-95 text-left sm:text-center shadow-lg"
           >
             <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
               ⚡
             </span>
             <div>
-              <p className="text-xs font-black text-slate-900 dark:text-[#F8F6F1]">ถามฤกษ์ด่วน</p>
-              <p className="text-[10px] text-slate-500 dark:text-[#C6B79F] mt-0.5">
+              <p className="text-xs font-black text-[#F8F6F1]">ถามฤกษ์ด่วน</p>
+              <p className="text-[10px] text-[#C6B79F] mt-0.5">
                 ประเมินจังหวะเวลานี้
               </p>
             </div>
@@ -847,36 +847,36 @@ export default function TodayScreen() {
 
           <Link
             to="/dashboard/calendar"
-            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-white/5 hover:border-[#C6A96B]/50 transition-all group active:scale-95 text-left sm:text-center shadow-sm"
+            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-white/10 bg-[#0A2240]/40 hover:border-[#C6A96B]/50 hover:bg-[#0A2240]/60 transition-all group active:scale-95 text-left sm:text-center shadow-md"
           >
             <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
               📅
             </span>
             <div>
-              <p className="text-xs font-black text-slate-900 dark:text-[#F8F6F1]">ปฏิทินทั้งเดือน</p>
-              <p className="text-[10px] text-slate-500 dark:text-[#94A3B8] mt-0.5">
+              <p className="text-xs font-black text-[#F8F6F1]">ปฏิทินทั้งเดือน</p>
+              <p className="text-[10px] text-[#94A3B8] mt-0.5">
                 วางแผนล่วงหน้า 100 ปี
               </p>
             </div>
-            <span className="sm:hidden text-xs text-slate-400 dark:text-[#94A3B8]">→</span>
+            <span className="sm:hidden text-xs text-[#94A3B8]">→</span>
           </Link>
 
           <Link
             to="/dashboard/horoscope"
-            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-slate-200 dark:border-white/10 bg-white/90 dark:bg-white/5 hover:border-[#C6A96B]/50 transition-all group active:scale-95 text-left sm:text-center shadow-sm"
+            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-white/10 bg-[#0A2240]/40 hover:border-[#C6A96B]/50 hover:bg-[#0A2240]/60 transition-all group active:scale-95 text-left sm:text-center shadow-md"
           >
             <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
               🛡️
             </span>
             <div>
-              <p className="text-xs font-black text-slate-900 dark:text-[#F8F6F1]">
+              <p className="text-xs font-black text-[#F8F6F1]">
                 ผังดวงจักรพรรดิ
               </p>
-              <p className="text-[10px] text-slate-500 dark:text-[#94A3B8] mt-0.5">
+              <p className="text-[10px] text-[#94A3B8] mt-0.5">
                 ตรวจดวงชะตาเลข 7 ตัว
               </p>
             </div>
-            <span className="sm:hidden text-xs text-slate-400 dark:text-[#94A3B8]">→</span>
+            <span className="sm:hidden text-xs text-[#94A3B8]">→</span>
           </Link>
         </div>
       </div>
