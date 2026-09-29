@@ -606,7 +606,7 @@ export default function WisdomChatPage() {
                   disabled={isStreaming}
                   className="flex-1 bg-transparent outline-none resize-none leading-relaxed disabled:opacity-50 text-[var(--text-body)]"
                   style={{
-                    fontSize: "15px",
+                    fontSize: "16px",
                     fontFamily: "'IBM Plex Sans Thai', sans-serif",
                     maxHeight: "96px",
                     overflowY: "auto",
@@ -642,9 +642,9 @@ function MessageBubble({ msg }: { msg: Message }) {
     return (
       <div className="flex justify-end animate-fade-up">
         <div
-          className="rounded-2xl rounded-tr-sm px-4 py-2.5 leading-relaxed font-semibold text-[14px]"
+          className="rounded-2xl rounded-tr-sm px-4 py-3 leading-relaxed font-semibold text-[15.5px] sm:text-base"
           style={{
-            maxWidth: "80%",
+            maxWidth: "85%",
             background: "rgba(198,169,107,0.18)",
             border: "1px solid rgba(198,169,107,0.25)",
             color: "var(--text-body)",
@@ -670,13 +670,12 @@ function MessageBubble({ msg }: { msg: Message }) {
       </div>
 
       <div
-        className="rounded-2xl rounded-tl-sm px-4 py-2.5 leading-relaxed text-sm border"
+        className="rounded-2xl rounded-tl-sm px-4 py-3 leading-relaxed text-[15.5px] sm:text-base border"
         style={{
-          maxWidth: "83%",
+          maxWidth: "88%",
           background: "var(--card-dark-bg)",
           borderColor: "var(--card-dark-border)",
           color: "var(--text-secondary)",
-          fontSize: "14px",
         }}
       >
         {msg.text

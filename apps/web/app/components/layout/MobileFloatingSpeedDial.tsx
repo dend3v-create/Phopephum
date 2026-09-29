@@ -81,7 +81,7 @@ export function MobileFloatingSpeedDial() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-[76px] right-4 z-50 select-none">
+    <div className="md:hidden fixed bottom-[80px] right-4 z-50 select-none">
       {/* Backdrop */}
       {isOpen && (
         <div
@@ -93,22 +93,22 @@ export function MobileFloatingSpeedDial() {
       {/* Floating Speed Dial Actions */}
       <div className="relative z-50 flex flex-col items-end gap-3">
         {isOpen && (
-          <div className="flex flex-col items-end gap-2.5 mb-1 animate-scaleUp">
+          <div className="flex flex-col items-end gap-3 mb-1 animate-scaleUp">
             {menuItems.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 onClick={close}
-                className="flex items-center gap-2.5 group active:scale-95 transition-all"
+                className="flex items-center gap-3 group active:scale-95 transition-all"
               >
-                {/* High-Contrast Crisp Label Pill in Light & Dark Themes */}
-                <span className="px-3.5 py-1.5 rounded-xl bg-white/95 dark:bg-[#071427]/95 backdrop-blur-md border border-[#C6A96B]/40 text-[#0F172A] dark:text-[#F8F6F1] font-sans text-xs font-bold shadow-lg shadow-black/20 dark:shadow-black/60 tracking-wide transition-colors">
+                {/* High-Contrast Crisp Large Label Pill in Light & Dark Themes */}
+                <span className="px-4 py-2 rounded-2xl bg-white/95 dark:bg-[#071427]/95 backdrop-blur-md border border-[#C6A96B]/50 text-slate-900 dark:text-[#F8F6F1] font-sarabun text-[14px] sm:text-[15px] font-bold shadow-xl shadow-black/20 dark:shadow-black/70 tracking-normal transition-colors">
                   {item.label}
                 </span>
 
                 {/* Distinct Astrological Icon Badge */}
                 <div
-                  className={`w-11 h-11 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-105 ${item.badgeClass}`}
+                  className={`w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-105 shrink-0 ${item.badgeClass}`}
                 >
                   {item.icon}
                 </div>
@@ -121,20 +121,20 @@ export function MobileFloatingSpeedDial() {
         <button
           type="button"
           onClick={toggle}
-          className={`w-13 h-13 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 active:scale-90 cursor-pointer ${
+          className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 active:scale-90 cursor-pointer ${
             isOpen
               ? "bg-white dark:bg-[#0A2240] text-[#C6A96B] rotate-90 border-2 border-[#C6A96B] shadow-amber-500/20"
               : "bg-gradient-to-tr from-[#0F172A] via-[#1E3A8A] to-[#2563EB] text-[#F8F6F1] shadow-[#1E3A8A]/50 border-2 border-[#C6A96B]/60 hover:border-[#C6A96B]"
           }`}
-          style={{ width: "52px", height: "52px" }}
+          style={{ width: "56px", height: "56px" }}
           aria-label="Toggle Quick Navigation"
         >
           {isOpen ? (
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-5 h-5">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-6 h-6">
               <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           ) : (
-            <svg viewBox="0 0 24 24" fill="none" className="w-6 h-6">
+            <svg viewBox="0 0 24 24" fill="none" className="w-7 h-7">
               {/* 8-Ray Auspicious Astrological Star */}
               <path
                 d="M12 2L14.4 8.6L21 11L14.4 13.4L12 20L9.6 13.4L3 11L9.6 8.6L12 2Z"

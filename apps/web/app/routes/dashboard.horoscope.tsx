@@ -2040,22 +2040,22 @@ export default function HoroscopePage() {
                 <a
                   key={cat.value}
                   href={`/dashboard/reports/new?type=${cat.value}&name=${encodeURIComponent(currentSubjectName)}&birthDate=${activeResult?.birthDate || profile?.birth_date || ''}&birthTime=${encodeURIComponent(activeResult?.birthTime || profile?.birth_time || '')}&birthPlace=${encodeURIComponent(currentBirthPlace)}`}
-                  className={`relative overflow-hidden rounded-2xl border p-4 bg-white/95 dark:bg-[#07162C]/90 hover:bg-slate-50 dark:hover:bg-[#0A203E] ${cat.border} ${cat.glow} transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] group flex flex-col justify-between min-h-[145px] shadow-sm backdrop-blur-md`}
+                  className={`relative overflow-hidden rounded-2xl border p-4 bg-white/95 dark:bg-[#07162C]/90 hover:bg-slate-50 dark:hover:bg-[#0A203E] ${cat.border} ${cat.glow} transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] group flex flex-col justify-between min-h-[155px] shadow-sm backdrop-blur-md`}
                 >
                   <div className="mb-2.5">
-                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${cat.iconGlow} transition-transform group-hover:scale-110 shadow-sm`}>
+                    <div className={`w-11 h-11 rounded-xl flex items-center justify-center border ${cat.iconGlow} transition-transform group-hover:scale-110 shadow-sm`}>
                       {cat.renderIcon()}
                     </div>
                   </div>
                   <div>
-                    <p className={`font-bold text-xs text-slate-900 dark:text-[#F8F6F1] ${cat.activeText} transition-colors leading-tight`}>
+                    <p className={`font-bold text-[14.5px] sm:text-base text-slate-900 dark:text-[#F8F6F1] ${cat.activeText} transition-colors leading-snug`}>
                       {cat.label}
                     </p>
-                    <p className="text-[12px] text-slate-500 dark:text-[#94A3B8] group-hover:text-slate-700 dark:group-hover:text-slate-300 transition-colors mt-1 leading-snug">
+                    <p className="text-[13px] sm:text-[13.5px] text-slate-600 dark:text-[#94A3B8] group-hover:text-slate-800 dark:group-hover:text-slate-300 transition-colors mt-1 leading-snug">
                       {cat.desc}
                     </p>
                   </div>
-                  <span className="absolute bottom-2.5 right-3 text-[11px] text-[#8C6D2D] dark:text-[#C6A96B] opacity-0 group-hover:opacity-100 transition-opacity font-bold flex items-center gap-0.5">
+                  <span className="absolute bottom-2.5 right-3 text-xs text-[#8C6D2D] dark:text-[#C6A96B] opacity-0 group-hover:opacity-100 transition-opacity font-bold flex items-center gap-0.5">
                     ถอดรหัส ➔
                   </span>
                 </a>
@@ -2064,12 +2064,12 @@ export default function HoroscopePage() {
 
             {/* ประวัติรายงานล่าสุด */}
             <div className="space-y-3 pt-4">
-              <h3 className="text-sm font-bold text-[#D9BC82] uppercase tracking-wider flex items-center gap-2">
-                <span className="text-xs text-[#C6A96B]">✦</span> ประวัติรายงานชะตาชีวิตของคุณ
+              <h3 className="text-base sm:text-lg font-bold text-[#8C6D2D] dark:text-[#D9BC82] tracking-wide flex items-center gap-2">
+                <span className="text-sm text-[#C6A96B]">✦</span> ประวัติรายงานชะตาชีวิตของคุณ
               </h3>
               {reports.length === 0 ? (
                 <Card className="text-center py-8 border-dashed border-white/5 bg-transparent">
-                  <p className="text-xs text-[#C6B79F]">
+                  <p className="text-sm text-slate-600 dark:text-[#C6B79F]">
                     ยังไม่พบรายงานที่ท่านเคยสร้างไว้ เลือกหมวดหมู่การ์ดด้านบนเพื่อเริ่มต้นตรวจดวงชะตาเชิงลึกชิ้นแรก!
                   </p>
                 </Card>
@@ -2091,12 +2091,12 @@ export default function HoroscopePage() {
                         href={`/dashboard/reports/${rep.id}`}
                         className="block group"
                       >
-                        <Card className="hover:border-[#C9A96E]/40 bg-slate-950/20 transition-all py-3.5 px-4 flex items-center justify-between gap-4 cursor-pointer">
+                        <Card className="hover:border-[#C9A96E]/40 bg-white/95 dark:bg-slate-950/40 border border-slate-200 dark:border-white/10 transition-all py-4 px-4 sm:px-5 flex items-center justify-between gap-4 cursor-pointer shadow-sm rounded-2xl">
                           <div className="min-w-0">
-                            <p className="text-xs font-bold text-[#F8F6F1] group-hover:text-[#C9A96E] transition-colors">
+                            <p className="text-[14.5px] sm:text-base font-bold text-slate-900 dark:text-[#F8F6F1] group-hover:text-[#8C6D2D] dark:group-hover:text-[#C9A96E] transition-colors leading-snug">
                               ✨ {typeLabels[rep.report_type] ?? rep.report_type}
                             </p>
-                            <p className="text-[13px] text-[#C6B79F] mt-1 truncate">
+                            <p className="text-[13px] sm:text-[13.5px] text-slate-500 dark:text-[#C6B79F] mt-1 truncate">
                               {new Date(rep.created_at).toLocaleDateString("th-TH", {
                                 day: "numeric",
                                 month: "short",
@@ -2104,7 +2104,7 @@ export default function HoroscopePage() {
                               })}
                             </p>
                           </div>
-                          <span className="text-xs text-[#C9A96E] shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <span className="text-xs sm:text-sm font-bold text-[#8C6D2D] dark:text-[#C9A96E] shrink-0 opacity-80 group-hover:opacity-100 transition-opacity">
                             อ่าน ➔
                           </span>
                         </Card>

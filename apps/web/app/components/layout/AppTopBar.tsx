@@ -52,16 +52,6 @@ export function AppTopBar({
 
       {/* ── Actions on Right ── */}
       <div className="flex items-center gap-1.5">
-        {/* Quick New Horoscope Button (Sesheta Style ⚡) */}
-        <Link
-          to="/dashboard/horoscope"
-          className="flex items-center gap-1 px-2.5 min-h-[34px] rounded-full text-xs font-bold transition-all active:scale-95 border bg-[#0A2240]/80 border-[#C6A96B]/40 text-[#D9BC82] hover:border-[#C6A96B] shadow-sm"
-          title="ตั้งดวงใหม่ / ผูกดวงชะตา"
-        >
-          <span className="text-[#FBBF24]">⚡</span>
-          <span className="hidden xs:inline text-[11px] font-display font-semibold">ตั้งดวง</span>
-        </Link>
-
         {/* Timing Reminder Bell */}
         <div className="flex items-center justify-center min-w-[36px] min-h-[40px]">
           <TimingReminderBell />

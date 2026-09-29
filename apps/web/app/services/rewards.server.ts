@@ -281,6 +281,20 @@ export async function spendSandsForFeature(options: {
   return { success: res.success, newBalance: res.newBalance, error: res.error };
 }
 
+function cleanRewardErrorMessage(err?: string, fallback = "คุณได้รับทรายกาลเวลารางวัลประจำวันเรียบร้อยแล้ว"): string {
+  if (!err) return fallback;
+  if (
+    err.includes("Duplicate") ||
+    err.includes("ครบกำหนด") ||
+    err.includes("à¸") ||
+    err.includes("à¹") ||
+    err.includes("duplicate")
+  ) {
+    return fallback;
+  }
+  return err;
+}
+
 // ─── 1. ระบบ Login รายวัน (+1 Sands of Time) ──────────────────────────────────
 export async function checkAndAwardDailyLogin(
   userId: string,
@@ -303,7 +317,7 @@ export async function checkAndAwardDailyLogin(
     return {
       success: false,
       earned: 0,
-      message: res.error || "วันนี้รับทรายกาลเวลาจากการเข้าสู่ระบบไปแล้ว",
+      message: cleanRewardErrorMessage(res.error, "วันนี้รับทรายกาลเวลาจากการเข้าสู่ระบบไปแล้ว"),
       newBalance: res.newBalance,
       capReached: res.capReached,
     };
@@ -339,7 +353,7 @@ export async function awardCheckinReward(
     return {
       success: false,
       earned: 0,
-      message: res.error || "วันนี้สำรวจดวงดาวรับทรายไปแล้ว",
+      message: cleanRewardErrorMessage(res.error, "วันนี้สำรวจดวงดาวรับทรายไปแล้ว"),
       newBalance: res.newBalance,
       capReached: res.capReached,
     };

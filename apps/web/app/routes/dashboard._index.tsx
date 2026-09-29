@@ -506,7 +506,7 @@ export default function TodayScreen() {
       style={{ paddingBottom: "calc(84px + env(safe-area-inset-bottom, 0px))" }}
     >
       {/* ── Login Reward Toast ── */}
-      {showReward && loginReward && (
+      {showReward && loginReward && loginReward.earned > 0 && (
         <LoginRewardToast
           reward={loginReward}
           onClose={() => setShowReward(false)}
