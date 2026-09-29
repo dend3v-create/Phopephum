@@ -131,20 +131,33 @@ export default function WisdomChatPage() {
   const [showQuestions, setShowQuestions] = useState(false);
   const [journalDetail, setJournalDetail] = useState<any | null>(null);
 
+  const chatFeedRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const isInitialMount = useRef(true);
 
-  // Scroll to bottom on updates
+  // Scroll strictly the chat feed container, keeping page header in view
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      window.scrollTo(0, 0);
+      if (chatFeedRef.current) {
+        chatFeedRef.current.scrollTop = 0;
+      }
+      return;
+    }
+    if (chatFeedRef.current) {
+      chatFeedRef.current.scrollTo({
+        top: chatFeedRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [messagesByMode, activeMode]);
 
-  // Close suggestions panel and focus input when switching modes
+  // Ensure window stays at top on mode switch and close suggestions
   useEffect(() => {
     setShowQuestions(false);
-    if (activeMode !== "journal") {
-      setTimeout(() => inputRef.current?.focus(), 50);
-    }
+    window.scrollTo(0, 0);
   }, [activeMode]);
 
   const sendMessage = useCallback(async (text: string) => {
@@ -269,11 +282,11 @@ export default function WisdomChatPage() {
 
   return (
     <div
-      className="-mx-4 -mt-6 -mb-6 flex flex-col md:flex-row relative bg-[var(--bg-base)]"
+      className="-mx-3.5 sm:-mx-6 -my-4 md:-my-6 flex flex-col md:flex-row relative bg-[var(--bg-base)] w-auto max-w-full"
       style={{
-        height: "calc(100dvh - 48px - 64px)",
+        height: "calc(100dvh - 56px - 68px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
+        maxHeight: "calc(100dvh - 56px - 68px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))",
         overflow: "hidden",
-        maxWidth: "100vw",
       }}
     >
       {/* ── Desktop Left Sidebar Tabs ── */}
@@ -349,12 +362,14 @@ export default function WisdomChatPage() {
         </div>
       </div>
 
-      {/* ── Mobile Top Horizonal Scroll Tab Bar ── */}
+      {/* ── Mobile Top Horizonal Scroll Tab Bar (Sticky at Top) ── */}
       <div
-        className="flex md:hidden overflow-x-auto shrink-0 border-b scrollbar-none whitespace-nowrap px-3 py-2.5 gap-2"
+        className="flex md:hidden overflow-x-auto shrink-0 border-b scrollbar-none whitespace-nowrap px-3 py-2.5 gap-2 sticky top-0 z-30"
         style={{
-          background: "rgba(10, 34, 64, 0.25)",
-          borderColor: "var(--border-gold)",
+          background: "var(--sidebar-bg, rgba(2, 6, 23, 0.98))",
+          backdropFilter: "blur(24px)",
+          WebkitBackdropFilter: "blur(24px)",
+          borderColor: "var(--border-gold, rgba(198, 169, 107, 0.25))",
         }}
       >
         {Object.values(MODE_CONFIGS).map(mode => {
@@ -366,10 +381,10 @@ export default function WisdomChatPage() {
                 setActiveMode(mode.id);
                 setJournalDetail(null);
               }}
-              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 ${
+              className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all border shrink-0 ${
                 active
-                  ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] border-transparent shadow-md"
-                  : "bg-[var(--card-dark-bg)] border-[var(--card-dark-border)] text-[var(--text-secondary)]"
+                  ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] border-transparent shadow-md shadow-[#C6A96B]/20"
+                  : "bg-[var(--card-dark-bg)] border-[var(--card-dark-border)] text-slate-700 dark:text-[var(--text-secondary)] hover:border-[#C6A96B]/40"
               }`}
             >
               <span>{mode.emoji}</span>
@@ -382,10 +397,10 @@ export default function WisdomChatPage() {
             setActiveMode("journal");
             setJournalDetail(null);
           }}
-          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all border shrink-0 ${
+          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-bold transition-all border shrink-0 ${
             activeMode === "journal"
-              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] border-transparent shadow-md"
-              : "bg-[var(--card-dark-bg)] border-[var(--card-dark-border)] text-[var(--text-secondary)]"
+              ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] border-transparent shadow-md shadow-[#C6A96B]/20"
+              : "bg-[var(--card-dark-bg)] border-[var(--card-dark-border)] text-slate-700 dark:text-[var(--text-secondary)] hover:border-[#C6A96B]/40"
           }`}
         >
           <span>📜</span>
@@ -542,7 +557,7 @@ export default function WisdomChatPage() {
           /* Active Chat Workspace */
           <>
             {/* Chat Feed */}
-            <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-none">
+            <div ref={chatFeedRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-4 scrollbar-none">
               {messagesByMode[activeMode].map(msg => (
                 <MessageBubble key={msg.id} msg={msg} />
               ))}
