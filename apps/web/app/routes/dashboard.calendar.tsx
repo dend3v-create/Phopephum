@@ -56,14 +56,19 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const { supabase, headers } = createSupabaseClient(request, env);
     
     const title = formData.get("title") as string;
+    const description = (formData.get("description") as string || "").trim();
     const eventType = formData.get("eventType") as string;
     const eventDate = formData.get("eventDate") as string;
     const eventTime = formData.get("eventTime") as string;
     const score = parseInt(formData.get("score") as string || "0");
     const verdict = formData.get("verdict") as string;
-    const advice = formData.get("advice") as string;
+    const rawAdvice = formData.get("advice") as string;
     const yamName = formData.get("yamName") as string;
     const bhop = formData.get("bhop") as string;
+
+    const advice = description
+      ? `${description}\n\n✦ คำแนะนำฤกษ์: ${rawAdvice}`
+      : rawAdvice;
 
     const { error } = await supabase.from("appointments").insert({
       user_id: user.id,
@@ -156,6 +161,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const eventTime = url.searchParams.get("eventTime") || "12:00";
   const eventType = url.searchParams.get("eventType") || "negotiation";
   const appointmentTitle = url.searchParams.get("title") || "";
+  const appointmentDescription = url.searchParams.get("description") || "";
   
   const dayIntelligence = await calculateDayIntelligence(eventDate, profileContext);
   let advisorResult = null;
@@ -260,6 +266,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     eventTime,
     eventType,
     appointmentTitle,
+    appointmentDescription,
     advisorResult,
     appointments: appointments || [],
     dayIntelligence,
@@ -270,7 +277,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 export default function DashboardCalendar() {
   const { 
     year, month, calendarDays, firstDayOfWeek, 
-    eventDate, eventTime, eventType, appointmentTitle,
+    eventDate, eventTime, eventType, appointmentTitle, appointmentDescription,
     advisorResult, profile, appointments,
     dayIntelligence, monthOverview,
   } = useLoaderData<typeof loader>();
@@ -281,6 +288,7 @@ export default function DashboardCalendar() {
   const [selectedTime, setSelectedTime] = useState(eventTime);
   const [selectedEventType, setSelectedEventType] = useState(eventType);
   const [selectedTitle, setSelectedTitle] = useState(appointmentTitle);
+  const [selectedDescription, setSelectedDescription] = useState(appointmentDescription);
   const [showPlannerForm, setShowPlannerForm] = useState(false);
 
   useEffect(() => {
@@ -408,7 +416,7 @@ export default function DashboardCalendar() {
               {calendarDays.map((day) => (
                 <Link 
                   key={day.day}
-                  to={`?year=${year}&month=${month}&eventDate=${day.dateStr}&eventTime=${eventTime}&eventType=${eventType}&title=${encodeURIComponent(appointmentTitle)}#day-intelligence-section`}
+                  to={`?year=${year}&month=${month}&eventDate=${day.dateStr}&eventTime=${eventTime}&eventType=${eventType}&title=${encodeURIComponent(appointmentTitle)}&description=${encodeURIComponent(appointmentDescription)}#day-intelligence-section`}
                   className={`relative min-h-[52px] sm:min-h-[64px] aspect-square md:aspect-video border-b border-r border-slate-200/60 dark:border-white/5 p-1 sm:p-2 transition-all hover:bg-amber-100/40 dark:hover:bg-[#C9A96E]/10 active:scale-[0.98] group ${
                     day.isWanPhra ? "bg-amber-50/60 dark:bg-[#C9A96E]/5" : ""
                   } ${
@@ -427,8 +435,8 @@ export default function DashboardCalendar() {
                     } group-hover:text-slate-950 dark:group-hover:text-[#F8F6F1] transition-colors`}>
                       {day.day}
                     </span>
-                    {day.hasGoldenWindow && (
-                      <span className="text-[11px] text-amber-500 dark:text-amber-300 font-bold leading-none animate-pulse" title="มีช่วงเวลาทองคำ (Golden Window)">
+                    {day.appointments.length > 0 && (
+                      <span className="text-[11px] text-amber-500 dark:text-amber-300 font-bold leading-none" title={`มีบันทึกนัดหมาย (${day.appointments.length} รายการ)`}>
                         ⭐
                       </span>
                     )}
@@ -675,41 +683,20 @@ export default function DashboardCalendar() {
                 </div>
               </div>
 
-              {/* 5. 4 Life Domains */}
-              <div className="space-y-2 relative z-10">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#C6A96B] dark:text-[#94A3B8]">
-                  ความสอดคล้อง 4 มิติชีวิต:
-                </span>
-                <div className="grid grid-cols-2 gap-2">
-                  {dayIntelligence.domainScores.map((dm) => (
-                    <div key={dm.domain} className="p-2.5 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/5 dark:border-white/5 space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="flex items-center gap-1 font-bold text-slate-900 dark:text-white text-[11px]">
-                          <span>{dm.icon}</span>
-                          <span>{dm.label.split("&")[0]}</span>
-                        </span>
-                        <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300">{dm.score}%</span>
-                      </div>
-                      <p className="text-[10px] text-slate-600 dark:text-[#94A3B8] leading-tight line-clamp-1">{dm.verdict}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* 6. Toggle Appointment Planner */}
-              <div className="pt-2 border-t border-white/10 relative z-10 space-y-3">
+              {/* 5. Toggle Appointment Planner */}
+              <div className="pt-2 border-t border-black/10 dark:border-white/10 relative z-10 space-y-3">
                 <div className="flex items-center justify-between">
                   <button
                     type="button"
                     onClick={() => setShowPlannerForm(!showPlannerForm)}
-                    className="text-xs font-bold text-[#C6A96B] hover:underline flex items-center gap-1"
+                    className="text-xs font-bold text-[#8C6D2D] dark:text-[#C6A96B] hover:underline flex items-center gap-1"
                   >
                     <span>{showPlannerForm ? "▲ ย่อแบบฟอร์มนัดหมาย" : "▼ เปิดแบบฟอร์มนัดหมายฤกษ์สำเร็จ"}</span>
                   </button>
 
                   <Link
                     to={`/dashboard/check-yam?mode=compare&date=${eventDate}`}
-                    className="text-[11px] text-[#94A3B8] hover:text-white underline flex items-center gap-1"
+                    className="text-[11px] text-slate-500 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white underline flex items-center gap-1"
                   >
                     <span>⚖️ เปรียบเทียบ 3 ช่วงเวลา</span>
                   </Link>
@@ -722,28 +709,40 @@ export default function DashboardCalendar() {
                     <input type="hidden" name="year" value={year} />
 
                     <div className="space-y-1">
-                      <label className="text-[11px] text-[#C6B79F] font-bold">ชื่องานนัดหมาย:</label>
+                      <label className="text-[11px] text-slate-700 dark:text-[#C6B79F] font-bold">ชื่องานนัดหมาย:</label>
                       <input
                         name="title"
                         type="text"
                         value={selectedTitle}
                         onChange={(e) => setSelectedTitle(e.target.value)}
                         placeholder="เช่น นัดเซ็นสัญญากับลูกค้า"
-                        className="w-full bg-[#020617]/70 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#C6A96B]"
+                        className="w-full bg-white dark:bg-[#020617]/70 border border-slate-200 dark:border-[#C9A96E]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#C6A96B]"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[11px] text-slate-700 dark:text-[#C6B79F] font-bold">รายละเอียดของกิจกรรม (ถ้ามี):</label>
+                      <textarea
+                        name="description"
+                        rows={2}
+                        value={selectedDescription}
+                        onChange={(e) => setSelectedDescription(e.target.value)}
+                        placeholder="เช่น รายละเอียดการประชุม, เอกสารที่ต้องเตรียม, สถานที่"
+                        className="w-full bg-white dark:bg-[#020617]/70 border border-slate-200 dark:border-[#C9A96E]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-3 py-2 text-xs outline-none focus:border-[#C6A96B] resize-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <label className="text-[11px] text-[#C6B79F] font-bold">ประเภทกิจกรรม:</label>
+                        <label className="text-[11px] text-slate-700 dark:text-[#C6B79F] font-bold">ประเภทกิจกรรม:</label>
                         <select
                           name="eventType"
                           value={selectedEventType}
                           onChange={(e) => setSelectedEventType(e.target.value)}
-                          className="w-full bg-[#020617]/70 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2 py-2 text-xs outline-none focus:border-[#C6A96B]"
+                          className="w-full bg-white dark:bg-[#020617]/70 border border-slate-200 dark:border-[#C9A96E]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-2 py-2 text-xs outline-none focus:border-[#C6A96B]"
                         >
                           {EVENT_TYPES.map((e) => (
-                            <option key={e.id} value={e.id} className="bg-[#020617]">
+                            <option key={e.id} value={e.id} className="bg-white dark:bg-[#020617]">
                               {e.label}
                             </option>
                           ))}
@@ -751,13 +750,13 @@ export default function DashboardCalendar() {
                       </div>
 
                       <div className="space-y-1">
-                        <label className="text-[11px] text-[#C6B79F] font-bold">เวลาที่เริ่มนัด:</label>
+                        <label className="text-[11px] text-slate-700 dark:text-[#C6B79F] font-bold">เวลาที่เริ่มนัด:</label>
                         <input
                           name="eventTime"
                           type="time"
                           value={selectedTime}
                           onChange={(e) => setSelectedTime(e.target.value)}
-                          className="w-full bg-[#020617]/70 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2 py-2 text-xs outline-none focus:border-[#C6A96B]"
+                          className="w-full bg-white dark:bg-[#020617]/70 border border-slate-200 dark:border-[#C9A96E]/20 text-slate-900 dark:text-[#F8F6F1] rounded-xl px-2 py-2 text-xs outline-none focus:border-[#C6A96B]"
                         />
                       </div>
                     </div>
@@ -775,13 +774,13 @@ export default function DashboardCalendar() {
 
                 {/* Display advisor result (if submitted) */}
                 {advisorResult && (
-                  <div className="pt-3 border-t border-white/10 space-y-3 animate-fade-up">
+                  <div className="pt-3 border-t border-black/10 dark:border-white/10 space-y-3 animate-fade-up">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="text-[#94A3B8] font-bold">คะแนนฤกษ์สำเร็จ:</span>
-                      <span className="text-sm font-black text-amber-300">{advisorResult.score}%</span>
+                      <span className="text-slate-600 dark:text-[#94A3B8] font-bold">คะแนนฤกษ์สำเร็จ:</span>
+                      <span className="text-sm font-black text-amber-600 dark:text-amber-300">{advisorResult.score}%</span>
                     </div>
 
-                    <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-[#CBD5E1] leading-relaxed">
+                    <div className="p-3 rounded-xl bg-black/[0.03] dark:bg-white/5 border border-black/5 dark:border-white/10 text-xs text-slate-700 dark:text-[#CBD5E1] leading-relaxed">
                       {advisorResult.advice}
                     </div>
 
@@ -790,6 +789,7 @@ export default function DashboardCalendar() {
                       <Form method="post">
                         <input type="hidden" name="intent" value="save_appointment" />
                         <input type="hidden" name="title" value={selectedTitle || appointmentTitle} />
+                        <input type="hidden" name="description" value={selectedDescription} />
                         <input type="hidden" name="eventType" value={selectedEventType} />
                         <input type="hidden" name="eventDate" value={eventDate} />
                         <input type="hidden" name="eventTime" value={selectedTime} />
@@ -802,7 +802,7 @@ export default function DashboardCalendar() {
                         <button
                           type="submit"
                           disabled={isSaving}
-                          className="w-full py-2 rounded-xl text-xs font-bold text-[#F8F6F1] bg-white/10 hover:bg-white/20 border border-white/10 transition-all flex items-center justify-center gap-1.5"
+                          className="w-full py-2 rounded-xl text-xs font-bold text-slate-800 dark:text-[#F8F6F1] bg-black/5 hover:bg-black/10 dark:bg-white/10 dark:hover:bg-white/20 border border-black/10 dark:border-white/10 transition-all flex items-center justify-center gap-1.5"
                         >
                           <Save className="w-3.5 h-3.5" />
                           <span>บันทึกนัดหมาย</span>
@@ -810,10 +810,17 @@ export default function DashboardCalendar() {
                       </Form>
 
                       <a
-                        href={getGoogleCalendarUrl(selectedTitle || appointmentTitle, eventDate, selectedTime, advisorResult.advice)}
+                        href={getGoogleCalendarUrl(
+                          selectedTitle || appointmentTitle,
+                          eventDate,
+                          selectedTime,
+                          selectedDescription
+                            ? `${selectedDescription}\n\n────────────────\n✦ คำแนะนำฤกษ์ (PhopePhum):\nคะแนนความสำเร็จ: ${advisorResult.score}%\nยาม: ${advisorResult.yamName} (${advisorResult.bhop})\nคำแนะนำ: ${advisorResult.advice}`
+                            : `✦ คำแนะนำฤกษ์ (PhopePhum):\nคะแนนความสำเร็จ: ${advisorResult.score}%\nยาม: ${advisorResult.yamName} (${advisorResult.bhop})\nคำแนะนำ: ${advisorResult.advice}`
+                        )}
                         target="_blank"
                         rel="noreferrer"
-                        className="py-2 rounded-xl text-xs font-bold text-[#020617] bg-[#F8F6F1] hover:bg-white transition-all flex items-center justify-center gap-1.5"
+                        className="py-2 rounded-xl text-xs font-bold text-[#020617] bg-[#F8F6F1] hover:bg-white transition-all flex items-center justify-center gap-1.5 shadow-sm"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />
                         <span>Google Sync</span>
