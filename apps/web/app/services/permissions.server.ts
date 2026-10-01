@@ -56,10 +56,15 @@ export function getUserPlan(profile: ProfileLike): CanonicalPlan {
     }
   }
 
-  const rawPlan = (profile.plan || profile.subscription || "free").toLowerCase();
-  if (rawPlan === "master" || rawPlan === "imperial" || rawPlan === "lifetime") return "master";
-  if (rawPlan === "pro" || rawPlan === "pro_annual" || rawPlan === "pro_monthly") return "pro";
-  if (rawPlan === "premium" || rawPlan === "basic" || rawPlan === "basic_monthly") return "premium";
+  const rawSub = (profile.subscription || "").toLowerCase();
+  const rawPlan = (profile.plan || "").toLowerCase();
+
+  if (rawSub === "lifetime" || rawPlan === "lifetime") return "master";
+
+  const effectivePlan = (rawPlan && rawPlan !== "free") ? rawPlan : (rawSub || rawPlan || "free");
+  if (effectivePlan === "master" || effectivePlan === "imperial") return "master";
+  if (effectivePlan === "pro" || effectivePlan === "pro_annual" || effectivePlan === "pro_monthly") return "pro";
+  if (effectivePlan === "premium" || effectivePlan === "basic" || effectivePlan === "basic_monthly") return "premium";
   return "free";
 }
 

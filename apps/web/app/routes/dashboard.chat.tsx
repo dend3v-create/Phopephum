@@ -37,20 +37,20 @@ const MODE_CONFIGS: Record<Exclude<Mode, "journal">, ModeConfig> = {
     id: "horoscope",
     emoji: "🔮",
     label: "ตรวจดวงชะตา",
-    desc: "วิเคราะห์พื้นดวงชะตาและอุปสรรคตามวันเดือนปีเกิดและเวลาเกิดของคุณ",
-    welcome: "สวัสดีครับ ✦ ยินดีต้อนรับสู่โหมด **ตรวจดวงชะตา**\n\nผมคือ Wisdom AI จะนำแผนผังดวงชะตาและพื้นดวงชะตาของคุณ (เลข ๗ ตัว) มาวิเคราะห์ร่วมกับคำถามที่คุณสงสัยครับ\n\nสามารถถามเกี่ยวกับพื้นดวง ทิศทางชีวิต หรือข้อดีข้อเสียส่วนตัวได้เลยครับ",
+    desc: "วิเคราะห์ผังดวง ๗ ตัว ๙ ฐาน (๓๕ ภพเรือน) และจังหวะชีวิตตามปฏิทินสุริยยาตร์แท้ ๑๐๐ ปี",
+    welcome: "สวัสดีครับ ✦ ยินดีต้อนรับสู่โหมด **ตรวจดวงชะตา (ผังดวง ๗ ตัว ๙ ฐาน)**\n\nWisdom AI ดึงโครงสร้างผังดวง ๓๕ ภพเรือน และตำแหน่งดาวตามคัมภีร์สุริยยาตร์ไทยแท้ ๑๐๐ ปี มาวิเคราะห์ร่วมกับคำถามของคุณโดยตรง เพื่อเปลี่ยนความหมายโบราณให้กลายเป็นยุทธศาสตร์วางแผนชีวิตเชิงรุกครับ\n\nสามารถถามเกี่ยวกับพื้นดวง ทิศทางการงาน การเงิน หรือจังหวะชีวิตได้เลยครับ",
     suggestions: [
       "วิเคราะห์พื้นดวงการงานและอาชีพที่เหมาะสมกับดวงชะตาของฉัน",
       "พื้นดวงชะตาด้านการเงินของฉันมีจุดเด่นและจุดรั่วไหลที่ต้องระวังอย่างไร?",
-      "วิเคราะห์พื้นฐานจุดแข็งจุดอ่อนในดวงชะตาของฉัน"
+      "วิเคราะห์จุดหนุนนำและจังหวะชีวิตในช่วงนี้ตามทักษาจรและวัยจร"
     ]
   },
   yam: {
     id: "yam",
     emoji: "⏰",
     label: "เช็คฤกษ์ยาม",
-    desc: "หาจังหวะเวลาที่เป็นมงคลเพื่อเริ่มต้นเจรจาหรือดำเนินกิจกรรมสำคัญ",
-    welcome: "สวัสดีครับ ✦ ยินดีต้อนรับสู่โหมด **เช็คฤกษ์ยาม**\n\nผมคือ Wisdom AI จะพยากรณ์ความมงคลของกิจกรรมตามหลักยามอัฐกาลและยามย่อยในขณะนี้ เพื่อค้นหาจังหวะเวลาที่ราบรื่นและส่งเสริมที่สุดสำหรับคุณครับ\n\nสามารถถามความมงคลของเวลาในการเจรจาหรือเริ่มกิจกรรมได้เลยครับ",
+    desc: "คำนวณยามอัฐกาล ๑๖ ยาม และกาลโยค ค้นหาจังหวะเวลามงคลในการเจรจาหรือเริ่มงาน",
+    welcome: "สวัสดีครับ ✦ ยินดีต้อนรับสู่โหมด **เช็คฤกษ์ยาม (ยามอัฐกาล ๑๖ ยาม & กาลโยค)**\n\nระบบคำนวณพลังงานยามใหญ่และยามซอย ๔ ช่วงย่อย ณ วินาทีนี้อย่างแม่นยำ เพื่อแนะนำจังหวะเวลาที่ราบรื่นและส่งเสริมที่สุดสำหรับกิจกรรมของคุณครับ\n\nสามารถถามความมงคลของเวลาในการเจรจา เซ็นสัญญา หรือเริ่มงานสำคัญได้เลยครับ",
     suggestions: [
       "ช่วงเวลานี้เหมาะแก่การเจรจาติดต่อธุรกิจสำคัญหรือเรื่องการเงินไหม?",
       "ชั่วโมงถัดไปจากนี้เป็นยามดีหรือร้ายสำหรับการทำธุรกรรมสำคัญ?",
@@ -61,8 +61,8 @@ const MODE_CONFIGS: Record<Exclude<Mode, "journal">, ModeConfig> = {
     id: "karnchata",
     emoji: "⏳",
     label: "กาลชะตา",
-    desc: "อ่านแนวโน้มเรื่องด่วนของสถานการณ์ตามกาลเวลาที่ตั้งคำถาม",
-    welcome: "ยินดีต้อนรับสู่โหมด **กาลชะตา (เลข ๗ ตัวกาลชะตา)** ✦\n\nโหมดนี้จะวิเคราะห์พลังงานของสถานการณ์ผ่านเคล็ดกาลชะตาประจำช่วงเวลานี้ เพื่อชี้แนวโน้มความสำเร็จ ทางเลือกการแก้ไข และจังหวะชีวิตก้าวถัดไปของคุณครับ\n\nถามเรื่องเรื่องราวที่เกิดขึ้นด่วนหรือสถานการณ์เฉพาะตัวได้เลยครับ",
+    desc: "ผูกดวง ณ วินาทีที่ตั้งคำถาม (Time Oracle) อ่านพลังงานสถานการณ์และจังหวะก้าวถัดไป",
+    welcome: "ยินดีต้อนรับสู่โหมด **กาลชะตา (เลข ๗ ตัวกาลชะตา)** ✦\n\nโหมดนี้จะผูกดวงกาลชะตา ณ จุดเวลาที่ตั้งคำถาม เพื่อวิเคราะห์พลังงานเฉพาะหน้า ชี้แนวโน้มความสำเร็จ ทางเลือกการแก้ไข และจังหวะก้าวถัดไปของคุณครับ\n\nถามเรื่องราวที่เกิดขึ้นเฉพาะหน้า หรือสถานการณ์ที่ต้องการทางออกได้เลยครับ",
     suggestions: [
       "ปัญหายุ่งยากเรื่องงานในตอนนี้ตามกาลชะตาจะคลี่คลายอย่างไร?",
       "การตัดสินใจลงทุนร่วมหุ้นในช่วงนี้จะส่งผลดีร้ายอย่างไรบ้าง?",
@@ -73,8 +73,8 @@ const MODE_CONFIGS: Record<Exclude<Mode, "journal">, ModeConfig> = {
     id: "horanu",
     emoji: "🦉",
     label: "พรายกระซิบ",
-    desc: "พยากรณ์ผลลัพธ์เฉพาะเจาะจง ตกภพย่อยและดาวลอยประจำวินาที",
-    welcome: "ยินดีต้อนรับสู่โหมด **พรายกระซิบ** ✦\n\nทำนายผลลัพธ์ของเรื่องเฉพาะเจาะจงทันทีจากจุดวินาทีที่ถาม โดยผูกดวงยามพรายกระซิบวิเคราะห์ ภพ และดาวลอยประจำนาที ตีความประดุจพรายกระซิบเตือนภัย\n\nระบุคำถามที่ต้องการคำตอบที่เด็ดขาดและด่วนที่สุดได้เลยครับ",
+    desc: "พยากรณ์ผลลัพธ์เฉพาะเจาะจง ตกภพย่อย ๗.๕ นาที ดาวลอย ๑๑ ดวง และสมการ X+Y+Z",
+    welcome: "ยินดีต้อนรับสู่โหมด **พรายกระซิบ** ✦\n\nทำนายผลลัพธ์ของเรื่องเฉพาะเจาะจงทันทีจากจุดวินาทีที่ถาม โดยผูกดวงยามพรายกระซิบวิเคราะห์ ภพย่อย และดาวลอยประจำนาที ตีความประดุจพรายกระซิบเตือนภัยตามสมการ X+Y+Z\n\nระบุคำถามที่ต้องการคำตอบที่เด็ดขาดและด่วนที่สุดได้เลยครับ",
     suggestions: [
       "การสอบแข่งขันหรือสมัครงานสำคัญในวันนี้ จะประสบความสำเร็จไหม?",
       "คนที่เพิ่งเข้ามาเจรจาหรือติดต่อในขณะนี้ มีความจริงใจเพียงใด?",
@@ -136,6 +136,15 @@ export default function WisdomChatPage() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const isInitialMount = useRef(true);
 
+  // Auto-expand textarea height as user types
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.style.height = "auto";
+      const newHeight = Math.min(Math.max(inputRef.current.scrollHeight, 38), 220);
+      inputRef.current.style.height = `${newHeight}px`;
+    }
+  }, [input]);
+
   // Scroll strictly the chat feed container, keeping page header in view
   useEffect(() => {
     if (isInitialMount.current) {
@@ -177,29 +186,16 @@ export default function WisdomChatPage() {
     setShowQuestions(false);
 
     try {
-      let response: Response;
+      const fd = new FormData();
+      fd.append("question", text.trim());
+      fd.append("category", MODE_CONFIGS[modeId].label);
+      fd.append("mode", modeId);
+      fd.append("targetDate", new Date().toISOString());
 
-      if (modeId === "horanu") {
-        response = await fetch("/api/horanu-chat", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            question: text.trim(),
-            isoTime: new Date().toISOString(),
-          }),
-        });
-      } else {
-        const endpoint = modeId === "karnchata" ? "/api/karnchata-chat" : "/api/wisdom-chat";
-        const fd = new FormData();
-        fd.append("question", text.trim());
-        fd.append("category", MODE_CONFIGS[modeId].label);
-        if (modeId === "karnchata") {
-          fd.append("targetDate", new Date().toISOString());
-        }
-        response = await fetch(endpoint, { method: "POST", body: fd });
-      }
+      const response = await fetch("/api/wisdom-chat", {
+        method: "POST",
+        body: fd,
+      });
 
       if (!response.ok || !response.body) {
         const err = await response.json().catch(() => ({}));
@@ -619,11 +615,12 @@ export default function WisdomChatPage() {
                   placeholder={`ถามในโหมด${MODE_CONFIGS[activeMode].label}...`}
                   rows={1}
                   disabled={isStreaming}
-                  className="flex-1 bg-transparent outline-none resize-none leading-relaxed disabled:opacity-50 text-[var(--text-body)]"
+                  className="flex-1 bg-transparent outline-none resize-none leading-relaxed disabled:opacity-50 text-[var(--text-body)] transition-[height] duration-75"
                   style={{
                     fontSize: "16px",
                     fontFamily: "'IBM Plex Sans Thai', sans-serif",
-                    maxHeight: "96px",
+                    minHeight: "38px",
+                    maxHeight: "220px",
                     overflowY: "auto",
                   }}
                 />

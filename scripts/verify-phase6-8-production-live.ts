@@ -332,13 +332,13 @@ async function runStep68ProductionLiveVerification() {
   const quotaAi = getAiReportLimit(updatedProf);
 
   assert(quotaPersons === 20, "Pro Master Person Quota is 20");
-  assert(quotaAi === 15, "Pro Master AI Report Quota is 15");
+  assert(quotaAi === 5, "Pro Master AI Report Quota is 5");
 
   recordGate({
     gateNumber: 4,
     gateName: "E2E User Journey Smoke Test Gate",
     status: "PASS",
-    summary: `Full flow verified: Landing → Pricing → Register → Pay ฿289 → Dashboard (20 Persons / 15 AI Reports)`,
+    summary: `Full flow verified: Landing → Pricing → Register → Pay ฿289 → Dashboard (20 Persons / 5 AI Reports)`,
     evidence: {
       plan: updatedProf.plan,
       personQuota: quotaPersons,

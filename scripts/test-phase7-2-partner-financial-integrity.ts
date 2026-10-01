@@ -56,7 +56,7 @@ const CANONICAL_SKU_POLICIES: Record<string, SkuPolicy> = {
   free: { sku: "free", grossPriceThb: 0, commissionable: false, type: "base" },
   basic: { sku: "basic", grossPriceThb: 89, commissionable: true, type: "subscription" },
   pro: { sku: "pro", grossPriceThb: 289, commissionable: true, type: "subscription" },
-  pro_annual: { sku: "pro_annual", grossPriceThb: 2790, commissionable: true, type: "subscription" },
+  pro_annual: { sku: "pro_annual", grossPriceThb: 2770, commissionable: true, type: "subscription" },
   imperial: { sku: "imperial", grossPriceThb: 1289, commissionable: true, type: "lifetime" },
   sands_50: { sku: "sands_50", grossPriceThb: 59, commissionable: false, type: "sands_refill" },
   sands_150: { sku: "sands_150", grossPriceThb: 149, commissionable: false, type: "sands_refill" },
@@ -130,16 +130,16 @@ function computeCommissionableBase(grossThb: number, vatRate: number = 0.07): nu
 const base89 = computeCommissionableBase(89); // 89 / 1.07 = 83.17757... -> 83.18
 const base289 = computeCommissionableBase(289); // 289 / 1.07 = 270.09345... -> 270.09
 const base1289 = computeCommissionableBase(1289); // 1289 / 1.07 = 1204.67289... -> 1204.67
-const base2790 = computeCommissionableBase(2790); // 2790 / 1.07 = 2607.4766... -> 2607.48
+const base2770 = computeCommissionableBase(2770); // 2770 / 1.07 = 2588.785... -> 2588.79
 
 const vatBaseAccurate =
-  base89 === 83.18 && base289 === 270.09 && base1289 === 1204.67 && base2790 === 2607.48;
+  base89 === 83.18 && base289 === 270.09 && base1289 === 1204.67 && base2770 === 2588.79;
 
 assertInvariant(
   "INV-PARTNER-03",
   "VAT-Segregated Base Calculation (7% Inc)",
   vatBaseAccurate,
-  `฿89→฿${base89}, ฿289→฿${base289}, ฿1289→฿${base1289}, ฿2790→฿${base2790} exactly verified`
+  `฿89→฿${base89}, ฿289→฿${base289}, ฿1289→฿${base1289}, ฿2770→฿${base2770} exactly verified`
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1933,9 +1933,9 @@ const whtRate1 = 0.03;
 const whtAmount1 = Number((grossPayout1 * whtRate1).toFixed(2)); // 30.00
 const netPayout1 = Number((grossPayout1 - whtAmount1).toFixed(2)); // 970.00
 
-const grossPayout2 = 2790.0; // Annual Pro Plan
-const whtAmount2 = Number((grossPayout2 * whtRate1).toFixed(2)); // 83.70
-const netPayout2 = Number((grossPayout2 - whtAmount2).toFixed(2)); // 2706.30
+const grossPayout2 = 2770.0; // Annual Pro Plan
+const whtAmount2 = Number((grossPayout2 * whtRate1).toFixed(2)); // 83.10
+const netPayout2 = Number((grossPayout2 - whtAmount2).toFixed(2)); // 2686.90
 
 const grossPayout3 = 500.0; // Minimum Threshold
 const whtAmount3 = Number((grossPayout3 * whtRate1).toFixed(2)); // 15.00
@@ -1944,8 +1944,8 @@ const netPayout3 = Number((grossPayout3 - whtAmount3).toFixed(2)); // 485.00
 const whtAccuracy =
   whtAmount1 === 30.0 &&
   netPayout1 === 970.0 &&
-  whtAmount2 === 83.7 &&
-  netPayout2 === 2706.3 &&
+  whtAmount2 === 83.1 &&
+  netPayout2 === 2686.9 &&
   whtAmount3 === 15.0 &&
   netPayout3 === 485.0;
 
@@ -1953,7 +1953,7 @@ assertInvariant(
   "STMT-05",
   "50 ทวิ WHT Exact 3% Calculation & Precision",
   whtAccuracy,
-  "WHT 3% calculated with exact 2-decimal precision (฿1000→฿30, ฿2790→฿83.70, ฿500→฿15.00) with zero drift"
+  "WHT 3% calculated with exact 2-decimal precision (฿1000→฿30, ฿2770→฿83.10, ฿500→฿15.00) with zero drift"
 );
 
 // ── STMT-06: 1:1 Payout-to-WHT Certificate Linkage & Sequential Numbering ──

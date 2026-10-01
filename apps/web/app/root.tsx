@@ -55,6 +55,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
     <html
       lang={LOCALE_LANG[locale] ?? "th"}
       data-theme={theme}
+      className={theme === "dark" ? "dark" : ""}
       suppressHydrationWarning
     >
       <head>

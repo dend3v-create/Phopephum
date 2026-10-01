@@ -1,4 +1,4 @@
-import { json, redirect } from "@remix-run/cloudflare";
+import { json } from "@remix-run/cloudflare";
 import { useLoaderData, useSearchParams, Form, Link, useNavigation } from "@remix-run/react";
 import type { LoaderFunctionArgs, ActionFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
@@ -7,25 +7,27 @@ import { Card } from "~/components/ui/Card";
 import {
   calculatePhopephum,
   getThaiBaseNumbers,
-  THAI_MONTH_NAMES,
   getAstrologicalDate,
   getAstrologicalDateStr,
+  getSunTimes,
+  getYamPrediction,
+  getChanChaiItem,
+  yamMeaning,
 } from "@phopephum/engine";
 import {
   calculateDayIntelligence,
   calculateMonthOverview,
 } from "~/services/calendarIntelligence.server";
 import type {
-  CalendarDayIntelligence,
   CalendarMonthDayOverview,
 } from "@phopephum/types";
 import type { Env } from "~/env.server";
-import { useState, useMemo, useEffect } from "react";
-import { Compass, Calendar as CalendarIcon, Clock, CheckCircle2, AlertTriangle, Star, Save, ExternalLink, ListTodo, Sparkles } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Calendar as CalendarIcon, Clock, Save, ExternalLink, ListTodo } from "lucide-react";
 
 export const meta: MetaFunction = () => [
-  { title: "ปฏิทินสำเร็จ 100 ปี & วางแผนฤกษ์มงคล — PhopePhum" },
-  { name: "description", content: "ตรวจสอบวันทางจันทรคติไทย และวิเคราะห์ฤกษ์มงคลเฉพาะบุคคลด้วยระบบปฏิทินอัจฉริยะ" },
+  { title: "ปฏิทินสำเร็จ 100 ปี & ฤกษ์ยามอัฏฐกาล — PhopePhum" },
+  { name: "description", content: "ตรวจสอบวันทางจันทรคติไทย และวิเคราะห์ฤกษ์ยามอัฏฐกาลเฉพาะบุคคลด้วยระบบปฏิทินอัจฉริยะ" },
 ];
 
 const G_MONTH_NAMES = [
@@ -45,6 +47,139 @@ const STAR_TH: Record<number, string> = {
   1: "อาทิตย์", 2: "จันทร์", 3: "อังคาร", 4: "พุธ",
   5: "พฤหัสบดี", 6: "ศุกร์", 7: "เสาร์", 8: "ราหู"
 };
+
+export interface CalendarYamSlot {
+  yamNumber: number;
+  yamName: string;
+  period: "day" | "night";
+  startTime: string;
+  endTime: string;
+  timeLabel: string;
+  ticks: number;
+  level: "bad" | "good" | "very_good" | "excellent";
+  label: string;
+  score: number;
+  planetSymbol: string;
+  planetColor: string;
+  planetNameThai: string;
+  prophecy: string;
+  shouldDo: string;
+  shouldNotDo: string;
+  auspicious: string;
+  suitableTags: string[];
+}
+
+// ─── Helper: คำนวณตารางยามอัฏฐกาล 16 ยามของวันที่เลือก ─────────────────────────
+function calculateDailyYamSlotsForDate(targetDate: Date): {
+  daySlots: CalendarYamSlot[];
+  nightSlots: CalendarYamSlot[];
+} {
+  const sunTimes = getSunTimes(targetDate);
+  const sunrise = sunTimes.sunrise;
+  const sunset = sunTimes.sunset;
+
+  const dayMs = sunset.getTime() - sunrise.getTime();
+  const nightMs = 86400000 - dayMs;
+
+  const daySlotMs = dayMs / 8;
+  const nightSlotMs = nightMs / 8;
+
+  const daySlots: CalendarYamSlot[] = [];
+  for (let i = 0; i < 8; i++) {
+    const startTime = new Date(sunrise.getTime() + i * daySlotMs);
+    const endTime = new Date(sunrise.getTime() + (i + 1) * daySlotMs);
+    const midTime = new Date(startTime.getTime() + daySlotMs / 2);
+    const result = getYamPrediction(midTime);
+    const chanChai = getChanChaiItem(result.yamName);
+    const meaning = yamMeaning[result.yamName];
+    const score =
+      result.travelAuspiciousness.ticks === 3
+        ? 95
+        : result.travelAuspiciousness.ticks === 2
+        ? 85
+        : result.travelAuspiciousness.ticks === 1
+        ? 70
+        : 45;
+
+    const startFormatted = startTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+    const endFormatted = endTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+
+    const suitableTags = (meaning?.shouldDo || "เจรจา, ปฏิบัติงาน")
+      .split(/[,、]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    daySlots.push({
+      yamNumber: i + 1,
+      yamName: result.yamName,
+      period: "day",
+      startTime: startFormatted,
+      endTime: endFormatted,
+      timeLabel: `${startFormatted} - ${endFormatted} น.`,
+      ticks: result.travelAuspiciousness.ticks,
+      level: result.travelAuspiciousness.level,
+      label: result.travelAuspiciousness.label,
+      score,
+      planetSymbol: chanChai?.planetSymbol || "★",
+      planetColor: chanChai?.planetColor || "#C6A96B",
+      planetNameThai: chanChai?.planetNameThai || result.yamName,
+      prophecy: chanChai?.chanChai?.middle?.text || result.travelAuspiciousness.description,
+      shouldDo: meaning?.shouldDo || "ดำเนินงานตามแผน",
+      shouldNotDo: meaning?.shouldNotDo || "หลีกเลี่ยงความประมาท",
+      auspicious: meaning?.auspicious || "ความราบรื่น",
+      suitableTags: suitableTags.slice(0, 3),
+    });
+  }
+
+  const nightSlots: CalendarYamSlot[] = [];
+  for (let i = 0; i < 8; i++) {
+    const startTime = new Date(sunset.getTime() + i * nightSlotMs);
+    const endTime = new Date(sunset.getTime() + (i + 1) * nightSlotMs);
+    const midTime = new Date(startTime.getTime() + nightSlotMs / 2);
+    const result = getYamPrediction(midTime);
+    const chanChai = getChanChaiItem(result.yamName);
+    const meaning = yamMeaning[result.yamName];
+    const score =
+      result.travelAuspiciousness.ticks === 3
+        ? 95
+        : result.travelAuspiciousness.ticks === 2
+        ? 85
+        : result.travelAuspiciousness.ticks === 1
+        ? 70
+        : 45;
+
+    const startFormatted = startTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+    const endFormatted = endTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" });
+
+    const suitableTags = (meaning?.shouldDo || "วางแผน, ทบทวนงาน")
+      .split(/[,、]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    nightSlots.push({
+      yamNumber: i + 1,
+      yamName: result.yamName,
+      period: "night",
+      startTime: startFormatted,
+      endTime: endFormatted,
+      timeLabel: `${startFormatted} - ${endFormatted} น.`,
+      ticks: result.travelAuspiciousness.ticks,
+      level: result.travelAuspiciousness.level,
+      label: result.travelAuspiciousness.label,
+      score,
+      planetSymbol: chanChai?.planetSymbol || "★",
+      planetColor: chanChai?.planetColor || "#C6A96B",
+      planetNameThai: chanChai?.planetNameThai || result.yamName,
+      prophecy: chanChai?.chanChai?.middle?.text || result.travelAuspiciousness.description,
+      shouldDo: meaning?.shouldDo || "ดำเนินงานตามแผน",
+      shouldNotDo: meaning?.shouldNotDo || "หลีกเลี่ยงความประมาท",
+      auspicious: meaning?.auspicious || "ความสงบและสติ",
+      suitableTags: suitableTags.slice(0, 3),
+    });
+  }
+
+  return { daySlots, nightSlots };
+}
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const env = context.cloudflare.env as Env;
@@ -164,6 +299,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const appointmentDescription = url.searchParams.get("description") || "";
   
   const dayIntelligence = await calculateDayIntelligence(eventDate, profileContext);
+  
+  // คำนวณผังยาม 16 ยามของวันที่เลือก
+  const parsedEventDate = new Date(`${eventDate}T12:00:00+07:00`);
+  const eventYamSlots = calculateDailyYamSlotsForDate(parsedEventDate);
+
   let advisorResult = null;
 
   if (profile?.birth_date && eventDate) {
@@ -270,6 +410,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     advisorResult,
     appointments: appointments || [],
     dayIntelligence,
+    eventYamSlots,
     monthOverview,
   });
 }
@@ -278,8 +419,8 @@ export default function DashboardCalendar() {
   const { 
     year, month, calendarDays, firstDayOfWeek, 
     eventDate, eventTime, eventType, appointmentTitle, appointmentDescription,
-    advisorResult, profile, appointments,
-    dayIntelligence, monthOverview,
+    advisorResult, appointments,
+    dayIntelligence, eventYamSlots,
   } = useLoaderData<typeof loader>();
   const [searchParams] = useSearchParams();
   const navigation = useNavigation();
@@ -290,25 +431,23 @@ export default function DashboardCalendar() {
   const [selectedTitle, setSelectedTitle] = useState(appointmentTitle);
   const [selectedDescription, setSelectedDescription] = useState(appointmentDescription);
   const [showPlannerForm, setShowPlannerForm] = useState(false);
+  const [yamTab, setYamTab] = useState<"day" | "night">("day");
 
   useEffect(() => {
     setSelectedTime(eventTime);
   }, [eventTime]);
 
-  const beYear = year + 543;
-
-  // คำนวณเดือนก่อนหน้าและเดือนถัดไป
   const prevMonth = month === 1 ? 12 : month - 1;
   const prevYear = month === 1 ? year - 1 : year;
   const nextMonth = month === 12 ? 1 : month + 1;
   const nextYear = month === 12 ? year + 1 : year;
 
+  const currentYamSlots = yamTab === "day" ? eventYamSlots.daySlots : eventYamSlots.nightSlots;
+
   // ฟังก์ชันสร้าง Google Calendar Link
   const getGoogleCalendarUrl = (title: string, date: string, time: string, details: string) => {
     const baseUrl = "https://www.google.com/calendar/render?action=TEMPLATE";
-    // Format: YYYYMMDDTHHmmSSZ
     const startStr = date.replace(/-/g, "") + "T" + time.replace(/:/g, "") + "00";
-    // เพิ่ม 1 ชั่วโมงเป็นเวลาสิ้นสุด default
     const [h, m] = time.split(":").map(Number);
     const endH = (h + 1) % 24;
     const endStr = date.replace(/-/g, "") + "T" + String(endH).padStart(2, "0") + String(m).padStart(2, "0") + "00";
@@ -335,13 +474,12 @@ export default function DashboardCalendar() {
             ปฏิทินสำเร็จ 100 ปี & ฤกษ์มงคล
           </h1>
           <p className="text-slate-600 dark:text-[#C6B79F] text-xs sm:text-sm font-sans-thai">
-            วางแผนวันสำคัญ ค้นหาช่วงเวลาทองคำ (Golden Window) เฉพาะบุคคล
+            วางแผนวันสำคัญ ค้นหาฤกษ์ยามอัฏฐกาลและช่วงเวลามงคลเฉพาะบุคคล
           </p>
         </div>
 
         {/* ── Month/Year Selectors & Prev/Next Quick Navigation ── */}
         <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-          {/* Quick Prev Button */}
           <Link
             to={`?year=${prevYear}&month=${prevMonth}&eventDate=${prevYear}-${String(prevMonth).padStart(2, "0")}-01`}
             className="min-h-[40px] min-w-[40px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-[#C6A96B]/50 active:scale-95 transition-all text-slate-700 dark:text-white flex items-center justify-center text-xs font-bold shadow-sm"
@@ -350,7 +488,6 @@ export default function DashboardCalendar() {
             ‹
           </Link>
 
-          {/* Jump to Today Button */}
           <Link
             to={`/dashboard/calendar`}
             className="min-h-[40px] px-3 py-1.5 rounded-xl border border-[#C6A96B]/30 bg-[#C6A96B]/10 hover:bg-[#C6A96B]/20 active:scale-95 transition-all text-[#8C6D2D] dark:text-[#F3D68B] text-xs font-bold flex items-center gap-1 shrink-0"
@@ -359,7 +496,6 @@ export default function DashboardCalendar() {
             <span>วันนี้</span>
           </Link>
 
-          {/* Select Forms */}
           <Form method="get" className="flex items-center gap-1.5">
             <select 
               name="month" 
@@ -384,7 +520,6 @@ export default function DashboardCalendar() {
             </select>
           </Form>
 
-          {/* Quick Next Button */}
           <Link
             to={`?year=${nextYear}&month=${nextMonth}&eventDate=${nextYear}-${String(nextMonth).padStart(2, "0")}-01`}
             className="min-h-[40px] min-w-[40px] px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-white/10 bg-white dark:bg-white/5 hover:border-[#C6A96B]/50 active:scale-95 transition-all text-slate-700 dark:text-white flex items-center justify-center text-xs font-bold shadow-sm"
@@ -525,7 +660,6 @@ export default function DashboardCalendar() {
 
         {/* ── Right: Personal Auspicious Day Intelligence (1/3 width) ── */}
         <div id="day-intelligence-section" className="space-y-6 scroll-mt-24">
-          {/* Day Intelligence Card */}
           {dayIntelligence && (
             <Card className="p-5 sm:p-6 border-2 border-slate-200 dark:border-[#C9A96E]/40 bg-white/95 dark:bg-gradient-to-br dark:from-[#0a2240] dark:via-[#0d1f38] dark:to-[#020617] rounded-3xl shadow-xl space-y-5 relative overflow-hidden">
               <div
@@ -582,108 +716,160 @@ export default function DashboardCalendar() {
                 )}
               </div>
 
-              {/* 3. ⭐ GOLDEN WINDOW SPOTLIGHT */}
-              {dayIntelligence.goldenWindow && (
-                <div className="p-4 rounded-2xl border-2 border-amber-400/40 bg-gradient-to-r from-amber-500/15 via-[#C6A96B]/15 to-transparent relative z-10 space-y-3 shadow-lg">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">⭐</span>
-                      <div>
-                        <span className="text-[10px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-300">
-                          GOLDEN WINDOW OF THE DAY
-                        </span>
-                        <h4 className="text-sm sm:text-base font-bold text-slate-900 dark:text-white">
-                          {dayIntelligence.goldenWindow.startTime} – {dayIntelligence.goldenWindow.endTime} น.
-                        </h4>
-                      </div>
-                    </div>
-                    <span className="text-xs font-black text-amber-800 dark:text-amber-300 bg-amber-400/20 border border-amber-400/30 px-2.5 py-1 rounded-full">
-                      {dayIntelligence.goldenWindow.score}/100
+              {/* 3. ⚡ ผังยามอัฏฐกาล & ฤกษ์มงคลประจำวัน (DAILY ASTROLOGICAL YAM MATRIX) */}
+              <div className="space-y-3 relative z-10">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div>
+                    <span className="text-[11px] font-black uppercase tracking-[0.18em] text-[#8C6D2D] dark:text-[#C6A96B] flex items-center gap-1.5">
+                      <span>⚡</span> ผังยามอัฏฐกาล & ฤกษ์มงคลประจำวัน
                     </span>
+                    <p className="text-[10px] text-slate-500 dark:text-[#94A3B8]">
+                      เลือกช่วงเวลาที่ดีที่สุดสำหรับวางแผนนัดหมาย
+                    </p>
                   </div>
 
-                  {/* Chips */}
-                  <div className="flex flex-wrap gap-1.5">
-                    {dayIntelligence.goldenWindow.suitableFor.map((item, idx) => (
-                      <span
-                        key={idx}
-                        className="text-[11px] px-2.5 py-0.5 rounded-full bg-black/5 dark:bg-white/10 text-slate-800 dark:text-[#F8F6F1] border border-black/10 dark:border-white/10 font-medium"
-                      >
-                        ✓ {item}
-                      </span>
-                    ))}
+                  {/* Day / Night toggle */}
+                  <div className="flex bg-black/5 dark:bg-black/40 rounded-xl p-0.5 border border-slate-200 dark:border-white/10 self-start sm:self-auto shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setYamTab("day")}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                        yamTab === "day"
+                          ? "bg-[#C6A96B] text-[#020617] shadow-sm font-black"
+                          : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      ☀️ กลางวัน
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setYamTab("night")}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition-all ${
+                        yamTab === "night"
+                          ? "bg-[#C6A96B] text-[#020617] shadow-sm font-black"
+                          : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      🌙 กลางคืน
+                    </button>
                   </div>
-
-                  <p className="text-xs text-slate-700 dark:text-[#CBD5E1] leading-relaxed font-medium">
-                    {dayIntelligence.goldenWindow.plainAdvice}
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedTime(dayIntelligence.goldenWindow!.startTime);
-                      setShowPlannerForm(true);
-                    }}
-                    className="w-full min-h-[44px] py-2.5 rounded-xl text-xs font-bold text-[#020617] active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm"
-                    style={{ background: "linear-gradient(135deg, #C6A96B 0%, #F2D49B 100%)" }}
-                  >
-                    <span>✨ ใช้นัดหมายช่วงเวลานี้</span>
-                  </button>
-                </div>
-              )}
-
-              {/* 4. Timeline of the Day (8 slots) */}
-              <div className="space-y-2 relative z-10">
-                <div className="flex items-center justify-between">
-                  <span className="text-[11px] font-bold uppercase tracking-wider text-[#C6A96B] dark:text-[#94A3B8]">
-                    ไทม์ไลน์ช่วงเวลาตลอดวัน:
-                  </span>
-                  <span className="text-[10px] text-slate-600 dark:text-[#64748B]">คลิกเพื่อเลือกเวลา</span>
                 </div>
 
-                <div className="space-y-1.5 max-h-52 overflow-y-auto pr-1 no-scrollbar">
-                  {dayIntelligence.timelineWindows.map((win) => {
-                    const isSelected = selectedTime === win.startTime;
+                {/* Yam Slots List */}
+                <div className="space-y-2 max-h-[360px] overflow-y-auto pr-1 no-scrollbar">
+                  {currentYamSlots.map((slot) => {
+                    const isSelected = selectedTime === slot.startTime;
+                    const isExcellent = slot.ticks === 3;
+                    const isVeryGood = slot.ticks === 2;
+
                     return (
-                      <button
-                        key={win.id}
-                        type="button"
-                        onClick={() => {
-                          setSelectedTime(win.startTime);
-                          setShowPlannerForm(true);
-                        }}
-                        className={`w-full text-left p-2.5 rounded-xl border text-xs transition-all flex items-center justify-between ${
+                      <div
+                        key={slot.timeLabel}
+                        className={`p-3.5 rounded-2xl border transition-all space-y-2 ${
                           isSelected
-                            ? "bg-[#C6A96B]/20 border-[#C6A96B] text-slate-900 dark:text-white"
-                            : win.level === "golden"
-                            ? "bg-amber-500/10 border-amber-500/30 text-amber-900 dark:text-amber-200 hover:bg-amber-500/20"
-                            : win.level === "favorable"
-                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-900 dark:text-emerald-200 hover:bg-emerald-500/20"
-                            : win.level === "caution" || win.level === "avoid"
-                            ? "bg-rose-500/10 border-rose-500/20 text-rose-900 dark:text-rose-300 hover:bg-rose-500/20"
-                            : "bg-white/5 border-black/10 dark:border-white/5 text-slate-800 dark:text-[#CBD5E1] hover:bg-white/10"
+                            ? "bg-[#C6A96B]/20 border-[#C6A96B] shadow-md ring-1 ring-[#C6A96B]/40"
+                            : isExcellent
+                            ? "bg-emerald-500/10 dark:bg-emerald-950/25 border-emerald-500/35 hover:bg-emerald-500/15"
+                            : isVeryGood
+                            ? "bg-blue-500/10 dark:bg-blue-950/25 border-blue-500/35 hover:bg-blue-500/15"
+                            : slot.ticks === 1
+                            ? "bg-amber-500/5 dark:bg-white/[0.03] border-amber-500/25 hover:bg-amber-500/10"
+                            : "bg-rose-500/5 dark:bg-white/[0.02] border-rose-500/20 opacity-80"
                         }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold font-mono text-[11px]">
-                            {win.startTime}–{win.endTime}
-                          </span>
-                          <span className="text-[11px] truncate max-w-[130px] font-medium">{win.suitableFor[0] || win.title}</span>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className="w-7 h-7 rounded-xl flex items-center justify-center text-sm font-bold shrink-0 shadow-sm"
+                              style={{
+                                backgroundColor: `${slot.planetColor}25`,
+                                color: slot.planetColor,
+                                border: `1px solid ${slot.planetColor}50`,
+                              }}
+                            >
+                              {slot.planetSymbol}
+                            </span>
+                            <div>
+                              <h4 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-[#F8F6F1] flex items-center gap-1.5">
+                                <span>ยาม{slot.yamName}</span>
+                                <span className="text-[11px] font-normal text-slate-500 dark:text-[#94A3B8]">({slot.planetNameThai})</span>
+                              </h4>
+                              <p className="font-mono text-[11px] font-bold text-[#8C6D2D] dark:text-[#C6A96B]">
+                                {slot.timeLabel}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-end gap-1 shrink-0">
+                            <span
+                              className="text-[10px] font-black px-2 py-0.5 rounded-full"
+                              style={{
+                                backgroundColor:
+                                  slot.ticks === 3
+                                    ? "rgba(16,185,129,0.2)"
+                                    : slot.ticks === 2
+                                    ? "rgba(96,165,250,0.2)"
+                                    : slot.ticks === 1
+                                    ? "rgba(198,169,107,0.2)"
+                                    : "rgba(244,63,94,0.2)",
+                                color:
+                                  slot.ticks === 3
+                                    ? "#10B981"
+                                    : slot.ticks === 2
+                                    ? "#60A5FA"
+                                    : slot.ticks === 1
+                                    ? "#C6A96B"
+                                    : "#F43F5E",
+                              }}
+                            >
+                              {slot.ticks === 3 ? "🌟 ดีเยี่ยม" : slot.ticks === 2 ? "✨ ดีมาก" : slot.ticks === 1 ? "✦ ราบรื่น" : "⚠️ ชะลอ"} ({slot.score}%)
+                            </span>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {win.isGoldenWindow && <span className="text-xs">⭐</span>}
-                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-black/10 dark:bg-black/30 text-slate-900 dark:text-white border border-black/5 dark:border-white/5">
-                            {win.score}%
-                          </span>
+                        {/* Suitable Chips */}
+                        {slot.suitableTags.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {slot.suitableTags.map((tag, idx) => (
+                              <span
+                                key={idx}
+                                className="text-[10px] px-2 py-0.5 rounded-md bg-black/5 dark:bg-white/10 text-slate-700 dark:text-[#CBD5E1] border border-black/5 dark:border-white/10 font-medium"
+                              >
+                                ✓ {tag}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Prophecy */}
+                        <p className="text-[11px] text-slate-600 dark:text-[#94A3B8] leading-relaxed line-clamp-2 italic">
+                          "{slot.prophecy}"
+                        </p>
+
+                        {/* Select Button */}
+                        <div className="pt-1 flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedTime(slot.startTime);
+                              setShowPlannerForm(true);
+                            }}
+                            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 ${
+                              isSelected
+                                ? "bg-[#C6A96B] text-[#020617] shadow-sm font-black"
+                                : "bg-white/10 dark:bg-white/5 hover:bg-[#C6A96B]/20 text-slate-800 dark:text-[#F8F6F1] border border-slate-200 dark:border-white/10"
+                            }`}
+                          >
+                            <span>{isSelected ? "✓ เลือกเวลานี้แล้ว" : "✨ ใช้นัดหมายยามนี้"}</span>
+                          </button>
                         </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
               </div>
 
-              {/* 5. Toggle Appointment Planner */}
+              {/* 4. Toggle Appointment Planner Form */}
               <div className="pt-2 border-t border-black/10 dark:border-white/10 relative z-10 space-y-3">
                 <div className="flex items-center justify-between">
                   <button

@@ -161,27 +161,27 @@ async function runPricingPackagingSuite() {
     status: "PASS",
   });
 
-  // TEST 3: Professional Master Annual ฿2,790
-  assert(SUBSCRIPTION_PLANS.pro_annual.priceThb === 2790, "Pro Annual must be ฿2,790/year");
+  // TEST 3: Professional Master Annual ฿2,770
+  assert(SUBSCRIPTION_PLANS.pro_annual.priceThb === 2770, "Pro Annual must be ฿2,770/year");
   assert(SUBSCRIPTION_PLANS.pro_annual.durationDays === 365, "Pro Annual must have 365 days duration");
   recordResult({
     id: 3,
     domain: "PRICING",
-    name: "Professional Master Annual (฿2,790/yr)",
-    expected: "priceThb: 2790, durationDays: 365",
+    name: "Professional Master Annual (฿2,770/yr)",
+    expected: "priceThb: 2770, durationDays: 365",
     actual: `฿${SUBSCRIPTION_PLANS.pro_annual.priceThb}/yr (Save ~20% vs monthly)`,
     evidence: "apps/web/app/lib/plans.ts SUBSCRIPTION_PLANS.pro_annual",
     status: "PASS",
   });
 
-  // TEST 4: Imperial Master ฿789
-  assert(SUBSCRIPTION_PLANS.imperial.priceThb === 789, "Imperial Master must be ฿789");
+  // TEST 4: Imperial Master ฿1,289
+  assert(SUBSCRIPTION_PLANS.imperial.priceThb === 1289, "Imperial Master must be ฿1,289");
   assert(SUBSCRIPTION_PLANS.imperial.canonicalPlan === "master", "Imperial must map to canonical master");
   recordResult({
     id: 4,
     domain: "PRICING",
-    name: "Imperial Master (฿789)",
-    expected: "priceThb: 789, canonicalPlan: 'master'",
+    name: "Imperial Master (฿1,289)",
+    expected: "priceThb: 1289, canonicalPlan: 'master'",
     actual: `฿${SUBSCRIPTION_PLANS.imperial.priceThb} (${SUBSCRIPTION_PLANS.imperial.name})`,
     evidence: "apps/web/app/lib/plans.ts SUBSCRIPTION_PLANS.imperial",
     status: "PASS",
@@ -333,18 +333,18 @@ async function runPricingPackagingSuite() {
   // ─────────────────────────────────────────────────────────────────────────────
   console.log("\n🔒 --- DOMAIN 5: UNLIMITED SEMANTICS & QUOTA BOUNDARIES ---");
 
-  // TEST 10: Null Unlimited Semantics
-  assert(AI_REPORT_LIMIT.master === null, "AI_REPORT_LIMIT.master must be null");
-  assert(PERSON_LIMIT.master === null, "PERSON_LIMIT.master must be null");
-  assert(AI_REPORT_LIMIT.pro === 15, "AI_REPORT_LIMIT.pro must be 15");
+  // TEST 10: Quota Boundaries & Semantics
+  assert(AI_REPORT_LIMIT.master === 10, "AI_REPORT_LIMIT.master must be 10");
+  assert(PERSON_LIMIT.master === 100, "PERSON_LIMIT.master must be 100");
+  assert(AI_REPORT_LIMIT.pro === 5, "AI_REPORT_LIMIT.pro must be 5");
   assert(PERSON_LIMIT.pro === 20, "PERSON_LIMIT.pro must be 20");
 
   recordResult({
     id: 10,
     domain: "SEMANTICS",
-    name: "Unlimited Semantics (null values)",
-    expected: "master limits are null (∞), pro limits are 15 reports & 20 persons",
-    actual: `Master AI Limit: ${AI_REPORT_LIMIT.master} (∞), Pro AI Limit: ${AI_REPORT_LIMIT.pro}`,
+    name: "Quota Boundaries Semantics",
+    expected: "master limits are 10 reports & 100 persons, pro limits are 5 reports & 20 persons",
+    actual: `Master AI Limit: ${AI_REPORT_LIMIT.master}, Pro AI Limit: ${AI_REPORT_LIMIT.pro}`,
     evidence: "apps/web/app/services/permissions.server.ts",
     status: "PASS",
   });

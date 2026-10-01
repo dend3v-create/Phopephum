@@ -502,6 +502,121 @@ const MAHA_QUALITY_MEANINGS: Record<string, { label: string; tone: "good" | "neu
   โลกาวินาศ: { label: "โลกาวินาศจร", tone: "bad", desc: "สภาวะอารมณ์ภายในแปรปรวนลึกๆ มีเรื่องคาดไม่ถึงพลิกผันให้แก้ไข แนะนำให้รักษาความนิ่ง ปรับตัวตามสถานการณ์ และไม่แบกความเครียดไว้คนเดียว" }
 };
 
+export type EmperorTopicKey = "magnetism" | "identity" | "wealth" | "career" | "timing";
+
+export interface EmperorWisdomReport {
+  subjectName: string;
+  birthFormatted: string;
+  starBadge: string;
+  topicTitle: string;
+  keyPoint: string; // ประเด็นสำคัญ
+  situation: string; // สถานการณ์ที่กำลังเกิดขึ้น / มิติพลังงานตัวตน
+  strategy: string; // แนวทางรับมือและจังหวะเวลา
+  closingQuestion: string;
+}
+
+export const EMPEROR_TOPIC_OPTIONS: Array<{ key: EmperorTopicKey; label: string; icon: string }> = [
+  { key: "magnetism", label: "วิเคราะห์เสน่ห์จากพื้นดวงกำเนิด", icon: "✨" },
+  { key: "identity", label: "ตัวตนและวิสัยทัศน์ชีวิต", icon: "💎" },
+  { key: "wealth", label: "การเงินและขุมทรัพย์ชะตา", icon: "💰" },
+  { key: "career", label: "ทิศทางการงานและโปรเจกต์", icon: "💼" },
+  { key: "timing", label: "ภาพรวมจังหวะชีวิตและโอกาส", icon: "🌟" },
+];
+
+export function getEmperorChartWisdomReading(
+  activeResult: any,
+  profile: any,
+  subjectName: string,
+  topicKey: EmperorTopicKey = "magnetism"
+): EmperorWisdomReport {
+  const birthDateStr = activeResult?.birthDate || profile?.birth_date || "";
+  const birthTimeStr = (activeResult?.birthTime || profile?.birth_time || "06:00").slice(0, 5);
+  const birthDateObj = birthDateStr ? new Date(birthDateStr) : new Date();
+
+  // ฐาน 1-3 และ ฐาน 4
+  const matrixBases = activeResult?.matrix || activeResult?.phopephumResult?.nineBase?.bases;
+  const dayBaseNum = Number(matrixBases?.[0]?.[0] || (birthDateStr ? ((birthDateObj.getDay() + 1) % 7 || 7) : 1));
+  const monthBaseNum = Number(matrixBases?.[1]?.[0] || (birthDateStr ? (birthDateObj.getMonth() + 1) : 1));
+  const yearBaseNum = Number(matrixBases?.[2]?.[0] || 1);
+  const base4NatalSum = Number(matrixBases?.[3]?.[0] || (dayBaseNum + monthBaseNum + yearBaseNum));
+
+  // ข้อมูลจันทรคติ
+  const natalLunar = activeResult?.phopephumResult?.nineBase?.lunarDate || activeResult?.lunarDateInfo || activeResult?.lunar;
+  
+  const DAY_NAMES = ["", "วันอาทิตย์ (๑)", "วันจันทร์ (๒)", "วันอังคาร (๓)", "วันพุธ (๔)", "วันพฤหัสบดี (๕)", "วันศุกร์ (๖)", "วันเสาร์ (๗)"];
+  const thaiDay = natalLunar?.thaiDayName || DAY_NAMES[dayBaseNum] || "วันกำเนิด";
+  const thaiMonth = natalLunar?.lunarMonth || `เดือน ${monthBaseNum}`;
+  const thaiYearZodiac = natalLunar?.zodiacYear || `ปี ${yearBaseNum}`;
+  const moonPhaseName = natalLunar?.moonPhase || "ข้างขึ้น";
+
+  const birthFormatted = `${thaiDay} · ${thaiMonth} · ${thaiYearZodiac} · เวลาเกิด ${birthTimeStr} น. (${moonPhaseName})`;
+  const starBadge = `ดาวตนุ: ${thaiDay.split(" ")[0]} · ฐานกำลังชีวิต ${base4NatalSum}`;
+
+  if (topicKey === "identity") {
+    return {
+      subjectName,
+      birthFormatted,
+      starBadge,
+      topicTitle: "ตัวตนและศักยภาพสูงสุดจากผังดวงจักรพรรดิ",
+      keyPoint: `ตัวตนที่แท้จริงจากพื้นดวงของคุณเป็นตัวตนของผู้สร้างรากฐานที่มั่นคง (${thaiDay}) มีจิตวิญญาณแห่งผู้นำที่สุขุมรอบคอบ มองการณ์ไกล รักศักดิ์ศรีและความถูกต้อง ไม่ชอบการพึ่งพาใครแบบฉาบฉวย และมีความอดทนต่อแรงกดดันได้ดีกว่าคนทั่วไป`,
+      situation: `ผสานพลังของ ${thaiMonth} และจิตวิญญาณแห่ง ${thaiYearZodiac} ทำให้คุณอยู่ในช่วงของการสั่งสมบารมีและขยายขอบเขตความสามารถ จิตวิญญาณของคุณเรียกร้องการสร้างผลงานที่มีคุณค่าแท้จริงและเป็นประโยชน์ต่อผู้คน มากกว่าความสำเร็จระยะสั้น คุณจึงเป็นคนคิดลึก วางแผนซับซ้อน และพิถีพิถันในทุกรายละเอียด`,
+      strategy: `เชื่อมั่นในสัญชาตญาณและการวางแผนระยะยาวของคุณที่มีฐานกำลังชีวิต ${base4NatalSum} หนุนนำ อย่าปล่อยให้ความเร่งรีบของกระแสรอบข้างทำให้คุณไขว้เขว การจัดสรรเวลาพักผ่อนและปล่อยวางความกังวลในเรื่องเล็กน้อย จะช่วยให้คุณรักษาความเฉียบคมในการตัดสินใจเรื่องใหญ่ได้อย่างยอดเยี่ยม`,
+      closingQuestion: `อยากให้วิเคราะห์เจาะลึกในจุดแข็งด้านใดของตัวตนเพิ่มเติม สอบถามได้ตลอดเวลานะคะ`,
+    };
+  }
+
+  if (topicKey === "wealth") {
+    return {
+      subjectName,
+      birthFormatted,
+      starBadge,
+      topicTitle: "การเงินและขุมทรัพย์ชะตาจากผังดวงจักรพรรดิ",
+      keyPoint: `กระแสการเงินจากพื้นดวงของคุณเป็นแบบ "ยิ่งเชี่ยวชาญจริง ทรัพย์ยิ่งพอกพูน" รายได้หลักจะเกิดจากคุณค่าของผลงาน ปัญญาความรู้ และความน่าเชื่อถือ มากกว่าการพึ่งพาโชคช่วยเพียงอย่างเดียว`,
+      situation: `พื้นดวงชะตาของคุณมีพลังแห่งการดึงดูดทุนและโอกาสทางธุรกิจเข้ามาอย่างต่อเนื่อง แต่สิ่งที่ต้องระวังคือการใจกว้างหรือการแบกรับภาระแทนผู้อื่น ซึ่งอาจทำให้สภาพคล่องบางจังหวะตึงมือกว่าที่ควรจะเป็น`,
+      strategy: `แนะนำให้ตั้งระบบการออมและการลงทุนที่ชัดเจน แยกบัญชีสำรองออกจากเงินหมุนเวียน และเน้นการต่อยอดเงินในสินทรัพย์ที่สร้างมูลค่าเพิ่มระยะยาว การบริหารเงินอย่างมีสติและมีระบบจะช่วยให้ทรัพย์สินของคุณมั่นคงถาวรไม่มีวันหมด`,
+      closingQuestion: `ท่านกำลังเล็งการลงทุนหรือมีแผนการเงินก้อนใหญ่เรื่องใดอยู่เป็นพิเศษไหมคะ สอบถามต่อได้เลยค่ะ`,
+    };
+  }
+
+  if (topicKey === "career") {
+    return {
+      subjectName,
+      birthFormatted,
+      starBadge,
+      topicTitle: "ทิศทางการงานและโปรเจกต์จากผังดวงจักรพรรดิ",
+      keyPoint: `ทิศทางการงานของคุณเป็นดวงที่เหมาะกับการเป็น "ผู้นำ ผู้เชี่ยวชาญ หรือเจ้าของโครงการ" ที่มีอำนาจการตัดสินใจเต็มที่ คุณจะไม่ถนัดการทำงานในกรอบที่แคบหรือถูกจำกัดความคิดสร้างสรรค์`,
+      situation: `คุณมักได้รับมอบหมายภารกิจที่ท้าทายและมีความรับผิดชอบสูงเสมอ คนรอบข้างมองเห็นความสามารถในการแก้ปัญหาและความน่าเชื่อถือของคุณ จึงมักนำพาโปรเจกต์สำคัญหรือเรื่องยากๆ มาให้คุณเป็นผู้ขับเคลื่อนให้สำเร็จ`,
+      strategy: `เน้นการสร้างทีมและกระจายงานตามความถนัด หลีกเลี่ยงการลงไปทำทุกรายละเอียดด้วยตนเอง และมุ่งเน้นการวางยุทธศาสตร์ภาพรวม จะช่วยให้คุณสร้างผลงานชิ้นเอกได้อย่างมีพลังและไม่เหนื่อยล้าเกินไป`,
+      closingQuestion: `มีโปรเจกต์งานหรือการเจรจากับผู้ใหญ่เรื่องใดที่ต้องการคำแนะนำเป็นพิเศษไหมคะ`,
+    };
+  }
+
+  if (topicKey === "timing") {
+    return {
+      subjectName,
+      birthFormatted,
+      starBadge,
+      topicTitle: "ภาพรวมจังหวะชีวิตและโอกาสความสำเร็จ",
+      keyPoint: `ภาพรวมจังหวะชีวิตในรอบเวลานี้ กำลังอยู่ในช่วง "การปรับฐานเพื่อการเติบโตก้าวกระโดด" สิ่งที่เคยติดขัดหรือสะสมไว้จะเริ่มคลี่คลายและส่งสัญญาณของความสำเร็จที่เป็นรูปธรรม`,
+      situation: `มีจังหวะของโอกาสใหม่เข้ามาทักทาย โดยเฉพาะงานที่เกี่ยวข้องกับการเจรจา พันธมิตร หรือการขยายช่องทางเดิม เป็นช่วงเวลาที่พลังงานชีวิตเปิดรับสิ่งใหม่ ขอเพียงกล้าตัดสินใจลงมือทำ`,
+      strategy: `ใช้สติและความนิ่งในการพิจารณาทุกข้อเสนอ ตรวจสอบสัญญาและความพร้อมให้รอบคอบ เมื่อจังหวะมาถึงให้ลุยอย่างเต็มที่ด้วยความมั่นใจ ชัยชนะและความสำเร็จจะอยู่เคียงข้างคุณแน่นอน`,
+      closingQuestion: `หากมีเรื่องใดที่ท่านต้องการให้เจาะลึกเป็นพิเศษ สามารถส่งคำถามคุยต่อได้เลยนะคะ`,
+    };
+  }
+
+  // Default: magnetism (วิเคราะห์เสน่ห์จากพื้นดวงกำเนิด — ตรงตาม Screenshot 2)
+  return {
+    subjectName,
+    birthFormatted,
+    starBadge,
+    topicTitle: "วิเคราะห์เสน่ห์จากพื้นดวงกำเนิด",
+    keyPoint: `เสน่ห์จากพื้นดวงกำเนิดของคุณเป็นเสน่ห์แบบ "ผู้ใหญ่ที่น่าเชื่อถือ" ไม่ใช่เสน่ห์แบบหวือหวาเรียกความสนใจตั้งแต่แรกเห็น แต่เป็นความน่าเกรงขามที่แฝงความอบอุ่น คนที่เข้ามาใกล้จะรู้สึกว่าคุณเป็นคนที่ไว้ใจได้ พึ่งพาได้ และมีอะไรให้น่าค้นหาเรื่อยๆ`,
+    situation: `พื้นดวงของคุณมีพลังของ "คำพูดที่จริงใจ" เป็นเครื่องมือสำคัญ ยิ่งพูดน้อยแต่พูดจริง คนยิ่งเชื่อและประทับใจ ยิ่งช่วงนี้ที่คุณกำลังขับเคลื่อนเรื่องการเงินและงานอยู่ เสน่ห์ของคุณจะยิ่งเปล่งออกมาในจังหวะที่คุณ "ลงมือทำ" มากกว่าพูดโชว์ เพราะคนรอบข้างกำลังจับตาดูว่าคุณทำได้จริงไหม`,
+    strategy: `จุดที่ควรระวังคือ บางครั้งความสุขุมของคุณอาจดูเหมือน "เข้าถึงยาก" หรือ "ดุเกินไป" แนะนำให้เพิ่มรอยยิ้มและการรับฟังอย่างเป็นกันเอง จะช่วยเปลี่ยนพลังอำนาจให้กลายเป็นความเมตตามหานิยมที่ดึงดูดผู้ใหญ่และโอกาสดีๆ เข้ามาอย่างไม่ขาดสาย`,
+    closingQuestion: `อยากให้แนะนำวิธีใช้เสน่ห์เฉพาะตัวในการเจรจาหรือติดต่อเรื่องใดเพิ่มเติม ถามต่อได้เลยนะคะ`,
+  };
+}
+
 export default function HoroscopePage() {
   const {
     profile,
@@ -537,6 +652,9 @@ export default function HoroscopePage() {
 
   // ── ระบบจัดการ Tabs ย่อย (4 Tabs) ──
   const [activeTab, setActiveTab] = useState<"calc" | "chart" | "taksa" | "analysis">("analysis");
+
+  // ── หัวข้อการอ่านคำพยากรณ์ผังดวงจักรพรรดิ (Emperor Chart Reading Topic) ──
+  const [selectedEmperorTopic, setSelectedEmperorTopic] = useState<EmperorTopicKey>("magnetism");
 
   // ── Sesheta-Style Core Star Wisdom Modal State ──
   const [isWisdomModalOpen, setIsWisdomModalOpen] = useState(false);
@@ -1027,83 +1145,123 @@ export default function HoroscopePage() {
         </p>
       </div>
 
-      {/* ── Sesheta-Style Core Star Hero Card (ป้ายตัวตน & รหัสดาวกำเนิด) ── */}
-      {activeResult && (
-        <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-gradient-to-b dark:from-[#0B1E38]/90 dark:via-[#061426]/95 dark:to-[#020617] border border-[#C6A96B]/35 p-5 sm:p-6 shadow-xl shadow-amber-950/5 dark:shadow-2xl text-center flex flex-col items-center gap-3.5 backdrop-blur-xl">
-          {/* Background Ambient Cosmic Glow */}
-          <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-32 bg-gradient-to-b from-[#C6A96B]/20 via-[#4B6FAE]/15 to-transparent blur-2xl rounded-full pointer-events-none" />
+      {/* ── Sesheta-Style Emperor Chart Reading Hero Card (คำพยากรณ์จากระบบผังดวงจักรพรรดิ) ── */}
+      {activeResult && (() => {
+        const emperorReport = getEmperorChartWisdomReading(
+          activeResult,
+          profile,
+          currentSubjectName,
+          selectedEmperorTopic
+        );
 
-          {/* Element & Star Pill */}
-          <div className="relative z-10 inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/40 text-[#8C6D2D] dark:text-[#D9BC82] text-xs font-bold tracking-wider uppercase shadow-sm">
-            <span>✦ รหัสดาวกำเนิด</span>
-            <span>·</span>
-            <span>{coreStarWisdomData.element}</span>
-          </div>
+        return (
+          <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-gradient-to-b dark:from-[#0B1E38]/95 dark:via-[#061426]/95 dark:to-[#020617] border border-[#C6A96B]/35 p-5 sm:p-6 shadow-xl shadow-amber-950/5 dark:shadow-2xl text-left flex flex-col gap-4 backdrop-blur-xl">
+            {/* Background Ambient Cosmic Glow */}
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-32 bg-gradient-to-b from-[#C6A96B]/20 via-[#4B6FAE]/15 to-transparent blur-2xl rounded-full pointer-events-none" />
 
-          {/* Star Title & Tagline */}
-          <div className="relative z-10 space-y-1">
-            <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-[#F8F6F1] tracking-tight">
-              {coreStarWisdomData.starName}
-            </h2>
-            <p className="text-sm italic text-[#8B6914] dark:text-[#C6B79F] font-serif max-w-md mx-auto leading-relaxed">
-              "{coreStarWisdomData.quote}"
-            </p>
-          </div>
-
-          {/* CTA Button: เรียนรู้เพิ่มเติม ❯ */}
-          <button
-            type="button"
-            onClick={() => setIsWisdomModalOpen(true)}
-            className="relative z-10 inline-flex items-center gap-2 px-7 py-2.5 rounded-full bg-gradient-to-r from-[#C6A96B] via-[#E2C785] to-[#D9BC82] hover:brightness-110 active:scale-95 border border-[#F5E6C8]/80 text-[#020617] text-xs sm:text-sm font-extrabold tracking-wide transition-all shadow-lg shadow-amber-950/40 cursor-pointer"
-          >
-            <span>เรียนรู้เพิ่มเติม</span>
-            <span className="font-black text-sm text-[#020617]">❯</span>
-          </button>
-
-          {/* Teaser 3 Insights Cards (Sesheta Inspiration) */}
-          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-2.5 w-full mt-2">
-            <div
-              onClick={() => setIsWisdomModalOpen(true)}
-              className="group flex items-center gap-3 p-3 rounded-2xl bg-white/80 dark:bg-[#07192F]/80 hover:bg-slate-100 dark:hover:bg-[#0A2240] border border-slate-200 dark:border-[#C6A96B]/25 hover:border-[#C6A96B]/60 cursor-pointer transition-all text-left shadow-sm active:scale-98 backdrop-blur-md"
-            >
-              <span className="text-2xl group-hover:scale-110 transition-transform">💎</span>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-[#9A7B38] dark:text-[#E2C785] truncate">ตัวตนของคุณ</p>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate">{coreStarWisdomData.identity.slice(0, 24)}...</p>
+            {/* Header Badge with Exact Birth Details */}
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-2 border-b border-white/10 pb-3">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#C6A96B]/15 border border-[#C6A96B]/40 text-[#8C6D2D] dark:text-[#D9BC82] text-xs font-bold tracking-wide">
+                <span>✦ ผังดวงจักรพรรดิ</span>
+                <span>·</span>
+                <span>{emperorReport.birthFormatted}</span>
               </div>
+              <span className="text-xs font-semibold text-[#D9BC82] bg-slate-900/60 px-3 py-1 rounded-full border border-white/5">
+                {emperorReport.starBadge}
+              </span>
             </div>
 
-            <div
-              onClick={() => setIsWisdomModalOpen(true)}
-              className="group flex items-center gap-3 p-3 rounded-2xl bg-white/80 dark:bg-[#07192F]/80 hover:bg-slate-100 dark:hover:bg-[#0A2240] border border-slate-200 dark:border-[#60A5FA]/25 hover:border-[#60A5FA]/60 cursor-pointer transition-all text-left shadow-sm active:scale-98 backdrop-blur-md"
-            >
-              <span className="text-2xl group-hover:scale-110 transition-transform">🛡️</span>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-[#2563EB] dark:text-[#60A5FA] truncate">จุดแข็ง & พรสวรรค์</p>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate">{coreStarWisdomData.strengths.slice(0, 24)}...</p>
-              </div>
+            {/* Topic Chips Filter Bar */}
+            <div className="relative z-10 flex flex-wrap gap-1.5 pt-1">
+              {EMPEROR_TOPIC_OPTIONS.map((opt) => {
+                const isActive = selectedEmperorTopic === opt.key;
+                return (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => setSelectedEmperorTopic(opt.key)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold shadow-md scale-100 ring-1 ring-[#F5E6C8]/80"
+                        : "bg-slate-900/70 hover:bg-[#C6A96B]/15 border border-white/10 text-slate-300 hover:text-[#F8F6F1]"
+                    }`}
+                  >
+                    <span>{opt.icon}</span>
+                    <span>{opt.label}</span>
+                  </button>
+                );
+              })}
             </div>
 
-            <div
-              onClick={() => setIsWisdomModalOpen(true)}
-              className="group flex items-center gap-3 p-3 rounded-2xl bg-white/80 dark:bg-[#07192F]/80 hover:bg-slate-100 dark:hover:bg-[#0A2240] border border-slate-200 dark:border-[#34D399]/25 hover:border-[#34D399]/60 cursor-pointer transition-all text-left shadow-sm active:scale-98 backdrop-blur-md"
-            >
-              <span className="text-2xl group-hover:scale-110 transition-transform">🏺</span>
-              <div className="min-w-0">
-                <p className="text-xs font-bold text-[#059669] dark:text-[#34D399] truncate">เส้นทางของคุณ</p>
-                <p className="text-[11px] text-slate-600 dark:text-slate-300 truncate">{coreStarWisdomData.destinyPath.slice(0, 24)}...</p>
+            {/* Emperor Chart Reading Content Box (Structure matching Screenshot 2) */}
+            <div className="relative z-10 rounded-2xl bg-[#07192F]/90 dark:bg-[#06162B]/95 border border-[#C6A96B]/30 p-4 sm:p-5 shadow-lg space-y-4 text-xs sm:text-[13px] leading-relaxed backdrop-blur-md">
+              {/* 1. ประเด็นสำคัญ */}
+              <div className="space-y-1">
+                <h4 className="font-bold text-[#C6A96B] text-sm sm:text-base flex items-center gap-1.5">
+                  <span>👑</span>
+                  <span>ประเด็นสำคัญ</span>
+                </h4>
+                <p className="text-slate-100 dark:text-[#F8F6F1] leading-relaxed">
+                  {emperorReport.keyPoint}
+                </p>
+              </div>
+
+              {/* 2. สถานการณ์ที่กำลังเกิดขึ้น */}
+              <div className="space-y-1 pt-1 border-t border-white/5">
+                <h4 className="font-bold text-[#C6A96B] text-sm sm:text-base flex items-center gap-1.5">
+                  <span>⚡</span>
+                  <span>สถานการณ์ที่กำลังเกิดขึ้น</span>
+                </h4>
+                <p className="text-slate-100 dark:text-[#F8F6F1] leading-relaxed">
+                  {emperorReport.situation}
+                </p>
+              </div>
+
+              {/* 3. แนวทางรับมือและจังหวะเวลา */}
+              <div className="space-y-1 pt-1 border-t border-white/5">
+                <h4 className="font-bold text-[#C6A96B] text-sm sm:text-base flex items-center gap-1.5">
+                  <span>🧭</span>
+                  <span>แนวทางรับมือและจังหวะเวลา</span>
+                </h4>
+                <p className="text-slate-100 dark:text-[#F8F6F1] leading-relaxed">
+                  {emperorReport.strategy}
+                </p>
+              </div>
+
+              {/* Closing footer invite */}
+              <div className="pt-2 border-t border-white/5 flex flex-wrap items-center justify-between gap-2 text-[11px] text-[#C6B79F]/80">
+                <span className="italic">{emperorReport.closingQuestion}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const topicPromptMap: Record<EmperorTopicKey, string> = {
+                      magnetism: "วิเคราะห์เจาะลึกเรื่องเสน่ห์และการดึงดูดจากพื้นดวงกำเนิด พร้อมแนวทางพัฒนาตนเอง",
+                      identity: "วิเคราะห์เจาะลึกเรื่องตัวตน ศักยภาพ และวิสัยทัศน์ชีวิตจากพื้นดวงกำเนิด",
+                      wealth: "วิเคราะห์เจาะลึกเรื่องการเงิน ขุมทรัพย์ชะตา และการบริหารความมั่งคั่งจากพื้นดวง",
+                      career: "วิเคราะห์เจาะลึกเรื่องทิศทางการงาน โปรเจกต์ และความสำเร็จในอาชีพจากพื้นดวง",
+                      timing: "วิเคราะห์เจาะลึกเรื่องภาพรวมจังหวะชีวิตและโอกาสความสำเร็จจากพื้นดวง",
+                    };
+                    const query = topicPromptMap[selectedEmperorTopic] || "สอบถามคำทำนายเพิ่มเติมเกี่ยวกับพื้นดวงชะตา";
+                    setActiveTab("chart");
+                    setForecastMode("natal");
+                    handleSendMessage(query);
+                    setTimeout(() => {
+                      const chatEl = document.getElementById("horoscope-chat-section");
+                      if (chatEl) {
+                        chatEl.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }
+                    }, 120);
+                  }}
+                  className="text-[#D9BC82] hover:text-[#F5E6C8] hover:underline font-semibold flex items-center gap-1 cursor-pointer ml-auto transition-colors"
+                >
+                  <span>💬 ถามเจาะลึกเพิ่มเติม</span>
+                  <span>➔</span>
+                </button>
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* ── Core Star Wisdom Pop-up Modal ── */}
-      <CoreStarWisdomModal
-        isOpen={isWisdomModalOpen}
-        onClose={() => setIsWisdomModalOpen(false)}
-        data={coreStarWisdomData}
-      />
+        );
+      })()}
 
       {/* ── Sub-menu Card Navigation — บนสุด ── */}
 
@@ -1694,9 +1852,10 @@ export default function HoroscopePage() {
           />
 
           {/* ── [ยกระดับ!] พื้นที่แชทตรวจดวงชะตาสดตาม Filter และผังดวงจริง ── */}
-          <Card className="border-[#C9A96E]/20 bg-[#0A2240]/40 backdrop-blur-md p-5 space-y-4 rounded-2xl relative overflow-hidden">
-            {/* Background Aura */}
-            <div className="absolute inset-0 bg-radial-gradient from-[#4B6FAE]/5 via-transparent to-transparent pointer-events-none" />
+          <div id="horoscope-chat-section">
+            <Card className="border-[#C9A96E]/20 bg-[#0A2240]/40 backdrop-blur-md p-5 space-y-4 rounded-2xl relative overflow-hidden">
+              {/* Background Aura */}
+              <div className="absolute inset-0 bg-radial-gradient from-[#4B6FAE]/5 via-transparent to-transparent pointer-events-none" />
             
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#C9A96E]/15 pb-3">
               <div className="flex items-center gap-2">
@@ -1885,7 +2044,8 @@ export default function HoroscopePage() {
             </div>
           </Card>
         </div>
-      )}
+      </div>
+    )}
 
       {/* ── TAB 3: ผังทักษา/มหาภูติ ── */}
       {activeTab === "taksa" && activeResult?.taksaMaha && (

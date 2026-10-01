@@ -4,10 +4,15 @@ import type { LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
 import { requireAuth, getProfile } from "~/services/auth.server";
 import {
   getCurrentYam,
+  getYamPrediction,
   calculateMoonPhase,
   calculatePhopephum,
   getAstrologicalDateStr,
   getAstrologicalThaiFormattedDate,
+  getSunTimes,
+  getChanChaiItem,
+  yamMeaning,
+  type ChanChaiPhase,
 } from "@phopephum/engine";
 import { checkAndAwardDailyLogin } from "~/services/rewards.server";
 import { generateDailyAdvice } from "~/services/dailyAdvisor.server";
@@ -23,15 +28,13 @@ import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import i18next from "~/lib/i18n/i18n.server";
 import { AstralIcon } from "~/components/ui/AstralIcon";
-import { ActiveSubjectBanner } from "~/components/subject/ActiveSubjectBanner";
 import { resolveActiveSubject } from "~/services/activeSubject.server";
 
-
 export const meta: MetaFunction = () => [
-  { title: "วันนี้ — PhopePhum" },
+  { title: "กาลชะตารายชั่วโมง — PhopePhum" },
   {
     name: "description",
-    content: "สรุปจังหวะพลังงานประจำวัน ช่วงเวลาทอง และปัญญาชีวิตเฉพาะตนที่ PhopePhum",
+    content: "สรุปจังหวะพลังงานกาลชะตารายชั่วโมง ฤกษ์สดขณะนี้ และไทม์ไลน์ 8 ยามอัฏฐกาลเฉพาะตนที่ PhopePhum",
   },
 ];
 
@@ -45,6 +48,127 @@ interface TodayAppointment {
   score: number;
   verdict: string;
   advice: string;
+}
+
+export interface HourlyYamSlot {
+  yamNumber: number;
+  yamName: string;
+  period: "day" | "night";
+  timeLabel: string;
+  startTimeISO: string;
+  endTimeISO: string;
+  ticks: number;
+  level: "bad" | "good" | "very_good" | "excellent";
+  label: string;
+  score: number;
+  planetSymbol: string;
+  planetColor: string;
+  planetNameThai: string;
+  prophecy: string;
+  shouldDo: string;
+  shouldNotDo: string;
+  auspicious: string;
+  isCurrent: boolean;
+}
+
+const PHASE_LABELS: Record<string, string> = {
+  start: "ยามต้น (ช่วง 30 นาทีแรก)",
+  middle: "ยามกลาง (ช่วง 30 นาทีกลาง)",
+  end: "ยามปลาย (ช่วง 30 นาทีท้าย)",
+};
+
+// ─── Helper: คำนวณตาราง 8 ยามรายชั่วโมงตลอดวัน ────────────────────────────────
+function calculateDailyYamSlots(targetDate: Date): {
+  daySlots: HourlyYamSlot[];
+  nightSlots: HourlyYamSlot[];
+  currentSlotIndex: number;
+  isDayNow: boolean;
+} {
+  const sunTimes = getSunTimes(targetDate);
+  const sunrise = sunTimes.sunrise;
+  const sunset = sunTimes.sunset;
+
+  const dayMs = sunset.getTime() - sunrise.getTime();
+  const nightMs = 86400000 - dayMs;
+
+  const daySlotMs = dayMs / 8;
+  const nightSlotMs = nightMs / 8;
+  const nowMs = targetDate.getTime();
+  const isDayNow = nowMs >= sunrise.getTime() && nowMs < sunset.getTime();
+
+  const daySlots: HourlyYamSlot[] = [];
+  let currentSlotIndex = 0;
+
+  for (let i = 0; i < 8; i++) {
+    const startTime = new Date(sunrise.getTime() + i * daySlotMs);
+    const endTime = new Date(sunrise.getTime() + (i + 1) * daySlotMs);
+    const midTime = new Date(startTime.getTime() + daySlotMs / 2);
+    const result = getYamPrediction(midTime);
+    const chanChai = getChanChaiItem(result.yamName);
+    const meaning = yamMeaning[result.yamName];
+    const isCurrent = isDayNow && nowMs >= startTime.getTime() && nowMs < endTime.getTime();
+    if (isCurrent) currentSlotIndex = i;
+
+    const score = result.travelAuspiciousness.ticks === 3 ? 95 : result.travelAuspiciousness.ticks === 2 ? 85 : result.travelAuspiciousness.ticks === 1 ? 70 : 45;
+
+    daySlots.push({
+      yamNumber: i + 1,
+      yamName: result.yamName,
+      period: "day",
+      timeLabel: `${startTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} - ${endTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}`,
+      startTimeISO: startTime.toISOString(),
+      endTimeISO: endTime.toISOString(),
+      ticks: result.travelAuspiciousness.ticks,
+      level: result.travelAuspiciousness.level,
+      label: result.travelAuspiciousness.label,
+      score,
+      planetSymbol: chanChai?.planetSymbol || "★",
+      planetColor: chanChai?.planetColor || "#C6A96B",
+      planetNameThai: chanChai?.planetNameThai || result.yamName,
+      prophecy: chanChai?.chanChai?.middle?.text || result.travelAuspiciousness.description,
+      shouldDo: meaning?.shouldDo || "ดำเนินงานตามแผน",
+      shouldNotDo: meaning?.shouldNotDo || "หลีกเลี่ยงความประมาท",
+      auspicious: meaning?.auspicious || "ความราบรื่น",
+      isCurrent,
+    });
+  }
+
+  const nightSlots: HourlyYamSlot[] = [];
+  for (let i = 0; i < 8; i++) {
+    const startTime = new Date(sunset.getTime() + i * nightSlotMs);
+    const endTime = new Date(sunset.getTime() + (i + 1) * nightSlotMs);
+    const midTime = new Date(startTime.getTime() + nightSlotMs / 2);
+    const result = getYamPrediction(midTime);
+    const chanChai = getChanChaiItem(result.yamName);
+    const meaning = yamMeaning[result.yamName];
+    const isCurrent = !isDayNow && nowMs >= startTime.getTime() && nowMs < endTime.getTime();
+    if (isCurrent) currentSlotIndex = i;
+
+    const score = result.travelAuspiciousness.ticks === 3 ? 95 : result.travelAuspiciousness.ticks === 2 ? 85 : result.travelAuspiciousness.ticks === 1 ? 70 : 45;
+
+    nightSlots.push({
+      yamNumber: i + 1,
+      yamName: result.yamName,
+      period: "night",
+      timeLabel: `${startTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })} - ${endTime.toLocaleTimeString("th-TH", { hour: "2-digit", minute: "2-digit" })}`,
+      startTimeISO: startTime.toISOString(),
+      endTimeISO: endTime.toISOString(),
+      ticks: result.travelAuspiciousness.ticks,
+      level: result.travelAuspiciousness.level,
+      label: result.travelAuspiciousness.label,
+      score,
+      planetSymbol: chanChai?.planetSymbol || "★",
+      planetColor: chanChai?.planetColor || "#C6A96B",
+      planetNameThai: chanChai?.planetNameThai || result.yamName,
+      prophecy: chanChai?.chanChai?.middle?.text || result.travelAuspiciousness.description,
+      shouldDo: meaning?.shouldDo || "ดำเนินงานตามแผน",
+      shouldNotDo: meaning?.shouldNotDo || "หลีกเลี่ยงความประมาท",
+      auspicious: meaning?.auspicious || "ความสงบและสติ",
+      isCurrent,
+    });
+  }
+
+  return { daySlots, nightSlots, currentSlotIndex, isDayNow };
 }
 
 // ─── Helper: derive Do / Avoid lists from dailyAdvice ────────────────────────
@@ -153,7 +277,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const locale = await i18next.getLocale(request);
   const currentLocale = locale === "zh" ? "zh-CN" : locale === "en" ? "en-US" : "th-TH";
 
-  // ── ดึงข้อมูลเจ้าชะตาที่กำลัง Active (ดวงตนเอง หรือ ลูกดวงที่เลือกไว้) ──
+  // ── ดึงข้อมูลเจ้าชะตาที่กำลัง Active ──
   const {
     activeSubject,
     customers,
@@ -166,11 +290,23 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const bkkDateStr = getAstrologicalDateStr(now);
   const thaiDateLabel = getAstrologicalThaiFormattedDate(now, currentLocale);
 
-  // ── 1. Live Yam & Moon ──
+  // ── 1. Live Yam & Moon & Chan Chai Details ──
   const yam = getCurrentYam();
   const moon = calculateMoonPhase();
+  const liveChanChaiItem = getChanChaiItem(yam.yamName);
+  const phaseKey = (yam.phase as ChanChaiPhase) || "middle";
+  const liveChanChaiSub = liveChanChaiItem?.chanChai?.[phaseKey];
+  const liveMeaning = yamMeaning[yam.yamName];
 
-  // ── 2. Active Subject Context (ผูกกับเจ้าชะตาที่กำลังเปิดอยู่) ──
+  // คำนวณตาราง 8 ยามรายชั่วโมงวันนี้
+  const dailySlots = calculateDailyYamSlots(now);
+
+  // หายามทองคำถัดไปของวัน (Upcoming Golden Window)
+  const activeCycleSlots = dailySlots.isDayNow ? dailySlots.daySlots : dailySlots.nightSlots;
+  const upcomingSlots = activeCycleSlots.filter((_, idx) => idx > dailySlots.currentSlotIndex);
+  const nextGoldenSlot = upcomingSlots.find(s => s.ticks >= 2) || activeCycleSlots.find(s => s.ticks === 3) || null;
+
+  // ── 2. Active Subject Context ──
   const subjectContext = activeSubject.birthDate
     ? {
         birthDate: activeSubject.birthDate,
@@ -180,11 +316,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       }
     : null;
 
-  // ── 3. STEP 5.1 Calendar Intelligence (Daily Theme, Golden Window, 4 Domains) ──
+  // ── 3. Calendar Intelligence ──
   const dayIntelligence: CalendarDayIntelligence =
     await calculateDayIntelligence(bkkDateStr, subjectContext);
 
-  // ── 4. STEP 4.5 Personal Wisdom Intelligence ──
+  // ── 4. Personal Wisdom Intelligence ──
   let wisdomIntelligence: PersonalWisdomIntelligence | null = null;
   try {
     wisdomIntelligence = await generatePersonalWisdomIntelligence({
@@ -217,7 +353,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     })
   );
 
-  // ── 6. Daily Advice (Phopephum Taksa detail — คำนวณตามเจ้าชะตาที่กำลัง Active) ──
+  // ── 6. Daily Advice & Hourly Advice ──
   let dailyAdvice = null;
   if (activeSubject.birthDate) {
     try {
@@ -235,7 +371,24 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     }
   }
 
-  const { doList, avoidList } = getDoAvoidLists(dailyAdvice, locale);
+  const { doList: dailyDoList, avoidList: dailyAvoidList } = getDoAvoidLists(dailyAdvice, locale);
+
+  // คำนวณ Do & Avoid ประจำยาม/ชั่วโมงนี้
+  const hourlyDoItems: string[] = [];
+  if (liveMeaning?.shouldDo) {
+    liveMeaning.shouldDo.split(/[,、]/).forEach((s) => hourlyDoItems.push(s.trim()));
+  }
+  if (liveMeaning?.howTo) {
+    hourlyDoItems.push(`แนวทาง: ${liveMeaning.howTo}`);
+  }
+
+  const hourlyAvoidItems: string[] = [];
+  if (liveMeaning?.shouldNotDo) {
+    liveMeaning.shouldNotDo.split(/[,、]/).forEach((s) => hourlyAvoidItems.push(s.trim()));
+  }
+
+  const doList = hourlyDoItems.length > 0 ? hourlyDoItems : dailyDoList;
+  const avoidList = hourlyAvoidItems.length > 0 ? hourlyAvoidItems : dailyAvoidList;
 
   // ── 7. Yam countdown ISO ──
   const sunTimes = yam.sunTimes;
@@ -270,15 +423,31 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     yam: {
       name: yam.yamName,
       period: yam.period,
+      phase: yam.phase,
+      yamNumber: yam.yamNumber,
       level: yam.travelAuspiciousness.level,
       label: yam.travelAuspiciousness.label,
       ticks: yam.travelAuspiciousness.ticks,
+      description: yam.travelAuspiciousness.description,
       shouldDo: yam.prediction?.shouldDo ?? "",
+      planetSymbol: liveChanChaiItem?.planetSymbol || "★",
+      planetColor: liveChanChaiItem?.planetColor || "#C6A96B",
+      planetNameThai: liveChanChaiItem?.planetNameThai || yam.yamName,
+      chanChaiText: liveChanChaiSub?.text || yam.travelAuspiciousness.description,
+      chanChaiQuality: liveChanChaiSub?.quality || "good",
+      news: liveMeaning?.news || "เชื่อถือได้ตามหลักเหตุผล",
+      sickness: liveMeaning?.sickness || "ดูแลรักษาตามอาการ",
+      lostItem: liveMeaning?.lostItem || "จะพบตามทิศและธาตุประจำดาว",
+      howTo: liveMeaning?.howTo || "ดำเนินด้วยความมีสติและรอบคอบ",
+      auspicious: liveMeaning?.auspicious || "ความราบรื่นและปัญญา",
     },
+    dailySlots,
+    nextGoldenSlot,
     moon: {
       phase: moon.moonPhase,
       illumination: moon.illumination,
       isWanPhra: moon.isWanPhra,
+      guidance: moon.guidance,
     },
     dayIntelligence,
     wisdomIntelligence,
@@ -295,76 +464,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 }
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
-
-function ScoreRing({ score }: { score: number }) {
-  const radius = 54;
-  const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (score / 100) * circumference;
-
-  const color =
-    score >= 80
-      ? "#10B981"
-      : score >= 65
-      ? "#C6A96B"
-      : score >= 50
-      ? "#F59E0B"
-      : "#EF4444";
-
-  const label =
-    score >= 80
-      ? "ส่งเสริมดีเยี่ยม"
-      : score >= 65
-      ? "ราบรื่นคล่องตัว"
-      : score >= 50
-      ? "ปานกลาง"
-      : "ควรเน้นรอบคอบ";
-
-  return (
-    <div className="flex flex-col items-center gap-1 shrink-0">
-      <div className="relative w-28 h-28 sm:w-32 sm:h-32">
-        <svg viewBox="0 0 128 128" className="w-full h-full -rotate-90">
-          <circle
-            cx="64"
-            cy="64"
-            r={radius}
-            fill="none"
-            className="score-track"
-            stroke="rgba(255,255,255,0.08)"
-            strokeWidth="10"
-          />
-          <circle
-            cx="64"
-            cy="64"
-            r={radius}
-            fill="none"
-            stroke={color}
-            strokeWidth="10"
-            strokeLinecap="round"
-            strokeDasharray={circumference}
-            strokeDashoffset={offset}
-            style={{
-              transition: "stroke-dashoffset 1.2s cubic-bezier(0.34,1.56,0.64,1)",
-            }}
-          />
-        </svg>
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-display font-black text-3xl leading-none text-[#F8F6F1]">
-            {score}
-          </span>
-          <span className="text-[10px] text-[#C6B79F] tracking-wider mt-0.5">
-            /100
-          </span>
-        </div>
-      </div>
-      <span
-        className="text-xs sm:text-sm font-bold tracking-wide"
-        style={{ color }}
-      >
-        {label}
-      </span>
-    </div>
-  );
-}
 
 function LoginRewardToast({
   reward,
@@ -415,18 +514,16 @@ export default function TodayScreen() {
   const {
     profile,
     activeSubject,
-    customers,
-    personLimit,
-    hasReachedLimit,
     loginReward,
     pendingCount,
     bkkDateStr,
     thaiDateLabel: initialDateLabel,
     yam,
+    dailySlots,
+    nextGoldenSlot,
     moon,
     yamEndTimeISO,
     dayIntelligence,
-    wisdomIntelligence,
     todayAppointments,
     doList,
     avoidList,
@@ -435,12 +532,13 @@ export default function TodayScreen() {
   const currentSubjectName = activeSubject?.name || profile?.display_name || t("auth.user", "คุณ");
   const locale = i18n.language;
 
-  // ── Live date label ──
+  // ── State ──
   const [dateLabel, setDateLabel] = useState(initialDateLabel || "");
   const [greeting, setGreeting] = useState("");
   const [showReward, setShowReward] = useState(false);
   const [timeLeft, setTimeLeft] = useState("");
-
+  const [timelineTab, setTimelineTab] = useState<"day" | "night">(dailySlots.isDayNow ? "day" : "night");
+  const [selectedSlot, setSelectedSlot] = useState<HourlyYamSlot | null>(null);
 
   useEffect(() => {
     const now = new Date();
@@ -465,7 +563,7 @@ export default function TodayScreen() {
     }
   }, [loginReward, locale]);
 
-  // Countdown to end of current Yam (fixed calculation format)
+  // Countdown to end of current Yam
   useEffect(() => {
     if (!yamEndTimeISO) return;
     const update = () => {
@@ -481,7 +579,7 @@ export default function TodayScreen() {
       if (hours > 0) {
         setTimeLeft(`${hours} ชม. ${min} น.`);
       } else {
-        setTimeLeft(`${min}:${String(sec).padStart(2, "0")} น.`);
+        setTimeLeft(`${min}:${String(sec).padStart(2, "0")} นาที`);
       }
     };
     update();
@@ -504,7 +602,8 @@ export default function TodayScreen() {
       ? "#C6A96B"
       : "#F87171";
 
-  const goldenWindow = dayIntelligence.goldenWindow;
+  const yamScore = yam.ticks === 3 ? 95 : yam.ticks === 2 ? 85 : yam.ticks === 1 ? 70 : 45;
+  const activeSlots = timelineTab === "day" ? dailySlots.daySlots : dailySlots.nightSlots;
 
   return (
     <div
@@ -554,130 +653,177 @@ export default function TodayScreen() {
         </p>
       </div>
 
-      {/* ── 🎯 PILLAR 1: สิ่งที่ควรใส่พลังงานทุ่มเทในวันนี้ (POWER FOCUS & GOLDEN WINDOW) ── */}
-      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/40 overflow-hidden relative animate-fade-up bg-gradient-to-br from-[#0a2240]/90 via-[#0d1f38]/95 to-[#020617] backdrop-blur-xl shadow-xl space-y-4">
+      {/* ── ⚡ HERO CARD: สภาวะกาลชะตารายชั่วโมง (HOURLY KALA CHATA & LIVE YAM) ── */}
+      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/40 overflow-hidden relative animate-fade-up bg-gradient-to-br from-[#0a2240]/95 via-[#0d1f38]/95 to-[#020617] backdrop-blur-xl shadow-2xl space-y-4">
+        {/* Glow orb */}
         <div
-          className="absolute -top-12 -right-12 w-48 h-48 rounded-full blur-3xl pointer-events-none opacity-30"
+          className="absolute -top-12 -right-12 w-52 h-52 rounded-full blur-3xl pointer-events-none opacity-30"
           style={{
-            background: "radial-gradient(circle, #C6A96B50 0%, transparent 70%)",
+            background: `radial-gradient(circle, ${yamLevelColor}60 0%, transparent 70%)`,
           }}
         />
 
-        {/* Top Header: Score & Theme */}
-        <div className="relative flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div className="space-y-1">
-            <span className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-[#C6A96B]">
-              <span>✦</span> จุดโฟกัสพลังงานประจำวัน (POWER FOCUS)
+        {/* Top Status Bar: Live pulse + Countdown + Score */}
+        <div className="relative flex flex-wrap items-center justify-between gap-2.5 pb-1 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <span className="flex h-2.5 w-2.5 relative">
+              <span
+                className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                style={{ backgroundColor: yamLevelColor }}
+              />
+              <span
+                className="relative inline-flex rounded-full h-2.5 w-2.5"
+                style={{ backgroundColor: yamLevelColor }}
+              />
             </span>
-            <h2 className="font-display text-lg sm:text-xl font-black text-[#F8F6F1] leading-snug">
-              {dayIntelligence.dailyTheme}
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-2 self-start sm:self-center px-3 py-1.5 rounded-2xl bg-white/5 border border-[#C6A96B]/30 backdrop-blur-sm">
-            <span className="text-xs text-[#94A3B8] font-bold">ความราบรื่น:</span>
-            <span className="font-display text-base font-black text-[#F2D49B]">
-              {dayIntelligence.overallScore}
+            <span className="text-[11px] font-black uppercase tracking-[0.2em] text-[#C6A96B]">
+              กาลชะตาชั่วโมงนี้ (LIVE YAM)
             </span>
-            <span className="text-[10px] text-[#94A3B8]">/100</span>
-          </div>
-        </div>
-
-        {/* Focus Highlight Card: เรื่องที่ควรทุ่มเทพลังงาน */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-[#C6A96B]/15 to-[#0A2240]/40 border border-[#C6A96B]/40 space-y-3 relative z-10">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🎯</span>
-              <span className="text-xs font-black text-[#F8F6F1]">
-                {goldenWindow
-                  ? `ช่วงเวลาทองคำ: ${goldenWindow.startTime} – ${goldenWindow.endTime} น.`
-                  : "จังหวะเวลาขับเคลื่อนผลงานที่ดีที่สุด"}
-              </span>
-            </div>
-            {goldenWindow && (
-              <span className="text-[10px] font-black text-amber-300 bg-amber-400/20 border border-amber-400/40 px-2.5 py-0.5 rounded-full self-start sm:self-auto">
-                ฤกษ์สำเร็จ {goldenWindow.score}%
+            {timeLeft && (
+              <span
+                className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full bg-white/10 text-[#F2D49B] border border-white/10"
+                suppressHydrationWarning
+              >
+                เหลือ {timeLeft}
               </span>
             )}
           </div>
 
-          {/* Suitable tags */}
-          {goldenWindow && goldenWindow.suitableFor.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {goldenWindow.suitableFor.map((item, idx) => (
-                <span
-                  key={idx}
-                  className="text-[11px] px-2.5 py-0.5 rounded-full bg-white/10 text-[#F8F6F1] border border-white/15 font-bold"
-                >
-                  ✓ {item}
-                </span>
-              ))}
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            <span
+              className="px-2.5 py-1 rounded-xl text-[11px] font-black flex items-center gap-1.5 backdrop-blur-sm"
+              style={{
+                backgroundColor: `${yamLevelColor}20`,
+                color: yamLevelColor,
+                border: `1px solid ${yamLevelColor}50`,
+              }}
+            >
+              <span>{yam.ticks === 3 ? "🌟" : yam.ticks === 2 ? "✨" : yam.ticks === 1 ? "✦" : "⚠️"}</span>
+              <span>{yam.label}</span>
+              <span className="font-bold font-mono ml-0.5">({yamScore}%)</span>
+            </span>
+          </div>
+        </div>
 
-          <p className="text-xs text-[#CBD5E1] leading-relaxed font-medium">
-            {goldenWindow?.plainAdvice || dayIntelligence.personalNote || dayIntelligence.dailySummary}
+        {/* Main Planet Banner */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-1">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span
+                className="w-8 h-8 rounded-xl flex items-center justify-center text-base font-bold shadow-md"
+                style={{
+                  backgroundColor: `${yam.planetColor}25`,
+                  color: yam.planetColor,
+                  border: `1px solid ${yam.planetColor}50`,
+                }}
+              >
+                {yam.planetSymbol}
+              </span>
+              <div>
+                <h2 className="font-display text-xl sm:text-2xl font-black text-[#F8F6F1] flex items-center gap-2">
+                  <span>ยาม{yam.name}</span>
+                  <span className="text-sm font-normal text-[#C6B79F]">({yam.planetNameThai})</span>
+                </h2>
+              </div>
+            </div>
+            <p className="text-xs text-[#94A3B8] font-medium pl-10">
+              {PHASE_LABELS[yam.phase] || "ช่วงเวลาปัจจุบัน"} • ยามที่ {yam.yamNumber} {yam.period === "day" ? "กลางวัน" : "กลางคืน"}
+            </p>
+          </div>
+
+          <Link
+            to="/dashboard/check-yam"
+            className="self-start sm:self-center shrink-0 px-3 py-1.5 rounded-xl text-[11px] font-bold text-[#020617] bg-gradient-to-r from-[#C6A96B] to-[#F2D49B] hover:scale-105 active:scale-95 transition-all shadow-md flex items-center gap-1"
+          >
+            <span>⚡ ถามฤกษ์ด่วน</span>
+            <span>→</span>
+          </Link>
+        </div>
+
+        {/* Living Prophecy Card: คำพยากรณ์อัฏฐกาลชั้นฉาย ณ เวลานี้ */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0A2240]/80 via-[#0E2C52]/70 to-[#0A2240]/80 border border-[#C6A96B]/35 space-y-3 relative z-10 shadow-inner">
+          <div className="flex items-center gap-2">
+            <span className="text-base">📜</span>
+            <span className="text-[11px] font-black uppercase tracking-wider text-[#F2D49B]">
+              คำพยากรณ์กาลชะตาชั้นฉาย ณ ขณะนี้
+            </span>
+          </div>
+
+          <p className="text-xs sm:text-sm text-[#F8F6F1] leading-relaxed font-medium pl-1 border-l-2 border-[#C6A96B]/70">
+            "{yam.chanChaiText || yam.description}"
           </p>
 
-          {goldenWindow && (
-            <div className="pt-1 flex items-center justify-end">
+          {/* 3 Micro Insights: ข่าวสาร / วิธีการ / มงคลเด่น */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 text-[11px]">
+            <div className="p-2 rounded-xl bg-white/[0.04] border border-white/5 space-y-0.5">
+              <span className="text-[#C6B79F] font-bold block text-[10px]">📢 เรื่องที่ได้ยิน / ข่าวสาร</span>
+              <p className="text-[#E2E8F0] line-clamp-2">{yam.news}</p>
+            </div>
+            <div className="p-2 rounded-xl bg-white/[0.04] border border-white/5 space-y-0.5">
+              <span className="text-[#C6B79F] font-bold block text-[10px]">💼 แนวทางการทำงาน</span>
+              <p className="text-[#E2E8F0] line-clamp-2">{yam.howTo}</p>
+            </div>
+            <div className="p-2 rounded-xl bg-white/[0.04] border border-white/5 space-y-0.5">
+              <span className="text-[#C6B79F] font-bold block text-[10px]">🌟 มงคลเด่นชั่วโมงนี้</span>
+              <p className="text-[#E2E8F0] line-clamp-2">{yam.auspicious}</p>
+            </div>
+          </div>
+
+          {/* Next Golden Hour Notification */}
+          {nextGoldenSlot && (
+            <div className="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-1.5 text-[#CBD5E1]">
+                <span className="text-amber-400">🎯</span>
+                <span>
+                  ยามทองคำถัดไป: <strong className="text-[#F2D49B]">{nextGoldenSlot.yamName}</strong> ({nextGoldenSlot.timeLabel}) — ฤกษ์สำเร็จ {nextGoldenSlot.score}%
+                </span>
+              </div>
               <Link
-                to={`/dashboard/calendar?date=${bkkDateStr}&time=${goldenWindow.startTime}&eventType=negotiation`}
-                className="text-xs font-bold text-[#F2D49B] hover:text-[#C6A96B] hover:underline flex items-center gap-1 transition-colors"
+                to={`/dashboard/calendar?date=${bkkDateStr}&time=${nextGoldenSlot.timeLabel.split("-")[0]?.trim() || "12:00"}`}
+                className="text-[11px] font-bold text-[#C6A96B] hover:text-[#F2D49B] hover:underline"
               >
-                <span>✦ วางแผนนัดหมายช่วงเวลานี้</span>
-                <span>→</span>
+                + วางแผนเวลานี้ →
               </Link>
             </div>
           )}
         </div>
 
-        {/* Live Yam and Moon Status Bar */}
-        <div className="pt-2 border-t border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div className="flex items-center gap-2">
-            <div
-              className="w-2 h-2 rounded-full animate-pulse shrink-0"
-              style={{ background: yamLevelColor }}
-            />
-            <span className="text-[#C6B79F] font-semibold">
-              ยามขณะนี้:{" "}
-              <span className="font-bold" style={{ color: yamLevelColor }}>
-                {yam.name}
-              </span>
-            </span>
-            {timeLeft && (
-              <span
-                className="text-[10px] text-[#94A3B8] font-mono"
-                suppressHydrationWarning
-              >
-                (เหลือ {timeLeft})
-              </span>
-            )}
-          </div>
-
-          <div className="flex items-center gap-1.5 text-[11px] text-[#94A3B8]">
+        {/* Live Moon Status Bar */}
+        <div className="pt-1 flex flex-wrap items-center justify-between gap-2 text-xs text-[#94A3B8]">
+          <div className="flex items-center gap-1.5">
             <span>{moon.isWanPhra ? "🙏" : "🌙"}</span>
-            <span>{moon.phase}</span>
+            <span>{moon.phase} (ความสว่าง {moon.illumination}%)</span>
             {moon.isWanPhra && (
-              <span className="text-amber-400 font-bold ml-1 bg-amber-400/20 px-1.5 py-0.5 rounded border border-amber-400/30">
+              <span className="text-amber-400 font-bold ml-1 bg-amber-400/20 px-1.5 py-0.5 rounded border border-amber-400/30 text-[10px]">
                 วันพระ
               </span>
             )}
           </div>
+          <Link
+            to="/dashboard/yam"
+            className="text-[11px] text-[#C6A96B] hover:underline font-bold"
+          >
+            เปิดคัมภีร์ยาม ๒๔ ชั้นฉายฉบับเต็ม →
+          </Link>
         </div>
       </div>
 
-      {/* ── ⚖️ PILLAR 2 & 3: แนวทางที่เหมาะควรทำ VS สิ่งที่ควรระวัง (MINIMAL 2-COLUMN) ── */}
+      {/* ── ⚖️ PILLAR 2: คำแนะนำเฉพาะชั่วโมงนี้ (HOURLY DO & AVOID) ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 animate-fade-up">
-        {/* Recommended Actions */}
-        <div className="p-4 sm:p-5 rounded-3xl border border-emerald-500/30 bg-emerald-950/30 backdrop-blur-md shadow-sm space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-emerald-500/20 text-emerald-300 font-black text-sm">
-              ✓
+        {/* Recommended Actions for this hour */}
+        <div className="p-4 sm:p-5 rounded-3xl border border-emerald-500/30 bg-emerald-950/25 backdrop-blur-md shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-emerald-500/20 text-emerald-300 font-black text-sm">
+                ✓
+              </div>
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-emerald-400">
+                  เหมาะเร่งลงมือทำในชั่วโมงนี้
+                </p>
+                <p className="text-[10px] text-emerald-300/70">พลังหนุนเสริมยาม{yam.name}</p>
+              </div>
             </div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-400">
-              แนวทางที่เหมาะควรทำ
-            </p>
           </div>
           <ul className="space-y-2">
             {doList.slice(0, 3).map((item, i) => (
@@ -692,15 +838,20 @@ export default function TodayScreen() {
           </ul>
         </div>
 
-        {/* Things to Avoid */}
-        <div className="p-4 sm:p-5 rounded-3xl border border-rose-500/30 bg-rose-950/30 backdrop-blur-md shadow-sm space-y-3">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-rose-500/20 text-rose-300 font-black text-sm">
-              ✕
+        {/* Things to Avoid for this hour */}
+        <div className="p-4 sm:p-5 rounded-3xl border border-rose-500/30 bg-rose-950/25 backdrop-blur-md shadow-sm space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-rose-500/20 text-rose-300 font-black text-sm">
+                ✕
+              </div>
+              <div>
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-rose-400">
+                  ควรชะลอหรือเลี่ยงในชั่วโมงนี้
+                </p>
+                <p className="text-[10px] text-rose-300/70">ป้องกันอุปสรรคขัดขวาง</p>
+              </div>
             </div>
-            <p className="text-xs font-black uppercase tracking-[0.2em] text-rose-400">
-              สิ่งที่ควรระวัง / หลีกเลี่ยง
-            </p>
           </div>
           <ul className="space-y-2">
             {avoidList.slice(0, 3).map((item, i) => (
@@ -716,30 +867,176 @@ export default function TodayScreen() {
         </div>
       </div>
 
-      {/* ── CARD 3: หาฤกษ์มงคล & จังหวะเวลาที่ดีที่สุด ── */}
-      <div className="rounded-3xl p-5 border border-[#C6A96B]/40 bg-gradient-to-br from-[#0a2240]/80 via-[#071427]/90 to-[#020617] backdrop-blur-xl shadow-lg relative overflow-hidden animate-fade-up">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
-          <div className="space-y-1">
-            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-[#C6A96B]">
-              AUSPICIOUS TIMING FINDER
-            </span>
-            <h3 className="font-display text-base sm:text-lg font-black text-[#F8F6F1]">
-              หาฤกษ์มงคล & จังหวะเวลาที่ดีที่สุด
-            </h3>
-            <p className="text-xs text-[#CBD5E1] max-w-md leading-relaxed">
-              ออกรถใหม่, ขึ้นบ้านใหม่, เซ็นสัญญา หรือเจรจาสำคัญ คัดกรอง Top 3 ช่วงเวลาทองคำเฉพาะคุณ
-            </p>
+      {/* ── ⏱️ PILLAR 3: ไทม์ไลน์ 8 ยามรายชั่วโมงวันนี้ (TODAY'S HOURLY YAM FLOW) ── */}
+      <div className="rounded-3xl p-5 border border-white/10 bg-[#0A2240]/40 backdrop-blur-md animate-fade-up shadow-lg space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-[#C6A96B]/15 border border-[#C6A96B]/30 text-[#C6A96B] font-black text-sm shrink-0">
+              ⏱️
+            </div>
+            <div>
+              <h3 className="font-display text-sm sm:text-base font-black text-[#F8F6F1]">
+                ไทม์ไลน์ ๘ ยามรายชั่วโมงวันนี้
+              </h3>
+              <p className="text-[11px] text-[#94A3B8]">
+                แตะแต่ละช่วงเวลาเพื่อดูระดับฤกษ์และคำพยากรณ์ล่วงหน้า
+              </p>
+            </div>
           </div>
 
-          <Link
-            to="/dashboard/check-yam"
-            className="w-full sm:w-auto shrink-0 min-h-[44px] px-5 py-2.5 rounded-2xl text-xs font-black text-[#020617] bg-gradient-to-r from-[#C6A96B] via-[#F2D49B] to-[#C6A96B] hover:scale-[1.02] active:scale-95 transition-all shadow-md flex items-center justify-center gap-2"
-          >
-            <span>✦</span>
-            <span>หาฤกษ์ให้ฉัน</span>
-            <span>→</span>
-          </Link>
+          {/* Day / Night Switcher */}
+          <div className="flex bg-black/40 rounded-xl p-1 border border-white/10 self-start sm:self-auto">
+            <button
+              onClick={() => {
+                setTimelineTab("day");
+                setSelectedSlot(null);
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                timelineTab === "day"
+                  ? "bg-[#C6A96B] text-[#020617] shadow"
+                  : "text-[#94A3B8] hover:text-white"
+              }`}
+            >
+              ☀️ กลางวัน (8 ยาม)
+            </button>
+            <button
+              onClick={() => {
+                setTimelineTab("night");
+                setSelectedSlot(null);
+              }}
+              className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                timelineTab === "night"
+                  ? "bg-[#C6A96B] text-[#020617] shadow"
+                  : "text-[#94A3B8] hover:text-white"
+              }`}
+            >
+              🌙 กลางคืน (8 ยาม)
+            </button>
+          </div>
         </div>
+
+        {/* Horizontal Slider of 8 Yam Slots */}
+        <div className="flex gap-2.5 overflow-x-auto pb-2 pt-1 no-scrollbar">
+          {activeSlots.map((slot) => {
+            const isSelected = selectedSlot?.timeLabel === slot.timeLabel;
+            const slotBorderColor =
+              slot.ticks === 3
+                ? "border-emerald-500/50 hover:border-emerald-400"
+                : slot.ticks === 2
+                ? "border-blue-500/50 hover:border-blue-400"
+                : slot.ticks === 1
+                ? "border-[#C6A96B]/40 hover:border-[#C6A96B]"
+                : "border-rose-500/30 hover:border-rose-400";
+
+            return (
+              <button
+                key={slot.timeLabel}
+                onClick={() => setSelectedSlot(slot)}
+                className={`flex-shrink-0 w-32 p-3 rounded-2xl border text-left transition-all relative ${
+                  slot.isCurrent
+                    ? "bg-gradient-to-b from-[#C6A96B]/25 via-[#0A2240] to-[#020617] border-[#C6A96B] ring-2 ring-[#C6A96B]/30 shadow-lg scale-[1.02]"
+                    : isSelected
+                    ? "bg-white/10 border-white/40 shadow-md"
+                    : `bg-white/[0.03] ${slotBorderColor} hover:bg-white/[0.07]`
+                }`}
+              >
+                {slot.isCurrent && (
+                  <span className="absolute -top-2 left-2 px-1.5 py-0.2 rounded bg-amber-400 text-[#020617] text-[9px] font-black uppercase tracking-wider shadow">
+                    NOW
+                  </span>
+                )}
+
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-[10px] text-[#94A3B8] font-bold">
+                    {slot.timeLabel.split("-")[0]?.trim()}
+                  </span>
+                  <span
+                    className="text-xs font-bold"
+                    style={{ color: slot.planetColor }}
+                  >
+                    {slot.planetSymbol}
+                  </span>
+                </div>
+
+                <p className="font-display font-bold text-xs text-[#F8F6F1] mt-1 truncate">
+                  ยาม{slot.yamName}
+                </p>
+
+                <div className="mt-2 flex items-center justify-between text-[10px]">
+                  <span
+                    className="font-black"
+                    style={{
+                      color:
+                        slot.ticks === 3
+                          ? "#10B981"
+                          : slot.ticks === 2
+                          ? "#60A5FA"
+                          : slot.ticks === 1
+                          ? "#C6A96B"
+                          : "#F87171",
+                    }}
+                  >
+                    {slot.ticks === 3
+                      ? "✓✓✓ ดีเยี่ยม"
+                      : slot.ticks === 2
+                      ? "✓✓ ดีมาก"
+                      : slot.ticks === 1
+                      ? "✓ ราบรื่น"
+                      : "⚠️ ชะลอ"}
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Selected Slot Detailed Preview */}
+        {selectedSlot && (
+          <div className="p-4 rounded-2xl bg-white/[0.05] border border-white/15 space-y-2 animate-fade-in">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span style={{ color: selectedSlot.planetColor }} className="text-base font-bold">
+                  {selectedSlot.planetSymbol}
+                </span>
+                <span className="font-display font-black text-sm text-[#F8F6F1]">
+                  ยาม{selectedSlot.yamName} ({selectedSlot.planetNameThai}) • เวลา {selectedSlot.timeLabel}
+                </span>
+              </div>
+              <span
+                className="text-xs font-black px-2 py-0.5 rounded-full"
+                style={{
+                  backgroundColor:
+                    selectedSlot.ticks === 3 ? "rgba(16,185,129,0.2)" : "rgba(198,169,107,0.2)",
+                  color: selectedSlot.ticks === 3 ? "#10B981" : "#C6A96B",
+                }}
+              >
+                {selectedSlot.label} ({selectedSlot.score}%)
+              </span>
+            </div>
+
+            <p className="text-xs text-[#CBD5E1] leading-relaxed">
+              <strong>คำพยากรณ์:</strong> {selectedSlot.prophecy}
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] pt-1">
+              <div className="text-emerald-300">
+                <strong>✓ แนะนำ:</strong> {selectedSlot.shouldDo}
+              </div>
+              <div className="text-rose-300">
+                <strong>✕ หลีกเลี่ยง:</strong> {selectedSlot.shouldNotDo}
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <Link
+                to={`/dashboard/calendar?date=${bkkDateStr}&time=${selectedSlot.timeLabel.split("-")[0]?.trim() || "12:00"}`}
+                className="text-xs font-bold text-[#F2D49B] hover:underline"
+              >
+                + วางแผนนัดหมายช่วง {selectedSlot.timeLabel} →
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── CARD 4: TODAY'S APPOINTMENTS (นัดหมายวันนี้) ── */}
@@ -812,9 +1109,7 @@ export default function TodayScreen() {
               ยังไม่มีนัดหมายที่ลงบันทึกไว้ในวันนี้
             </span>
             <Link
-              to={`/dashboard/calendar?date=${bkkDateStr}${
-                goldenWindow ? `&time=${goldenWindow.startTime}` : ""
-              }`}
+              to={`/dashboard/calendar?date=${bkkDateStr}`}
               className="text-xs font-bold text-[#C6A96B] hover:underline"
             >
               + วางแผนนัดหมาย
@@ -846,16 +1141,16 @@ export default function TodayScreen() {
           </Link>
 
           <Link
-            to="/dashboard/calendar"
+            to="/dashboard/yam"
             className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-white/10 bg-[#0A2240]/40 hover:border-[#C6A96B]/50 hover:bg-[#0A2240]/60 transition-all group active:scale-95 text-left sm:text-center shadow-md"
           >
             <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
-              📅
+              📜
             </span>
             <div>
-              <p className="text-xs font-black text-[#F8F6F1]">ปฏิทินทั้งเดือน</p>
+              <p className="text-xs font-black text-[#F8F6F1]">คัมภีร์ยาม ๒๔ ชั้นฉาย</p>
               <p className="text-[10px] text-[#94A3B8] mt-0.5">
-                วางแผนล่วงหน้า 100 ปี
+                ดูตารางยามมาตรฐาน ๗ ฐาน
               </p>
             </div>
             <span className="sm:hidden text-xs text-[#94A3B8]">→</span>
@@ -883,4 +1178,3 @@ export default function TodayScreen() {
     </div>
   );
 }
-

@@ -595,13 +595,13 @@ async function runStep67ProductionReadinessSuite() {
   const entAuditUserA = await auditUserEntitlement(userA, env);
   assert(entAuditUserA.isValid, "User A entitlement audit must be valid");
   assert(entAuditUserA.normalizedPlan === "pro", "User A plan must be 'pro'");
-  assert(entAuditUserA.personLimit === 20 && entAuditUserA.aiReportLimit === 15, "Pro limits: 20 persons, 15 AI reports");
+  assert(entAuditUserA.personLimit === 20 && entAuditUserA.aiReportLimit === 5, "Pro limits: 20 persons, 5 AI reports");
 
   recordResult({
     id: 15,
     domain: "ENTITLEMENT",
     name: "Payment SUCCESS → Entitlement Reconciliation",
-    expected: "Plan 'pro' active with 20 person limit & 15 AI report limit",
+    expected: "Plan 'pro' active with 20 person limit & 5 AI report limit",
     actual: `Plan: ${entAuditUserA.normalizedPlan}, Persons: ${entAuditUserA.personLimit}, AI: ${entAuditUserA.aiReportLimit} (Valid: ${entAuditUserA.isValid})`,
     evidence: "auditUserEntitlement single source of truth validator",
     status: "PASS",
@@ -628,21 +628,21 @@ async function runStep67ProductionReadinessSuite() {
     status: "PASS",
   });
 
-  // TEST 17: Imperial Unlimited Semantics (Null = ∞)
+  // TEST 17: Master / Imperial Quota Boundaries
   const imperialProf = { plan: "imperial", membership_status: "active" };
   const masterProf = { plan: "master", membership_status: "active" };
 
-  assert(getPersonLimit(imperialProf) === null, "Imperial person limit is null");
-  assert(getAiReportLimit(imperialProf) === null, "Imperial AI limit is null");
-  assert(getPersonLimit(masterProf) === null, "Master person limit is null");
-  assert(getAiReportLimit(masterProf) === null, "Master AI limit is null");
+  assert(getPersonLimit(imperialProf) === 100, "Imperial person limit is 100");
+  assert(getAiReportLimit(imperialProf) === 10, "Imperial AI limit is 10");
+  assert(getPersonLimit(masterProf) === 100, "Master person limit is 100");
+  assert(getAiReportLimit(masterProf) === 10, "Master AI limit is 10");
 
   recordResult({
     id: 17,
     domain: "SEMANTICS",
-    name: "Imperial Unlimited Semantics (Null = ∞)",
-    expected: "Person & AI limits are null (∞) without magic numbers (9999/99999)",
-    actual: `Imperial Person: ${getPersonLimit(imperialProf)} (∞), Imperial AI: ${getAiReportLimit(imperialProf)} (∞)`,
+    name: "Imperial Master Quota Boundaries",
+    expected: "Person & AI limits are 100 & 10 with fair use guard",
+    actual: `Imperial Person: ${getPersonLimit(imperialProf)}, Imperial AI: ${getAiReportLimit(imperialProf)}`,
     evidence: "apps/web/app/services/permissions.server.ts PERSON_LIMIT & AI_REPORT_LIMIT",
     status: "PASS",
   });

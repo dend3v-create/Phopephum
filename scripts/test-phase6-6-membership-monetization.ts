@@ -132,13 +132,13 @@ async function runStep66MonetizationSuite() {
   // 2.3 Quota Limits
   assert(getAiReportLimit(freeUser) === 0, "Free report limit must be 0");
   assert(getAiReportLimit(premiumUser) === 1, "Premium report limit must be 1");
-  assert(getAiReportLimit(proUser) === 15, "Pro report limit must be 15");
-  assert(getAiReportLimit(masterUser) === null, "Master report limit must be unlimited (null)");
+  assert(getAiReportLimit(proUser) === 5, "Pro report limit must be 5");
+  assert(getAiReportLimit(masterUser) === 10, "Master report limit must be 10");
 
-  assert(getPersonLimit(freeUser) === 0, "Free CRM person limit must be 0");
-  assert(getPersonLimit(premiumUser) === 3, "Premium CRM person limit must be 3");
+  assert(getPersonLimit(freeUser) === 1, "Free CRM person limit must be 1");
+  assert(getPersonLimit(premiumUser) === 5, "Premium CRM person limit must be 5");
   assert(getPersonLimit(proUser) === 20, "Pro CRM person limit must be 20");
-  assert(getPersonLimit(masterUser) === null, "Master CRM person limit must be unlimited (null)");
+  assert(getPersonLimit(masterUser) === 100, "Master CRM person limit must be 100");
 
   assert(getTimingComparisonLimit(proUser) === 5, "Pro candidate limit must be 5");
 
@@ -149,9 +149,9 @@ async function runStep66MonetizationSuite() {
   // ─────────────────────────────────────────────────────────────────────────────
   console.log("🔹 TEST 3: Subscription & Sands Refill Pricing Consistency");
 
-  assert(SUBSCRIPTION_PLANS.basic.priceThb === 59, "Basic price must be ฿59");
-  assert(SUBSCRIPTION_PLANS.pro.priceThb === 259, "Pro price must be ฿259");
-  assert(SUBSCRIPTION_PLANS.pro_annual.priceThb === 2490, "Pro annual price must be ฿2,490");
+  assert(SUBSCRIPTION_PLANS.basic.priceThb === 89, "Basic price must be ฿89");
+  assert(SUBSCRIPTION_PLANS.pro.priceThb === 289, "Pro price must be ฿289");
+  assert(SUBSCRIPTION_PLANS.pro_annual.priceThb === 2770, "Pro annual price must be ฿2,770");
   assert(SUBSCRIPTION_PLANS.imperial.priceThb === 1289, "Imperial price must be ฿1,289");
 
   assert(SANDS_REFILL_PACKS.sands_50.priceThb === 59, "50 Sands must be ฿59");
@@ -165,12 +165,12 @@ async function runStep66MonetizationSuite() {
   // ─────────────────────────────────────────────────────────────────────────────
   console.log("🔹 TEST 4: Omise PromptPay Fee Calculation & Webhook Authenticity");
 
-  // PromptPay ฿259 charge
-  const fee259 = calculateOmiseFee(259, "promptpay");
-  assert(fee259.feeThb === 4.27, `Expected fee 4.27, got ${fee259.feeThb}`); // 259 * 0.0165 = 4.2735 -> 4.27
-  assert(fee259.feeVatThb === 0.3, `Expected fee VAT 0.30, got ${fee259.feeVatThb}`); // 4.27 * 0.07 = 0.2989 -> 0.30
-  assert(fee259.totalDeductionThb === 4.57, `Expected total deduction 4.57, got ${fee259.totalDeductionThb}`);
-  assert(fee259.netReceivedThb === 254.43, `Expected net received 254.43, got ${fee259.netReceivedThb}`);
+  // PromptPay ฿289 charge
+  const fee289 = calculateOmiseFee(289, "promptpay");
+  assert(fee289.feeThb === 4.77, `Expected fee 4.77, got ${fee289.feeThb}`); // 289 * 0.0165 = 4.7685 -> 4.77
+  assert(fee289.feeVatThb === 0.33, `Expected fee VAT 0.33, got ${fee289.feeVatThb}`); // 4.77 * 0.07 = 0.3339 -> 0.33
+  assert(fee289.totalDeductionThb === 5.1, `Expected total deduction 5.10, got ${fee289.totalDeductionThb}`);
+  assert(fee289.netReceivedThb === 283.9, `Expected net received 283.90, got ${fee289.netReceivedThb}`);
 
   // Webhook verification test
   const mockEnv = {

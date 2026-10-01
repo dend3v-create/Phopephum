@@ -9,9 +9,13 @@ interface Env {
   AI_WORKER_SECRET: string;
   KV_PROMPT_CACHE: KVNamespace;
   ENVIRONMENT: string;
+  CF_ACCOUNT_ID?: string;
+  CF_GATEWAY_ID?: string;
 }
 
-const DEEPSEEK_API_URL = "https://api.deepseek.com/chat/completions";
+// Cloudflare AI Gateway URL (Account: Dend3v, Gateway: ai-proxy)
+const CLOUDFLARE_GATEWAY_URL = "https://gateway.ai.cloudflare.com/v1/991b94ee81040db7dd450378d5bdd750/ai-proxy/deepseek/chat/completions";
+const DEEPSEEK_DIRECT_URL = "https://api.deepseek.com/chat/completions";
 const DEEPSEEK_MODEL = "deepseek-chat";
 
 export default {
@@ -68,8 +72,9 @@ async function handleGenerate(request: Request, env: Env): Promise<Response> {
     );
   }
 
-  // Call DeepSeek streaming API (OpenAI-compatible)
-  const deepseekRes = await fetch(DEEPSEEK_API_URL, {
+  // Call DeepSeek streaming API via Cloudflare AI Gateway
+  const targetUrl = CLOUDFLARE_GATEWAY_URL;
+  let deepseekRes = await fetch(targetUrl, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -92,6 +97,34 @@ async function handleGenerate(request: Request, env: Env): Promise<Response> {
       max_tokens: 8192,
     }),
   });
+
+  // Fallback to direct DeepSeek API if Gateway has temporary network issue
+  if (!deepseekRes.ok) {
+    console.warn(`AI Gateway responded with ${deepseekRes.status}, falling back to Direct DeepSeek...`);
+    deepseekRes = await fetch(DEEPSEEK_DIRECT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: DEEPSEEK_MODEL,
+        messages: [
+          {
+            role: "system",
+            content: "คุณคือ Wisdom Guidance ผู้เชี่ยวชาญการวิเคราะห์ดวงชะตาและระบบภพภูมิ โหราศาสตร์ไทยโบราณผสมผสานวิทยาศาสตร์การวางแผนชีวิต ให้คำแนะนำที่สุขุม ลึกซึ้ง และสร้างแรงบันดาลใจ",
+          },
+          {
+            role: "user",
+            content: body.prompt,
+          },
+        ],
+        stream: true,
+        temperature: 0.7,
+        max_tokens: 8192,
+      }),
+    });
+  }
 
   if (!deepseekRes.ok) {
     const errText = await deepseekRes.text();

@@ -253,7 +253,7 @@ async function runStep664E2EConversionSuite() {
 
   assert(prodBasic?.priceThb === 89 && prodBasic?.sku === "basic", "Basic resolved correctly");
   assert(prodPro?.priceThb === 289 && prodPro?.sku === "pro", "Pro resolved correctly");
-  assert(prodProAnnual?.priceThb === 2790 && prodProAnnual?.sku === "pro_annual", "Pro Annual resolved correctly");
+  assert(prodProAnnual?.priceThb === 2770 && prodProAnnual?.sku === "pro_annual", "Pro Annual resolved correctly");
   assert(prodImperial?.priceThb === 1289 && prodImperial?.sku === "imperial", "Imperial resolved correctly");
   assert(prodSands50?.priceThb === 59 && prodSands50?.sandsAmount === 50, "Sands 50 resolved correctly");
   assert(prodSands150?.priceThb === 149 && prodSands150?.sandsAmount === 150, "Sands 150 resolved correctly");
@@ -491,12 +491,12 @@ async function runStep664E2EConversionSuite() {
   const proP = { plan: "pro", membership_status: "active" };
   const imperialP = { plan: "imperial", membership_status: "active" };
 
-  assert(getPersonLimit(freeP) === 0, "Free person limit = 0");
+  assert(getPersonLimit(freeP) === 1, "Free person limit = 1");
   assert(getAiReportLimit(freeP) === 0, "Free AI report limit = 0");
-  assert(getPersonLimit(basicP) === 3, "Basic person limit = 3");
+  assert(getPersonLimit(basicP) === 5, "Basic person limit = 5");
   assert(getAiReportLimit(basicP) === 1, "Basic AI report limit = 1");
   assert(getPersonLimit(proP) === 20, "Pro person limit = 20");
-  assert(getAiReportLimit(proP) === 15, "Pro AI report limit = 15");
+  assert(getAiReportLimit(proP) === 5, "Pro AI report limit = 5");
 
   assert(!canUseFeature(freeP, "horoscope_self"), "Free cannot access horoscope_self");
   assert(canUseFeature(basicP, "horoscope_self"), "Basic can access horoscope_self");
@@ -507,24 +507,24 @@ async function runStep664E2EConversionSuite() {
     id: 11,
     domain: "QUOTA GATES",
     name: "Quota & Feature Gate Enforcement",
-    expected: "Free: 0/0, Basic: 3/1, Pro: 20/15, gates enforced strictly",
+    expected: "Free: 1/0, Basic: 5/1, Pro: 20/5, gates enforced strictly",
     actual: `Free: ${getPersonLimit(freeP)}/${getAiReportLimit(freeP)}, Basic: ${getPersonLimit(basicP)}/${getAiReportLimit(basicP)}, Pro: ${getPersonLimit(proP)}/${getAiReportLimit(proP)}`,
     evidence: "apps/web/app/services/permissions.server.ts getPersonLimit / getAiReportLimit",
     status: "PASS",
   });
 
-  // TEST 12: Unlimited Semantics (Imperial null values)
-  assert(getPersonLimit(imperialP) === null, "Imperial person limit must be null (∞)");
-  assert(getAiReportLimit(imperialP) === null, "Imperial AI report limit must be null (∞)");
-  assert(AI_REPORT_LIMIT.master === null, "AI_REPORT_LIMIT.master must be null");
-  assert(PERSON_LIMIT.master === null, "PERSON_LIMIT.master must be null");
+  // TEST 12: Master Boundaries Semantics
+  assert(getPersonLimit(imperialP) === 100, "Imperial person limit must be 100");
+  assert(getAiReportLimit(imperialP) === 10, "Imperial AI report limit must be 10");
+  assert(AI_REPORT_LIMIT.master === 10, "AI_REPORT_LIMIT.master must be 10");
+  assert(PERSON_LIMIT.master === 100, "PERSON_LIMIT.master must be 100");
 
   recordResult({
     id: 12,
     domain: "SEMANTICS",
-    name: "Imperial Unlimited Semantics (null = ∞)",
-    expected: "Imperial/Master limits are strictly null (no 9999/99999 magic numbers)",
-    actual: `Imperial Person: ${getPersonLimit(imperialP)} (∞), Imperial AI: ${getAiReportLimit(imperialP)} (∞)`,
+    name: "Imperial Master Quota Boundaries",
+    expected: "Imperial/Master limits are 100 persons and 10 reports with fair use guard",
+    actual: `Imperial Person: ${getPersonLimit(imperialP)}, Imperial AI: ${getAiReportLimit(imperialP)}`,
     evidence: "apps/web/app/services/permissions.server.ts AI_REPORT_LIMIT & PERSON_LIMIT",
     status: "PASS",
   });

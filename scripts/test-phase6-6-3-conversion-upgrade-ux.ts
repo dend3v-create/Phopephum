@@ -50,21 +50,21 @@ async function runConversionUpgradeUxTests() {
     "PRICING",
     SUBSCRIPTION_PLANS.basic.priceThb === 89 &&
     SUBSCRIPTION_PLANS.pro.priceThb === 289 &&
-    SUBSCRIPTION_PLANS.pro_annual.priceThb === 2790 &&
+    SUBSCRIPTION_PLANS.pro_annual.priceThb === 2770 &&
     SUBSCRIPTION_PLANS.imperial.priceThb === 1289,
-    "Basic=฿89, Pro=฿289, Pro Annual=฿2,790, Imperial=฿789 confirmed"
+    "Basic=฿89, Pro=฿289, Pro Annual=฿2,770, Imperial=฿1,289 confirmed"
   );
 
   const monthlyProCost = SUBSCRIPTION_PLANS.pro.priceThb * 12; // 289 * 12 = 3468
-  const annualProCost = SUBSCRIPTION_PLANS.pro_annual.priceThb; // 2790
-  const savingsThb = monthlyProCost - annualProCost; // 678
-  const savingsPct = (savingsThb / monthlyProCost) * 100; // 19.55% ~ 20%
+  const annualProCost = SUBSCRIPTION_PLANS.pro_annual.priceThb; // 2770
+  const savingsThb = monthlyProCost - annualProCost; // 698
+  const savingsPct = (savingsThb / monthlyProCost) * 100; // 20.12% ~ 20%
 
   assert(
     "02",
     "Annual Savings Calculation (~20%)",
     "PRICING",
-    savingsThb === 678 && Math.round(savingsPct) === 20,
+    savingsThb === 698 && Math.round(savingsPct) === 20,
     `Monthly x12=฿${monthlyProCost}, Annual=฿${annualProCost} (Save ฿${savingsThb} / ${savingsPct.toFixed(1)}%)`
   );
 
