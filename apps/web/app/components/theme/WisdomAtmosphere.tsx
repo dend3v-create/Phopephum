@@ -28,16 +28,38 @@ export function CelestialSeal() {
   );
 }
 
+/** Decorative crescent illustration; does not represent the calculated lunar phase. */
+export function CelestialMoon() {
+  const id = `celestial-moon-${useId().replace(/:/g, "")}`;
+  return (
+    <svg viewBox="0 0 400 400" fill="none" aria-hidden="true" focusable="false">
+      <defs>
+        <radialGradient id={id} cx=".72" cy=".3" r=".85">
+          <stop stopColor="#FDF8E8" /><stop offset=".3" stopColor="#BDE9E4" /><stop offset="1" stopColor="#52668B" />
+        </radialGradient>
+      </defs>
+      <g stroke="currentColor" opacity=".45">
+        <ellipse cx="200" cy="200" rx="184" ry="68" transform="rotate(-28 200 200)" />
+        <ellipse cx="200" cy="200" rx="195" ry="94" transform="rotate(-28 200 200)" opacity=".45" />
+        <circle cx="200" cy="200" r="154" strokeDasharray="1 9" opacity=".35" />
+      </g>
+      <path d="M246 90a120 120 0 1 0 0 220c-96-25-96-195 0-220Z" fill={`url(#${id})`} />
+      <path d="M246 90a120 120 0 1 0 0 220" stroke="#BDE9E4" strokeOpacity=".75" />
+      <g fill="currentColor"><circle cx="63" cy="272" r="3" /><circle cx="335" cy="119" r="3" /><circle cx="310" cy="303" r="2" /></g>
+      <path d="M83 82v16M75 90h16M316 53v12M310 59h12" stroke="currentColor" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function WisdomAtmosphere() {
   return (
     <div className="pp-atmosphere" aria-hidden="true">
       <div className="pp-atmosphere-sky" />
       <div className="pp-atmosphere-stars" />
-      <div className="pp-atmosphere-seal"><CelestialSeal /></div>
-      <svg className="pp-atmosphere-horizon" viewBox="0 0 1440 320" preserveAspectRatio="none" focusable="false">
-        <path d="M0 290L120 234 214 253 352 132 468 221 562 190 698 266 814 168 916 203 1072 105 1214 224 1336 196 1440 257V320H0Z" fill="currentColor" opacity=".05" />
-        <path d="M0 290L120 234 214 253 352 132 468 221 562 190 698 266 814 168 916 203 1072 105 1214 224 1336 196 1440 257" stroke="currentColor" strokeWidth="1" opacity=".25" fill="none" />
-        <path d="M0 310Q370 175 720 264T1440 280" stroke="currentColor" strokeWidth="1" opacity=".15" fill="none" />
+      <div className="pp-atmosphere-seal"><CelestialMoon /></div>
+      <svg className="pp-atmosphere-horizon" fill="none" viewBox="0 0 1440 320" preserveAspectRatio="none" focusable="false">
+        <path d="M-140 340Q720-60 1580 340M-140 365Q720 0 1580 365M-140 390Q720 65 1580 390" stroke="currentColor" opacity=".2" />
+        <path d="M0 288Q460 122 860 267T1440 250" stroke="currentColor" opacity=".1" />
       </svg>
     </div>
   );

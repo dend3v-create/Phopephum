@@ -3,6 +3,7 @@
 @import "./public-wisdom.css";
 @import "./astral-dawn.css";
 @import "./theme-surfaces.css";
+@import "./celestial-flow.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 

@@ -1,5 +1,6 @@
+import { CelestialMoon } from "~/components/theme/WisdomAtmosphere";
 import { Link } from "@remix-run/react";
-import { ArrowRight, BriefcaseBusiness, Heart, Leaf, Sun, Wallet, Clock3 } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, Heart, Leaf, Wallet, Clock3 } from "lucide-react";
 import type { CalendarDayIntelligence } from "@phopephum/types";
 
 const DOMAIN_ICONS = {
@@ -14,7 +15,7 @@ export function DailyGuidanceOverview({ day }: { day: CalendarDayIntelligence })
   return (
     <section className="pp-daily" aria-label="สรุปแนวทางประจำวัน">
       <article className="pp-wisdom-hero">
-        <div className="pp-orbit" aria-hidden="true"><Sun size={48} strokeWidth={1} /></div>
+        <div className="pp-orbit" aria-hidden="true"><CelestialMoon /></div>
         <p className="pp-eyebrow">{day.hasPersonalContext ? "ภาพรวมเฉพาะคุณ" : "ภาพรวมประจำวัน"}</p>
         <h2>{day.dailyTheme}</h2>
         <p className="pp-summary">{day.dailySummary}</p>
@@ -37,7 +38,7 @@ export function DailyGuidanceOverview({ day }: { day: CalendarDayIntelligence })
           {day.domainScores.map((domain) => {
             const Icon = DOMAIN_ICONS[domain.domain];
             return (
-              <article className="pp-domain-card" key={domain.domain}>
+              <article className="pp-domain-card" data-domain={domain.domain} key={domain.domain}>
                 <div className="pp-domain-head"><span className="pp-icon-ring" aria-hidden="true"><Icon size={22} strokeWidth={1.5} /></span><span className="pp-domain-score">{domain.score}<small> / 100</small></span></div>
                 <h3>{domain.label}</h3>
                 <p>{domain.verdict}</p>
