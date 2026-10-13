@@ -81,7 +81,7 @@ export function MobileFloatingSpeedDial() {
   ];
 
   return (
-    <div className="md:hidden fixed bottom-[80px] right-4 z-50 select-none">
+    <div className="md:hidden fixed right-4 z-50 select-none" style={{ bottom: "calc(80px + env(safe-area-inset-bottom, 0px))" }}>
       {/* Backdrop */}
       {isOpen && (
         <div
@@ -93,7 +93,7 @@ export function MobileFloatingSpeedDial() {
       {/* Floating Speed Dial Actions */}
       <div className="relative z-50 flex flex-col items-end gap-3">
         {isOpen && (
-          <div className="flex flex-col items-end gap-3 mb-1 animate-scaleUp">
+          <div id="mobile-quick-menu" className="flex flex-col items-end gap-3 mb-1 motion-safe:animate-scaleUp">
             {menuItems.map((item) => (
               <Link
                 key={item.to}
@@ -124,10 +124,12 @@ export function MobileFloatingSpeedDial() {
           className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 active:scale-90 cursor-pointer ${
             isOpen
               ? "bg-white dark:bg-[#0A2240] text-[#C6A96B] rotate-90 border-2 border-[#C6A96B] shadow-amber-500/20"
-              : "bg-gradient-to-tr from-[#0F172A] via-[#1E3A8A] to-[#2563EB] text-[#F8F6F1] shadow-[#1E3A8A]/50 border-2 border-[#C6A96B]/60 hover:border-[#C6A96B]"
+              : "bg-[#07172A] text-[#FDF8E8] shadow-black/30 border-2 border-[#C6A96B]/60 hover:border-[#C6A96B]"
           }`}
           style={{ width: "56px", height: "56px" }}
-          aria-label="Toggle Quick Navigation"
+          aria-label={isOpen ? "ปิดเมนูลัด" : "เปิดเมนูลัด"}
+          aria-expanded={isOpen}
+          aria-controls={isOpen ? "mobile-quick-menu" : undefined}
         >
           {isOpen ? (
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="w-6 h-6">

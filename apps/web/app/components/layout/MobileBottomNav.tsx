@@ -44,7 +44,7 @@ const NAV_TABS = [
 ] as const;
 
 function TabIcon({ name, isActive }: { name: string; isActive: boolean }) {
-  const cls = `w-[22px] h-[22px] transition-transform duration-200 ${isActive ? "scale-110" : "scale-100"}`;
+  const cls = `w-[22px] h-[22px] motion-safe:transition-transform motion-safe:duration-200 ${isActive ? "scale-105" : "scale-100"}`;
 
   if (name === "today") {
     // Sacred Solar Star of Daily Wisdom (ดวงตะวัน ๘ แฉกแห่งปัญญา)
@@ -119,11 +119,11 @@ export function MobileBottomNav({ currentPath }: MobileBottomNavProps) {
       aria-label={t("nav.main_menu", "เมนูหลัก")}
       role="navigation"
     >
-      <div className="flex w-full items-stretch" role="tablist">
+      <div className="flex w-full items-stretch px-2 py-1">
         {NAV_TABS.map((tab) => {
           const isActive = tab.exact
             ? currentPath === tab.to
-            : currentPath.startsWith(tab.to);
+            : (currentPath === tab.to || currentPath.startsWith(`${tab.to}/`));
 
           const label = t(`nav.${tab.labelKey}`, tab.defaultLabel);
 
@@ -131,14 +131,13 @@ export function MobileBottomNav({ currentPath }: MobileBottomNavProps) {
             <Link
               key={tab.to}
               to={tab.to}
-              role="tab"
-              aria-selected={isActive}
               aria-current={isActive ? "page" : undefined}
-              className="relative flex-1 min-h-[52px] flex flex-col items-center justify-center gap-1 transition-all duration-200 active:scale-95 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[#C6A96B]"
+              className="relative flex-1 min-w-0 min-h-[52px] rounded-2xl flex flex-col items-center justify-center gap-1 motion-safe:transition-all motion-safe:duration-200 motion-safe:active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#C6A96B]"
               style={{
+                background: isActive ? "var(--input-bg)" : "transparent",
                 color: isActive
                   ? "var(--accent-gold, #C6A96B)"
-                  : "var(--text-muted, #94A3B8)",
+                  : "var(--text-secondary, #CBD5E1)",
               }}
             >
               {/* Active top edge indicator with gold glow */}
@@ -152,15 +151,15 @@ export function MobileBottomNav({ currentPath }: MobileBottomNavProps) {
                 />
               )}
 
-              <span className="flex items-center justify-center shrink-0">
+              <span aria-hidden="true" className="flex items-center justify-center shrink-0">
                 <TabIcon name={tab.icon} isActive={isActive} />
               </span>
 
               <span
                 className={`font-sarabun tracking-tight leading-tight ${
                   isActive
-                    ? "font-bold text-xs sm:text-[13px] text-[#8C6D2D] dark:text-[#F2D49B]"
-                    : "font-medium text-[11.5px] sm:text-xs text-slate-600 dark:text-[#94A3B8]"
+                    ? "font-bold text-xs sm:text-[13px]"
+                    : "font-medium text-xs"
                 }`}
               >
                 {label}

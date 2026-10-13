@@ -83,7 +83,7 @@ export function TimingReminderBell({
       <button
         type="button"
         onClick={handleToggle}
-        className="relative p-2 rounded-xl text-[#F8F6F1]/80 hover:text-[#C6A96B] hover:bg-white/5 active:scale-95 transition-all focus:outline-none"
+        className="relative min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-xl text-[#F8F6F1]/80 hover:text-[#C6A96B] hover:bg-white/5 active:scale-95 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#D4AF37]"
         aria-label="การแจ้งเตือนจังหวะเวลา"
         title="Personal Timing Reminders"
       >
@@ -113,7 +113,7 @@ export function TimingReminderBell({
       {/* ── Dropdown Panel ── */}
       {isOpen && (
         <div
-          className="absolute right-0 mt-2 w-80 sm:w-96 rounded-2xl shadow-2xl z-50 overflow-hidden border animate-in fade-in slide-in-from-top-2 duration-200"
+          className="fixed left-3 right-3 top-[calc(64px+env(safe-area-inset-top,0px))] w-auto sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 rounded-2xl shadow-2xl z-50 overflow-hidden border animate-in fade-in slide-in-from-top-2 duration-200"
           style={{
             background: "rgba(10, 20, 38, 0.96)",
             backdropFilter: "blur(24px)",
