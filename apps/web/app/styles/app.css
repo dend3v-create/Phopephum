@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./daily-wisdom.css";
 @import "./public-wisdom.css";
+@import "./astral-dawn.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 

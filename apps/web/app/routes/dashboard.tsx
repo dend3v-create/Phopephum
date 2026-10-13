@@ -7,6 +7,7 @@ import { ProtectedContent } from "~/components/ui/ProtectedContent";
 import { MobileBottomNav } from "~/components/layout/MobileBottomNav";
 import { MobileFloatingSpeedDial } from "~/components/layout/MobileFloatingSpeedDial";
 import { AppTopBar } from "~/components/layout/AppTopBar";
+import { WisdomAtmosphere } from "~/components/theme/WisdomAtmosphere";
 import { DesktopSidebar } from "~/components/layout/DesktopSidebar";
 import type { Env } from "~/env.server";
 import { useState } from "react";
@@ -51,7 +52,9 @@ export default function DashboardLayout() {
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   return (
-    <div className="min-h-screen flex bg-[#020617] text-[#F8F6F1] w-full max-w-full overflow-x-hidden">
+    <div className="pp-theme-shell pp-member-shell min-h-screen flex w-full max-w-full overflow-x-clip">
+      <WisdomAtmosphere />
+
       {/* ── 1. Desktop Sidebar (md:flex) & Mobile Drawer ── */}
       <DesktopSidebar
         displayName={displayName}
