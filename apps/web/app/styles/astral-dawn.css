@@ -1,0 +1,56 @@
+/* Astral Dawn — scoped Phopephum theme shared by public pages and the web app. */
+.pp-theme-shell {
+  --pp-glass: rgba(8, 27, 46, .90);
+  --pp-glass-soft: rgba(12, 34, 54, .84);
+  --pp-theme-line: rgba(212, 175, 55, .27);
+  --pp-theme-gold: #F6D88C;
+  --pp-card-shadow: 0 16px 44px rgba(0, 0, 0, .24), inset 0 1px 0 rgba(255, 255, 255, .06);
+  --sidebar-bg: rgba(7, 23, 42, .94);
+  --border-gold: var(--pp-theme-line);
+  --input-bg: rgba(212, 175, 55, .09);
+  position: relative; isolation: isolate; background: #07172A; color: var(--text-body);
+}
+.pp-atmosphere { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; color: #D4AF37; }
+.pp-atmosphere-sky { position: absolute; inset: 0; background: radial-gradient(ellipse at 80% 22%, rgba(212,175,55,.16), transparent 36%), radial-gradient(ellipse at 5% 65%, rgba(62,100,145,.23), transparent 48%), radial-gradient(ellipse at 68% 105%, rgba(212,175,55,.13), transparent 40%), linear-gradient(155deg,#07172A,#050E1B 68%,#10253A); }
+.pp-atmosphere-stars { position: absolute; inset: 0; opacity: .38; background-image: radial-gradient(circle at 12px 27px,#F6D88C 1px,transparent 1.6px), radial-gradient(circle at 77px 118px,#E2E8F0 .6px,transparent 1.2px), radial-gradient(circle at 148px 62px,#D4AF37 .8px,transparent 1.4px); background-size: 241px 263px, 317px 293px, 389px 337px; mask-image: linear-gradient(black,rgba(0,0,0,.4) 65%,transparent); }
+.pp-atmosphere-seal { position: absolute; width: min(70vw,760px); right: -12vw; top: -7vh; opacity: .22; }
+.pp-atmosphere-seal svg { display: block; width: 100%; height: auto; }
+.pp-atmosphere-horizon { position: absolute; bottom: 0; left: 0; width: 100%; height: min(30vh,280px); }
+.pp-theme-shell > header { background: var(--sidebar-bg); border-color: var(--pp-theme-line); padding-top: env(safe-area-inset-top,0px); }
+.pp-theme-shell .pp-home-hero { position: relative; --pp-home-card: var(--pp-glass); --pp-home-border: var(--pp-theme-line); --pp-home-gold: var(--pp-theme-gold); background: transparent; padding-top: 48px; padding-bottom: 48px; }
+.pp-theme-shell .pp-home-kicker { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--pp-glass-soft); border: 1px solid var(--pp-theme-line); border-radius: 999px; line-height: 1.5; letter-spacing: .1em; }
+.pp-theme-shell .pp-home-kicker::before { content: "✦"; font-size: 14px; }
+.pp-theme-shell .pp-home-message { min-height: 334px; padding: 28px; background: linear-gradient(145deg,rgba(212,175,55,.09),transparent 60%),var(--pp-glass); border-radius: 28px; box-shadow: var(--pp-card-shadow); }
+.pp-theme-shell .pp-home-message h2 { max-width: 88%; font-weight: 600; }
+.pp-theme-shell .pp-home-message-label { letter-spacing: .16em; margin-top: 28px; }
+.pp-theme-shell .pp-home-solar { width: 320px; height: 320px; right: -70px; top: 64px; border: 0; opacity: .48; }
+.pp-theme-shell .pp-home-solar::before, .pp-theme-shell .pp-home-solar::after { content: none; }
+.pp-theme-shell .pp-home-solar svg { width: 100%; height: 100%; }
+.pp-theme-shell .pp-home-path { position: relative; background: linear-gradient(155deg,rgba(212,175,55,.055),transparent 60%),var(--pp-glass); border-color: var(--pp-theme-line); box-shadow: var(--pp-card-shadow); padding: 18px 14px; }
+.pp-theme-shell .pp-home-path::after { content: ""; position: absolute; height: 1px; left: 18px; right: 18px; top: 0; background: linear-gradient(90deg,transparent,rgba(246,216,140,.45),transparent); }
+.pp-theme-shell .pp-home-icon { background: radial-gradient(circle,rgba(212,175,55,.14),transparent); border-color: var(--pp-theme-line); }
+.pp-theme-shell .pp-home-primary, .pp-theme-shell .pp-timing-cta { box-shadow: 0 6px 24px rgba(212,175,55,.12),inset 0 1px 0 rgba(255,255,255,.35); }
+.pp-theme-shell .pp-home-secondary { background: var(--pp-glass-soft); }
+.pp-theme-shell .pp-home-dock { margin: 0 12px 10px; left: 0; right: 0; border: 1px solid var(--pp-theme-line); border-radius: 24px; padding-bottom: max(8px,env(safe-area-inset-bottom)); box-shadow: 0 10px 40px rgba(0,0,0,.24); }
+.pp-theme-shell .pp-home-dock a.is-current { color: var(--pp-theme-gold); background: linear-gradient(145deg,rgba(212,175,55,.15),rgba(212,175,55,.05)); }
+.pp-theme-shell .pp-wisdom-hero, .pp-theme-shell .pp-domain-card, .pp-theme-shell .pp-window-card { background: linear-gradient(145deg,rgba(212,175,55,.055),transparent 60%),var(--pp-glass); border-color: var(--pp-theme-line); box-shadow: var(--pp-card-shadow); }
+.pp-theme-shell .pp-live-details { background: var(--pp-glass); box-shadow: var(--pp-card-shadow); }
+.pp-theme-shell .pp-energy-track { height: 6px; }
+.pp-theme-shell .pp-domain-card { border-radius: 24px; }
+.pp-theme-shell .pp-icon-ring { background: rgba(212,175,55,.06); }
+/* A translucent outer surface reveals the atmosphere without adding texture behind body text. */
+.pp-theme-shell #auspicious-demo { position: relative; }
+.pp-theme-shell #auspicious-demo > div:first-child { max-width: 620px; margin-inline: auto; }
+.pp-theme-shell #auspicious-demo > div:last-child { box-shadow: var(--pp-card-shadow); }
+[data-theme="light"] .pp-theme-shell { --pp-glass: rgba(255,252,245,.94); --pp-glass-soft: rgba(255,252,245,.84); --pp-theme-line: rgba(118,89,11,.24); --pp-theme-gold: #76590B; --pp-card-shadow: 0 12px 32px rgba(7,23,42,.07),inset 0 1px 0 rgba(255,255,255,.8); --sidebar-bg: rgba(253,248,232,.95); --input-bg: rgba(118,89,11,.07); background: #FDF8E8; }
+[data-theme="light"] .pp-atmosphere-sky { background: radial-gradient(ellipse at 85% 18%,rgba(212,175,55,.17),transparent 44%),radial-gradient(ellipse at 4% 65%,rgba(62,100,145,.06),transparent 50%),linear-gradient(155deg,#FDF8E8,#F8F4EA 65%,#EEE8D9); }
+[data-theme="light"] .pp-atmosphere { color: #9A7730; }
+[data-theme="light"] .pp-atmosphere-stars { opacity: .15; }
+[data-theme="light"] .pp-atmosphere-seal { opacity: .13; }
+[data-theme="light"] .pp-theme-shell .pp-home-solar { opacity: .3; }
+[data-theme="light"] .pp-theme-shell .pp-home-dock a.is-current { background: rgba(118,89,11,.08); }
+@media (min-width:768px) { .pp-theme-shell .pp-home-hero { padding-block: 64px; }.pp-theme-shell .pp-home-message { min-height: 350px; } }
+@media (max-width:767px) { .pp-atmosphere-seal { width: 560px; right: -280px; top: 12vh; opacity: .17; }.pp-atmosphere-stars { opacity: .26; }.pp-theme-shell .pp-home-hero { padding: 28px 18px 40px; gap: 24px; }.pp-theme-shell .pp-home-message { min-height: 300px; padding: 22px; }.pp-theme-shell .pp-home-solar { width: 270px; height: 270px; right: -72px; top: 64px; }.pp-theme-shell .pp-home-path h3 { font-size: 15px; }.pp-theme-shell.pp-public-home { padding-bottom: calc(94px + env(safe-area-inset-bottom,0px)); } }
+@media (max-width:359px) { .pp-theme-shell .pp-home-kicker { font-size: 10px; padding: 8px 10px; }.pp-theme-shell .pp-home-path { padding: 14px; } }
+@media (prefers-reduced-motion:reduce) { .pp-theme-shell *, .pp-theme-shell *::before, .pp-theme-shell *::after { scroll-behavior: auto; animation: none !important; transition-duration: 0s !important; } }
+@media (forced-colors:active) { .pp-atmosphere, .pp-home-solar { display: none; }.pp-theme-shell .pp-home-message, .pp-theme-shell .pp-home-path, .pp-theme-shell .pp-domain-card { border: 1px solid CanvasText; box-shadow: none; } }

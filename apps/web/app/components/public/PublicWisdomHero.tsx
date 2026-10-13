@@ -1,4 +1,5 @@
 import { Link, useLocation } from "@remix-run/react";
+import { CelestialSeal } from "~/components/theme/WisdomAtmosphere";
 import { ArrowDown, ArrowRight, CalendarDays, Compass, HeartHandshake, Sparkles, Sun, UserRound } from "lucide-react";
 
 interface Props { isLoggedIn: boolean }
@@ -36,7 +37,7 @@ export function PublicWisdomHero({ isLoggedIn }: Props) {
         <div className="pp-home-experience">
           <article className="pp-home-message">
             <div className="pp-home-message-head"><span>ภพภูมิ · ปัญญาและกาลเวลาชีวิต</span><Sun size={18} aria-hidden="true" /></div>
-            <div className="pp-home-solar" aria-hidden="true"><span className="pp-home-solar-core"><Sun size={54} strokeWidth={1} /></span><i /><i /><i /></div>
+            <div className="pp-home-solar" aria-hidden="true"><CelestialSeal /></div>
             <p className="pp-home-message-label">WISDOM FOR A BETTER YOU</p>
             <h2>รู้จังหวะชีวิต<br /><span>ก้าวต่อด้วยความเข้าใจ</span></h2>
             <p>ไม่ต้องมีคำตอบทั้งหมดในวันนี้<br />เริ่มจากสิ่งสำคัญที่คุณอยากทำ</p>
