@@ -6,6 +6,7 @@ import { captureReferralClick } from "~/services/attribution.server";
 import { getUser } from "~/services/auth.server";
 import type { Env } from "~/env.server";
 import { PublicLayout } from "~/components/public/PublicLayout";
+import { PublicWisdomHero } from "~/components/public/PublicWisdomHero";
 import { HeroAuspiciousWidget } from "~/components/public/HeroAuspiciousWidget";
 import { AstralIcon } from "~/components/ui/AstralIcon";
 
@@ -58,11 +59,11 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     return json({ isLoggedIn: !!user }, { headers });
   }
 
-  // Edge CDN Cache: ถ้ายังไม่ล็อกอิน ให้แคชบน Cloudflare Edge 1 ชั่วโมง (ประหยัด CPU 100%)
+  // Short anonymous edge cache keeps homepage releases fresh; authenticated responses remain private.
   const headers: HeadersInit = !user
     ? {
-        "Cache-Control": "public, max-age=120, s-maxage=3600, stale-while-revalidate=86400",
-        "CDN-Cache-Control": "max-age=3600",
+        "Cache-Control": "public, max-age=0, s-maxage=300, stale-while-revalidate=60",
+        "CDN-Cache-Control": "max-age=300",
       }
     : {
         "Cache-Control": "private, no-cache",
@@ -110,72 +111,8 @@ export default function IndexPage() {
   ];
 
   return (
-    <PublicLayout isLoggedIn={isLoggedIn}>
-      {/* ──────────────────────────────────────────────────────────────────────────
-          01 — HERO SECTION: Value Prop + Immediate Clarity
-      ────────────────────────────────────────────────────────────────────────── */}
-      <section className="relative pt-12 pb-16 sm:pt-20 sm:pb-24 overflow-hidden">
-        {/* Background glow effects */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[350px] bg-gradient-to-tr from-[#C6A96B]/15 via-[#4B6FAE]/10 to-transparent blur-3xl pointer-events-none rounded-full" />
-
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 text-center relative z-10">
-          {/* Trust Pill */}
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-[#C6A96B]/30 bg-[#C6A96B]/[0.08] backdrop-blur-md mb-6 shadow-sm">
-            <span className="text-[#C6A96B] text-xs">✦</span>
-            <span className="text-[11px] sm:text-xs font-semibold text-[#8C6D2D] dark:text-[#F6D88C] tracking-wide">
-              ระบบวิเคราะห์กาลชะตาเฉพาะบุคคล · Ancient Wisdom × Modern AI
-            </span>
-          </div>
-
-          {/* Primary Core Headline */}
-          <h1 className="font-display text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-[#F8F6F1] tracking-tight leading-[1.2] mb-6">
-            วันนี้คุณควรทำอะไร <br className="hidden sm:block" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#8C6D2D] via-[#D4AF37] to-[#F6D88C] dark:from-[#C6A96B] dark:via-[#F6D88C] dark:to-[#C6A96B]">
-              และช่วงเวลาไหนดีที่สุด?
-            </span>
-          </h1>
-
-          {/* Value Prop Subheadline */}
-          <p className="font-sarabun text-base sm:text-lg text-slate-600 dark:text-[#94A3B8] max-w-2xl mx-auto leading-relaxed mb-8">
-            <strong className="text-slate-900 dark:text-[#F8F6F1] font-semibold">PHOPEPHUM OS</strong>{" "}
-            ถอดรหัสจังหวะชีวิตเฉพาะบุคคล ผสานสูตรคำนวณสุริยยาตร์แท้กับ Wisdom AI เพื่อบอก{" "}
-            <span className="text-[#8C6D2D] dark:text-[#C6A96B] font-semibold">“ช่วงเวลาทอง” (Golden Window)</span>{" "}
-            ให้ทุกการตัดสินใจของคุณเฉียบคม แม่นยำ และลงมือทำได้อย่างมั่นใจ
-          </p>
-
-          {/* Primary CTA Cluster */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8">
-            <Link
-              to={ctaTarget}
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-[#C6A96B] via-[#D9BC82] to-[#C6A96B] text-[#020617] shadow-xl shadow-[#C6A96B]/20 hover:shadow-2xl hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
-            >
-              <span>{ctaText}</span>
-              <span className="text-base">→</span>
-            </Link>
-
-            <a
-              href="#auspicious-demo"
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl font-semibold text-sm border border-slate-300 dark:border-white/15 bg-white/60 dark:bg-white/[0.04] text-slate-700 dark:text-[#F8F6F1] hover:bg-slate-100 dark:hover:bg-white/[0.08] transition-all flex items-center justify-center gap-2"
-            >
-              <span>ทดลองหาฤกษ์สด</span>
-              <span className="text-xs text-[#C6A96B]">▼</span>
-            </a>
-          </div>
-
-          {/* Micro-Trust Signals */}
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8 text-xs text-slate-500 dark:text-[#94A3B8]">
-            <span className="flex items-center gap-1.5">
-              <span className="text-emerald-500 font-bold">✓</span> เริ่มต้นฟรี ไม่ต้องใช้บัตรเครดิต
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-emerald-500 font-bold">✓</span> ปลอดภัยตามมาตรฐาน PDPA
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="text-emerald-500 font-bold">✓</span> สูตรคำนวณสุริยยาตร์แท้ 100 ปี
-            </span>
-          </div>
-        </div>
-      </section>
+    <PublicLayout isLoggedIn={isLoggedIn} className="pp-public-home">
+      <PublicWisdomHero isLoggedIn={isLoggedIn} />
 
       {/* ──────────────────────────────────────────────────────────────────────────
           02 — PRODUCT PREVIEW: Interactive Golden Window & Auspicious Widget
