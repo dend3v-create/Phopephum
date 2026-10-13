@@ -10,7 +10,7 @@ interface PublicLayoutProps {
 
 export function PublicLayout({ children, isLoggedIn = false, className = "" }: PublicLayoutProps) {
   return (
-    <div className={`relative min-h-screen flex flex-col overflow-x-hidden bg-[var(--bg-base)] text-[var(--text-body)] transition-colors duration-200 ${className}`}>
+    <div className={`relative min-h-screen flex flex-col overflow-x-clip bg-[var(--bg-base)] text-[var(--text-body)] transition-colors duration-200 ${className}`}>
       
       {/* ── Background Cosmic Ambience ── */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">

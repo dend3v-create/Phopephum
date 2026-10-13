@@ -25,7 +25,7 @@ export function PublicWisdomHero({ isLoggedIn }: Props) {
           <p className="pp-home-description">เข้าใจตัวเอง รู้จังหวะเวลา และเปลี่ยนคำแนะนำเป็นสิ่งที่ลงมือทำได้ ผ่านภูมิปัญญาโบราณและผู้ช่วย AI ของภพภูมิ</p>
           <div className="pp-home-actions">
             <Link to={accountTarget} className="pp-home-primary">{isLoggedIn ? "เปิดวันนี้ของฉัน" : "เริ่มต้นใช้งานฟรี"}<ArrowRight size={20} aria-hidden="true" /></Link>
-            <a href="#auspicious-demo" className="pp-home-secondary">ทดลองหาฤกษ์<ArrowDown size={18} aria-hidden="true" /></a>
+            <Link to="/#auspicious-demo" className="pp-home-secondary">ทดลองหาฤกษ์<ArrowDown size={18} aria-hidden="true" /></Link>
           </div>
           <p className="pp-home-note">เริ่มต้นฟรี · ไม่ต้องใช้บัตรเครดิต · คุณเลือกแนวทางของตัวเอง</p>
         </div>
@@ -40,7 +40,7 @@ export function PublicWisdomHero({ isLoggedIn }: Props) {
           </article>
 
           <div className="pp-home-paths" aria-label="เลือกสิ่งที่คุณอยากเริ่มต้น">
-            <a href="#auspicious-demo" className="pp-home-path"><span className="pp-home-icon"><Compass size={24} strokeWidth={1.5} aria-hidden="true" /></span><h3>รู้จังหวะเวลา</h3><p>หาฤกษ์สำหรับสิ่งสำคัญ</p><ArrowRight size={17} aria-hidden="true" /></a>
+            <Link to="/#auspicious-demo" className="pp-home-path"><span className="pp-home-icon"><Compass size={24} strokeWidth={1.5} aria-hidden="true" /></span><h3>รู้จังหวะเวลา</h3><p>หาฤกษ์สำหรับสิ่งสำคัญ</p><ArrowRight size={17} aria-hidden="true" /></Link>
             <Link to="/dashboard/horoscope" className="pp-home-path"><span className="pp-home-icon"><Sparkles size={24} strokeWidth={1.5} aria-hidden="true" /></span><h3>เข้าใจตัวเอง</h3><p>สำรวจผังดวงของคุณ</p><ArrowRight size={17} aria-hidden="true" /></Link>
             <Link to="/dashboard/planner" className="pp-home-path"><span className="pp-home-icon"><HeartHandshake size={24} strokeWidth={1.5} aria-hidden="true" /></span><h3>วางแผนชีวิต</h3><p>ตั้งเป้าหมายและลงมือทำ</p><ArrowRight size={17} aria-hidden="true" /></Link>
           </div>
