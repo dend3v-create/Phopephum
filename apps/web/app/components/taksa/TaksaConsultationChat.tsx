@@ -288,7 +288,7 @@ export function TaksaConsultationChat({
               <div
                 className={`max-w-[90%] sm:max-w-[82%] rounded-2xl p-4 text-xs md:text-sm leading-relaxed whitespace-pre-wrap ${
                   isUser
-                    ? "bg-[#0A2240] text-white rounded-tr-none border border-sky-500/30 shadow-md"
+                    ? "bg-[var(--pp-surface-0a2240)] text-white rounded-tr-none border border-sky-500/30 shadow-md"
                     : "bg-white dark:bg-slate-900/85 text-slate-800 dark:text-[#F8F6F1] rounded-tl-none border border-slate-200 dark:border-white/10 shadow-sm"
                 }`}
               >

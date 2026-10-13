@@ -1,0 +1,133 @@
+/* Theme-aware legacy surfaces: dark values remain exact; light uses ivory paper.
+   Used by cards, chart readings, calendar, reports, partner panels and auth screens.
+   Explicit dark: variants and colored action buttons retain their own palette. */
+:root {
+  --pp-surface-02060b: #02060b;
+  --pp-surface-020617: #020617;
+  --pp-surface-020b07: #020b07;
+  --pp-surface-040a18: #040a18;
+  --pp-surface-050e24: #050e24;
+  --pp-surface-061426: #061426;
+  --pp-surface-07132b: #07132b;
+  --pp-surface-071427: #071427;
+  --pp-surface-07172a: #07172a;
+  --pp-surface-07192f: #07192f;
+  --pp-surface-071e15: #071e15;
+  --pp-surface-071e3d: #071e3d;
+  --pp-surface-080205: #080205;
+  --pp-surface-081522: #081522;
+  --pp-surface-09152b: #09152b;
+  --pp-surface-091838: #091838;
+  --pp-surface-091a3e: #091a3e;
+  --pp-surface-0a0802: #0a0802;
+  --pp-surface-0a1628: #0a1628;
+  --pp-surface-0a1a30: #0a1a30;
+  --pp-surface-0a2240: #0a2240;
+  --pp-surface-0b1528: #0b1528;
+  --pp-surface-0b182f: #0b182f;
+  --pp-surface-0b1e38: #0b1e38;
+  --pp-surface-0d1d2c: #0d1d2c;
+  --pp-surface-0d1f38: #0d1f38;
+  --pp-surface-0d2245: #0d2245;
+  --pp-surface-0d241c: #0d241c;
+  --pp-surface-0e203e: #0e203e;
+  --pp-surface-0e2c52: #0e2c52;
+  --pp-surface-0f172a: #0f172a;
+  --pp-surface-150b0f: #150b0f;
+  --pp-surface-15120f: #15120f;
+  --pp-surface-1a1607: #1a1607;
+  --pp-surface-1e1730: #1e1730;
+  --pp-surface-1e293b: #1e293b;
+  --pp-surface-1f1116: #1f1116;
+  --pp-surface-241f0d: #241f0d;
+  --pp-slate-700: var(--color-slate-700);
+  --pp-slate-800: var(--color-slate-800);
+  --pp-slate-900: var(--color-slate-900);
+  --pp-slate-950: var(--color-slate-950);
+  --pp-gray-700: var(--color-gray-700);
+  --pp-gray-800: var(--color-gray-800);
+  --pp-gray-900: var(--color-gray-900);
+  --pp-gray-950: var(--color-gray-950);
+  --pp-zinc-700: var(--color-zinc-700);
+  --pp-zinc-800: var(--color-zinc-800);
+  --pp-zinc-900: var(--color-zinc-900);
+  --pp-zinc-950: var(--color-zinc-950);
+}
+[data-theme="light"] {
+  color-scheme: light;
+  --pp-surface-02060b: #F9F7F3;
+  --pp-surface-020617: #F9F7F3;
+  --pp-surface-020b07: #F9F7F3;
+  --pp-surface-040a18: #FFFFFF;
+  --pp-surface-050e24: #FFFFFF;
+  --pp-surface-061426: #FFFFFF;
+  --pp-surface-07132b: #FFFFFF;
+  --pp-surface-071427: #FFFFFF;
+  --pp-surface-07172a: #FFFFFF;
+  --pp-surface-07192f: #FFFFFF;
+  --pp-surface-071e15: #FFFFFF;
+  --pp-surface-071e3d: #FFFFFF;
+  --pp-surface-080205: #F9F7F3;
+  --pp-surface-081522: #FFFFFF;
+  --pp-surface-09152b: #FFFFFF;
+  --pp-surface-091838: #FFFFFF;
+  --pp-surface-091a3e: #FFFFFF;
+  --pp-surface-0a0802: #F9F7F3;
+  --pp-surface-0a1628: #FFFFFF;
+  --pp-surface-0a1a30: #FFFFFF;
+  --pp-surface-0a2240: #FFFFFF;
+  --pp-surface-0b1528: #FFFFFF;
+  --pp-surface-0b182f: #FFFFFF;
+  --pp-surface-0b1e38: #FFFFFF;
+  --pp-surface-0d1d2c: #FFFFFF;
+  --pp-surface-0d1f38: #FFFFFF;
+  --pp-surface-0d2245: #FFFFFF;
+  --pp-surface-0d241c: #FFFFFF;
+  --pp-surface-0e203e: #FFFFFF;
+  --pp-surface-0e2c52: #FFFFFF;
+  --pp-surface-0f172a: #FFFFFF;
+  --pp-surface-150b0f: #F9F7F3;
+  --pp-surface-15120f: #F9F7F3;
+  --pp-surface-1a1607: #FFFFFF;
+  --pp-surface-1e1730: #FFFFFF;
+  --pp-surface-1e293b: #FFFFFF;
+  --pp-surface-1f1116: #FFFFFF;
+  --pp-surface-241f0d: #FFFFFF;
+  --pp-slate-700: #F1ECE8;
+  --pp-slate-800: #F1ECE8;
+  --pp-slate-900: #FFFFFF;
+  --pp-slate-950: #FFFFFF;
+  --pp-gray-700: #F1ECE8;
+  --pp-gray-800: #F1ECE8;
+  --pp-gray-900: #FFFFFF;
+  --pp-gray-950: #FFFFFF;
+  --pp-zinc-700: #F1ECE8;
+  --pp-zinc-800: #F1ECE8;
+  --pp-zinc-900: #FFFFFF;
+  --pp-zinc-950: #FFFFFF;
+  --text-muted: #64748B;
+  --text-faint: #64748B;
+  --accent-gold: #76590B;
+  --accent-gold-hi: #76590B;
+  --color-text-primary: var(--text-body);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-cosmic-950: #F9F7F3;
+  --color-cosmic-900: #FFFFFF;
+  --color-cosmic-800: #F5F0ED;
+  --color-cosmic-700: #ECE5DF;
+}
+[data-theme="dark"] { color-scheme: dark; }
+/* Bright gold fills need dark lettering in both themes. */
+[data-theme="light"] body .bg-\[\#C6A96B\] { background-color: #C6A96B !important; }
+[data-theme="light"] body .bg-\[\#C9A96E\] { background-color: #C9A96E !important; }
+[data-theme="light"] body .bg-\[\#D9BC82\] { background-color: #D9BC82 !important; }
+[data-theme="light"] .glow-gold, [data-theme="light"] .glow-mystic { text-shadow: none; }
+
+[data-theme="light"] body .hover\:text-\[\#F3EFE8\]:hover { color: var(--text-body) !important; }
+
+/* Intentional brand-blue fills keep an explicit foreground. */
+.pp-on-brand { color: #FFFFFF !important; }
+[data-theme="light"] .text-gold-shimmer {
+  background-image: linear-gradient(105deg, #76590B, #8C6030, #76590B);
+}

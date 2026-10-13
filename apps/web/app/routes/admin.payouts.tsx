@@ -131,7 +131,7 @@ export default function AdminPayoutsPage() {
       case "failed":
         return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-red-500/20 text-red-400 border border-red-500/40 flex items-center gap-1.5"><AlertTriangle className="w-3.5 h-3.5" /> โอนไม่สำเร็จ</span>;
       default:
-        return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-700 text-slate-300">{status}</span>;
+        return <span className="px-2.5 py-1 text-xs font-semibold rounded-full bg-[var(--pp-slate-700)] text-slate-300">{status}</span>;
     }
   };
 
@@ -633,7 +633,7 @@ export default function AdminPayoutsPage() {
       {/* ── MODAL: PARTNER FINANCIAL DETAIL & KYC INSPECTOR ── */}
       {modalMode === "detail" && selectedPayout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg rounded-3xl border border-[#C6A96B]/40 bg-[#0A1628] p-6 space-y-4 shadow-2xl card-glass-premium">
+          <div className="w-full max-w-lg rounded-3xl border border-[#C6A96B]/40 bg-[var(--pp-surface-0a1628)] p-6 space-y-4 shadow-2xl card-glass-premium">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <h3 className="font-display font-black text-lg text-white">
                 ข้อมูลพันธมิตร & 3 Operational Balances
@@ -663,7 +663,7 @@ export default function AdminPayoutsPage() {
               </div>
 
               {/* 3 Operational Balances + 1 Clawback Debt */}
-              <div className="p-3 rounded-2xl bg-slate-900/60 border border-white/10 space-y-2">
+              <div className="p-3 rounded-2xl bg-[var(--pp-slate-900)]/60 border border-white/10 space-y-2">
                 <div className="text-[11px] font-bold text-[#C6A96B] uppercase tracking-wider">
                   สถานะทางบัญชี (3 Operational Balances + 1 Clawback Debt)
                 </div>
@@ -740,7 +740,7 @@ export default function AdminPayoutsPage() {
       {/* ── MODAL: APPROVE CONFIRMATION ── */}
       {modalMode === "approve" && selectedPayout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md rounded-3xl border border-emerald-500/40 bg-[#0A1628] p-6 space-y-4 shadow-2xl card-glass-premium">
+          <div className="w-full max-w-md rounded-3xl border border-emerald-500/40 bg-[var(--pp-surface-0a1628)] p-6 space-y-4 shadow-2xl card-glass-premium">
             <div className="flex items-center gap-2 text-emerald-400 font-display font-black text-lg">
               <ShieldCheck className="w-5 h-5" />
               <span>ยืนยันการอนุมัติคำขอถอนเงิน</span>
@@ -813,7 +813,7 @@ export default function AdminPayoutsPage() {
       {/* ── MODAL: REJECT CONFIRMATION ── */}
       {modalMode === "reject" && selectedPayout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md rounded-3xl border border-rose-500/40 bg-[#0A1628] p-6 space-y-4 shadow-2xl card-glass-premium">
+          <div className="w-full max-w-md rounded-3xl border border-rose-500/40 bg-[var(--pp-surface-0a1628)] p-6 space-y-4 shadow-2xl card-glass-premium">
             <div className="flex items-center gap-2 text-rose-400 font-display font-black text-lg">
               <XCircle className="w-5 h-5" />
               <span>ปฏิเสธคำขอถอนเงิน (คืนยอดเข้า Available)</span>
@@ -885,7 +885,7 @@ export default function AdminPayoutsPage() {
       {/* ── MODAL: EXECUTE OMISE TRANSFER ── */}
       {modalMode === "transfer" && selectedPayout && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-md rounded-3xl border border-[#C6A96B]/50 bg-[#0A1628] p-6 space-y-4 shadow-2xl card-glass-premium">
+          <div className="w-full max-w-md rounded-3xl border border-[#C6A96B]/50 bg-[var(--pp-surface-0a1628)] p-6 space-y-4 shadow-2xl card-glass-premium">
             <div className="flex items-center gap-2 text-[#C6A96B] font-display font-black text-lg">
               <Send className="w-5 h-5" />
               <span>ส่งคำสั่งโอนเงินออก (Omise Transfer API)</span>
@@ -947,7 +947,7 @@ export default function AdminPayoutsPage() {
       {/* ── MODAL: JOB FAILURE DETAILS ── */}
       {selectedJobLog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="w-full max-w-lg rounded-3xl border border-rose-500/40 bg-[#0A1628] p-6 space-y-4 shadow-2xl card-glass-premium">
+          <div className="w-full max-w-lg rounded-3xl border border-rose-500/40 bg-[var(--pp-surface-0a1628)] p-6 space-y-4 shadow-2xl card-glass-premium">
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="flex items-center gap-2 text-rose-400 font-bold">
                 <AlertTriangle className="w-5 h-5" />

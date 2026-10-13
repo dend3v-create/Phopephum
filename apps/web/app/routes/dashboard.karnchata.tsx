@@ -609,35 +609,35 @@ function DateTimePicker({ timeMode, setTimeMode, onSubmit, isLoading }: {
   };
 
   return (
-    <div className="bg-[#0A1628] border border-white/5 rounded-2xl p-4">
-      <div className="flex bg-[#020617] rounded-xl p-1 gap-1 mb-3">
+    <div className="bg-[var(--pp-surface-0a1628)] border border-white/5 rounded-2xl p-4">
+      <div className="flex bg-[var(--pp-surface-020617)] rounded-xl p-1 gap-1 mb-3">
         <button onClick={reset} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${timeMode === "live" ? "bg-[#C6A96B] text-[#020617]" : "text-[#C6B79F] hover:text-[#F8F6F1]"}`}>⏱ เรียลไทม์</button>
-        <button onClick={() => setTimeMode("custom")} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[#1E1730] text-[#F8F6F1]" : "text-[#C6B79F] hover:text-[#F8F6F1]"}`}>📅 เลือกเวลา</button>
+        <button onClick={() => setTimeMode("custom")} className={`flex-1 py-2 text-xs font-bold rounded-lg transition-all ${timeMode === "custom" ? "bg-[var(--pp-surface-1e1730)] text-[#F8F6F1]" : "text-[#C6B79F] hover:text-[#F8F6F1]"}`}>📅 เลือกเวลา</button>
       </div>
       {timeMode === "custom" && (
         <div className="space-y-2">
           <div className="grid grid-cols-4 gap-2">
             <div>
               <label className="text-[10px] text-[#C6B79F] font-bold block mb-1">วัน</label>
-              <select value={day} onChange={e => setDay(Number(e.target.value))} className="w-full bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none">
+              <select value={day} onChange={e => setDay(Number(e.target.value))} className="w-full bg-[var(--pp-surface-020617)] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none">
                 {Array.from({length:31},(_,i)=>i+1).map(d => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
             <div>
               <label className="text-[10px] text-[#C6B79F] font-bold block mb-1">เดือน</label>
-              <select value={month} onChange={e => setMonth(Number(e.target.value))} className="w-full bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none">
+              <select value={month} onChange={e => setMonth(Number(e.target.value))} className="w-full bg-[var(--pp-surface-020617)] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none">
                 {MONTHS.map((m,i) => <option key={i+1} value={i+1}>{m}</option>)}
               </select>
             </div>
             <div>
               <label className="text-[10px] text-[#C6B79F] font-bold block mb-1">ปี พ.ศ.</label>
-              <select value={year} onChange={e => setYear(Number(e.target.value))} className="w-full bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none">
+              <select value={year} onChange={e => setYear(Number(e.target.value))} className="w-full bg-[var(--pp-surface-020617)] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none">
                 {Array.from({length:10},(_,i)=>curYear-5+i).map(y=><option key={y} value={y}>{y}</option>)}
               </select>
             </div>
             <div>
               <label className="text-[10px] text-[#C6B79F] font-bold block mb-1">เวลา</label>
-              <input type="time" value={timeStr} onChange={e => setTimeStr(e.target.value)} className="w-full bg-[#020617] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none" />
+              <input type="time" value={timeStr} onChange={e => setTimeStr(e.target.value)} className="w-full bg-[var(--pp-surface-020617)] border border-white/10 text-[#F8F6F1] text-xs rounded-lg px-2 py-2 outline-none" />
             </div>
           </div>
           <button onClick={apply} disabled={isLoading} className="w-full bg-[#C6A96B] text-[#020617] font-bold text-xs py-2 rounded-xl hover:bg-[#D9BC82] disabled:opacity-40 transition-all">
@@ -852,7 +852,7 @@ export default function KarnchataPage() {
       </div>
 
       {/* ── Clock Strip ── */}
-      <div className="flex items-center justify-between bg-[#0A1628]/80 border border-white/5 rounded-2xl px-5 py-3">
+      <div className="flex items-center justify-between bg-[var(--pp-surface-0a1628)]/80 border border-white/5 rounded-2xl px-5 py-3">
         <div className="flex items-center gap-3">
           <div className="w-2 h-2 rounded-full bg-[#C6A96B] animate-pulse shadow-[0_0_8px_rgba(198,169,107,0.6)]" />
           <span className="text-2xl font-display font-black text-[#F8F6F1]">{formatTime(time)}</span>
@@ -871,7 +871,7 @@ export default function KarnchataPage() {
       <DateTimePicker timeMode={timeMode} setTimeMode={setTimeMode} onSubmit={handleDateSubmit} isLoading={isLoading} />
 
       {/* ── Tab Selector ── */}
-      <div className="flex bg-[#0A1628]/60 p-1.5 rounded-2xl border border-white/5 gap-1">
+      <div className="flex bg-[var(--pp-surface-0a1628)]/60 p-1.5 rounded-2xl border border-white/5 gap-1">
         {([
           ["daily", "📅", "รายวัน", false],
           ["hourly", "⏱", "รายชั่วโมง", isProLocked],
@@ -932,7 +932,7 @@ export default function KarnchataPage() {
           />
 
           {/* 16-yam table */}
-          <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-5">
+          <Card className="border-[#C6A96B]/20 bg-[var(--pp-surface-0a1628)] p-5">
             <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางกาลชะตา 16 ยาม — กดดูคำแนะนำ</h3>
             <p className="text-[10px] text-[#C6B79F] mb-4">ยามไฮไลต์คือปัจจุบัน · กดแต่ละยามเพื่อดูสิ่งที่ควรทำ</p>
             <div className="space-y-4">
@@ -983,7 +983,7 @@ export default function KarnchataPage() {
                 yamName={activeResult.yamYaiName}
                 label="ชั่วโมงนี้ (ยามใหญ่)"
               />
-              <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-5">
+              <Card className="border-[#C6A96B]/20 bg-[var(--pp-surface-0a1628)] p-5">
                 <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยาม{isDaytime ? "กลางวัน" : "กลางคืน"} 8 ยาม</h3>
               </Card>
             </div>
@@ -1022,7 +1022,7 @@ export default function KarnchataPage() {
             />
 
             {/* Yam table */}
-            <Card className="border-[#C6A96B]/20 bg-[#0A1628] p-5">
+            <Card className="border-[#C6A96B]/20 bg-[var(--pp-surface-0a1628)] p-5">
               <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยาม{isDaytime ? "กลางวัน" : "กลางคืน"} 8 ยาม</h3>
               <p className="text-[10px] text-[#C6B79F] mb-4">กดแต่ละยามเพื่อดูคำแนะนำตัดสินใจ</p>
               <div className="space-y-1">
@@ -1067,7 +1067,7 @@ export default function KarnchataPage() {
                 yamName={activeResult.yamSoyName}
                 label="นาทีนี้ (ยามซอย)"
               />
-              <Card className="border-[#6D8FC7]/20 bg-[#0A1628] p-5">
+              <Card className="border-[#6D8FC7]/20 bg-[var(--pp-surface-0a1628)] p-5">
                 <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยามซอย 8 ช่วง — ยามใหญ่ {activeResult.yamYaiName}</h3>
               </Card>
             </div>
@@ -1106,7 +1106,7 @@ export default function KarnchataPage() {
             />
 
             {/* Soy table */}
-            <Card className="border-[#6D8FC7]/20 bg-[#0A1628] p-5">
+            <Card className="border-[#6D8FC7]/20 bg-[var(--pp-surface-0a1628)] p-5">
               <h3 className="text-sm font-bold text-[#F8F6F1] mb-1">ตารางยามซอย 8 ช่วง — ยามใหญ่ {activeResult.yamYaiName}</h3>
               <p className="text-[10px] text-[#C6B79F] mb-4">แต่ละซอย 3 นาที 45 วินาที · กดเพื่อดูคำแนะนำ</p>
               <div className="space-y-1">

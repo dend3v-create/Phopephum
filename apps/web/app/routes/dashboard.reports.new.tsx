@@ -508,7 +508,7 @@ export default function NewReportPage() {
 
       {/* ── Full-screen Generating Overlay ── */}
       {isGenerating && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#020617]/85 backdrop-blur-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--pp-surface-020617)]/85 backdrop-blur-md">
           <div className="text-center space-y-6 px-8 max-w-xs">
             <div className="relative mx-auto w-24 h-24">
               <div className="absolute inset-0 rounded-full border border-[#C9A96E]/20 animate-ping" />

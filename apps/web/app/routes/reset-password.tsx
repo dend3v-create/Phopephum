@@ -62,7 +62,7 @@ export default function ResetPasswordPage() {
   const isLoading = navigation.state === "submitting";
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[#020617]">
+    <div className="min-h-screen flex items-center justify-center px-4 py-12 bg-[var(--pp-surface-020617)]">
       {/* Background glow */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-[#C9A96E]/5 rounded-full blur-3xl" />

@@ -24,7 +24,7 @@ export function MobileFloatingSpeedDial() {
           <circle cx="6" cy="17" r="1" fill="currentColor" />
         </svg>
       ),
-      badgeClass: "bg-gradient-to-tr from-[#1E3A8A] to-[#2563EB] text-[#F8F6F1] border border-[#C6A96B]/50 shadow-md shadow-blue-900/30",
+      badgeClass: "bg-gradient-to-tr from-[#1E3A8A] to-[#2563EB] pp-on-brand border border-[#C6A96B]/50 shadow-md shadow-blue-900/30",
     },
     {
       to: "/dashboard",
@@ -124,7 +124,7 @@ export function MobileFloatingSpeedDial() {
           className={`w-14 h-14 rounded-full flex items-center justify-center shadow-2xl transition-all duration-300 active:scale-90 cursor-pointer ${
             isOpen
               ? "bg-white dark:bg-[#0A2240] text-[#C6A96B] rotate-90 border-2 border-[#C6A96B] shadow-amber-500/20"
-              : "bg-[#07172A] text-[#FDF8E8] shadow-black/30 border-2 border-[#C6A96B]/60 hover:border-[#C6A96B]"
+              : "bg-[var(--pp-surface-07172a)] text-[#FDF8E8] shadow-black/30 border-2 border-[#C6A96B]/60 hover:border-[#C6A96B]"
           }`}
           style={{ width: "56px", height: "56px" }}
           aria-label={isOpen ? "ปิดเมนูลัด" : "เปิดเมนูลัด"}

@@ -304,7 +304,7 @@ export default function WisdomChatPage() {
       <div
         className="hidden md:flex flex-col w-72 shrink-0 border-r"
         style={{
-          background: "rgba(10, 34, 64, 0.15)",
+          background: "var(--bg-surface)",
           borderColor: "var(--border-gold)",
         }}
       >

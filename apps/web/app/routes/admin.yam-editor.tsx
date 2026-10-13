@@ -210,7 +210,7 @@ function ZodiacSelect({ name, defaultValue }: { name: string; defaultValue?: num
     <select
       name={name}
       defaultValue={defaultValue ?? 0}
-      className="w-full bg-[#020617] border border-white/10 rounded-lg px-1.5 py-1 text-xs text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40"
+      className="w-full bg-[var(--pp-surface-020617)] border border-white/10 rounded-lg px-1.5 py-1 text-xs text-[#F8F6F1] focus:outline-none focus:border-[#C9A96E]/40"
     >
       {ZODIAC_OPTIONS.map(o => (
         <option key={o.value} value={o.value}>{o.label}</option>
@@ -309,8 +309,8 @@ export default function YamEditorPage() {
                 return (
                   <div key={id} className={`rounded-xl border p-3 ${
                     hasData
-                      ? "border-[#C9A96E]/20 bg-slate-900/40"
-                      : "border-white/8 bg-slate-950/20"
+                      ? "border-[#C9A96E]/20 bg-[var(--pp-slate-900)]/40"
+                      : "border-white/8 bg-[var(--pp-slate-950)]/20"
                   }`}>
                     {/* Yam header */}
                     <div className="flex items-center gap-2 mb-3">

@@ -399,7 +399,7 @@ export default function PartnerPortalPage() {
   return (
     <div className="space-y-6 pb-16 font-sans text-[#F8F6F1]">
       {/* ── 1. Top Hero Header: Astral Imperial Flow ── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#0B182F]/95 via-[#071427]/90 to-[#020617] border border-[#C6A96B]/30 p-6 md:p-8 backdrop-blur-2xl shadow-2xl">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[var(--pp-surface-0b182f)]/95 via-[var(--pp-surface-071427)]/90 to-[var(--pp-surface-020617)] border border-[#C6A96B]/30 p-6 md:p-8 backdrop-blur-2xl shadow-2xl">
         <div className="absolute -top-32 -right-32 w-96 h-96 bg-[#4B6FAE]/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-[#C6A96B]/15 rounded-full blur-3xl pointer-events-none" />
 
@@ -427,8 +427,8 @@ export default function PartnerPortalPage() {
           </div>
 
           {/* Quick Share Code & Link */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-[#020617]/80 p-3 rounded-2xl border border-white/10 backdrop-blur-md shadow-inner">
-            <div className="px-3.5 py-2 bg-[#071427] rounded-xl border border-white/10 flex items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 bg-[var(--pp-surface-020617)]/80 p-3 rounded-2xl border border-white/10 backdrop-blur-md shadow-inner">
+            <div className="px-3.5 py-2 bg-[var(--pp-surface-071427)] rounded-xl border border-white/10 flex items-center justify-between gap-3">
               <span className="text-xs text-slate-400">รหัสของคุณ:</span>
               <span className="font-mono font-bold text-[#D9BC82] text-sm tracking-wider">{partnerCode}</span>
               <button
@@ -541,7 +541,7 @@ export default function PartnerPortalPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Balance 1: Available Balance (พร้อมถอน) */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0D241C]/90 via-[#071E15]/80 to-[#020B07] border border-emerald-500/30 p-5 shadow-xl backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--pp-surface-0d241c)]/90 via-[var(--pp-surface-071e15)]/80 to-[var(--pp-surface-020b07)] border border-emerald-500/30 p-5 shadow-xl backdrop-blur-xl">
             <div className="flex items-center justify-between text-xs text-emerald-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
                 <Wallet className="w-4 h-4 text-emerald-400" />
@@ -568,7 +568,7 @@ export default function PartnerPortalPage() {
           </div>
 
           {/* Balance 2: Holding Balance (รอปลดล็อก 14 วัน) */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#241F0D]/90 via-[#1A1607]/80 to-[#0A0802] border border-amber-500/30 p-5 shadow-xl backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--pp-surface-241f0d)]/90 via-[var(--pp-surface-1a1607)]/80 to-[var(--pp-surface-0a0802)] border border-amber-500/30 p-5 shadow-xl backdrop-blur-xl">
             <div className="flex items-center justify-between text-xs text-amber-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
                 <Clock className="w-4 h-4 text-amber-400" />
@@ -585,7 +585,7 @@ export default function PartnerPortalPage() {
           </div>
 
           {/* Balance 3: Payout Pending (กำลังโอน) */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0D1D2C]/90 via-[#081522]/80 to-[#02060B] border border-sky-500/30 p-5 shadow-xl backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--pp-surface-0d1d2c)]/90 via-[var(--pp-surface-081522)]/80 to-[var(--pp-surface-02060b)] border border-sky-500/30 p-5 shadow-xl backdrop-blur-xl">
             <div className="flex items-center justify-between text-xs text-sky-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
                 <Send className="w-4 h-4 text-sky-400" />
@@ -602,7 +602,7 @@ export default function PartnerPortalPage() {
           </div>
 
           {/* Balance 4: Clawback Debt & Lifetime Earned */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1F1116]/90 via-[#150B0F]/80 to-[#080205] border border-rose-500/30 p-5 shadow-xl backdrop-blur-xl">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[var(--pp-surface-1f1116)]/90 via-[var(--pp-surface-150b0f)]/80 to-[var(--pp-surface-080205)] border border-rose-500/30 p-5 shadow-xl backdrop-blur-xl">
             <div className="flex items-center justify-between text-xs text-rose-400 font-medium mb-2">
               <span className="flex items-center gap-1.5">
                 <Coins className="w-4 h-4 text-rose-400" />
@@ -623,7 +623,7 @@ export default function PartnerPortalPage() {
       </div>
 
       {/* ── 3. Navigation Tabs ── */}
-      <div className="p-1.5 rounded-2xl bg-[#071427]/80 border border-white/10 backdrop-blur-xl flex items-center gap-1.5 overflow-x-auto scrollbar-none shadow-lg">
+      <div className="p-1.5 rounded-2xl bg-[var(--pp-surface-071427)]/80 border border-white/10 backdrop-blur-xl flex items-center gap-1.5 overflow-x-auto scrollbar-none shadow-lg">
         <button
           type="button"
           onClick={() => setActiveTab("overview")}
@@ -716,7 +716,7 @@ export default function PartnerPortalPage() {
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-6 rounded-2xl bg-[#0A1628]/90 border border-white/10 shadow-xl backdrop-blur-xl hover:border-[#4B6FAE]/40 transition-all">
+              <div className="p-6 rounded-2xl bg-[var(--pp-surface-0a1628)]/90 border border-white/10 shadow-xl backdrop-blur-xl hover:border-[#4B6FAE]/40 transition-all">
                 <div className="text-xs text-slate-400 mb-1">ยอดคลิกลิงก์ทั้งหมด (Attribution Clicks)</div>
                 <div className="text-3xl font-bold font-mono text-[#F8F6F1]">
                   {referralPerformance.totalClicks.toLocaleString()}
@@ -726,7 +726,7 @@ export default function PartnerPortalPage() {
                 </div>
               </div>
 
-              <div className="p-6 rounded-2xl bg-[#0A1628]/90 border border-white/10 shadow-xl backdrop-blur-xl hover:border-emerald-500/40 transition-all">
+              <div className="p-6 rounded-2xl bg-[var(--pp-surface-0a1628)]/90 border border-white/10 shadow-xl backdrop-blur-xl hover:border-emerald-500/40 transition-all">
                 <div className="text-xs text-slate-400 mb-1">สมาชิกที่สมัครสำเร็จ (Conversions)</div>
                 <div className="text-3xl font-bold font-mono text-emerald-400">
                   {referralPerformance.totalConverted.toLocaleString()}
@@ -736,7 +736,7 @@ export default function PartnerPortalPage() {
                 </div>
               </div>
 
-              <div className="p-6 rounded-2xl bg-[#0A1628]/90 border border-white/10 shadow-xl backdrop-blur-xl hover:border-amber-500/40 transition-all">
+              <div className="p-6 rounded-2xl bg-[var(--pp-surface-0a1628)]/90 border border-white/10 shadow-xl backdrop-blur-xl hover:border-amber-500/40 transition-all">
                 <div className="text-xs text-slate-400 mb-1">อัตราความสำเร็จ (Conversion Rate)</div>
                 <div className="text-3xl font-bold font-mono text-[#D9BC82]">
                   {referralPerformance.conversionRate}%
@@ -752,7 +752,7 @@ export default function PartnerPortalPage() {
           {/* Campaign Generator & Tier Details */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Tier Perks Card — Refined Deep Cosmic Gold */}
-            <div className="p-6 md:p-7 rounded-2xl bg-gradient-to-br from-[#0B182F]/95 via-[#071427]/90 to-[#020617] border border-[#C6A96B]/30 shadow-2xl space-y-4 backdrop-blur-2xl">
+            <div className="p-6 md:p-7 rounded-2xl bg-gradient-to-br from-[var(--pp-surface-0b182f)]/95 via-[var(--pp-surface-071427)]/90 to-[var(--pp-surface-020617)] border border-[#C6A96B]/30 shadow-2xl space-y-4 backdrop-blur-2xl">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
                   <Award className="w-5 h-5 text-[#D9BC82]" />
@@ -771,7 +771,7 @@ export default function PartnerPortalPage() {
                 <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs transition-all ${
                   tier === "affiliate"
                     ? "bg-[#C6A96B]/15 border-[#C6A96B]/50 text-[#F8F6F1] ring-1 ring-[#C6A96B]/30 shadow-lg shadow-[#C6A96B]/10"
-                    : "bg-[#071427]/60 border-white/10 text-slate-300 hover:border-white/20"
+                    : "bg-[var(--pp-surface-071427)]/60 border-white/10 text-slate-300 hover:border-white/20"
                 }`}>
                   <div>
                     <div className="font-bold text-sm text-[#F8F6F1] flex items-center gap-1.5">
@@ -786,7 +786,7 @@ export default function PartnerPortalPage() {
                 <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs transition-all ${
                   tier === "creator"
                     ? "bg-[#C6A96B]/15 border-[#C6A96B]/50 text-[#F8F6F1] ring-1 ring-[#C6A96B]/30 shadow-lg shadow-[#C6A96B]/10"
-                    : "bg-[#071427]/60 border-white/10 text-slate-300 hover:border-white/20"
+                    : "bg-[var(--pp-surface-071427)]/60 border-white/10 text-slate-300 hover:border-white/20"
                 }`}>
                   <div>
                     <div className="font-bold text-sm text-[#F8F6F1] flex items-center gap-1.5">
@@ -801,7 +801,7 @@ export default function PartnerPortalPage() {
                 <div className={`p-3.5 rounded-xl border flex items-center justify-between text-xs transition-all ${
                   tier === "master"
                     ? "bg-[#C6A96B]/15 border-[#C6A96B]/50 text-[#F8F6F1] ring-1 ring-[#C6A96B]/30 shadow-lg shadow-[#C6A96B]/10"
-                    : "bg-[#071427]/60 border-white/10 text-slate-300 hover:border-white/20"
+                    : "bg-[var(--pp-surface-071427)]/60 border-white/10 text-slate-300 hover:border-white/20"
                 }`}>
                   <div>
                     <div className="font-bold text-sm text-[#F8F6F1] flex items-center gap-1.5">
@@ -816,7 +816,7 @@ export default function PartnerPortalPage() {
             </div>
 
             {/* Campaign Generator & Link Share */}
-            <div className="p-6 md:p-7 rounded-2xl bg-gradient-to-br from-[#0A1628]/95 to-[#020617] border border-white/10 shadow-2xl space-y-4 backdrop-blur-2xl">
+            <div className="p-6 md:p-7 rounded-2xl bg-gradient-to-br from-[var(--pp-surface-0a1628)]/95 to-[var(--pp-surface-020617)] border border-white/10 shadow-2xl space-y-4 backdrop-blur-2xl">
               <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
                 <Share2 className="w-5 h-5 text-sky-400" />
                 สร้างลิงก์แคมเปญเฉพาะกิจ (Custom Campaign Link)
@@ -833,7 +833,7 @@ export default function PartnerPortalPage() {
                     value={customCampaign}
                     onChange={(e) => setCustomCampaign(e.target.value)}
                     placeholder="เช่น facebook_group, youtube"
-                    className="bg-[#020617]/80 border border-white/15 text-white text-xs placeholder:text-slate-500 rounded-xl px-3.5 py-2.5 focus:border-[#C6A96B] focus:ring-1 focus:ring-[#C6A96B]"
+                    className="bg-[var(--pp-surface-020617)]/80 border border-white/15 text-white text-xs placeholder:text-slate-500 rounded-xl px-3.5 py-2.5 focus:border-[#C6A96B] focus:ring-1 focus:ring-[#C6A96B]"
                   />
                   <Button
                     type="button"
@@ -845,14 +845,14 @@ export default function PartnerPortalPage() {
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#020617]/90 border border-[#C6A96B]/30 text-xs font-mono text-[#D9BC82] break-all select-all shadow-inner">
+              <div className="p-4 rounded-xl bg-[var(--pp-surface-020617)]/90 border border-[#C6A96B]/30 text-xs font-mono text-[#D9BC82] break-all select-all shadow-inner">
                 {dynamicReferralLink}
               </div>
             </div>
           </div>
 
           {/* UX HIERARCHY LEVEL 3: Details & Audit Trail Quicklinks */}
-          <div className="p-6 rounded-2xl bg-[#071427]/60 border border-white/10 space-y-3 backdrop-blur-xl">
+          <div className="p-6 rounded-2xl bg-[var(--pp-surface-071427)]/60 border border-white/10 space-y-3 backdrop-blur-xl">
             <h2 className="text-xs md:text-sm font-semibold text-slate-300 uppercase tracking-wider flex items-center gap-2">
               <Layers className="w-4 h-4 text-purple-400" />
               ระดับที่ 3 — รายละเอียดประวัติและการตรวจสอบ (Details & Audit Trail)
@@ -861,7 +861,7 @@ export default function PartnerPortalPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("commissions")}
-                className="p-4 rounded-xl bg-[#0B182F]/70 hover:bg-[#0E203E]/90 border border-white/10 hover:border-[#C6A96B]/40 text-left transition-all flex items-center justify-between group shadow-sm"
+                className="p-4 rounded-xl bg-[var(--pp-surface-0b182f)]/70 hover:bg-[var(--pp-surface-0e203e)]/90 border border-white/10 hover:border-[#C6A96B]/40 text-left transition-all flex items-center justify-between group shadow-sm"
               >
                 <div>
                   <div className="text-xs font-semibold text-slate-200 group-hover:text-[#D9BC82]">ประวัติคอมมิชชัน</div>
@@ -873,7 +873,7 @@ export default function PartnerPortalPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("payouts")}
-                className="p-4 rounded-xl bg-[#0B182F]/70 hover:bg-[#0E203E]/90 border border-white/10 hover:border-[#C6A96B]/40 text-left transition-all flex items-center justify-between group shadow-sm"
+                className="p-4 rounded-xl bg-[var(--pp-surface-0b182f)]/70 hover:bg-[var(--pp-surface-0e203e)]/90 border border-white/10 hover:border-[#C6A96B]/40 text-left transition-all flex items-center justify-between group shadow-sm"
               >
                 <div>
                   <div className="text-xs font-semibold text-slate-200 group-hover:text-[#D9BC82]">ประวัติการถอนเงิน</div>
@@ -885,7 +885,7 @@ export default function PartnerPortalPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab("ledger")}
-                className="p-4 rounded-xl bg-[#0B182F]/70 hover:bg-[#0E203E]/90 border border-white/10 hover:border-[#C6A96B]/40 text-left transition-all flex items-center justify-between group shadow-sm"
+                className="p-4 rounded-xl bg-[var(--pp-surface-0b182f)]/70 hover:bg-[var(--pp-surface-0e203e)]/90 border border-white/10 hover:border-[#C6A96B]/40 text-left transition-all flex items-center justify-between group shadow-sm"
               >
                 <div>
                   <div className="text-xs font-semibold text-slate-200 group-hover:text-[#D9BC82]">สมุดบัญชีแยกประเภท</div>
@@ -949,9 +949,9 @@ export default function PartnerPortalPage() {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0A1628]/90 backdrop-blur-2xl shadow-xl">
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[var(--pp-surface-0a1628)]/90 backdrop-blur-2xl shadow-xl">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#071427] text-slate-300 uppercase tracking-wider font-semibold border-b border-white/10">
+              <thead className="bg-[var(--pp-surface-071427)] text-slate-300 uppercase tracking-wider font-semibold border-b border-white/10">
                 <tr>
                   <th className="p-4">วันที่ / รายการ</th>
                   <th className="p-4">ผู้ซื้อ (Masked PII)</th>
@@ -1036,7 +1036,7 @@ export default function PartnerPortalPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left 2 Cols: Recent Referrals (Masked PII) */}
           <div className="lg:col-span-2 space-y-4">
-            <div className="p-6 rounded-2xl bg-[#0A1628]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
+            <div className="p-6 rounded-2xl bg-[var(--pp-surface-0a1628)]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
               <div className="flex items-center justify-between">
                 <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
                   <Users className="w-5 h-5 text-sky-400" />
@@ -1077,7 +1077,7 @@ export default function PartnerPortalPage() {
 
           {/* Right Col: Top Campaigns */}
           <div className="space-y-4">
-            <div className="p-6 rounded-2xl bg-[#0A1628]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
+            <div className="p-6 rounded-2xl bg-[var(--pp-surface-0a1628)]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
               <h3 className="text-sm font-semibold text-[#F8F6F1] flex items-center gap-2">
                 <TrendingUp className="w-4 h-4 text-[#D9BC82]" />
                 สถิติแคมเปญ (Top Channels)
@@ -1090,7 +1090,7 @@ export default function PartnerPortalPage() {
                   </div>
                 ) : (
                   referralPerformance.topCampaigns.map((camp, idx) => (
-                    <div key={idx} className="p-3.5 rounded-xl bg-[#071427] border border-white/5 text-xs flex justify-between items-center hover:border-white/10 transition-colors">
+                    <div key={idx} className="p-3.5 rounded-xl bg-[var(--pp-surface-071427)] border border-white/5 text-xs flex justify-between items-center hover:border-white/10 transition-colors">
                       <div>
                         <span className="font-mono text-[#D9BC82] font-semibold">{camp.campaignCode}</span>
                         <div className="text-[10px] text-slate-400 mt-0.5">{camp.clicks} ครั้งที่กดเข้าชม</div>
@@ -1130,9 +1130,9 @@ export default function PartnerPortalPage() {
             </Button>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0A1628]/90 backdrop-blur-2xl shadow-xl">
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[var(--pp-surface-0a1628)]/90 backdrop-blur-2xl shadow-xl">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#071427] text-slate-300 uppercase tracking-wider font-semibold border-b border-white/10">
+              <thead className="bg-[var(--pp-surface-071427)] text-slate-300 uppercase tracking-wider font-semibold border-b border-white/10">
                 <tr>
                   <th className="p-4">เลขที่คำขอ / วันที่</th>
                   <th className="p-4 text-right">ยอดที่ขอถอน</th>
@@ -1247,9 +1247,9 @@ export default function PartnerPortalPage() {
             </div>
           </div>
 
-          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[#0A1628]/90 backdrop-blur-2xl shadow-xl">
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-[var(--pp-surface-0a1628)]/90 backdrop-blur-2xl shadow-xl">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#071427] text-slate-300 uppercase tracking-wider font-semibold border-b border-white/10">
+              <thead className="bg-[var(--pp-surface-071427)] text-slate-300 uppercase tracking-wider font-semibold border-b border-white/10">
                 <tr>
                   <th className="p-4">วันและเวลา</th>
                   <th className="p-4">ประเภทธุรกรรม</th>
@@ -1321,7 +1321,7 @@ export default function PartnerPortalPage() {
       {activeTab === "settings" && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Form 1: Payout Destination */}
-          <div className="p-6 md:p-7 rounded-2xl bg-[#0A1628]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
+          <div className="p-6 md:p-7 rounded-2xl bg-[var(--pp-surface-0a1628)]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
             <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
               <Building className="w-5 h-5 text-emerald-400" />
               ข้อมูลบัญชีรับเงินโอน (Payout Destination)
@@ -1341,7 +1341,7 @@ export default function PartnerPortalPage() {
                   defaultValue={partnerProfile?.bankName || "กสิกรไทย (KBANK)"}
                   placeholder="เช่น กสิกรไทย, ไทยพาณิชย์, กรุงเทพ"
                   required
-                  className="bg-[#020617]/80 border-white/15 text-xs text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
+                  className="bg-[var(--pp-surface-020617)]/80 border-white/15 text-xs text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
@@ -1353,7 +1353,7 @@ export default function PartnerPortalPage() {
                   defaultValue={partnerProfile?.bankAccountNo || ""}
                   placeholder="เช่น 012-3-45678-9"
                   required
-                  className="bg-[#020617]/80 border-white/15 text-xs font-mono text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
+                  className="bg-[var(--pp-surface-020617)]/80 border-white/15 text-xs font-mono text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
@@ -1365,7 +1365,7 @@ export default function PartnerPortalPage() {
                   defaultValue={partnerProfile?.bankAccountName || profile?.display_name || ""}
                   placeholder="ชื่อ-นามสกุลเจ้าของบัญชี"
                   required
-                  className="bg-[#020617]/80 border-white/15 text-xs text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
+                  className="bg-[var(--pp-surface-020617)]/80 border-white/15 text-xs text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
@@ -1376,7 +1376,7 @@ export default function PartnerPortalPage() {
                   name="promptpayId"
                   defaultValue={partnerProfile?.promptpayId || ""}
                   placeholder="เบอร์โทรศัพท์ หรือ เลขบัตร ปชช."
-                  className="bg-[#020617]/80 border-white/15 text-xs font-mono text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
+                  className="bg-[var(--pp-surface-020617)]/80 border-white/15 text-xs font-mono text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
@@ -1391,7 +1391,7 @@ export default function PartnerPortalPage() {
           </div>
 
           {/* Form 2: Tax Compliance Profile */}
-          <div className="p-6 md:p-7 rounded-2xl bg-[#0A1628]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
+          <div className="p-6 md:p-7 rounded-2xl bg-[var(--pp-surface-0a1628)]/90 border border-white/10 space-y-4 shadow-xl backdrop-blur-2xl">
             <h3 className="text-base font-semibold text-[#F8F6F1] flex items-center gap-2">
               <FileText className="w-5 h-5 text-[#D9BC82]" />
               ข้อมูลภาษีและหนังสือรับรอง (Tax Compliance Profile)
@@ -1408,7 +1408,7 @@ export default function PartnerPortalPage() {
                 <select
                   name="entityType"
                   defaultValue={partnerProfile?.entityType || "individual"}
-                  className="w-full bg-[#020617]/80 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-[#C6A96B]"
+                  className="w-full bg-[var(--pp-surface-020617)]/80 border border-white/15 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-[#C6A96B]"
                 >
                   <option value="individual">บุคคลธรรมดา (หัก ณ ที่จ่ายตามเกณฑ์สรรพากร)</option>
                   <option value="corporate">นิติบุคคล / บริษัทจำกัด (หัก ณ ที่จ่ายตามเกณฑ์สรรพากร)</option>
@@ -1423,7 +1423,7 @@ export default function PartnerPortalPage() {
                   defaultValue={partnerProfile?.taxId || ""}
                   placeholder="เลข 13 หลัก"
                   required
-                  className="bg-[#020617]/80 border-white/15 text-xs font-mono text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
+                  className="bg-[var(--pp-surface-020617)]/80 border-white/15 text-xs font-mono text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
@@ -1435,11 +1435,11 @@ export default function PartnerPortalPage() {
                   defaultValue={partnerProfile?.legalName || partnerProfile?.bankAccountName || profile?.display_name || ""}
                   placeholder="ชื่อนิติบุคคลหรือชื่อบุคคลตามบัตร ปชช."
                   required
-                  className="bg-[#020617]/80 border-white/15 text-xs text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
+                  className="bg-[var(--pp-surface-020617)]/80 border-white/15 text-xs text-white rounded-xl py-2.5 focus:border-[#C6A96B]"
                 />
               </div>
 
-              <div className="p-4 rounded-xl bg-[#020617]/60 border border-white/10 space-y-2">
+              <div className="p-4 rounded-xl bg-[var(--pp-surface-020617)]/60 border border-white/10 space-y-2">
                 <label className="flex items-center gap-2 text-xs text-slate-300 cursor-pointer">
                   <input
                     type="checkbox"
@@ -1467,7 +1467,7 @@ export default function PartnerPortalPage() {
       {/* ── 5. Payout Request Drawer / Modal with Live Dynamic Tax Calculation Preview ── */}
       {isPayoutModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-          <div className="relative w-full max-w-lg rounded-3xl bg-gradient-to-b from-[#0B182F] via-[#071427] to-[#020617] border border-[#C6A96B]/40 p-6 md:p-8 shadow-2xl space-y-6">
+          <div className="relative w-full max-w-lg rounded-3xl bg-gradient-to-b from-[var(--pp-surface-0b182f)] via-[var(--pp-surface-071427)] to-[var(--pp-surface-020617)] border border-[#C6A96B]/40 p-6 md:p-8 shadow-2xl space-y-6">
             <button
               type="button"
               onClick={() => setIsPayoutModalOpen(false)}
@@ -1531,14 +1531,14 @@ export default function PartnerPortalPage() {
                         value={payoutAmount}
                         onChange={(e) => setPayoutAmount(Math.max(0, parseFloat(e.target.value) || 0))}
                         required
-                        className="bg-[#020617]/80 border-white/20 text-lg font-mono font-bold text-[#F8F6F1] pl-8 py-2.5 rounded-xl focus:border-[#C6A96B]"
+                        className="bg-[var(--pp-surface-020617)]/80 border-white/20 text-lg font-mono font-bold text-[#F8F6F1] pl-8 py-2.5 rounded-xl focus:border-[#C6A96B]"
                       />
                       <span className="absolute left-3 top-3 text-slate-400 font-mono text-sm">฿</span>
                     </div>
                   </div>
 
                   {/* Live Dynamic Tax Breakdown */}
-                  <div className="p-4 rounded-xl bg-[#020617]/90 border border-white/10 space-y-2 text-xs">
+                  <div className="p-4 rounded-xl bg-[var(--pp-surface-020617)]/90 border border-white/10 space-y-2 text-xs">
                     <div className="flex justify-between text-slate-300">
                       <span>ยอดที่ขอถอน:</span>
                       <span className="font-mono">฿{payoutAmount.toLocaleString("th-TH", { minimumFractionDigits: 2 })}</span>

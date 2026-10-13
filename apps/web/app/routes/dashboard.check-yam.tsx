@@ -1417,7 +1417,7 @@ export default function CheckYamPage() {
                 onClick={() => setVaultFilter("pending")}
                 className={`px-3 py-1.5 rounded-xl font-bold transition-all ${
                   vaultFilter === "pending"
-                    ? "bg-slate-700 text-white shadow-sm"
+                    ? "bg-[var(--pp-slate-700)] text-white shadow-sm"
                     : "text-slate-600 dark:text-[#94A3B8] hover:text-slate-900 dark:hover:text-white"
                 }`}
               >

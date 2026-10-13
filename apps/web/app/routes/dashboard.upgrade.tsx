@@ -183,7 +183,7 @@ export default function UpgradePage() {
 
       {/* ── Tab Switcher (Subscriptions vs Sands Packs) ── */}
       <div className="flex justify-center mb-8">
-        <div className="inline-flex p-1 rounded-2xl border border-white/10 bg-[#0B1528]/80 backdrop-blur-md">
+        <div className="inline-flex p-1 rounded-2xl border border-white/10 bg-[var(--pp-surface-0b1528)]/80 backdrop-blur-md">
           <button
             type="button"
             onClick={() => setActiveTab("membership")}
@@ -226,7 +226,7 @@ export default function UpgradePage() {
                   className={`cursor-pointer group relative flex flex-col rounded-3xl border p-5 sm:p-6 transition-all duration-300 ${
                     isSelected
                       ? "border-[#C6A96B] bg-[#C6A96B]/[0.06] shadow-xl shadow-[#C6A96B]/10 scale-[1.02]"
-                      : "border-white/10 bg-[#0B1528]/40 hover:border-white/20"
+                      : "border-white/10 bg-[var(--pp-surface-0b1528)]/40 hover:border-white/20"
                   }`}
                 >
                   <input
@@ -301,7 +301,7 @@ export default function UpgradePage() {
                     className={`cursor-pointer group relative flex flex-col rounded-3xl border p-6 transition-all duration-300 ${
                       isSelected
                         ? "border-[#C6A96B] bg-[#C6A96B]/[0.06] shadow-xl shadow-[#C6A96B]/10 scale-[1.02]"
-                        : "border-white/10 bg-[#0B1528]/40 hover:border-white/20"
+                        : "border-white/10 bg-[var(--pp-surface-0b1528)]/40 hover:border-white/20"
                     }`}
                   >
                     <input
@@ -415,7 +415,7 @@ export default function UpgradePage() {
       {/* ── Modal: Redirecting to Stripe Checkout ── */}
       {showRedirectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="relative w-full max-w-md rounded-3xl border border-[#C6A96B]/40 bg-[#0B1528] p-6 sm:p-8 text-center shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative w-full max-w-md rounded-3xl border border-[#C6A96B]/40 bg-[var(--pp-surface-0b1528)] p-6 sm:p-8 text-center shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
             <div
               className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full pointer-events-none opacity-20"
               style={{ background: "radial-gradient(circle, #C6A96B 0%, transparent 70%)" }}

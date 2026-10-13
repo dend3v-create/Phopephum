@@ -622,7 +622,7 @@ export default function YamPage() {
       </div>
 
       {/* 🌙 แถบพลังงานจันทรา (Moon Phase Slim Banner) */}
-      <div className="relative overflow-hidden rounded-2xl border border-[#D9BC82]/15 bg-[#0A1628]/35 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-4 transition-all shadow-[0_0_15px_rgba(198,169,107,0.05)]">
+      <div className="relative overflow-hidden rounded-2xl border border-[#D9BC82]/15 bg-[var(--pp-surface-0a1628)]/35 backdrop-blur-md px-4 py-3 flex items-center justify-between gap-4 transition-all shadow-[0_0_15px_rgba(198,169,107,0.05)]">
         <div className="absolute top-0 right-0 w-24 h-24 bg-[#D9BC82]/5 rounded-full blur-2xl pointer-events-none" />
         
         <div className="flex items-center gap-3.5 min-w-0">
@@ -2199,7 +2199,7 @@ export default function YamPage() {
         >
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="bg-[#0A1628]/40 border-[#4B6FAE]/20 p-5">
+            <Card className="bg-[var(--pp-surface-0a1628)]/40 border-[#4B6FAE]/20 p-5">
               <h3 className="font-display text-sm font-bold text-[#F8F6F1] mb-4 border-b border-white/5 pb-2 flex items-center justify-between">
                 <span>🚗 ทางเลือกที่ 1 (Option A)</span>
                 <span className="text-[13px] text-[#4B6FAE] uppercase tracking-wider font-bold">สัญจร A</span>
@@ -2212,29 +2212,29 @@ export default function YamPage() {
                     <select 
                       value={compDayA} 
                       onChange={(e) => setCompDayA(Number(e.target.value))}
-                      className="bg-slate-950/40 border border-[#4B6FAE]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#4B6FAE]/50 outline-none"
+                      className="bg-[var(--pp-slate-950)]/40 border border-[#4B6FAE]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#4B6FAE]/50 outline-none"
                     >
                       {Array.from({ length: 31 }).map((_, i) => (
-                        <option key={i + 1} value={i + 1} className="bg-[#020617]">{i + 1}</option>
+                        <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-020617)]">{i + 1}</option>
                       ))}
                     </select>
                     <select 
                       value={compMonthA} 
                       onChange={(e) => setCompMonthA(Number(e.target.value))}
-                      className="bg-slate-950/40 border border-[#4B6FAE]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#4B6FAE]/50 outline-none"
+                      className="bg-[var(--pp-slate-950)]/40 border border-[#4B6FAE]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#4B6FAE]/50 outline-none"
                     >
                       {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                        <option key={i + 1} value={i + 1} className="bg-[#020617]">{m}</option>
+                        <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-020617)]">{m}</option>
                       ))}
                     </select>
                     <select 
                       value={compYearA} 
                       onChange={(e) => setCompYearA(Number(e.target.value))}
-                      className="bg-slate-950/40 border border-[#4B6FAE]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#4B6FAE]/50 outline-none"
+                      className="bg-[var(--pp-slate-950)]/40 border border-[#4B6FAE]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#4B6FAE]/50 outline-none"
                     >
                       {Array.from({ length: 21 }).map((_, i) => {
                         const y = 2560 + i;
-                        return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
+                        return <option key={y} value={y} className="bg-[var(--pp-surface-020617)]">{y}</option>;
                       })}
                     </select>
                   </div>
@@ -2246,7 +2246,7 @@ export default function YamPage() {
                     type="time"
                     value={compTimeA}
                     onChange={(e) => setCompTimeA(e.target.value)}
-                    className="w-full bg-[#1E293B]/40 border border-[#4B6FAE]/20 rounded-xl px-4 py-2 text-[#F8F6F1] font-display text-sm focus:border-[#4B6FAE]/50 outline-none transition-all"
+                    className="w-full bg-[var(--pp-surface-1e293b)]/40 border border-[#4B6FAE]/20 rounded-xl px-4 py-2 text-[#F8F6F1] font-display text-sm focus:border-[#4B6FAE]/50 outline-none transition-all"
                   />
                 </div>
 
@@ -2260,7 +2260,7 @@ export default function YamPage() {
               </div>
             </Card>
 
-            <Card className="bg-[#0A1628]/40 border-[#D9BC82]/20 p-5">
+            <Card className="bg-[var(--pp-surface-0a1628)]/40 border-[#D9BC82]/20 p-5">
               <h3 className="font-display text-sm font-bold text-[#F8F6F1] mb-4 border-b border-white/5 pb-2 flex items-center justify-between">
                 <span>✈️ ทางเลือกที่ 2 (Option B)</span>
                 <span className="text-[13px] text-[#D9BC82] uppercase tracking-wider font-bold">สัญจร B</span>
@@ -2273,29 +2273,29 @@ export default function YamPage() {
                     <select 
                       value={compDayB} 
                       onChange={(e) => setCompDayB(Number(e.target.value))}
-                      className="bg-slate-950/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
+                      className="bg-[var(--pp-slate-950)]/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
                     >
                       {Array.from({ length: 31 }).map((_, i) => (
-                        <option key={i + 1} value={i + 1} className="bg-[#020617]">{i + 1}</option>
+                        <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-020617)]">{i + 1}</option>
                       ))}
                     </select>
                     <select 
                       value={compMonthB} 
                       onChange={(e) => setCompMonthB(Number(e.target.value))}
-                      className="bg-slate-950/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
+                      className="bg-[var(--pp-slate-950)]/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
                     >
                       {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                        <option key={i + 1} value={i + 1} className="bg-[#020617]">{m}</option>
+                        <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-020617)]">{m}</option>
                       ))}
                     </select>
                     <select 
                       value={compYearB} 
                       onChange={(e) => setCompYearB(Number(e.target.value))}
-                      className="bg-slate-950/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
+                      className="bg-[var(--pp-slate-950)]/40 border border-[#D9BC82]/20 text-[#F8F6F1] rounded-xl px-2 py-2.5 text-xs focus:border-[#D9BC82]/50 outline-none"
                     >
                       {Array.from({ length: 21 }).map((_, i) => {
                         const y = 2560 + i;
-                        return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
+                        return <option key={y} value={y} className="bg-[var(--pp-surface-020617)]">{y}</option>;
                       })}
                     </select>
                   </div>
@@ -2307,7 +2307,7 @@ export default function YamPage() {
                     type="time"
                     value={compTimeB}
                     onChange={(e) => setCompTimeB(e.target.value)}
-                    className="w-full bg-[#1E293B]/40 border border-[#D9BC82]/20 rounded-xl px-4 py-2 text-[#F8F6F1] font-display text-sm focus:border-[#D9BC82]/50 outline-none transition-all"
+                    className="w-full bg-[var(--pp-surface-1e293b)]/40 border border-[#D9BC82]/20 rounded-xl px-4 py-2 text-[#F8F6F1] font-display text-sm focus:border-[#D9BC82]/50 outline-none transition-all"
                   />
                 </div>
 
@@ -2347,7 +2347,7 @@ export default function YamPage() {
               </Card>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Card className="bg-[#0A1628]/40 border-[#4B6FAE]/25 p-5 flex flex-col justify-between shadow-[0_0_20px_rgba(75,111,174,0.1)]">
+                <Card className="bg-[var(--pp-surface-0a1628)]/40 border-[#4B6FAE]/25 p-5 flex flex-col justify-between shadow-[0_0_20px_rgba(75,111,174,0.1)]">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>
@@ -2400,7 +2400,7 @@ export default function YamPage() {
                   </div>
                 </Card>
 
-                <Card className="bg-[#0A1628]/40 border-[#D9BC82]/25 p-5 flex flex-col justify-between shadow-[0_0_20px_rgba(217,188,130,0.1)]">
+                <Card className="bg-[var(--pp-surface-0a1628)]/40 border-[#D9BC82]/25 p-5 flex flex-col justify-between shadow-[0_0_20px_rgba(217,188,130,0.1)]">
                   <div className="space-y-4">
                     <div className="flex justify-between items-start">
                       <div>

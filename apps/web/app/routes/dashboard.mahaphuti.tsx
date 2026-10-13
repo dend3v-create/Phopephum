@@ -672,7 +672,7 @@ function MahaphutiConsultationChat({
       <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 dark:border-white/10 pb-4 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#4B6FAE] to-[#C6A96B] p-0.5 shadow-md flex items-center justify-center shrink-0">
-            <div className="w-full h-full rounded-[10px] bg-[#020617] flex items-center justify-center">
+            <div className="w-full h-full rounded-[10px] bg-[var(--pp-surface-020617)] flex items-center justify-center">
               <Bot className="w-5 h-5 text-[#C6A96B]" />
             </div>
           </div>
@@ -975,7 +975,7 @@ export default function MahaPhuti() {
       {/* Loading */}
       {isLoading && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-[#020617] border border-[#4B6FAE]/30 rounded-2xl p-8 flex flex-col items-center gap-3">
+          <div className="bg-[var(--pp-surface-020617)] border border-[#4B6FAE]/30 rounded-2xl p-8 flex flex-col items-center gap-3">
             <div className="w-10 h-10 border-2 border-[#4B6FAE]/30 border-t-[#4B6FAE] rounded-full animate-spin" />
             <p className="text-[#4B6FAE] text-sm font-bold">กำลังคำนวณมหาภูติ...</p>
           </div>

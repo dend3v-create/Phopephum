@@ -467,8 +467,8 @@ export default function ReportDetail() {
                                     : isBase4Linked
                                     ? "bg-gradient-to-br from-[#FDE047] via-[#F59E0B] to-[#D97706] text-[#020617] font-black shadow-lg shadow-amber-500/40 border-white scale-[1.04]"
                                     : isBase4
-                                    ? "bg-[#0B1E38]/85 hover:bg-[#0B1E38] border-[#C6A96B]/35 hover:border-[#C6A96B]/60 text-[#F8F6F1] shadow-sm"
-                                    : "bg-[#061426]/75 hover:bg-[#0A2240]/80 border-white/10 hover:border-[#C6A96B]/40 text-[#F8F6F1]"
+                                    ? "bg-[var(--pp-surface-0b1e38)]/85 hover:bg-[var(--pp-surface-0b1e38)] border-[#C6A96B]/35 hover:border-[#C6A96B]/60 text-[#F8F6F1] shadow-sm"
+                                    : "bg-[var(--pp-surface-061426)]/75 hover:bg-[var(--pp-surface-0a2240)]/80 border-white/10 hover:border-[#C6A96B]/40 text-[#F8F6F1]"
                                 }`}
                               >
                                 <span

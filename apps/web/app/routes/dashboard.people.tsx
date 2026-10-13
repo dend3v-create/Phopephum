@@ -279,7 +279,7 @@ export default function PeopleProfilesPage() {
 
       {/* ฟอร์ม เพิ่ม / แก้ไขข้อมูล (เปิดด้านบนเมื่อต้องการจัดการ) */}
       {formMode !== "idle" && (
-        <Card className="border-[#C6A96B]/30 bg-[#0A2240]/40 backdrop-blur-xl p-6 relative overflow-hidden animate-in slide-in-from-top-4 duration-300">
+        <Card className="border-[#C6A96B]/30 bg-[var(--pp-surface-0a2240)]/40 backdrop-blur-xl p-6 relative overflow-hidden animate-in slide-in-from-top-4 duration-300">
           <div className="absolute top-0 right-0 w-24 h-24 rounded-full blur-3xl bg-[#C6A96B]/10 -z-10" />
           <h2 className="text-[#C6A96B] text-[15px] font-bold mb-4 flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-[#C6A96B]" />
@@ -311,20 +311,20 @@ export default function PeopleProfilesPage() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs text-[#C6B79F] font-bold uppercase tracking-wider">วันเดือนปีเกิด (พ.ศ.) *</label>
                 <div className="grid grid-cols-3 gap-2">
-                  <select name="birthDay" defaultValue={defaults.day} className="bg-slate-950/50 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-2.5 text-xs focus:border-[#C6A96B]/50 outline-none">
+                  <select name="birthDay" defaultValue={defaults.day} className="bg-[var(--pp-slate-950)]/50 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-2.5 text-xs focus:border-[#C6A96B]/50 outline-none">
                     {Array.from({ length: 31 }).map((_, i) => (
-                      <option key={i + 1} value={i + 1} className="bg-[#020617]">{i + 1}</option>
+                      <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-020617)]">{i + 1}</option>
                     ))}
                   </select>
-                  <select name="birthMonth" defaultValue={defaults.month} className="bg-slate-950/50 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-2.5 text-xs focus:border-[#C6A96B]/50 outline-none">
+                  <select name="birthMonth" defaultValue={defaults.month} className="bg-[var(--pp-slate-950)]/50 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-2.5 text-xs focus:border-[#C6A96B]/50 outline-none">
                     {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                      <option key={i + 1} value={i + 1} className="bg-[#020617]">{m}</option>
+                      <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-020617)]">{m}</option>
                     ))}
                   </select>
-                  <select name="birthYear" defaultValue={defaults.year} className="bg-slate-950/50 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-2.5 text-xs focus:border-[#C6A96B]/50 outline-none">
+                  <select name="birthYear" defaultValue={defaults.year} className="bg-[var(--pp-slate-950)]/50 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-2.5 text-xs focus:border-[#C6A96B]/50 outline-none">
                     {Array.from({ length: 120 }).map((_, i) => {
                       const y = new Date().getFullYear() + 543 - i;
-                      return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
+                      return <option key={y} value={y} className="bg-[var(--pp-surface-020617)]">{y}</option>;
                     })}
                   </select>
                 </div>
@@ -390,7 +390,7 @@ export default function PeopleProfilesPage() {
             return (
               <Card 
                 key={person.id} 
-                className="border-[#C6A96B]/10 hover:border-[#C6A96B]/30 bg-[#0A2240]/25 backdrop-blur-md p-5 flex flex-col justify-between gap-4 transition-all duration-300 group hover:scale-[1.01] hover:shadow-[0_8px_30px_rgb(0,0,0,0.3)] relative"
+                className="border-[#C6A96B]/10 hover:border-[#C6A96B]/30 bg-[var(--pp-surface-0a2240)]/25 backdrop-blur-md p-5 flex flex-col justify-between gap-4 transition-all duration-300 group hover:scale-[1.01] hover:shadow-[0_8px_30px_rgb(0,0,0,0.3)] relative"
               >
                 {/* ตกแต่งมุมการ์ดเบาๆ */}
                 <div className="absolute top-0 right-0 w-2 h-2 border-t border-r border-[#C6A96B]/20 rounded-tr-xl opacity-0 group-hover:opacity-100 transition-opacity" />

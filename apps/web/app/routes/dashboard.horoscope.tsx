@@ -41,7 +41,7 @@ import { useT } from "~/i18n/context";
 export const meta: MetaFunction = () => [
   { title: "เลข 7 ตัว 9 ฐาน และผังดวงจักรพรรดิ — PhopePhum" },
   { name: "description", content: "คำนวณผูกดวงชะตาเชิงลึกด้วยคัมภีร์ เลข 7 ตัว 9 ฐาน และ ผังดวงจักรพรรดิ ตรวจสอบวัยจร ปีจร ทักษากำเนิดและมหาภูติตามหลักเกณฑ์จันทรคติไทยแท้" },
-  
+
   // Open Graph / Facebook
   { property: "og:type", content: "website" },
   { property: "og:url", content: "https://phopephum.com/dashboard/horoscope" },
@@ -162,8 +162,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const bMonth = Number(formData.get("birthMonth") ?? "0");
     const bYear = Number(formData.get("birthYear") ?? "0");
     const bYearCE = bYear - 543;
-    const birthDateStr = bDay && bMonth && bYear 
-      ? `${bYearCE}-${String(bMonth).padStart(2, "0")}-${String(bDay).padStart(2, "0")}` 
+    const birthDateStr = bDay && bMonth && bYear
+      ? `${bYearCE}-${String(bMonth).padStart(2, "0")}-${String(bDay).padStart(2, "0")}`
       : "";
 
     const raw = {
@@ -182,8 +182,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const tMonth = Number(formData.get("transitMonth") ?? "0");
     const tYear = Number(formData.get("transitYear") ?? "0");
     const tYearCE = tYear - 543;
-    const transitDate = tDay && tMonth && tYear 
-      ? `${tYearCE}-${String(tMonth).padStart(2, "0")}-${String(tDay).padStart(2, "0")}` 
+    const transitDate = tDay && tMonth && tYear
+      ? `${tYearCE}-${String(tMonth).padStart(2, "0")}-${String(tDay).padStart(2, "0")}`
       : new Date().toISOString().split("T")[0];
 
     const transitTime = String(formData.get("transitTime") ?? "") || "00:00";
@@ -214,8 +214,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     await supabase.from("calculations").insert({
       user_id: user.id,
       calc_type: "phopephum_v2",
-      input_data: { 
-        birthDate: parsed.data.birthDate, 
+      input_data: {
+        birthDate: parsed.data.birthDate,
         birthTime: parsed.data.birthTime,
         birthPlace: parsed.data.birthPlace,
         checkDate: checkDate.toISOString(),
@@ -542,7 +542,7 @@ export function getEmperorChartWisdomReading(
 
   // ข้อมูลจันทรคติ
   const natalLunar = activeResult?.phopephumResult?.nineBase?.lunarDate || activeResult?.lunarDateInfo || activeResult?.lunar;
-  
+
   const DAY_NAMES = ["", "วันอาทิตย์ (๑)", "วันจันทร์ (๒)", "วันอังคาร (๓)", "วันพุธ (๔)", "วันพฤหัสบดี (๕)", "วันศุกร์ (๖)", "วันเสาร์ (๗)"];
   const thaiDay = natalLunar?.thaiDayName || DAY_NAMES[dayBaseNum] || "วันกำเนิด";
   const thaiMonth = natalLunar?.lunarMonth || `เดือน ${monthBaseNum}`;
@@ -636,7 +636,7 @@ export default function HoroscopePage() {
 
   // ── ผลลัพธ์ที่แสดงผลปัจจุบัน (ลำดับความสำคัญ: actionData > initialResult) ──
   const [activeResult, setActiveResult] = useState<any>(ad || initialResult);
-  
+
   // อัปเดตเมื่อ actionData มีการเปลี่ยนแปลง (เช่น กดปุ่มคำนวณ)
   useEffect(() => {
     if (ad && !ad.error) {
@@ -707,7 +707,7 @@ export default function HoroscopePage() {
   useEffect(() => {
     let isCancelled = false;
     const cacheKey = `phopephum_chat_${currentSubjectName}`;
-    
+
     // 1. โหลดจาก LocalStorage ก่อนเพื่อความรวดเร็ว
     try {
       const local = localStorage.getItem(cacheKey);
@@ -852,7 +852,7 @@ export default function HoroscopePage() {
       }
 
       const finalCleanAnswer = fullAnswer.trim() || "ระบบได้วิเคราะห์ผังดวงของท่านเรียบร้อยแล้วค่ะ";
-      
+
       setChatMessages(prev => {
         const copy = [...prev];
         const lastIdx = copy.length - 1;
@@ -951,7 +951,7 @@ export default function HoroscopePage() {
         const starNum = Number(filterValue);
         const starInfo = STAR_CORE_MEANINGS[starNum];
         const tBhop = taksaTransit?.map?.[starNum as StarNumber];
-        
+
         let subText = "";
         if (tBhop === "ศรี") {
           subText = "ปีนี้จัดเป็น 'ปีแห่งสิริมงคลสูงสุด' นำมาซึ่งเงินทองไหลมาเทมา ความสำเร็จและการอุปถัมภ์ที่น่ายินดีอย่างยิ่งค่ะ ✨";
@@ -992,7 +992,7 @@ export default function HoroscopePage() {
     } else {
       setFilterType(type);
       setFilterValue(value);
-      
+
       let targetStar: number | null = null;
       if (type === "star") {
         targetStar = Number(value);
@@ -1166,7 +1166,7 @@ export default function HoroscopePage() {
                 <span>·</span>
                 <span>{emperorReport.birthFormatted}</span>
               </div>
-              <span className="text-xs font-semibold text-[#D9BC82] bg-slate-900/60 px-3 py-1 rounded-full border border-white/5">
+              <span className="text-xs font-semibold text-[#D9BC82] bg-[var(--pp-slate-900)]/60 px-3 py-1 rounded-full border border-white/5">
                 {emperorReport.starBadge}
               </span>
             </div>
@@ -1183,7 +1183,7 @@ export default function HoroscopePage() {
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
                       isActive
                         ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold shadow-md scale-100 ring-1 ring-[#F5E6C8]/80"
-                        : "bg-slate-900/70 hover:bg-[#C6A96B]/15 border border-white/10 text-slate-300 hover:text-[#F8F6F1]"
+                        : "bg-[var(--pp-slate-900)]/70 hover:bg-[#C6A96B]/15 border border-white/10 text-slate-300 hover:text-[#F8F6F1]"
                     }`}
                   >
                     <span>{opt.icon}</span>
@@ -1194,7 +1194,7 @@ export default function HoroscopePage() {
             </div>
 
             {/* Emperor Chart Reading Content Box (Structure matching Screenshot 2) */}
-            <div className="relative z-10 rounded-2xl bg-[#07192F]/90 dark:bg-[#06162B]/95 border border-[#C6A96B]/30 p-4 sm:p-5 shadow-lg space-y-4 text-xs sm:text-[13px] leading-relaxed backdrop-blur-md">
+            <div className="relative z-10 rounded-2xl bg-[var(--pp-surface-07192f)]/90 dark:bg-[#06162B]/95 border border-[#C6A96B]/30 p-4 sm:p-5 shadow-lg space-y-4 text-xs sm:text-[13px] leading-relaxed backdrop-blur-md">
               {/* 1. ประเด็นสำคัญ */}
               <div className="space-y-1">
                 <h4 className="font-bold text-[#C6A96B] text-sm sm:text-base flex items-center gap-1.5">
@@ -1335,7 +1335,7 @@ export default function HoroscopePage() {
                     }}
                     className="cursor-pointer group hover:scale-[1.01] active:scale-[0.99] transition-all"
                   >
-                    <Card className="border-[#C6A96B]/10 p-4 bg-slate-950/20 group-hover:border-[#C6A96B]/30 transition-all flex flex-col gap-1.5">
+                    <Card className="border-[#C6A96B]/10 p-4 bg-[var(--pp-slate-950)]/20 group-hover:border-[#C6A96B]/30 transition-all flex flex-col gap-1.5">
                       <p className="text-[14px] font-bold text-[#F8F6F1] truncate">
                         👤 {h.result_data?.subjectName || h.input_data?.subjectName || h.result_data?.customerName || profile?.display_name || "เจ้าชะตา"}
                       </p>
@@ -1356,9 +1356,9 @@ export default function HoroscopePage() {
           )}
 
           {/* ── Form ── */}
-          <Card className="border-[#C9A96E]/20 bg-slate-900/40 backdrop-blur-md">
-            <Form 
-              method="post" 
+          <Card className="border-[#C9A96E]/20 bg-[var(--pp-slate-900)]/40 backdrop-blur-md">
+            <Form
+              method="post"
               className="space-y-6"
               onSubmit={() => {
                 // เปลี่ยนหน้าไปแท็บ 2 อัตโนมัติเมื่อกดคำนวณสำเร็จ
@@ -1372,8 +1372,8 @@ export default function HoroscopePage() {
                 <div className="flex items-center justify-between border-b border-[#C9A96E]/15 pb-2">
                   <span className="text-xs text-[#C9A96E] font-bold uppercase tracking-wider">วันกำเนิด (วันเกิด)</span>
                   {customers && customers.length > 0 && (
-                    <select 
-                      className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#C9A96E] rounded px-2 py-1 text-[13px] outline-none"
+                    <select
+                      className="bg-[var(--pp-slate-950)]/40 border border-[#C9A96E]/20 text-[#C9A96E] rounded px-2 py-1 text-[13px] outline-none"
                       onChange={async (e) => {
                         const cust = customers.find((c: any) => c.id === e.target.value);
                         if (cust) {
@@ -1384,7 +1384,7 @@ export default function HoroscopePage() {
                           const timeInput = document.querySelector('input[name="birthTime"]') as HTMLInputElement;
                           const placeInput = document.querySelector('input[name="birthPlace"]') as HTMLInputElement;
                           const nameInput = document.querySelector('input[name="customerName"]') as HTMLInputElement;
-                          
+
                           if (cust.birth_date) {
                             const [y, m, d] = cust.birth_date.split('-');
                             if (dSel) dSel.value = parseInt(d, 10).toString();
@@ -1442,7 +1442,7 @@ export default function HoroscopePage() {
                     >
                       <option value="">-- เลือกลูกค้าที่บันทึกไว้ --</option>
                       {customers.map((c: any) => (
-                        <option key={c.id} value={c.id} className="bg-[#020617]">{c.name}</option>
+                        <option key={c.id} value={c.id} className="bg-[var(--pp-surface-020617)]">{c.name}</option>
                       ))}
                     </select>
                   )}
@@ -1452,20 +1452,20 @@ export default function HoroscopePage() {
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider">วันเกิด (พ.ศ.) *</label>
                     <div className="grid grid-cols-3 gap-1.5">
-                      <select name="birthDay" defaultValue={defaultBDay} className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
+                      <select name="birthDay" defaultValue={defaultBDay} className="bg-[var(--pp-slate-950)]/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
                         {Array.from({ length: 31 }).map((_, i) => (
-                          <option key={i + 1} value={i + 1} className="bg-[#020617]">{i + 1}</option>
+                          <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-020617)]">{i + 1}</option>
                         ))}
                       </select>
-                      <select name="birthMonth" defaultValue={defaultBMonth} className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
+                      <select name="birthMonth" defaultValue={defaultBMonth} className="bg-[var(--pp-slate-950)]/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
                         {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                          <option key={i + 1} value={i + 1} className="bg-[#020617]">{m}</option>
+                          <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-020617)]">{m}</option>
                         ))}
                       </select>
-                      <select name="birthYear" defaultValue={defaultBYear} className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
+                      <select name="birthYear" defaultValue={defaultBYear} className="bg-[var(--pp-slate-950)]/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
                         {Array.from({ length: 120 }).map((_, i) => {
                           const y = new Date().getFullYear() + 543 - i;
-                          return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
+                          return <option key={y} value={y} className="bg-[var(--pp-surface-020617)]">{y}</option>;
                         })}
                       </select>
                     </div>
@@ -1474,20 +1474,20 @@ export default function HoroscopePage() {
                   <Input name="birthTime" type="time" label="เวลาเกิด" defaultValue={profile?.birth_time ?? ""} />
                   <Input name="birthPlace" label="จังหวัดที่เกิด" defaultValue={profile?.birth_place ?? ""} placeholder="กรุงเทพมหานคร" />
                 </div>
-                
+
                 {/* Save Customer Checkbox */}
                 <div className="flex items-center gap-3 pt-2">
                   <div className="flex items-center gap-1.5">
                     <input type="checkbox" name="saveCustomer" id="saveCustomer" className="w-3.5 h-3.5 accent-[#C9A96E] rounded cursor-pointer" />
                     <label htmlFor="saveCustomer" className="text-[14px] text-[#94A3B8] cursor-pointer">บันทึกเป็นลูกค้าใหม่</label>
                   </div>
-                  <input 
-                    type="text" 
-                    name="customerName" 
+                  <input
+                    type="text"
+                    name="customerName"
                     value={subjectName !== (profile?.display_name || "เจ้าชะตา") ? subjectName : ""}
                     onChange={(e) => setSubjectName(e.target.value)}
-                    placeholder="ชื่อลูกค้า (สำหรับบันทึก)..." 
-                    className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded px-2.5 py-1.5 text-[14px] outline-none focus:border-[#C9A96E]/50 flex-1 max-w-[200px]" 
+                    placeholder="ชื่อลูกค้า (สำหรับบันทึก)..."
+                    className="bg-[var(--pp-slate-950)]/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded px-2.5 py-1.5 text-[14px] outline-none focus:border-[#C9A96E]/50 flex-1 max-w-[200px]"
                   />
                 </div>
               </div>
@@ -1514,7 +1514,7 @@ export default function HoroscopePage() {
                         if (mSel) mSel.value = String(now.getMonth() + 1);
                         if (ySel) ySel.value = String(now.getFullYear() + 543);
                         if (timeInput) timeInput.value = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
-                        
+
                         triggerRealtimeUpdate();
                       }}
                       className="text-[13px] font-bold border border-[#C9A96E]/40 text-[#C9A96E] px-2.5 py-1 rounded-md hover:bg-[#C9A96E]/10 transition-all"
@@ -1527,20 +1527,20 @@ export default function HoroscopePage() {
                     <div className="flex flex-col gap-1.5">
                       <label className="text-xs text-[#94A3B8] font-bold uppercase tracking-wider">วันที่จร (พ.ศ.) *</label>
                       <div className="grid grid-cols-3 gap-1.5">
-                        <select name="transitDay" onChange={triggerRealtimeUpdate} defaultValue={defaultTDay} className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
+                        <select name="transitDay" onChange={triggerRealtimeUpdate} defaultValue={defaultTDay} className="bg-[var(--pp-slate-950)]/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
                           {Array.from({ length: 31 }).map((_, i) => (
-                            <option key={i + 1} value={i + 1} className="bg-[#020617]">{i + 1}</option>
+                            <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-020617)]">{i + 1}</option>
                           ))}
                         </select>
-                        <select name="transitMonth" onChange={triggerRealtimeUpdate} defaultValue={defaultTMonth} className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
+                        <select name="transitMonth" onChange={triggerRealtimeUpdate} defaultValue={defaultTMonth} className="bg-[var(--pp-slate-950)]/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
                           {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                            <option key={i + 1} value={i + 1} className="bg-[#020617]">{m}</option>
+                            <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-020617)]">{m}</option>
                           ))}
                         </select>
-                        <select name="transitYear" onChange={triggerRealtimeUpdate} defaultValue={defaultTYear} className="bg-slate-950/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
+                        <select name="transitYear" onChange={triggerRealtimeUpdate} defaultValue={defaultTYear} className="bg-[var(--pp-slate-950)]/40 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-2.5 py-2.5 text-xs focus:border-[#C9A96E]/50 outline-none">
                           {Array.from({ length: 30 }).map((_, i) => {
                             const y = new Date().getFullYear() + 543 + 10 - i;
-                            return <option key={y} value={y} className="bg-[#020617]">{y}</option>;
+                            return <option key={y} value={y} className="bg-[var(--pp-surface-020617)]">{y}</option>;
                           })}
                         </select>
                       </div>
@@ -1853,10 +1853,10 @@ export default function HoroscopePage() {
 
           {/* ── [ยกระดับ!] พื้นที่แชทตรวจดวงชะตาสดตาม Filter และผังดวงจริง ── */}
           <div id="horoscope-chat-section">
-            <Card className="border-[#C9A96E]/20 bg-[#0A2240]/40 backdrop-blur-md p-5 space-y-4 rounded-2xl relative overflow-hidden">
+            <Card className="border-[#C9A96E]/20 bg-[var(--pp-surface-0a2240)]/40 backdrop-blur-md p-5 space-y-4 rounded-2xl relative overflow-hidden">
               {/* Background Aura */}
               <div className="absolute inset-0 bg-radial-gradient from-[#4B6FAE]/5 via-transparent to-transparent pointer-events-none" />
-            
+
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#C9A96E]/15 pb-3">
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#C9A96E] animate-ping" />
@@ -1892,7 +1892,7 @@ export default function HoroscopePage() {
             </div>
 
             {/* ── [ยกระดับ!] ปุ่มเลือกโหมดการพยากรณ์: ดวงจร vs พื้นดวงเดิม ── */}
-            <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 bg-slate-950/60 rounded-xl border border-[#C6A96B]/20">
+            <div className="flex flex-wrap items-center justify-between gap-2 p-1.5 bg-[var(--pp-slate-950)]/60 rounded-xl border border-[#C6A96B]/20">
               <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="text-[11px] text-[#C6B79F] font-semibold pl-1 pr-0.5">เลือกโหมด:</span>
                 <button
@@ -1921,8 +1921,8 @@ export default function HoroscopePage() {
                 </button>
               </div>
               <span className="text-[11px] text-[#D9BC82]/80 italic px-2">
-                {forecastMode === "transit" 
-                  ? "✦ เจาะลึก วัยจร/ปีจร/ลัคนาจร ด้วยพลังฐาน ๔ และดาวย้ำลูกโซ่" 
+                {forecastMode === "transit"
+                  ? "✦ เจาะลึก วัยจร/ปีจร/ลัคนาจร ด้วยพลังฐาน ๔ และดาวย้ำลูกโซ่"
                   : "✦ วิเคราะห์ศักยภาพ วาสนาบารมี และจุดเปราะบางประจำตัว"}
               </span>
             </div>
@@ -1947,15 +1947,15 @@ export default function HoroscopePage() {
                   type="button"
                   disabled={isChatLoading}
                   onClick={() => handleSendMessage(chip.q)}
-                  className="text-[11px] px-2.5 py-1 rounded-full border border-white/10 hover:border-[#C6A96B]/50 bg-slate-950/40 hover:bg-[#C6A96B]/10 text-[#C6B79F] hover:text-[#F8F6F1] transition-all disabled:opacity-50"
+                  className="text-[11px] px-2.5 py-1 rounded-full border border-white/10 hover:border-[#C6A96B]/50 bg-[var(--pp-slate-950)]/40 hover:bg-[#C6A96B]/10 text-[#C6B79F] hover:text-[#F8F6F1] transition-all disabled:opacity-50"
                 >
                   {chip.label}
                 </button>
               ))}
             </div>
-            
+
             {/* กล่องประวัติแชท */}
-            <div className="space-y-3.5 max-h-[360px] overflow-y-auto p-4 bg-slate-950/70 rounded-2xl border border-white/5 shadow-inner">
+            <div className="space-y-3.5 max-h-[360px] overflow-y-auto p-4 bg-[var(--pp-slate-950)]/70 rounded-2xl border border-white/5 shadow-inner">
               {chatMessages.map((msg, index) => {
                 // จัดรูปแบบข้อความให้อ่านง่าย แปลง **หัวข้อ** เป็นตัวหนาและตัด ** ออก
                 const formattedText = msg.text ? (
@@ -1963,7 +1963,7 @@ export default function HoroscopePage() {
                     {msg.text.split("\n\n").map((para: string, pIdx: number) => {
                       const trimmed = para.trim();
                       if (!trimmed) return null;
-                      
+
                       // ตรวจสอบว่าพารากราฟเริ่มต้นด้วยหัวข้อตัวหนาหรือไม่ เช่น **ประเด็นสำคัญ**
                       const headerMatch = trimmed.match(/^\*\*([^*]+)\*\*\s*([\s\S]*)$/);
                       if (headerMatch) {
@@ -1980,7 +1980,7 @@ export default function HoroscopePage() {
                           </div>
                         );
                       }
-                      
+
                       return (
                         <p key={pIdx} className="leading-relaxed">
                           {trimmed.replace(/\*\*([^*]+)\*\*/g, "$1")}
@@ -1993,9 +1993,9 @@ export default function HoroscopePage() {
                 return (
                   <div key={index} className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"}`}>
                     <div className={`max-w-[90%] md:max-w-[82%] rounded-2xl px-4 py-3 text-xs sm:text-[13px] leading-relaxed ${
-                      msg.sender === "user" 
-                        ? "bg-gradient-to-br from-[#C6A96B] to-[#D9BC82] text-[#020617] font-semibold rounded-tr-none shadow-md" 
-                        : "bg-[#0A2240]/80 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-tl-none shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
+                      msg.sender === "user"
+                        ? "bg-gradient-to-br from-[#C6A96B] to-[#D9BC82] text-[#020617] font-semibold rounded-tr-none shadow-md"
+                        : "bg-[var(--pp-surface-0a2240)]/80 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-tl-none shadow-[0_4px_16px_rgba(0,0,0,0.3)]"
                     }`}>
                       {formattedText || (msg.isStreaming ? (
                         <span className="flex items-center gap-2 text-[#C6A96B] italic animate-pulse">
@@ -2019,7 +2019,7 @@ export default function HoroscopePage() {
                 onChange={e => setUserInput(e.target.value)}
                 disabled={isChatLoading}
                 placeholder={`สอบถามคำทำนายเพิ่มเติมเกี่ยวกับดวงชะตาของ ${currentSubjectName}...`}
-                className="flex-1 bg-slate-950/50 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-4 py-2.5 text-xs sm:text-[13px] focus:border-[#C9A96E]/60 outline-none disabled:opacity-50"
+                className="flex-1 bg-[var(--pp-slate-950)]/50 border border-[#C9A96E]/20 text-[#F8F6F1] rounded-xl px-4 py-2.5 text-xs sm:text-[13px] focus:border-[#C9A96E]/60 outline-none disabled:opacity-50"
                 onKeyDown={e => {
                   if (e.key === "Enter" && userInput.trim() && !isChatLoading) {
                     handleSendMessage();
@@ -2067,7 +2067,7 @@ export default function HoroscopePage() {
               className="absolute -top-24 -right-24 w-72 h-72 rounded-full pointer-events-none opacity-20 blur-3xl"
               style={{ background: "radial-gradient(circle, #C6A96B 0%, transparent 70%)" }}
             />
-            
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-white/10 pb-4 relative z-10">
               <div>
                 <span className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8C6D2D] dark:text-[#C6A96B] block mb-1">
@@ -2326,7 +2326,7 @@ export function getTaksaTransitIndicator(star: number, taksaMaha?: any) {
   const bhop = taksaMaha.taksaTransit.map[star];
   switch (bhop) {
     case "บริวาร":
-      return { label: "บริวาร", fullName: "บริวารจร (บริวาร/ผู้ติดตาม/สังคม)", color: "text-slate-300 bg-slate-800/80 border-slate-500/30" };
+      return { label: "บริวาร", fullName: "บริวารจร (บริวาร/ผู้ติดตาม/สังคม)", color: "text-slate-300 bg-[var(--pp-slate-800)]/80 border-slate-500/30" };
     case "อายุ":
       return { label: "อายุ", fullName: "อายุจร (สุขภาพ/อายุ/ความมั่นคง)", color: "text-teal-300 bg-teal-950/80 border-teal-500/30" };
     case "เดช":
@@ -2488,7 +2488,7 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
     { element: "น้ำ", stars: [4, 6], nature: "ความสุข ครอบครัว สบายๆ เรื่อยๆ" },
   ] as const;
 
-  const pairInfo = elementPairs.find((p: { element: string; stars: readonly number[]; nature: string }) => 
+  const pairInfo = elementPairs.find((p: { element: string; stars: readonly number[]; nature: string }) =>
     p.stars.includes(star)
   );
   if (pairInfo) {
@@ -2498,7 +2498,7 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
   return (
     <Card className="border-slate-200 dark:border-[#C9A96E]/30 bg-white/95 dark:bg-gradient-to-br dark:from-[#0A2240]/60 dark:to-[#020617]/90 backdrop-blur-xl p-5 relative overflow-hidden shadow-md dark:shadow-2xl rounded-2xl">
       <div className="absolute top-0 right-0 w-48 h-48 bg-[#C9A96E]/5 rounded-full blur-3xl -z-10" />
-      
+
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-amber-300/30 dark:border-[#C9A96E]/20 pb-4 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-12 h-12 rounded-2xl bg-[#C9A96E]/15 border border-[#C9A96E]/35 flex items-center justify-center font-display text-2xl font-bold text-[#8C6D2D] dark:text-[#C9A96E] shadow-inner animate-pulse">
@@ -2528,7 +2528,7 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
                 ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
                 : currentTaksa === "กาลกิณี"
                 ? "bg-rose-500/10 border-rose-500/30 text-rose-400"
-                : "bg-slate-900/80 border-[#C9A96E]/25 text-[#C9A96E]"
+                : "bg-[var(--pp-slate-900)]/80 border-[#C9A96E]/25 text-[#C9A96E]"
             }`}>
               ทักษาจร: {currentTaksa}จร
             </span>
@@ -2539,7 +2539,7 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
                 ? "bg-sky-500/10 border-sky-500/30 text-sky-400"
                 : ["อริ", "มรณะ", "โลกาวินาศ"].includes(currentMaha)
                 ? "bg-amber-500/10 border-amber-500/30 text-amber-400"
-                : "bg-slate-900/80 border-[#C9A96E]/25 text-[#C9A96E]"
+                : "bg-[var(--pp-slate-900)]/80 border-[#C9A96E]/25 text-[#C9A96E]"
             }`}>
               มหาภูติจร: {currentMaha}จร
             </span>
@@ -2576,11 +2576,11 @@ function YearlyStarPredictionPanel({ star, taksaMaha }: { star: number; taksaMah
         </div>
 
         <div className="grid grid-cols-2 gap-3 pt-2 text-[13px] text-[#C6B79F] border-t border-white/5">
-          <div className="flex flex-col gap-0.5 bg-slate-950/20 p-2 rounded-xl border border-white/5">
+          <div className="flex flex-col gap-0.5 bg-[var(--pp-slate-950)]/20 p-2 rounded-xl border border-white/5">
             <span>พื้นเพดวงเดิม (ทักษากำเนิด):</span>
             <span className="font-bold text-[#F8F6F1]">{natalTaksa ? `${natalTaksa}กำเนิด` : "ไม่มีตำแหน่งสำคัญ"}</span>
           </div>
-          <div className="flex flex-col gap-0.5 bg-slate-950/20 p-2 rounded-xl border border-white/5">
+          <div className="flex flex-col gap-0.5 bg-[var(--pp-slate-950)]/20 p-2 rounded-xl border border-white/5">
             <span>สภาวะภายในเดิม (มหาภูติกำเนิด):</span>
             <span className="font-bold text-[#F8F6F1]">{natalMaha ? `${natalMaha}กำเนิด` : "ไม่มีตำแหน่งสำคัญ"}</span>
           </div>
@@ -2620,8 +2620,8 @@ function numColor(
 ) {
   const { isActive, isDimmed, isBase4, isGlowFiltered } = opts;
 
-  const base4Card = "bg-[#071E3D]/75 border-[#6D8FC7]/22";
-  const normalCard = "bg-[#071427]/75 border-[#C6A96B]/18";
+  const base4Card = "bg-[var(--pp-surface-071e3d)]/75 border-[#6D8FC7]/22";
+  const normalCard = "bg-[var(--pp-surface-071427)]/75 border-[#C6A96B]/18";
 
   if (isDimmed) {
     return {
@@ -2632,8 +2632,8 @@ function numColor(
   if (isActive || isGlowFiltered) {
     return {
       card: isBase4
-        ? "bg-[#0D2245]/90 border-[#C6A96B]/60 shadow-[0_0_16px_rgba(198,169,107,0.22),inset_0_1px_0_rgba(198,169,107,0.10)]"
-        : "bg-[#0A1A30]/90 border-[#C6A96B]/60 shadow-[0_0_16px_rgba(198,169,107,0.22),inset_0_1px_0_rgba(198,169,107,0.10)]",
+        ? "bg-[var(--pp-surface-0d2245)]/90 border-[#C6A96B]/60 shadow-[0_0_16px_rgba(198,169,107,0.22),inset_0_1px_0_rgba(198,169,107,0.10)]"
+        : "bg-[var(--pp-surface-0a1a30)]/90 border-[#C6A96B]/60 shadow-[0_0_16px_rgba(198,169,107,0.22),inset_0_1px_0_rgba(198,169,107,0.10)]",
       text: "text-[#F8F6F1] font-black",
     };
   }
@@ -2695,11 +2695,11 @@ const BASE4_MEANINGS: Record<number, string> = {
   17: 'พุธใหญ่', 18: 'มหาจักรพรรดิ์', 19: 'พระพฤหัส', 20: 'เสาร์ใหญ่', 21: 'พระศุกร์',
 };
 
-function FateMatrixPanel({ 
-  matrix, 
-  activeNum, 
-  onNumClick, 
-  taksaMaha, 
+function FateMatrixPanel({
+  matrix,
+  activeNum,
+  onNumClick,
+  taksaMaha,
   phopephumResult,
   highlightedStars = new Set<number>(),
   isFiltering = false,
@@ -2777,11 +2777,11 @@ function FateMatrixPanel({
               const isBase4 = rIdx === 3;
               const isTargetRow = [0, 1, 2, 7, 8].includes(rIdx); // แสดงดาวลิงค์เฉพาะฐาน 1-2-3-8-9
               return (
-                <tr 
-                  key={rIdx} 
+                <tr
+                  key={rIdx}
                   className={`group transition-all ${
                     isBase4
-                      ? "bg-[#0A2240]/25 border-y border-[#4B6FAE]/10"
+                      ? "bg-[var(--pp-surface-0a2240)]/25 border-y border-[#4B6FAE]/10"
                       : ""
                   }`}
                 >
@@ -2817,7 +2817,7 @@ function FateMatrixPanel({
                     };
 
                     const actualNum = isBase4 ? getStarFromBase4(num) : (num % 7 || 7);
-                    
+
                     const isBaseHighlight = activeNum !== null && (isBase4 ? matrix[2]?.[cIdx] === activeNum : (actualNum === activeNum && isTargetRow));
                     // isGlowFiltered: จำกัดเฉพาะฐาน 1-3-4-8-9 (ไม่รวมฐาน 5-6-7)
                     const isGlowFiltered = isFiltering && (isTargetRow || isBase4) && highlightedStars.has(isBase4 ? matrix[2]?.[cIdx] : actualNum);
@@ -2831,7 +2831,7 @@ function FateMatrixPanel({
                       isGlowFiltered,
                     });
                     const houseName = isBase4 ? BASE4_MEANINGS[num] : ROW_META[rIdx].phopNames?.[cIdx];
-                    
+
                     const skipIndicators = [3, 4, 5, 6].includes(rIdx);
                     const showInd = !skipIndicators && actualNum !== 9;
                     const taksaInd = showInd ? getTaksaTransitIndicator(actualNum, taksaMaha) : null;
@@ -2839,28 +2839,28 @@ function FateMatrixPanel({
 
                     // ── สัญญาณลัคนาและดวงจร (เฉพาะ 3 แถวแรก ฐาน 1-3) ──
                     const isRow012 = [0, 1, 2].includes(rIdx);
-                    const isLagnaNatal = isRow012 && phopephumResult?.lagna && 
-                      phopephumResult.lagna.row === (rIdx + 1) && 
+                    const isLagnaNatal = isRow012 && phopephumResult?.lagna &&
+                      phopephumResult.lagna.row === (rIdx + 1) &&
                       phopephumResult.lagna.col === (cIdx + 1);
-                    
-                    const isLagnaTransit = isRow012 && phopephumResult?.lagnaTransit && 
-                      phopephumResult.lagnaTransit.row === (rIdx + 1) && 
+
+                    const isLagnaTransit = isRow012 && phopephumResult?.lagnaTransit &&
+                      phopephumResult.lagnaTransit.row === (rIdx + 1) &&
                       phopephumResult.lagnaTransit.col === (cIdx + 1);
-                    
-                    const isVayaJorn = isRow012 && phopephumResult?.vayaJorn && 
-                      phopephumResult.vayaJorn.row === (rIdx + 1) && 
+
+                    const isVayaJorn = isRow012 && phopephumResult?.vayaJorn &&
+                      phopephumResult.vayaJorn.row === (rIdx + 1) &&
                       phopephumResult.vayaJorn.col === (cIdx + 1);
-                    
-                    const isYearlyJorn = isRow012 && phopephumResult?.yearlyJorn && 
-                      phopephumResult.yearlyJorn.row === (rIdx + 1) && 
+
+                    const isYearlyJorn = isRow012 && phopephumResult?.yearlyJorn &&
+                      phopephumResult.yearlyJorn.row === (rIdx + 1) &&
                       phopephumResult.yearlyJorn.col === (cIdx + 1);
 
-                    const isMonthlyJorn = isRow012 && phopephumResult?.monthlyJorn && 
-                      phopephumResult.monthlyJorn.row === (rIdx + 1) && 
+                    const isMonthlyJorn = isRow012 && phopephumResult?.monthlyJorn &&
+                      phopephumResult.monthlyJorn.row === (rIdx + 1) &&
                       phopephumResult.monthlyJorn.col === (cIdx + 1);
 
-                    const isDailyJorn = isRow012 && phopephumResult?.dailyJorn && 
-                      phopephumResult.dailyJorn.row === (rIdx + 1) && 
+                    const isDailyJorn = isRow012 && phopephumResult?.dailyJorn &&
+                      phopephumResult.dailyJorn.row === (rIdx + 1) &&
                       phopephumResult.dailyJorn.col === (cIdx + 1);
 
                     return (
@@ -2895,8 +2895,8 @@ function FateMatrixPanel({
                             {/* ── ชื่อภพ ── */}
                             {showHouseNames && houseName && (
                               <span className="text-[9.5px] sm:text-[11px] text-[#F8F6F1]/70 mt-1 leading-tight text-center font-bold px-0.5">
-                                {isBase4 
-                                  ? tHoro("base4_meanings." + houseName, houseName) 
+                                {isBase4
+                                  ? tHoro("base4_meanings." + houseName, houseName)
                                   : tHoro("houses." + houseName, houseName)}
                               </span>
                             )}
@@ -2993,7 +2993,7 @@ function FateMatrixPanel({
       </div>
 
       {/* ── คู่มือสัญลักษณ์ & คำอธิบายผังดวง (Collapsible Dropdown Accordion) ── */}
-      <div className="border-t border-[#C6A96B]/20 bg-[#020617]/80">
+      <div className="border-t border-[#C6A96B]/20 bg-[var(--pp-surface-020617)]/80">
         <button
           type="button"
           onClick={(e) => {
@@ -3016,7 +3016,7 @@ function FateMatrixPanel({
           <div className="border-t border-[#C6A96B]/10 space-y-0 animate-in fade-in duration-200">
             {/* ── ลัคนาเกิด / ลัคนาจร Detail Panel ── */}
             {phopephumResult?.lagna && (
-              <div className="bg-[#020617]/60 px-3 sm:px-5 py-3 space-y-2 text-xs sm:text-sm">
+              <div className="bg-[var(--pp-surface-020617)]/60 px-3 sm:px-5 py-3 space-y-2 text-xs sm:text-sm">
                 {/* ลัคนาเกิด */}
                 {showNatalLagna && (
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -3175,11 +3175,11 @@ function FateMatrixPanel({
 
             {/* Legend Block */}
             {taksaMaha && (
-              <div className="bg-[#0f172a]/50 p-4 border-t border-[#D9BC82]/10 text-[13px] space-y-2 text-[#C6B79F]">
+              <div className="bg-[var(--pp-surface-0f172a)]/50 p-4 border-t border-[#D9BC82]/10 text-[13px] space-y-2 text-[#C6B79F]">
                 <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
                   <span className="font-bold text-[#D9BC82] uppercase tracking-wider text-[12px] w-full">ปัจจัยภายนอก (ทักษาจร — 8 ภพ [มุมล่างขวาของการ์ด]):</span>
                   {[
-                    { label: "บริวาร", desc: "บริวาร/สังคม/ผู้ติดตาม",            cls: "text-slate-300 bg-slate-800/80 border-slate-500/30" },
+                    { label: "บริวาร", desc: "บริวาร/สังคม/ผู้ติดตาม",            cls: "text-slate-300 bg-[var(--pp-slate-800)]/80 border-slate-500/30" },
                     { label: "อายุ",   desc: "สุขภาพ/อายุ/ความมั่นคง",             cls: "text-teal-300 bg-teal-950/80 border-teal-500/30" },
                     { label: "เดช",    desc: "เกียรติยศ/อำนาจบารมี",               cls: "text-[#F8F6F1] bg-white/20 border-white/40" },
                     { label: "ศรี",    desc: "โชคลาภ/โอกาสดี/ทรัพย์สิน",          cls: "text-emerald-400 bg-emerald-950/80 border-emerald-500/30" },

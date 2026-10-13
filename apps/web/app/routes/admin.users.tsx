@@ -257,7 +257,7 @@ export default function AdminUsersPage() {
             type="text"
             defaultValue={search}
             placeholder="ค้นหาชื่อ หรือ อีเมล..."
-            className="w-full bg-[#0A1628] border border-white/10 rounded-xl px-4 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#38BDF8]/50"
+            className="w-full bg-[var(--pp-surface-0a1628)] border border-white/10 rounded-xl px-4 py-2 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#38BDF8]/50"
           />
         </div>
         <div>
@@ -265,7 +265,7 @@ export default function AdminUsersPage() {
           <select
             name="role"
             defaultValue={roleFilter}
-            className="w-full bg-[#0A1628] border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none"
+            className="w-full bg-[var(--pp-surface-0a1628)] border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none"
           >
             <option value="all">ทั้งหมด</option>
             <option value="user">User</option>
@@ -278,7 +278,7 @@ export default function AdminUsersPage() {
           <select
             name="plan"
             defaultValue={planFilter}
-            className="w-full bg-[#0A1628] border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none"
+            className="w-full bg-[var(--pp-surface-0a1628)] border border-white/10 rounded-xl px-3 py-2 text-sm text-[#F8F6F1] focus:outline-none"
           >
             <option value="all">ทุกระดับ</option>
             <option value="free">Free</option>
@@ -299,7 +299,7 @@ export default function AdminUsersPage() {
 
       {/* ── แถบดำเนินการเมื่อมีการเลือกสมาชิก (Bulk Action Bar) ── */}
       {selectedUserIds.length > 0 && (
-        <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-rose-950/70 via-[#0A1628] to-rose-950/70 border border-rose-500/40 p-4 rounded-2xl shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="flex flex-wrap items-center justify-between gap-3 bg-gradient-to-r from-rose-950/70 via-[var(--pp-surface-0a1628)] to-rose-950/70 border border-rose-500/40 p-4 rounded-2xl shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-3">
             <span className="w-3 h-3 rounded-full bg-rose-500 animate-pulse shrink-0" />
             <span className="text-sm font-semibold text-[#F8F6F1]">
@@ -342,7 +342,7 @@ export default function AdminUsersPage() {
                       if (el) el.indeterminate = isIndeterminate;
                     }}
                     onChange={handleToggleAll}
-                    className="w-4 h-4 rounded border-white/30 bg-[#0A1628] text-rose-500 focus:ring-rose-500 focus:ring-offset-0 cursor-pointer"
+                    className="w-4 h-4 rounded border-white/30 bg-[var(--pp-surface-0a1628)] text-rose-500 focus:ring-rose-500 focus:ring-offset-0 cursor-pointer"
                   />
                 </th>
                 <th className="px-6 py-4 text-xs font-semibold text-[#94A3B8] uppercase tracking-wider">ผู้ใช้งาน</th>
@@ -380,14 +380,14 @@ export default function AdminUsersPage() {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => handleToggleUser(u.id)}
-                          className="w-4 h-4 rounded border-white/30 bg-[#0A1628] text-rose-500 focus:ring-rose-500 focus:ring-offset-0 cursor-pointer"
+                          className="w-4 h-4 rounded border-white/30 bg-[var(--pp-surface-0a1628)] text-rose-500 focus:ring-rose-500 focus:ring-offset-0 cursor-pointer"
                         />
                       )}
                     </td>
 
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-[#38BDF8]">
+                        <div className="w-8 h-8 rounded-full bg-[var(--pp-slate-800)] border border-slate-700 flex items-center justify-center text-xs font-bold text-[#38BDF8]">
                           {(u.display_name || u.email || "?").charAt(0).toUpperCase()}
                         </div>
                         <div className="flex flex-col">
@@ -410,7 +410,7 @@ export default function AdminUsersPage() {
                           form={`edit-form-${u.id}`}
                           name="role"
                           defaultValue={u.role || "user"}
-                          className="bg-[#0A1628] border border-white/20 rounded-lg px-2 py-1.5 text-xs text-[#F8F6F1] w-full"
+                          className="bg-[var(--pp-surface-0a1628)] border border-white/20 rounded-lg px-2 py-1.5 text-xs text-[#F8F6F1] w-full"
                         >
                           <option value="user">User</option>
                           <option value="operator">Operator</option>
@@ -438,7 +438,7 @@ export default function AdminUsersPage() {
                             form={`edit-form-${u.id}`}
                             name="subscription"
                             defaultValue={u.subscription === "imperial" || u.subscription === "lifetime" ? "master" : u.subscription || "free"}
-                            className="bg-[#0A1628] border border-white/20 rounded-lg px-2 py-1.5 text-[10px] text-[#F8F6F1]"
+                            className="bg-[var(--pp-surface-0a1628)] border border-white/20 rounded-lg px-2 py-1.5 text-[10px] text-[#F8F6F1]"
                           >
                             <option value="free">Tier: Free (เริ่มทดลอง)</option>
                             <option value="basic">Tier: Basic (ยกระดับชีวิต)</option>
@@ -449,7 +449,7 @@ export default function AdminUsersPage() {
                             form={`edit-form-${u.id}`}
                             name="plan"
                             defaultValue={u.plan || "free"}
-                            className="bg-[#0A1628] border border-white/20 rounded-lg px-2 py-1.5 text-[10px] text-[#F8F6F1]"
+                            className="bg-[var(--pp-surface-0a1628)] border border-white/20 rounded-lg px-2 py-1.5 text-[10px] text-[#F8F6F1]"
                           >
                             <option value="free">Plan: Free (เริ่มทดลอง)</option>
                             <option value="basic">Plan: Basic (฿89/ด.)</option>
@@ -484,7 +484,7 @@ export default function AdminUsersPage() {
                           form={`edit-form-${u.id}`}
                           name="status"
                           defaultValue={u.membership_status || "active"}
-                          className="bg-[#0A1628] border border-white/20 rounded-lg px-2 py-1.5 text-[10px] text-[#F8F6F1] w-full"
+                          className="bg-[var(--pp-surface-0a1628)] border border-white/20 rounded-lg px-2 py-1.5 text-[10px] text-[#F8F6F1] w-full"
                         >
                           <option value="active">Active</option>
                           <option value="pending">Pending</option>
@@ -567,7 +567,7 @@ export default function AdminUsersPage() {
       {mounted && userToDeleteSingle && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-md p-4 flex min-h-full items-center justify-center">
           <div className="fixed inset-0" onClick={() => setUserToDeleteSingle(null)} aria-hidden="true" />
-          <div className="relative bg-[#0A2240] border border-rose-500/40 rounded-2xl p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 z-10 animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-[var(--pp-surface-0a2240)] border border-rose-500/40 rounded-2xl p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 z-10 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 text-rose-400">
               <span className="text-2xl">⚠️</span>
               <h3 className="text-lg font-bold">ยืนยันการลบสมาชิก</h3>
@@ -607,7 +607,7 @@ export default function AdminUsersPage() {
       {mounted && isBulkDeleteModalOpen && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-md p-4 flex min-h-full items-center justify-center">
           <div className="fixed inset-0" onClick={() => setIsBulkDeleteModalOpen(false)} aria-hidden="true" />
-          <div className="relative bg-[#0A2240] border border-rose-500/40 rounded-2xl p-6 max-w-lg w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 max-h-[85vh] overflow-y-auto z-10 animate-in fade-in zoom-in-95 duration-200">
+          <div className="relative bg-[var(--pp-surface-0a2240)] border border-rose-500/40 rounded-2xl p-6 max-w-lg w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 max-h-[85vh] overflow-y-auto z-10 animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center gap-3 text-rose-400">
               <span className="text-2xl">⚠️</span>
               <h3 className="text-lg font-bold">ยืนยันการลบสมาชิกพร้อมกัน ({selectedUserIds.length} คน)</h3>
@@ -617,7 +617,7 @@ export default function AdminUsersPage() {
             </p>
 
             {/* รายชื่อสรุปที่เลือก */}
-            <div className="bg-slate-950/60 border border-white/10 rounded-xl p-3 max-h-48 overflow-y-auto space-y-1.5 text-xs">
+            <div className="bg-[var(--pp-slate-950)]/60 border border-white/10 rounded-xl p-3 max-h-48 overflow-y-auto space-y-1.5 text-xs">
               <p className="text-[#94A3B8] font-semibold mb-1">รายชื่อที่จะถูกลบ:</p>
               {selectedUsersList.map(u => (
                 <div key={u.id} className="flex items-center justify-between text-[#F8F6F1] py-0.5 border-b border-white/5 last:border-0">
