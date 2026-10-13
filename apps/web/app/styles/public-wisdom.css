@@ -38,3 +38,20 @@
 @media (max-width: 359px) { .pp-home-paths { grid-template-columns: 1fr; }.pp-home-path { display: grid; grid-template-columns: 44px 1fr 20px; column-gap: 12px; align-items: center; padding: 14px; }.pp-home-icon { grid-row: span 2; margin: 0; }.pp-home-path > svg { grid-column: 3; grid-row: 1 / span 2; margin: 0; }.pp-home-path p { margin-top: 0; } }
 @media (min-width: 768px) { .pp-home-hero { grid-template-columns: 1fr 1fr; gap: 48px; padding-top: 64px; padding-bottom: 64px; }.pp-home-dock { display: none; }.pp-public-home { padding-bottom: 0; } }
 @media (max-width: 767px) { .pp-home-actions > a { flex: 1; }.pp-home-hero { gap: 28px; }.pp-home-intro { max-width: 560px; }.pp-home-message { padding: 22px; } }
+
+/* Visitor homepage: visible public actions, separate from the member app. */
+@media (max-width: 767px) {
+  .pp-theme-shell .pp-home-hero--guest .pp-home-message { display: none; }
+  .pp-home-hero--guest .pp-home-lead { font-size: 18px; }
+  .pp-home-hero--guest .pp-home-description { font-size: 15px; }
+  .pp-home-hero--guest .pp-home-actions a { padding-inline: 12px; white-space: nowrap; }
+  .pp-home-dock a { font-size: 11px; }
+}
+@media (max-width: 600px) {
+  .pp-home-hero--guest .pp-home-paths { grid-template-columns: 1fr; }
+  .pp-theme-shell .pp-home-hero--guest .pp-home-path { display: grid; grid-template-columns: 44px 1fr 20px; column-gap: 12px; align-items: center; padding: 14px; }
+  .pp-home-hero--guest .pp-home-icon { grid-row: 1 / span 2; margin: 0; }
+  .pp-home-hero--guest .pp-home-path h3 { grid-column: 2; grid-row: 1; }
+  .pp-home-hero--guest .pp-home-path p { grid-column: 2; grid-row: 2; margin-top: 0; }
+  .pp-home-hero--guest .pp-home-path > svg { grid-column: 3; grid-row: 1 / span 2; margin: 0; }
+}
