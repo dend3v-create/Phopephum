@@ -57,7 +57,7 @@ export function WisdomAtmosphere() {
       <div className="pp-atmosphere-sky" />
       <div className="pp-atmosphere-stars" />
       <div className="pp-atmosphere-seal"><CelestialMoon /></div>
-      <svg className="pp-atmosphere-horizon" viewBox="0 0 1440 320" preserveAspectRatio="none" focusable="false">
+      <svg className="pp-atmosphere-horizon" fill="none" viewBox="0 0 1440 320" preserveAspectRatio="none" focusable="false">
         <path d="M-140 340Q720-60 1580 340M-140 365Q720 0 1580 365M-140 390Q720 65 1580 390" stroke="currentColor" opacity=".2" />
         <path d="M0 288Q460 122 860 267T1440 250" stroke="currentColor" opacity=".1" />
       </svg>
