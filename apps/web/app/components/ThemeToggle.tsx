@@ -13,8 +13,8 @@ export function ThemeToggle() {
       <button
         type="submit"
         title={nextTheme === "light" ? t("theme.light") : t("theme.dark")}
-        className="flex items-center justify-center w-8 h-8 rounded-full border border-[var(--border-gold)] text-[var(--text-muted)] hover:text-[var(--accent-gold)] hover:border-[var(--accent-gold)] transition-all duration-200"
-        aria-label="Toggle theme"
+        className="flex items-center justify-center w-11 h-11 rounded-full border border-[var(--border-gold)] text-[var(--text-muted)] hover:text-[var(--accent-gold)] hover:border-[var(--accent-gold)] transition-all duration-200"
+        aria-label={nextTheme === "light" ? t("theme.light") : t("theme.dark")}
       >
         {currentTheme === "dark" ? (
           /* Sun icon */

@@ -1,0 +1,45 @@
+/* Mobile wisdom cards: SOULRA-inspired hierarchy, Phopephum brand and real loader data. */
+.pp-daily { --pp-gold: #F6D88C; display: grid; gap: 16px; color: var(--text-body); }
+.pp-wisdom-hero, .pp-domain-card, .pp-window-card {
+  border: 1px solid var(--border-gold); border-radius: 24px;
+  background: var(--bg-surface); min-width: 0;
+}
+.pp-wisdom-hero {
+  position: relative; overflow: hidden; padding: 24px;
+  background: radial-gradient(ellipse at 100% 0%, rgba(212,175,55,.10), transparent 65%), var(--bg-surface);
+}
+.pp-eyebrow { color: var(--pp-gold); font-size: 12px; font-weight: 600; letter-spacing: .04em; margin-bottom: 16px; }
+.pp-wisdom-hero h2 { position: relative; max-width: 90%; font-family: var(--font-family-sarabun); font-size: clamp(24px, 5vw, 32px); line-height: 1.4; font-weight: 600; text-wrap: balance; }
+.pp-summary { position: relative; color: var(--text-secondary); font-size: 16px; line-height: 1.8; margin-top: 12px; }
+.pp-orbit { position: absolute; right: -28px; top: -20px; width: 144px; height: 144px; border: 1px solid var(--border-gold); border-radius: 50%; display: grid; place-items: center; color: var(--accent-gold); opacity: .25; pointer-events: none; }
+.pp-orbit::after { content: ""; position: absolute; inset: 14px; border: 1px solid currentColor; border-radius: 50%; }
+.pp-energy { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-gold); }
+.pp-energy-label { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--text-secondary); }
+.pp-energy-label > span:last-child { color: var(--pp-gold); font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pp-energy small, .pp-domain-score small { font-size: 12px; font-weight: 400; color: var(--text-secondary); }
+.pp-energy-track { height: 5px; border-radius: 999px; background: var(--border-gold); margin-top: 12px; overflow: hidden; }
+.pp-energy-track > span { display: block; height: 100%; background: linear-gradient(90deg, #D4AF37, #F6D88C); border-radius: inherit; }
+.pp-caption { font-size: 12px; line-height: 1.6; margin-top: 8px; color: var(--text-secondary); }
+.pp-timing-cta { display: flex; align-items: center; justify-content: space-between; gap: 16px; border-radius: 24px; background: linear-gradient(110deg, #D4AF37, #F6D88C); color: #07172A; padding: 20px 24px; min-height: 88px; }
+.pp-timing-cta > div { min-width: 0; }
+.pp-timing-cta > svg { flex-shrink: 0; }
+.pp-cta-title { display: block; font-size: 20px; line-height: 1.4; font-weight: 700; }
+.pp-cta-description { display: block; font-size: 14px; line-height: 1.6; margin-top: 4px; }
+.pp-domain-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.pp-domain-card { padding: 18px; }
+.pp-domain-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 12px; }
+.pp-icon-ring { width: 44px; height: 44px; display: grid; place-items: center; flex-shrink: 0; border: 1px solid var(--border-gold); border-radius: 50%; color: var(--pp-gold); }
+.pp-domain-score { color: var(--pp-gold); font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pp-domain-card h3, .pp-window-card h3 { font-size: 17px; font-weight: 600; line-height: 1.5; }
+.pp-domain-card p, .pp-window-copy > p { color: var(--text-secondary); font-size: 14px; line-height: 1.7; margin-top: 6px; overflow-wrap: anywhere; }
+.pp-window-card { display: flex; align-items: flex-start; gap: 14px; padding: 20px; }
+.pp-window-copy { min-width: 0; }
+.pp-window-copy .pp-window-time { color: var(--pp-gold); font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.pp-window-link { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; color: var(--pp-gold); font-size: 14px; font-weight: 600; margin-top: 8px; }
+.pp-timing-cta:focus-visible, .pp-window-link:focus-visible, .pp-live-details > summary:focus-visible { outline: 2px solid var(--accent-gold); outline-offset: 4px; }
+.pp-live-details { border: 1px solid var(--border-gold); border-radius: 24px; overflow: hidden; }
+.pp-live-details > summary { padding: 18px 20px; min-height: 56px; font-size: 15px; font-weight: 600; color: var(--text-body); cursor: pointer; }
+.pp-live-details[open] > summary { border-bottom: 1px solid var(--border-gold); }
+@media (max-width: 359px) { .pp-domain-grid { grid-template-columns: 1fr; } .pp-wisdom-hero, .pp-timing-cta { padding: 20px; } }
+
+[data-theme="light"] .pp-daily { --pp-gold: #76590B; }

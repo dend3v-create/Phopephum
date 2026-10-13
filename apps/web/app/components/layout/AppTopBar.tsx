@@ -21,7 +21,7 @@ export function AppTopBar({
 
   return (
     <header
-      className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-3.5 border-b select-none touch-manipulation"
+      className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-3 gap-2 border-b select-none touch-manipulation"
       style={{
         background: "var(--sidebar-bg, rgba(2,6,23,0.97))",
         backdropFilter: "blur(20px)",
@@ -34,33 +34,33 @@ export function AppTopBar({
       {/* ── Brand Logo ── */}
       <Link
         to="/dashboard"
-        className="flex items-center gap-2 min-h-[44px] py-1 active:scale-95 transition-transform"
+        className="flex items-center gap-2 min-w-0 min-h-[44px] py-1 active:scale-95 transition-transform"
         aria-label="PhopePhum Home"
       >
-        <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-[#C6A96B] to-[#D9BC82] flex items-center justify-center shadow-md shadow-[#C6A96B]/20 shrink-0">
+        <div className="relative w-8 h-8 rounded-xl bg-gradient-to-br from-[#C6A96B] to-[#D9BC82] flex items-center justify-center shadow-md shadow-[#C6A96B]/20 shrink-0">
           <span className="text-[#020617] text-sm font-black font-display">P</span>
         </div>
-        <div className="flex flex-col">
-          <span className="font-display text-base font-bold tracking-tight text-[var(--text-body)] leading-none">
+        <div className={`flex flex-col min-w-0 ${isPro ? "max-[380px]:hidden" : ""}`}>
+          <span className="font-display text-sm font-bold tracking-tight text-[var(--text-body)] leading-none">
             PhopePhum
           </span>
-          <span className="text-[9px] tracking-[0.18em] uppercase text-[#C6A96B] font-semibold mt-0.5 opacity-90">
+          <span className="text-[10px] tracking-[0.08em] uppercase text-[#C6A96B] font-semibold mt-0.5 opacity-90">
             Wisdom OS
           </span>
         </div>
       </Link>
 
       {/* ── Actions on Right ── */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1 shrink-0">
         {/* Timing Reminder Bell */}
-        <div className="flex items-center justify-center min-w-[36px] min-h-[40px]">
+        <div className="flex items-center justify-center min-w-[44px] min-h-[44px]">
           <TimingReminderBell />
         </div>
 
         {/* Sands of Time Token Badge */}
         <Link
           to="/dashboard/upgrade?tab=sands"
-          className="flex items-center gap-1.5 px-2.5 min-h-[34px] rounded-full text-xs font-bold transition-all active:scale-95 border"
+          className="flex items-center gap-1.5 px-2.5 min-h-[44px] rounded-full text-xs font-bold transition-all active:scale-95 border"
           style={{
             background: "rgba(198, 169, 107, 0.08)",
             borderColor: "rgba(198, 169, 107, 0.25)",
@@ -78,7 +78,7 @@ export function AppTopBar({
         </Link>
 
         {/* Theme Toggle */}
-        <div className="flex items-center justify-center min-w-[36px] min-h-[40px]">
+        <div className="flex items-center justify-center min-w-[44px] min-h-[44px]">
           <ThemeToggle />
         </div>
 
@@ -87,20 +87,13 @@ export function AppTopBar({
           <button
             type="button"
             onClick={onOpenProDrawer}
-            className="min-w-[40px] min-h-[40px] flex items-center justify-center rounded-lg border border-[var(--border-gold)] text-[#C6A96B] hover:bg-white/5 active:scale-95 transition-all"
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg border border-[var(--border-gold)] text-[#C6A96B] hover:bg-white/5 active:scale-95 transition-all"
             aria-label={t("nav.pro_tools", "เครื่องมือโหร")}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className="w-5 h-5">
               <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" />
             </svg>
           </button>
-        ) : !isPro ? (
-          <Link
-            to="/dashboard/upgrade"
-            className="text-[10px] font-extrabold text-[#020617] bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] px-2.5 min-h-[34px] flex items-center justify-center rounded-full hover:scale-105 active:scale-95 transition-all shadow-sm"
-          >
-            ✦ PRO
-          </Link>
         ) : null}
       </div>
     </header>
