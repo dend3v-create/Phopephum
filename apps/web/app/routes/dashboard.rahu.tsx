@@ -669,19 +669,23 @@ function RahuConsultationChat({ rahuResult }: { rahuResult: any }) {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulated = "";
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
         for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6).trim();
-          if (data === "[DONE]") continue;
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith("data:")) continue;
+          const data = trimmed.replace(/^data:\s*/, "");
+          if (data === "[DONE]") break;
           try {
             const parsed = JSON.parse(data);
-            const token = parsed?.choices?.[0]?.delta?.content ?? parsed?.content ?? "";
+            const token = parsed?.text ?? parsed?.choices?.[0]?.delta?.content ?? parsed?.content ?? (typeof parsed === "string" ? parsed : "");
             if (token) {
               accumulated += token;
               setMessages((prev) =>
@@ -689,7 +693,12 @@ function RahuConsultationChat({ rahuResult }: { rahuResult: any }) {
               );
             }
           } catch {
-            // plain text fallback
+            if (data && !data.startsWith("{") && !data.startsWith("[")) {
+              accumulated += data;
+              setMessages((prev) =>
+                prev.map((m) => (m.id === assistantMsgId ? { ...m, text: accumulated } : m))
+              );
+            }
           }
         }
       }

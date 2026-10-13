@@ -30,16 +30,28 @@ export const meta: MetaFunction = () => [
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
-  const user = await getUser(request, env);
+  const user = await getUser(request, env).catch(() => null);
   const url = new URL(request.url);
   const showUpgradeBanner = url.searchParams.get("upgrade") === "1";
   const requiredPlan = url.searchParams.get("require") || null;
 
-  return json({
-    isLoggedIn: !!user,
-    showUpgradeBanner,
-    requiredPlan,
-  });
+  const headers: HeadersInit = (!user && !showUpgradeBanner && !requiredPlan)
+    ? {
+        "Cache-Control": "public, max-age=120, s-maxage=3600, stale-while-revalidate=86400",
+        "CDN-Cache-Control": "max-age=3600",
+      }
+    : {
+        "Cache-Control": "private, no-cache",
+      };
+
+  return json(
+    {
+      isLoggedIn: !!user,
+      showUpgradeBanner,
+      requiredPlan,
+    },
+    { headers }
+  );
 }
 
 // ─── Plan definitions ─────────────────────────────────────────────────────────────

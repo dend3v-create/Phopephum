@@ -24,7 +24,15 @@ export const meta: MetaFunction = () => [
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const env = context.cloudflare.env as Env;
   const user = await getUser(request, env).catch(() => null);
-  return json({ isLoggedIn: !!user });
+  const headers: HeadersInit = !user
+    ? {
+        "Cache-Control": "public, max-age=120, s-maxage=3600, stale-while-revalidate=86400",
+        "CDN-Cache-Control": "max-age=3600",
+      }
+    : {
+        "Cache-Control": "private, no-cache",
+      };
+  return json({ isLoggedIn: !!user }, { headers });
 }
 
 export default function HowItWorksPage() {

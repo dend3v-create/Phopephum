@@ -210,19 +210,23 @@ export default function WisdomChatPage() {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let acc = "";
+      let buffer = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        const chunk = decoder.decode(value, { stream: true });
-        const lines = chunk.split("\n");
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
         for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const data = line.slice(6).trim();
-          if (data === "[DONE]") continue;
+          const trimmed = line.trim();
+          if (!trimmed || !trimmed.startsWith("data:")) continue;
+          const data = trimmed.replace(/^data:\s*/, "");
+          if (data === "[DONE]") break;
           try {
             const parsed = JSON.parse(data);
-            const token = parsed?.choices?.[0]?.delta?.content ?? parsed?.content ?? "";
+            const token = parsed?.text ?? parsed?.choices?.[0]?.delta?.content ?? parsed?.content ?? (typeof parsed === "string" ? parsed : "");
             if (token) {
               acc += token;
               setMessagesByMode(prev => ({
@@ -230,21 +234,32 @@ export default function WisdomChatPage() {
                 [modeId]: prev[modeId].map(m => m.id === wisdomId ? { ...m, text: acc } : m)
               }));
             }
-          } catch { /* skip */ }
+          } catch {
+            // plain text chunk fallback
+            if (data && !data.startsWith("{") && !data.startsWith("[")) {
+              acc += data;
+              setMessagesByMode(prev => ({
+                ...prev,
+                [modeId]: prev[modeId].map(m => m.id === wisdomId ? { ...m, text: acc } : m)
+              }));
+            }
+          }
         }
       }
 
+      const finalText = acc.trim() || "ระบบประมวลผลคำตอบสำเร็จแล้วครับ ✦";
+
       setMessagesByMode(prev => ({
         ...prev,
-        [modeId]: prev[modeId].map(m => m.id === wisdomId ? { ...m, text: acc, streaming: false } : m)
+        [modeId]: prev[modeId].map(m => m.id === wisdomId ? { ...m, text: finalText, streaming: false } : m)
       }));
 
       // ── บันทึกลง Wisdom Journal เมื่อรับคำตอบเสร็จสมบูรณ์ ──────────────────────
-      if (acc.trim()) {
+      if (finalText) {
         const saveFd = new FormData();
         const modeLabel = MODE_CONFIGS[modeId].emoji + " " + MODE_CONFIGS[modeId].label;
         saveFd.append("question", `[${modeLabel}] ${text.trim()}`);
-        saveFd.append("answer", acc.trim());
+        saveFd.append("answer", finalText);
         saveFd.append("energyRating", "3");
 
         fetch("/api/journal-save", {
@@ -647,6 +662,33 @@ export default function WisdomChatPage() {
 
 // ─── MessageBubble ────────────────────────────────────────────────────────────
 
+function FormattedWisdomText({ text }: { text: string }) {
+  if (!text) return null;
+  const lines = text.split("\n");
+  return (
+    <div className="space-y-1.5">
+      {lines.map((line, idx) => {
+        if (!line.trim()) return <div key={idx} className="h-1.5" />;
+        const parts = line.split(/(\*\*.*?\*\*)/g);
+        return (
+          <p key={idx} className="leading-relaxed">
+            {parts.map((part, pIdx) => {
+              if (part.startsWith("**") && part.endsWith("**")) {
+                return (
+                  <strong key={pIdx} className="font-bold text-[#E5D5B3] dark:text-[#E5D5B3]">
+                    {part.slice(2, -2)}
+                  </strong>
+                );
+              }
+              return part;
+            })}
+          </p>
+        );
+      })}
+    </div>
+  );
+}
+
 function MessageBubble({ msg }: { msg: Message }) {
   const isUser = msg.role === "user";
 
@@ -654,11 +696,11 @@ function MessageBubble({ msg }: { msg: Message }) {
     return (
       <div className="flex justify-end animate-fade-up">
         <div
-          className="rounded-2xl rounded-tr-sm px-4 py-3 leading-relaxed font-semibold text-[15.5px] sm:text-base"
+          className="rounded-2xl rounded-tr-sm px-4 py-3 leading-relaxed font-semibold text-[15px] sm:text-base shadow-sm"
           style={{
             maxWidth: "85%",
-            background: "rgba(198,169,107,0.18)",
-            border: "1px solid rgba(198,169,107,0.25)",
+            background: "rgba(198,169,107,0.20)",
+            border: "1px solid rgba(198,169,107,0.35)",
             color: "var(--text-body)",
           }}
         >
@@ -669,12 +711,12 @@ function MessageBubble({ msg }: { msg: Message }) {
   }
 
   return (
-    <div className="flex gap-2.5 animate-fade-up">
+    <div className="flex gap-2.5 animate-fade-up items-start">
       {/* Avatar */}
       <div
-        className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-0.5 border"
+        className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-0.5 border shadow-sm"
         style={{
-          background: "rgba(198,169,107,0.10)",
+          background: "rgba(198,169,107,0.12)",
           borderColor: "var(--border-gold)",
         }}
       >
@@ -682,21 +724,17 @@ function MessageBubble({ msg }: { msg: Message }) {
       </div>
 
       <div
-        className="rounded-2xl rounded-tl-sm px-4 py-3 leading-relaxed text-[15.5px] sm:text-base border"
+        className="rounded-2xl rounded-tl-sm px-4 py-3 leading-relaxed text-[15px] sm:text-base border shadow-sm flex-1 min-w-0"
         style={{
-          maxWidth: "88%",
+          maxWidth: "90%",
           background: "var(--card-dark-bg)",
           borderColor: "var(--card-dark-border)",
           color: "var(--text-secondary)",
         }}
       >
-        {msg.text
-          ? msg.text.split("\n").map((line, i, arr) => (
-              <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
-            ))
-          : null}
+        {msg.text ? <FormattedWisdomText text={msg.text} /> : null}
         {msg.streaming && (
-          <span className="inline-flex items-center gap-1 ml-1.5">
+          <span className="inline-flex items-center gap-1 mt-1">
             {[0, 1, 2].map(i => (
               <span
                 key={i}

@@ -8,6 +8,15 @@ import { awardReferralSignupReward } from "./rewards.server";
 export { canAccess, type Plan };
 
 export async function getUser(request: Request, env: Env) {
+  const cookieHeader = request.headers.get("Cookie") ?? "";
+  // Fast Path: ถ้าไม่มี cookie เกี่ยวกับ Auth ให้ return null ทันที (ใช้ CPU < 0.05ms)
+  if (
+    !cookieHeader.includes("sb-") &&
+    !cookieHeader.includes("access_token") &&
+    !cookieHeader.includes("supabase")
+  ) {
+    return null;
+  }
   const { supabase } = createSupabaseClient(request, env);
   const {
     data: { user },
@@ -165,10 +174,8 @@ export async function getProfile(userId: string, request: Request, env: Env) {
     .single();
 
   // 2. ระบบ Self-Healing สำหรับ System Admin (คุณเด่น)
-  // ถ้าเป็นคุณเด่น แต่ข้อมูลหาย (เพราะ Reset DB) หรือยังไม่เป็น Admin
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  if (user?.email === "dend3v@gmail.com" && (error || !data || data.role !== 'admin')) {
+  // ทำงานเฉพาะเมื่อโปรไฟล์ตรงกับ admin email แต่ role ยังไม่เป็น admin หรือ profile หาย
+  if (data?.email === "dend3v@gmail.com" && (error || data.role !== 'admin')) {
     console.log("🛠️ Detecting Admin account - Triggering Self-Healing...");
     
     const adminClient = env.SUPABASE_SERVICE_ROLE_KEY 
@@ -179,7 +186,7 @@ export async function getProfile(userId: string, request: Request, env: Env) {
       .from("profiles")
       .upsert({
         id: userId,
-        email: user.email,
+        email: data.email,
         display_name: data?.display_name || "System Admin",
         role: 'admin',
         subscription: 'lifetime',
@@ -191,7 +198,7 @@ export async function getProfile(userId: string, request: Request, env: Env) {
 
     if (!healError && healedProfile) {
       return healedProfile;
-    } else {
+    } else if (healError) {
       console.error("❌ Admin Self-Healing failed:", healError);
     }
   }

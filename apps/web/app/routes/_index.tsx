@@ -58,7 +58,17 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
     return json({ isLoggedIn: !!user }, { headers });
   }
 
-  return json({ isLoggedIn: !!user });
+  // Edge CDN Cache: ถ้ายังไม่ล็อกอิน ให้แคชบน Cloudflare Edge 1 ชั่วโมง (ประหยัด CPU 100%)
+  const headers: HeadersInit = !user
+    ? {
+        "Cache-Control": "public, max-age=120, s-maxage=3600, stale-while-revalidate=86400",
+        "CDN-Cache-Control": "max-age=3600",
+      }
+    : {
+        "Cache-Control": "private, no-cache",
+      };
+
+  return json({ isLoggedIn: !!user }, { headers });
 }
 
 export default function IndexPage() {
