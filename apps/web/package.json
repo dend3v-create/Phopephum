@@ -9,7 +9,8 @@
     "build": "remix vite:build",
     "typecheck": "tsc",
     "lint": "tsc --noEmit",
-    "deploy": "remix vite:build && wrangler pages deploy ./build/client --project-name=phopephum-web --branch=phopephum --commit-dirty=true"
+    "deploy": "remix vite:build && wrangler pages deploy ./build/client --project-name=phopephum-web --branch=phopephum --commit-dirty=true",
+    "test": "node ../../scripts/test-active-subject-updates.mjs"
   },
   "dependencies": {
     "@phopephum/analytics": "workspace:*",

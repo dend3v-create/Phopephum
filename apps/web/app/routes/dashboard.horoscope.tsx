@@ -1,3 +1,4 @@
+import { resolveRevalidatedCalculation } from "~/utils/revalidatedCalculation";
 import { json } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, useLoaderData } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
@@ -119,6 +120,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
           alerts: phopephumResult.crossCheck.alerts,
         },
         birthDate: activeSubject.birthDate,
+        birthPlace: activeSubject.birthPlace,
         birthTime: activeSubject.birthTime || "",
         transitDate: new Date().toISOString().split("T")[0],
         transitTime: "12:00",
@@ -637,12 +639,13 @@ export default function HoroscopePage() {
   // ── ผลลัพธ์ที่แสดงผลปัจจุบัน (ลำดับความสำคัญ: actionData > initialResult) ──
   const [activeResult, setActiveResult] = useState<any>(ad || initialResult);
 
-  // อัปเดตเมื่อ actionData มีการเปลี่ยนแปลง (เช่น กดปุ่มคำนวณ)
+  const lastActionData = useRef<typeof ad>(undefined);
+  // A new calculation action wins; later loader revalidation reflects saved edits.
   useEffect(() => {
-    if (ad && !ad.error) {
-      setActiveResult(ad);
-    }
-  }, [ad]);
+    const hasNewAction = ad !== lastActionData.current;
+    lastActionData.current = ad;
+    setActiveResult(resolveRevalidatedCalculation(initialResult, ad, hasNewAction));
+  }, [ad, initialResult]);
 
   const [hoverNum, setHoverNum] = useState<number | null>(null);
 
@@ -689,7 +692,7 @@ export default function HoroscopePage() {
     (initialResult as any)?.subjectName || (initialResult as any)?.customerName || profile?.display_name || "เจ้าชะตา"
   );
   const currentSubjectName = activeResult?.subjectName || activeResult?.customerName || subjectName || profile?.display_name || "เจ้าชะตา";
-  const currentBirthPlace = activeResult?.birthPlace || profile?.birth_place || "กรุงเทพมหานคร";
+  const currentBirthPlace = activeResult?.birthPlace || activeSubject.birthPlace || "กรุงเทพมหานคร";
 
   // ── ส่วนแชทพยากรณ์อัจฉริยะตามผังดวง พร้อมระบบบันทึกประวัติแยกตามเจ้าชะตา ──
   const [forecastMode, setForecastMode] = useState<"natal" | "transit">("transit");
@@ -1644,7 +1647,7 @@ export default function HoroscopePage() {
                       </div>
                     )}
                     {/* จังหวัดเกิด */}
-                    {(activeResult?.birthPlace || profile?.birth_place) && (
+                    {currentBirthPlace && (
                       <div className="flex items-center gap-1.5">
                         <span className="text-[#A68444] dark:text-[#C6A96B]">@</span>
                         <span className="text-slate-500 dark:text-[#C6B79F]">จังหวัด</span>
