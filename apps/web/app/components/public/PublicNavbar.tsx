@@ -24,24 +24,24 @@ export function PublicNavbar({ isLoggedIn = false }: PublicNavbarProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 sm:h-20 flex items-center justify-between gap-4">
         
         {/* Brand Logo */}
-        <Link to="/" className="flex items-center gap-3 group">
+        <Link to="/" className="flex items-center gap-3 group min-w-0">
           <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#C6A96B] to-[#9E824C] p-0.5 shadow-md shadow-[#C6A96B]/20 flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
             <div className="w-full h-full rounded-[10px] bg-[#020617] flex items-center justify-center">
               <span className="font-display text-[#C6A96B] text-lg sm:text-xl font-bold">P</span>
             </div>
           </div>
-          <div className="flex flex-col">
+          <div className="flex flex-col min-w-0">
             <span className="font-display font-bold text-lg sm:text-xl tracking-wide text-slate-900 dark:text-[#F8F6F1] group-hover:text-[#8C6D2D] dark:group-hover:text-[#C6A96B] transition-colors">
               PhopePhum
             </span>
-            <span className="text-[10px] text-slate-700 dark:text-slate-400 font-medium tracking-wider -mt-0.5">
+            <span className="max-[400px]:hidden text-[10px] text-slate-700 dark:text-slate-400 font-medium tracking-wider -mt-0.5">
               ภพภูมิ • ปัญญาและกาลเวลาชีวิต
             </span>
           </div>
         </Link>
 
         {/* Desktop Navigation Links */}
-        <nav className="hidden lg:flex items-center gap-1 xl:gap-2">
+        <nav className="hidden xl:flex items-center gap-1 xl:gap-2">
           {navLinks.map((link) => {
             const isActive = location.pathname === link.href;
             return (
@@ -61,7 +61,7 @@ export function PublicNavbar({ isLoggedIn = false }: PublicNavbarProps) {
         </nav>
 
         {/* Right Actions (Theme, Auth CTAs) */}
-        <div className="hidden sm:flex items-center gap-2.5">
+        <div className="hidden lg:flex items-center gap-2.5">
           <ThemeToggle />
 
           {isLoggedIn ? (
@@ -92,8 +92,8 @@ export function PublicNavbar({ isLoggedIn = false }: PublicNavbarProps) {
         </div>
 
         {/* Mobile Hamburger & Controls */}
-        <div className="flex sm:hidden items-center gap-2">
-          <ThemeToggle />
+        <div className="flex xl:hidden items-center gap-2">
+          <div className="lg:hidden"><ThemeToggle /></div>
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -119,7 +119,7 @@ export function PublicNavbar({ isLoggedIn = false }: PublicNavbarProps) {
       {mobileMenuOpen && (
         <div
           id="mobile-nav-menu"
-          className="sm:hidden border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#020617]/95 backdrop-blur-2xl px-5 py-6 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
+          className="xl:hidden border-b border-slate-200 dark:border-white/10 bg-white/95 dark:bg-[#020617]/95 backdrop-blur-2xl px-5 py-6 space-y-4 animate-in fade-in slide-in-from-top-3 duration-200"
         >
           <nav className="flex flex-col space-y-1">
             {navLinks.map((link) => (
