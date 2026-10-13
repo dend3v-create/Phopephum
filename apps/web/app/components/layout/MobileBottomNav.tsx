@@ -107,7 +107,7 @@ export function MobileBottomNav({ currentPath }: MobileBottomNavProps) {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-50 border-t flex items-stretch select-none touch-manipulation"
+      className="pp-member-dock md:hidden fixed bottom-0 left-0 right-0 z-50 border-t flex items-stretch select-none touch-manipulation"
       style={{
         background: "var(--sidebar-bg, rgba(2,6,23,0.97))",
         backdropFilter: "blur(24px)",

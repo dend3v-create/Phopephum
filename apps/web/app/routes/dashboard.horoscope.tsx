@@ -1115,7 +1115,7 @@ export default function HoroscopePage() {
   const placeholderMatrix = Array(9).fill(0).map(() => Array(7).fill(0));
 
   return (
-    <div className="space-y-6 max-w-2xl pb-20 animate-fade-up w-full" style={{ overflowX: "hidden" }}>
+    <div className="pp-horoscope-shell space-y-6 max-w-2xl pb-20 animate-fade-up w-full" style={{ overflowX: "hidden" }}>
 
       {/* ── แถบสลับและจัดการเจ้าชะตาแบบเรียลไทม์ (Active Subject Banner) ── */}
       {activeSubject && (
@@ -1158,7 +1158,7 @@ export default function HoroscopePage() {
         );
 
         return (
-          <div className="relative overflow-hidden rounded-3xl bg-white dark:bg-gradient-to-b dark:from-[#0B1E38]/95 dark:via-[#061426]/95 dark:to-[#020617] border border-[#C6A96B]/35 p-5 sm:p-6 shadow-xl shadow-amber-950/5 dark:shadow-2xl text-left flex flex-col gap-4 backdrop-blur-xl">
+          <div className="pp-chart-reading-card relative overflow-hidden rounded-3xl bg-white dark:bg-gradient-to-b dark:from-[#0B1E38]/95 dark:via-[#061426]/95 dark:to-[#020617] border border-[#C6A96B]/35 p-5 sm:p-6 shadow-xl shadow-amber-950/5 dark:shadow-2xl text-left flex flex-col gap-4 backdrop-blur-xl">
             {/* Background Ambient Cosmic Glow */}
             <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-72 h-32 bg-gradient-to-b from-[#C6A96B]/20 via-[#4B6FAE]/15 to-transparent blur-2xl rounded-full pointer-events-none" />
 
@@ -1175,13 +1175,14 @@ export default function HoroscopePage() {
             </div>
 
             {/* Topic Chips Filter Bar */}
-            <div className="relative z-10 flex flex-wrap gap-1.5 pt-1">
+            <div className="pp-topic-chips relative z-10 flex flex-wrap gap-1.5 pt-1">
               {EMPEROR_TOPIC_OPTIONS.map((opt) => {
                 const isActive = selectedEmperorTopic === opt.key;
                 return (
                   <button
                     key={opt.key}
                     type="button"
+                    aria-pressed={isActive}
                     onClick={() => setSelectedEmperorTopic(opt.key)}
                     className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
                       isActive

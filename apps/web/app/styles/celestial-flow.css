@@ -1,0 +1,79 @@
+/* Celestial Flow: Phopephum gold with quiet moonlight and orbital surfaces. */
+.pp-theme-shell {
+  --pp-moonlight: #8BD8D1;
+  --pp-violet: #BEAFE7;
+  --pp-coral: #EDABA5;
+  --pp-glass: rgba(9, 24, 43, .94);
+  --pp-glass-soft: rgba(16, 33, 54, .9);
+  --pp-theme-line: rgba(161, 189, 211, .23);
+  --pp-card-shadow: 0 14px 38px rgba(0, 0, 0, .2), inset 0 1px 0 rgba(219, 232, 245, .06);
+}
+.pp-theme-shell .pp-atmosphere-sky {
+  background: radial-gradient(ellipse at 88% 12%, rgba(112, 88, 166, .23), transparent 46%), radial-gradient(ellipse at 4% 68%, rgba(43, 111, 126, .16), transparent 48%), linear-gradient(155deg, #07172A, #060D20 60%, #10243A);
+}
+.pp-theme-shell .pp-atmosphere { color: var(--pp-moonlight); }
+.pp-theme-shell .pp-atmosphere-seal { width: min(64vw, 690px); right: -9vw; top: 3vh; opacity: .3; }
+.pp-theme-shell .pp-atmosphere-stars { opacity: .25; }
+.pp-theme-shell .pp-atmosphere-horizon { height: min(25vh, 220px); }
+.pp-theme-shell .pp-home-message {
+  background: radial-gradient(ellipse at 95% 30%, rgba(88, 112, 157, .13), transparent 65%), var(--pp-glass);
+  border-color: var(--pp-theme-line);
+}
+.pp-theme-shell .pp-home-solar { color: var(--pp-moonlight); opacity: .65; right: -58px; top: 56px; }
+.pp-theme-shell .pp-home-path { transition: border-color .18s ease, background .18s ease; }
+.pp-theme-shell .pp-home-path:hover { border-color: var(--pp-moonlight); }
+.pp-theme-shell .pp-home-path:nth-child(2) .pp-home-icon { color: var(--pp-moonlight); border-color: currentColor; }
+.pp-theme-shell .pp-home-path:nth-child(3) .pp-home-icon { color: var(--pp-violet); border-color: currentColor; }
+.pp-theme-shell .pp-home-message-head { font-size: 13px; }
+.pp-theme-shell .pp-home-kicker { letter-spacing: .08em; }
+.pp-theme-shell .pp-home-dock, .pp-theme-shell .pp-member-dock { box-shadow: 0 -8px 32px rgba(0, 0, 0, .2); }
+.pp-theme-shell .pp-member-dock { border-radius: 24px 24px 0 0; }
+.pp-theme-shell .pp-wisdom-hero {
+  background: radial-gradient(ellipse at 100% 0%, rgba(113, 111, 173, .16), transparent 70%), var(--pp-glass);
+  padding: 26px;
+}
+.pp-theme-shell .pp-orbit { width: 210px; height: 210px; right: -70px; top: -28px; border: 0; opacity: .38; color: var(--pp-moonlight); }
+.pp-theme-shell .pp-orbit::after { content: none; }
+.pp-theme-shell .pp-orbit svg { width: 100%; height: 100%; }
+.pp-theme-shell .pp-eyebrow { color: var(--pp-moonlight); }
+.pp-theme-shell .pp-domain-card { --domain-color: var(--pp-moonlight); border-color: var(--pp-theme-line); }
+.pp-theme-shell .pp-domain-card[data-domain="finance"] { --domain-color: var(--pp-theme-gold); }
+.pp-theme-shell .pp-domain-card[data-domain="relationship"] { --domain-color: var(--pp-coral); }
+.pp-theme-shell .pp-domain-card[data-domain="wellness"] { --domain-color: var(--pp-violet); }
+.pp-theme-shell .pp-domain-card .pp-icon-ring { color: var(--domain-color); border-color: currentColor; background: transparent; }
+.pp-theme-shell .pp-domain-score { color: var(--domain-color); }
+.pp-theme-shell .pp-window-card { border-color: var(--pp-moonlight); }
+.pp-theme-shell .pp-window-card .pp-icon-ring { color: var(--pp-moonlight); border-color: currentColor; }
+.pp-theme-shell .pp-chart-reading-card { border-color: var(--pp-theme-line); box-shadow: var(--pp-card-shadow); }
+.pp-theme-shell .pp-topic-chips { gap: 8px; }
+.pp-theme-shell .pp-topic-chips button { min-height: 44px; line-height: 1.6; padding: 8px 12px; border-radius: 14px; }
+.pp-theme-shell .pp-topic-chips button:focus-visible { outline: 2px solid var(--pp-moonlight); outline-offset: 3px; }
+.pp-theme-shell .pp-topic-chips button[aria-pressed="true"] { box-shadow: 0 4px 16px rgba(212, 175, 55, .13); }
+[data-theme="light"] .pp-theme-shell {
+  --pp-moonlight: #246B68;
+  --pp-violet: #6B519D;
+  --pp-coral: #9A4B4B;
+  --pp-glass: rgba(255, 253, 248, .96);
+  --pp-glass-soft: rgba(255, 253, 248, .92);
+  --pp-theme-line: rgba(81, 99, 115, .22);
+  --pp-card-shadow: 0 10px 30px rgba(29, 41, 57, .06), inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+[data-theme="light"] .pp-theme-shell .pp-atmosphere-sky {
+  background: radial-gradient(ellipse at 88% 12%, rgba(191, 175, 223, .16), transparent 46%), radial-gradient(ellipse at 4% 68%, rgba(139, 216, 209, .12), transparent 48%), linear-gradient(155deg, #FDF8E8, #F8F6F0 60%, #EEF2EF);
+}
+[data-theme="light"] .pp-theme-shell .pp-atmosphere-seal { opacity: .13; }
+[data-theme="light"] .pp-theme-shell .pp-home-solar { opacity: .35; }
+[data-theme="light"] .pp-theme-shell .pp-home-dock, [data-theme="light"] .pp-theme-shell .pp-member-dock { box-shadow: 0 -5px 24px rgba(29, 41, 57, .06); }
+@media (max-width: 767px) {
+  .pp-theme-shell .pp-atmosphere-seal { width: 420px; right: -240px; top: 16vh; opacity: .2; }
+  .pp-theme-shell .pp-wisdom-hero { padding: 22px; }
+  .pp-theme-shell .pp-domain-grid { grid-template-columns: 1fr; gap: 12px; }
+  .pp-theme-shell .pp-domain-card { display: grid; grid-template-columns: 48px 1fr; gap: 2px 14px; padding: 18px; }
+  .pp-theme-shell .pp-domain-head { display: contents; }
+  .pp-theme-shell .pp-domain-card .pp-icon-ring { grid-column: 1; grid-row: 1 / span 3; align-self: center; }
+  .pp-theme-shell .pp-domain-card h3 { grid-column: 2; grid-row: 1; }
+  .pp-theme-shell .pp-domain-card p { grid-column: 2; grid-row: 2; margin: 2px 0 0; }
+  .pp-theme-shell .pp-domain-score { grid-column: 2; grid-row: 3; margin-top: 8px; font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .pp-theme-shell .pp-home-path { transition: none; } }
+@media (forced-colors: active) { .pp-theme-shell .pp-orbit { display: none; } }
