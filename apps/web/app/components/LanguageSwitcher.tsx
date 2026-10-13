@@ -51,7 +51,7 @@ export function LanguageSwitcher() {
             onClick={() => handleLanguageChange(lang.code)}
             className={`px-3 py-1 rounded-full text-xs font-medium transition-all whitespace-nowrap inline-flex items-center ${
               i18n.language === lang.code
-                ? "bg-[var(--accent-blue)] text-white shadow-md shadow-[var(--accent-blue)]/10"
+                ? "bg-[var(--accent-blue)] pp-on-brand shadow-md shadow-[var(--accent-blue)]/10"
                 : "text-[var(--text-muted)] hover:text-[var(--text-body)] hover:bg-black/5 dark:hover:bg-white/5"
             }`}
           >

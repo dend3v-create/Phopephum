@@ -24,7 +24,7 @@ export function MobileFloatingSpeedDial() {
           <circle cx="6" cy="17" r="1" fill="currentColor" />
         </svg>
       ),
-      badgeClass: "bg-gradient-to-tr from-[#1E3A8A] to-[#2563EB] text-[#F8F6F1] border border-[#C6A96B]/50 shadow-md shadow-blue-900/30",
+      badgeClass: "bg-gradient-to-tr from-[#1E3A8A] to-[#2563EB] pp-on-brand border border-[#C6A96B]/50 shadow-md shadow-blue-900/30",
     },
     {
       to: "/dashboard",
