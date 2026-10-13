@@ -271,7 +271,7 @@ export default function PlannerPage() {
               </span>
             )}
           </div>
-          <Card className="bg-[#0A1628]/40 border-[#D9BC82]/10 p-5 space-y-3">
+          <Card className="bg-[var(--pp-surface-0a1628)]/40 border-[#D9BC82]/10 p-5 space-y-3">
             <p className="text-[13px] text-[#94A3B8] font-medium leading-relaxed">
               {t("common:planner.intention_desc", "เป้าหมายสำคัญที่สุดของวันนี้เพื่อสร้างสัจจะบารมีและการฝึกจิตใจให้ตั้งมั่น")}
             </p>
@@ -280,7 +280,7 @@ export default function PlannerPage() {
               name="intention"
               defaultValue={plan?.intention ?? ""}
               placeholder={t("common:planner.intention_placeholder", "กรอกความตั้งใจของคุณเช้านี้... (เช่น วันนี้จะเคลียร์งานสำคัญ 1 อย่าง หรือแบ่งเวลาทำสมาธิ 15 นาที)")}
-              className="w-full bg-[#1E293B]/30 border border-[#D9BC82]/10 focus:border-[#C6A96B]/40 rounded-xl px-4 py-3 text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 outline-none transition-all"
+              className="w-full bg-[var(--pp-surface-1e293b)]/30 border border-[#D9BC82]/10 focus:border-[#C6A96B]/40 rounded-xl px-4 py-3 text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 outline-none transition-all"
             />
           </Card>
         </section>
@@ -290,7 +290,7 @@ export default function PlannerPage() {
           <div className="flex items-center gap-2 text-[#D9BC82] text-xs font-bold uppercase tracking-widest">
             <Zap className="w-4 h-4" /> {t("common:planner.dharma_title", "DAILY WISDOM GUIDE")}
           </div>
-          <Card className="bg-[#0A1628]/40 border-[#D9BC82]/10 p-5">
+          <Card className="bg-[var(--pp-surface-0a1628)]/40 border-[#D9BC82]/10 p-5">
             <div className="space-y-4">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
@@ -327,10 +327,10 @@ export default function PlannerPage() {
               const slotPeriod = t("yam:period_" + slot.period, slot.period === "day" ? "กลางวัน" : "กลางคืน");
               const slotOrder = t("yam:yam_order", { order: slot.yamNumber, defaultValue: `ยามที่ ${slot.yamNumber}` });
               return (
-                <Card key={i} className={`p-4 transition-all border-[#D9BC82]/10 ${activeSlot === i ? 'ring-1 ring-[#D9BC82]/40 bg-[#D9BC82]/5' : 'bg-[#0A1628]/20'}`}>
+                <Card key={i} className={`p-4 transition-all border-[#D9BC82]/10 ${activeSlot === i ? 'ring-1 ring-[#D9BC82]/40 bg-[#D9BC82]/5' : 'bg-[var(--pp-surface-0a1628)]/20'}`}>
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-[#1E293B] border border-white/5 flex items-center justify-center shrink-0">
+                      <div className="w-10 h-10 rounded-xl bg-[var(--pp-surface-1e293b)] border border-white/5 flex items-center justify-center shrink-0">
                         <span className="text-xl" style={{ color: slot.ruler.color }}>{slot.ruler.symbol}</span>
                       </div>
                       <div>
@@ -374,7 +374,7 @@ export default function PlannerPage() {
           <div className="flex items-center gap-2 text-[#D9BC82] text-xs font-bold uppercase tracking-widest">
             <BookOpen className="w-4 h-4" /> {t("common:planner.evening_reflection", "REFLECTION JOURNAL")}
           </div>
-          <Card className="bg-[#0A1628]/40 border-[#D9BC82]/10 p-6 space-y-6">
+          <Card className="bg-[var(--pp-surface-0a1628)]/40 border-[#D9BC82]/10 p-6 space-y-6">
             <div className="space-y-4">
               <div className="flex justify-between items-center border-b border-[#C6A96B]/10 pb-3">
                 <h3 className="text-xl font-bold text-[#F8F6F1]">
@@ -400,7 +400,7 @@ export default function PlannerPage() {
                   defaultValue={plan?.reflection ?? ""}
                   placeholder={t("common:planner.reflection_placeholder", "ทบทวนเหตุการณ์และความรู้สึกของวันนี้... สิ่งที่คุณทำสำเร็จตามความตั้งใจ หรือบทเรียนสัจจะบารมีที่คุณได้รับในวันนี้คืออะไร?")}
                   rows={4}
-                  className="w-full bg-[#1E293B]/30 border border-[#D9BC82]/10 focus:border-[#C6A96B]/40 rounded-xl p-4 text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 outline-none transition-all resize-none"
+                  className="w-full bg-[var(--pp-surface-1e293b)]/30 border border-[#D9BC82]/10 focus:border-[#C6A96B]/40 rounded-xl p-4 text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 outline-none transition-all resize-none"
                 />
               </div>
               
@@ -421,7 +421,7 @@ export default function PlannerPage() {
                       <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${
                         (plan?.energy_level ?? 3) === level 
                           ? 'border-[#D9BC82] bg-[#D9BC82]/10 text-[#D9BC82]' 
-                          : 'border-white/5 bg-[#1E293B]/40 text-[#94A3B8] group-hover:border-white/10'
+                          : 'border-white/5 bg-[var(--pp-surface-1e293b)]/40 text-[#94A3B8] group-hover:border-white/10'
                       }`}>
                         {level}
                       </div>
@@ -439,7 +439,7 @@ export default function PlannerPage() {
                   defaultValue={plan?.success_notes ?? ""}
                   placeholder={t("common:planner.success_notes_placeholder", "วันนี้ได้สัจจะบารมีเรื่องใดบ้าง? หรือมีสิ่งใดให้เรียนรู้เพิ่มเติม...")}
                   rows={4}
-                  className="w-full bg-[#1E293B]/30 border border-white/5 rounded-xl p-4 text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 focus:border-[#D9BC82]/20 outline-none transition-all resize-none"
+                  className="w-full bg-[var(--pp-surface-1e293b)]/30 border border-white/5 rounded-xl p-4 text-sm text-[#D9CDB7] placeholder-[#94A3B8]/40 focus:border-[#D9BC82]/20 outline-none transition-all resize-none"
                 />
               </div>
 

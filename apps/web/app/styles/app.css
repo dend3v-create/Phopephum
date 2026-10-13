@@ -2,6 +2,7 @@
 @import "./daily-wisdom.css";
 @import "./public-wisdom.css";
 @import "./astral-dawn.css";
+@import "./theme-surfaces.css";
 
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
@@ -81,10 +82,10 @@
   --bg-elevated:    rgba(255, 255, 255, 0.95);
   --text-body:      #1D2939;
   --text-secondary: #475467;
-  --text-muted:     #98A2B3;
-  --text-faint:     rgba(29, 41, 57, 0.30);
-  --accent-gold:    #A68444;
-  --accent-gold-hi: #C6A96B;
+  --text-muted:     #64748B;
+  --text-faint:     #64748B;
+  --accent-gold:    #76590B;
+  --accent-gold-hi: #76590B;
   --accent-blue:    #3D5361;
   --accent-blue-hi: #4C6475;
   --border-gold:    rgba(198, 169, 107, 0.18);

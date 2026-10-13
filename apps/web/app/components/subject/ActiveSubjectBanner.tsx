@@ -271,7 +271,7 @@ export function ActiveSubjectBanner({
           {isDeleteConfirmOpen && (
             <div className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-sm p-4 flex min-h-full items-center justify-center">
               <div className="fixed inset-0" onClick={() => setIsDeleteConfirmOpen(false)} aria-hidden="true" />
-              <div className="relative bg-[#0A2240] border border-rose-500/40 rounded-2xl p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 z-10 animate-in fade-in zoom-in-95 duration-200">
+              <div className="relative bg-[var(--pp-surface-0a2240)] border border-rose-500/40 rounded-2xl p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 z-10 animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex items-center gap-3 text-rose-400">
                   <span className="text-2xl">⚠️</span>
                   <h3 className="text-lg font-bold">ยืนยันการลบเจ้าชะตา</h3>
@@ -303,8 +303,8 @@ export function ActiveSubjectBanner({
           {isAddModalOpen && (
             <div className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:p-6 flex min-h-full items-center justify-center">
               <div className="fixed inset-0" onClick={() => setIsAddModalOpen(false)} aria-hidden="true" />
-              <div className="relative bg-[#0A2240] border border-[#C6A96B]/50 rounded-2xl p-5 sm:p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 max-h-[90vh] overflow-y-auto z-10 animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between border-b border-[#C6A96B]/20 pb-3 sticky top-0 bg-[#0A2240] z-10">
+              <div className="relative bg-[var(--pp-surface-0a2240)] border border-[#C6A96B]/50 rounded-2xl p-5 sm:p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 max-h-[90vh] overflow-y-auto z-10 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-center justify-between border-b border-[#C6A96B]/20 pb-3 sticky top-0 bg-[var(--pp-surface-0a2240)] z-10">
                   <h3 className="text-lg font-bold text-[#F8F6F1] flex items-center gap-2">
                     <span>➕</span>
                     <span>เพิ่มเจ้าชะตาใหม่</span>
@@ -343,7 +343,7 @@ export function ActiveSubjectBanner({
                         value={formName}
                         onChange={e => setFormName(e.target.value)}
                         placeholder="เช่น คุณสมชาย หรือ ลูกดวง A"
-                        className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] focus:border-[#C6A96B] outline-none"
+                        className="w-full bg-[var(--pp-slate-950)]/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] focus:border-[#C6A96B] outline-none"
                       />
                     </div>
 
@@ -353,28 +353,28 @@ export function ActiveSubjectBanner({
                         <select
                           value={formDay}
                           onChange={e => setFormDay(Number(e.target.value))}
-                          className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                          className="bg-[var(--pp-slate-950)]/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
                         >
                           {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
-                            <option key={d} value={d} className="bg-[#0A2240]">{d}</option>
+                            <option key={d} value={d} className="bg-[var(--pp-surface-0a2240)]">{d}</option>
                           ))}
                         </select>
                         <select
                           value={formMonth}
                           onChange={e => setFormMonth(Number(e.target.value))}
-                          className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                          className="bg-[var(--pp-slate-950)]/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
                         >
                           {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                            <option key={i + 1} value={i + 1} className="bg-[#0A2240]">{m}</option>
+                            <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-0a2240)]">{m}</option>
                           ))}
                         </select>
                         <select
                           value={formYear}
                           onChange={e => setFormYear(Number(e.target.value))}
-                          className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                          className="bg-[var(--pp-slate-950)]/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
                         >
                           {Array.from({ length: 100 }, (_, i) => 2569 - i).map(y => (
-                            <option key={y} value={y} className="bg-[#0A2240]">{y}</option>
+                            <option key={y} value={y} className="bg-[var(--pp-surface-0a2240)]">{y}</option>
                           ))}
                         </select>
                       </div>
@@ -387,7 +387,7 @@ export function ActiveSubjectBanner({
                           type="time"
                           value={formTime}
                           onChange={e => setFormTime(e.target.value)}
-                          className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                          className="w-full bg-[var(--pp-slate-950)]/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
                         />
                       </div>
                       <div>
@@ -396,12 +396,12 @@ export function ActiveSubjectBanner({
                           type="text"
                           value={formPlace}
                           onChange={e => setFormPlace(e.target.value)}
-                          className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                          className="w-full bg-[var(--pp-slate-950)]/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
                         />
                       </div>
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-3 border-t border-white/10 sticky bottom-0 bg-[#0A2240]">
+                    <div className="flex justify-end gap-3 pt-3 border-t border-white/10 sticky bottom-0 bg-[var(--pp-surface-0a2240)]">
                       <button
                         type="button"
                         onClick={() => setIsAddModalOpen(false)}
@@ -426,8 +426,8 @@ export function ActiveSubjectBanner({
           {isEditModalOpen && (
             <div className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:p-6 flex min-h-full items-center justify-center">
               <div className="fixed inset-0" onClick={() => setIsEditModalOpen(false)} aria-hidden="true" />
-              <div className="relative bg-[#0A2240] border border-[#C6A96B]/50 rounded-2xl p-5 sm:p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 max-h-[90vh] overflow-y-auto z-10 animate-in fade-in zoom-in-95 duration-200">
-                <div className="flex items-center justify-between border-b border-[#C6A96B]/20 pb-3 sticky top-0 bg-[#0A2240] z-10">
+              <div className="relative bg-[var(--pp-surface-0a2240)] border border-[#C6A96B]/50 rounded-2xl p-5 sm:p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 max-h-[90vh] overflow-y-auto z-10 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex items-center justify-between border-b border-[#C6A96B]/20 pb-3 sticky top-0 bg-[var(--pp-surface-0a2240)] z-10">
                   <h3 className="text-lg font-bold text-[#F8F6F1] flex items-center gap-2">
                     <span>✏️</span>
                     <span>แก้ไขข้อมูลเจ้าชะตา</span>
@@ -449,7 +449,7 @@ export function ActiveSubjectBanner({
                       required
                       value={formName}
                       onChange={e => setFormName(e.target.value)}
-                      className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] focus:border-[#C6A96B] outline-none"
+                      className="w-full bg-[var(--pp-slate-950)]/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] focus:border-[#C6A96B] outline-none"
                     />
                   </div>
 
@@ -459,28 +459,28 @@ export function ActiveSubjectBanner({
                       <select
                         value={formDay}
                         onChange={e => setFormDay(Number(e.target.value))}
-                        className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                        className="bg-[var(--pp-slate-950)]/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
                       >
                         {Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
-                          <option key={d} value={d} className="bg-[#0A2240]">{d}</option>
+                          <option key={d} value={d} className="bg-[var(--pp-surface-0a2240)]">{d}</option>
                         ))}
                       </select>
                       <select
                         value={formMonth}
                         onChange={e => setFormMonth(Number(e.target.value))}
-                        className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                        className="bg-[var(--pp-slate-950)]/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
                       >
                         {["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."].map((m, i) => (
-                          <option key={i + 1} value={i + 1} className="bg-[#0A2240]">{m}</option>
+                          <option key={i + 1} value={i + 1} className="bg-[var(--pp-surface-0a2240)]">{m}</option>
                         ))}
                       </select>
                       <select
                         value={formYear}
                         onChange={e => setFormYear(Number(e.target.value))}
-                        className="bg-slate-950/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                        className="bg-[var(--pp-slate-950)]/80 border border-white/15 rounded-xl px-2 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
                       >
                         {Array.from({ length: 100 }, (_, i) => 2569 - i).map(y => (
-                          <option key={y} value={y} className="bg-[#0A2240]">{y}</option>
+                          <option key={y} value={y} className="bg-[var(--pp-surface-0a2240)]">{y}</option>
                         ))}
                       </select>
                     </div>
@@ -493,7 +493,7 @@ export function ActiveSubjectBanner({
                         type="time"
                         value={formTime}
                         onChange={e => setFormTime(e.target.value)}
-                        className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                        className="w-full bg-[var(--pp-slate-950)]/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
                       />
                     </div>
                     <div>
@@ -502,12 +502,12 @@ export function ActiveSubjectBanner({
                         type="text"
                         value={formPlace}
                         onChange={e => setFormPlace(e.target.value)}
-                        className="w-full bg-slate-950/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
+                        className="w-full bg-[var(--pp-slate-950)]/60 border border-white/15 rounded-xl px-3 py-2 text-[#F8F6F1] outline-none focus:border-[#C6A96B]"
                       />
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-3 pt-3 border-t border-white/10 sticky bottom-0 bg-[#0A2240]">
+                  <div className="flex justify-end gap-3 pt-3 border-t border-white/10 sticky bottom-0 bg-[var(--pp-surface-0a2240)]">
                     <button
                       type="button"
                       onClick={() => setIsEditModalOpen(false)}

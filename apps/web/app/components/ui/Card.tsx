@@ -16,7 +16,7 @@ export function Card({
   const base =
     variant === "glass"
       ? "card-glass"
-      : "bg-[#0A2240]/80 border border-[rgba(217,188,130,0.18)] rounded-[1.25rem]";
+      : "bg-[var(--pp-surface-0a2240)]/80 border border-[rgba(217,188,130,0.18)] rounded-[1.25rem]";
 
   return (
     <div

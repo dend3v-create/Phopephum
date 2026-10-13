@@ -67,7 +67,7 @@ export function CombinedMahaCard({
         {/* ── Legend Badges: กำเนิด (ขาว) + จร (ฟ้า) + โลกาวินาศ (เหลือง) + มรณะ/อริ (แดง) ── */}
         <div className="flex flex-wrap items-center gap-1.5 text-[11px]">
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white font-bold">
-            <span className="w-2 h-2 rounded-full bg-slate-700 dark:bg-white" />
+            <span className="w-2 h-2 rounded-full bg-[var(--pp-slate-700)] dark:bg-white" />
             กำเนิด (สีขาว)
           </span>
           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-500/40 text-sky-800 dark:text-sky-400 font-bold">

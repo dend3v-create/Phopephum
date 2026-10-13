@@ -142,7 +142,7 @@ export default function Onboarding() {
                 type="text"
                 placeholder="เช่น คุณดวงดี มีสุข"
                 required
-                className="w-full bg-[#020617]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary placeholder:text-text-muted/40 rounded-xl pl-9 pr-4 py-2.5 text-xs focus:outline-none transition-colors"
+                className="w-full bg-[var(--pp-surface-020617)]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary placeholder:text-text-muted/40 rounded-xl pl-9 pr-4 py-2.5 text-xs focus:outline-none transition-colors"
               />
             </div>
           </div>
@@ -159,7 +159,7 @@ export default function Onboarding() {
                 className={`py-2 rounded-xl text-xs font-bold transition-all border
                   ${gender === "male"
                     ? "bg-gold-500 text-cosmic-950 border-gold-liquid shadow-[0_0_15px_rgba(232,196,106,0.25)]"
-                    : "bg-[#020617]/40 border-white/5 text-[#C6B79F] hover:text-text-primary hover:border-gold-500/30"}`}
+                    : "bg-[var(--pp-surface-020617)]/40 border-white/5 text-[#C6B79F] hover:text-text-primary hover:border-gold-500/30"}`}
               >
                 ♂ ชาย
               </button>
@@ -169,7 +169,7 @@ export default function Onboarding() {
                 className={`py-2 rounded-xl text-xs font-bold transition-all border
                   ${gender === "female"
                     ? "bg-gold-500 text-cosmic-950 border-gold-liquid shadow-[0_0_15px_rgba(232,196,106,0.25)]"
-                    : "bg-[#020617]/40 border-white/5 text-[#C6B79F] hover:text-text-primary hover:border-gold-500/30"}`}
+                    : "bg-[var(--pp-surface-020617)]/40 border-white/5 text-[#C6B79F] hover:text-text-primary hover:border-gold-500/30"}`}
               >
                 ♀ หญิง
               </button>
@@ -179,7 +179,7 @@ export default function Onboarding() {
                 className={`py-2 rounded-xl text-xs font-bold transition-all border
                   ${gender === "other"
                     ? "bg-mystic-500 text-text-primary border-mystic-400 shadow-[0_0_15px_rgba(109,143,199,0.25)]"
-                    : "bg-[#020617]/40 border-white/5 text-[#C6B79F] hover:text-text-primary hover:border-gold-500/30"}`}
+                    : "bg-[var(--pp-surface-020617)]/40 border-white/5 text-[#C6B79F] hover:text-text-primary hover:border-gold-500/30"}`}
               >
                 ⚧ อื่นๆ
               </button>
@@ -199,12 +199,12 @@ export default function Onboarding() {
                 max={31}
                 placeholder="วัน"
                 required
-                className="col-span-3 text-center bg-[#020617]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary placeholder:text-text-muted/40 rounded-xl py-2.5 text-xs focus:outline-none transition-colors"
+                className="col-span-3 text-center bg-[var(--pp-surface-020617)]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary placeholder:text-text-muted/40 rounded-xl py-2.5 text-xs focus:outline-none transition-colors"
               />
               <select
                 name="birthMonth"
                 required
-                className="col-span-5 bg-[#020617]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary rounded-xl px-2 py-2.5 text-xs focus:outline-none transition-colors"
+                className="col-span-5 bg-[var(--pp-surface-020617)]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary rounded-xl px-2 py-2.5 text-xs focus:outline-none transition-colors"
               >
                 <option value="">เดือน...</option>
                 <option value="1">มกราคม</option>
@@ -227,7 +227,7 @@ export default function Onboarding() {
                 max={2600}
                 placeholder="พ.ศ."
                 required
-                className="col-span-4 text-center bg-[#020617]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary placeholder:text-text-muted/40 rounded-xl py-2.5 text-xs focus:outline-none transition-colors"
+                className="col-span-4 text-center bg-[var(--pp-surface-020617)]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary placeholder:text-text-muted/40 rounded-xl py-2.5 text-xs focus:outline-none transition-colors"
               />
             </div>
           </div>
@@ -246,7 +246,7 @@ export default function Onboarding() {
                       type="checkbox"
                       checked={unknownTime}
                       onChange={(e) => setUnknownTime(e.target.checked)}
-                      className="w-3.5 h-3.5 rounded border-white/10 bg-[#020617]/70 text-gold-500 focus:ring-0"
+                      className="w-3.5 h-3.5 rounded border-white/10 bg-[var(--pp-surface-020617)]/70 text-gold-500 focus:ring-0"
                     />
                     <span>ไม่ทราบเวลา</span>
                   </label>
@@ -260,12 +260,12 @@ export default function Onboarding() {
                         <select
                           value={selectedHour}
                           onChange={(e) => setSelectedHour(e.target.value)}
-                          className="w-full bg-[#020617]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary rounded-xl px-2.5 py-2 text-xs focus:outline-none transition-colors font-sans"
+                          className="w-full bg-[var(--pp-surface-020617)]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary rounded-xl px-2.5 py-2 text-xs focus:outline-none transition-colors font-sans"
                         >
                           {Array.from({ length: 24 }, (_, i) => {
                             const val = String(i).padStart(2, "0");
                             return (
-                              <option key={val} value={val} className="bg-[#020617] text-white">
+                              <option key={val} value={val} className="bg-[var(--pp-surface-020617)] text-white">
                                 {val} น.
                               </option>
                             );
@@ -277,12 +277,12 @@ export default function Onboarding() {
                         <select
                           value={selectedMinute}
                           onChange={(e) => setSelectedMinute(e.target.value)}
-                          className="w-full bg-[#020617]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary rounded-xl px-2.5 py-2 text-xs focus:outline-none transition-colors font-sans"
+                          className="w-full bg-[var(--pp-surface-020617)]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary rounded-xl px-2.5 py-2 text-xs focus:outline-none transition-colors font-sans"
                         >
                           {Array.from({ length: 60 }, (_, i) => {
                             const val = String(i).padStart(2, "0");
                             return (
-                              <option key={val} value={val} className="bg-[#020617] text-white">
+                              <option key={val} value={val} className="bg-[var(--pp-surface-020617)] text-white">
                                 {val} นาที
                               </option>
                             );
@@ -335,7 +335,7 @@ export default function Onboarding() {
                   name="birthPlace"
                   type="text"
                   placeholder="เช่น กรุงเทพฯ"
-                  className="w-full bg-[#020617]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary placeholder:text-text-muted/40 rounded-xl px-3 py-2 text-xs focus:outline-none transition-colors"
+                  className="w-full bg-[var(--pp-surface-020617)]/70 border border-[#C6A96B]/20 focus:border-gold-liquid text-text-primary placeholder:text-text-muted/40 rounded-xl px-3 py-2 text-xs focus:outline-none transition-colors"
                 />
               </div>
             </div>
@@ -360,7 +360,7 @@ export default function Onboarding() {
 
       {/* ── Welcome Reward Modal ── */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#020617]/95 backdrop-blur-md animate-fade-up">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[var(--pp-surface-020617)]/95 backdrop-blur-md animate-fade-up">
           <div className="relative w-full max-w-sm bg-cosmic-900 rounded-[2.5rem] border border-gold-500/25 p-8 text-center shadow-2xl overflow-hidden">
             {/* Modal Glow Decoration */}
             <div className="absolute -top-12 -left-12 w-32 h-32 rounded-full pointer-events-none bg-radial from-gold-500/10 to-transparent blur-xl" />

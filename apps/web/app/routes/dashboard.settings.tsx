@@ -623,7 +623,7 @@ export default function SettingsPage() {
             <span
               className={`text-[10px] px-1.5 py-0.5 rounded-full font-black shrink-0 ${
                 activeTab === "wisdom"
-                  ? "bg-[#0A1628]/20 text-[#0A1628]"
+                  ? "bg-[var(--pp-surface-0a1628)]/20 text-[#0A1628]"
                   : "bg-[#C6A96B]/20 text-[#8C6D2D] dark:text-[#C6A96B]"
               }`}
             >
@@ -647,7 +647,7 @@ export default function SettingsPage() {
           <span
             className={`text-[10px] px-1.5 py-0.5 rounded-full font-black shrink-0 ${
               activeTab === "sands"
-                ? "bg-[#0A1628]/20 text-[#0A1628]"
+                ? "bg-[var(--pp-surface-0a1628)]/20 text-[#0A1628]"
                 : "bg-[#C6A96B]/20 text-[#8C6D2D] dark:text-[#C6A96B]"
             }`}
           >
@@ -1390,7 +1390,7 @@ export default function SettingsPage() {
           {/* PHASE D — Detail Modal with Outcome Tracking & Personal Wisdom Form */}
           {selectedDetailQuery && (
             <div
-              className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/80 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+              className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[var(--pp-slate-900)]/80 dark:bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
               onClick={() => setSelectedDetailQuery(null)}
             >
               <div
@@ -1747,7 +1747,7 @@ export default function SettingsPage() {
         <div className="space-y-6 animate-in fade-in duration-300">
           
           {/* Affiliate Explanation Card */}
-          <Card className="border-[#C6A96B]/30 bg-gradient-to-br from-[#0B1528] to-[#020617] overflow-hidden">
+          <Card className="border-[#C6A96B]/30 bg-gradient-to-br from-[var(--pp-surface-0b1528)] to-[var(--pp-surface-020617)] overflow-hidden">
             <div className="flex flex-col md:flex-row">
               <div className="p-6 md:w-2/3 space-y-4">
                 <div className="flex items-center gap-2">
@@ -1765,7 +1765,7 @@ export default function SettingsPage() {
 
           {/* Wallet & Stats Dashboard */}
           <div className="grid grid-cols-1 gap-4">
-            <Card className="relative overflow-hidden border-[#C6A96B]/30 p-6 bg-gradient-to-br from-[#0B1528] to-[#020617] shadow-xl">
+            <Card className="relative overflow-hidden border-[#C6A96B]/30 p-6 bg-gradient-to-br from-[var(--pp-surface-0b1528)] to-[var(--pp-surface-020617)] shadow-xl">
               <div className="absolute top-0 right-0 p-4 opacity-10 text-4xl">💰</div>
               <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">
                 {t("common:settings.wallet_balance", "ยอดเงินสะสมในกระเป๋าพันธมิตร")}
@@ -1776,7 +1776,7 @@ export default function SettingsPage() {
               </div>
             </Card>
 
-            <Card className="border-white/5 p-6 bg-slate-900/40">
+            <Card className="border-white/5 p-6 bg-[var(--pp-slate-900)]/40">
               <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">
                 {t("common:settings.referred_friends", "แนะนำเพื่อนสำเร็จ")}
               </p>
@@ -1785,7 +1785,7 @@ export default function SettingsPage() {
               </h3>
             </Card>
 
-            <Card className="border-white/5 p-6 bg-slate-900/40">
+            <Card className="border-white/5 p-6 bg-[var(--pp-slate-900)]/40">
               <p className="text-[#C6B79F] text-[13px] uppercase tracking-widest font-bold mb-1">
                 {t("common:settings.referred_code_label", "รหัสแนะนำของคุณ")}
               </p>
@@ -1807,7 +1807,7 @@ export default function SettingsPage() {
 
           <div className="space-y-4">
             {/* Transaction History Table */}
-            <Card className="border-white/5 p-0 overflow-hidden bg-slate-900/40">
+            <Card className="border-white/5 p-0 overflow-hidden bg-[var(--pp-slate-900)]/40">
               <div className="px-6 py-4 border-b border-white/5 bg-white/5">
                 <h3 className="text-[#F8F6F1] font-display text-sm font-bold">
                   {t("common:settings.wallet_history", "ประวัติกระเป๋าเงิน (Wallet History)")}
@@ -1816,7 +1816,7 @@ export default function SettingsPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs border-collapse">
                   <thead>
-                    <tr className="bg-slate-950/60 text-[#C6B79F] uppercase font-bold tracking-widest text-[12px]">
+                    <tr className="bg-[var(--pp-slate-950)]/60 text-[#C6B79F] uppercase font-bold tracking-widest text-[12px]">
                       <th className="px-6 py-3">{t("common:settings.tx_datetime", "วัน/เวลา")}</th>
                       <th className="px-6 py-3">{t("common:settings.tx_type", "รายการ")}</th>
                       <th className="px-6 py-3 text-right">{t("common:settings.tx_amount", "จำนวนเงิน")}</th>
@@ -1853,7 +1853,7 @@ export default function SettingsPage() {
       {/* 4. แท็บการแจ้งเตือนจังหวะเวลาเฉพาะตน (STEP 5.2) */}
       {activeTab === "reminders" && (
         <div className="space-y-6 animate-in fade-in duration-300">
-          <Card className="border-[#C6A96B]/15 p-6 bg-slate-950/40">
+          <Card className="border-[#C6A96B]/15 p-6 bg-[var(--pp-slate-950)]/40">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-[#C6A96B] font-display text-lg font-bold flex items-center gap-2">
                 <span>🔔</span> ตั้งค่าการแจ้งเตือนจังหวะเวลา (Personal Timing Reminder)
@@ -1911,7 +1911,7 @@ export default function SettingsPage() {
                         goldenWindowLeadMinutes: parseInt(e.target.value, 10),
                       })
                     }
-                    className="bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#C6A96B] disabled:opacity-40"
+                    className="bg-[var(--pp-surface-0a1628)]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#C6A96B] disabled:opacity-40"
                   >
                     <option value={15}>ก่อน 15 นาที</option>
                     <option value={30}>ก่อน 30 นาที</option>
@@ -1930,7 +1930,7 @@ export default function SettingsPage() {
                       }
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C6A96B]"></div>
+                    <div className="w-11 h-6 bg-[var(--pp-slate-800)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C6A96B]"></div>
                   </label>
                 </div>
               </div>
@@ -1959,7 +1959,7 @@ export default function SettingsPage() {
                         appointmentLeadMinutes: parseInt(e.target.value, 10),
                       })
                     }
-                    className="bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#C6A96B] disabled:opacity-40"
+                    className="bg-[var(--pp-surface-0a1628)]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#C6A96B] disabled:opacity-40"
                   >
                     <option value={15}>ก่อน 15 นาที</option>
                     <option value={30}>ก่อน 30 นาที</option>
@@ -1978,7 +1978,7 @@ export default function SettingsPage() {
                       }
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C6A96B]"></div>
+                    <div className="w-11 h-6 bg-[var(--pp-slate-800)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C6A96B]"></div>
                   </label>
                 </div>
               </div>
@@ -2008,7 +2008,7 @@ export default function SettingsPage() {
                         dailyBriefTime: e.target.value,
                       })
                     }
-                    className="bg-[#0A1628]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#C6A96B] disabled:opacity-40"
+                    className="bg-[var(--pp-surface-0a1628)]/70 border border-[#C6A96B]/20 text-[#F8F6F1] rounded-xl px-3 py-1.5 text-xs focus:outline-none focus:border-[#C6A96B] disabled:opacity-40"
                   />
 
                   <label className="relative inline-flex items-center cursor-pointer">
@@ -2023,7 +2023,7 @@ export default function SettingsPage() {
                       }
                       className="sr-only peer"
                     />
-                    <div className="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C6A96B]"></div>
+                    <div className="w-11 h-6 bg-[var(--pp-slate-800)] peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#C6A96B]"></div>
                   </label>
                 </div>
               </div>
@@ -2223,11 +2223,11 @@ export default function SettingsPage() {
             </h3>
 
             {sandsLedgerHistory.length === 0 ? (
-              <Card className="bg-[#0A1628]/20 border-white/5 p-8 text-center text-xs text-[#94A3B8]">
+              <Card className="bg-[var(--pp-surface-0a1628)]/20 border-white/5 p-8 text-center text-xs text-[#94A3B8]">
                 ยังไม่มีบันทึกการเคลื่อนไหวของละอองทราย เริ่มต้นบันทึกความตั้งใจยามเช้าหรือเปิดไพ่สำรวจดวงดาวเพื่อเริ่มสะสม!
               </Card>
             ) : (
-              <Card className="bg-[#0A1628]/35 border-[#C6A96B]/10 p-4 overflow-x-auto">
+              <Card className="bg-[var(--pp-surface-0a1628)]/35 border-[#C6A96B]/10 p-4 overflow-x-auto">
                 <table className="w-full text-left text-xs text-[#D9CDB7]">
                   <thead>
                     <tr className="border-b border-[#C6A96B]/15 text-[#94A3B8] font-bold text-[11px]">

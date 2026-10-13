@@ -258,7 +258,7 @@ export default function RahuDashboard() {
               className={`p-2.5 rounded-xl border transition-all ${
                 notificationsEnabled
                   ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                  : "bg-slate-950/40 border-white/5 text-[#C6B79F] hover:text-[#F8F6F1]"
+                  : "bg-[var(--pp-slate-950)]/40 border-white/5 text-[#C6B79F] hover:text-[#F8F6F1]"
               }`}
               title={notificationsEnabled ? "ปิดการแจ้งเตือนฤกษ์มงคล" : "เปิดการแจ้งเตือนฤกษ์มงคล"}
             >
@@ -269,7 +269,7 @@ export default function RahuDashboard() {
               className={`p-2.5 rounded-xl border transition-all ${
                 soundEnabled
                   ? "bg-[#C6A96B]/10 border-[#C6A96B]/25 text-[#C6A96B]"
-                  : "bg-slate-950/40 border-white/5 text-[#C6B79F]"
+                  : "bg-[var(--pp-slate-950)]/40 border-white/5 text-[#C6B79F]"
               }`}
               title={soundEnabled ? "ปิดเสียงเตือน" : "เปิดเสียงเตือน"}
             >
@@ -280,7 +280,7 @@ export default function RahuDashboard() {
       </div>
 
       {/* ── ส่วนหลัก: รายงานยามปัจจุบันพร้อมเรดาร์ตรวจจับฤกษ์มงคล ── */}
-      <Card className="p-6 sm:p-8 border-[#C6A96B]/20 relative overflow-hidden bg-gradient-to-br from-[#020617] via-[#09152b] to-[#020617] shadow-2xl">
+      <Card className="p-6 sm:p-8 border-[#C6A96B]/20 relative overflow-hidden bg-gradient-to-br from-[var(--pp-surface-020617)] via-[var(--pp-surface-09152b)] to-[var(--pp-surface-020617)] shadow-2xl">
         {/* วอลเปเปอร์ลวดลายจักรวาลโกลว์ */}
         <div className="absolute top-0 right-0 p-8 opacity-[0.04] pointer-events-none">
            <IconRahuLarge />
@@ -362,7 +362,7 @@ export default function RahuDashboard() {
                   ? "bg-emerald-950/20 border-emerald-500/40 shadow-[inset_0_0_20px_rgba(16,185,129,0.1)]"
                   : rahuResult.sub_block.is_good
                   ? "bg-amber-950/20 border-amber-500/40"
-                  : "bg-slate-950/50 border-white/5"
+                  : "bg-[var(--pp-slate-950)]/50 border-white/5"
               }`}>
                 
                 <Target className={`w-6 h-6 mb-2 transition-colors ${
@@ -429,7 +429,7 @@ export default function RahuDashboard() {
               </div>
               
               {/* แท็บปุ่มกดเลือก 7 วัน */}
-              <div className="flex flex-wrap gap-1 bg-slate-950/40 p-1 rounded-xl border border-white/5">
+              <div className="flex flex-wrap gap-1 bg-[var(--pp-slate-950)]/40 p-1 rounded-xl border border-white/5">
                 {[
                   { id: 1, label: "อา.", name: "อาทิตย์" },
                   { id: 2, label: "จ.", name: "จันทร์" },
@@ -737,7 +737,7 @@ function RahuConsultationChat({ rahuResult }: { rahuResult: any }) {
       <div className="flex items-center justify-between gap-3 border-b border-slate-200/80 dark:border-white/10 pb-4 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C6A96B] to-[#9E824C] p-0.5 shadow-md flex items-center justify-center shrink-0">
-            <div className="w-full h-full rounded-[10px] bg-[#020617] flex items-center justify-center">
+            <div className="w-full h-full rounded-[10px] bg-[var(--pp-surface-020617)] flex items-center justify-center">
               <Bot className="w-5 h-5 text-[#C6A96B]" />
             </div>
           </div>
@@ -913,7 +913,7 @@ function TimelineBlockCard({
       className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
         isCurrent
           ? "border-[#C6A96B] bg-[#C6A96B]/5 shadow-[0_0_15px_rgba(198,169,107,0.08)]"
-          : "border-white/5 bg-slate-950/20 hover:border-white/10 hover:bg-slate-950/45"
+          : "border-white/5 bg-[var(--pp-slate-950)]/20 hover:border-white/10 hover:bg-[var(--pp-slate-950)]/45"
       }`}
     >
       {/* ส่วนหัวยาม */}
@@ -946,7 +946,7 @@ function TimelineBlockCard({
 
         {/* ฝั่งขวา: สรุปฤกษ์ย่อ & Expander */}
         <div className="flex items-center gap-3">
-          <span className="text-[13px] bg-slate-900 px-2.5 py-1 rounded-lg border border-white/5 text-[#C6B79F] font-mono leading-none">
+          <span className="text-[13px] bg-[var(--pp-slate-900)] px-2.5 py-1 rounded-lg border border-white/5 text-[#C6B79F] font-mono leading-none">
             {yamRule.good_phase_desc.split(" (")[0]}
           </span>
           {isExpanded ? <ChevronUp className="w-4 h-4 text-[#C6B79F]" /> : <ChevronDown className="w-4 h-4 text-[#C6B79F]" />}
@@ -955,7 +955,7 @@ function TimelineBlockCard({
 
       {/* ส่วนแผงขยาย เจาะลึกยามย่อย 9 คอร์สย่อย */}
       {isExpanded && (
-        <div className="border-t border-white/5 bg-slate-950/40 p-4 space-y-4">
+        <div className="border-t border-white/5 bg-[var(--pp-slate-950)]/40 p-4 space-y-4">
           {/* รายละเอียดคำทำนายยามหลัก */}
           <div className="grid grid-cols-3 gap-2.5 text-[13px] bg-white/2.5 p-3 rounded-xl border border-white/5">
             <div>
@@ -1000,7 +1000,7 @@ function TimelineBlockCard({
                       isAuspicious
                         ? "bg-emerald-500/10 border-emerald-500/25 text-emerald-400 font-bold"
                         : sb.is_good
-                        ? "bg-slate-900/60 border-white/5 text-[#F8F6F1]"
+                        ? "bg-[var(--pp-slate-900)]/60 border-white/5 text-[#F8F6F1]"
                         : "bg-rose-500/5 border-rose-500/15 text-rose-400"
                     }`}
                   >

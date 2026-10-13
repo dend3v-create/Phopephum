@@ -111,7 +111,7 @@ export function InteractiveTaksaCard({
         {/* ── Badges Legend: 2 สีหลัก ขาว (กำเนิด) + ฟ้า (จร) + แดง (กาลกิณี) ── */}
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 border border-slate-300 dark:border-white/20 text-slate-800 dark:text-white font-bold">
-            <span className="w-2 h-2 rounded-full bg-slate-700 dark:bg-white" />
+            <span className="w-2 h-2 rounded-full bg-[var(--pp-slate-700)] dark:bg-white" />
             กำเนิด (สีขาว)
           </span>
           <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-sky-100 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-500/40 text-sky-800 dark:text-sky-400 font-bold">
@@ -304,7 +304,7 @@ export function InteractiveTaksaCard({
                 </div>
                 <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-bold shrink-0 ml-1 ${
                   isSelected
-                    ? "bg-slate-900 text-[#C9A96E]"
+                    ? "bg-[var(--pp-slate-900)] text-[#C9A96E]"
                     : isKala
                     ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
                     : "bg-sky-100 text-sky-800 dark:bg-sky-950/80 dark:text-sky-400"

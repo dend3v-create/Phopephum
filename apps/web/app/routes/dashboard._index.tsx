@@ -660,7 +660,7 @@ export default function TodayScreen() {
         <summary>ดูรายละเอียดฤกษ์ยามขณะนี้</summary>
 
       {/* ── ⚡ HERO CARD: สภาวะกาลชะตารายชั่วโมง (HOURLY KALA CHATA & LIVE YAM) ── */}
-      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/40 overflow-hidden relative animate-fade-up bg-gradient-to-br from-[#0a2240]/95 via-[#0d1f38]/95 to-[#020617] backdrop-blur-xl shadow-2xl space-y-4">
+      <div className="rounded-3xl p-5 sm:p-6 border border-[#C6A96B]/40 overflow-hidden relative animate-fade-up bg-gradient-to-br from-[var(--pp-surface-0a2240)]/95 via-[var(--pp-surface-0d1f38)]/95 to-[var(--pp-surface-020617)] backdrop-blur-xl shadow-2xl space-y-4">
         {/* Glow orb */}
         <div
           className="absolute -top-12 -right-12 w-52 h-52 rounded-full blur-3xl pointer-events-none opacity-30"
@@ -747,7 +747,7 @@ export default function TodayScreen() {
         </div>
 
         {/* Living Prophecy Card: คำพยากรณ์อัฏฐกาลชั้นฉาย ณ เวลานี้ */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0A2240]/80 via-[#0E2C52]/70 to-[#0A2240]/80 border border-[#C6A96B]/35 space-y-3 relative z-10 shadow-inner">
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-[var(--pp-surface-0a2240)]/80 via-[var(--pp-surface-0e2c52)]/70 to-[var(--pp-surface-0a2240)]/80 border border-[#C6A96B]/35 space-y-3 relative z-10 shadow-inner">
           <div className="flex items-center gap-2">
             <span className="text-base">📜</span>
             <span className="text-xs font-black uppercase tracking-wider text-[#F2D49B]">
@@ -876,7 +876,7 @@ export default function TodayScreen() {
       </div>
 
       {/* ── ⏱️ PILLAR 3: ไทม์ไลน์ 8 ยามรายชั่วโมงวันนี้ (TODAY'S HOURLY YAM FLOW) ── */}
-      <div className="rounded-3xl p-5 border border-white/10 bg-[#0A2240]/40 backdrop-blur-md animate-fade-up shadow-lg space-y-4">
+      <div className="rounded-3xl p-5 border border-white/10 bg-[var(--pp-surface-0a2240)]/40 backdrop-blur-md animate-fade-up shadow-lg space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-xl flex items-center justify-center bg-[#C6A96B]/15 border border-[#C6A96B]/30 text-[#C6A96B] font-black text-sm shrink-0">
@@ -942,7 +942,7 @@ export default function TodayScreen() {
                 onClick={() => setSelectedSlot(slot)}
                 className={`flex-shrink-0 w-36 p-3 rounded-2xl border text-left transition-all relative ${
                   slot.isCurrent
-                    ? "bg-gradient-to-b from-[#C6A96B]/25 via-[#0A2240] to-[#020617] border-[#C6A96B] ring-2 ring-[#C6A96B]/30 shadow-lg scale-[1.02]"
+                    ? "bg-gradient-to-b from-[#C6A96B]/25 via-[var(--pp-surface-0a2240)] to-[var(--pp-surface-020617)] border-[#C6A96B] ring-2 ring-[#C6A96B]/30 shadow-lg scale-[1.02]"
                     : isSelected
                     ? "bg-white/10 border-white/40 shadow-md"
                     : `bg-white/[0.03] ${slotBorderColor} hover:bg-white/[0.07]`
@@ -1048,7 +1048,7 @@ export default function TodayScreen() {
       </div>
 
       {/* ── CARD 4: TODAY'S APPOINTMENTS (นัดหมายวันนี้) ── */}
-      <div className="rounded-3xl p-5 border border-white/10 bg-[#0A2240]/40 backdrop-blur-md animate-fade-up shadow-sm space-y-3">
+      <div className="rounded-3xl p-5 border border-white/10 bg-[var(--pp-surface-0a2240)]/40 backdrop-blur-md animate-fade-up shadow-sm space-y-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-white/5 border border-white/10 shrink-0">
@@ -1134,7 +1134,7 @@ export default function TodayScreen() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <Link
             to="/dashboard/check-yam"
-            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-[#C6A96B]/40 bg-gradient-to-br from-[#C6A96B]/20 via-[#0A2240]/60 to-[#020617] hover:border-[#C6A96B] transition-all group active:scale-95 text-left sm:text-center shadow-lg"
+            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-[#C6A96B]/40 bg-gradient-to-br from-[#C6A96B]/20 via-[var(--pp-surface-0a2240)]/60 to-[var(--pp-surface-020617)] hover:border-[#C6A96B] transition-all group active:scale-95 text-left sm:text-center shadow-lg"
           >
             <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
               ⚡
@@ -1150,7 +1150,7 @@ export default function TodayScreen() {
 
           <Link
             to="/dashboard/yam"
-            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-white/10 bg-[#0A2240]/40 hover:border-[#C6A96B]/50 hover:bg-[#0A2240]/60 transition-all group active:scale-95 text-left sm:text-center shadow-md"
+            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-white/10 bg-[var(--pp-surface-0a2240)]/40 hover:border-[#C6A96B]/50 hover:bg-[var(--pp-surface-0a2240)]/60 transition-all group active:scale-95 text-left sm:text-center shadow-md"
           >
             <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
               📜
@@ -1166,7 +1166,7 @@ export default function TodayScreen() {
 
           <Link
             to="/dashboard/horoscope"
-            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-white/10 bg-[#0A2240]/40 hover:border-[#C6A96B]/50 hover:bg-[#0A2240]/60 transition-all group active:scale-95 text-left sm:text-center shadow-md"
+            className="flex sm:flex-col items-center justify-between sm:justify-center p-4 rounded-2xl border border-white/10 bg-[var(--pp-surface-0a2240)]/40 hover:border-[#C6A96B]/50 hover:bg-[var(--pp-surface-0a2240)]/60 transition-all group active:scale-95 text-left sm:text-center shadow-md"
           >
             <span className="text-2xl mb-1 group-hover:scale-110 transition-transform">
               🛡️

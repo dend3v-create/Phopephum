@@ -14,7 +14,7 @@ export function PublicFooter() {
           <div className="lg:col-span-2 space-y-4">
             <Link to="/" className="flex items-center gap-3 group inline-flex">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#C6A96B] to-[#9E824C] p-0.5 shadow-md shadow-[#C6A96B]/20 flex items-center justify-center">
-                <div className="w-full h-full rounded-[10px] bg-[#020617] flex items-center justify-center">
+                <div className="w-full h-full rounded-[10px] bg-[var(--pp-surface-020617)] flex items-center justify-center">
                   <span className="font-display text-[#C6A96B] text-xl font-bold">P</span>
                 </div>
               </div>

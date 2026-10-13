@@ -241,7 +241,7 @@ function ScreenCaptureWarning({
         style={{
           maxWidth: 420,
           width: "90%",
-          background: "rgba(15, 23, 42, 0.95)",
+          background: "var(--bg-elevated)",
           border: "1px solid rgba(198,169,107,0.35)",
           borderRadius: 24,
           padding: "36px 32px",
@@ -269,7 +269,7 @@ function ScreenCaptureWarning({
 
         <h3
           style={{
-            color: "#F8F6F1",
+            color: "var(--text-body)",
             fontSize: 18,
             fontWeight: "bold",
             marginBottom: 8,
@@ -279,13 +279,13 @@ function ScreenCaptureWarning({
           ตรวจพบการบันทึกหน้าจอ
         </h3>
 
-        <p style={{ color: "#94A3B8", fontSize: 13, lineHeight: 1.7, marginBottom: 8 }}>
-          เนื้อหานี้เป็น<strong style={{ color: "#F8F6F1" }}>ลิขสิทธิ์เฉพาะสมาชิก</strong>
+        <p style={{ color: "var(--text-muted)", fontSize: 13, lineHeight: 1.7, marginBottom: 8 }}>
+          เนื้อหานี้เป็น<strong style={{ color: "var(--text-body)" }}>ลิขสิทธิ์เฉพาะสมาชิก</strong>
           <br />
           ห้ามบันทึก แคปเจอร์ หรือเผยแพร่โดยไม่ได้รับอนุญาต
         </p>
 
-        <p style={{ color: "#C6A96B", fontSize: 11, marginBottom: 28, opacity: 0.8 }}>
+        <p style={{ color: "var(--accent-gold)", fontSize: 11, marginBottom: 28, opacity: 0.8 }}>
           การละเมิดอาจส่งผลให้ระงับบัญชีสมาชิก
         </p>
 
@@ -309,7 +309,7 @@ function ScreenCaptureWarning({
             onClick={onDismiss}
             style={{
               background: "transparent",
-              color: "#94A3B8",
+              color: "var(--text-muted)",
               border: "1px solid rgba(148,163,184,0.2)",
               borderRadius: 12,
               padding: "10px 24px",

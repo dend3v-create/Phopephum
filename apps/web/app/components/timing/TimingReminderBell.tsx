@@ -115,7 +115,7 @@ export function TimingReminderBell({
         <div
           className="fixed left-3 right-3 top-[calc(64px+env(safe-area-inset-top,0px))] w-auto sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:w-96 rounded-2xl shadow-2xl z-50 overflow-hidden border animate-in fade-in slide-in-from-top-2 duration-200"
           style={{
-            background: "rgba(10, 20, 38, 0.96)",
+            background: "var(--bg-elevated)",
             backdropFilter: "blur(24px)",
             WebkitBackdropFilter: "blur(24px)",
             borderColor: "rgba(198, 169, 107, 0.28)",

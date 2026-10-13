@@ -553,7 +553,7 @@ export default function IndexPage() {
             </div>
             <Link
               to="/pricing"
-              className="w-full text-center py-3.5 rounded-xl font-bold text-sm bg-slate-900 text-white dark:bg-white/10 dark:text-white hover:bg-slate-800 transition-colors"
+              className="w-full text-center py-3.5 rounded-xl font-bold text-sm bg-[var(--pp-slate-900)] text-white dark:bg-white/10 dark:text-white hover:bg-[var(--pp-slate-800)] transition-colors"
             >
               เลือกแผน Premium
             </Link>
@@ -617,7 +617,7 @@ export default function IndexPage() {
             </div>
             <Link
               to="/pricing"
-              className="w-full text-center py-3.5 rounded-xl font-bold text-sm bg-slate-900 text-white dark:bg-white/10 dark:text-white hover:bg-slate-800 transition-colors"
+              className="w-full text-center py-3.5 rounded-xl font-bold text-sm bg-[var(--pp-slate-900)] text-white dark:bg-white/10 dark:text-white hover:bg-[var(--pp-slate-800)] transition-colors"
             >
               เลือกแผน Master
             </Link>

@@ -26,7 +26,7 @@ export function PublicNavbar({ isLoggedIn = false }: PublicNavbarProps) {
         {/* Brand Logo */}
         <Link to="/" className="flex items-center gap-3 group min-w-0">
           <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-[#C6A96B] to-[#9E824C] p-0.5 shadow-md shadow-[#C6A96B]/20 flex items-center justify-center transition-transform group-hover:scale-105 duration-300">
-            <div className="w-full h-full rounded-[10px] bg-[#020617] flex items-center justify-center">
+            <div className="w-full h-full rounded-[10px] bg-[var(--pp-surface-020617)] flex items-center justify-center">
               <span className="font-display text-[#C6A96B] text-lg sm:text-xl font-bold">P</span>
             </div>
           </div>

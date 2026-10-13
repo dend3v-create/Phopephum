@@ -55,7 +55,7 @@ export function UpgradePaywall({
   const hasEnoughSands = timeSands >= sandsCost;
 
   const cardContent = (
-    <div className="relative z-10 max-w-lg w-full px-5 py-8 sm:px-8 sm:py-10 text-center rounded-3xl border border-[#C6A96B]/30 bg-[#020617]/90 shadow-2xl shadow-black/90 backdrop-blur-2xl">
+    <div className="relative z-10 max-w-lg w-full px-5 py-8 sm:px-8 sm:py-10 text-center rounded-3xl border border-[#C6A96B]/30 bg-[var(--pp-surface-020617)]/90 shadow-2xl shadow-black/90 backdrop-blur-2xl">
       {/* ── Lock Icon with Astral Radial Glow ── */}
       <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-6 flex items-center justify-center">
         <div className="absolute inset-0 rounded-full bg-[#C6A96B]/15 blur-xl animate-pulse" />
@@ -168,7 +168,7 @@ export function UpgradePaywall({
         </div>
 
         {/* ── Centered Lock Modal ── */}
-        <div className="absolute inset-0 z-20 flex items-center justify-center p-4 bg-[#020617]/60 backdrop-blur-sm">
+        <div className="absolute inset-0 z-20 flex items-center justify-center p-4 bg-[var(--pp-surface-020617)]/60 backdrop-blur-sm">
           {cardContent}
         </div>
       </div>

@@ -275,7 +275,7 @@ export default function PricingPage() {
               <span>รายปี (Annual)</span>
               <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-colors ${
                 billingCycle === "annual"
-                  ? "bg-[#020617]/20 text-[#020617]"
+                  ? "bg-[var(--pp-surface-020617)]/20 text-[#020617]"
                   : "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30"
               }`}>
                 ประหยัด -20%

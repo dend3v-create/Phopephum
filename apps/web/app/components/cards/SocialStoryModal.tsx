@@ -472,7 +472,7 @@ export function SocialStoryModal({ isOpen, onClose, data }: SocialStoryModalProp
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/80 backdrop-blur-xl animate-in fade-in duration-300">
-      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col md:flex-row gap-6 p-4 sm:p-6 rounded-3xl border border-[#C6A96B]/30 bg-[#07132b]/95 shadow-2xl shadow-black/90 overflow-y-auto">
+      <div className="relative w-full max-w-4xl max-h-[92vh] flex flex-col md:flex-row gap-6 p-4 sm:p-6 rounded-3xl border border-[#C6A96B]/30 bg-[var(--pp-surface-07132b)]/95 shadow-2xl shadow-black/90 overflow-y-auto">
         
         {/* Close Button */}
         <button
@@ -596,7 +596,7 @@ export function SocialStoryModal({ isOpen, onClose, data }: SocialStoryModalProp
               <button
                 type="button"
                 onClick={handleNativeShare}
-                className="py-2.5 px-3 rounded-xl border border-[#C6A96B]/40 bg-[#091838]/60 hover:bg-[#C6A96B]/15 text-[#F8F6F1] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-2.5 px-3 rounded-xl border border-[#C6A96B]/40 bg-[var(--pp-surface-091838)]/60 hover:bg-[#C6A96B]/15 text-[#F8F6F1] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>📲 แชร์ Story</span>
               </button>
@@ -604,7 +604,7 @@ export function SocialStoryModal({ isOpen, onClose, data }: SocialStoryModalProp
               <button
                 type="button"
                 onClick={handleCopyImage}
-                className="py-2.5 px-3 rounded-xl border border-[#C6A96B]/40 bg-[#091838]/60 hover:bg-[#C6A96B]/15 text-[#F8F6F1] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                className="py-2.5 px-3 rounded-xl border border-[#C6A96B]/40 bg-[var(--pp-surface-091838)]/60 hover:bg-[#C6A96B]/15 text-[#F8F6F1] text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <span>{copiedImage ? "✓ คัดลอกแล้ว!" : "📋 คัดลอกรูป"}</span>
               </button>

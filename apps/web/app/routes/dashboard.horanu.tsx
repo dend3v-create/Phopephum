@@ -146,7 +146,7 @@ function PlanetSummary({ result }: { result: HoraTaynooResult }) {
   const yamP = PLANET_INFO[result.yamPlanet];
   return (
     <div className="grid grid-cols-2 gap-3">
-      <div className="border border-white/8 bg-slate-900/30 rounded-2xl p-4">
+      <div className="border border-white/8 bg-[var(--pp-slate-900)]/30 rounded-2xl p-4">
         <p className="text-[10px] text-[#D9CDB7] uppercase tracking-wider mb-2">ดาวประจำวัน</p>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center font-display text-lg font-bold shrink-0"
@@ -159,7 +159,7 @@ function PlanetSummary({ result }: { result: HoraTaynooResult }) {
           </div>
         </div>
       </div>
-      <div className="border border-white/8 bg-slate-900/30 rounded-2xl p-4">
+      <div className="border border-white/8 bg-[var(--pp-slate-900)]/30 rounded-2xl p-4">
         <p className="text-[10px] text-[#D9CDB7] uppercase tracking-wider mb-2">ดาวเจ้ายาม</p>
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-xl flex items-center justify-center font-display text-lg font-bold shrink-0"
@@ -193,7 +193,7 @@ function getPlanetThreeBhavas(planetNum: number, zodiacIndex: number, bhavaMap: 
 function ThreeBhavaTable({ result }: { result: HoraTaynooResult }) {
   const planetsList = [1, 2, 3, 4, 5, 6, 7, 8];
   return (
-    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+    <Card className="border-[#C9A96E]/15 bg-[var(--pp-slate-900)]/40 p-4">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-2 h-2 bg-[#C9A96E] rounded-full" />
         <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold font-display">ดาว 3 ภพ (เจ้าเรือน + สถิต)</p>
@@ -205,7 +205,7 @@ function ThreeBhavaTable({ result }: { result: HoraTaynooResult }) {
           if (!entry) return null;
           const threeBhavas = getPlanetThreeBhavas(pNum, entry.zodiacIndex, result.bhavaMap, entry.status);
           return (
-            <div key={pNum} className="rounded-xl p-2 text-center border border-white/5 bg-slate-950/20">
+            <div key={pNum} className="rounded-xl p-2 text-center border border-white/5 bg-[var(--pp-slate-950)]/20">
               <div className="flex items-center justify-between mb-0.5">
                 <span className="text-[9px] text-[#D9CDB7] font-bold">ดาว {pNum}</span>
                 {entry.status && (
@@ -278,7 +278,7 @@ function CurrentPredictionPoint({ result }: { result: HoraTaynooResult }) {
               const pInfo = p.planetNum !== null ? PLANET_INFO[p.planetNum] : null;
               const st = p.status ? STATUS_GLYPHS[p.status] : null;
               return (
-                <div key={idx} className="flex flex-col items-center bg-slate-950/40 border border-white/5 rounded-lg px-2 py-0.5">
+                <div key={idx} className="flex flex-col items-center bg-[var(--pp-slate-950)]/40 border border-white/5 rounded-lg px-2 py-0.5">
                   <span className="text-sm font-bold font-serif" style={{ color: pInfo?.color ?? '#C9A96E' }}>
                     {p.labelThai}
                   </span>
@@ -621,7 +621,7 @@ function TwoStageBhavaPredictor({
   };
 
   return (
-    <div className="border border-[#C6A96B]/30 bg-gradient-to-b from-[#07132b] to-[#040a18] backdrop-blur-md rounded-2xl p-5 sm:p-7 shadow-xl shadow-black/60 space-y-5 text-left">
+    <div className="border border-[#C6A96B]/30 bg-gradient-to-b from-[var(--pp-surface-07132b)] to-[var(--pp-surface-040a18)] backdrop-blur-md rounded-2xl p-5 sm:p-7 shadow-xl shadow-black/60 space-y-5 text-left">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#C6A96B]/20 pb-4">
         <div>
@@ -653,7 +653,7 @@ function TwoStageBhavaPredictor({
                 className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer flex items-center gap-2.5 ${
                   isSelected
                     ? "border-[#C6A96B] bg-[#C6A96B]/20 text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20 ring-1 ring-[#C6A96B]/40"
-                    : "border-white/10 bg-[#091838]/50 text-[#D9CDB7] hover:border-[#C6A96B]/40 hover:text-[#F8F6F1]"
+                    : "border-white/10 bg-[var(--pp-surface-091838)]/50 text-[#D9CDB7] hover:border-[#C6A96B]/40 hover:text-[#F8F6F1]"
                 }`}
               >
                 <div
@@ -678,7 +678,7 @@ function TwoStageBhavaPredictor({
       </div>
 
       {/* Two-Stage Visual Flow */}
-      <div className="bg-[#091838]/70 border border-[#C6A96B]/20 rounded-2xl p-4 sm:p-6 space-y-4">
+      <div className="bg-[var(--pp-surface-091838)]/70 border border-[#C6A96B]/20 rounded-2xl p-4 sm:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <span className="text-[11px] font-bold text-[#C6A96B] uppercase tracking-wider font-display">
             ๒. การเชื่อมโยงเส้นทางดาว (๒ จังหวะ):
@@ -694,7 +694,7 @@ function TwoStageBhavaPredictor({
 
         <div className="grid grid-cols-1 md:grid-cols-11 gap-3 items-center">
           {/* Stage 1: Origin Card */}
-          <div className="md:col-span-5 rounded-xl border border-[#C6A96B]/30 bg-[#07132b] p-4 shadow-inner">
+          <div className="md:col-span-5 rounded-xl border border-[#C6A96B]/30 bg-[var(--pp-surface-07132b)] p-4 shadow-inner">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] text-[#C6A96B] font-bold font-display uppercase tracking-wider">
                 จังหวะที่ ๑: ภพตั้งต้นเรื่องที่ถาม
@@ -739,7 +739,7 @@ function TwoStageBhavaPredictor({
           </div>
 
           {/* Stage 2: Destination Card */}
-          <div className="md:col-span-5 rounded-xl border border-[#C6A96B]/30 bg-[#07132b] p-4 shadow-inner">
+          <div className="md:col-span-5 rounded-xl border border-[#C6A96B]/30 bg-[var(--pp-surface-07132b)] p-4 shadow-inner">
             <div className="flex items-center justify-between mb-2">
               <span className="text-[10px] text-[#C6A96B] font-bold font-display uppercase tracking-wider">
                 จังหวะที่ ๒: ภพปลายทางผลลัพธ์
@@ -778,7 +778,7 @@ function TwoStageBhavaPredictor({
         </div>
 
         {/* Synthetic Astrological Verdict Box */}
-        <div className="rounded-xl border border-[#C6A96B]/25 bg-[#07132b]/90 p-4 space-y-2 text-left">
+        <div className="rounded-xl border border-[#C6A96B]/25 bg-[var(--pp-surface-07132b)]/90 p-4 space-y-2 text-left">
           <div className="flex items-center gap-2">
             <span className="text-[#C6A96B] text-xs">✦</span>
             <p className="text-xs font-bold text-[#C6A96B] uppercase tracking-wide font-display">
@@ -901,7 +901,7 @@ function PhraKrasibCalcTable({
   };
 
   return (
-    <div className="border border-[#C6A96B]/30 bg-gradient-to-b from-[#07132b] to-[#040a18] backdrop-blur-md rounded-2xl p-5 sm:p-7 shadow-xl shadow-black/60 space-y-5 text-left">
+    <div className="border border-[#C6A96B]/30 bg-gradient-to-b from-[var(--pp-surface-07132b)] to-[var(--pp-surface-040a18)] backdrop-blur-md rounded-2xl p-5 sm:p-7 shadow-xl shadow-black/60 space-y-5 text-left">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-[#C6A96B]/20 pb-4">
         <div>
@@ -923,7 +923,7 @@ function PhraKrasibCalcTable({
       {/* 3 Step Equation Flow */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {/* Step X */}
-        <div className="rounded-xl border border-[#C6A96B]/30 bg-[#07132b] p-4 shadow-inner">
+        <div className="rounded-xl border border-[#C6A96B]/30 bg-[var(--pp-surface-07132b)] p-4 shadow-inner">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] text-[#C6A96B] font-bold font-display uppercase">จุดพยากรณ์แรก (X)</span>
             <span className="text-[10px] text-[#D9CDB7] font-mono">{activeSlot.startStr}-{activeSlot.endStr}</span>
@@ -936,7 +936,7 @@ function PhraKrasibCalcTable({
         </div>
 
         {/* Step Y */}
-        <div className="rounded-xl border border-[#C6A96B]/30 bg-[#07132b] p-4 shadow-inner">
+        <div className="rounded-xl border border-[#C6A96B]/30 bg-[var(--pp-surface-07132b)] p-4 shadow-inner">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] text-[#C6A96B] font-bold font-display uppercase">จุดพยากรณ์สอง (Y)</span>
             <span className="text-[10px] text-[#C6A96B] font-mono">ดาว {xLord} จรไป</span>
@@ -949,7 +949,7 @@ function PhraKrasibCalcTable({
         </div>
 
         {/* Step Z */}
-        <div className="rounded-xl border border-[#C6A96B]/30 bg-[#07132b] p-4 shadow-inner">
+        <div className="rounded-xl border border-[#C6A96B]/30 bg-[var(--pp-surface-07132b)] p-4 shadow-inner">
           <div className="flex items-center justify-between mb-1">
             <span className="text-[10px] text-[#C6A96B] font-bold font-display uppercase">จุดพยากรณ์สาม (Z)</span>
             <span className="text-[10px] text-[#C6A96B] font-mono">ดาว {yLord} จรไป</span>
@@ -963,7 +963,7 @@ function PhraKrasibCalcTable({
       </div>
 
       {/* Summary Table */}
-      <div className="overflow-x-auto rounded-xl border border-[#C6A96B]/20 bg-[#091838]/60 p-2">
+      <div className="overflow-x-auto rounded-xl border border-[#C6A96B]/20 bg-[var(--pp-surface-091838)]/60 p-2">
         <table className="w-full text-center border-collapse">
           <thead>
             <tr className="border-b border-[#C6A96B]/20 text-[11px] text-[#C6A96B] font-bold">
@@ -1005,7 +1005,7 @@ function PhraKrasibCalcTable({
 
 function PlanetTable({ result }: { result: HoraTaynooResult }) {
   return (
-    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+    <Card className="border-[#C9A96E]/15 bg-[var(--pp-slate-900)]/40 p-4">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-2 h-2 bg-[#C9A96E] rounded-full" />
         <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">ดาวลอย 11 ดวง</p>
@@ -1021,7 +1021,7 @@ function PlanetTable({ result }: { result: HoraTaynooResult }) {
             <div key={i} className={`rounded-xl p-2 text-center border transition-all ${
               entry.isLagna
                 ? "border-[#4B6FAE]/40 bg-[#4B6FAE]/10"
-                : "border-white/5 bg-slate-950/20 hover:border-[#C9A96E]/20"
+                : "border-white/5 bg-[var(--pp-slate-950)]/20 hover:border-[#C9A96E]/20"
             }`}>
               <div className="font-display text-xl font-bold mb-0.5" style={{ color }}>
                 {entry.labelThai}
@@ -1051,7 +1051,7 @@ function BhavaTable({ result }: { result: HoraTaynooResult }) {
   });
 
   return (
-    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+    <Card className="border-[#C9A96E]/15 bg-[var(--pp-slate-900)]/40 p-4">
       <div className="flex items-center gap-2 mb-3">
         <div className="w-2 h-2 bg-[#4B6FAE] rounded-full" />
         <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold">ภพ 12 หลัง</p>
@@ -1064,7 +1064,7 @@ function BhavaTable({ result }: { result: HoraTaynooResult }) {
             <div key={i} className={`rounded-xl p-2.5 border ${
               isBad  ? "border-rose-500/20 bg-rose-950/10" :
               isGood && b.planets.length > 0 ? "border-emerald-500/20 bg-emerald-950/10" :
-              "border-white/5 bg-slate-950/20"
+              "border-white/5 bg-[var(--pp-slate-950)]/20"
             }`}>
               <div className="flex items-center justify-between mb-0.5">
                 <span className={`text-[10px] font-bold uppercase tracking-wider ${
@@ -1099,7 +1099,7 @@ function SubTimePanel({ result, isLive }: { result: HoraTaynooResult; isLive: bo
   };
 
   return (
-    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+    <Card className="border-[#C9A96E]/15 bg-[var(--pp-slate-900)]/40 p-4">
       <div className="flex items-center gap-2 mb-3">
         <div className={`w-2 h-2 bg-[#C9A96E] rounded-full ${isLive ? "animate-pulse" : ""}`} />
         <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold font-display">ยามย่อย (7.5 นาที × 12)</p>
@@ -1234,7 +1234,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
         <input type="hidden" name="yamNo"   value={formVals.yamNo} />
       </Form>
 
-      <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-4">
+      <Card className="border-[#C9A96E]/15 bg-[var(--pp-slate-900)]/40 p-4">
         {/* Header + stats */}
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
           <div className="flex items-center gap-2">
@@ -1314,7 +1314,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
                   className={`rounded-xl p-2.5 border text-left transition-all hover:scale-[1.02] active:scale-95 ${
                     isSelected
                       ? `${gc} shadow-lg`
-                      : "border-white/8 bg-slate-950/30 hover:border-[#C9A96E]/25"
+                      : "border-white/8 bg-[var(--pp-slate-950)]/30 hover:border-[#C9A96E]/25"
                   }`}>
                   {/* Grade badge */}
                   <div className="flex items-center justify-between mb-1.5">
@@ -1364,7 +1364,7 @@ function LibraryGrid({ library }: { library: YamLibraryRow[] }) {
 function CustomTimeForm() {
   const now = new Date();
   return (
-    <Card className="border-[#C9A96E]/15 bg-slate-900/40 p-5">
+    <Card className="border-[#C9A96E]/15 bg-[var(--pp-slate-900)]/40 p-5">
       <p className="text-[#C9A96E] text-[11px] uppercase tracking-widest font-bold mb-4">ตั้งเวลาเอง</p>
       <Form method="post" className="grid grid-cols-2 sm:flex sm:flex-wrap items-end gap-3">
         <input type="hidden" name="mode" value="custom" />
@@ -1609,7 +1609,7 @@ function HoranuChatPanel({
   };
 
   return (
-    <div className="border border-[#C6A96B]/25 bg-[#07132b]/85 backdrop-blur-md rounded-2xl p-6 shadow-xl shadow-black/50 text-left">
+    <div className="border border-[#C6A96B]/25 bg-[var(--pp-surface-07132b)]/85 backdrop-blur-md rounded-2xl p-6 shadow-xl shadow-black/50 text-left">
       {/* Header */}
       <div className="flex items-center gap-2 mb-4">
         <div className={`w-2 h-2 rounded-full ${isLoading ? "bg-[#C6A96B] animate-pulse" : "bg-[#C6A96B]"}`} />
@@ -1633,7 +1633,7 @@ function HoranuChatPanel({
             className={`text-[10px] px-3 py-1.5 rounded-full border transition-all disabled:opacity-40 ${
               activeCategory === cat.key
                 ? "border-[#C6A96B] bg-[#C6A96B]/20 text-[#C6A96B] font-bold shadow-sm shadow-[#C6A96B]/20"
-                : "border-[#C6A96B]/20 bg-[#091838]/40 text-[#D9CDB7] hover:border-[#C6A96B]/50 hover:text-[#F8F6F1]"
+                : "border-[#C6A96B]/20 bg-[var(--pp-surface-091838)]/40 text-[#D9CDB7] hover:border-[#C6A96B]/50 hover:text-[#F8F6F1]"
             }`}
           >
             {cat.label}
@@ -1649,7 +1649,7 @@ function HoranuChatPanel({
             type="button"
             onClick={() => setQuestion(q)}
             disabled={isLoading}
-            className="text-[10px] px-3 py-1.5 rounded-full border border-[#C6A96B]/15 bg-[#091838]/60 text-[#D9CDB7] hover:border-[#C6A96B]/40 hover:text-[#F8F6F1] disabled:opacity-40 transition-all text-left"
+            className="text-[10px] px-3 py-1.5 rounded-full border border-[#C6A96B]/15 bg-[var(--pp-surface-091838)]/60 text-[#D9CDB7] hover:border-[#C6A96B]/40 hover:text-[#F8F6F1] disabled:opacity-40 transition-all text-left"
           >
             {q}
           </button>
@@ -1670,7 +1670,7 @@ function HoranuChatPanel({
           placeholder="พิมพ์คำถามของคุณที่นี่... (กด Enter เพื่อส่งคำถาม หรือ Shift+Enter เพื่อขึ้นบรรทัดใหม่)"
           disabled={isLoading}
           rows={3}
-          className="flex-1 min-w-0 bg-[#091838]/70 border border-[#C6A96B]/25 rounded-xl px-4 py-3 text-sm text-[#F8F6F1] placeholder:text-[#D9CDB7]/40 focus:outline-none focus:border-[#C6A96B]/60 disabled:opacity-60 resize-none"
+          className="flex-1 min-w-0 bg-[var(--pp-surface-091838)]/70 border border-[#C6A96B]/25 rounded-xl px-4 py-3 text-sm text-[#F8F6F1] placeholder:text-[#D9CDB7]/40 focus:outline-none focus:border-[#C6A96B]/60 disabled:opacity-60 resize-none"
         />
         <button
           type="button"
@@ -1691,7 +1691,7 @@ function HoranuChatPanel({
       {(answer || (isLoading && !error)) && (
         <div
           ref={answerRef}
-          className="mt-4 p-5 rounded-xl bg-[#091838]/80 border border-[#C6A96B]/20 text-sm text-[#F8F6F1] leading-relaxed whitespace-pre-wrap text-left shadow-inner"
+          className="mt-4 p-5 rounded-xl bg-[var(--pp-surface-091838)]/80 border border-[#C6A96B]/20 text-sm text-[#F8F6F1] leading-relaxed whitespace-pre-wrap text-left shadow-inner"
         >
           {isLoading && !answer ? (
             <span className="inline-flex items-center gap-2 text-[#D9CDB7]">
@@ -1731,7 +1731,7 @@ function HoranuChatPanel({
                   key={c.id}
                   type="button"
                   onClick={() => selectPastChat(c)}
-                  className="w-full p-3 rounded-xl bg-[#091838]/60 border border-[#C6A96B]/15 hover:border-[#C6A96B]/40 transition-all cursor-pointer text-left block"
+                  className="w-full p-3 rounded-xl bg-[var(--pp-surface-091838)]/60 border border-[#C6A96B]/15 hover:border-[#C6A96B]/40 transition-all cursor-pointer text-left block"
                 >
                   <div className="flex items-center justify-between gap-2 mb-1.5">
                     <span className="text-[10px] text-[#D9CDB7]/60 font-mono">
@@ -1805,7 +1805,7 @@ export default function HoraNuPage() {
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
 
       {/* ── Grand Astral Book Cover Frame ── */}
-      <div className="relative rounded-3xl border-2 border-[#C6A96B]/35 bg-gradient-to-b from-[#07132b] via-[#091a3e] to-[#050e24] p-6 sm:p-10 shadow-2xl shadow-black/80 overflow-hidden text-center">
+      <div className="relative rounded-3xl border-2 border-[#C6A96B]/35 bg-gradient-to-b from-[var(--pp-surface-07132b)] via-[var(--pp-surface-091a3e)] to-[var(--pp-surface-050e24)] p-6 sm:p-10 shadow-2xl shadow-black/80 overflow-hidden text-center">
         
         {/* Subtle Decorative Star Accents */}
         <div className="absolute top-3.5 left-3.5 text-[#C6A96B]/50 text-xs select-none">✦</div>
@@ -1845,7 +1845,7 @@ export default function HoraNuPage() {
                 className={`text-[11px] font-bold px-3 py-1 rounded-full border transition-all ${
                   showCustom
                     ? "bg-[#C6A96B]/20 border-[#C6A96B]/50 text-[#C6A96B]"
-                    : "border-[#C6A96B]/25 bg-[#091838]/40 text-[#D9CDB7] hover:border-[#C6A96B]/60 hover:text-[#C6A96B]"
+                    : "border-[#C6A96B]/25 bg-[var(--pp-surface-091838)]/40 text-[#D9CDB7] hover:border-[#C6A96B]/60 hover:text-[#C6A96B]"
                 }`}
               >
                 {showCustom ? "✕ ปิด" : "⚙ ตั้งเวลา"}
@@ -1880,7 +1880,7 @@ export default function HoraNuPage() {
                   type="checkbox" 
                   checked={(options as any)[opt.key]}
                   onChange={(e) => setOptions(prev => ({ ...prev, [opt.key]: e.target.checked }))}
-                  className="w-3.5 h-3.5 rounded border-[#C6A96B]/30 bg-[#091838] text-[#C6A96B] focus:ring-[#C6A96B]/50"
+                  className="w-3.5 h-3.5 rounded border-[#C6A96B]/30 bg-[var(--pp-surface-091838)] text-[#C6A96B] focus:ring-[#C6A96B]/50"
                 />
                 <span className="text-[11px] text-[#D9CDB7] group-hover:text-[#C6A96B] transition-colors">{opt.label}</span>
               </label>
@@ -1902,14 +1902,14 @@ export default function HoraNuPage() {
         description="เข้าถึงระบบพยากรณ์ยามพรายกระซิบ ๑๑๒ ผังสำเร็จ สมการจุดพยากรณ์ ๑๒ ภพ และห้องสนทนาปัญญายามสด"
       >
         <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row gap-2.5 p-1.5 rounded-2xl bg-[#07132b]/90 border border-[#C6A96B]/30 shadow-xl shadow-black/50">
+          <div className="flex flex-col sm:flex-row gap-2.5 p-1.5 rounded-2xl bg-[var(--pp-surface-07132b)]/90 border border-[#C6A96B]/30 shadow-xl shadow-black/50">
             <button
               type="button"
               onClick={() => setPredictionMethod("time")}
               className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
                 predictionMethod === "time"
                   ? "bg-gradient-to-r from-[#C6A96B]/30 to-[#D9BC82]/35 border border-[#C6A96B] text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20"
-                  : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[#091838]/60"
+                  : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[var(--pp-surface-091838)]/60"
               }`}
             >
               <ModeSymbol mode="time" className="w-5 h-5 text-[#C6A96B] shrink-0" />
@@ -1922,7 +1922,7 @@ export default function HoraNuPage() {
               className={`flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-bold font-display transition-all flex items-center justify-center gap-2.5 cursor-pointer ${
                 predictionMethod === "bhava"
                   ? "bg-gradient-to-r from-[#C6A96B]/30 to-[#D9BC82]/35 border border-[#C6A96B] text-[#F8F6F1] shadow-md shadow-[#C6A96B]/20"
-                  : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[#091838]/60"
+                  : "border border-transparent text-[#D9CDB7] hover:text-[#F8F6F1] hover:bg-[var(--pp-surface-091838)]/60"
               }`}
             >
               <ModeSymbol mode="bhava" className="w-5 h-5 text-[#C6A96B] shrink-0" />
@@ -1951,7 +1951,7 @@ export default function HoraNuPage() {
       {/* Loading overlay */}
       {isSubmitting && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="bg-[#07132b] border border-[#C6A96B]/40 rounded-2xl p-8 flex flex-col items-center gap-3">
+          <div className="bg-[var(--pp-surface-07132b)] border border-[#C6A96B]/40 rounded-2xl p-8 flex flex-col items-center gap-3">
             <div className="w-10 h-10 border-2 border-[#C6A96B]/30 border-t-[#C6A96B] rounded-full animate-spin" />
             <p className="text-[#C6A96B] text-sm font-bold">กำลังโหลดดวงยาม...</p>
           </div>

@@ -200,7 +200,7 @@ export default function RegisterPage() {
           />
           <div className="flex flex-col gap-1.5">
              <label className="text-xs font-semibold text-[#C6B79F] uppercase tracking-wider ml-1">เพศ</label>
-             <select name="gender" className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#D9BC82]/50">
+             <select name="gender" className="w-full bg-[var(--pp-surface-0a1628)]/50 border border-[#D9BC82]/20 rounded-xl px-4 py-2.5 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#D9BC82]/50">
                 <option value="ชาย">ชาย</option>
                 <option value="หญิง">หญิง</option>
              </select>
@@ -216,7 +216,7 @@ export default function RegisterPage() {
             <select
               name="birthDay"
               required
-              className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-3 py-2.5 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#D9BC82]/50"
+              className="w-full bg-[var(--pp-surface-0a1628)]/50 border border-[#D9BC82]/20 rounded-xl px-3 py-2.5 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#D9BC82]/50"
             >
               <option value="">วัน</option>
               {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
@@ -226,7 +226,7 @@ export default function RegisterPage() {
             <select
               name="birthMonth"
               required
-              className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-3 py-2.5 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#D9BC82]/50"
+              className="w-full bg-[var(--pp-surface-0a1628)]/50 border border-[#D9BC82]/20 rounded-xl px-3 py-2.5 text-sm text-[#F8F6F1] focus:outline-none focus:border-[#D9BC82]/50"
             >
               <option value="">เดือน</option>
               {["มกราคม","กุมภาพันธ์","มีนาคม","เมษายน","พฤษภาคม","มิถุนายน",
@@ -242,7 +242,7 @@ export default function RegisterPage() {
               min={2400}
               max={2580}
               placeholder="พ.ศ."
-              className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-3 py-2.5 text-sm text-[#F8F6F1] placeholder-[#94A3B8]/40 focus:outline-none focus:border-[#D9BC82]/50"
+              className="w-full bg-[var(--pp-surface-0a1628)]/50 border border-[#D9BC82]/20 rounded-xl px-3 py-2.5 text-sm text-[#F8F6F1] placeholder-[#94A3B8]/40 focus:outline-none focus:border-[#D9BC82]/50"
             />
           </div>
         </div>
@@ -258,7 +258,7 @@ export default function RegisterPage() {
                 type="checkbox"
                 checked={unknownTime}
                 onChange={(e) => setUnknownTime(e.target.checked)}
-                className="w-3.5 h-3.5 rounded border-[#D9BC82]/30 text-amber-500 focus:ring-amber-500/30 bg-[#0A1628]/50"
+                className="w-3.5 h-3.5 rounded border-[#D9BC82]/30 text-amber-500 focus:ring-amber-500/30 bg-[var(--pp-surface-0a1628)]/50"
               />
               <span>ไม่ทราบเวลาเกิดแน่นอน</span>
             </label>
@@ -271,7 +271,7 @@ export default function RegisterPage() {
           />
 
           {unknownTime ? (
-            <div className="p-3.5 rounded-xl border border-[#D9BC82]/20 bg-[#0A1628]/40 text-xs sm:text-sm text-[#C6B79F] flex items-center justify-between font-sarabun">
+            <div className="p-3.5 rounded-xl border border-[#D9BC82]/20 bg-[var(--pp-surface-0a1628)]/40 text-xs sm:text-sm text-[#C6B79F] flex items-center justify-between font-sarabun">
               <span>✦ ใช้เวลามาตรฐานสากล: <strong className="text-[#F8F6F1]">12:00 น. (เที่ยงวัน)</strong></span>
               <span className="text-[11px] text-amber-400/90 font-medium">คำนวณตำแหน่งดาวระดับวัน</span>
             </div>
@@ -283,13 +283,13 @@ export default function RegisterPage() {
                   <select
                     value={selectedHour}
                     onChange={(e) => setSelectedHour(e.target.value)}
-                    className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-3.5 py-2.5 text-sm text-[#F8F6F1] font-mono focus:outline-none focus:border-[#D9BC82]/50 appearance-none cursor-pointer"
+                    className="w-full bg-[var(--pp-surface-0a1628)]/50 border border-[#D9BC82]/20 rounded-xl px-3.5 py-2.5 text-sm text-[#F8F6F1] font-mono focus:outline-none focus:border-[#D9BC82]/50 appearance-none cursor-pointer"
                   >
                     {Array.from({ length: 24 }, (_, i) => {
                       const h = String(i).padStart(2, "0");
                       const period = i < 6 ? "ดึก" : i < 12 ? "เช้า" : i < 18 ? "บ่าย" : "ค่ำ";
                       return (
-                        <option key={h} value={h} className="bg-[#0A1628] text-[#F8F6F1]">
+                        <option key={h} value={h} className="bg-[var(--pp-surface-0a1628)] text-[#F8F6F1]">
                           {h} นาฬิกา ({period})
                         </option>
                       );
@@ -305,12 +305,12 @@ export default function RegisterPage() {
                   <select
                     value={selectedMinute}
                     onChange={(e) => setSelectedMinute(e.target.value)}
-                    className="w-full bg-[#0A1628]/50 border border-[#D9BC82]/20 rounded-xl px-3.5 py-2.5 text-sm text-[#F8F6F1] font-mono focus:outline-none focus:border-[#D9BC82]/50 appearance-none cursor-pointer"
+                    className="w-full bg-[var(--pp-surface-0a1628)]/50 border border-[#D9BC82]/20 rounded-xl px-3.5 py-2.5 text-sm text-[#F8F6F1] font-mono focus:outline-none focus:border-[#D9BC82]/50 appearance-none cursor-pointer"
                   >
                     {Array.from({ length: 60 }, (_, i) => {
                       const m = String(i).padStart(2, "0");
                       return (
-                        <option key={m} value={m} className="bg-[#0A1628] text-[#F8F6F1]">
+                        <option key={m} value={m} className="bg-[var(--pp-surface-0a1628)] text-[#F8F6F1]">
                           {m} นาที
                         </option>
                       );
@@ -343,7 +343,7 @@ export default function RegisterPage() {
                     className={`px-2 py-0.5 rounded-lg text-[10px] sm:text-[11px] font-sarabun transition-all shrink-0 ${
                       selectedHour === preset.h && selectedMinute === preset.m
                         ? "bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold shadow-xs"
-                        : "bg-[#0A1628]/40 border border-[#D9BC82]/15 text-[#C6B79F] hover:border-[#D9BC82]/40"
+                        : "bg-[var(--pp-surface-0a1628)]/40 border border-[#D9BC82]/15 text-[#C6B79F] hover:border-[#D9BC82]/40"
                     }`}
                   >
                     {preset.label}
