@@ -43,8 +43,8 @@ export function CelestialMoon() {
         <ellipse cx="200" cy="200" rx="195" ry="94" transform="rotate(-28 200 200)" opacity=".45" />
         <circle cx="200" cy="200" r="154" strokeDasharray="1 9" opacity=".35" />
       </g>
-      <path d="M244 91a119 119 0 1 1-99 217 117 117 0 0 0 99-217Z" fill={`url(#${id})`} />
-      <path d="M244 91a119 119 0 1 1-99 217" stroke="#BDE9E4" strokeOpacity=".75" />
+      <path d="M246 90a120 120 0 1 0 0 220c-96-25-96-195 0-220Z" fill={`url(#${id})`} />
+      <path d="M246 90a120 120 0 1 0 0 220" stroke="#BDE9E4" strokeOpacity=".75" />
       <g fill="currentColor"><circle cx="63" cy="272" r="3" /><circle cx="335" cy="119" r="3" /><circle cx="310" cy="303" r="2" /></g>
       <path d="M83 82v16M75 90h16M316 53v12M310 59h12" stroke="currentColor" strokeLinecap="round" />
     </svg>
