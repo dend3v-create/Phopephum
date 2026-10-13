@@ -1,6 +1,6 @@
 import { Link, useLocation } from "@remix-run/react";
 import { CelestialSeal } from "~/components/theme/WisdomAtmosphere";
-import { ArrowDown, ArrowRight, CalendarDays, Compass, HeartHandshake, Sparkles, Sun, UserRound } from "lucide-react";
+import { ArrowDown, ArrowRight, CalendarDays, Compass, HeartHandshake, Sparkles, Sun, UserRound, LogIn, Layers } from "lucide-react";
 
 interface Props { isLoggedIn: boolean }
 
@@ -11,27 +11,35 @@ export function PublicWisdomHero({ isLoggedIn }: Props) {
     document.getElementById("auspicious-demo")?.scrollIntoView({ block: "start", behavior: "instant" });
   };
   const accountTarget = isLoggedIn ? "/dashboard" : "/register";
-  const dock = [
-    { to: "/#main-content", label: "วันนี้", Icon: Sun },
-    { to: "/#auspicious-demo", label: "ฤกษ์", Icon: Compass },
+  const dock = isLoggedIn ? [
+    { to: "/dashboard", label: "วันนี้", Icon: Sun },
+    { to: "/dashboard/check-yam", label: "ฤกษ์", Icon: Compass },
     { to: "/dashboard/calendar", label: "ปฏิทิน", Icon: CalendarDays },
     { to: "/dashboard/horoscope", label: "ดวง", Icon: Sparkles },
-    { to: isLoggedIn ? "/dashboard/settings" : "/login", label: "ฉัน", Icon: UserRound },
+    { to: "/dashboard/settings", label: "ฉัน", Icon: UserRound },
+  ] : [
+    { to: "/#main-content", label: "หน้าแรก", Icon: Sun },
+    { to: "/#auspicious-demo", label: "ทดลอง", Icon: Compass },
+    { to: "/features", label: "ฟีเจอร์", Icon: Layers },
+    { to: "/login", label: "เข้าสู่ระบบ", Icon: LogIn },
   ];
+  const scrollToHome = () => {
+    document.getElementById("main-content")?.scrollIntoView({ block: "start", behavior: "instant" });
+  };
 
   return (
     <>
-      <section className="pp-home-hero" aria-labelledby="public-wisdom-title">
+      <section className={`pp-home-hero ${!isLoggedIn ? "pp-home-hero--guest" : ""}`} aria-labelledby="public-wisdom-title">
         <div className="pp-home-intro">
           <p className="pp-home-kicker">ANCIENT WISDOM × AI INTELLIGENCE</p>
           <h1 id="public-wisdom-title">ทุกคำถามของชีวิต<br /><span>มีแนวทางเสมอ</span></h1>
           <p className="pp-home-lead">วันนี้ควรทำอะไร และช่วงเวลาไหนเหมาะกับคุณ?</p>
-          <p className="pp-home-description">เข้าใจตัวเอง รู้จังหวะเวลา และเปลี่ยนคำแนะนำเป็นสิ่งที่ลงมือทำได้ ผ่านภูมิปัญญาโบราณและผู้ช่วย AI ของภพภูมิ</p>
+          <p className="pp-home-description">ทดลองค้นหาช่วงเวลาที่เหมาะกับสิ่งสำคัญได้ทันที แล้วเริ่มรู้จักตัวเองผ่านผังดวงและคำแนะนำเฉพาะบุคคล</p>
           <div className="pp-home-actions">
-            <Link to={accountTarget} className="pp-home-primary">{isLoggedIn ? "เปิดวันนี้ของฉัน" : "เริ่มต้นใช้งานฟรี"}<ArrowRight size={20} aria-hidden="true" /></Link>
+            <Link to={accountTarget} className="pp-home-primary">{isLoggedIn ? "เปิดวันนี้ของฉัน" : "สมัครฟรี"}<ArrowRight size={20} aria-hidden="true" /></Link>
             <Link to="/#auspicious-demo" onClick={scrollToTimingDemo} className="pp-home-secondary">ทดลองหาฤกษ์<ArrowDown size={18} aria-hidden="true" /></Link>
           </div>
-          <p className="pp-home-note">เริ่มต้นฟรี · ไม่ต้องใช้บัตรเครดิต · คุณเลือกแนวทางของตัวเอง</p>
+          <p className="pp-home-note">ทดลองหาฤกษ์ได้โดยไม่ต้องสมัคร · ผังดวงส่วนตัวสำหรับสมาชิก</p>
         </div>
 
         <div className="pp-home-experience">
@@ -45,17 +53,17 @@ export function PublicWisdomHero({ isLoggedIn }: Props) {
 
           <div className="pp-home-paths" aria-label="เลือกสิ่งที่คุณอยากเริ่มต้น">
             <Link to="/#auspicious-demo" onClick={scrollToTimingDemo} className="pp-home-path"><span className="pp-home-icon"><Compass size={24} strokeWidth={1.5} aria-hidden="true" /></span><h3>รู้จังหวะเวลา</h3><p>หาฤกษ์สำหรับสิ่งสำคัญ</p><ArrowRight size={17} aria-hidden="true" /></Link>
-            <Link to="/dashboard/horoscope" className="pp-home-path"><span className="pp-home-icon"><Sparkles size={24} strokeWidth={1.5} aria-hidden="true" /></span><h3>เข้าใจตัวเอง</h3><p>สำรวจผังดวงของคุณ</p><ArrowRight size={17} aria-hidden="true" /></Link>
-            <Link to="/dashboard/planner" className="pp-home-path"><span className="pp-home-icon"><HeartHandshake size={24} strokeWidth={1.5} aria-hidden="true" /></span><h3>วางแผนชีวิต</h3><p>ตั้งเป้าหมายและลงมือทำ</p><ArrowRight size={17} aria-hidden="true" /></Link>
+            <Link to={isLoggedIn ? "/dashboard/horoscope" : "/features"} className="pp-home-path"><span className="pp-home-icon"><Sparkles size={24} strokeWidth={1.5} aria-hidden="true" /></span><h3>เข้าใจตัวเอง</h3><p>{isLoggedIn ? "สำรวจผังดวงของคุณ" : "รู้จักเครื่องมือผังดวงส่วนตัว"}</p><ArrowRight size={17} aria-hidden="true" /></Link>
+            <Link to={isLoggedIn ? "/dashboard/planner" : "/how-it-works"} className="pp-home-path"><span className="pp-home-icon"><HeartHandshake size={24} strokeWidth={1.5} aria-hidden="true" /></span><h3>วางแผนชีวิต</h3><p>{isLoggedIn ? "ตั้งเป้าหมายและลงมือทำ" : "ดูวิธีเริ่มต้นวางแผนชีวิต"}</p><ArrowRight size={17} aria-hidden="true" /></Link>
           </div>
-          {!isLoggedIn && <p className="pp-home-account-note">ผังดวงและแผนชีวิตใช้งานหลังเข้าสู่ระบบ</p>}
+          {!isLoggedIn && <p className="pp-home-account-note">สมัครฟรีเพื่อสร้างผังดวงและแผนชีวิตของคุณ หรือทดลองหาฤกษ์ด้านล่างได้เลย</p>}
         </div>
       </section>
 
-      <nav className="pp-home-dock" aria-label="เมนูภพภูมิบนมือถือ">
-        {dock.map(({ to, label, Icon }, index) => {
-          const active = index === 0 ? !location.hash || location.hash === "#main-content" : index === 1 && location.hash === "#auspicious-demo";
-          return <Link key={label} to={to} onClick={index === 1 ? scrollToTimingDemo : undefined} className={active ? "is-current" : undefined} aria-current={active ? "location" : undefined}><Icon size={22} strokeWidth={1.5} aria-hidden="true" /><span>{label}</span></Link>;
+      <nav className="pp-home-dock" aria-label={isLoggedIn ? "เมนูสมาชิกบนมือถือ" : "เมนูผู้เยี่ยมชมบนมือถือ"}>
+        {dock.map(({ to, label, Icon }) => {
+          const active = !isLoggedIn && (to === "/#main-content" ? !location.hash || location.hash === "#main-content" : to === "/#auspicious-demo" && location.hash === "#auspicious-demo");
+          return <Link key={label} to={to} onClick={to === "/#auspicious-demo" ? scrollToTimingDemo : to === "/#main-content" ? scrollToHome : undefined} className={active ? "is-current" : undefined} aria-current={active ? "location" : undefined}><Icon size={22} strokeWidth={1.5} aria-hidden="true" /><span>{label}</span></Link>;
         })}
       </nav>
     </>
