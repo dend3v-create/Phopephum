@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { Link, useNavigate, useFetcher } from "@remix-run/react";
 
@@ -37,7 +37,10 @@ export function ActiveSubjectBanner({
   showManageButtons = true,
 }: ActiveSubjectProps) {
   const navigate = useNavigate();
-  const fetcher = useFetcher();
+  const fetcher = useFetcher<{ success?: string; error?: string | null; customerId?: string }>();
+  const pendingSave = useRef<"create" | "update" | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const isSaving = fetcher.state !== "idle";
 
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
@@ -57,6 +60,7 @@ export function ActiveSubjectBanner({
   const [formPlace, setFormPlace] = useState("กรุงเทพมหานคร");
 
   const openAddModal = () => {
+    setSaveError(null);
     setFormName("");
     setFormDay(1);
     setFormMonth(1);
@@ -68,6 +72,7 @@ export function ActiveSubjectBanner({
 
   const openEditModal = () => {
     if (!currentSubject.isCustomer) return;
+    setSaveError(null);
     setFormName(currentSubject.name);
     if (currentSubject.birthDate) {
       const [y, m, d] = currentSubject.birthDate.split("-").map(Number);
@@ -132,11 +137,14 @@ export function ActiveSubjectBanner({
 
   const handleSaveAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName.trim()) return;
+    if (!formName.trim() || isSaving) return;
+    setSaveError(null);
+    pendingSave.current = "create";
 
     fetcher.submit(
       {
         _action: "create",
+        activateSubject: "true",
         name: formName.trim(),
         birthDay: String(formDay),
         birthMonth: String(formMonth),
@@ -146,15 +154,14 @@ export function ActiveSubjectBanner({
       },
       { method: "post", action: "/dashboard/people" }
     );
-    setIsAddModalOpen(false);
-    setTimeout(() => {
-      window.location.reload();
-    }, 800);
+
   };
 
   const handleSaveEdit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formName.trim() || !currentSubject.id) return;
+    if (!formName.trim() || !currentSubject.id || isSaving) return;
+    setSaveError(null);
+    pendingSave.current = "update";
 
     fetcher.submit(
       {
@@ -169,11 +176,25 @@ export function ActiveSubjectBanner({
       },
       { method: "post", action: "/dashboard/people" }
     );
-    setIsEditModalOpen(false);
-    setTimeout(() => {
-      window.location.reload();
-    }, 800);
+
   };
+
+  useEffect(() => {
+    if (fetcher.state !== "idle" || !pendingSave.current || !fetcher.data) return;
+    const mode = pendingSave.current;
+    pendingSave.current = null;
+    if (fetcher.data.error || !fetcher.data.success) {
+      setSaveError(fetcher.data.error || "บันทึกไม่สำเร็จ กรุณาลองอีกครั้ง");
+      return;
+    }
+    setIsAddModalOpen(false);
+    setIsEditModalOpen(false);
+    if (mode === "create" && fetcher.data.customerId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("customerId", fetcher.data.customerId);
+      navigate(`${url.pathname}${url.search}${url.hash}`);
+    }
+  }, [fetcher.state, fetcher.data, navigate]);
 
   return (
     <>
@@ -302,7 +323,7 @@ export function ActiveSubjectBanner({
           {/* ── Modal เพิ่มเจ้าชะตาใหม่ ── */}
           {isAddModalOpen && (
             <div className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:p-6 flex min-h-full items-center justify-center">
-              <div className="fixed inset-0" onClick={() => setIsAddModalOpen(false)} aria-hidden="true" />
+              <div className="fixed inset-0" onClick={() => { if (!isSaving) setIsAddModalOpen(false); }} aria-hidden="true" />
               <div className="relative bg-[var(--pp-surface-0a2240)] border border-[#C6A96B]/50 rounded-2xl p-5 sm:p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 max-h-[90vh] overflow-y-auto z-10 animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex items-center justify-between border-b border-[#C6A96B]/20 pb-3 sticky top-0 bg-[var(--pp-surface-0a2240)] z-10">
                   <h3 className="text-lg font-bold text-[#F8F6F1] flex items-center gap-2">
@@ -311,6 +332,7 @@ export function ActiveSubjectBanner({
                   </h3>
                   <button
                     type="button"
+                    disabled={isSaving}
                     onClick={() => setIsAddModalOpen(false)}
                     className="text-[#C6B79F] hover:text-white text-lg font-bold p-1 rounded-lg hover:bg-white/10"
                   >
@@ -334,7 +356,9 @@ export function ActiveSubjectBanner({
                     </Link>
                   </div>
                 ) : (
-                  <form onSubmit={handleSaveAdd} className="space-y-4 text-xs sm:text-sm">
+                  <form onSubmit={handleSaveAdd} className="space-y-4 text-xs sm:text-sm" aria-busy={isSaving}>
+                  {saveError && <p role="alert" className="text-rose-700 dark:text-rose-300">{saveError}</p>}
+                  <fieldset disabled={isSaving} className="contents">
                     <div>
                       <label className="block text-[#C6B79F] mb-1 font-semibold">ชื่อเจ้าชะตา / ลูกดวง *</label>
                       <input
@@ -404,6 +428,7 @@ export function ActiveSubjectBanner({
                     <div className="flex justify-end gap-3 pt-3 border-t border-white/10 sticky bottom-0 bg-[var(--pp-surface-0a2240)]">
                       <button
                         type="button"
+                        disabled={isSaving}
                         onClick={() => setIsAddModalOpen(false)}
                         className="px-4 py-2 rounded-xl border border-white/10 text-[#C6B79F] hover:bg-white/5"
                       >
@@ -416,7 +441,8 @@ export function ActiveSubjectBanner({
                         บันทึกเจ้าชะตา
                       </button>
                     </div>
-                  </form>
+                    </fieldset>
+                </form>
                 )}
               </div>
             </div>
@@ -425,7 +451,7 @@ export function ActiveSubjectBanner({
           {/* ── Modal แก้ไขเจ้าชะตา ── */}
           {isEditModalOpen && (
             <div className="fixed inset-0 z-[999999] overflow-y-auto bg-black/80 backdrop-blur-sm p-4 sm:p-6 flex min-h-full items-center justify-center">
-              <div className="fixed inset-0" onClick={() => setIsEditModalOpen(false)} aria-hidden="true" />
+              <div className="fixed inset-0" onClick={() => { if (!isSaving) setIsEditModalOpen(false); }} aria-hidden="true" />
               <div className="relative bg-[var(--pp-surface-0a2240)] border border-[#C6A96B]/50 rounded-2xl p-5 sm:p-6 max-w-md w-full my-auto shadow-2xl text-[#F8F6F1] space-y-4 max-h-[90vh] overflow-y-auto z-10 animate-in fade-in zoom-in-95 duration-200">
                 <div className="flex items-center justify-between border-b border-[#C6A96B]/20 pb-3 sticky top-0 bg-[var(--pp-surface-0a2240)] z-10">
                   <h3 className="text-lg font-bold text-[#F8F6F1] flex items-center gap-2">
@@ -434,6 +460,7 @@ export function ActiveSubjectBanner({
                   </h3>
                   <button
                     type="button"
+                    disabled={isSaving}
                     onClick={() => setIsEditModalOpen(false)}
                     className="text-[#C6B79F] hover:text-white text-lg font-bold p-1 rounded-lg hover:bg-white/10"
                   >
@@ -441,7 +468,9 @@ export function ActiveSubjectBanner({
                   </button>
                 </div>
 
-                <form onSubmit={handleSaveEdit} className="space-y-4 text-xs sm:text-sm">
+                <form onSubmit={handleSaveEdit} className="space-y-4 text-xs sm:text-sm" aria-busy={isSaving}>
+                  {saveError && <p role="alert" className="text-rose-700 dark:text-rose-300">{saveError}</p>}
+                  <fieldset disabled={isSaving} className="contents">
                   <div>
                     <label className="block text-[#C6B79F] mb-1 font-semibold">ชื่อเจ้าชะตา / ลูกดวง *</label>
                     <input
@@ -510,7 +539,8 @@ export function ActiveSubjectBanner({
                   <div className="flex justify-end gap-3 pt-3 border-t border-white/10 sticky bottom-0 bg-[var(--pp-surface-0a2240)]">
                     <button
                       type="button"
-                      onClick={() => setIsEditModalOpen(false)}
+                      disabled={isSaving}
+                    onClick={() => setIsEditModalOpen(false)}
                       className="px-4 py-2 rounded-xl border border-white/10 text-[#C6B79F] hover:bg-white/5"
                     >
                       ยกเลิก
@@ -519,9 +549,10 @@ export function ActiveSubjectBanner({
                       type="submit"
                       className="px-5 py-2 rounded-xl bg-gradient-to-r from-[#C6A96B] to-[#D9BC82] text-[#020617] font-bold shadow-md hover:opacity-90"
                     >
-                      บันทึกการแก้ไข
+                      {isSaving ? "กำลังบันทึก…" : "บันทึกการแก้ไข"}
                     </button>
                   </div>
+                  </fieldset>
                 </form>
               </div>
             </div>

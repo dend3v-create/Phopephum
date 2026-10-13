@@ -1,3 +1,4 @@
+import { createActiveSubjectCookieHeader } from "~/services/activeSubject.server";
 import { json, redirect } from "@remix-run/cloudflare";
 import { Form, useLoaderData, useNavigation, useActionData, Link } from "@remix-run/react";
 import type { ActionFunctionArgs, LoaderFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
@@ -89,7 +90,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const bYearCE = bYear - 543;
     const birthDateStr = `${bYearCE}-${String(bMonth).padStart(2, "0")}-${String(bDay).padStart(2, "0")}`;
 
-    const { error: insertError } = await supabase
+    const { data: createdPerson, error: insertError } = await supabase
       .from("customers")
       .insert({
         user_id: user.id,
@@ -97,15 +98,22 @@ export async function action({ request, context }: ActionFunctionArgs) {
         birth_date: birthDateStr,
         birth_time: birthTime || "12:00",
         birth_place: birthPlace || "กรุงเทพมหานคร",
-      });
+      })
+      .select("id")
+      .single();
 
-    if (insertError) {
+    if (insertError || !createdPerson) {
       console.error("Insert profile error:", insertError);
       return json({ error: "เกิดข้อผิดพลาดในการบันทึกข้อมูล" }, { status: 500 });
     }
 
     await logEvent(request, env, EVENTS.CALC_HORA, { action: "create_person", source: "people" });
-    return json({ success: "เพิ่มข้อมูลโปรไฟล์บุคคลสำเร็จ", error: null });
+    return json(
+      { success: "เพิ่มข้อมูลโปรไฟล์บุคคลสำเร็จ", error: null, customerId: createdPerson.id },
+      formData.get("activateSubject") === "true"
+        ? { headers: { "Set-Cookie": createActiveSubjectCookieHeader(createdPerson.id) } }
+        : undefined
+    );
   }
 
   if (actionType === "update") {
@@ -124,7 +132,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const bYearCE = bYear - 543;
     const birthDateStr = `${bYearCE}-${String(bMonth).padStart(2, "0")}-${String(bDay).padStart(2, "0")}`;
 
-    const { error: updateError } = await supabase
+    const { data: updatedPerson, error: updateError } = await supabase
       .from("customers")
       .update({
         name,
@@ -133,13 +141,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
         birth_place: birthPlace || "กรุงเทพมหานคร",
       })
       .eq("id", id)
-      .eq("user_id", user.id);
+      .eq("user_id", user.id)
+      .select("id")
+      .maybeSingle();
 
     if (updateError) {
       console.error("Update profile error:", updateError);
       return json({ error: "เกิดข้อผิดพลาดในการแก้ไขข้อมูล" }, { status: 500 });
     }
 
+    if (!updatedPerson) return json({ error: "ไม่พบเจ้าชะตาที่คุณมีสิทธิ์แก้ไข" }, { status: 404 });
     return json({ success: "อัปเดตข้อมูลโปรไฟล์บุคคลสำเร็จ", error: null });
   }
 
